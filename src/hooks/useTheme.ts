@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
-import { getData, saveData } from '../db';
 import type { AppSettings } from '../types';
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<AppSettings['theme']>('system');
-  const [accentColor, setAccentColorState] = useState('#6366F1');
+  const [theme, setThemeState] = useState<AppSettings['theme']>(
+    () => (localStorage.getItem('theme') as AppSettings['theme']) || 'system'
+  );
+  const [accentColor, setAccentColorState] = useState(
+    () => localStorage.getItem('accentColor') || '#6366F1'
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    getData().then((data) => {
-      setThemeState(data.settings.theme);
-      setAccentColorState(data.settings.accentColor);
-      setMounted(true);
-    });
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -33,17 +32,18 @@ export function useTheme() {
     const b = parseInt(accentColor.slice(5, 7), 16);
     root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
 
-    saveData({ settings: { theme, accentColor } });
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('accentColor', accentColor);
   }, [theme, accentColor, mounted]);
 
   const setTheme = (t: AppSettings['theme']) => {
     setThemeState(t);
-    getData().then(d => saveData({ settings: { ...d.settings, theme: t } }));
+    localStorage.setItem('theme', t);
   };
 
   const setAccentColor = (c: string) => {
     setAccentColorState(c);
-    getData().then(d => saveData({ settings: { ...d.settings, accentColor: c } }));
+    localStorage.setItem('accentColor', c);
   };
 
   return { theme, setTheme, accentColor, setAccentColor, mounted };

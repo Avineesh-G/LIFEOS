@@ -1,7 +1,6 @@
-import type { AppData, StudySession, WorkoutPlan, WorkoutLog, Expense, TimetableBlock, Task, DayReview, AppSettings } from './types';
-
-const DB_NAME = 'LifeOSDB';
-const DB_VERSION = 1;
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import type { AppData } from './types';
 
 const DEFAULT_DATA: AppData = {
   studySessions: [],
@@ -20,7 +19,6 @@ const DEFAULT_DATA: AppData = {
   tasks: [],
   reviews: [],
   settings: { theme: 'system', accentColor: '#6366F1' },
-  // Profile & Nutrition
   profile: null,
   menuMonths: [],
   nutritionLogs: [],
@@ -28,15 +26,8 @@ const DEFAULT_DATA: AppData = {
   geminiApiKey: '',
 };
 
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from './firebase';
-import { auth } from './firebase';
-
-export async function getData(): Promise<AppData> {
-  const user = auth.currentUser;
-  if (!user) throw new Error('Not authenticated');
-  
-  const docRef = doc(db, 'users', user.uid);
+export async function getData(uid: string): Promise<AppData> {
+  const docRef = doc(db, 'users', uid);
   const snap = await getDoc(docRef);
   if (snap.exists()) {
     return { ...DEFAULT_DATA, ...(snap.data() as Partial<AppData>) };
@@ -44,32 +35,25 @@ export async function getData(): Promise<AppData> {
   return DEFAULT_DATA;
 }
 
-export async function saveData(data: Partial<AppData>): Promise<void> {
-  const user = auth.currentUser;
-  if (!user) throw new Error('Not authenticated');
-
-  const existing = await getData().catch(() => DEFAULT_DATA);
+export async function saveData(uid: string, data: Partial<AppData>): Promise<void> {
+  const existing = await getData(uid).catch(() => DEFAULT_DATA);
   const merged = { ...existing, ...data };
-  
-  const docRef = doc(db, 'users', user.uid);
+  const docRef = doc(db, 'users', uid);
   await setDoc(docRef, merged, { merge: true });
 }
 
-export async function exportData(): Promise<string> {
-  const data = await getData();
+export async function exportData(uid: string): Promise<string> {
+  const data = await getData(uid);
   return JSON.stringify(data, null, 2);
 }
 
-export async function importData(json: string): Promise<void> {
+export async function importData(uid: string, json: string): Promise<void> {
   const data = JSON.parse(json) as AppData;
-  await saveData(data);
+  await saveData(uid, data);
 }
 
-export async function clearAllData(): Promise<void> {
-  const user = auth.currentUser;
-  if (!user) throw new Error('Not authenticated');
-  
-  const docRef = doc(db, 'users', user.uid);
+export async function clearAllData(uid: string): Promise<void> {
+  const docRef = doc(db, 'users', uid);
   await deleteDoc(docRef);
 }
 

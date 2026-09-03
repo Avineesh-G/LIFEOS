@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getData, saveData } from '../db';
+import { getData, saveData, DEFAULT_DATA } from '../db';
 import type { AppData } from '../types';
-import { DEFAULT_DATA } from '../db';
 import { User } from 'firebase/auth';
 
 export function useData(user: User | null) {
@@ -14,14 +13,13 @@ export function useData(user: User | null) {
       setLoading(true);
       setError(null);
 
-      // 10 second timeout in case Firestore is unreachable
       const timeout = setTimeout(() => {
         console.warn('Firestore took too long, loading with default data');
         setData(DEFAULT_DATA);
         setLoading(false);
       }, 10000);
 
-      getData()
+      getData(user.uid)
         .then((d) => {
           clearTimeout(timeout);
           setData(d);
@@ -42,18 +40,20 @@ export function useData(user: User | null) {
     }
   }, [user]);
 
-  const updateData = useCallback(async (partial: Partial<AppData>) => {
-    await saveData(partial);
-    const fresh = await getData();
+  const updateData = useCallback(async (partial: Partial<AppData>): Promise<AppData> => {
+    if (!user) return DEFAULT_DATA;
+    await saveData(user.uid, partial);
+    const fresh = await getData(user.uid);
     setData(fresh);
     return fresh;
-  }, []);
+  }, [user]);
 
-  const refresh = useCallback(async () => {
-    const fresh = await getData();
+  const refresh = useCallback(async (): Promise<AppData> => {
+    if (!user) return DEFAULT_DATA;
+    const fresh = await getData(user.uid);
     setData(fresh);
     return fresh;
-  }, []);
+  }, [user]);
 
   return { data, loading, updateData, refresh, error };
 }
