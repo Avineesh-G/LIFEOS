@@ -3,12 +3,12 @@ import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDwyxGvvFlBNv2LLDZ6Jo22AY0sSNcIyuE",
-  authDomain: "lifeos-f4de3.firebaseapp.com",
-  projectId: "lifeos-f4de3",
-  storageBucket: "lifeos-f4de3.firebasestorage.app",
-  messagingSenderId: "527411007566",
-  appId: "1:527411007566:web:7a85f483d2b5efeafdb31f"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 export const app = initializeApp(firebaseConfig);
