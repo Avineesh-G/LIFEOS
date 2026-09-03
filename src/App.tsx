@@ -57,7 +57,7 @@ function App() {
   const { data, loading: dataLoading, updateData, refresh } = useData(user);
   const location = useLocation();
 
-  if (!mounted || authLoading || (user && dataLoading)) {
+  if (!mounted || authLoading || (user && (dataLoading || !data))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
