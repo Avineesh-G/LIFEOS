@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from 'firebase/auth';
+import { AnimatedSparkles } from '../components/AnimatedIcons';
 
 interface WelcomeSplashProps {
   user: User;
@@ -38,11 +39,9 @@ export default function WelcomeSplash({ user, onDone }: WelcomeSplashProps) {
             className="text-center"
           >
             <motion.div
-              animate={{ rotate: [0, -10, 10, -8, 8, 0] }}
-              transition={{ duration: 0.8, delay: 0.3, ease: 'easeInOut' }}
-              className="text-8xl mb-4 select-none"
+              className="flex justify-center mb-6 text-accent"
             >
-              🙏
+              <AnimatedSparkles size={72} />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
