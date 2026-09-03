@@ -28,45 +28,31 @@ const DEFAULT_DATA: AppData = {
   geminiApiKey: '',
 };
 
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => resolve(req.result);
-    req.onupgradeneeded = (e) => {
-      const db = (e.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains('data')) {
-        db.createObjectStore('data');
-      }
-    };
-  });
-}
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { db } from './firebase';
+import { auth } from './firebase';
 
 export async function getData(): Promise<AppData> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('data', 'readonly');
-    const store = tx.objectStore('data');
-    const req = store.get('appData');
-    req.onsuccess = () => {
-      const data = req.result;
-      resolve(data ? { ...DEFAULT_DATA, ...data } : DEFAULT_DATA);
-    };
-    req.onerror = () => reject(req.error);
-  });
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+  
+  const docRef = doc(db, 'users', user.uid);
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    return { ...DEFAULT_DATA, ...(snap.data() as Partial<AppData>) };
+  }
+  return DEFAULT_DATA;
 }
 
 export async function saveData(data: Partial<AppData>): Promise<void> {
-  const db = await openDB();
-  const existing = await getData();
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+
+  const existing = await getData().catch(() => DEFAULT_DATA);
   const merged = { ...existing, ...data };
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('data', 'readwrite');
-    const store = tx.objectStore('data');
-    const req = store.put(merged, 'appData');
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+  
+  const docRef = doc(db, 'users', user.uid);
+  await setDoc(docRef, merged, { merge: true });
 }
 
 export async function exportData(): Promise<string> {
@@ -80,14 +66,11 @@ export async function importData(json: string): Promise<void> {
 }
 
 export async function clearAllData(): Promise<void> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('data', 'readwrite');
-    const store = tx.objectStore('data');
-    const req = store.delete('appData');
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+  
+  const docRef = doc(db, 'users', user.uid);
+  await deleteDoc(docRef);
 }
 
 export { DEFAULT_DATA };

@@ -18,7 +18,12 @@ import Spending from './pages/Spending';
 import Timetable from './pages/Timetable';
 import Tasks from './pages/Tasks';
 import Progress from './pages/Progress';
-import Settings from './pages/Settings';
+import { Settings } from 'lucide-react'; // Fallback import just in case
+import SettingsPage from './pages/Settings';
+import Auth from './pages/Auth';
+import { useEffect, useState } from 'react';
+import { auth } from './firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 const pageTransition = {
   initial: { opacity: 0, y: 6 },
@@ -37,15 +42,31 @@ function AnimatedPage({ children }: { children: React.ReactNode }) {
 
 function App() {
   const { theme, setTheme, accentColor, setAccentColor, mounted } = useTheme();
-  const { data, loading, updateData, refresh } = useData();
+  
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const { data, loading: dataLoading, updateData, refresh } = useData(user);
   const location = useLocation();
 
-  if (!mounted || loading) {
+  if (!mounted || authLoading || (user && dataLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (!user) {
+    return <Auth />;
   }
 
   return (
@@ -67,7 +88,7 @@ function App() {
           <Route path="/timetable" element={<AnimatedPage><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
           <Route path="/tasks" element={<AnimatedPage><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
           <Route path="/progress" element={<AnimatedPage><Progress data={data!} /></AnimatedPage>} />
-          <Route path="/settings" element={<AnimatedPage><Settings theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
+          <Route path="/settings" element={<AnimatedPage><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
         </Routes>
       </AnimatePresence>
     </Layout>

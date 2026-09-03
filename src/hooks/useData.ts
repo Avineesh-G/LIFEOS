@@ -2,16 +2,26 @@ import { useEffect, useState, useCallback } from 'react';
 import { getData, saveData } from '../db';
 import type { AppData } from '../types';
 
-export function useData() {
+import { User } from 'firebase/auth';
+
+export function useData(user: User | null) {
   const [data, setData] = useState<AppData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getData().then((d) => {
-      setData(d);
+    if (user) {
+      getData().then((d) => {
+        setData(d);
+        setLoading(false);
+      }).catch(err => {
+        console.error("Failed to fetch user data:", err);
+        setLoading(false);
+      });
+    } else {
+      setData(null);
       setLoading(false);
-    });
-  }, []);
+    }
+  }, [user]);
 
   const updateData = useCallback(async (partial: Partial<AppData>) => {
     await saveData(partial);

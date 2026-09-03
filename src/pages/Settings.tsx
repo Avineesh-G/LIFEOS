@@ -1,9 +1,11 @@
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 interface SettingsProps {
   theme: AppSettings['theme'];
@@ -110,6 +112,24 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           <p className="text-[10px] text-muted-light dark:text-muted-dark mt-1">Required for AI Coach and Nutrition parsing.</p>
         </div>
       </motion.div>
+
+      {/* Account Settings */}
+      <motion.div variants={item} className="card p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Account</p>
+            <p className="text-sm font-medium text-primary-light dark:text-primary-dark">{auth.currentUser?.email}</p>
+          </div>
+          <button
+            onClick={() => signOut(auth)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+        </div>
+      </motion.div>
+
       <motion.div variants={item} className="text-center py-4">
         <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.0</p>
       </motion.div>
