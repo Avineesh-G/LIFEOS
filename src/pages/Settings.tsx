@@ -115,14 +115,14 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
       {/* Account Settings */}
       <motion.div variants={item} className="card p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
             <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Account</p>
-            <p className="text-sm font-medium text-primary-light dark:text-primary-dark">{auth.currentUser?.email}</p>
+            <p className="text-sm font-medium text-primary-light dark:text-primary-dark truncate" title={auth.currentUser?.email || ''}>{auth.currentUser?.email}</p>
           </div>
           <button
             onClick={() => signOut(auth)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
+            className="shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
           >
             <LogOut size={16} />
             Sign Out
