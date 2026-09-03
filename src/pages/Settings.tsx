@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { triggerHaptic } from '../utils/haptics';
@@ -6,6 +6,8 @@ import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface SettingsProps {
   theme: AppSettings['theme'];
@@ -120,13 +122,30 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Account</p>
             <p className="text-sm font-medium text-primary-light dark:text-primary-dark truncate" title={auth.currentUser?.email || ''}>{auth.currentUser?.email}</p>
           </div>
-          <button
-            onClick={() => signOut(auth)}
-            className="shrink-0 whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
-          >
-            <LogOut size={16} />
-            Sign Out
-          </button>
+          <div className="flex flex-col gap-2 shrink-0">
+            <button
+              onClick={() => signOut(auth)}
+              className="whitespace-nowrap flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
+            >
+              <LogOut size={16} />
+              Sign Out
+            </button>
+            <button
+              onClick={async () => {
+                if (window.confirm('Are you sure you want to reset all your data? This cannot be undone.')) {
+                  if (auth.currentUser) {
+                    await deleteDoc(doc(db, 'users', auth.currentUser.uid));
+                    alert('Data reset successfully! The app will now reload.');
+                    window.location.reload();
+                  }
+                }
+              }}
+              className="whitespace-nowrap flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors text-xs font-medium"
+            >
+              <AlertTriangle size={14} />
+              Reset Data
+            </button>
+          </div>
         </div>
       </motion.div>
 
