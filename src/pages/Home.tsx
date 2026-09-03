@@ -60,7 +60,10 @@ export default function Home({ data }: HomeProps) {
 
   // ── Greeting ──
   const h = now.getHours();
-  const greetWord = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
+  let greetWord = 'Evening';
+  if (h < 12) greetWord = 'Morning';
+  else if (h === 12) greetWord = 'Noon';
+  else if (h < 17) greetWord = 'Afternoon';
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
@@ -72,7 +75,7 @@ export default function Home({ data }: HomeProps) {
         </p>
         <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">
           Good{' '}
-          <span className="text-outline text-primary-light dark:text-primary-dark">
+          <span className="text-accent">
             {greetWord}
           </span>
         </h1>

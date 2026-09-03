@@ -14,7 +14,10 @@ export default function WelcomeSplash({ user, onDone }: WelcomeSplashProps) {
   const firstName = user.displayName?.split(' ')[0] || 'there';
 
   const h = new Date().getHours();
-  const timeGreet = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+  let timeGreet = 'Good Evening';
+  if (h < 12) timeGreet = 'Good Morning';
+  else if (h === 12) timeGreet = 'Good Noon';
+  else if (h < 17) timeGreet = 'Good Afternoon';
 
   useEffect(() => {
     // Show namaste animation for 1.2s, then welcome for 1.8s, then enter app
