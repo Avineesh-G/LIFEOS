@@ -285,8 +285,7 @@ Output a valid JSON object in this exact format:
 }`;
 
   try {
-    // We intentionally pass expectJson=false to bypass the strict Groq JSON validator that often crashes 400.
-    const raw = await callGroq(prompt, apiKey, 800, false);
+    const raw = await callGroq(prompt, apiKey, 800, true);
     
     try {
       return JSON.parse(raw);
