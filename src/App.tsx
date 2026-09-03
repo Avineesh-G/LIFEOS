@@ -21,6 +21,7 @@ import Progress from './pages/Progress';
 import { Settings } from 'lucide-react'; // Fallback import just in case
 import SettingsPage from './pages/Settings';
 import Auth from './pages/Auth';
+import WelcomeSplash from './pages/WelcomeSplash';
 import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -45,14 +46,21 @@ function App() {
   
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [prevUser, setPrevUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Show welcome splash only when user just logged in (transition from null to user)
+      if (currentUser && !prevUser) {
+        setShowWelcome(true);
+      }
+      setPrevUser(currentUser);
       setUser(currentUser);
       setAuthLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [prevUser]);
 
   const { data, loading: dataLoading, updateData, refresh } = useData(user);
   const location = useLocation();
@@ -67,6 +75,10 @@ function App() {
 
   if (!user) {
     return <Auth />;
+  }
+
+  if (showWelcome) {
+    return <WelcomeSplash user={user} onDone={() => setShowWelcome(false)} />;
   }
 
   return (
