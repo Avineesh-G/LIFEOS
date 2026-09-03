@@ -35,7 +35,7 @@ export default function Auth() {
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-accent blur-xl opacity-40 rounded-3xl" />
-              <img src="/icon-512.jpg" alt="LifeOS" className="w-24 h-24 rounded-3xl shadow-xl relative z-10" />
+              <img src="/icon-512.png" alt="LifeOS" className="w-24 h-24 rounded-3xl shadow-xl relative z-10" />
             </div>
           </div>
 
