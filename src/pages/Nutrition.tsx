@@ -79,12 +79,13 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const strokeDash = (ringPct / 100) * circumference;
 
   const handleGetAdvice = async () => {
-    if (!todayMenu || !data.profile) return;
+    if (!todayMenu) return;
     setFetchingAdvice(true);
     setShowCoach(true);
     triggerHaptic(10);
     try {
-      const advice = await getDietAdvice(todayMenu, data.profile, data.geminiApiKey || GEMINI_API_KEY);
+      const p = data.profile || { goalWeight: 'maintain', currentCalorieTarget: 2000 };
+      const advice = await getDietAdvice(todayMenu, p, data.geminiApiKey || GEMINI_API_KEY);
       setCoachAdvice(advice);
     } catch (err) {
       console.error(err);
