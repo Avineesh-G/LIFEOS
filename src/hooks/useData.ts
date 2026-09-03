@@ -1,22 +1,41 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getData, saveData } from '../db';
 import type { AppData } from '../types';
-
+import { DEFAULT_DATA } from '../db';
 import { User } from 'firebase/auth';
 
 export function useData(user: User | null) {
   const [data, setData] = useState<AppData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      getData().then((d) => {
-        setData(d);
+      setLoading(true);
+      setError(null);
+
+      // 10 second timeout in case Firestore is unreachable
+      const timeout = setTimeout(() => {
+        console.warn('Firestore took too long, loading with default data');
+        setData(DEFAULT_DATA);
         setLoading(false);
-      }).catch(err => {
-        console.error("Failed to fetch user data:", err);
-        setLoading(false);
-      });
+      }, 10000);
+
+      getData()
+        .then((d) => {
+          clearTimeout(timeout);
+          setData(d);
+          setLoading(false);
+        })
+        .catch(err => {
+          clearTimeout(timeout);
+          console.error('Failed to fetch user data:', err);
+          setError(err.message || 'Failed to load data');
+          setData(DEFAULT_DATA);
+          setLoading(false);
+        });
+
+      return () => clearTimeout(timeout);
     } else {
       setData(null);
       setLoading(false);
@@ -36,5 +55,5 @@ export function useData(user: User | null) {
     return fresh;
   }, []);
 
-  return { data, loading, updateData, refresh };
+  return { data, loading, updateData, refresh, error };
 }
