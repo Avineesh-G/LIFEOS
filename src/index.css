@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent: #6366F1;
+    --accent-rgb: 99, 102, 241;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+  }
+
+  /* iOS safe area top */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Grid background for light mode */
+
+  .bg-grid {
+    background-color: #F7F7F5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 0v40M40 0v40M0 0h40M0 40h40' stroke='%23D4D4D8' stroke-width='0.5'/%3E%3C/svg%3E");
+  }
+
+  .dark .bg-grid {
+    background-color: #09090B;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 0v40M40 0v40M0 0h40M0 40h40' stroke='%2327272A' stroke-width='0.5'/%3E%3C/svg%3E");
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.08) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* iOS safe area for bottom nav */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Outline text effect */
+  .text-outline {
+    -webkit-text-stroke: 1.5px currentColor;
+    color: transparent;
+  }
+
+  .dark .text-outline {
+    -webkit-text-stroke: 1.5px currentColor;
+    color: transparent;
+  }
+
+  /* Monospace stat label */
+  .label-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl font-bold transition-all duration-150 active:scale-[0.98] shadow-sm;
+  }
+
+  /* Pill button (black/white based on theme) */
+  .btn-pill {
+    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-all duration-150 active:scale-[0.97];
+  }
+
+  /* Ghost pill button */
+  .btn-ghost-pill {
+    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-all duration-150 active:scale-[0.97] text-primary-light dark:text-primary-dark;
+  }
+
+  /* Segmented progress bar */
+  .progress-segment {
+    @apply h-1.5 rounded-full flex-1 transition-all duration-500;
+  }
+}
