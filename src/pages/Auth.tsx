@@ -25,12 +25,12 @@ export default function Auth() {
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-bg-light dark:bg-bg-dark p-4">
       
       {/* Background Effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-accent/20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/5 rounded-full pointer-events-none" />
 
       <div className="w-full max-w-sm relative z-10">
         
-        <div className="bg-white/40 dark:bg-surface-dark/40 backdrop-blur-xl border border-white/50 dark:border-white/5 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-white/80 dark:bg-surface-dark/80 border border-border-light dark:border-border-dark rounded-3xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="relative">
@@ -60,7 +60,7 @@ export default function Auth() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 border border-border-light dark:border-border-dark rounded-2xl px-5 py-4 text-text-light dark:text-text-dark font-medium shadow-sm hover:shadow-md active:scale-95 transition-all disabled:opacity-50 backdrop-blur-md group"
+            className="w-full flex items-center justify-center gap-3 bg-bg-light dark:bg-bg-dark hover:bg-gray-50 dark:hover:bg-white/5 border border-border-light dark:border-border-dark rounded-2xl px-5 py-4 text-text-light dark:text-text-dark font-medium shadow-sm hover:shadow-md active:scale-95 transition-all disabled:opacity-50 group"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />

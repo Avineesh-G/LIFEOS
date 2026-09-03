@@ -54,7 +54,7 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-grid text-primary-light dark:text-primary-dark transition-colors duration-200">
 
       {/* ── Top header bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-safe h-14 bg-bg-light/80 dark:bg-bg-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark">
+      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-safe h-14 bg-bg-light dark:bg-bg-dark border-b border-border-light dark:border-border-dark">
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-secondary-light dark:text-secondary-dark">
           LifeOS
         </span>
@@ -82,7 +82,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* ── Floating pill bottom nav ── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-4 pb-6 pb-safe pointer-events-none">
         <nav
-          className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-primary-light dark:bg-primary-dark rounded-full px-2 sm:px-3 py-2.5 shadow-pill overflow-x-auto no-scrollbar touch-pan-x"
+          className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-full px-2 sm:px-3 py-2.5 shadow-lg overflow-x-auto no-scrollbar touch-pan-x"
           style={{ maxWidth: '100%' }}
         >
           {navItems.map((item) => {
@@ -97,22 +97,18 @@ export default function Layout({ children }: LayoutProps) {
                 title={item.label}
                 className={`relative flex flex-col items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full transition-all duration-200 flex-shrink-0 ${
                   active
-                    ? 'bg-white/15 dark:bg-black/15'
-                    : 'hover:bg-white/10 dark:hover:bg-black/10 active:scale-90'
+                    ? 'text-accent'
+                    : 'text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-90'
                 }`}
               >
                 <item.icon
                   size={18}
                   strokeWidth={active ? 2.5 : 1.8}
-                  className={active
-                    ? 'text-white dark:text-primary-light'
-                    : 'text-white/50 dark:text-primary-light/40'
-                  }
                 />
                 {active && (
-                  <motion.span
+                  <motion.div
                     layoutId="navDot"
-                    className="absolute bottom-1 w-1 h-1 rounded-full bg-white dark:bg-primary-light"
+                    className="absolute bottom-1 w-1 h-1 rounded-full bg-accent"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
@@ -130,7 +126,7 @@ export default function Layout({ children }: LayoutProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50 flex items-end justify-center"
+            className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center"
             onClick={() => setShowQuickAdd(false)}
           >
             <motion.div
