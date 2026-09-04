@@ -623,13 +623,19 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       <motion.div variants={item} className="pt-4">
         <button 
           onClick={handleSaveDay}
-          className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
+          className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
         >
-          {showSavedFeedback ? (
-             <><Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}</>
-          ) : (
-             <><Save size={20} /> Save Day's Nutrition</>
-          )}
+          <AnimatePresence mode="wait">
+            {showSavedFeedback ? (
+               <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-2">
+                 <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
+               </motion.div>
+            ) : (
+               <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-2">
+                 <Save size={20} /> Save Day's Nutrition
+               </motion.div>
+            )}
+          </AnimatePresence>
         </button>
       </motion.div>
 
