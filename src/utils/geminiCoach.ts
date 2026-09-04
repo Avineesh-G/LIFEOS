@@ -325,7 +325,7 @@ Output exactly this JSON format:
 }`;
 
   try {
-    const raw = await callGroq(prompt, apiKey, 800, true);
+    const raw = await callGroq(prompt, apiKey, 350, true);
     try {
       return JSON.parse(raw);
     } catch {

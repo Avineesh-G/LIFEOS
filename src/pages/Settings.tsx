@@ -100,9 +100,14 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           const profile = data.profile || { currentCalorieTarget: 2000 };
           const result = await getHistoryAnalysis(filteredLogs, profile, data.geminiApiKey || GEMINI_API_KEY);
           setAiAnalysis(result);
-      } catch (err) {
+      } catch (err: any) {
           console.error(err);
-          setAiAnalysis({ error: "Failed to analyze history. Please check your API key." });
+          const errMsg = err?.message || '';
+          if (errMsg.includes('429')) {
+             setAiAnalysis({ error: "You are doing this too fast. Please wait a minute before analyzing again." });
+          } else {
+             setAiAnalysis({ error: "Failed to analyze history. Please check your API key." });
+          }
       } finally {
           setAnalyzing(false);
       }
