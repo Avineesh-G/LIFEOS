@@ -124,16 +124,22 @@ export interface EatLogItem {
   calories: number; // estimated based on quantity
 }
 
+export interface MealItemLog {
+  id: string; // unique ID for editing extra items
+  name: string;
+  calories: number; // base calories for 1 portion
+  portion: number; // e.g., 0.5, 1, 2
+  isExtra: boolean; // true if added via "Ate something else?"
+}
+
 export interface NutritionLog {
   id: string;
   date: string;       // 'yyyy-MM-dd'
+  isSaved?: boolean;  // Tracks if the user explicitly hit "Save"
   mealsEaten: {
     slot: MealSlot;
-    itemsSelected: string[]; // names of items selected
-    portion: PortionSize;
-    calories: number;
+    items: MealItemLog[];
   }[];
-  extraItems: string[];
   dailyTotal: number;
 }
 // ──────────────────────────────────────────────────────────────────────────

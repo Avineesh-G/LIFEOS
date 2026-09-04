@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
-import type { AppData, MealSlot, NutritionLog, PortionSize, DayMenu } from '../types';
+import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 
 interface NutritionProps {
   data: AppData;
@@ -20,25 +20,12 @@ const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: strin
   { slot: 'dinner',    label: 'Dinner',    icon: <Moon size={16} className="text-indigo-500" />,        time: '7:30–9:00 PM',   dotColor: 'bg-indigo-400' },
 ];
 
-const PORTIONS: { val: PortionSize; label: string }[] = [
-  { val: 0.5, label: '½' },
-  { val: 1,   label: '1' },
-  { val: 1.5, label: '1½' },
-  { val: 2,   label: '2' },
-];
-
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' } } };
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
   const today = format(new Date(), 'yyyy-MM-dd');
-  const currentMonthStr = format(new Date(), 'yyyy-MM');
-  
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const [showTextPaste, setShowTextPaste] = useState(false);
-  const [pastedText, setPastedText] = useState('');
   
   const [coachAdvice, setCoachAdvice] = useState<any>(null);
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
@@ -57,24 +44,45 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   const [expanded, setExpanded] = useState<MealSlot | null>('breakfast');
   
-  // Free text extra item
-  const [extraItemTxt, setExtraItemTxt] = useState('');
-  const [estimating, setEstimating] = useState(false);
+  // Free text extra items per slot
+  const [extraTexts, setExtraTexts] = useState<Record<string, string>>({});
+  const [estimatingSlot, setEstimatingSlot] = useState<MealSlot | null>(null);
 
-  // Current day's log
-  const todayLog = (data.nutritionLogs || []).find(l => l.date === today) || {
-    id: `nut-${today}`,
-    date: today,
-    mealsEaten: [],
-    extraItems: [],
-    dailyTotal: 0
-  } as NutritionLog;
+  // Edit Extra Item state
+  const [editingExtraId, setEditingExtraId] = useState<string | null>(null);
+  const [editExtraName, setEditExtraName] = useState('');
+  const [editExtraCals, setEditExtraCals] = useState('');
+
+  // Draft Log initialization
+  const [draftLog, setDraftLog] = useState<NutritionLog>(() => {
+    const existing = (data.nutritionLogs || []).find(l => l.date === today);
+    if (existing) {
+      // Migrate old format to new format if needed (if it has itemsSelected)
+      const isOldFormat = existing.mealsEaten.some((m: any) => 'itemsSelected' in m);
+      if (isOldFormat) {
+        return {
+          id: `nut-${today}`,
+          date: today,
+          isSaved: false,
+          mealsEaten: [],
+          dailyTotal: 0
+        };
+      }
+      return existing;
+    }
+    return {
+      id: `nut-${today}`,
+      date: today,
+      isSaved: false,
+      mealsEaten: [],
+      dailyTotal: 0
+    };
+  });
 
   const targetCals = data.profile?.currentCalorieTarget || 2000;
-  const totalConsumed = todayLog.dailyTotal;
+  const totalConsumed = draftLog.dailyTotal;
   const ringPct = Math.min((totalConsumed / targetCals) * 100, 100);
   const ringColor = ringPct < 85 ? '#10b981' : ringPct <= 100 ? '#f59e0b' : '#ef4444';
-
   const circumference = 2 * Math.PI * 42;
   const strokeDash = (ringPct / 100) * circumference;
 
@@ -95,74 +103,161 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     }
   };
 
-  const toggleMenuItem = async (mealSlot: MealSlot, itemName: string, estCals: number) => {
-    triggerHaptic(5);
-    const existingLog = { ...todayLog };
-    
-    let mealLog = existingLog.mealsEaten.find(m => m.slot === mealSlot);
-    if (!mealLog) {
-      mealLog = { slot: mealSlot, itemsSelected: [], portion: 1, calories: 0 };
-      existingLog.mealsEaten.push(mealLog);
-    }
-
-    if (mealLog.itemsSelected.includes(itemName)) {
-      mealLog.itemsSelected = mealLog.itemsSelected.filter(i => i !== itemName);
-      mealLog.calories -= (estCals * mealLog.portion);
-    } else {
-      mealLog.itemsSelected.push(itemName);
-      mealLog.calories += (estCals * mealLog.portion);
-    }
-
-    // Recalculate daily total
-    existingLog.dailyTotal = existingLog.mealsEaten.reduce((s, m) => s + m.calories, 0);
-
-    const logs = (data.nutritionLogs || []).filter(l => l.date !== today);
-    await updateData({ nutritionLogs: [...logs, existingLog] });
+  const calculateDailyTotal = (meals: NutritionLog['mealsEaten']) => {
+    let total = 0;
+    meals.forEach(m => {
+      m.items.forEach(i => {
+        total += (i.calories * i.portion);
+      });
+    });
+    return total;
   };
 
-  const setMealPortion = async (mealSlot: MealSlot, portion: PortionSize) => {
+  const toggleMenuItem = (mealSlot: MealSlot, itemName: string, estCals: number) => {
     triggerHaptic(5);
-    const existingLog = { ...todayLog };
-    let mealLog = existingLog.mealsEaten.find(m => m.slot === mealSlot);
-    if (!mealLog) return; // No items selected yet
+    setDraftLog(prev => {
+      const newLog = { ...prev };
+      let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
+      if (!mealLog) {
+        mealLog = { slot: mealSlot, items: [] };
+        newLog.mealsEaten.push(mealLog);
+      }
 
-    const oldPortion = mealLog.portion;
-    mealLog.portion = portion;
-    
-    // Recalculate cals
-    mealLog.calories = (mealLog.calories / oldPortion) * portion;
-    existingLog.dailyTotal = existingLog.mealsEaten.reduce((s, m) => s + m.calories, 0);
-    
-    const logs = (data.nutritionLogs || []).filter(l => l.date !== today);
-    await updateData({ nutritionLogs: [...logs, existingLog] });
+      const existingItemIdx = mealLog.items.findIndex(i => i.id === itemName && !i.isExtra);
+      if (existingItemIdx >= 0) {
+        // Remove item
+        mealLog.items.splice(existingItemIdx, 1);
+      } else {
+        // Add item with portion 1
+        mealLog.items.push({
+          id: itemName,
+          name: itemName,
+          calories: estCals,
+          portion: 1,
+          isExtra: false
+        });
+      }
+
+      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      return newLog;
+    });
   };
 
-  const handleAddExtraItem = async () => {
-    if (!extraItemTxt.trim()) return;
-    setEstimating(true);
+  const updateItemPortion = (mealSlot: MealSlot, itemId: string, change: number) => {
+    triggerHaptic(5);
+    setDraftLog(prev => {
+      const newLog = { ...prev };
+      let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
+      if (!mealLog) return prev;
+
+      const item = mealLog.items.find(i => i.id === itemId);
+      if (!item) return prev;
+
+      // Update portion
+      item.portion += change;
+      
+      // Prevent portion dropping below 0
+      if (item.portion <= 0) {
+        if (item.isExtra) {
+            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
+        } else {
+            // For standard menu items, we completely uncheck it
+            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
+        }
+      }
+
+      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      return newLog;
+    });
+  };
+
+  const handleAddExtraItem = async (mealSlot: MealSlot) => {
+    const txt = extraTexts[mealSlot] || '';
+    if (!txt.trim()) return;
+    
+    setEstimatingSlot(mealSlot);
     triggerHaptic(10);
     
     try {
-      const prompt = `Estimate the calories for this food item eaten: "${extraItemTxt}".
+      const prompt = `Estimate the calories for this food item eaten: "${txt}".
 Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized name"}. No markdown, no backticks.`;
       
       const res = await getCoachTip(prompt, data.geminiApiKey || GEMINI_API_KEY);
       const parsed = JSON.parse(res);
       
-      const existingLog = { ...todayLog };
-      existingLog.extraItems = [...(existingLog.extraItems || []), `${parsed.name} (${parsed.calories} kcal)`];
-      existingLog.dailyTotal += parsed.calories;
+      setDraftLog(prev => {
+        const newLog = { ...prev };
+        let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
+        if (!mealLog) {
+          mealLog = { slot: mealSlot, items: [] };
+          newLog.mealsEaten.push(mealLog);
+        }
+        
+        mealLog.items.push({
+          id: Date.now().toString(),
+          name: parsed.name,
+          calories: parsed.calories,
+          portion: 1,
+          isExtra: true
+        });
 
-      const logs = (data.nutritionLogs || []).filter(l => l.date !== today);
-      await updateData({ nutritionLogs: [...logs, existingLog] });
+        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        return newLog;
+      });
       
-      setExtraItemTxt('');
+      setExtraTexts(prev => ({ ...prev, [mealSlot]: '' }));
     } catch (err) {
       console.error(err);
     } finally {
-      setEstimating(false);
+      setEstimatingSlot(null);
     }
   };
+
+  const deleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
+    triggerHaptic(5);
+    setDraftLog(prev => {
+        const newLog = { ...prev };
+        const mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
+        if (mealLog) {
+            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
+        }
+        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        return newLog;
+    });
+  }
+
+  const saveEditedExtraItem = (mealSlot: MealSlot, itemId: string) => {
+    triggerHaptic(5);
+    const parsedCals = parseInt(editExtraCals);
+    
+    setDraftLog(prev => {
+        const newLog = { ...prev };
+        const mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
+        if (mealLog) {
+            const item = mealLog.items.find(i => i.id === itemId);
+            if (item) {
+                if (editExtraName.trim()) item.name = editExtraName.trim();
+                if (!isNaN(parsedCals) && parsedCals >= 0) item.calories = parsedCals;
+            }
+        }
+        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        return newLog;
+    });
+    setEditingExtraId(null);
+  }
+
+  const handleSaveDay = async () => {
+    triggerHaptic(10);
+    const finalLog = { ...draftLog, isSaved: true };
+    setDraftLog(finalLog);
+    
+    const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== today);
+    await updateData({ nutritionLogs: [...otherLogs, finalLog] });
+  };
+
+  const savedHistory = (data.nutritionLogs || [])
+    .filter(l => l.isSaved && l.date !== today)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-24">
@@ -275,8 +370,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           </AnimatePresence>
           {MEALS.map(mealObj => {
             const mealData = todayMenu.meals.find(m => m.slot === mealObj.slot);
-            const mealLog = todayLog.mealsEaten.find(m => m.slot === mealObj.slot);
+            const mealLog = draftLog.mealsEaten.find(m => m.slot === mealObj.slot);
             const isOpen = expanded === mealObj.slot;
+            
+            // Calculate total calories for this slot
+            const slotCals = mealLog ? mealLog.items.reduce((s, i) => s + (i.calories * i.portion), 0) : 0;
 
             return (
               <div key={mealObj.slot} className="card overflow-hidden">
@@ -294,9 +392,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {mealLog && mealLog.calories > 0 && (
+                    {slotCals > 0 && (
                       <span className="text-xs font-bold font-mono text-primary-light dark:text-primary-dark">
-                        {Math.round(mealLog.calories)} kcal
+                        {Math.round(slotCals)} kcal
                       </span>
                     )}
                     {isOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
@@ -307,58 +405,167 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   {isOpen && mealData && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <div className="px-4 pb-4 border-t border-border-light dark:border-border-dark pt-3">
+                        
+                        {/* Standard Menu Items */}
                         <div className="space-y-2 mb-4">
                           {mealData.items.map(item => {
-                            const isSelected = mealLog?.itemsSelected.includes(item.name);
+                            const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
+                            const isSelected = !!loggedItem;
+                            
                             const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
                             const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
                             
                             return (
-                              <button
+                              <div
                                 key={item.name}
-                                onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
-                                className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                className={`w-full flex flex-col p-3 rounded-xl border transition-all ${
                                   isSelected 
-                                    ? 'bg-primary-light dark:bg-primary-dark border-transparent' 
+                                    ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30' 
                                     : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
                                 }`}
                               >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'border-bg-light dark:border-bg-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
-                                    <Check size={12} strokeWidth={3} />
-                                  </div>
-                                  <span className={`text-sm font-medium flex items-center gap-2 ${isSelected ? 'text-bg-light dark:text-bg-dark' : 'text-primary-light dark:text-primary-dark'}`}>
-                                    {item.name}
-                                    {isRecommended && <Leaf size={14} className={isSelected ? 'text-bg-light/90 dark:text-bg-dark/90' : 'text-emerald-500'} />}
-                                    {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-bg-light/90 dark:text-bg-dark/90' : 'text-red-500'} />}
-                                  </span>
+                                <div className="flex items-center justify-between">
+                                  <button
+                                      className="flex items-center gap-3 flex-1 text-left"
+                                      onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
+                                  >
+                                    <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
+                                      <Check size={12} strokeWidth={3} />
+                                    </div>
+                                    <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                                      {item.name}
+                                      {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
+                                      {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
+                                    </span>
+                                  </button>
+                                  
+                                  {/* Item Portions Stepper */}
+                                  {isSelected && (
+                                    <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
+                                      <button 
+                                        className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                        onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
+                                      >
+                                        -
+                                      </button>
+                                      <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
+                                      <button 
+                                        className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                        onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  )}
+                                  {!isSelected && (
+                                    <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
+                                      {item.estCalories} kcal
+                                    </span>
+                                  )}
                                 </div>
-                                <span className={`label-mono text-[10px] ${isSelected ? 'text-bg-light/70 dark:text-bg-dark/70' : 'text-muted-light dark:text-muted-dark'}`}>
-                                  {item.estCalories} kcal
-                                </span>
-                              </button>
+                                {isSelected && (
+                                    <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
+                                        Total: {Math.round(loggedItem.calories * loggedItem.portion)} kcal
+                                    </div>
+                                )}
+                              </div>
                             );
                           })}
                         </div>
                         
-                        {/* Portions */}
-                        {mealLog && mealLog.itemsSelected.length > 0 && (
-                          <div className="flex items-center justify-between p-1 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
-                            {PORTIONS.map(p => (
-                              <button
-                                key={p.val}
-                                onClick={() => setMealPortion(mealObj.slot, p.val)}
-                                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                  mealLog.portion === p.val 
-                                    ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm' 
-                                    : 'text-secondary-light dark:text-secondary-dark'
-                                }`}
-                              >
-                                {p.label} portion
-                              </button>
-                            ))}
-                          </div>
+                        {/* Extra Items List for this slot */}
+                        {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
+                            <div className="mt-4 mb-4 space-y-2">
+                                <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">Extra Items</h4>
+                                {mealLog.items.filter(i => i.isExtra).map((extra) => (
+                                    <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
+                                        {editingExtraId === extra.id ? (
+                                            <div className="space-y-3">
+                                                <input 
+                                                    type="text" 
+                                                    value={editExtraName}
+                                                    onChange={(e) => setEditExtraName(e.target.value)}
+                                                    className="input-field text-sm w-full py-1.5 px-3"
+                                                    placeholder="Item name"
+                                                />
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="number" 
+                                                        value={editExtraCals}
+                                                        onChange={(e) => setEditExtraCals(e.target.value)}
+                                                        className="input-field text-sm flex-1 py-1.5 px-3"
+                                                        placeholder="Calories for 1 portion"
+                                                    />
+                                                    <button onClick={() => saveEditedExtraItem(mealObj.slot, extra.id)} className="btn-primary py-1 px-3 text-xs">Save</button>
+                                                    <button onClick={() => setEditingExtraId(null)} className="btn-secondary py-1 px-3 text-xs">Cancel</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-medium text-primary-light dark:text-primary-dark">{extra.name}</span>
+                                                    <div className="flex items-center gap-1">
+                                                        {/* Extra Item Portions Stepper */}
+                                                        <div className="flex items-center gap-2 bg-bg-light dark:bg-bg-dark rounded-lg px-2 py-0.5">
+                                                            <button 
+                                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, -0.5); }}
+                                                            >
+                                                                -
+                                                            </button>
+                                                            <span className="text-xs font-bold w-6 text-center">{extra.portion}</span>
+                                                            <button 
+                                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, 0.5); }}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        <button onClick={() => { setEditingExtraId(extra.id); setEditExtraName(extra.name); setEditExtraCals(extra.calories.toString()); }} className="p-1.5 text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+                                                            <Edit2 size={14} />
+                                                        </button>
+                                                        <button onClick={() => deleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="text-[10px] text-muted-light dark:text-muted-dark mt-1 font-mono">
+                                                    {extra.calories} kcal/portion • Total: {Math.round(extra.calories * extra.portion)} kcal
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         )}
+
+                        {/* Add Extra Item Input */}
+                        <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Sparkles size={14} className="text-purple-500" />
+                                <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">Ate something else?</span>
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 2 slices of pizza, 1 apple"
+                                    value={extraTexts[mealObj.slot] || ''}
+                                    onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
+                                    className="input-field flex-1 text-sm py-2 px-3"
+                                    disabled={estimatingSlot === mealObj.slot}
+                                />
+                                <button
+                                    onClick={() => handleAddExtraItem(mealObj.slot)}
+                                    disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
+                                    className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl disabled:opacity-50"
+                                >
+                                    {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
                       </div>
                     </motion.div>
                   )}
@@ -376,42 +583,73 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </motion.div>
       )}
 
-      {/* Extra Items Logger */}
-      <motion.div variants={item} className="card p-4 space-y-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles size={16} className="text-purple-500" />
-          <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Ate something else?</h3>
-        </div>
-        
-        {todayLog.extraItems && todayLog.extraItems.length > 0 && (
-          <div className="space-y-2 mb-3">
-            {todayLog.extraItems.map((ex, i) => (
-              <div key={i} className="flex justify-between items-center text-sm p-2 bg-surface-light dark:bg-surface-dark rounded-lg">
-                <span className="text-secondary-light dark:text-secondary-dark">{ex}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="e.g. 2 slices of pizza, 1 apple"
-            value={extraItemTxt}
-            onChange={(e) => setExtraItemTxt(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem()}
-            className="input-field flex-1 text-sm py-2 px-3"
-            disabled={estimating}
-          />
-          <button
-            onClick={handleAddExtraItem}
-            disabled={estimating || !extraItemTxt.trim()}
-            className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl disabled:opacity-50"
-          >
-            {estimating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
-          </button>
-        </div>
+      {/* Save Button */}
+      <motion.div variants={item} className="pt-4">
+        <button 
+          onClick={handleSaveDay}
+          className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all shadow-md active:scale-95 ${draftLog.isSaved ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
+        >
+          {draftLog.isSaved ? (
+             <><Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}</>
+          ) : (
+             <><Save size={20} /> Save Day's Nutrition</>
+          )}
+        </button>
       </motion.div>
+
+      {/* History View */}
+      {savedHistory.length > 0 && (
+        <motion.div variants={item} className="pt-8 space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-border-light dark:border-border-dark">
+                <History size={18} className="text-primary-light dark:text-primary-dark" />
+                <h3 className="font-bold text-primary-light dark:text-primary-dark">Saved History</h3>
+            </div>
+            <div className="space-y-3">
+                {savedHistory.map((log) => (
+                    <div key={log.id} className="card p-4">
+                        <div className="flex items-center justify-between mb-3 pb-2 border-b border-dashed border-border-light dark:border-border-dark">
+                            <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
+                                {format(parseISO(log.date), 'EEEE, MMM d, yyyy')}
+                            </span>
+                            <span className="text-sm font-bold font-mono text-emerald-500">
+                                {Math.round(log.dailyTotal)} kcal
+                            </span>
+                        </div>
+                        <div className="space-y-3">
+                            {log.mealsEaten.map((meal) => {
+                                const mealDef = MEALS.find(m => m.slot === meal.slot);
+                                if (!meal.items || meal.items.length === 0) return null;
+                                return (
+                                    <div key={meal.slot} className="space-y-1">
+                                        <div className="flex items-center gap-2 text-xs font-bold text-secondary-light dark:text-secondary-dark">
+                                            {mealDef?.icon}
+                                            {mealDef?.label}
+                                        </div>
+                                        <div className="pl-6 space-y-1">
+                                            {meal.items.map(item => (
+                                                <div key={item.id} className="flex justify-between items-center text-xs text-muted-light dark:text-muted-dark">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="w-5 text-right font-mono">{item.portion}x</span>
+                                                        <span>{item.name}</span>
+                                                        {item.isExtra && <Sparkles size={10} className="text-purple-400" />}
+                                                    </div>
+                                                    <span className="font-mono">{Math.round(item.calories * item.portion)} kcal</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {log.mealsEaten.length === 0 && (
+                                <p className="text-xs text-muted-light dark:text-muted-dark">No items recorded.</p>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </motion.div>
+      )}
+
     </motion.div>
   );
 }
