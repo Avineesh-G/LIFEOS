@@ -26,6 +26,18 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function Settings({ theme, setTheme, data, updateData }: SettingsProps) {
   const [isSaved, setIsSaved] = useState(false);
+  const [showDanger, setShowDanger] = useState(false);
+  
+  // History Expansion State
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const toggleLog = (id: string) => {
+    setExpandedLogs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
   
   // History State
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -237,17 +249,55 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                                 </div>
                             ) : (
                                 filteredLogs.map(log => (
-                                    <div key={log.id} className="flex items-center justify-between p-3 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
-                                                {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
-                                            </span>
+                                    <div 
+                                        key={log.id} 
+                                        onClick={() => toggleLog(log.id)}
+                                        className="flex flex-col p-3 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
+                                                    {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-sm font-bold font-mono ${log.dailyTotal > (data.profile?.currentCalorieTarget || 2000) ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                    {Math.round(log.dailyTotal)} kcal
+                                                </span>
+                                                <ChevronDown size={16} className={`text-muted-light dark:text-muted-dark transition-transform ${expandedLogs.has(log.id) ? 'rotate-180' : ''}`} />
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={`text-sm font-bold font-mono ${log.dailyTotal > (data.profile?.currentCalorieTarget || 2000) ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                {Math.round(log.dailyTotal)} kcal
-                                            </span>
-                                        </div>
+                                        
+                                        <AnimatePresence>
+                                            {expandedLogs.has(log.id) && (
+                                                <motion.div 
+                                                    initial={{ height: 0, opacity: 0 }} 
+                                                    animate={{ height: 'auto', opacity: 1 }} 
+                                                    exit={{ height: 0, opacity: 0 }} 
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark space-y-3">
+                                                        {log.mealsEaten.length === 0 ? (
+                                                            <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No meals logged.</p>
+                                                        ) : (
+                                                            log.mealsEaten.map((meal, idx) => (
+                                                                <div key={idx}>
+                                                                    <h5 className="text-[10px] font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider mb-1">{meal.slot}</h5>
+                                                                    <ul className="space-y-1">
+                                                                        {meal.items.map((item, iIdx) => (
+                                                                            <li key={iIdx} className="flex items-center justify-between text-xs">
+                                                                                <span className="text-secondary-light dark:text-secondary-dark">{item.name} {item.portion !== 1 && `(x${item.portion})`}</span>
+                                                                                <span className="font-mono text-primary-light dark:text-primary-dark">{Math.round(item.calories * item.portion)}</span>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 ))
                             )}

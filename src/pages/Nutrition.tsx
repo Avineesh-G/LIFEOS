@@ -148,6 +148,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }
 
       newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      newLog.isSaved = false;
       return newLog;
     });
   };
@@ -177,6 +178,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }
 
       newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      newLog.isSaved = false;
       return newLog;
     });
   };
@@ -217,6 +219,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         });
         
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        newLog.isSaved = false;
         return newLog;
       });
       
@@ -243,6 +246,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             mealLog.items = mealLog.items.filter(i => i.id !== itemId);
         }
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        newLog.isSaved = false;
         return newLog;
     });
   }
@@ -268,6 +272,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             }
         }
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+        newLog.isSaved = false;
         return newLog;
     });
     setEditingExtraId(null);
