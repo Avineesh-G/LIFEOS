@@ -1,14 +1,6 @@
-const CACHE_NAME = 'lifeos-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/src/main.tsx'
-];
+const CACHE_NAME = 'lifeos-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
-  );
   self.skipWaiting();
 });
 
@@ -26,11 +18,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Only intercept GET requests
+  if (event.request.method !== 'GET') return;
+
+  // Don't intercept browser extension requests
+  if (!event.request.url.startsWith('http')) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Update cache with the fresh network response (if it's a valid GET request)
-        if (event.request.method === 'GET' && response.status === 200) {
+        // Only cache successful HTTP responses
+        if (response.status === 200 || response.type === 'opaque') {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
@@ -42,9 +40,12 @@ self.addEventListener('fetch', (event) => {
         // If network fails (offline), fallback to cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
-          // Fallback to index.html for navigation requests
+          
+          // Fallback for navigation requests (HTML pages)
           if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match(event.request.url) 
+              .then(res => res || caches.match(new URL('./', event.request.url).href))
+              .then(res => res || caches.match('/index.html'));
           }
         });
       })
