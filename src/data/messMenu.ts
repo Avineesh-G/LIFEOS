@@ -70,3 +70,23 @@ export const HARDCODED_MESS_MENU: WeeklyMenu[] = [
     ]
   }
 ];
+
+export interface MonthlyMenu {
+  date: number; // 1 to 31
+  dayName: string;
+  meals: MealMenu[];
+}
+
+export const MONTHLY_MESS_MENU: MonthlyMenu[] = Array.from({ length: 31 }, (_, i) => {
+  const date = i + 1;
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Assumes the 1st of the month is a Tuesday (dayOfWeek: 2)
+  const dayIndex = (1 + date) % 7;
+  const weeklyMenu = HARDCODED_MESS_MENU.find(m => m.dayOfWeek === dayIndex);
+  
+  return {
+    date,
+    dayName: dayNames[dayIndex],
+    meals: weeklyMenu ? weeklyMenu.meals : []
+  };
+});

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
-import { HARDCODED_MESS_MENU } from '../data/messMenu';
+import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import type { AppData, MealSlot, NutritionLog, PortionSize, DayMenu } from '../types';
 
 interface NutritionProps {
@@ -44,14 +44,14 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
 
-  // Find today's menu from the hardcoded list based on day of week
-  const todayMenu: DayMenu | undefined = useMemo(() => {
-    const currentDayOfWeek = new Date().getDay();
-    const weeklyMenu = HARDCODED_MESS_MENU.find(m => m.dayOfWeek === currentDayOfWeek);
-    if (!weeklyMenu) return undefined;
+  // Find today's menu from the 31-day monthly menu based on current date
+  const todayMenu = useMemo(() => {
+    const currentDate = new Date().getDate();
+    const monthlyMenu = MONTHLY_MESS_MENU.find(m => m.date === currentDate);
+    if (!monthlyMenu) return undefined;
     return {
-      date: today,
-      meals: weeklyMenu.meals
+      ...monthlyMenu,
+      fullDateStr: today
     };
   }, [today]);
 
@@ -220,7 +220,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       {todayMenu && (
         <motion.div variants={item} className="space-y-3">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu</h2>
+            <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
             <button 
               onClick={handleGetAdvice}
               className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors"
