@@ -1,6 +1,7 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo } from 'react';
+import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
@@ -8,6 +9,7 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
 
 interface SettingsProps {
   theme: AppSettings['theme'];
@@ -24,6 +26,50 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function Settings({ theme, setTheme, data, updateData }: SettingsProps) {
   const [isSaved, setIsSaved] = useState(false);
+  
+  // History State
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  // Filter logs by selected month and only include saved logs
+  const filteredLogs = useMemo(() => {
+    if (!data.nutritionLogs) return [];
+    
+    // Parse selectedMonth into a Date object to get start and end of month
+    const [year, month] = selectedMonth.split('-');
+    const dateStr = `${year}-${month}-01T00:00:00`;
+    const filterDate = new Date(dateStr);
+    
+    const start = startOfMonth(filterDate);
+    const end = endOfMonth(filterDate);
+
+    return data.nutritionLogs
+      .filter(log => {
+          if (!log.isSaved) return false;
+          try {
+              const logDate = parseISO(log.date);
+              return isWithinInterval(logDate, { start, end });
+          } catch {
+              return false;
+          }
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [data.nutritionLogs, selectedMonth]);
+
+  const uniqueMonths = useMemo(() => {
+     if (!data.nutritionLogs) return [format(new Date(), 'yyyy-MM')];
+     const months = new Set<string>();
+     data.nutritionLogs.forEach(l => {
+         if (l.isSaved && l.date) {
+             months.add(l.date.substring(0, 7)); // 'yyyy-MM'
+         }
+     });
+     // Ensure current month is always an option
+     months.add(format(new Date(), 'yyyy-MM'));
+     return Array.from(months).sort().reverse();
+  }, [data.nutritionLogs]);
 
   const handleSaveFeedback = () => {
     triggerHaptic(15);
@@ -33,8 +79,25 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
   };
+
+  const handleAnalyzeHistory = async () => {
+      if (filteredLogs.length === 0) return;
+      triggerHaptic(10);
+      setAnalyzing(true);
+      try {
+          const profile = data.profile || { currentCalorieTarget: 2000 };
+          const result = await getHistoryAnalysis(filteredLogs, profile, data.geminiApiKey || GEMINI_API_KEY);
+          setAiAnalysis(result);
+      } catch (err) {
+          console.error(err);
+          setAiAnalysis({ error: "Failed to analyze history. Please check your API key." });
+      } finally {
+          setAnalyzing(false);
+      }
+  };
+
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-24">
       {/* Header */}
       <motion.div variants={item} className="pt-2">
         <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Preferences</p>
@@ -76,6 +139,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           </div>
         </div>
       </motion.div>
+      
       {/* Body Profile Section */}
       <motion.div variants={item} className="card p-5 space-y-4">
         <p className="label-mono text-secondary-light dark:text-secondary-dark">Body Profile & Targeting</p>
@@ -83,6 +147,116 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           initialProfile={data.profile} 
           onSave={(profile) => updateData({ profile })} 
         />
+      </motion.div>
+
+      {/* Nutrition History Section */}
+      <motion.div variants={item} className="card overflow-hidden">
+        <button
+            onClick={() => setHistoryOpen(!historyOpen)}
+            className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+        >
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-500/20 text-purple-500">
+                    <History size={16} />
+                </div>
+                <div className="text-left">
+                    <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Nutrition History</p>
+                    <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past saved calories</p>
+                </div>
+            </div>
+            {historyOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+        </button>
+
+        <AnimatePresence>
+            {historyOpen && (
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+                        
+                        {/* Filter Header */}
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
+                                <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                                <select 
+                                    value={selectedMonth}
+                                    onChange={(e) => {
+                                        setSelectedMonth(e.target.value);
+                                        setAiAnalysis(null);
+                                    }}
+                                    className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                                >
+                                    {uniqueMonths.map(m => {
+                                        const [y, mo] = m.split('-');
+                                        const date = new Date(parseInt(y), parseInt(mo) - 1);
+                                        return (
+                                            <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
+                                        )
+                                    })}
+                                </select>
+                            </div>
+                            <button 
+                                onClick={handleAnalyzeHistory}
+                                disabled={filteredLogs.length === 0 || analyzing}
+                                className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-purple-500 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+                            >
+                                {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                AI Insights
+                            </button>
+                        </div>
+
+                        {/* AI Insights Card */}
+                        {aiAnalysis && (
+                            <div className="p-4 rounded-xl border border-purple-500/30 bg-purple-500/5 relative">
+                                <button onClick={() => setAiAnalysis(null)} className="absolute top-2 right-2 text-purple-500/70 hover:text-purple-500">
+                                    <X size={14} />
+                                </button>
+                                <h4 className="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
+                                    <Sparkles size={14} /> Month Analysis
+                                </h4>
+                                {aiAnalysis.error ? (
+                                    <p className="text-sm text-red-500">{aiAnalysis.error}</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <p className="text-sm text-primary-light dark:text-primary-dark font-medium leading-relaxed">
+                                            {aiAnalysis.summary}
+                                        </p>
+                                        {aiAnalysis.tips && aiAnalysis.tips.length > 0 && (
+                                            <ul className="text-sm text-secondary-light dark:text-secondary-dark space-y-1 list-disc pl-4">
+                                                {aiAnalysis.tips.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* History List */}
+                        <div className="space-y-2">
+                            {filteredLogs.length === 0 ? (
+                                <div className="text-center py-6 text-sm text-secondary-light dark:text-secondary-dark">
+                                    No saved data for this month.
+                                </div>
+                            ) : (
+                                filteredLogs.map(log => (
+                                    <div key={log.id} className="flex items-center justify-between p-3 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark">
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
+                                                {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-sm font-bold font-mono ${log.dailyTotal > (data.profile?.currentCalorieTarget || 2000) ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                {Math.round(log.dailyTotal)} kcal
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Advanced Settings */}
@@ -102,7 +276,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 }
               }}
               className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3 py-2 text-primary-light dark:text-primary-dark focus:outline-none focus:ring-1 focus:ring-accent-light" 
-              placeholder="AIzaSy..."
+              placeholder="gsk_..."
             />
             <button
               onClick={handleSaveFeedback}
@@ -111,7 +285,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               {isSaved ? <><Check size={14} /> Saved!</> : 'Save'}
             </button>
           </div>
-          <p className="text-[10px] text-muted-light dark:text-muted-dark mt-1">Required for AI Coach and Nutrition parsing.</p>
+          <p className="text-[10px] text-muted-light dark:text-muted-dark mt-1">Required for AI Coach, AI Insights, and Nutrition parsing.</p>
         </div>
       </motion.div>
 

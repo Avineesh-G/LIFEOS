@@ -597,58 +597,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </button>
       </motion.div>
 
-      {/* History View */}
-      {savedHistory.length > 0 && (
-        <motion.div variants={item} className="pt-8 space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-border-light dark:border-border-dark">
-                <History size={18} className="text-primary-light dark:text-primary-dark" />
-                <h3 className="font-bold text-primary-light dark:text-primary-dark">Saved History</h3>
-            </div>
-            <div className="space-y-3">
-                {savedHistory.map((log) => (
-                    <div key={log.id} className="card p-4">
-                        <div className="flex items-center justify-between mb-3 pb-2 border-b border-dashed border-border-light dark:border-border-dark">
-                            <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
-                                {format(parseISO(log.date), 'EEEE, MMM d, yyyy')}
-                            </span>
-                            <span className="text-sm font-bold font-mono text-emerald-500">
-                                {Math.round(log.dailyTotal)} kcal
-                            </span>
-                        </div>
-                        <div className="space-y-3">
-                            {log.mealsEaten.map((meal) => {
-                                const mealDef = MEALS.find(m => m.slot === meal.slot);
-                                if (!meal.items || meal.items.length === 0) return null;
-                                return (
-                                    <div key={meal.slot} className="space-y-1">
-                                        <div className="flex items-center gap-2 text-xs font-bold text-secondary-light dark:text-secondary-dark">
-                                            {mealDef?.icon}
-                                            {mealDef?.label}
-                                        </div>
-                                        <div className="pl-6 space-y-1">
-                                            {meal.items.map(item => (
-                                                <div key={item.id} className="flex justify-between items-center text-xs text-muted-light dark:text-muted-dark">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="w-5 text-right font-mono">{item.portion}x</span>
-                                                        <span>{item.name}</span>
-                                                        {item.isExtra && <Sparkles size={10} className="text-purple-400" />}
-                                                    </div>
-                                                    <span className="font-mono">{Math.round(item.calories * item.portion)} kcal</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            {log.mealsEaten.length === 0 && (
-                                <p className="text-xs text-muted-light dark:text-muted-dark">No items recorded.</p>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </motion.div>
-      )}
+
 
     </motion.div>
   );

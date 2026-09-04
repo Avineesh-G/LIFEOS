@@ -299,3 +299,40 @@ Output a valid JSON object in this exact format:
     throw err;
   }
 }
+
+export async function getHistoryAnalysis(logs: any[], profile: any, apiKey: string = GEMINI_API_KEY): Promise<any> {
+  if (!logs || logs.length === 0) return null;
+  
+  // Format logs for the AI to understand concisely
+  const historyData = logs.map(l => {
+    return `Date: ${l.date}, Total: ${Math.round(l.dailyTotal)} kcal. Meals: ${l.mealsEaten.map((m: any) => `${m.slot}: ${m.items.map((i: any) => `${i.name} (x${i.portion})`).join(', ')}`).join(' | ')}`;
+  }).join('\n');
+
+  const prompt = `You are an expert AI Dietician. The user's calorie target is ${profile?.currentCalorieTarget || 2000} kcal.
+Here is their recent eating history:
+${historyData}
+
+Analyze this history and provide a concise JSON summary.
+Output exactly this JSON format:
+{
+  "summary": "A 2-sentence summary of their eating trends over this period.",
+  "tips": [
+    "Specific actionable tip 1 based on their data",
+    "Specific actionable tip 2 based on their data"
+  ]
+}`;
+
+  try {
+    const raw = await callGroq(prompt, apiKey, 800, true);
+    try {
+      return JSON.parse(raw);
+    } catch {
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('Could not parse history analysis from Groq response');
+      return JSON.parse(match[0]);
+    }
+  } catch (err) {
+    console.error('Groq history analysis error:', err);
+    throw err;
+  }
+}
