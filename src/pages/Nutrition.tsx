@@ -116,9 +116,14 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const toggleMenuItem = (mealSlot: MealSlot, itemName: string, estCals: number) => {
     triggerHaptic(5);
     setDraftLog(prev => {
-      const newLog = { ...prev };
-      let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
-      if (!mealLog) {
+      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+      
+      let mealLog;
+      if (mealIdx >= 0) {
+        mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+        newLog.mealsEaten[mealIdx] = mealLog;
+      } else {
         mealLog = { slot: mealSlot, items: [] };
         newLog.mealsEaten.push(mealLog);
       }
@@ -146,24 +151,25 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const updateItemPortion = (mealSlot: MealSlot, itemId: string, change: number) => {
     triggerHaptic(5);
     setDraftLog(prev => {
-      const newLog = { ...prev };
-      let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
-      if (!mealLog) return prev;
+      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+      if (mealIdx === -1) return prev;
 
-      const item = mealLog.items.find(i => i.id === itemId);
-      if (!item) return prev;
+      const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+      newLog.mealsEaten[mealIdx] = mealLog;
+
+      const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
+      if (itemIdx === -1) return prev;
+
+      const item = { ...mealLog.items[itemIdx] };
+      mealLog.items[itemIdx] = item;
 
       // Update portion
       item.portion += change;
       
       // Prevent portion dropping below 0
       if (item.portion <= 0) {
-        if (item.isExtra) {
-            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
-        } else {
-            // For standard menu items, we completely uncheck it
-            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
-        }
+         mealLog.items.splice(itemIdx, 1);
       }
 
       newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
@@ -186,9 +192,14 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       const parsed = JSON.parse(res);
       
       setDraftLog(prev => {
-        const newLog = { ...prev };
-        let mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
-        if (!mealLog) {
+        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+        
+        let mealLog;
+        if (mealIdx >= 0) {
+          mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+          newLog.mealsEaten[mealIdx] = mealLog;
+        } else {
           mealLog = { slot: mealSlot, items: [] };
           newLog.mealsEaten.push(mealLog);
         }
@@ -200,7 +211,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           portion: 1,
           isExtra: true
         });
-
+        
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
         return newLog;
       });
@@ -213,12 +224,13 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     }
   };
 
-  const deleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
-    triggerHaptic(5);
+  const handleDeleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
     setDraftLog(prev => {
-        const newLog = { ...prev };
-        const mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
-        if (mealLog) {
+        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+        if (mealIdx >= 0) {
+            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+            newLog.mealsEaten[mealIdx] = mealLog;
             mealLog.items = mealLog.items.filter(i => i.id !== itemId);
         }
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
@@ -231,11 +243,17 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     const parsedCals = parseInt(editExtraCals);
     
     setDraftLog(prev => {
-        const newLog = { ...prev };
-        const mealLog = newLog.mealsEaten.find(m => m.slot === mealSlot);
-        if (mealLog) {
-            const item = mealLog.items.find(i => i.id === itemId);
-            if (item) {
+        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+        if (mealIdx >= 0) {
+            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+            newLog.mealsEaten[mealIdx] = mealLog;
+            
+            const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
+            if (itemIdx >= 0) {
+                const item = { ...mealLog.items[itemIdx] };
+                mealLog.items[itemIdx] = item;
+                
                 if (editExtraName.trim()) item.name = editExtraName.trim();
                 if (!isNaN(parsedCals) && parsedCals >= 0) item.calories = parsedCals;
             }
@@ -525,7 +543,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                                         <button onClick={() => { setEditingExtraId(extra.id); setEditExtraName(extra.name); setEditExtraCals(extra.calories.toString()); }} className="p-1.5 text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
                                                             <Edit2 size={14} />
                                                         </button>
-                                                        <button onClick={() => deleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
+                                                        <button onClick={() => handleDeleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
                                                             <Trash2 size={14} />
                                                         </button>
                                                     </div>
