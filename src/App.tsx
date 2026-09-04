@@ -29,7 +29,7 @@ const pageTransition = {
   initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -6 },
-  transition: { duration: 0.18, ease: 'easeOut' }
+  transition: { duration: 0.4, ease: 'easeOut' }
 };
 
 function AnimatedPage({ children }: { children: React.ReactNode }) {

@@ -22,7 +22,7 @@ interface SettingsProps {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
 export default function Settings({ theme, setTheme, data, updateData }: SettingsProps) {
   const [isSaved, setIsSaved] = useState(false);

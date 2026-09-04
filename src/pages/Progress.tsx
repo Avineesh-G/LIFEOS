@@ -8,7 +8,7 @@ interface ProgressProps {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.26, ease: 'easeOut' } } };
+const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.46, ease: 'easeOut' } } };
 
 export default function Progress({ data }: ProgressProps) {
   const now = new Date();

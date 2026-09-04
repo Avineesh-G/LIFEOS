@@ -97,17 +97,17 @@
 
   /* Primary button */
   .btn-primary {
-    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl font-bold transition-all duration-150 active:scale-[0.98] shadow-sm;
+    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl font-bold transition-all duration-300 active:scale-[0.98] shadow-sm;
   }
 
   /* Pill button (black/white based on theme) */
   .btn-pill {
-    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-all duration-150 active:scale-[0.97];
+    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-all duration-300 active:scale-[0.97];
   }
 
   /* Ghost pill button */
   .btn-ghost-pill {
-    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-all duration-150 active:scale-[0.97] text-primary-light dark:text-primary-dark;
+    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-all duration-300 active:scale-[0.97] text-primary-light dark:text-primary-dark;
   }
 
   /* Segmented progress bar */

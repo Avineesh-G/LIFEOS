@@ -56,7 +56,7 @@ const STEPS = [
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
 export default function GymOnboarding({ updateData }: GymOnboardingProps) {
   const navigate = useNavigate();
@@ -107,7 +107,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
     initial: { opacity: 0, x: 24 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -24 },
-    transition: { duration: 0.2 },
+    transition: { duration: 0.4 },
   };
 
   return (

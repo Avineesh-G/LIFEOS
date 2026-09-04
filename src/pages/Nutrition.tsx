@@ -21,7 +21,7 @@ const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: strin
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: 'easeOut' } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
@@ -627,11 +627,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         >
           <AnimatePresence mode="wait">
             {showSavedFeedback ? (
-               <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-2">
+               <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
                  <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
                </motion.div>
             ) : (
-               <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-2">
+               <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
                  <Save size={20} /> Save Day's Nutrition
                </motion.div>
             )}

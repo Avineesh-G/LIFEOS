@@ -70,7 +70,7 @@ function InsightCard({ icon, title, subtitle, content, loading, error, accentCla
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: 0.4 }}
             className="overflow-hidden"
           >
             <div className="px-4 pb-4">
