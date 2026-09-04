@@ -43,6 +43,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   }, [today]);
 
   const [expanded, setExpanded] = useState<MealSlot | null>('breakfast');
+  const [showSavedFeedback, setShowSavedFeedback] = useState(false);
   
   // Free text extra items per slot
   const [extraTexts, setExtraTexts] = useState<Record<string, string>>({});
@@ -282,6 +283,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     triggerHaptic(10);
     const finalLog = { ...draftLog, isSaved: true };
     setDraftLog(finalLog);
+    
+    setShowSavedFeedback(true);
+    setTimeout(() => setShowSavedFeedback(false), 2000);
     
     const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== today);
     await updateData({ nutritionLogs: [...otherLogs, finalLog] });
@@ -619,9 +623,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       <motion.div variants={item} className="pt-4">
         <button 
           onClick={handleSaveDay}
-          className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all shadow-md active:scale-95 ${draftLog.isSaved ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
+          className={`w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
         >
-          {draftLog.isSaved ? (
+          {showSavedFeedback ? (
              <><Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}</>
           ) : (
              <><Save size={20} /> Save Day's Nutrition</>
