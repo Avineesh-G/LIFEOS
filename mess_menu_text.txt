@@ -1,41 +1,186 @@
-**Tue 1, 15, 29**
+**Tue 1**
 Breakfast: Idli (4 Pcs) / Dosa (2 Pcs), Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
 Lunch: Onion & Tomato Salad, Puri / Chapati, Dal Makhani / Dal Tadka, Mix Veg, Steamed Rice, Raita / Curd, Pickles / Papad / Chutney
 Snacks: Aloo Samosa (1 Pcs) / Pav Bhaji, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Puri / Chapati, Rajma Masala, Palak Paneer, Steamed Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Wed 2, 16, 30**
+**Wed 2**
 Breakfast: Aloo Paratha (2 Pcs) / Puri / Sabzi, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
 Lunch: Onion & Tomato Salad, Chapati, Matar Paneer / Kadai Paneer, Mix Veg, Jeera Rice, Raita / Curd, Pickles / Papad / Chutney
 Snacks: Chowmein / Maggi, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Paneer Butter Masala, Steamed Rice, Kheer, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Thu 3, 17, 31**
+**Thu 3**
 Breakfast: Poha / Upma, Sev, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
 Lunch: Onion & Tomato Salad, Chapati, Chhole Bhature, Aloo Gobi, Steamed Rice, Boondi Raita, Pickles / Papad / Chutney
 Snacks: Bread Pakora, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Malai Kofta, Jeera Rice, Fruit Custard, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Fri 4, 18**
+**Fri 4**
 Breakfast: Masala Dosa, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
 Lunch: Onion & Tomato Salad, Chapati, Rajma, Bhindi Fry, Steamed Rice, Plain Curd, Pickles / Papad / Chutney
 Snacks: Samosa, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Tikka Masala, Veg Biryani, Jalebi, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Sat 5, 19**
+**Sat 5**
 Breakfast: Puri Bhaji, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
 Lunch: Onion & Tomato Salad, Chapati, Kadhi Pakora, Aloo Jeera, Steamed Rice, Pickles / Papad / Chutney
 Snacks: Bhel Puri / Chaat, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Kadai Paneer, Jeera Rice, Ice Cream, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Sun 6, 20**
+**Sun 6**
 Breakfast: Chhole Bhature, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
 Lunch: Onion & Tomato Salad, Chapati, Dal Makhani, Shahi Paneer, Veg Pulao, Raita, Pickles / Papad / Chutney
 Snacks: Patties, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Mix Veg, Steamed Rice, Rasgulla, Pickles / Papad / Chutney, Milk / Bournvita
 
-**Mon 7, 21**
+**Mon 7**
 Breakfast: Uttapam, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
 Lunch: Onion & Tomato Salad, Chapati, Dal Tadka, Aloo Matar, Steamed Rice, Raita, Pickles / Papad / Chutney
 Snacks: Veg Sandwich, Tea / Coffee / Milk
 Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Bhurji, Jeera Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Tue 8**
+Breakfast: Idli (4 Pcs) / Dosa (2 Pcs), Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Puri / Chapati, Dal Makhani / Dal Tadka, Mix Veg, Steamed Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Aloo Samosa (1 Pcs) / Pav Bhaji, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Puri / Chapati, Rajma Masala, Palak Paneer, Steamed Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Wed 9**
+Breakfast: Aloo Paratha (2 Pcs) / Puri / Sabzi, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Matar Paneer / Kadai Paneer, Mix Veg, Jeera Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Chowmein / Maggi, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Paneer Butter Masala, Steamed Rice, Kheer, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Thu 10**
+Breakfast: Poha / Upma, Sev, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Chhole Bhature, Aloo Gobi, Steamed Rice, Boondi Raita, Pickles / Papad / Chutney
+Snacks: Bread Pakora, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Malai Kofta, Jeera Rice, Fruit Custard, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Fri 11**
+Breakfast: Masala Dosa, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Rajma, Bhindi Fry, Steamed Rice, Plain Curd, Pickles / Papad / Chutney
+Snacks: Samosa, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Tikka Masala, Veg Biryani, Jalebi, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sat 12**
+Breakfast: Puri Bhaji, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Kadhi Pakora, Aloo Jeera, Steamed Rice, Pickles / Papad / Chutney
+Snacks: Bhel Puri / Chaat, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Kadai Paneer, Jeera Rice, Ice Cream, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sun 13**
+Breakfast: Chhole Bhature, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Dal Makhani, Shahi Paneer, Veg Pulao, Raita, Pickles / Papad / Chutney
+Snacks: Patties, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Mix Veg, Steamed Rice, Rasgulla, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Mon 14**
+Breakfast: Uttapam, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Dal Tadka, Aloo Matar, Steamed Rice, Raita, Pickles / Papad / Chutney
+Snacks: Veg Sandwich, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Bhurji, Jeera Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Tue 15**
+Breakfast: Idli (4 Pcs) / Dosa (2 Pcs), Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Puri / Chapati, Dal Makhani / Dal Tadka, Mix Veg, Steamed Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Aloo Samosa (1 Pcs) / Pav Bhaji, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Puri / Chapati, Rajma Masala, Palak Paneer, Steamed Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Wed 16**
+Breakfast: Aloo Paratha (2 Pcs) / Puri / Sabzi, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Matar Paneer / Kadai Paneer, Mix Veg, Jeera Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Chowmein / Maggi, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Paneer Butter Masala, Steamed Rice, Kheer, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Thu 17**
+Breakfast: Poha / Upma, Sev, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Chhole Bhature, Aloo Gobi, Steamed Rice, Boondi Raita, Pickles / Papad / Chutney
+Snacks: Bread Pakora, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Malai Kofta, Jeera Rice, Fruit Custard, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Fri 18**
+Breakfast: Masala Dosa, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Rajma, Bhindi Fry, Steamed Rice, Plain Curd, Pickles / Papad / Chutney
+Snacks: Samosa, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Tikka Masala, Veg Biryani, Jalebi, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sat 19**
+Breakfast: Puri Bhaji, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Kadhi Pakora, Aloo Jeera, Steamed Rice, Pickles / Papad / Chutney
+Snacks: Bhel Puri / Chaat, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Kadai Paneer, Jeera Rice, Ice Cream, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sun 20**
+Breakfast: Chhole Bhature, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Dal Makhani, Shahi Paneer, Veg Pulao, Raita, Pickles / Papad / Chutney
+Snacks: Patties, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Mix Veg, Steamed Rice, Rasgulla, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Mon 21**
+Breakfast: Uttapam, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Dal Tadka, Aloo Matar, Steamed Rice, Raita, Pickles / Papad / Chutney
+Snacks: Veg Sandwich, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Bhurji, Jeera Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Tue 22**
+Breakfast: Idli (4 Pcs) / Dosa (2 Pcs), Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Puri / Chapati, Dal Makhani / Dal Tadka, Mix Veg, Steamed Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Aloo Samosa (1 Pcs) / Pav Bhaji, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Puri / Chapati, Rajma Masala, Palak Paneer, Steamed Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Wed 23**
+Breakfast: Aloo Paratha (2 Pcs) / Puri / Sabzi, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Matar Paneer / Kadai Paneer, Mix Veg, Jeera Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Chowmein / Maggi, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Paneer Butter Masala, Steamed Rice, Kheer, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Thu 24**
+Breakfast: Poha / Upma, Sev, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Chhole Bhature, Aloo Gobi, Steamed Rice, Boondi Raita, Pickles / Papad / Chutney
+Snacks: Bread Pakora, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Malai Kofta, Jeera Rice, Fruit Custard, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Fri 25**
+Breakfast: Masala Dosa, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Rajma, Bhindi Fry, Steamed Rice, Plain Curd, Pickles / Papad / Chutney
+Snacks: Samosa, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Tikka Masala, Veg Biryani, Jalebi, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sat 26**
+Breakfast: Puri Bhaji, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Kadhi Pakora, Aloo Jeera, Steamed Rice, Pickles / Papad / Chutney
+Snacks: Bhel Puri / Chaat, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Kadai Paneer, Jeera Rice, Ice Cream, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Sun 27**
+Breakfast: Chhole Bhature, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Dal Makhani, Shahi Paneer, Veg Pulao, Raita, Pickles / Papad / Chutney
+Snacks: Patties, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Mix Veg, Steamed Rice, Rasgulla, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Mon 28**
+Breakfast: Uttapam, Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Chapati, Dal Tadka, Aloo Matar, Steamed Rice, Raita, Pickles / Papad / Chutney
+Snacks: Veg Sandwich, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Makhani, Paneer Bhurji, Jeera Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Tue 29**
+Breakfast: Idli (4 Pcs) / Dosa (2 Pcs), Coconut Chutney, Sambar, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Omelette
+Lunch: Onion & Tomato Salad, Puri / Chapati, Dal Makhani / Dal Tadka, Mix Veg, Steamed Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Aloo Samosa (1 Pcs) / Pav Bhaji, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Puri / Chapati, Rajma Masala, Palak Paneer, Steamed Rice, Gulab Jamun, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Wed 30**
+Breakfast: Aloo Paratha (2 Pcs) / Puri / Sabzi, Pickles, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Boiled Egg
+Lunch: Onion & Tomato Salad, Chapati, Matar Paneer / Kadai Paneer, Mix Veg, Jeera Rice, Raita / Curd, Pickles / Papad / Chutney
+Snacks: Chowmein / Maggi, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Tadka, Paneer Butter Masala, Steamed Rice, Kheer, Pickles / Papad / Chutney, Milk / Bournvita
+
+**Thu 31**
+Breakfast: Poha / Upma, Sev, White Bread / Butter / Jam, Sprouts / 1 small apple, Tea / Coffee / Milk, Scrambled Egg
+Lunch: Onion & Tomato Salad, Chapati, Chhole Bhature, Aloo Gobi, Steamed Rice, Boondi Raita, Pickles / Papad / Chutney
+Snacks: Bread Pakora, Tea / Coffee / Milk
+Dinner: Onion & Tomato Salad, Chapati, Dal Fry, Malai Kofta, Jeera Rice, Fruit Custard, Pickles / Papad / Chutney, Milk / Bournvita
+
