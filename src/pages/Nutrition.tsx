@@ -95,9 +95,13 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       const p = data.profile || { goalWeight: 'maintain', currentCalorieTarget: 2000 };
       const advice = await getDietAdvice(todayMenu, p, data.geminiApiKey || GEMINI_API_KEY);
       setCoachAdvice(advice);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setCoachAdvice({ error: "Failed to load advice. Please try again." });
+      if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
+         setCoachAdvice({ error: "Please enter your Groq API Key in Settings to use the AI Coach." });
+      } else {
+         setCoachAdvice({ error: "Failed to load advice. Please try again." });
+      }
     } finally {
       setFetchingAdvice(false);
     }
@@ -217,8 +221,13 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       });
       
       setExtraTexts(prev => ({ ...prev, [mealSlot]: '' }));
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
+         alert("Please enter your Groq API Key in Settings to estimate calories.");
+      } else {
+         alert("Failed to estimate calories. Please try again.");
+      }
     } finally {
       setEstimatingSlot(null);
     }
