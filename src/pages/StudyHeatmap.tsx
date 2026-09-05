@@ -37,10 +37,10 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
 
   const intensityColors = [
     'bg-black/5 dark:bg-white/5',
-    'bg-accent/20',
-    'bg-accent/40',
-    'bg-accent/60',
-    'bg-accent',
+    'bg-indigo-200 dark:bg-indigo-900',
+    'bg-indigo-400 dark:bg-indigo-700',
+    'bg-indigo-600 dark:bg-indigo-500',
+    'bg-indigo-800 dark:bg-indigo-400',
   ];
 
   const weeks = [];
