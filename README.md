@@ -18,19 +18,20 @@ LifeOS (branded as **Flow**) is a comprehensive, personal life operating system 
 - **Gym & Workout Tracking**
   Log daily workouts, track sets, reps, and weights. View your PRs (Personal Records) and visualize progress over time.
 
-### 🎯 Nutrition & AI Tracking
+### Nutrition & AI Tracking
 - **Smart Dietician:** Get personalized Groq AI insights on your recent eating trends
 - **Meal Planning:** Add extra items outside the predefined mess menu
+- **Skipped Meals:** Mark any meal slot as skipped; accurately reflected in history (v1.1)
 - **Interactive Tracking:** Calorie progress ring dynamically fills as you log your day
 - **Smooth Save Feedback:** Visual confirmation for saved meals with polished transition effects
 
-### ✨ Premium UI/UX
-- **Buttery-Smooth Animations:** Powered by `framer-motion` for gliding page transitions and interactive elements
+### Premium UI/UX
+- **Buttery-Smooth Animations:** Powered by `framer-motion` for gliding page transitions and interactive elements (Refined in v1.1)
 - **Responsive Elements:** Perfectly tuned CSS transitions for hover, tap, and state changes
 - **Dark Mode First:** Seamlessly switches between light and true-dark themes
 
-- **Study Timer & Tracking**
-  Pomodoro-style study timers with deep work tracking. Categorize your study sessions by subject.
+- **Study Timer & Timetable**
+  Pomodoro-style study timers with deep work tracking. Detailed timetable schedules with teacher, slot, and room mapping (v1.1).
 
 - **Spending Tracker**
   Keep a close eye on your daily expenses with categorized inputs and monthly summaries.

@@ -252,6 +252,40 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     });
   }
 
+  const handleSkipMeal = (mealSlot: MealSlot) => {
+    triggerHaptic(5);
+    setDraftLog(prev => {
+      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+      
+      let mealLog;
+      if (mealIdx >= 0) {
+        mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+        newLog.mealsEaten[mealIdx] = mealLog;
+      } else {
+        mealLog = { slot: mealSlot, items: [] };
+        newLog.mealsEaten.push(mealLog);
+      }
+
+      const skippedIdx = mealLog.items.findIndex(i => i.id === 'skipped');
+      if (skippedIdx >= 0) {
+         mealLog.items.splice(skippedIdx, 1);
+      } else {
+         mealLog.items = [{
+           id: 'skipped',
+           name: 'Meal Skipped',
+           calories: 0,
+           portion: 1,
+           isExtra: false
+         }];
+      }
+
+      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      newLog.isSaved = false;
+      return newLog;
+    });
+  };
+
   const saveEditedExtraItem = (mealSlot: MealSlot, itemId: string) => {
     triggerHaptic(5);
     const parsedCals = parseInt(editExtraCals);
@@ -409,8 +443,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             const mealLog = draftLog.mealsEaten.find(m => m.slot === mealObj.slot);
             const isOpen = expanded === mealObj.slot;
             
-            // Calculate total calories for this slot
+                            // Calculate total calories for this slot
             const slotCals = mealLog ? mealLog.items.reduce((s, i) => s + (i.calories * i.portion), 0) : 0;
+            const isSkipped = mealLog?.items.some(i => i.id === 'skipped');
 
             return (
               <div key={mealObj.slot} className="card overflow-hidden">
@@ -428,9 +463,14 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {slotCals > 0 && (
+                    {slotCals > 0 && !isSkipped && (
                       <span className="text-xs font-bold font-mono text-primary-light dark:text-primary-dark">
                         {Math.round(slotCals)} kcal
+                      </span>
+                    )}
+                    {isSkipped && (
+                      <span className="text-xs font-bold text-amber-500">
+                        Skipped
                       </span>
                     )}
                     {isOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
@@ -441,9 +481,21 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   {isOpen && mealData && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <div className="px-4 pb-4 border-t border-border-light dark:border-border-dark pt-3">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">Menu</h4>
+                          <button onClick={() => handleSkipMeal(mealObj.slot)} className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${isSkipped ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-bg-light dark:hover:bg-bg-dark text-secondary-light dark:text-secondary-dark'}`}>
+                              {isSkipped ? 'Undo Skip' : 'Skip Meal'}
+                          </button>
+                        </div>
                         
-                        {/* Standard Menu Items */}
-                        <div className="space-y-2 mb-4">
+                        {isSkipped ? (
+                           <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                             <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped this meal</p>
+                           </div>
+                        ) : (
+                          <>
+                            {/* Standard Menu Items */}
+                            <div className="space-y-2 mb-4">
                           {mealData.items.map(item => {
                             const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
                             const isSelected = !!loggedItem;
@@ -601,7 +653,8 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                 </button>
                             </div>
                         </div>
-
+                        </>
+                        )}
                       </div>
                     </motion.div>
                   )}

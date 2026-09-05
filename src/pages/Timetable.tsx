@@ -47,6 +47,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   const [day, setDay] = useState(today);
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
+  const [slot, setSlot] = useState('');
+  const [teacher, setTeacher] = useState('');
+  const [room, setRoom] = useState('');
+  const [courseCode, setCourseCode] = useState('');
 
   const openAdd = () => {
     triggerHaptic(12);
@@ -55,6 +59,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
     setDay(DAYS[activeDay]);
     setStartTime('09:00');
     setEndTime('10:00');
+    setSlot('');
+    setTeacher('');
+    setRoom('');
+    setCourseCode('');
     setShowModal(true);
   };
 
@@ -65,6 +73,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
     setDay(block.day);
     setStartTime(block.startTime);
     setEndTime(block.endTime);
+    setSlot(block.slot || '');
+    setTeacher(block.teacher || '');
+    setRoom(block.room || '');
+    setCourseCode(block.courseCode || '');
     setShowModal(true);
   };
 
@@ -77,6 +89,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       day,
       startTime,
       endTime,
+      slot: slot.trim() || undefined,
+      teacher: teacher.trim() || undefined,
+      room: room.trim() || undefined,
+      courseCode: courseCode.trim() || undefined,
     };
     const updated = editingBlock
       ? data.timetable.map(b => b.id === block.id ? block : b)
@@ -180,7 +196,13 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-primary-light dark:text-primary-dark truncate">{block.subject}</p>
-                    <p className="label-mono text-muted-light dark:text-muted-dark">{dur}min session</p>
+                    {block.teacher && <p className="text-[11px] text-secondary-light dark:text-secondary-dark truncate">{block.teacher}</p>}
+                    {(block.courseCode || block.room || block.slot) && (
+                      <p className="text-[10px] text-muted-light dark:text-muted-dark truncate mt-0.5">
+                        {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
+                      </p>
+                    )}
+                    <p className="label-mono text-muted-light dark:text-muted-dark mt-1">{dur}min session</p>
                   </div>
                   {DAYS[activeDay] === today && (
                     <button
@@ -215,9 +237,14 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                     <p className="text-[10px] font-bold leading-tight">{block.startTime}</p>
                     <p className="text-[9px] opacity-70">{block.endTime}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm text-primary-light dark:text-primary-dark">{block.subject}</p>
-                    <p className="label-mono text-muted-light dark:text-muted-dark">{dur}min</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-primary-light dark:text-primary-dark truncate">{block.subject}</p>
+                    {block.teacher && <p className="text-[11px] text-secondary-light dark:text-secondary-dark truncate">{block.teacher}</p>}
+                    {(block.courseCode || block.room || block.slot) && (
+                      <p className="text-[10px] text-muted-light dark:text-muted-dark truncate mt-0.5">
+                        {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
+                      </p>
+                    )}
                   </div>
                   <button
                     onClick={() => navigate(`/study/timer?subject=${encodeURIComponent(block.subject)}&duration=${dur}`)}
@@ -264,6 +291,50 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                     autoFocus
                     className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label-mono text-secondary-light dark:text-secondary-dark mb-2 block">Teacher / Faculty</label>
+                    <input
+                      type="text"
+                      value={teacher}
+                      onChange={e => setTeacher(e.target.value)}
+                      placeholder="Optional"
+                      className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="label-mono text-secondary-light dark:text-secondary-dark mb-2 block">Course Code</label>
+                    <input
+                      type="text"
+                      value={courseCode}
+                      onChange={e => setCourseCode(e.target.value)}
+                      placeholder="e.g. CSE3004"
+                      className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="label-mono text-secondary-light dark:text-secondary-dark mb-2 block">Room / Location</label>
+                    <input
+                      type="text"
+                      value={room}
+                      onChange={e => setRoom(e.target.value)}
+                      placeholder="e.g. 501-CB"
+                      className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
+                  <div>
+                    <label className="label-mono text-secondary-light dark:text-secondary-dark mb-2 block">Slot</label>
+                    <input
+                      type="text"
+                      value={slot}
+                      onChange={e => setSlot(e.target.value)}
+                      placeholder="e.g. L23+L24"
+                      className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="label-mono text-secondary-light dark:text-secondary-dark mb-2 block">Day</label>

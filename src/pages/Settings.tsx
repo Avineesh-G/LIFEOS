@@ -285,19 +285,25 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                                                         {log.mealsEaten.length === 0 ? (
                                                             <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No meals logged.</p>
                                                         ) : (
-                                                            log.mealsEaten.map((meal, idx) => (
+                                                            log.mealsEaten.map((meal, idx) => {
+                                                                const isSkipped = meal.items.some(i => i.id === 'skipped');
+                                                                return (
                                                                 <div key={idx}>
                                                                     <h5 className="text-[10px] font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider mb-1">{meal.slot}</h5>
-                                                                    <ul className="space-y-1">
-                                                                        {meal.items.map((item, iIdx) => (
-                                                                            <li key={iIdx} className="flex items-center justify-between text-xs">
-                                                                                <span className="text-secondary-light dark:text-secondary-dark">{item.name} {item.portion !== 1 && `(x${item.portion})`}</span>
-                                                                                <span className="font-mono text-primary-light dark:text-primary-dark">{Math.round(item.calories * item.portion)}</span>
-                                                                            </li>
-                                                                        ))}
-                                                                    </ul>
+                                                                    {isSkipped ? (
+                                                                        <p className="text-xs text-amber-500 font-medium">Meal Skipped</p>
+                                                                    ) : (
+                                                                        <ul className="space-y-1">
+                                                                            {meal.items.map((item, iIdx) => (
+                                                                                <li key={iIdx} className="flex items-center justify-between text-xs">
+                                                                                    <span className="text-secondary-light dark:text-secondary-dark">{item.name} {item.portion !== 1 && `(x${item.portion})`}</span>
+                                                                                    <span className="font-mono text-primary-light dark:text-primary-dark">{Math.round(item.calories * item.portion)}</span>
+                                                                                </li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    )}
                                                                 </div>
-                                                            ))
+                                                            )})
                                                         )}
                                                     </div>
                                                 </motion.div>
@@ -379,7 +385,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <motion.div variants={item} className="text-center py-4">
-        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.0</p>
+        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.1</p>
       </motion.div>
     </motion.div>
   );

@@ -54,6 +54,10 @@ export interface TimetableBlock {
   day: string;
   startTime: string;
   endTime: string;
+  slot?: string;
+  teacher?: string;
+  room?: string;
+  courseCode?: string;
   color?: string;
 }
 
