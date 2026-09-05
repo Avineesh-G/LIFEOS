@@ -269,11 +269,11 @@ export default function Home({ data }: HomeProps) {
         {[
           { label: 'Study streak', value: `${data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length}d` },
           { label: 'Workouts', value: data.workoutLogs.length.toString() },
-          { label: 'This month', value: `₹${data.expenses.filter(e => e.date.startsWith(format(now, 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0).toLocaleString('en-IN')}` },
+          { label: 'This month', value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(now, 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}` },
         ].map(stat => (
-          <div key={stat.label} className="card p-3.5 text-center">
-            <p className="text-xl font-bold tracking-tight text-primary-light dark:text-primary-dark">{stat.value}</p>
-            <p className="label-mono text-muted-light dark:text-muted-dark mt-1" style={{ fontSize: 8 }}>{stat.label}</p>
+          <div key={stat.label} className="card p-3.5 text-center flex flex-col justify-center items-center overflow-hidden">
+            <p className="text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark truncate w-full">{stat.value}</p>
+            <p className="label-mono text-muted-light dark:text-muted-dark mt-1 truncate w-full" style={{ fontSize: 8 }}>{stat.label}</p>
           </div>
         ))}
       </motion.div>
