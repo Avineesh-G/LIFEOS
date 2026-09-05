@@ -1,5 +1,6 @@
 import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
@@ -25,6 +26,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
 export default function Settings({ theme, setTheme, data, updateData }: SettingsProps) {
+  const navigate = useNavigate();
   const [isSaved, setIsSaved] = useState(false);
   const [showDanger, setShowDanger] = useState(false);
   
@@ -359,7 +361,10 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           </div>
           <div className="flex flex-col gap-2 shrink-0">
             <button
-              onClick={() => signOut(auth)}
+              onClick={() => {
+                navigate('/');
+                signOut(auth);
+              }}
               className="whitespace-nowrap flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
             >
               <LogOut size={16} />
