@@ -26,6 +26,7 @@ LifeOS (branded as **Flow**) is a comprehensive, personal life operating system 
 - **Smooth Save Feedback:** Visual confirmation for saved meals with polished transition effects
 
 ### Premium UI/UX
+- **Ethereal Abstract Blobs:** A dynamic, premium layered gradient background providing a beautiful, minimal aesthetic (v1.1)
 - **Buttery-Smooth Animations:** Powered by `framer-motion` for gliding page transitions and interactive elements (Refined in v1.1)
 - **Responsive Elements:** Perfectly tuned CSS transitions for hover, tap, and state changes
 - **Dark Mode First:** Seamlessly switches between light and true-dark themes

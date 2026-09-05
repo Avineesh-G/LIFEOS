@@ -51,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
   const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
-    <div className="min-h-screen bg-grid text-primary-light dark:text-primary-dark transition-colors duration-200">
+    <div className="min-h-screen bg-blobs text-primary-light dark:text-primary-dark transition-colors duration-200">
 
       {/* ── Top header bar ── */}
       <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-safe h-14 bg-bg-light dark:bg-bg-dark border-b border-border-light dark:border-border-dark">
