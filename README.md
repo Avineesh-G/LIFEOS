@@ -12,6 +12,14 @@ LifeOS (branded as **Flow**) is a comprehensive, personal life operating system 
 
 ## Architecture & Features
 
+### What's New in Version 1.2
+- **TO-DO List:** Rebranded and streamlined daily task management for focused productivity.
+- **Dedicated Gym Timer:** Integrated live timer card formatted as `HH:MM:SS` using JetBrains Mono with manual start/pause/reset controls.
+- **Gym History in Settings:** Separate workout archive organized by month, complete with AI Workout Analysis examining consistency, volume, and progressive overload.
+- **Cardio Only Mode:** One-tap AI routine generator for cardio, endurance, and core sessions directly from the Gym dashboard.
+- **Real-Time Active Timetable:** Classes in session are automatically filled with the application's theme color and marked with live pulsating badges. Start buttons replaced with spacious, clean cards.
+- **Precision Input Handling:** Seamless number editing across sets, reps, and weights with auto-select on focus and zero-clearing.
+
 - **Auth & Cloud Sync**
   Powered by Firebase Authentication (Google Sign-in) and Firestore, ensuring your data is securely synced in real-time across all your devices. No guest access; your data stays safe in your account.
   
@@ -33,7 +41,7 @@ LifeOS (branded as **Flow**) is a comprehensive, personal life operating system 
 - **Dark Mode First:** Seamlessly switches between light and true-dark themes
 
 - **Study Timer & Timetable**
-  Pomodoro-style study timers with deep work tracking. Detailed timetable schedules with teacher, slot, and room mapping (v1.1).
+  Pomodoro-style study timers with deep work tracking. Detailed timetable schedules with teacher, slot, and room mapping (v1.1) and real-time ongoing class highlights (v1.2).
 
 - **Spending Tracker**
   Keep a close eye on your daily expenses with categorized inputs and monthly summaries.

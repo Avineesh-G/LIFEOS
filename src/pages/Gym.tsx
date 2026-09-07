@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, ChevronRight, Play, Settings, UtensilsCrossed } from 'lucide-react';
+import { Dumbbell, ChevronRight, Play, Settings, UtensilsCrossed, Flame, Sparkles, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { AnimatedMoon } from '../components/AnimatedIcons';
-import type { AppData } from '../types';
+import { triggerHaptic } from '../utils/haptics';
+import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
+import type { AppData, Exercise } from '../types';
 
 interface GymProps {
   data: AppData;
@@ -13,8 +16,9 @@ interface GymProps {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.48, ease: 'easeOut' } } };
 
-export default function Gym({ data }: GymProps) {
+export default function Gym({ data, updateData }: GymProps) {
   const navigate = useNavigate();
+  const [generatingCardio, setGeneratingCardio] = useState(false);
   const today    = format(new Date(), 'EEEE');
   const todayDate = format(new Date(), 'yyyy-MM-dd');
   const shortDay = ({ Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' } as Record<string, string>)[today] || '';
@@ -30,6 +34,57 @@ export default function Gym({ data }: GymProps) {
   const totalSets = todayLog
     ? todayLog.exercises.reduce((s, ex) => s + ex.sets.filter(st => st.completed).length, 0)
     : 0;
+
+  const handleGenerateCardio = async () => {
+    triggerHaptic(15);
+    setGeneratingCardio(true);
+    try {
+      const apiKey = data.geminiApiKey || GEMINI_API_KEY;
+      const aiPlan = await getAiWorkoutPlan('CARDIO', data.profile, apiKey);
+      
+      const newExercises: Exercise[] = aiPlan.exercises.map(ex => ({
+        id: crypto.randomUUID(),
+        name: ex.name,
+        sets: ex.sets,
+        reps: parseInt(ex.reps) || 10,
+        weight: ex.weight || 0,
+        rest: ex.rest,
+        howTo: ex.howTo,
+        iconKey: ex.iconKey,
+      }));
+
+      // Update today's plan in workoutPlans to CARDIO with new exercises
+      const updatedPlans = data.workoutPlans.map(p => 
+        p.day === shortDay ? { ...p, type: 'CARDIO', exercises: newExercises } : p
+      );
+
+      // If a log already existed for today, update it to the new cardio exercises
+      let updatedLogs = data.workoutLogs;
+      if (todayLog) {
+        updatedLogs = data.workoutLogs.map(w => 
+          w.id === todayLog.id ? {
+            ...w,
+            type: 'CARDIO',
+            exercises: newExercises.map(ex => ({
+              name: ex.name,
+              howTo: ex.howTo,
+              rest: ex.rest,
+              sets: Array.from({ length: ex.sets }, () => ({ reps: ex.reps, weight: ex.weight, completed: false }))
+            }))
+          } : w
+        );
+      }
+
+      await updateData({ workoutPlans: updatedPlans, workoutLogs: updatedLogs });
+      triggerHaptic(20);
+      navigate('/gym/workout');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate cardio session. Please check your Groq API key in Settings.');
+    } finally {
+      setGeneratingCardio(false);
+    }
+  };
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
@@ -116,6 +171,43 @@ export default function Gym({ data }: GymProps) {
             </p>
           </div>
         )}
+      </motion.div>
+
+      {/* Cardio Only AI Card */}
+      <motion.div variants={item} className="card p-5 border border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-transparent to-amber-500/5 relative overflow-hidden">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center">
+                <Flame size={18} />
+              </span>
+              <p className="font-bold text-base text-primary-light dark:text-primary-dark">Cardio Only Session</p>
+            </div>
+            <p className="text-xs text-secondary-light dark:text-secondary-dark pt-1 leading-relaxed">
+              Want to do cardio today? Generate an AI-powered cardio routine (HIIT, Treadmill, Cycling & Core intervals) customized for you.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 pt-3 border-t border-border-light dark:border-border-dark flex items-center justify-between">
+          <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark flex items-center gap-1">
+            <Sparkles size={11} className="text-rose-500" /> AI Customized
+          </span>
+          <button
+            onClick={handleGenerateCardio}
+            disabled={generatingCardio}
+            className="btn-pill px-4 py-2 text-xs flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/20 disabled:opacity-50"
+          >
+            {generatingCardio ? (
+              <>
+                <Loader2 size={13} className="animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Play size={12} fill="currentColor" /> Start Cardio (AI)
+              </>
+            )}
+          </button>
+        </div>
       </motion.div>
 
       {/* Recent workouts */}

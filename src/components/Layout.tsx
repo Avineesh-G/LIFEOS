@@ -16,7 +16,7 @@ const navItems = [
   { icon: Wallet,       label: 'Money',     path: '/spending' },
   { icon: CalendarDays, label: 'Timetable', path: '/timetable' },
   { icon: Utensils,     label: 'Nutrition', path: '/nutrition' },
-  { icon: CheckSquare,  label: 'Tasks',     path: '/tasks' },
+  { icon: CheckSquare,  label: 'TO-DO List', path: '/tasks' },
   { icon: BarChart3,    label: 'Progress',  path: '/progress' },
   { icon: Settings,     label: 'Settings',  path: '/settings' },
 ];
@@ -25,7 +25,7 @@ const quickAddOptions = [
   { icon: Clock,        label: 'Start Study Timer', path: '/study/timer',  color: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' },
   { icon: DumbbellIcon, label: 'Log Workout',        path: '/gym/workout',  color: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' },
   { icon: Banknote,     label: 'Add Expense',        path: '/spending',     color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
-  { icon: StickyNote,   label: 'New Task',           path: '/tasks',        color: 'bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400' },
+  { icon: StickyNote,   label: 'New TO-DO',          path: '/tasks',        color: 'bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400' },
 ];
 
 interface LayoutProps {

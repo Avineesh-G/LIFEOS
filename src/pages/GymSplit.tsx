@@ -153,8 +153,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
-                    value={ex.sets}
-                    onChange={(e) => updateExercise(i, 'sets', parseInt(e.target.value) || 0)}
+                    inputMode="numeric"
+                    value={ex.sets === 0 ? '' : ex.sets}
+                    placeholder="0"
+                    onFocus={e => e.target.select()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateExercise(i, 'sets', val === '' ? 0 : Math.max(0, parseInt(val) || 0));
+                    }}
                     className="w-full bg-transparent border border-border-light dark:border-border-dark rounded-lg px-2 py-1.5 text-base text-center focus:outline-none focus:ring-2 focus:ring-accent/30"
                   />
                   <span className="text-[10px] text-secondary-light dark:text-secondary-dark">sets</span>
@@ -162,8 +168,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
-                    value={ex.reps}
-                    onChange={(e) => updateExercise(i, 'reps', parseInt(e.target.value) || 0)}
+                    inputMode="numeric"
+                    value={ex.reps === 0 ? '' : ex.reps}
+                    placeholder="0"
+                    onFocus={e => e.target.select()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateExercise(i, 'reps', val === '' ? 0 : Math.max(0, parseInt(val) || 0));
+                    }}
                     className="w-full bg-transparent border border-border-light dark:border-border-dark rounded-lg px-2 py-1.5 text-base text-center focus:outline-none focus:ring-2 focus:ring-accent/30"
                   />
                   <span className="text-[10px] text-secondary-light dark:text-secondary-dark">reps</span>
@@ -171,8 +183,15 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 <div className="flex items-center gap-1">
                   <input
                     type="number"
-                    value={ex.weight}
-                    onChange={(e) => updateExercise(i, 'weight', parseInt(e.target.value) || 0)}
+                    inputMode="decimal"
+                    step="any"
+                    value={ex.weight === 0 ? '' : ex.weight}
+                    placeholder="0"
+                    onFocus={e => e.target.select()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateExercise(i, 'weight', val === '' ? 0 : Math.max(0, parseFloat(val) || 0));
+                    }}
                     className="w-full bg-transparent border border-border-light dark:border-border-dark rounded-lg px-2 py-1.5 text-base text-center focus:outline-none focus:ring-2 focus:ring-accent/30"
                   />
                   <span className="text-[10px] text-secondary-light dark:text-secondary-dark">kg</span>

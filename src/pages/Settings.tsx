@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
@@ -10,7 +10,7 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { getHistoryAnalysis, getGymHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
 
 interface SettingsProps {
   theme: AppSettings['theme'];
@@ -113,6 +113,75 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       } finally {
           setAnalyzing(false);
       }
+  };
+
+  // Gym History State
+  const [gymHistoryOpen, setGymHistoryOpen] = useState(false);
+  const [selectedGymMonth, setSelectedGymMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [gymAiAnalysis, setGymAiAnalysis] = useState<any>(null);
+  const [gymAnalyzing, setGymAnalyzing] = useState(false);
+  const [expandedGymLogs, setExpandedGymLogs] = useState<Set<string>>(new Set());
+
+  const toggleGymLog = (id: string) => {
+    setExpandedGymLogs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const filteredGymLogs = useMemo(() => {
+    if (!data.workoutLogs) return [];
+    const [year, month] = selectedGymMonth.split('-');
+    const dateStr = `${year}-${month}-01T00:00:00`;
+    const filterDate = new Date(dateStr);
+    const start = startOfMonth(filterDate);
+    const end = endOfMonth(filterDate);
+
+    return data.workoutLogs
+      .filter(log => {
+        if (!log.date) return false;
+        try {
+          const logDate = parseISO(log.date);
+          return isWithinInterval(logDate, { start, end });
+        } catch {
+          return false;
+        }
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [data.workoutLogs, selectedGymMonth]);
+
+  const uniqueGymMonths = useMemo(() => {
+    if (!data.workoutLogs) return [format(new Date(), 'yyyy-MM')];
+    const months = new Set<string>();
+    data.workoutLogs.forEach(l => {
+      if (l.date) {
+        months.add(l.date.substring(0, 7));
+      }
+    });
+    months.add(format(new Date(), 'yyyy-MM'));
+    return Array.from(months).sort().reverse();
+  }, [data.workoutLogs]);
+
+  const handleAnalyzeGymHistory = async () => {
+    if (filteredGymLogs.length === 0) return;
+    triggerHaptic(10);
+    setGymAnalyzing(true);
+    try {
+      const result = await getGymHistoryAnalysis(filteredGymLogs, data.geminiApiKey || GEMINI_API_KEY);
+      setGymAiAnalysis(result);
+    } catch (err: any) {
+      console.error(err);
+      const errMsg = err?.message || '';
+      if (errMsg.includes('429')) {
+        setGymAiAnalysis({ error: "You are doing this too fast. Please wait a minute before analyzing again." });
+      } else {
+        setGymAiAnalysis({ error: "Failed to analyze gym history. Please check your API key." });
+      }
+    } finally {
+      setGymAnalyzing(false);
+    }
   };
 
   return (
@@ -322,6 +391,183 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </AnimatePresence>
       </motion.div>
 
+      {/* Gym History Section */}
+      <motion.div variants={item} className="card overflow-hidden">
+        <button
+          onClick={() => {
+            triggerHaptic(8);
+            setGymHistoryOpen(!gymHistoryOpen);
+          }}
+          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-500">
+              <Dumbbell size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Gym History</p>
+              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past workouts & routines</p>
+            </div>
+          </div>
+          {gymHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+        </button>
+
+        <AnimatePresence>
+          {gymHistoryOpen && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+                
+                {/* Filter Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
+                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                    <select 
+                      value={selectedGymMonth}
+                      onChange={(e) => {
+                        setSelectedGymMonth(e.target.value);
+                        setGymAiAnalysis(null);
+                      }}
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                    >
+                      {uniqueGymMonths.map(m => {
+                        const [y, mo] = m.split('-');
+                        const date = new Date(parseInt(y), parseInt(mo) - 1);
+                        return (
+                          <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <button 
+                    onClick={handleAnalyzeGymHistory}
+                    disabled={filteredGymLogs.length === 0 || gymAnalyzing}
+                    className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                  >
+                    {gymAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    AI Insights
+                  </button>
+                </div>
+
+                {/* AI Insights Card */}
+                {gymAiAnalysis && (
+                  <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 relative">
+                    <button onClick={() => setGymAiAnalysis(null)} className="absolute top-2 right-2 text-emerald-500/70 hover:text-emerald-500">
+                      <X size={14} />
+                    </button>
+                    <h4 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
+                      <Sparkles size={14} /> Month Workout Analysis
+                    </h4>
+                    {gymAiAnalysis.error ? (
+                      <p className="text-sm text-red-500">{gymAiAnalysis.error}</p>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-sm text-primary-light dark:text-primary-dark font-medium leading-relaxed">
+                          {gymAiAnalysis.summary}
+                        </p>
+                        {gymAiAnalysis.tips && gymAiAnalysis.tips.length > 0 && (
+                          <ul className="text-sm text-secondary-light dark:text-secondary-dark space-y-1 list-disc pl-4">
+                            {gymAiAnalysis.tips.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Gym History List */}
+                <div className="space-y-2">
+                  {filteredGymLogs.length === 0 ? (
+                    <div className="text-center py-6 text-sm text-secondary-light dark:text-secondary-dark">
+                      No completed workouts recorded for this month.
+                    </div>
+                  ) : (
+                    filteredGymLogs.map(log => {
+                      const completedSets = (log.exercises || []).reduce((sum, ex) => sum + (ex.sets?.filter(s => s.completed).length || 0), 0);
+                      const totalSets = (log.exercises || []).reduce((sum, ex) => sum + (ex.sets?.length || 0), 0);
+                      const durationMin = log.startTime && log.endTime ? Math.round((log.endTime - log.startTime) / 60000) : null;
+                      const isExpanded = expandedGymLogs.has(log.id);
+
+                      return (
+                        <div 
+                          key={log.id} 
+                          onClick={() => toggleGymLog(log.id)}
+                          className="flex flex-col p-3 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
+                                {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
+                              </span>
+                              <span className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
+                                {log.type} {log.day && `· ${log.day}`}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {durationMin !== null && (
+                                <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark flex items-center gap-1 bg-bg-light dark:bg-bg-dark px-2 py-0.5 rounded-md border border-border-light dark:border-border-dark">
+                                  <Timer size={10} />
+                                  {durationMin > 0 ? `${durationMin}m` : '<1m'}
+                                </span>
+                              )}
+                              <span className="text-sm font-bold font-mono text-emerald-500">
+                                {completedSets}/{totalSets} sets
+                              </span>
+                              <ChevronDown size={16} className={`text-muted-light dark:text-muted-dark transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            </div>
+                          </div>
+                          
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div 
+                                initial={{ height: 0, opacity: 0 }} 
+                                animate={{ height: 'auto', opacity: 1 }} 
+                                exit={{ height: 0, opacity: 0 }} 
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark space-y-3">
+                                  {(log.exercises || []).length === 0 ? (
+                                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No exercises logged.</p>
+                                  ) : (
+                                    log.exercises.map((ex, exIdx) => {
+                                      const doneSets = ex.sets.filter(s => s.completed).length;
+                                      return (
+                                        <div key={exIdx} className="bg-bg-light dark:bg-bg-dark/50 p-2.5 rounded-lg border border-border-light dark:border-border-dark/60">
+                                          <div className="flex items-center justify-between mb-1.5">
+                                            <h5 className="text-xs font-bold text-primary-light dark:text-primary-dark">{ex.name}</h5>
+                                            <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark">{doneSets}/{ex.sets.length} done</span>
+                                          </div>
+                                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                                            {ex.sets.map((s, sIdx) => (
+                                              <div 
+                                                key={sIdx} 
+                                                className={`text-[11px] p-1.5 rounded flex items-center justify-between border ${s.completed ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-muted-light dark:text-muted-dark'}`}
+                                              >
+                                                <span>Set {sIdx + 1}</span>
+                                                <span className="font-mono font-medium">{s.reps}r @ {s.weight}kg</span>
+                                                {s.completed && <Check size={10} className="text-emerald-500 stroke-[3]" />}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       {/* Advanced Settings */}
       <motion.div variants={item} className="card p-5 space-y-4">
         <p className="label-mono text-secondary-light dark:text-secondary-dark">Advanced</p>
@@ -390,7 +636,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <motion.div variants={item} className="text-center py-4">
-        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.1</p>
+        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.2</p>
       </motion.div>
     </motion.div>
   );

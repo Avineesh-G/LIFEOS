@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Trash2, X, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Trash2, X, Clock, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -40,6 +40,22 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   const today = format(new Date(), 'EEEE');
   const todayIndex = DAYS.indexOf(today);
   const [activeDay, setActiveDay] = useState(todayIndex >= 0 ? todayIndex : 0);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const isClassOngoing = (blockDay: string, start: string, end: string) => {
+    if (blockDay !== today) return false;
+    const nowMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    return nowMin >= startMin && nowMin < endMin;
+  };
 
   const [showModal, setShowModal] = useState(false);
   const [editingBlock, setEditingBlock] = useState<TimetableBlock | null>(null);
@@ -180,41 +196,55 @@ export default function Timetable({ data, updateData }: TimetableProps) {
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3.5">
             {activeDayBlocks.map(block => {
               const dur = getDuration(block.startTime, block.endTime);
               const colorClass = getBlockColor(block.subject);
+              const isOngoing = isClassOngoing(DAYS[activeDay], block.startTime, block.endTime);
+
               return (
                 <button
                   key={block.id}
                   onClick={() => openEdit(block)}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-bg-light dark:hover:bg-bg-dark active:scale-[0.985] transition-all text-left"
+                  className={`w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left active:scale-[0.985] ${
+                    isOngoing
+                      ? 'bg-accent text-white border-accent shadow-lg shadow-accent/25 ring-2 ring-accent/30'
+                      : 'bg-bg-light dark:bg-bg-dark border-border-light dark:border-border-dark hover:border-accent/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
+                  }`}
                 >
-                  <div className={`px-2 py-1.5 rounded-xl border text-center min-w-[52px] ${colorClass}`}>
-                    <p className="text-[10px] font-bold leading-tight">{block.startTime}</p>
-                    <p className="text-[9px] opacity-70">{block.endTime}</p>
+                  <div className={`px-2.5 py-2 rounded-xl border text-center min-w-[56px] flex-shrink-0 ${
+                    isOngoing
+                      ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm'
+                      : colorClass
+                  }`}>
+                    <p className="text-[11px] font-bold leading-tight">{block.startTime}</p>
+                    <p className={`text-[10px] ${isOngoing ? 'text-white/80' : 'opacity-70'}`}>{block.endTime}</p>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-primary-light dark:text-primary-dark truncate">{block.subject}</p>
-                    {block.teacher && <p className="text-[11px] text-secondary-light dark:text-secondary-dark truncate">{block.teacher}</p>}
+                    <div className="flex items-center gap-2">
+                      <p className={`font-bold text-sm truncate ${isOngoing ? 'text-white' : 'text-primary-light dark:text-primary-dark'}`}>
+                        {block.subject}
+                      </p>
+                    </div>
+                    {block.teacher && (
+                      <p className={`text-xs truncate mt-0.5 ${isOngoing ? 'text-white/85' : 'text-secondary-light dark:text-secondary-dark'}`}>
+                        {block.teacher}
+                      </p>
+                    )}
                     {(block.courseCode || block.room || block.slot) && (
-                      <p className="text-[10px] text-muted-light dark:text-muted-dark truncate mt-0.5">
+                      <p className={`text-[11px] truncate mt-0.5 ${isOngoing ? 'text-white/75' : 'text-muted-light dark:text-muted-dark'}`}>
                         {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
                       </p>
                     )}
-                    <p className="label-mono text-muted-light dark:text-muted-dark mt-1">{dur}min session</p>
+                    <p className={`label-mono text-[10px] mt-1.5 ${isOngoing ? 'text-white/70' : 'text-muted-light dark:text-muted-dark'}`}>
+                      {dur}min session
+                    </p>
                   </div>
-                  {DAYS[activeDay] === today && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        triggerHaptic(15);
-                        navigate(`/study/timer?subject=${encodeURIComponent(block.subject)}&duration=${dur}`);
-                      }}
-                      className="btn-pill px-3 py-1.5 text-xs flex-shrink-0"
-                    >
-                      Start
-                    </button>
+                  {isOngoing && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/30 flex-shrink-0 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                      <span>Live</span>
+                    </div>
                   )}
                 </button>
               );
@@ -227,32 +257,55 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       {activeDay !== todayIndex && todayBlocks.length > 0 && (
         <motion.div variants={item} className="card p-5">
           <p className="label-mono text-secondary-light dark:text-secondary-dark mb-4">Today · {today}</p>
-          <div className="space-y-2">
+          <div className="space-y-3.5">
             {todayBlocks.map(block => {
               const dur = getDuration(block.startTime, block.endTime);
               const colorClass = getBlockColor(block.subject);
+              const isOngoing = isClassOngoing(today, block.startTime, block.endTime);
+
               return (
-                <div key={block.id} className="flex items-center gap-3 p-3 rounded-xl">
-                  <div className={`px-2 py-1.5 rounded-xl border text-center min-w-[52px] ${colorClass}`}>
-                    <p className="text-[10px] font-bold leading-tight">{block.startTime}</p>
-                    <p className="text-[9px] opacity-70">{block.endTime}</p>
+                <button
+                  key={block.id}
+                  onClick={() => openEdit(block)}
+                  className={`w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left active:scale-[0.985] ${
+                    isOngoing
+                      ? 'bg-accent text-white border-accent shadow-lg shadow-accent/25 ring-2 ring-accent/30'
+                      : 'bg-bg-light dark:bg-bg-dark border-border-light dark:border-border-dark hover:border-accent/40'
+                  }`}
+                >
+                  <div className={`px-2.5 py-2 rounded-xl border text-center min-w-[56px] flex-shrink-0 ${
+                    isOngoing
+                      ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm'
+                      : colorClass
+                  }`}>
+                    <p className="text-[11px] font-bold leading-tight">{block.startTime}</p>
+                    <p className={`text-[10px] ${isOngoing ? 'text-white/80' : 'opacity-70'}`}>{block.endTime}</p>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-primary-light dark:text-primary-dark truncate">{block.subject}</p>
-                    {block.teacher && <p className="text-[11px] text-secondary-light dark:text-secondary-dark truncate">{block.teacher}</p>}
+                    <p className={`font-bold text-sm truncate ${isOngoing ? 'text-white' : 'text-primary-light dark:text-primary-dark'}`}>
+                      {block.subject}
+                    </p>
+                    {block.teacher && (
+                      <p className={`text-xs truncate mt-0.5 ${isOngoing ? 'text-white/85' : 'text-secondary-light dark:text-secondary-dark'}`}>
+                        {block.teacher}
+                      </p>
+                    )}
                     {(block.courseCode || block.room || block.slot) && (
-                      <p className="text-[10px] text-muted-light dark:text-muted-dark truncate mt-0.5">
+                      <p className={`text-[11px] truncate mt-0.5 ${isOngoing ? 'text-white/75' : 'text-muted-light dark:text-muted-dark'}`}>
                         {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
                       </p>
                     )}
+                    <p className={`label-mono text-[10px] mt-1.5 ${isOngoing ? 'text-white/70' : 'text-muted-light dark:text-muted-dark'}`}>
+                      {dur}min session
+                    </p>
                   </div>
-                  <button
-                    onClick={() => navigate(`/study/timer?subject=${encodeURIComponent(block.subject)}&duration=${dur}`)}
-                    className="btn-ghost-pill px-3 py-1.5 text-xs"
-                  >
-                    <Clock size={11} className="inline mr-1" />Start
-                  </button>
-                </div>
+                  {isOngoing && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/30 flex-shrink-0 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                      <span>Live</span>
+                    </div>
+                  )}
+                </button>
               );
             })}
           </div>

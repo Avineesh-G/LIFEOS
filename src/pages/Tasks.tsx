@@ -43,7 +43,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
       <motion.div variants={item} className="flex items-end justify-between pt-2">
         <div>
           <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Today</p>
-          <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">Tasks</h1>
+          <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">TO-DO List</h1>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-pill flex items-center gap-2 px-5 py-2.5 text-sm">
           <Plus size={14} strokeWidth={2.5} /> Add
@@ -117,8 +117,8 @@ export default function Tasks({ data, updateData }: TasksProps) {
         {todayTasks.length === 0 && (
           <motion.div variants={item} className="card p-10 text-center">
             <p className="text-2xl mb-2">✓</p>
-            <p className="label-mono text-secondary-light dark:text-secondary-dark">No tasks yet</p>
-            <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + to add your first task</p>
+            <p className="label-mono text-secondary-light dark:text-secondary-dark">No TO-DOs yet</p>
+            <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + to add your first TO-DO</p>
           </motion.div>
         )}
       </motion.div>
@@ -139,7 +139,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
             >
               <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6" />
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-semibold">New Task</h2>
+                <h2 className="text-xl font-semibold">New TO-DO</h2>
                 <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-light dark:bg-bg-dark">
                   <X size={15} />
                 </button>
@@ -159,7 +159,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   disabled={!newTask.trim()}
                   className="btn-pill w-full py-3.5 text-sm disabled:opacity-30"
                 >
-                  Add Task
+                  Add TO-DO
                 </button>
               </div>
             </motion.div>

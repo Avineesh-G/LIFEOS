@@ -338,3 +338,42 @@ Output exactly this JSON format:
     throw err;
   }
 }
+
+export async function getGymHistoryAnalysis(logs: any[], apiKey: string = GEMINI_API_KEY): Promise<any> {
+  if (!logs || logs.length === 0) return null;
+
+  const historyData = logs.map(l => {
+    const totalSets = (l.exercises || []).reduce((s: number, e: any) => s + (e.sets?.filter((st: any) => st.completed)?.length || 0), 0);
+    const exSummary = (l.exercises || []).map((e: any) => `${e.name} (${(e.sets || []).length} sets)`).join(', ');
+    const durationMin = l.startTime && l.endTime ? Math.round((l.endTime - l.startTime) / 60000) : null;
+    return `Date: ${l.date} (${l.day || ''}), Type: ${l.type}, Completed Sets: ${totalSets}${durationMin ? `, Duration: ${durationMin}m` : ''}, Exercises: ${exSummary}`;
+  }).join('\n');
+
+  const prompt = `You are an elite personal fitness coach and exercise scientist.
+Analyze this user's completed gym workout history for this month:
+${historyData}
+
+Provide a concise, motivating, data-driven analysis in this exact JSON format:
+{
+  "summary": "A 2-sentence summary of their workout consistency, training frequency, and muscle group distribution over this month.",
+  "tips": [
+    "Specific actionable tip 1 for progressive overload or recovery",
+    "Specific actionable tip 2 for volume or split balance"
+  ]
+}`;
+
+  try {
+    const raw = await callGroq(prompt, apiKey, 400, true);
+    try {
+      return JSON.parse(raw);
+    } catch {
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('Could not parse gym history analysis from Groq response');
+      return JSON.parse(match[0]);
+    }
+  } catch (err) {
+    console.error('Groq gym history analysis error:', err);
+    throw err;
+  }
+}
+
