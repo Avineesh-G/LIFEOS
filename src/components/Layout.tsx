@@ -73,19 +73,33 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* ── Main content ── */}
-      <main className="pt-14 pb-36 min-h-screen">
+      <main className="pt-14 pb-40 sm:pb-44 min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-6">
           {children}
         </div>
       </main>
 
-      {/* ── Translucent gradient blur backdrop behind/below dock ── */}
-      <div className="fixed bottom-0 left-0 right-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-bg-light/95 dark:from-bg-dark/95 via-bg-light/60 dark:via-bg-dark/60 to-transparent backdrop-blur-[6px]" />
+      {/* ── Apple & Pixel style frosted translucent bottom floor ── */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none"
+        style={{ height: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div 
+          className="w-full h-full bg-surface-light/70 dark:bg-surface-dark/75 backdrop-blur-2xl border-t border-border-light/30 dark:border-border-dark/30"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
+            maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)'
+          }}
+        />
+      </div>
 
       {/* ── Floating pill bottom nav ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-4 pb-7 sm:pb-8 pb-safe pointer-events-none">
+      <div 
+        className="fixed left-0 right-0 z-40 flex justify-center px-4 pointer-events-none"
+        style={{ bottom: 'calc(1.15rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <nav
-          className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-full px-2 sm:px-3 py-2.5 shadow-lg overflow-x-auto no-scrollbar touch-pan-x"
+          className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-xl border border-border-light/80 dark:border-border-dark/80 rounded-full px-2 sm:px-3 py-2 sm:py-2.5 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] overflow-x-auto no-scrollbar touch-pan-x"
           style={{ maxWidth: '100%' }}
         >
           {navItems.map((item) => {
