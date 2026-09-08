@@ -26,7 +26,7 @@ export default function Auth() {
       
       {/* Top Header Section */}
       <div className="flex flex-col items-center text-center mb-10 w-full max-w-sm">
-        <img src="/icon-512.png" alt="LifeOS Logo" className="w-20 h-20 rounded-3xl shadow-sm mb-5" />
+        <img src="/icon.svg" alt="LifeOS Logo" className="w-20 h-20 rounded-3xl shadow-sm mb-5" />
         <h1 className="text-3xl font-bold text-text-light dark:text-text-dark mb-2 tracking-tight">
           LifeOS
         </h1>
