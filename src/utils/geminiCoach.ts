@@ -6,29 +6,54 @@ export const GEMINI_API_KEY: string = import.meta.env.VITE_GROQ_API_KEY || (_p1 
 // ──────────────────────────────────────────────────────────────────────────
 
 async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
-  if (!apiKey || !apiKey.trim() || !apiKey.trim().startsWith('gsk_')) {
-    apiKey = GEMINI_API_KEY;
-  }
-  if (!apiKey || !apiKey.trim()) throw new Error('NO_API_KEY');
+  let activeKey = apiKey && apiKey.trim().startsWith('gsk_') ? apiKey.trim() : GEMINI_API_KEY;
+  if (!activeKey || !activeKey.trim()) throw new Error('NO_API_KEY');
   
   if (isPdf) {
     throw new Error('Groq API does not support direct PDF uploads. Please use the "Paste Text" option below.');
   }
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey.trim()}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'qwen/qwen3.8-27b',
-      messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: maxTokens,
-      temperature: expectJson ? 0.1 : 0.7,
-      ...(expectJson ? { response_format: { type: 'json_object' } } : {})
-    })
-  });
+  const messages: { role: string; content: string }[] = [];
+  if (expectJson) {
+    messages.push({
+      role: 'system',
+      content: 'You are an expert AI assistant. You must always respond with a valid, well-formed JSON object only.'
+    });
+  }
+  messages.push({ role: 'user', content: prompt });
+
+  const tryCall = async (model: string, keyToUse: string) => {
+    return await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${keyToUse}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_completion_tokens: maxTokens,
+        temperature: expectJson ? 0.1 : 0.7,
+        ...(expectJson ? { response_format: { type: 'json_object' } } : {})
+      })
+    });
+  };
+
+  let response: Response;
+  try {
+    response = await tryCall('qwen/qwen3.8-27b', activeKey);
+    // If 401 and activeKey was a custom key, fallback to default key
+    if (response.status === 401 && activeKey !== GEMINI_API_KEY) {
+      activeKey = GEMINI_API_KEY;
+      response = await tryCall('qwen/qwen3.8-27b', activeKey);
+    }
+    // If model rate limited or temporarily unavailable, fallback to qwen/qwen3.6-27b
+    if (!response.ok && (response.status === 429 || response.status === 503)) {
+      response = await tryCall('qwen/qwen3.6-27b', activeKey);
+    }
+  } catch (netErr: any) {
+    throw new Error(`Network error communicating with AI: ${netErr.message}`);
+  }
 
   if (!response.ok) {
     const errorData = await response.text();
@@ -395,7 +420,7 @@ Category Breakdown: ${catSummary}
 Recent Transactions:
 ${recentItems}
 
-Provide a concise, data-driven analysis highlighting where the user is overspending and actionable advice on where to spend less:
+    Provide a concise, data-driven analysis highlighting where the user is overspending and actionable advice on where to spend less in this exact JSON format:
 {
   "summary": "A 2-sentence summary of their primary spending habits and largest financial drains.",
   "tips": [
@@ -405,7 +430,7 @@ Provide a concise, data-driven analysis highlighting where the user is overspend
 }`;
 
   try {
-    const raw = await callGroq(prompt, apiKey, 400, true);
+    const raw = await callGroq(prompt, apiKey, 800, true);
     try {
       return JSON.parse(raw);
     } catch {

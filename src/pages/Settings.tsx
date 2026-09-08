@@ -231,7 +231,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
-      setSpendingAiAnalysis({ error: "Failed to analyze spending history." });
+      setSpendingAiAnalysis({ error: err.message || "Failed to analyze spending history. Please try again." });
     } finally {
       setSpendingAnalyzing(false);
     }
@@ -712,7 +712,16 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                       <Sparkles size={14} /> Smart Spending Insights
                     </h4>
                     {spendingAiAnalysis.error ? (
-                      <p className="text-xs text-red-500">{spendingAiAnalysis.error}</p>
+                      <div className="space-y-2">
+                        <p className="text-xs text-red-500 font-medium">{spendingAiAnalysis.error}</p>
+                        <button
+                          onClick={handleAnalyzeSpending}
+                          disabled={spendingAnalyzing}
+                          className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 underline hover:no-underline flex items-center gap-1"
+                        >
+                          <Sparkles size={11} /> Retry Analysis
+                        </button>
+                      </div>
                     ) : (
                       <div className="space-y-2.5 text-xs">
                         <p className="text-secondary-light dark:text-secondary-dark leading-relaxed font-medium">
