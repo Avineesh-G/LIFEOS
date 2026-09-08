@@ -14,7 +14,7 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 
 ### Real-Time Device Theme Synchronization
 - **Dynamic System Adaptation:** Integrated an active `prefers-color-scheme` media query listener that automatically detects device-level dark or light mode changes in phone settings and switches the interface immediately without requiring manual selection or page reloads.
-- **Status Bar Matching:** Synchronizes browser and native status bar color metadata (`#09090B` for dark mode and `#FAFAF9` for light mode) to blend with the app shell.
+- **Status Bar Matching:** Synchronizes browser and native status bar color metadata (`#09090B` for dark mode and `#FFFFFF` for light mode) to blend seamlessly with the system shell.
 - **Material You Themed Icons:** Configured a dedicated monochrome vector icon in the Web App Manifest (`purpose: "monochrome"`). On Android 13+ devices with Themed Icons enabled, the home screen launcher dynamically tints the app icon with the system wallpaper palette without requiring special permissions.
 
 ### Gym Stability and Completion Lifecycle
@@ -57,7 +57,11 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 - **Home and List Synchronization:** Subtasks render cleanly on both the dedicated TO-DO List interface and the Home dashboard preview.
 - **Task History Accordion:** Settings now includes a TO-DO history accordion detailing completed tasks, categories, and timestamps.
 
-### Ambient UI Refinements
+### Ambient UI and Mobile System Integration
+- **Mobile Header Architecture and Safe-Area Geometry:** Restructured the fixed top navigation bar with explicit top safe-area inset padding (`env(safe-area-inset-top)`) and a dedicated 56px content row, ensuring full clearance beneath hardware camera cutouts and dynamic islands.
+- **Natural System Default Status Bar:** Standardized system theme color configuration (`#FFFFFF` in light mode and `#09090B` in dark mode) across `useTheme.ts`, `manifest.json`, and `index.html` to eliminate contrasting black lines and maintain a unified native aesthetic.
+- **Vector App Branding on Login:** Updated the authentication interface (`/auth`) to render the official high-resolution vector emblem (`/icon.svg`) with smooth corner curvature and subtle depth.
+- **PWA Cache Invalidation (v6):** Service worker cache bumped to `lifeos-v6` guaranteeing immediate client-side retrieval of updated interface assets without stale cache delays.
 - **Floating Dock Ergonomics:** Bottom navigation raised slightly with an ambient gradient backdrop blur to ensure comfort across curved and gesture-navigated displays.
 - **Extended Content Clearance:** Page containers provide generous bottom padding to eliminate content occlusion behind the floating navigation bar.
 - **Invisible AI Pipeline:** Removed the manual API key input card in Settings; AI operations utilize a robust background integration.
