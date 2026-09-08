@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History, Lock, Unlock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
-import { getCoachTip, getDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { getCoachTip, getDietAdvice, askFoodDoubt, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 
@@ -20,30 +20,38 @@ const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: strin
   { slot: 'dinner',    label: 'Dinner',    icon: <Moon size={16} className="text-indigo-500" />,        time: '7:30–9:00 PM',   dotColor: 'bg-indigo-400' },
 ];
 
+const getCurrentMealSlot = (): MealSlot => {
+  const hour = new Date().getHours();
+  const minute = new Date().getMinutes();
+  const totalMin = hour * 60 + minute;
+  if (totalMin < 630) return 'breakfast';
+  if (totalMin < 930) return 'lunch';
+  if (totalMin < 1110) return 'snacks';
+  return 'dinner';
+};
+
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
   const today = format(new Date(), 'yyyy-MM-dd');
+  const todayDayOfMonth = new Date().getDate();
+  const todayMenu = MONTHLY_MESS_MENU.find(m => m.date === todayDayOfMonth) || MONTHLY_MESS_MENU[0];
   
   const [coachAdvice, setCoachAdvice] = useState<any>(null);
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
 
-  // Find today's menu from the 31-day monthly menu based on current date
-  const todayMenu = useMemo(() => {
-    const currentDate = new Date().getDate();
-    const monthlyMenu = MONTHLY_MESS_MENU.find(m => m.date === currentDate);
-    if (!monthlyMenu) return undefined;
-    return {
-      ...monthlyMenu,
-      fullDateStr: today
-    };
-  }, [today]);
-
-  const [expanded, setExpanded] = useState<MealSlot | null>('breakfast');
+  // Auto-expand current meal slot based on time
+  const [expanded, setExpanded] = useState<MealSlot | null>(getCurrentMealSlot);
   const [showSavedFeedback, setShowSavedFeedback] = useState(false);
+
+  // Food Doubt State (AI Can I eat this?)
+  const [foodDoubtQuery, setFoodDoubtQuery] = useState('');
+  const [foodDoubtAnswer, setFoodDoubtAnswer] = useState<string | null>(null);
+  const [foodDoubtLoading, setFoodDoubtLoading] = useState(false);
+  const [foodDoubtError, setFoodDoubtError] = useState<string | null>(null);
   
   // Free text extra items per slot
   const [extraTexts, setExtraTexts] = useState<Record<string, string>>({});
@@ -55,8 +63,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [editExtraCals, setEditExtraCals] = useState('');
 
   // Draft Log initialization
+  const existingTodayLog = (data.nutritionLogs || []).find(l => l.date === today);
+  const [isLocked, setIsLocked] = useState(!!existingTodayLog?.isSaved);
   const [draftLog, setDraftLog] = useState<NutritionLog>(() => {
-    const existing = (data.nutritionLogs || []).find(l => l.date === today);
+    const existing = existingTodayLog;
     if (existing) {
       // Migrate old format to new format if needed (if it has itemsSelected)
       const isOldFormat = existing.mealsEaten.some((m: any) => 'itemsSelected' in m);
@@ -105,6 +115,23 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }
     } finally {
       setFetchingAdvice(false);
+    }
+  };
+
+  const handleAskFoodDoubt = async () => {
+    if (!foodDoubtQuery.trim()) return;
+    triggerHaptic(10);
+    setFoodDoubtLoading(true);
+    setFoodDoubtError(null);
+    setFoodDoubtAnswer(null);
+    try {
+      const res = await askFoodDoubt(foodDoubtQuery.trim(), data.profile, data.geminiApiKey || GEMINI_API_KEY);
+      setFoodDoubtAnswer(res);
+    } catch (err: any) {
+      console.error(err);
+      setFoodDoubtError('Failed to get answer. Please try again.');
+    } finally {
+      setFoodDoubtLoading(false);
     }
   };
 
@@ -314,9 +341,10 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   }
 
   const handleSaveDay = async () => {
-    triggerHaptic(10);
+    triggerHaptic(15);
     const finalLog = { ...draftLog, isSaved: true };
     setDraftLog(finalLog);
+    setIsLocked(true);
     
     setShowSavedFeedback(true);
     setTimeout(() => setShowSavedFeedback(false), 2000);
@@ -381,6 +409,69 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </div>
       </motion.div>
 
+      {/* ── Food Doubt Card (Can I eat this?) ── */}
+      <motion.div variants={item} className="card p-4 sm:p-5 border border-border-light dark:border-border-dark space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+              <Sparkles size={16} />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Food Doubt · Can I eat this?</h3>
+              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">Instant AI verdict for foods outside your mess meal</p>
+            </div>
+          </div>
+          {foodDoubtAnswer && (
+            <button 
+              onClick={() => {
+                setFoodDoubtAnswer(null);
+                setFoodDoubtQuery('');
+              }}
+              className="text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark"
+            >
+              Ask Another
+            </button>
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={foodDoubtQuery}
+            onChange={(e) => setFoodDoubtQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !foodDoubtLoading && handleAskFoodDoubt()}
+            placeholder="e.g. 2 slices of pepperoni pizza, iced mocha, samosa..."
+            className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
+          />
+          <button
+            onClick={handleAskFoodDoubt}
+            disabled={foodDoubtLoading || !foodDoubtQuery.trim()}
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-700 active:scale-95 text-white transition-all disabled:opacity-40 flex items-center gap-1.5 shadow-sm"
+          >
+            {foodDoubtLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+            <span>Ask</span>
+          </button>
+        </div>
+
+        {foodDoubtError && (
+          <p className="text-xs text-red-500">{foodDoubtError}</p>
+        )}
+
+        <AnimatePresence>
+          {foodDoubtAnswer && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="p-3 rounded-xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 text-xs text-primary-light dark:text-primary-dark leading-relaxed flex items-start gap-2.5"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+              <p className="flex-1 font-medium">{foodDoubtAnswer}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       {/* Menu Cards */}
       {todayMenu && (
         <motion.div variants={item} className="space-y-3">
@@ -439,7 +530,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             )}
           </AnimatePresence>
           {MEALS.map(mealObj => {
-            const mealData = todayMenu.meals.find(m => m.slot === mealObj.slot);
+            const mealData = todayMenu.meals.find((m: any) => m.slot === mealObj.slot);
             const mealLog = draftLog.mealsEaten.find(m => m.slot === mealObj.slot);
             const isOpen = expanded === mealObj.slot;
             
@@ -496,7 +587,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                           <>
                             {/* Standard Menu Items */}
                             <div className="space-y-2 mb-4">
-                          {mealData.items.map(item => {
+                          {mealData.items.map((item: any) => {
                             const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
                             const isSelected = !!loggedItem;
                             
@@ -672,24 +763,55 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </motion.div>
       )}
 
-      {/* Save Button */}
+      {/* Save Button & Locked Protection */}
       <motion.div variants={item} className="pt-4">
-        <button 
-          onClick={handleSaveDay}
-          className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
-        >
-          <AnimatePresence mode="wait">
-            {showSavedFeedback ? (
-               <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                 <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
-               </motion.div>
-            ) : (
-               <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                 <Save size={20} /> Save Day's Nutrition
-               </motion.div>
-            )}
-          </AnimatePresence>
-        </button>
+        {draftLog.isSaved && isLocked ? (
+          <div className="card p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
+            <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <Check size={20} className="stroke-[3]" />
+              <p className="font-bold text-base">Day's Nutrition Saved & Protected!</p>
+            </div>
+            <p className="text-xs text-secondary-light dark:text-secondary-dark">
+              Total: {Math.round(draftLog.dailyTotal)} kcal. Locked against accidental overwriting.
+            </p>
+            <div className="pt-1 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic(10);
+                  setIsLocked(false);
+                }}
+                className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
+              >
+                <Unlock size={14} /> Unlock to Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="btn-pill flex-1 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
+              >
+                Back to Home
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button 
+            onClick={handleSaveDay}
+            className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
+          >
+            <AnimatePresence mode="wait">
+              {showSavedFeedback ? (
+                 <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
+                   <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
+                 </motion.div>
+              ) : (
+                 <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
+                   <Save size={20} /> Save Day's Nutrition
+                 </motion.div>
+              )}
+            </AnimatePresence>
+          </button>
+        )}
       </motion.div>
 
 

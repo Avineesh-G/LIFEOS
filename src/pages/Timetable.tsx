@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, X, Clock, Sparkles } from 'lucide-react';
-import { format } from 'date-fns';
+import { Plus, Trash2, X, Clock, Sparkles, Edit2, BookOpen, Check, Save, Lock, Unlock, ChevronDown, ChevronUp } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '../utils/haptics';
@@ -41,6 +41,12 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   const todayIndex = DAYS.indexOf(today);
   const [activeDay, setActiveDay] = useState(todayIndex >= 0 ? todayIndex : 0);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Topic discussed states
+  const [topicDrafts, setTopicDrafts] = useState<Record<string, string>>({});
+  const [unlockedTopics, setUnlockedTopics] = useState<Record<string, boolean>>({});
+  const [showTopicHistory, setShowTopicHistory] = useState<Record<string, boolean>>({});
+  const [topicSavedFeedback, setTopicSavedFeedback] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 30000);
@@ -201,52 +207,209 @@ export default function Timetable({ data, updateData }: TimetableProps) {
               const dur = getDuration(block.startTime, block.endTime);
               const colorClass = getBlockColor(block.subject);
               const isOngoing = isClassOngoing(DAYS[activeDay], block.startTime, block.endTime);
+              const todayDateStr = format(new Date(), 'yyyy-MM-dd');
+              const currentMonthStr = format(new Date(), 'yyyy-MM');
+              const savedTodayTopic = block.topicsByDate?.[todayDateStr] || '';
+              const draftTopic = topicDrafts[block.id] !== undefined ? topicDrafts[block.id] : savedTodayTopic;
+              const isLocked = !!savedTodayTopic && !unlockedTopics[block.id];
+              const isSaved = !!topicSavedFeedback[block.id];
+              const isHistoryOpen = !!showTopicHistory[block.id];
+
+              // Filter topics for current month
+              const monthTopics = Object.entries(block.topicsByDate || {})
+                .filter(([d]) => d.startsWith(currentMonthStr))
+                .sort((a, b) => b[0].localeCompare(a[0]));
+
+              const handleSaveTopic = async () => {
+                if (!draftTopic.trim()) return;
+                triggerHaptic(15);
+                const updatedTopics = {
+                  ...(block.topicsByDate || {}),
+                  [todayDateStr]: draftTopic.trim(),
+                };
+                const updatedTimetable = data.timetable.map(b => 
+                  b.id === block.id ? { ...b, topicsByDate: updatedTopics } : b
+                );
+                await updateData({ timetable: updatedTimetable });
+                setTopicSavedFeedback(prev => ({ ...prev, [block.id]: true }));
+                setUnlockedTopics(prev => ({ ...prev, [block.id]: false }));
+                setTimeout(() => {
+                  setTopicSavedFeedback(prev => ({ ...prev, [block.id]: false }));
+                }, 2000);
+              };
 
               return (
-                <button
+                <div
                   key={block.id}
-                  onClick={() => openEdit(block)}
-                  className={`w-full flex items-center gap-3.5 p-4 rounded-2xl border transition-all text-left active:scale-[0.985] ${
+                  className={`w-full rounded-2xl border transition-all overflow-hidden ${
                     isOngoing
-                      ? 'bg-accent text-white border-accent shadow-lg shadow-accent/25 ring-2 ring-accent/30'
-                      : 'bg-bg-light dark:bg-bg-dark border-border-light dark:border-border-dark hover:border-accent/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]'
+                      ? 'bg-accent/5 border-accent/40 shadow-lg shadow-accent/10 ring-1 ring-accent/30'
+                      : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
                   }`}
                 >
-                  <div className={`px-2.5 py-2 rounded-xl border text-center min-w-[56px] flex-shrink-0 ${
-                    isOngoing
-                      ? 'bg-white/20 text-white border-white/30 backdrop-blur-sm'
-                      : colorClass
-                  }`}>
-                    <p className="text-[11px] font-bold leading-tight">{block.startTime}</p>
-                    <p className={`text-[10px] ${isOngoing ? 'text-white/80' : 'opacity-70'}`}>{block.endTime}</p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className={`font-bold text-sm truncate ${isOngoing ? 'text-white' : 'text-primary-light dark:text-primary-dark'}`}>
-                        {block.subject}
+                  {/* Top class info row */}
+                  <div 
+                    onClick={() => openEdit(block)}
+                    className="p-4 flex items-center gap-3.5 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+                  >
+                    <div className={`px-2.5 py-2 rounded-xl border text-center min-w-[56px] flex-shrink-0 ${
+                      isOngoing
+                        ? 'bg-accent text-white border-accent'
+                        : colorClass
+                    }`}>
+                      <p className="text-[11px] font-bold leading-tight">{block.startTime}</p>
+                      <p className={`text-[10px] ${isOngoing ? 'text-white/80' : 'opacity-70'}`}>{block.endTime}</p>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm truncate text-primary-light dark:text-primary-dark">
+                          {block.subject}
+                        </p>
+                      </div>
+                      {block.teacher && (
+                        <p className="text-xs truncate mt-0.5 text-secondary-light dark:text-secondary-dark">
+                          {block.teacher}
+                        </p>
+                      )}
+                      {(block.courseCode || block.room || block.slot) && (
+                        <p className="text-[11px] truncate mt-0.5 text-muted-light dark:text-muted-dark">
+                          {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
+                        </p>
+                      )}
+                      <p className="label-mono text-[10px] mt-1.5 text-muted-light dark:text-muted-dark">
+                        {dur}min session
                       </p>
                     </div>
-                    {block.teacher && (
-                      <p className={`text-xs truncate mt-0.5 ${isOngoing ? 'text-white/85' : 'text-secondary-light dark:text-secondary-dark'}`}>
-                        {block.teacher}
-                      </p>
-                    )}
-                    {(block.courseCode || block.room || block.slot) && (
-                      <p className={`text-[11px] truncate mt-0.5 ${isOngoing ? 'text-white/75' : 'text-muted-light dark:text-muted-dark'}`}>
-                        {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
-                      </p>
-                    )}
-                    <p className={`label-mono text-[10px] mt-1.5 ${isOngoing ? 'text-white/70' : 'text-muted-light dark:text-muted-dark'}`}>
-                      {dur}min session
-                    </p>
-                  </div>
-                  {isOngoing && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/25 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/30 flex-shrink-0 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                      <span>Live</span>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {isOngoing && (
+                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-white text-[10px] font-bold uppercase tracking-wider shadow-sm animate-pulse">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                          <span>Live</span>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(block);
+                        }}
+                        className="p-2 rounded-xl text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        title="Edit class"
+                      >
+                        <Edit2 size={14} />
+                      </button>
                     </div>
-                  )}
-                </button>
+                  </div>
+
+                  {/* Attached Sub-section: Today's Topic Discussed */}
+                  <div className="border-t border-border-light dark:border-border-dark bg-bg-light/40 dark:bg-bg-dark/40 p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
+                        <BookOpen size={13} className="text-accent" />
+                        Today's Topic Discussed
+                      </span>
+                      {savedTodayTopic && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(8);
+                            setUnlockedTopics(prev => ({ ...prev, [block.id]: !prev[block.id] }));
+                          }}
+                          className="flex items-center gap-1 text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark"
+                        >
+                          {isLocked ? (
+                            <>
+                              <Lock size={11} className="text-amber-500" /> Locked
+                            </>
+                          ) : (
+                            <>
+                              <Unlock size={11} className="text-emerald-500" /> Editing
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        disabled={isLocked}
+                        value={draftTopic}
+                        onChange={(e) => setTopicDrafts(prev => ({ ...prev, [block.id]: e.target.value }))}
+                        onKeyDown={(e) => e.key === 'Enter' && !isLocked && handleSaveTopic()}
+                        placeholder="e.g. Chapter 4: Integration by Parts..."
+                        className={`flex-1 bg-surface-light dark:bg-surface-dark border rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all ${
+                          isLocked ? 'opacity-85 cursor-not-allowed bg-black/[0.02] dark:bg-white/[0.02] border-border-light/60 dark:border-border-dark/60' : 'border-border-light dark:border-border-dark'
+                        }`}
+                      />
+                      {!isLocked ? (
+                        <button
+                          type="button"
+                          onClick={handleSaveTopic}
+                          disabled={!draftTopic.trim()}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-40 ${
+                            isSaved ? 'bg-emerald-500 text-white' : 'bg-accent text-white hover:opacity-90'
+                          }`}
+                        >
+                          {isSaved ? <><Check size={13} /> Saved</> : <><Save size={13} /> Save</>}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(8);
+                            setUnlockedTopics(prev => ({ ...prev, [block.id]: true }));
+                          }}
+                          className="px-3 py-2 rounded-xl text-xs font-medium border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Month Topics Dropdown / History */}
+                    {monthTopics.length > 0 && (
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic(5);
+                            setShowTopicHistory(prev => ({ ...prev, [block.id]: !prev[block.id] }));
+                          }}
+                          className="text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center gap-1"
+                        >
+                          <span>{format(new Date(), 'MMMM yyyy')} Topics ({monthTopics.length})</span>
+                          {isHistoryOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </button>
+
+                        <AnimatePresence>
+                          {isHistoryOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.25 }}
+                              className="overflow-hidden mt-2 space-y-1.5 bg-surface-light/60 dark:bg-surface-dark/60 p-2.5 rounded-xl border border-border-light/60 dark:border-border-dark/60"
+                            >
+                              {monthTopics.map(([dateKey, topic]) => (
+                                <div key={dateKey} className="flex items-start justify-between text-xs gap-2">
+                                  <span className="font-mono text-[10px] text-muted-light dark:text-muted-dark shrink-0 pt-0.5">
+                                    {format(parseISO(dateKey), 'MMM d')}:
+                                  </span>
+                                  <span className="flex-1 text-primary-light dark:text-primary-dark font-medium leading-tight">
+                                    {topic}
+                                  </span>
+                                </div>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>

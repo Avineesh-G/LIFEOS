@@ -227,7 +227,7 @@ export default function Home({ data }: HomeProps) {
             <div className="flex items-center gap-2.5">
               <Calendar size={15} className="text-secondary-light dark:text-secondary-dark" />
               <p className="label-mono text-secondary-light dark:text-secondary-dark">
-                Tasks · {completedTasks}/{todayTasks.length}
+                TO-DO · {completedTasks}/{todayTasks.length}
               </p>
             </div>
             <button
@@ -251,13 +251,24 @@ export default function Home({ data }: HomeProps) {
                     </svg>
                   )}
                 </div>
-                <span className={`text-sm leading-snug ${
-                  task.completed
-                    ? 'line-through text-muted-light dark:text-muted-dark'
-                    : 'text-primary-light dark:text-primary-dark'
-                }`}>
-                  {task.text}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <span className={`text-sm leading-snug block truncate ${
+                    task.completed
+                      ? 'line-through text-muted-light dark:text-muted-dark'
+                      : 'text-primary-light dark:text-primary-dark'
+                  }`}>
+                    {task.text}
+                  </span>
+                  {task.subtask && (
+                    <span className={`text-xs block truncate ${
+                      task.completed
+                        ? 'line-through text-muted-light/70 dark:text-muted-dark/70'
+                        : 'text-secondary-light dark:text-secondary-dark'
+                    }`}>
+                      {task.subtask}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -6,6 +6,7 @@ export interface StudySession {
   startTime: string;
   duration: number;
   notes?: string;
+  doubts?: string; // Add doubts feature (up to 10,000 words)
 }
 
 export interface Exercise {
@@ -38,6 +39,7 @@ export interface WorkoutLog {
   }[];
   startTime?: number;
   endTime?: number;
+  isSaved?: boolean;
 }
 
 export interface Expense {
@@ -59,11 +61,13 @@ export interface TimetableBlock {
   room?: string;
   courseCode?: string;
   color?: string;
+  topicsByDate?: Record<string, string>; // Saved by date/month (e.g. '2026-09-08' -> topic string)
 }
 
 export interface Task {
   id: string;
   text: string;
+  subtask?: string; // "what to do actually" sub-option underneath main heading
   completed: boolean;
   date: string;
   linkedBlockId?: string;

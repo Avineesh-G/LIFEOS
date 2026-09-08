@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Trash2, GripVertical, Save, Sparkles, Loader2 } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, GripVertical, Save, Sparkles, Loader2, HeartPulse } from 'lucide-react';
+import { triggerHaptic } from '../utils/haptics';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
 import type { AppData, WorkoutPlan, Exercise } from '../types';
 
@@ -10,6 +11,15 @@ interface GymSplitProps {
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SPLIT_PRESETS = ['PUSH', 'PULL', 'LEGS', 'CARDIO', 'UPPER', 'LOWER', 'FULL BODY', 'REST'];
+
+const CARDIO_EXERCISE_PRESETS: Exercise[] = [
+  { id: 'cardio-1', name: 'Incline Treadmill Walk', sets: 3, reps: 15, weight: 0, rest: '60s', howTo: '12% incline at 3.5-4.0 km/h' },
+  { id: 'cardio-2', name: 'Stationary Cycling', sets: 3, reps: 15, weight: 0, rest: '60s', howTo: 'Moderate resistance, steady pace' },
+  { id: 'cardio-3', name: 'Jump Rope Intervals', sets: 4, reps: 50, weight: 0, rest: '45s', howTo: 'High speed intervals' },
+  { id: 'cardio-4', name: 'Rowing Machine', sets: 3, reps: 10, weight: 0, rest: '60s', howTo: 'Full leg drive, controlled recovery' },
+  { id: 'cardio-5', name: 'Stairmaster', sets: 3, reps: 10, weight: 0, rest: '60s', howTo: 'Constant step rate, core engaged' },
+];
 
 export default function GymSplit({ data, updateData }: GymSplitProps) {
   const navigate = useNavigate();
@@ -23,8 +33,15 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   const addExercise = () => {
+    triggerHaptic(5);
     const newEx: Exercise = { id: crypto.randomUUID(), name: 'New Exercise', sets: 3, reps: 10, weight: 0 };
     updatePlan({ ...activePlan, exercises: [...activePlan.exercises, newEx] });
+  };
+
+  const loadCardioCircuit = () => {
+    triggerHaptic(12);
+    const newExercises = CARDIO_EXERCISE_PRESETS.map(c => ({ ...c, id: crypto.randomUUID() }));
+    updatePlan({ ...activePlan, type: 'CARDIO', exercises: newExercises });
   };
 
   const updateExercise = (index: number, field: keyof Exercise, value: string | number) => {
@@ -34,6 +51,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   const removeExercise = (index: number) => {
+    triggerHaptic(8);
     const updated = [...activePlan.exercises];
     updated.splice(index, 1);
     updatePlan({ ...activePlan, exercises: updated });
@@ -48,12 +66,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   const handleSave = async () => {
+    triggerHaptic(15);
     await updateData({ workoutPlans: plans });
     navigate('/gym');
   };
 
   const handleAutoGenerate = async () => {
     if (activePlan.type === 'REST' || !activePlan.type.trim()) return;
+    triggerHaptic(10);
     setGenerating(true);
     try {
       const aiPlan = await getAiWorkoutPlan(activePlan.type, data.profile, (data as any).geminiApiKey || GEMINI_API_KEY);
@@ -83,7 +103,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         <button onClick={() => navigate('/gym')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
           <ChevronLeft size={16} /> Back
         </button>
-        <button onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all">
+        <button onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-sm">
           <Save size={16} /> Save
         </button>
       </div>
@@ -95,7 +115,10 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         {DAYS.map(day => (
           <button
             key={day}
-            onClick={() => setActiveDay(day)}
+            onClick={() => {
+              triggerHaptic(5);
+              setActiveDay(day);
+            }}
             className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
               activeDay === day 
                 ? 'bg-accent text-white' 
@@ -108,8 +131,8 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
       </div>
 
       {/* Workout Type */}
-      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2">Workout Type</label>
+      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4 space-y-3">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">Workout Type</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -129,6 +152,53 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
             </button>
           )}
         </div>
+
+        {/* Quick Split Presets with CARDIO */}
+        <div>
+          <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mb-1.5">Quick Splits:</p>
+          <div className="flex flex-wrap gap-1.5">
+            {SPLIT_PRESETS.map(preset => {
+              const isSelected = activePlan.type.toUpperCase() === preset;
+              const isCardio = preset === 'CARDIO';
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(6);
+                    if (isCardio && activePlan.exercises.length === 0) {
+                      loadCardioCircuit();
+                    } else {
+                      updatePlan({ ...activePlan, type: preset });
+                    }
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                    isSelected
+                      ? (isCardio ? 'bg-rose-500 text-white' : 'bg-accent text-white')
+                      : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                  }`}
+                >
+                  {isCardio && <HeartPulse size={12} />}
+                  {preset}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Cardio specific helper */}
+        {activePlan.type.toUpperCase() === 'CARDIO' && (
+          <div className="pt-2 border-t border-border-light dark:border-border-dark flex items-center justify-between">
+            <span className="text-xs text-secondary-light dark:text-secondary-dark">Cardio Session</span>
+            <button
+              type="button"
+              onClick={loadCardioCircuit}
+              className="text-xs text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 font-medium"
+            >
+              <HeartPulse size={12} /> Load Cardio Circuit Preset
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Exercises */}

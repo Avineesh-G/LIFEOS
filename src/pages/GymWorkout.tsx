@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Minus, Check, Save, Brain, TrendingUp, Activity, Award, Loader2, ChevronDown, ChevronUp, Timer, Play, Pause, RotateCcw } from 'lucide-react';
+import { ChevronLeft, Plus, Minus, Check, Save, Brain, TrendingUp, Activity, Award, Loader2, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
@@ -132,34 +132,8 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   });
   const [newExName, setNewExName] = useState('');
   const [saved, setSaved] = useState(false);
-
-  // Timer State
-  const initialElapsed = existingLog?.startTime && existingLog?.endTime
-    ? Math.max(0, Math.round((existingLog.endTime - existingLog.startTime) / 1000))
-    : 0;
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(initialElapsed);
-  const [actualStartTime, setActualStartTime] = useState<number | undefined>(existingLog?.startTime);
-  const [endTime, setEndTime] = useState<number | undefined>(existingLog?.endTime);
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (isTimerRunning) {
-      interval = setInterval(() => {
-        setElapsedSeconds(s => s + 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isTimerRunning]);
-
-  const formatTimer = (totalSec: number) => {
-    const hrs = Math.floor(totalSec / 3600);
-    const mins = Math.floor((totalSec % 3600) / 60);
-    const secs = totalSec % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const [isLocked, setIsLocked] = useState(!!existingLog?.isSaved);
+  const [isSavedDay, setIsSavedDay] = useState(!!existingLog?.isSaved);
 
   // AI state
   const [preTip, setPreTip] = useState('');
@@ -297,27 +271,21 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
 
   const handleSave = async (isComplete = false) => {
     triggerHaptic(20);
-    const now = Date.now();
-    const finalStart = actualStartTime || (elapsedSeconds > 0 ? now - elapsedSeconds * 1000 : (existingLog?.startTime || now));
-    const finalEnd = isComplete ? now : (actualStartTime ? finalStart + elapsedSeconds * 1000 : endTime);
-    
-    if (isComplete) {
-      setIsTimerRunning(false);
-      setEndTime(finalEnd);
-    }
-    
     const log: WorkoutLog = {
       id: existingLog?.id || crypto.randomUUID(),
-      date: today, day: shortDay, type: workoutType,
+      date: today,
+      day: shortDay,
+      type: workoutType,
       exercises: exercises.filter(e => e.sets.length > 0),
-      startTime: finalStart,
-      endTime: finalEnd,
+      isSaved: true,
     };
     const updatedLogs = existingLog
       ? data.workoutLogs.map(w => w.id === existingLog.id ? log : w)
       : [...data.workoutLogs, log];
     await updateData({ workoutLogs: updatedLogs });
     setSaved(true);
+    setIsSavedDay(true);
+    setIsLocked(true);
     setTimeout(() => setSaved(false), 3000);
     if (isComplete) {
       fetchPostSummary(); // auto-trigger post-workout analysis
@@ -352,8 +320,28 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           </div>
           {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-0.5 capitalize">{muscles}</p>}
         </div>
-        <button onClick={() => handleSave(false)} className="btn-pill flex items-center gap-2 px-5 py-2.5 text-sm">
-          <Save size={14} /> {saved ? 'Saved to History!' : 'Save Workout'}
+        <button 
+          onClick={() => {
+            if (isLocked) {
+              triggerHaptic(8);
+              setIsLocked(false);
+            } else {
+              handleSave(false);
+            }
+          }} 
+          className={`btn-pill flex items-center gap-2 px-5 py-2.5 text-sm transition-all ${
+            isLocked ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : ''
+          }`}
+        >
+          {isLocked ? (
+            <>
+              <Lock size={14} /> Saved & Locked
+            </>
+          ) : (
+            <>
+              <Save size={14} /> {saved ? 'Saved to History!' : 'Save Workout'}
+            </>
+          )}
         </button>
       </div>
 
@@ -370,70 +358,6 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
             />
           </div>
         </div>
-      )}
-
-      {/* ── Dedicated Gym Timer Card ── */}
-      {!isRest && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card p-4 sm:p-5 border border-border-light dark:border-border-dark flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <div className="flex items-center gap-3.5 w-full sm:w-auto">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors ${
-              isTimerRunning 
-                ? 'bg-emerald-500/20 text-emerald-500 ring-2 ring-emerald-500/30' 
-                : 'bg-bg-light dark:bg-bg-dark text-muted-light dark:text-muted-dark border border-border-light dark:border-border-dark'
-            }`}>
-              <Timer size={22} className={isTimerRunning ? 'animate-pulse' : ''} />
-            </div>
-            <div>
-              <p className="label-mono text-secondary-light dark:text-secondary-dark mb-0.5">Gym Timer (Hrs:Min:Sec)</p>
-              <div className="font-mono text-3xl sm:text-4xl font-extrabold tracking-wider text-primary-light dark:text-primary-dark">
-                {formatTimer(elapsedSeconds)}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => {
-                triggerHaptic(12);
-                if (!isTimerRunning && !actualStartTime) {
-                  setActualStartTime(Date.now());
-                }
-                setIsTimerRunning(!isTimerRunning);
-              }}
-              className={`btn-pill flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold transition-all active:scale-[0.98] ${
-                isTimerRunning
-                  ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                  : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-              }`}
-            >
-              {isTimerRunning ? (
-                <>
-                  <Pause size={16} fill="currentColor" /> Pause Timer
-                </>
-              ) : (
-                <>
-                  <Play size={16} fill="currentColor" /> {elapsedSeconds > 0 ? 'Resume Timer' : 'Start Timer'}
-                </>
-              )}
-            </button>
-            {elapsedSeconds > 0 && !isTimerRunning && (
-              <button
-                onClick={() => {
-                  triggerHaptic(8);
-                  setElapsedSeconds(0);
-                  setActualStartTime(undefined);
-                }}
-                className="btn-ghost-pill p-3 text-xs text-muted-light dark:text-muted-dark hover:text-red-500"
-                title="Reset Timer"
-              >
-                <RotateCcw size={16} />
-              </button>
-            )}
-          </div>
-        </motion.div>
       )}
 
       {/* ── AI Insights ─────────────────────────────────────────────────── */}
@@ -619,34 +543,34 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           </div>
           
           <div className="pt-4">
-            {endTime ? (
+            {isSavedDay ? (
               <div className="card p-5 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-center space-y-3">
                 <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
                   <Check size={20} className="stroke-[3]" />
                   <p className="font-bold text-base">Workout Complete & Saved to Gym History!</p>
                 </div>
-                <div className="flex items-center justify-center gap-4 text-xs font-mono text-emerald-700 dark:text-emerald-300">
-                  <div>
-                    <span className="block text-[10px] uppercase opacity-70">Duration</span>
-                    <span className="font-bold text-sm">{formatTimer(elapsedSeconds)}</span>
-                  </div>
-                  <div className="h-6 w-[1px] bg-emerald-300 dark:bg-emerald-700"></div>
-                  <div>
-                    <span className="block text-[10px] uppercase opacity-70">Start Time</span>
-                    {new Date(actualStartTime || (endTime - elapsedSeconds * 1000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                  <div className="h-6 w-[1px] bg-emerald-300 dark:bg-emerald-700"></div>
-                  <div>
-                    <span className="block text-[10px] uppercase opacity-70">End Time</span>
-                    {new Date(endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark">
+                  {isLocked 
+                    ? 'Protected from accidental overwrite. Click unlock to make edits.' 
+                    : 'Workout is unlocked for editing.'}
+                </p>
                 <div className="pt-1 flex gap-2">
                   <button 
-                    onClick={() => handleSave(false)}
-                    className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700"
+                    onClick={() => {
+                      triggerHaptic(10);
+                      setIsLocked(!isLocked);
+                    }}
+                    className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
                   >
-                    Update Session
+                    {isLocked ? (
+                      <>
+                        <Unlock size={14} /> Unlock to Edit
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={14} /> Lock Workout
+                      </>
+                    )}
                   </button>
                   <button 
                     onClick={() => navigate('/gym')}

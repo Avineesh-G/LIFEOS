@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
@@ -10,7 +10,7 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getHistoryAnalysis, getGymHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
 
 interface SettingsProps {
   theme: AppSettings['theme'];
@@ -183,6 +183,79 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       setGymAnalyzing(false);
     }
   };
+
+  // ── Spending History State ──────────────────────────────────────────────
+  const [spendingHistoryOpen, setSpendingHistoryOpen] = useState(false);
+  const [selectedSpendingMonth, setSelectedSpendingMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [spendingAiAnalysis, setSpendingAiAnalysis] = useState<any>(null);
+  const [spendingAnalyzing, setSpendingAnalyzing] = useState(false);
+
+  const filteredSpendingLogs = useMemo(() => {
+    if (!data.expenses) return [];
+    return data.expenses
+      .filter(e => e.date && e.date.startsWith(selectedSpendingMonth))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [data.expenses, selectedSpendingMonth]);
+
+  const uniqueSpendingMonths = useMemo(() => {
+    if (!data.expenses) return [format(new Date(), 'yyyy-MM')];
+    const months = new Set<string>();
+    data.expenses.forEach(e => {
+      if (e.date) months.add(e.date.substring(0, 7));
+    });
+    months.add(format(new Date(), 'yyyy-MM'));
+    return Array.from(months).sort().reverse();
+  }, [data.expenses]);
+
+  const spendingMonthTotal = useMemo(() => {
+    return filteredSpendingLogs.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  }, [filteredSpendingLogs]);
+
+  const spendingByCategory = useMemo(() => {
+    const cats: Record<string, number> = {};
+    filteredSpendingLogs.forEach(e => {
+      cats[e.category] = (cats[e.category] || 0) + (Number(e.amount) || 0);
+    });
+    return Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  }, [filteredSpendingLogs]);
+
+  const handleAnalyzeSpending = async () => {
+    if (filteredSpendingLogs.length === 0) return;
+    triggerHaptic(10);
+    setSpendingAnalyzing(true);
+    try {
+      const result = await getSpendingHistoryAnalysis(filteredSpendingLogs, data.geminiApiKey || GEMINI_API_KEY);
+      setSpendingAiAnalysis(result);
+    } catch (err: any) {
+      console.error(err);
+      setSpendingAiAnalysis({ error: "Failed to analyze spending history." });
+    } finally {
+      setSpendingAnalyzing(false);
+    }
+  };
+
+  // ── TO-DO History State ─────────────────────────────────────────────────
+  const [todoHistoryOpen, setTodoHistoryOpen] = useState(false);
+  const [selectedTodoMonth, setSelectedTodoMonth] = useState(format(new Date(), 'yyyy-MM'));
+
+  const filteredTodoTasks = useMemo(() => {
+    if (!data.tasks) return [];
+    return data.tasks
+      .filter(t => t.date && t.date.startsWith(selectedTodoMonth))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [data.tasks, selectedTodoMonth]);
+
+  const uniqueTodoMonths = useMemo(() => {
+    if (!data.tasks) return [format(new Date(), 'yyyy-MM')];
+    const months = new Set<string>();
+    data.tasks.forEach(t => {
+      if (t.date) months.add(t.date.substring(0, 7));
+    });
+    months.add(format(new Date(), 'yyyy-MM'));
+    return Array.from(months).sort().reverse();
+  }, [data.tasks]);
+
+  const completedTodoCount = filteredTodoTasks.filter(t => t.completed).length;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-24">
@@ -568,34 +641,226 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </AnimatePresence>
       </motion.div>
 
-      {/* Advanced Settings */}
-      <motion.div variants={item} className="card p-5 space-y-4">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark">Advanced</p>
-        
-        <div>
-          <label className="block text-sm font-medium text-primary-light dark:text-primary-dark mb-1">Groq API Key</label>
-          <div className="flex gap-2">
-            <input 
-              type="password" 
-              value={data.geminiApiKey || ''} 
-              onChange={e => updateData({ geminiApiKey: e.target.value })} 
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  handleSaveFeedback();
-                }
-              }}
-              className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3 py-2 text-primary-light dark:text-primary-dark focus:outline-none focus:ring-1 focus:ring-accent-light" 
-              placeholder="gsk_..."
-            />
-            <button
-              onClick={handleSaveFeedback}
-              className={`btn-pill px-4 py-2 text-sm transition-all flex items-center gap-1.5 ${isSaved ? 'bg-emerald-500 text-white' : ''}`}
-            >
-              {isSaved ? <><Check size={14} /> Saved!</> : 'Save'}
-            </button>
+      {/* Spending History Section */}
+      <motion.div variants={item} className="card overflow-hidden">
+        <button
+          onClick={() => setSpendingHistoryOpen(!spendingHistoryOpen)}
+          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-amber-500/20 text-amber-500">
+              <Wallet size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Spending History</p>
+              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past expenses & smart AI advice</p>
+            </div>
           </div>
-          <p className="text-[10px] text-muted-light dark:text-muted-dark mt-1">Required for AI Coach, AI Insights, and Nutrition parsing.</p>
-        </div>
+          {spendingHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+        </button>
+
+        <AnimatePresence>
+          {spendingHistoryOpen && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+                
+                {/* Filter Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
+                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                    <select 
+                      value={selectedSpendingMonth}
+                      onChange={(e) => {
+                        setSelectedSpendingMonth(e.target.value);
+                        setSpendingAiAnalysis(null);
+                      }}
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                    >
+                      {uniqueSpendingMonths.map(m => {
+                        const [y, mo] = m.split('-');
+                        const date = new Date(parseInt(y), parseInt(mo) - 1);
+                        return (
+                          <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <button 
+                    onClick={handleAnalyzeSpending}
+                    disabled={filteredSpendingLogs.length === 0 || spendingAnalyzing}
+                    className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                  >
+                    {spendingAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    AI Spend Analysis
+                  </button>
+                </div>
+
+                {/* AI Spend Analysis Card */}
+                {spendingAiAnalysis && (
+                  <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 relative">
+                    <button onClick={() => setSpendingAiAnalysis(null)} className="absolute top-2 right-2 text-amber-500/70 hover:text-amber-500">
+                      <X size={14} />
+                    </button>
+                    <h4 className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
+                      <Sparkles size={14} /> Smart Spending Insights
+                    </h4>
+                    {spendingAiAnalysis.error ? (
+                      <p className="text-xs text-red-500">{spendingAiAnalysis.error}</p>
+                    ) : (
+                      <div className="space-y-2.5 text-xs">
+                        <p className="text-secondary-light dark:text-secondary-dark leading-relaxed font-medium">
+                          {spendingAiAnalysis.summary}
+                        </p>
+                        {spendingAiAnalysis.tips && (
+                          <div className="space-y-1.5 pt-1 border-t border-amber-500/20">
+                            <span className="font-semibold text-amber-700 dark:text-amber-300 block text-[11px]">Where to spend less:</span>
+                            {spendingAiAnalysis.tips.map((tip: string, idx: number) => (
+                              <div key={idx} className="flex items-start gap-1.5 text-secondary-light dark:text-secondary-dark">
+                                <span className="text-amber-500 font-bold">•</span>
+                                <span>{tip}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Month Summary Bar */}
+                <div className="flex items-center justify-between bg-bg-light dark:bg-bg-dark/50 p-3 rounded-xl border border-border-light dark:border-border-dark">
+                  <div>
+                    <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark block">Total Spent</span>
+                    <span className="font-bold text-base text-primary-light dark:text-primary-dark">
+                      ₹{spendingMonthTotal.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark block">Transactions</span>
+                    <span className="font-mono text-sm font-semibold text-secondary-light dark:text-secondary-dark">
+                      {filteredSpendingLogs.length} items
+                    </span>
+                  </div>
+                </div>
+
+                {/* Category Pills */}
+                {spendingByCategory.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {spendingByCategory.map(([cat, amt]) => (
+                      <span key={cat} className="text-[11px] px-2.5 py-1 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-medium">
+                        {cat}: <strong className="text-primary-light dark:text-primary-dark">₹{amt.toLocaleString('en-IN')}</strong>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Expense List */}
+                <div className="space-y-2 pt-1 max-h-72 overflow-y-auto pr-1">
+                  {filteredSpendingLogs.length === 0 ? (
+                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4">No spending logged for this month.</p>
+                  ) : (
+                    filteredSpendingLogs.map((exp) => (
+                      <div key={exp.id} className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                            {exp.category} {exp.note && `· ${exp.note}`}
+                          </p>
+                          <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">
+                            {exp.date}
+                          </p>
+                        </div>
+                        <span className="font-mono font-bold text-sm text-amber-600 dark:text-amber-400 shrink-0">
+                          ₹{Number(exp.amount).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* TO-DO List History Section */}
+      <motion.div variants={item} className="card overflow-hidden">
+        <button
+          onClick={() => setTodoHistoryOpen(!todoHistoryOpen)}
+          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-500">
+              <ListTodo size={16} />
+            </div>
+            <div className="text-left">
+              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">TO-DO List History</p>
+              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View completed tasks & productivity</p>
+            </div>
+          </div>
+          {todoHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+        </button>
+
+        <AnimatePresence>
+          {todoHistoryOpen && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+                
+                {/* Filter Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
+                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                    <select 
+                      value={selectedTodoMonth}
+                      onChange={(e) => setSelectedTodoMonth(e.target.value)}
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                    >
+                      {uniqueTodoMonths.map(m => {
+                        const [y, mo] = m.split('-');
+                        const date = new Date(parseInt(y), parseInt(mo) - 1);
+                        return (
+                          <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <span className="label-mono text-xs font-bold text-emerald-500">
+                    {completedTodoCount}/{filteredTodoTasks.length} done
+                  </span>
+                </div>
+
+                {/* Tasks List */}
+                <div className="space-y-2 pt-1 max-h-72 overflow-y-auto pr-1">
+                  {filteredTodoTasks.length === 0 ? (
+                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4">No tasks found for this month.</p>
+                  ) : (
+                    filteredTodoTasks.map((t) => (
+                      <div key={t.id} className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-start gap-2.5">
+                        <div className={`w-4 h-4 rounded mt-0.5 border flex items-center justify-center flex-shrink-0 ${t.completed ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark' : 'border-border-light dark:border-border-dark'}`}>
+                          {t.completed && <Check size={10} className="text-surface-light dark:text-surface-dark stroke-[3]" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className={`text-xs font-medium block truncate ${t.completed ? 'line-through text-muted-light dark:text-muted-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                            {t.text}
+                          </span>
+                          {t.subtask && (
+                            <span className="text-[10px] text-secondary-light dark:text-secondary-dark block truncate mt-0.5">
+                              {t.subtask}
+                            </span>
+                          )}
+                          <span className="label-mono text-[9px] text-muted-light dark:text-muted-dark block mt-0.5">
+                            {t.date}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Account Settings */}
@@ -636,7 +901,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <motion.div variants={item} className="text-center py-4">
-        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.2</p>
+        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.3</p>
       </motion.div>
     </motion.div>
   );

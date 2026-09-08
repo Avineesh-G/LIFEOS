@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, Check } from 'lucide-react';
+import { Plus, Trash2, X, Check, ListChecks } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { triggerHaptic } from '../utils/haptics';
 import type { AppData, Task } from '../types';
 
 interface TasksProps {
@@ -14,6 +15,7 @@ const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transiti
 
 export default function Tasks({ data, updateData }: TasksProps) {
   const [newTask, setNewTask] = useState('');
+  const [newSubtask, setNewSubtask] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const today = format(new Date(), 'yyyy-MM-dd');
   const todayTasks     = data.tasks.filter(t => t.date === today);
@@ -22,17 +24,27 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
   const addTask = async () => {
     if (!newTask.trim()) return;
-    const task: Task = { id: crypto.randomUUID(), text: newTask.trim(), completed: false, date: today };
+    triggerHaptic(12);
+    const task: Task = {
+      id: crypto.randomUUID(),
+      text: newTask.trim(),
+      subtask: newSubtask.trim() || undefined,
+      completed: false,
+      date: today,
+    };
     await updateData({ tasks: [...data.tasks, task] });
     setNewTask('');
+    setNewSubtask('');
     setShowAdd(false);
   };
 
   const toggleTask = async (id: string) => {
+    triggerHaptic(8);
     await updateData({ tasks: data.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t) });
   };
 
   const deleteTask = async (id: string) => {
+    triggerHaptic(10);
     await updateData({ tasks: data.tasks.filter(t => t.id !== id) });
   };
 
@@ -96,13 +108,22 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 {task.completed && <Check size={11} className="text-surface-light dark:text-surface-dark" strokeWidth={3} />}
               </button>
               <div className="flex-1 min-w-0">
-                <span className={`text-sm leading-snug truncate block ${
+                <span className={`text-sm leading-snug truncate block font-medium ${
                   task.completed
                     ? 'line-through text-muted-light dark:text-muted-dark'
                     : 'text-primary-light dark:text-primary-dark'
                 }`}>
                   {task.text}
                 </span>
+                {task.subtask && (
+                  <span className={`text-xs block mt-0.5 truncate ${
+                    task.completed
+                      ? 'line-through text-muted-light/70 dark:text-muted-dark/70'
+                      : 'text-secondary-light dark:text-secondary-dark'
+                  }`}>
+                    {task.subtask}
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => deleteTask(task.id)}
@@ -145,19 +166,38 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 </button>
               </div>
               <div className="space-y-3">
-                <input
-                  type="text"
-                  value={newTask}
-                  onChange={e => setNewTask(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addTask()}
-                  placeholder="What needs to be done?"
-                  autoFocus
-                  className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-primary-light/20 dark:focus:ring-primary-dark/20 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
-                />
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5">
+                    Main Task
+                  </label>
+                  <input
+                    type="text"
+                    value={newTask}
+                    onChange={e => setNewTask(e.target.value)}
+                    placeholder="e.g. Physics Assignment 3"
+                    autoFocus
+                    className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5">
+                    What to do actually (sub-option / details)
+                  </label>
+                  <input
+                    type="text"
+                    value={newSubtask}
+                    onChange={e => setNewSubtask(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && addTask()}
+                    placeholder="e.g. Solve problems 1 through 10 and submit PDF"
+                    className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                  />
+                </div>
+
                 <button
                   onClick={addTask}
                   disabled={!newTask.trim()}
-                  className="btn-pill w-full py-3.5 text-sm disabled:opacity-30"
+                  className="btn-pill w-full py-3.5 text-sm disabled:opacity-30 mt-2"
                 >
                   Add TO-DO
                 </button>

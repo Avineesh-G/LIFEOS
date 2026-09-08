@@ -73,14 +73,17 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* ── Main content ── */}
-      <main className="pt-14 pb-32 min-h-screen">
+      <main className="pt-14 pb-36 min-h-screen">
         <div className="max-w-xl mx-auto px-4 py-6">
           {children}
         </div>
       </main>
 
+      {/* ── Translucent gradient blur backdrop behind/below dock ── */}
+      <div className="fixed bottom-0 left-0 right-0 h-28 pointer-events-none z-30 bg-gradient-to-t from-bg-light/95 dark:from-bg-dark/95 via-bg-light/60 dark:via-bg-dark/60 to-transparent backdrop-blur-[6px]" />
+
       {/* ── Floating pill bottom nav ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-4 pb-6 pb-safe pointer-events-none">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-4 pb-7 sm:pb-8 pb-safe pointer-events-none">
         <nav
           className="pointer-events-auto flex items-center gap-0.5 sm:gap-1 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-full px-2 sm:px-3 py-2.5 shadow-lg overflow-x-auto no-scrollbar touch-pan-x"
           style={{ maxWidth: '100%' }}

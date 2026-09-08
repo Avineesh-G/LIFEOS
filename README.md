@@ -6,111 +6,166 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 
-LifeOS (branded as **Flow**) is a comprehensive, personal life operating system designed to act as a unified dashboard for tracking daily habits, workouts, nutrition, studying, and spending. Built with a premium glassmorphic and minimalist UI, it operates seamlessly as a Progressive Web App (PWA) across all mobile and desktop devices.
+LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, glassmorphic aesthetics, and intelligent Groq AI inference.
 
 ---
 
-## Architecture & Features
+## What is New in Version 1.3
 
-### What's New in Version 1.2
-- **TO-DO List:** Rebranded and streamlined daily task management for focused productivity.
-- **Dedicated Gym Timer:** Integrated live timer card formatted as `HH:MM:SS` using JetBrains Mono with manual start/pause/reset controls.
-- **Gym History in Settings:** Separate workout archive organized by month, complete with AI Workout Analysis examining consistency, volume, and progressive overload.
-- **Cardio Only Mode:** One-tap AI routine generator for cardio, endurance, and core sessions directly from the Gym dashboard.
-- **Real-Time Active Timetable:** Classes in session are automatically filled with the application's theme color and marked with live pulsating badges. Start buttons replaced with spacious, clean cards.
-- **Precision Input Handling:** Seamless number editing across sets, reps, and weights with auto-select on focus and zero-clearing.
+### Study Session Doubts and In-Depth Inquiry
+- **Session Doubts Drawer:** Deep study logs now feature an integrated inquiry module where users can capture concepts, academic questions, and unresolved doubts directly under any saved study session in Study History.
+- **10,000-Word Capacity:** Equipped with a word limit of up to 10,000 words per session, supported by a live JetBrains Mono word and character counter.
+- **Lock Protection:** Implemented an edit lock once saved to guarantee that notes and queries are not lost or overwritten during fast navigation.
 
-- **Auth & Cloud Sync**
-  Powered by Firebase Authentication (Google Sign-in) and Firestore, ensuring your data is securely synced in real-time across all your devices. No guest access; your data stays safe in your account.
-  
-- **Gym & Workout Tracking**
-  Log daily workouts, track sets, reps, and weights. View your PRs (Personal Records) and visualize progress over time.
+### Global No-Overwrite Protection
+- **Immutable Log State:** Applied systematic safeguard architecture across all modules (Nutrition, Gym Workout, Timetable, and Study Doubts).
+- **Explicit Unlock Controls:** Once an entry is committed and saved, inputs become read-only and actions convert into a secure "Saved & Locked" status. Modifying previously logged entries requires an explicit tap on "Unlock to Edit".
 
-### Nutrition & AI Tracking
-- **Smart Dietician:** Get personalized Groq AI insights on your recent eating trends
-- **Meal Planning:** Add extra items outside the predefined mess menu
-- **Skipped Meals:** Mark any meal slot as skipped; accurately reflected in history (v1.1)
-- **Interactive Tracking:** Calorie progress ring dynamically fills as you log your day
-- **Smooth Save Feedback:** Visual confirmation for saved meals with polished transition effects
+### Streamlined Gym Architecture with Dedicated Cardio
+- **Clean Workout Logging:** Eliminated superfluous timers and start/end time pickers from the daily workout logging interface, focusing on set, repetition, weight, and exercise accuracy.
+- **Cardio Split Integration:** Added a Cardio category directly within the split selection screen alongside Push, Pull, Legs, Upper, Lower, Full Body, and Core.
+- **Circuit Presets:** Integrated quick-start cardio circuits including Zone 2 Base Building, High Intensity Interval Training (HIIT), Incline Treadmill Endurance, and Recovery Flush.
 
-### Premium UI/UX
-- **Ethereal Abstract Blobs:** A dynamic, premium layered gradient background providing a beautiful, minimal aesthetic (v1.1)
-- **Buttery-Smooth Animations:** Powered by `framer-motion` for gliding page transitions and interactive elements (Refined in v1.1)
-- **Smart Navigation:** Automatic scroll-to-top on route changes and seamless auth redirects for a native feel (v1.1)
-- **Responsive Elements:** Perfectly tuned CSS transitions for hover, tap, and state changes
-- **Dark Mode First:** Seamlessly switches between light and true-dark themes
+### Settings Spending History and AI Budget Optimizer
+- **Categorized Spending Archive:** Added an interactive spending history accordion in Settings, grouping transactions into calendar months.
+- **AI Spend Insights:** Features an integrated Groq AI budget evaluation model that scans monthly transaction logs, flags non-essential expenses, and provides prioritized, actionable advice on where to cut expenditures.
 
-- **Study Timer & Timetable**
-  Pomodoro-style study timers with deep work tracking. Detailed timetable schedules with teacher, slot, and room mapping (v1.1) and real-time ongoing class highlights (v1.2).
+### Timetable Lecture Topics by Month
+- **Attached Topic Subsection:** Each lecture card now features an expandable "Today's Topic Discussed" subsection to record syllabus coverage and key concepts.
+- **Monthly Topic History:** Automatically structures lecture coverage by calendar month, enabling students to review past discussions prior to examinations.
 
-- **Spending Tracker**
-  Keep a close eye on your daily expenses with categorized inputs and monthly summaries.
+### Context-Aware Nutrition and Food Doubt Assistant
+- **Automated Meal Slot Focus:** The nutrition screen inspects the current local time on initial load and expands the corresponding meal slot (Breakfast, Lunch, Snacks, or Dinner).
+- **Food Doubt ("Can I eat this?"):** Positioned directly beneath the daily calorie progress indicator, this AI assistant evaluates whether off-menu or external foods fit current macro targets. All responses are plain text and strictly constrained to under 100 characters.
 
-- **Progress Dashboard**
-  A high-level overview of your monthly trends, streaks, and top subjects/activities.
+### TO-DO List Actionable Subtasks and Settings Archive
+- **Task Specifics ("What to do actually"):** Tasks now feature an optional subtask descriptor beneath the main title to define clear execution steps.
+- **Home and List Synchronization:** Subtasks render cleanly on both the dedicated TO-DO List interface and the Home dashboard preview.
+- **Task History Accordion:** Settings now includes a TO-DO history accordion detailing completed tasks, categories, and timestamps.
 
-- **Fully Installable PWA**
-  Designed to feel exactly like a native app on iOS and Android.
+### Ambient UI Refinements
+- **Floating Dock Ergonomics:** Bottom navigation raised slightly with an ambient gradient backdrop blur to ensure comfort across curved and gesture-navigated displays.
+- **Extended Content Clearance:** Page containers provide generous bottom padding to eliminate content occlusion behind the floating navigation bar.
+- **Invisible AI Pipeline:** Removed the manual API key input card in Settings; AI operations utilize a robust background integration.
 
 ---
 
-## Technology Stack
+## Core Architecture and Features
 
-### Languages & Frameworks
-- **React 18**
-- **TypeScript**
-- **JavaScript**
-- **Vite** (Build Tool)
+### 1. Daily TO-DO Management
+- Quick task creation with custom categorization (Academic, Fitness, Personal, Urgent).
+- Actionable subtasks clarifying actual execution requirements.
+- Dynamic completion toggling with vibration haptics.
+- Historical logging with completed task counts and category distributions.
 
-### Styling & UI
-- **Tailwind CSS**
-- **Framer Motion** (Fluid animations)
-- **Lucide React** (Iconography)
+### 2. Physical Training and Gym Engine
+- Comprehensive workout logging tracking exercises, sets, weights, and repetitions.
+- Rapid exercise selection across Chest, Back, Shoulders, Arms, Legs, Core, and Cardio.
+- Split configuration saving routines across seven distinct training archetypes.
+- Monthly workout history in Settings with AI-driven training volume and progressive overload analysis.
+- One-tap quick weight adjustments (+1kg, +2.5kg, +5kg) and auto-select number fields.
 
-### Backend & AI
-- **Firebase** (Auth, Firestore)
-- **Groq API** (`qwen/qwen3.8-27b`) for intelligent nutrition and workout parsing
+### 3. Nutrition and Mess Meal Tracking
+- Interactive calorie and macronutrient rings tracking daily energy budgets.
+- Four daily meal slots: Breakfast (07:30 - 10:00), Lunch (12:00 - 14:30), Snacks (17:00 - 18:30), and Dinner (19:30 - 22:00).
+- Automatic time-slot expansion highlighting the active meal period.
+- AI Dietician analysis evaluating weekly nutrition trends.
+- Quick Food Doubt evaluator delivering advice in under 100 characters.
+
+### 4. Academic Scheduler and Deep Study
+- Schedule mapping with subject names, teacher info, room locations, and time slots.
+- Real-time ongoing class detection with theme color fills and live indicator badges.
+- Monthly lecture topic recording attached to each class.
+- Pomodoro deep-focus timer with background execution and sound alerts.
+- Study history with subject-wise time breakdowns and 10,000-word doubt journals.
+
+### 5. Financial Ledger and Expense Intelligence
+- Rapid expense logging with tags (Food, Academic, Transport, Entertainment, Utility).
+- Monthly spending summaries with category breakdowns.
+- Settings Spending History with AI budget critique and savings suggestions.
+
+### 6. Central Progress Matrix
+- Aggregated monthly streaks and consistency scores.
+- Visual completion graphs powered by Recharts.
+- Subject balance radar and workout frequency metrics.
+
+---
+
+## Technical Stack
+
+### Frontend Core
+- **React 18.3**: Declarative UI architecture utilizing custom hooks and memoized context.
+- **TypeScript 5.5**: Strict type safety covering all entity models, session records, and state transitions.
+- **Vite 8.2**: High-speed build tool with hot module replacement and optimized asset pipeline.
+
+### Styling and Animation
+- **Tailwind CSS 3.4**: Utility-first responsive design supporting full dark and light mode adaptation.
+- **Framer Motion 11.18**: Layout animations, spring transitions, gesture interactions, and sheet modals.
+- **Lucide React**: Vector iconography for modern mobile interfaces.
+- **Canvas Confetti**: Rewarding completion animations upon goal attainment.
+
+### Cloud and Artificial Intelligence
+- **Firebase Authentication**: Google OAuth authentication.
+- **Cloud Firestore**: Real-time cloud synchronization with offline persistence support.
+- **Groq AI SDK (`qwen/qwen-2.5-32b` / `llama-3.3-70b-versatile`)**: High-speed LLM inference for workout analysis, dietary coaching, budget reviews, and food evaluations.
+
+---
+
+## Typography Standards
+
+LifeOS adheres to strict typographical guidelines:
+- **90% Plus Jakarta Sans**: Applied to all structural headings, body text, buttons, and navigation for a friendly, modern feel.
+- **10% JetBrains Mono**: Reserved exclusively for numeric indicators, timestamps, weights, sets, reps, and counters to ensure instant scannability.
 
 ---
 
 ## Getting Started
 
-**1. Clone the repository**
+### Prerequisites
+- Node.js 18.x or higher
+- npm 9.x or higher
+
+### Installation
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/Avineesh-G/LIFEOS.git
 cd LIFEOS/lifeos
 ```
 
-**2. Install dependencies**
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-**3. Set up environment variables**
-Create a `.env` file in the root directory and add your Firebase keys:
+3. Configure environment variables:
+Create a `.env` file in the root directory:
 ```env
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_firebase_app_id
 ```
 
-**4. Run the development server**
+4. Run local development server:
 ```bash
 npm run dev
 ```
 
-**5. Build for Production**
+5. Build production bundle:
 ```bash
 npm run build
 ```
 
+6. Preview production build:
+```bash
+npm run preview
+```
+
 ---
 
-## UI/UX Design
+## License
 
-The application is built on a strict typographic rule for maximum readability:
-- **90% Plus Jakarta Sans**: Used for all structural elements (headings, buttons, body text) to provide a friendly, premium, native-app feel.
-- **10% JetBrains Mono**: Used exclusively for technical data (reps, weights, dates, small labels) to ensure crisp readability and scan-ability.
+Private project developed for personal life management and academic execution. All rights reserved.

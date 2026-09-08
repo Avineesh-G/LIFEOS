@@ -80,7 +80,7 @@ function App() {
           <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
           <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />
           <Route path="/study/timer" element={<AnimatedPage><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} /></AnimatedPage>} />
+          <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
           <Route path="/study/heatmap" element={<AnimatedPage><StudyHeatmap data={data!} /></AnimatedPage>} />
           <Route path="/gym" element={<AnimatedPage><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
           <Route path="/gym/onboarding" element={<AnimatedPage><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />

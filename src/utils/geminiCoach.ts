@@ -377,3 +377,66 @@ Provide a concise, motivating, data-driven analysis in this exact JSON format:
   }
 }
 
+export async function getSpendingHistoryAnalysis(expenses: any[], apiKey: string = GEMINI_API_KEY): Promise<any> {
+  if (!expenses || expenses.length === 0) return null;
+
+  const totalSpent = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const byCategory: Record<string, number> = {};
+  expenses.forEach(e => {
+    byCategory[e.category] = (byCategory[e.category] || 0) + (Number(e.amount) || 0);
+  });
+  const catSummary = Object.entries(byCategory).map(([c, a]) => `${c}: ₹${a}`).join(', ');
+  const recentItems = expenses.slice(0, 30).map(e => `${e.date}: ₹${e.amount} on ${e.category}${e.note ? ` (${e.note})` : ''}`).join('\n');
+
+  const prompt = `You are a financial advisor focusing on smart budgeting and reducing wasteful expenditure.
+Analyze this user's spending data:
+Total Spent: ₹${totalSpent}
+Category Breakdown: ${catSummary}
+Recent Transactions:
+${recentItems}
+
+Provide a concise, data-driven analysis highlighting where the user is overspending and actionable advice on where to spend less:
+{
+  "summary": "A 2-sentence summary of their primary spending habits and largest financial drains.",
+  "tips": [
+    "Specific actionable tip 1 on where and how to cut down unnecessary spending",
+    "Specific actionable tip 2 on smarter alternatives or budgeting"
+  ]
+}`;
+
+  try {
+    const raw = await callGroq(prompt, apiKey, 400, true);
+    try {
+      return JSON.parse(raw);
+    } catch {
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('Could not parse spending analysis from Groq response');
+      return JSON.parse(match[0]);
+    }
+  } catch (err) {
+    console.error('Groq spending history analysis error:', err);
+    throw err;
+  }
+}
+
+export async function askFoodDoubt(foodQuery: string, profile: any, apiKey: string = GEMINI_API_KEY): Promise<string> {
+  const target = profile?.currentCalorieTarget || 2000;
+  const prompt = `You are an expert nutrition coach. The user asks if they can eat this off-menu food: "${foodQuery}".
+Their daily calorie target is ${target} kcal.
+Provide a direct verdict (Yes / In moderation / Avoid) and a quick rationale.
+CRITICAL MANDATORY CONSTRAINT: Your entire output MUST BE strictly under 100 characters total. Plain text only. No markdown formatting.`;
+
+  try {
+    const reply = await callGroq(prompt, apiKey, 50, false);
+    const cleaned = reply.replace(/\n/g, ' ').trim();
+    // Enforce 100 chars limit
+    if (cleaned.length > 100) {
+      return cleaned.slice(0, 97) + '...';
+    }
+    return cleaned;
+  } catch (err) {
+    console.error('Groq food doubt error:', err);
+    throw err;
+  }
+}
+
