@@ -819,3 +819,4 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     </motion.div>
   );
 }
+
