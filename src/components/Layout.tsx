@@ -62,8 +62,9 @@ export default function Layout({ children }: LayoutProps) {
           {pageLabel}
         </span>
         <button
+          onPointerDown={() => triggerHaptic('light')}
           onClick={() => {
-            triggerHaptic(12);
+            triggerHaptic('light');
             setShowQuickAdd(true);
           }}
           className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light hover:opacity-80 active:scale-95 transition-all"
@@ -107,8 +108,9 @@ export default function Layout({ children }: LayoutProps) {
             return (
               <button
                 key={item.path}
+                onPointerDown={() => triggerHaptic('light')}
                 onClick={() => {
-                  triggerHaptic(10);
+                  triggerHaptic('light');
                   navigate(item.path);
                 }}
                 title={item.label}
@@ -171,7 +173,9 @@ export default function Layout({ children }: LayoutProps) {
                 {quickAddOptions.map((opt) => (
                   <button
                     key={opt.path}
+                    onPointerDown={() => triggerHaptic('light')}
                     onClick={() => {
+                      triggerHaptic('light');
                       setShowQuickAdd(false);
                       navigate(opt.path);
                     }}

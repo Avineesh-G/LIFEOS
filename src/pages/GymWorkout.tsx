@@ -270,7 +270,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   };
 
   const handleSave = async (isComplete = false) => {
-    triggerHaptic(20);
+    triggerHaptic('save');
     const log: WorkoutLog = {
       id: existingLog?.id || crypto.randomUUID(),
       date: today,
@@ -582,6 +582,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
               </div>
             ) : (
               <button 
+                onPointerDown={() => triggerHaptic('save')}
                 onClick={() => handleSave(true)}
                 className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold active:scale-[0.98] transition-all shadow-md shadow-emerald-500/20"
               >

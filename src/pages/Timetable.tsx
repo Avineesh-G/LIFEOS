@@ -222,7 +222,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
               const handleSaveTopic = async () => {
                 if (!draftTopic.trim()) return;
-                triggerHaptic(15);
+                triggerHaptic('save');
                 const updatedTopics = {
                   ...(block.topicsByDate || {}),
                   [todayDateStr]: draftTopic.trim(),
@@ -347,6 +347,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                       {!isLocked ? (
                         <button
                           type="button"
+                          onPointerDown={() => triggerHaptic('save')}
                           onClick={handleSaveTopic}
                           disabled={!draftTopic.trim()}
                           className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-40 ${

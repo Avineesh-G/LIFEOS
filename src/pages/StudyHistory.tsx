@@ -69,7 +69,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
       return;
     }
 
-    triggerHaptic(15);
+    triggerHaptic('save');
     const updatedSessions = data.studySessions.map(s => 
       s.id === session.id ? { ...s, doubts: draftText } : s
     );
@@ -240,6 +240,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
 
                               {!isLocked && (
                                 <button
+                                  onPointerDown={() => triggerHaptic('save')}
                                   onClick={() => handleSaveDoubts(s)}
                                   disabled={isOverLimit}
                                   className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95 disabled:opacity-40 ${

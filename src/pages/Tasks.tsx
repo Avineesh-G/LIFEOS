@@ -24,7 +24,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
   const addTask = async () => {
     if (!newTask.trim()) return;
-    triggerHaptic(12);
+    triggerHaptic('save');
     const task: Task = {
       id: crypto.randomUUID(),
       text: newTask.trim(),
@@ -39,12 +39,12 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   const toggleTask = async (id: string) => {
-    triggerHaptic(8);
+    triggerHaptic('medium');
     await updateData({ tasks: data.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t) });
   };
 
   const deleteTask = async (id: string) => {
-    triggerHaptic(10);
+    triggerHaptic('heavy');
     await updateData({ tasks: data.tasks.filter(t => t.id !== id) });
   };
 
@@ -195,6 +195,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 </div>
 
                 <button
+                  onPointerDown={() => triggerHaptic('save')}
                   onClick={addTask}
                   disabled={!newTask.trim()}
                   className="btn-pill w-full py-3.5 text-sm disabled:opacity-30 mt-2"

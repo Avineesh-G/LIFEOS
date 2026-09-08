@@ -101,11 +101,12 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     if (!todayMenu) return;
     setFetchingAdvice(true);
     setShowCoach(true);
-    triggerHaptic(10);
+    triggerHaptic('ai');
     try {
       const p = data.profile || { goalWeight: 'maintain', currentCalorieTarget: 2000 };
       const advice = await getDietAdvice(todayMenu, p, data.geminiApiKey || GEMINI_API_KEY);
       setCoachAdvice(advice);
+      triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
       if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
@@ -120,13 +121,14 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   const handleAskFoodDoubt = async () => {
     if (!foodDoubtQuery.trim()) return;
-    triggerHaptic(10);
+    triggerHaptic('ai');
     setFoodDoubtLoading(true);
     setFoodDoubtError(null);
     setFoodDoubtAnswer(null);
     try {
       const res = await askFoodDoubt(foodDoubtQuery.trim(), data.profile, data.geminiApiKey || GEMINI_API_KEY);
       setFoodDoubtAnswer(res);
+      triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
       setFoodDoubtError('Failed to get answer. Please try again.');
@@ -341,7 +343,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   }
 
   const handleSaveDay = async () => {
-    triggerHaptic(15);
+    triggerHaptic('save');
     const finalLog = { ...draftLog, isSaved: true };
     setDraftLog(finalLog);
     setIsLocked(true);
@@ -444,6 +446,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
           />
           <button
+            onPointerDown={() => triggerHaptic('ai')}
             onClick={handleAskFoodDoubt}
             disabled={foodDoubtLoading || !foodDoubtQuery.trim()}
             className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-700 active:scale-95 text-white transition-all disabled:opacity-40 flex items-center gap-1.5 shadow-sm"
@@ -478,6 +481,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           <div className="flex items-center justify-between mb-2">
             <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
             <button 
+              onPointerDown={() => triggerHaptic('ai')}
               onClick={handleGetAdvice}
               className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors"
             >
@@ -796,6 +800,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           </div>
         ) : (
           <button 
+            onPointerDown={() => triggerHaptic('save')}
             onClick={handleSaveDay}
             className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
           >

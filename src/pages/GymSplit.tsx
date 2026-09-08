@@ -66,14 +66,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   const handleSave = async () => {
-    triggerHaptic(15);
+    triggerHaptic('save');
     await updateData({ workoutPlans: plans });
     navigate('/gym');
   };
 
   const handleAutoGenerate = async () => {
     if (activePlan.type === 'REST' || !activePlan.type.trim()) return;
-    triggerHaptic(10);
+    triggerHaptic('ai');
     setGenerating(true);
     try {
       const aiPlan = await getAiWorkoutPlan(activePlan.type, data.profile, (data as any).geminiApiKey || GEMINI_API_KEY);
@@ -89,6 +89,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         iconKey: ex.iconKey,
       }));
       updatePlan({ ...activePlan, exercises: newExercises });
+      triggerHaptic('success');
     } catch (err) {
       console.error(err);
       alert('Failed to generate workout plan. Please try again.');
@@ -103,7 +104,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         <button onClick={() => navigate('/gym')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
           <ChevronLeft size={16} /> Back
         </button>
-        <button onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-sm">
+        <button onPointerDown={() => triggerHaptic('save')} onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-sm">
           <Save size={16} /> Save
         </button>
       </div>

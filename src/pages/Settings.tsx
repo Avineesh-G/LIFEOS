@@ -86,7 +86,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   }, [data.nutritionLogs]);
 
   const handleSaveFeedback = () => {
-    triggerHaptic(15);
+    triggerHaptic('save');
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -96,12 +96,13 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
   const handleAnalyzeHistory = async () => {
       if (filteredLogs.length === 0) return;
-      triggerHaptic(10);
+      triggerHaptic('ai');
       setAnalyzing(true);
       try {
           const profile = data.profile || { currentCalorieTarget: 2000 };
           const result = await getHistoryAnalysis(filteredLogs, profile, data.geminiApiKey || GEMINI_API_KEY);
           setAiAnalysis(result);
+          triggerHaptic('success');
       } catch (err: any) {
           console.error(err);
           const errMsg = err?.message || '';
@@ -166,11 +167,12 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
   const handleAnalyzeGymHistory = async () => {
     if (filteredGymLogs.length === 0) return;
-    triggerHaptic(10);
+    triggerHaptic('ai');
     setGymAnalyzing(true);
     try {
       const result = await getGymHistoryAnalysis(filteredGymLogs, data.geminiApiKey || GEMINI_API_KEY);
       setGymAiAnalysis(result);
+      triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
       const errMsg = err?.message || '';
@@ -221,11 +223,12 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
   const handleAnalyzeSpending = async () => {
     if (filteredSpendingLogs.length === 0) return;
-    triggerHaptic(10);
+    triggerHaptic('ai');
     setSpendingAnalyzing(true);
     try {
       const result = await getSpendingHistoryAnalysis(filteredSpendingLogs, data.geminiApiKey || GEMINI_API_KEY);
       setSpendingAiAnalysis(result);
+      triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
       setSpendingAiAnalysis({ error: "Failed to analyze spending history." });
@@ -355,6 +358,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                                 </select>
                             </div>
                             <button 
+                                onPointerDown={() => triggerHaptic('ai')}
                                 onClick={handleAnalyzeHistory}
                                 disabled={filteredLogs.length === 0 || analyzing}
                                 className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-purple-500 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-colors disabled:opacity-50"
@@ -512,6 +516,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     </select>
                   </div>
                   <button 
+                    onPointerDown={() => triggerHaptic('ai')}
                     onClick={handleAnalyzeGymHistory}
                     disabled={filteredGymLogs.length === 0 || gymAnalyzing}
                     className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
@@ -686,6 +691,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     </select>
                   </div>
                   <button 
+                    onPointerDown={() => triggerHaptic('ai')}
                     onClick={handleAnalyzeSpending}
                     disabled={filteredSpendingLogs.length === 0 || spendingAnalyzing}
                     className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors disabled:opacity-50"
