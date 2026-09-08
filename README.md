@@ -12,6 +12,20 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 
 ## What is New in Version 1.3
 
+### Real-Time Device Theme Synchronization
+- **Dynamic System Adaptation:** Integrated an active `prefers-color-scheme` media query listener that automatically detects device-level dark or light mode changes in phone settings and switches the interface immediately without requiring manual selection or page reloads.
+- **Status Bar Matching:** Synchronizes browser and native status bar color metadata (`#09090B` for dark mode and `#FAFAF9` for light mode) to blend with the app shell.
+- **Material You Themed Icons:** Configured a dedicated monochrome vector icon in the Web App Manifest (`purpose: "monochrome"`). On Android 13+ devices with Themed Icons enabled, the home screen launcher dynamically tints the app icon with the system wallpaper palette without requiring special permissions.
+
+### Gym Stability and Completion Lifecycle
+- **Defensive Data Normalization:** Implemented automatic sanitization for workout logs and sets across Firestore and local storage, ensuring that corrupted logs or missing fields never cause render crashes or white screens.
+- **Completed vs Resume Status:** Once a workout is saved and locked, the Gym dashboard hero action switches from "Resume" to an emerald "Completed" state with a checkmark badge. When a new calendar day begins, the status automatically returns to "Start".
+- **React Error Boundary:** Wrapped the entire application routing layer in an error boundary to provide a clean recovery view with reload controls in the event of unexpected exceptions.
+
+### Ergonomic Navigation Bar Haptics
+- **Dedicated Navigation Preset:** Added an ultra-light 12ms tactile vibration pulse specifically calibrated for bottom dock navigation switches, accompanied by subtle acoustic feedback (frequency 170Hz, duration 12ms).
+- **Double-Buzz Prevention:** Implemented an event throttle preventing duplicate haptic firings when pointer down and click events trigger in rapid succession.
+
 ### Study Session Doubts and In-Depth Inquiry
 - **Session Doubts Drawer:** Deep study logs now feature an integrated inquiry module where users can capture concepts, academic questions, and unresolved doubts directly under any saved study session in Study History.
 - **10,000-Word Capacity:** Equipped with a word limit of up to 10,000 words per session, supported by a live JetBrains Mono word and character counter.
@@ -107,7 +121,7 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 ### Cloud and Artificial Intelligence
 - **Firebase Authentication**: Google OAuth authentication.
 - **Cloud Firestore**: Real-time cloud synchronization with offline persistence support.
-- **Groq AI SDK (`qwen/qwen-2.5-32b` / `llama-3.3-70b-versatile`)**: High-speed LLM inference for workout analysis, dietary coaching, budget reviews, and food evaluations.
+- **Groq AI SDK (`qwen/qwen3.8-27b`)**: High-speed LLM inference for workout analysis, dietary coaching, budget reviews, and food evaluations.
 
 ---
 
