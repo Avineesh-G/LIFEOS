@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, Check, ListChecks } from 'lucide-react';
+import { Plus, Trash2, X, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
