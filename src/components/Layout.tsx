@@ -54,27 +54,38 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-blobs text-primary-light dark:text-primary-dark transition-colors duration-200">
 
       {/* ── Top header bar ── */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 pt-safe h-14 bg-bg-light dark:bg-bg-dark border-b border-border-light dark:border-border-dark">
-        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-secondary-light dark:text-secondary-dark">
-          LifeOS
-        </span>
-        <span className="font-semibold text-sm text-primary-light dark:text-primary-dark">
-          {pageLabel}
-        </span>
-        <button
-          onPointerDown={() => triggerHaptic('light')}
-          onClick={() => {
-            triggerHaptic('light');
-            setShowQuickAdd(true);
-          }}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light hover:opacity-80 active:scale-95 transition-all"
-        >
-          <Plus size={16} strokeWidth={2.5} />
-        </button>
+      <header 
+        className="fixed top-0 left-0 right-0 z-30 bg-bg-light/95 dark:bg-bg-dark/95 backdrop-blur-md border-b border-border-light dark:border-border-dark"
+        style={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+        }}
+      >
+        <div className="flex items-center justify-between px-5 h-14">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-secondary-light dark:text-secondary-dark">
+            LifeOS
+          </span>
+          <span className="font-semibold text-sm text-primary-light dark:text-primary-dark">
+            {pageLabel}
+          </span>
+          <button
+            onPointerDown={() => triggerHaptic('light')}
+            onClick={() => {
+              setShowQuickAdd(true);
+            }}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light hover:opacity-80 active:scale-95 transition-all"
+          >
+            <Plus size={16} strokeWidth={2.5} />
+          </button>
+        </div>
       </header>
 
       {/* ── Main content ── */}
-      <main className="pt-14 pb-40 sm:pb-44 min-h-screen">
+      <main 
+        className="pb-40 sm:pb-44 min-h-screen"
+        style={{
+          paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+        }}
+      >
         <div className="max-w-xl mx-auto px-4 py-6">
           {children}
         </div>
