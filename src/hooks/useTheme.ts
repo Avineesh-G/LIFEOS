@@ -43,11 +43,11 @@ export function useTheme() {
       root.classList.remove('dark');
     }
 
-    // Update meta theme-color to seamlessly match phone status bar
-    const metaTheme = document.querySelector('meta[name="theme-color"]:not([media])');
-    if (metaTheme) {
-      metaTheme.setAttribute('content', isDark ? '#09090B' : '#FAFAF9');
-    }
+    // Update all meta theme-color tags to match clean white system default surface
+    const metaThemeTags = document.querySelectorAll('meta[name="theme-color"]');
+    metaThemeTags.forEach(tag => {
+      tag.setAttribute('content', theme === 'dark' ? '#111113' : '#FFFFFF');
+    });
 
     root.style.setProperty('--accent', accentColor);
     const r = parseInt(accentColor.slice(1, 3), 16) || 99;

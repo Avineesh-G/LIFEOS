@@ -55,7 +55,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* ── Top header bar ── */}
       <header 
-        className="fixed top-0 left-0 right-0 z-30 bg-bg-light/95 dark:bg-bg-dark/95 backdrop-blur-md border-b border-border-light dark:border-border-dark"
+        className="fixed top-0 left-0 right-0 z-30 bg-white dark:bg-[#111113] border-b border-border-light dark:border-border-dark"
         style={{
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
