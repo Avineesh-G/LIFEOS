@@ -606,16 +606,17 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                                   {(log.exercises || []).length === 0 ? (
                                     <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No exercises logged.</p>
                                   ) : (
-                                    log.exercises.map((ex, exIdx) => {
-                                      const doneSets = ex.sets.filter(s => s.completed).length;
+                                    (log.exercises || []).map((ex, exIdx) => {
+                                      const safeSets = Array.isArray(ex?.sets) ? ex.sets : [];
+                                      const doneSets = safeSets.filter(s => s?.completed).length;
                                       return (
                                         <div key={exIdx} className="bg-bg-light dark:bg-bg-dark/50 p-2.5 rounded-lg border border-border-light dark:border-border-dark/60">
                                           <div className="flex items-center justify-between mb-1.5">
                                             <h5 className="text-xs font-bold text-primary-light dark:text-primary-dark">{ex.name}</h5>
-                                            <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark">{doneSets}/{ex.sets.length} done</span>
+                                            <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark">{doneSets}/{safeSets.length} done</span>
                                           </div>
                                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                                            {ex.sets.map((s, sIdx) => (
+                                            {safeSets.map((s, sIdx) => (
                                               <div 
                                                 key={sIdx} 
                                                 className={`text-[11px] p-1.5 rounded flex items-center justify-between border ${s.completed ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-muted-light dark:text-muted-dark'}`}

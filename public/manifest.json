@@ -4,10 +4,22 @@
   "description": "Your personal life operating system",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAFAF9",
-  "theme_color": "#6366F1",
+  "background_color": "#09090B",
+  "theme_color": "#09090B",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-monochrome.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",

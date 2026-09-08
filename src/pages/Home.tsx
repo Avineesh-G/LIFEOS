@@ -163,9 +163,9 @@ export default function Home({ data }: HomeProps) {
           </p>
           <p className="text-xs text-muted-light dark:text-muted-dark mt-1">
             {todayWorkout
-              ? `${todayWorkout.exercises.reduce((s, ex) => s + ex.sets.filter(st => st.completed).length, 0)} sets done`
-              : todayPlan && todayPlan.exercises.length > 0
-                ? `${todayPlan.exercises.reduce((s, ex) => s + ex.sets, 0)} sets planned`
+              ? `${(todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)} sets done`
+              : todayPlan && (todayPlan.exercises || []).length > 0
+                ? `${(todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)} sets planned`
                 : 'Rest day'}
           </p>
         </button>

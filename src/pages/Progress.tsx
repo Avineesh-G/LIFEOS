@@ -13,13 +13,13 @@ const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transiti
 export default function Progress({ data }: ProgressProps) {
   const now = new Date();
 
-  const totalStudyMins = data.studySessions.reduce((sum, s) => sum + s.duration, 0);
+  const totalStudyMins = (data.studySessions || []).reduce((sum, s) => sum + s.duration, 0);
   const totalStudyHours = Math.floor(totalStudyMins / 60);
   const totalStudyMinsRem = totalStudyMins % 60;
-  const totalWorkouts = data.workoutLogs.length;
-  const totalSpent = data.expenses.reduce((sum, e) => sum + e.amount, 0);
-  const totalFocusSessions = data.studySessions.length;
-  const daysTracked = new Set(data.studySessions.map(s => s.date)).size;
+  const totalWorkouts = (data.workoutLogs || []).length;
+  const totalSpent = (data.expenses || []).reduce((sum, e) => sum + e.amount, 0);
+  const totalFocusSessions = (data.studySessions || []).length;
+  const daysTracked = new Set((data.studySessions || []).map(s => s.date)).size;
 
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);

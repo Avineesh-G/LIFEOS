@@ -12,15 +12,16 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const { exerciseName } = useParams();
   const decodedName = decodeURIComponent(exerciseName || '');
 
-  const logs = data.workoutLogs
-    .filter(w => w.exercises.some(e => e.name === decodedName))
+  const logs = (data.workoutLogs || [])
+    .filter(w => (w.exercises || []).some(e => e.name === decodedName))
     .sort((a, b) => b.date.localeCompare(a.date));
 
   const sessions = logs.map(w => {
-    const ex = w.exercises.find(e => e.name === decodedName)!;
-    const bestSet = ex.sets.reduce((best, s) => s.weight > best.weight ? s : best, ex.sets[0] || { weight: 0, reps: 0 });
-    const totalVolume = ex.sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
-    return { date: w.date, sets: ex.sets, bestSet, totalVolume };
+    const ex = (w.exercises || []).find(e => e.name === decodedName);
+    const sets = Array.isArray(ex?.sets) ? ex.sets : [];
+    const bestSet = sets.reduce((best, s) => s.weight > best.weight ? s : best, sets[0] || { weight: 0, reps: 0 });
+    const totalVolume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
+    return { date: w.date, sets, bestSet, totalVolume };
   });
 
   const bestWeight = Math.max(...sessions.map(s => s.bestSet?.weight || 0), 0);

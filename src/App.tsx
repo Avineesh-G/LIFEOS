@@ -24,6 +24,7 @@ import Auth from './pages/Auth';
 import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const pageTransition = {
   initial: { opacity: 0, y: 6 },
@@ -75,26 +76,28 @@ function App() {
 
   return (
     <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor}>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
-          <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/study/timer" element={<AnimatedPage><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/study/heatmap" element={<AnimatedPage><StudyHeatmap data={data!} /></AnimatedPage>} />
-          <Route path="/gym" element={<AnimatedPage><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/gym/onboarding" element={<AnimatedPage><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/gym/workout" element={<AnimatedPage><GymWorkout data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/gym/split" element={<AnimatedPage><GymSplit data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/gym/history/:exerciseName" element={<AnimatedPage><GymExerciseHistory data={data!} /></AnimatedPage>} />
-          <Route path="/nutrition" element={<AnimatedPage><Nutrition data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/spending" element={<AnimatedPage><Spending data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/timetable" element={<AnimatedPage><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/tasks" element={<AnimatedPage><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
-          <Route path="/progress" element={<AnimatedPage><Progress data={data!} /></AnimatedPage>} />
-          <Route path="/settings" element={<AnimatedPage><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
-        </Routes>
-      </AnimatePresence>
+      <ErrorBoundary>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
+            <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/study/timer" element={<AnimatedPage><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/study/heatmap" element={<AnimatedPage><StudyHeatmap data={data!} /></AnimatedPage>} />
+            <Route path="/gym" element={<AnimatedPage><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/gym/onboarding" element={<AnimatedPage><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/gym/workout" element={<AnimatedPage><GymWorkout data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/gym/split" element={<AnimatedPage><GymSplit data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/gym/history/:exerciseName" element={<AnimatedPage><GymExerciseHistory data={data!} /></AnimatedPage>} />
+            <Route path="/nutrition" element={<AnimatedPage><Nutrition data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/spending" element={<AnimatedPage><Spending data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/timetable" element={<AnimatedPage><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/tasks" element={<AnimatedPage><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
+            <Route path="/progress" element={<AnimatedPage><Progress data={data!} /></AnimatedPage>} />
+            <Route path="/settings" element={<AnimatedPage><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
+          </Routes>
+        </AnimatePresence>
+      </ErrorBoundary>
     </Layout>
   );
 }

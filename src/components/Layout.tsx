@@ -108,9 +108,8 @@ export default function Layout({ children }: LayoutProps) {
             return (
               <button
                 key={item.path}
-                onPointerDown={() => triggerHaptic('light')}
+                onPointerDown={() => triggerHaptic('nav')}
                 onClick={() => {
-                  triggerHaptic('light');
                   navigate(item.path);
                 }}
                 title={item.label}

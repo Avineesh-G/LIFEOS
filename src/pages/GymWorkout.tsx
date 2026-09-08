@@ -119,13 +119,22 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const hasAi = !!currentApiKey && currentApiKey !== 'PASTE_YOUR_KEY_HERE';
 
   const [exercises, setExercises] = useState(() => {
-    if (existingLog) return existingLog.exercises;
-    if (todayPlan && todayPlan.type !== 'REST') {
+    if (existingLog && Array.isArray(existingLog.exercises)) {
+      return existingLog.exercises.map(ex => ({
+        name: ex.name || 'Exercise',
+        howTo: ex.howTo || '',
+        rest: ex.rest || '',
+        sets: Array.isArray(ex.sets)
+          ? ex.sets.map(s => ({ reps: Number(s?.reps) || 10, weight: Number(s?.weight) || 0, completed: Boolean(s?.completed) }))
+          : []
+      }));
+    }
+    if (todayPlan && todayPlan.type !== 'REST' && Array.isArray(todayPlan.exercises)) {
       return todayPlan.exercises.map(ex => ({
         name: ex.name,
-        howTo: ex.howTo,
-        rest: ex.rest,
-        sets: Array.from({ length: ex.sets }, () => ({ reps: ex.reps, weight: ex.weight, completed: false }))
+        howTo: ex.howTo || '',
+        rest: ex.rest || '',
+        sets: Array.from({ length: Number(ex.sets) || 3 }, () => ({ reps: Number(ex.reps) || 10, weight: Number(ex.weight) || 0, completed: false }))
       }));
     }
     return [] as { name: string; howTo?: string; rest?: string; sets: { reps: number; weight: number; completed: boolean }[] }[];
@@ -232,10 +241,10 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
     if (!hasAi) return;
     setPostLoading(true); setPostError('');
     try {
-      const exData = exercises.map(e => ({
+      const exData = (exercises || []).map(e => ({
         name: e.name,
-        topWeight: Math.max(...e.sets.map(s => s.weight), 0),
-        completedReps: e.sets.filter(s => s.completed).reduce((sum, s) => sum + s.reps, 0),
+        topWeight: Math.max(...(e.sets || []).map(s => Number(s?.weight) || 0), 0),
+        completedReps: (e.sets || []).filter(s => s?.completed).reduce((sum, s) => sum + (Number(s?.reps) || 0), 0),
       }));
       setPostTip(await getPostWorkoutSummary({ workoutType, completedSets, totalSets, exercises: exData }, currentApiKey));
     } catch (e: unknown) { setPostError(e instanceof Error ? e.message : 'Failed'); }
@@ -271,17 +280,33 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
 
   const handleSave = async (isComplete = false) => {
     triggerHaptic('save');
+    const cleanExercises = (exercises || [])
+      .filter(e => e && e.name)
+      .map(e => ({
+        name: e.name.trim(),
+        howTo: e.howTo || '',
+        rest: e.rest || '',
+        sets: Array.isArray(e.sets)
+          ? e.sets.map(s => ({
+              reps: Number(s?.reps) || 0,
+              weight: Number(s?.weight) || 0,
+              completed: Boolean(s?.completed),
+            }))
+          : []
+      }))
+      .filter(e => e.sets.length > 0);
+
     const log: WorkoutLog = {
       id: existingLog?.id || crypto.randomUUID(),
       date: today,
       day: shortDay,
       type: workoutType,
-      exercises: exercises.filter(e => e.sets.length > 0),
+      exercises: cleanExercises,
       isSaved: true,
     };
     const updatedLogs = existingLog
-      ? data.workoutLogs.map(w => w.id === existingLog.id ? log : w)
-      : [...data.workoutLogs, log];
+      ? (data.workoutLogs || []).map(w => w.id === existingLog.id ? log : w)
+      : [...(data.workoutLogs || []), log];
     await updateData({ workoutLogs: updatedLogs });
     setSaved(true);
     setIsSavedDay(true);
@@ -292,8 +317,8 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
     }
   };
 
-  const completedSets = exercises.reduce((s, e) => s + e.sets.filter(x => x.completed).length, 0);
-  const totalSets = exercises.reduce((s, e) => s + e.sets.length, 0);
+  const completedSets = (exercises || []).reduce((s, e) => s + (e?.sets || []).filter(x => x?.completed).length, 0);
+  const totalSets = (exercises || []).reduce((s, e) => s + (e?.sets || []).length, 0);
   const pct = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
   const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()];
 
