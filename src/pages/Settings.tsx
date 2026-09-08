@@ -261,26 +261,53 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const completedTodoCount = filteredTodoTasks.filter(t => t.completed).length;
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-24">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-28 sm:pb-32">
       {/* Header */}
       <motion.div variants={item} className="pt-2">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Preferences</p>
-        <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">Settings</h1>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Preferences & System</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Settings</h1>
       </motion.div>
 
       {/* Appearance Section */}
-      <motion.div variants={item} className="card p-5 space-y-4">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark">Appearance</p>
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 shadow-sm">
+              <Sun size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">Display & Theme</h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">Choose your visual environment</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-accent font-sans px-3.5 py-1.5 rounded-full bg-accent/10 capitalize">
+            {theme} Mode
+          </span>
+        </div>
 
         {/* Theme Picker */}
         <div>
-          <label className="block text-sm font-medium text-primary-light dark:text-primary-dark mb-3">Theme</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2.5">
             {[
-              { value: 'light' as const, icon: Sun, label: 'Light' },
-              { value: 'dark' as const, icon: Moon, label: 'Dark' },
-              { value: 'system' as const, icon: Monitor, label: 'System' },
-            ].map(({ value, icon: Icon, label }) => {
+              { 
+                value: 'light' as const, 
+                icon: Sun, 
+                label: 'Light',
+                activeClass: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-700/60 shadow-sm'
+              },
+              { 
+                value: 'dark' as const, 
+                icon: Moon, 
+                label: 'Dark',
+                activeClass: 'bg-indigo-100 text-indigo-900 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-200 dark:border-indigo-700/60 shadow-sm'
+              },
+              { 
+                value: 'system' as const, 
+                icon: Monitor, 
+                label: 'System',
+                activeClass: 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/60 dark:text-purple-200 dark:border-purple-700/60 shadow-sm'
+              },
+            ].map(({ value, icon: Icon, label, activeClass }) => {
               const active = theme === value;
               return (
                 <button
@@ -289,24 +316,41 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     triggerHaptic(15);
                     setTheme(value);
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border transition-all duration-150 active:scale-[0.97] ${
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[22px] border transition-all duration-150 active:scale-[0.96] ${
                     active
-                      ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-primary-light dark:border-primary-dark shadow-sm'
-                      : 'bg-bg-light dark:bg-bg-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
+                      ? activeClass
+                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
                   }`}
                 >
-                  <Icon size={18} strokeWidth={active ? 2.5 : 1.8} />
-                  <span className="text-xs font-medium">{label}</span>
+                  <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+                  <span className="text-xs font-bold font-sans">{label}</span>
                 </button>
               );
             })}
           </div>
         </div>
       </motion.div>
-      
+
       {/* Body Profile Section */}
-      <motion.div variants={item} className="card p-5 space-y-4">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark">Body Profile & Targeting</p>
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-m3-mint-badge/70 dark:bg-m3-mint-darkBadge/70 text-m3-mint-text dark:text-m3-mint-darkText shadow-sm">
+              <Dumbbell size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                Body Profile & Targets
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                Metabolic baseline & calorie target
+              </p>
+            </div>
+          </div>
+          <span className="rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText font-mono font-bold text-xs px-3.5 py-1.5 shadow-sm">
+            {data.profile?.currentCalorieTarget || 2000} kcal
+          </span>
+        </div>
         <BodyProfileForm 
           initialProfile={data.profile} 
           onSave={(profile) => updateData({ profile })} 
@@ -314,197 +358,196 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       {/* Nutrition History Section */}
-      <motion.div variants={item} className="card overflow-hidden">
+      <motion.div variants={item} className="rounded-[28px] overflow-hidden bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
         <button
-            onClick={() => setHistoryOpen(!historyOpen)}
-            className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+          onClick={() => setHistoryOpen(!historyOpen)}
+          className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] transition-all"
         >
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-purple-500/20 text-purple-500">
-                    <History size={16} />
-                </div>
-                <div className="text-left">
-                    <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Nutrition History</p>
-                    <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past saved calories</p>
-                </div>
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-m3-lavender-badge/70 dark:bg-m3-lavender-darkBadge/70 text-m3-lavender-text dark:text-m3-lavender-darkText shadow-sm">
+              <History size={20} />
             </div>
-            {historyOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+            <div className="text-left">
+              <p className="font-black text-base text-primary-light dark:text-primary-dark font-sans">Nutrition History</p>
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">View past saved calories & AI analysis</p>
+            </div>
+          </div>
+          {historyOpen ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
         </button>
 
         <AnimatePresence>
-            {historyOpen && (
-                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                    <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
-                        
-                        {/* Filter Header */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
-                                <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
-                                <select 
-                                    value={selectedMonth}
-                                    onChange={(e) => {
-                                        setSelectedMonth(e.target.value);
-                                        setAiAnalysis(null);
-                                    }}
-                                    className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
-                                >
-                                    {uniqueMonths.map(m => {
-                                        const [y, mo] = m.split('-');
-                                        const date = new Date(parseInt(y), parseInt(mo) - 1);
-                                        return (
-                                            <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
-                                        )
-                                    })}
-                                </select>
-                            </div>
-                            <button 
-                                onPointerDown={() => triggerHaptic('ai')}
-                                onClick={handleAnalyzeHistory}
-                                disabled={filteredLogs.length === 0 || analyzing}
-                                className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-purple-500 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-colors disabled:opacity-50"
-                            >
-                                {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                AI Insights
-                            </button>
-                        </div>
+          {historyOpen && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <div className="px-6 pb-6 border-t border-border-light/70 dark:border-border-dark/70 pt-5 space-y-5">
+                
+                {/* Filter Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1.5 rounded-full border border-border-light dark:border-border-dark">
+                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark" />
+                    <select 
+                      value={selectedMonth}
+                      onChange={(e) => {
+                        setSelectedMonth(e.target.value);
+                        setAiAnalysis(null);
+                      }}
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs"
+                    >
+                      {uniqueMonths.map(m => {
+                        const [y, mo] = m.split('-');
+                        const date = new Date(parseInt(y), parseInt(mo) - 1);
+                        return (
+                          <option key={m} value={m}>{format(date, 'MMMM yyyy')}</option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <button 
+                    onPointerDown={() => triggerHaptic('ai')}
+                    onClick={handleAnalyzeHistory}
+                    disabled={filteredLogs.length === 0 || analyzing}
+                    className="rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-[#4F378B] dark:bg-[#D0BCFF] text-white dark:text-[#231E2E] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-40"
+                  >
+                    {analyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    AI Insights
+                  </button>
+                </div>
 
-                        {/* AI Insights Card */}
-                        {aiAnalysis && (
-                            <div className="p-4 rounded-xl border border-purple-500/30 bg-purple-500/5 relative">
-                                <button onClick={() => setAiAnalysis(null)} className="absolute top-2 right-2 text-purple-500/70 hover:text-purple-500">
-                                    <X size={14} />
-                                </button>
-                                <h4 className="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
-                                    <Sparkles size={14} /> Month Analysis
-                                </h4>
-                                {aiAnalysis.error ? (
-                                    <p className="text-sm text-red-500">{aiAnalysis.error}</p>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <p className="text-sm text-primary-light dark:text-primary-dark font-medium leading-relaxed">
-                                            {aiAnalysis.summary}
-                                        </p>
-                                        {aiAnalysis.tips && aiAnalysis.tips.length > 0 && (
-                                            <ul className="text-sm text-secondary-light dark:text-secondary-dark space-y-1 list-disc pl-4">
-                                                {aiAnalysis.tips.map((t: string, i: number) => <li key={i}>{t}</li>)}
-                                            </ul>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                {/* AI Insights Card (Material 3 Lavender Tonal Container) */}
+                {aiAnalysis && (
+                  <div className="rounded-[22px] p-4 bg-m3-lavender-container dark:bg-m3-lavender-darkContainer text-m3-lavender-text dark:text-m3-lavender-darkText border border-m3-lavender-badge/60 dark:border-m3-lavender-darkBadge/60 relative shadow-sm">
+                    <button onClick={() => setAiAnalysis(null)} className="absolute top-3 right-3 text-m3-lavender-text/70 hover:text-m3-lavender-text">
+                      <X size={14} />
+                    </button>
+                    <h4 className="font-bold flex items-center gap-1.5 mb-2 text-xs uppercase tracking-wider font-mono">
+                      <Sparkles size={13} /> Month Nutritional Analysis
+                    </h4>
+                    {aiAnalysis.error ? (
+                      <p className="text-xs text-red-500 font-medium">{aiAnalysis.error}</p>
+                    ) : (
+                      <div className="space-y-2.5 text-xs leading-relaxed">
+                        <p className="font-medium">
+                          {aiAnalysis.summary}
+                        </p>
+                        {aiAnalysis.tips && aiAnalysis.tips.length > 0 && (
+                          <ul className="space-y-1 list-disc pl-4 opacity-90">
+                            {aiAnalysis.tips.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                          </ul>
                         )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                        {/* History List */}
-                        <div className="space-y-2">
-                            {filteredLogs.length === 0 ? (
-                                <div className="text-center py-6 text-sm text-secondary-light dark:text-secondary-dark">
-                                    No saved data for this month.
-                                </div>
-                            ) : (
-                                filteredLogs.map(log => (
-                                    <div 
-                                        key={log.id} 
-                                        onClick={() => toggleLog(log.id)}
-                                        className="flex flex-col p-3 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark cursor-pointer transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
-                                                    {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-sm font-bold font-mono ${log.dailyTotal > (data.profile?.currentCalorieTarget || 2000) ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                    {Math.round(log.dailyTotal)} kcal
-                                                </span>
-                                                <ChevronDown size={16} className={`text-muted-light dark:text-muted-dark transition-transform ${expandedLogs.has(log.id) ? 'rotate-180' : ''}`} />
-                                            </div>
-                                        </div>
-                                        
-                                        <AnimatePresence>
-                                            {expandedLogs.has(log.id) && (
-                                                <motion.div 
-                                                    initial={{ height: 0, opacity: 0 }} 
-                                                    animate={{ height: 'auto', opacity: 1 }} 
-                                                    exit={{ height: 0, opacity: 0 }} 
-                                                    className="overflow-hidden"
-                                                >
-                                                    <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark space-y-3">
-                                                        {log.mealsEaten.length === 0 ? (
-                                                            <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No meals logged.</p>
-                                                        ) : (
-                                                            log.mealsEaten.map((meal, idx) => {
-                                                                const isSkipped = meal.items.some(i => i.id === 'skipped');
-                                                                return (
-                                                                <div key={idx}>
-                                                                    <h5 className="text-[10px] font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider mb-1">{meal.slot}</h5>
-                                                                    {isSkipped ? (
-                                                                        <p className="text-xs text-amber-500 font-medium">Meal Skipped</p>
-                                                                    ) : (
-                                                                        <ul className="space-y-1">
-                                                                            {meal.items.map((item, iIdx) => (
-                                                                                <li key={iIdx} className="flex items-center justify-between text-xs">
-                                                                                    <span className="text-secondary-light dark:text-secondary-dark">{item.name} {item.portion !== 1 && `(x${item.portion})`}</span>
-                                                                                    <span className="font-mono text-primary-light dark:text-primary-dark">{Math.round(item.calories * item.portion)}</span>
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    )}
-                                                                </div>
-                                                            )})
-                                                        )}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-
+                {/* History List */}
+                <div className="space-y-2">
+                  {filteredLogs.length === 0 ? (
+                    <div className="text-center py-6 text-xs font-medium text-secondary-light dark:text-secondary-dark">
+                      No saved nutrition logs for this month.
                     </div>
-                </motion.div>
-            )}
+                  ) : (
+                    filteredLogs.map(log => (
+                      <div 
+                        key={log.id} 
+                        onClick={() => toggleLog(log.id)}
+                        className="flex flex-col p-3.5 bg-black/[0.02] dark:bg-white/[0.03] rounded-[18px] border border-border-light dark:border-border-dark cursor-pointer transition-all hover:bg-black/[0.04] dark:hover:bg-white/[0.05]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-sm text-primary-light dark:text-primary-dark font-sans">
+                            {format(parseISO(log.date), 'EEE, MMM d, yyyy')}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-bold font-mono px-2.5 py-1 rounded-full ${log.dailyTotal > (data.profile?.currentCalorieTarget || 2000) ? 'bg-red-500/10 text-red-600 dark:text-red-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
+                              {Math.round(log.dailyTotal)} kcal
+                            </span>
+                            <ChevronDown size={15} className={`text-muted-light dark:text-muted-dark transition-transform ${expandedLogs.has(log.id) ? 'rotate-180' : ''}`} />
+                          </div>
+                        </div>
+                        
+                        <AnimatePresence>
+                          {expandedLogs.has(log.id) && (
+                            <motion.div 
+                              initial={{ height: 0, opacity: 0 }} 
+                              animate={{ height: 'auto', opacity: 1 }} 
+                              exit={{ height: 0, opacity: 0 }} 
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-3 pt-3 border-t border-border-light/60 dark:border-border-dark/60 space-y-2.5">
+                                {log.mealsEaten.length === 0 ? (
+                                  <p className="text-xs text-secondary-light dark:text-secondary-dark italic">No meals logged.</p>
+                                ) : (
+                                  log.mealsEaten.map((meal, idx) => {
+                                    const isSkipped = meal.items.some(i => i.id === 'skipped');
+                                    return (
+                                      <div key={idx} className="bg-surface-light dark:bg-surface-dark p-2.5 rounded-[14px] border border-border-light/40 dark:border-border-dark/40">
+                                        <h5 className="text-[10px] font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider mb-1 font-mono">{meal.slot}</h5>
+                                        {isSkipped ? (
+                                          <p className="text-xs text-amber-500 font-medium">Meal Skipped</p>
+                                        ) : (
+                                          <ul className="space-y-1">
+                                            {meal.items.map((item, iIdx) => (
+                                              <li key={iIdx} className="flex items-center justify-between text-xs">
+                                                <span className="text-secondary-light dark:text-secondary-dark">{item.name} {item.portion !== 1 && `(x${item.portion})`}</span>
+                                                <span className="font-mono font-bold text-primary-light dark:text-primary-dark">{Math.round(item.calories * item.portion)} kcal</span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </motion.div>
 
       {/* Gym History Section */}
-      <motion.div variants={item} className="card overflow-hidden">
+      <motion.div variants={item} className="rounded-[28px] overflow-hidden bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
         <button
           onClick={() => {
             triggerHaptic(8);
             setGymHistoryOpen(!gymHistoryOpen);
           }}
-          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+          className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] transition-all"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-500">
-              <Dumbbell size={16} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-m3-mint-badge/70 dark:bg-m3-mint-darkBadge/70 text-m3-mint-text dark:text-m3-mint-darkText shadow-sm">
+              <Dumbbell size={20} strokeWidth={2.2} />
             </div>
             <div className="text-left">
-              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Gym History</p>
-              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past workouts & routines</p>
+              <p className="font-black text-base text-primary-light dark:text-primary-dark font-sans">Gym History</p>
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">View past workouts & routines</p>
             </div>
           </div>
-          {gymHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+          {gymHistoryOpen ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
         </button>
 
         <AnimatePresence>
           {gymHistoryOpen && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+              <div className="px-6 pb-6 border-t border-border-light/70 dark:border-border-dark/70 pt-5 space-y-5">
                 
                 {/* Filter Header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
-                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1.5 rounded-full border border-border-light dark:border-border-dark">
+                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark" />
                     <select 
                       value={selectedGymMonth}
                       onChange={(e) => {
                         setSelectedGymMonth(e.target.value);
                         setGymAiAnalysis(null);
                       }}
-                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs"
                     >
                       {uniqueGymMonths.map(m => {
                         const [y, mo] = m.split('-');
@@ -519,21 +562,21 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     onPointerDown={() => triggerHaptic('ai')}
                     onClick={handleAnalyzeGymHistory}
                     disabled={filteredGymLogs.length === 0 || gymAnalyzing}
-                    className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                    className="rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-40"
                   >
                     {gymAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                     AI Insights
                   </button>
                 </div>
 
-                {/* AI Insights Card */}
+                {/* AI Insights Card (Material 3 Mint Tonal Container) */}
                 {gymAiAnalysis && (
-                  <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 relative">
-                    <button onClick={() => setGymAiAnalysis(null)} className="absolute top-2 right-2 text-emerald-500/70 hover:text-emerald-500">
+                  <div className="rounded-[22px] p-4 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/60 dark:border-m3-mint-darkBadge/60 relative shadow-sm">
+                    <button onClick={() => setGymAiAnalysis(null)} className="absolute top-3 right-3 text-m3-mint-text/70 hover:text-m3-mint-text">
                       <X size={14} />
                     </button>
-                    <h4 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
-                      <Sparkles size={14} /> Month Workout Analysis
+                    <h4 className="font-bold flex items-center gap-1.5 mb-2 text-xs uppercase tracking-wider font-mono">
+                      <Sparkles size={13} /> Month Workout Analysis
                     </h4>
                     {gymAiAnalysis.error ? (
                       <p className="text-sm text-red-500">{gymAiAnalysis.error}</p>
@@ -648,39 +691,39 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       {/* Spending History Section */}
-      <motion.div variants={item} className="card overflow-hidden">
+      <motion.div variants={item} className="rounded-[28px] overflow-hidden bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
         <button
           onClick={() => setSpendingHistoryOpen(!spendingHistoryOpen)}
-          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+          className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] transition-all"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-amber-500/20 text-amber-500">
-              <Wallet size={16} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-m3-peach-badge/70 dark:bg-m3-peach-darkBadge/70 text-m3-peach-text dark:text-m3-peach-darkText shadow-sm">
+              <Wallet size={20} />
             </div>
             <div className="text-left">
-              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">Spending History</p>
-              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View past expenses & smart AI advice</p>
+              <p className="font-black text-base text-primary-light dark:text-primary-dark font-sans">Spending History</p>
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">View past expenses & smart AI advice</p>
             </div>
           </div>
-          {spendingHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+          {spendingHistoryOpen ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
         </button>
 
         <AnimatePresence>
           {spendingHistoryOpen && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+              <div className="px-6 pb-6 border-t border-border-light/70 dark:border-border-dark/70 pt-5 space-y-5">
                 
                 {/* Filter Header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
-                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1.5 rounded-full border border-border-light dark:border-border-dark">
+                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark" />
                     <select 
                       value={selectedSpendingMonth}
                       onChange={(e) => {
                         setSelectedSpendingMonth(e.target.value);
                         setSpendingAiAnalysis(null);
                       }}
-                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs"
                     >
                       {uniqueSpendingMonths.map(m => {
                         const [y, mo] = m.split('-');
@@ -695,21 +738,21 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     onPointerDown={() => triggerHaptic('ai')}
                     onClick={handleAnalyzeSpending}
                     disabled={filteredSpendingLogs.length === 0 || spendingAnalyzing}
-                    className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-amber-500 hover:bg-amber-500/10 dark:hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                    className="rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-[#8F4C1B] dark:bg-[#FFB787] text-white dark:text-[#2B1E17] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-40"
                   >
                     {spendingAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                     AI Spend Analysis
                   </button>
                 </div>
 
-                {/* AI Spend Analysis Card */}
+                {/* AI Spend Analysis Card (Material 3 Peach Tonal Container) */}
                 {spendingAiAnalysis && (
-                  <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 relative">
-                    <button onClick={() => setSpendingAiAnalysis(null)} className="absolute top-2 right-2 text-amber-500/70 hover:text-amber-500">
+                  <div className="rounded-[22px] p-4 bg-m3-peach-container dark:bg-m3-peach-darkContainer text-m3-peach-text dark:text-m3-peach-darkText border border-m3-peach-badge/60 dark:border-m3-peach-darkBadge/60 relative shadow-sm">
+                    <button onClick={() => setSpendingAiAnalysis(null)} className="absolute top-3 right-3 text-m3-peach-text/70 hover:text-m3-peach-text">
                       <X size={14} />
                     </button>
-                    <h4 className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">
-                      <Sparkles size={14} /> Smart Spending Insights
+                    <h4 className="font-bold flex items-center gap-1.5 mb-2 text-xs uppercase tracking-wider font-mono">
+                      <Sparkles size={13} /> Smart Spending Insights
                     </h4>
                     {spendingAiAnalysis.error ? (
                       <div className="space-y-2">
@@ -717,22 +760,22 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                         <button
                           onClick={handleAnalyzeSpending}
                           disabled={spendingAnalyzing}
-                          className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 underline hover:no-underline flex items-center gap-1"
+                          className="text-[11px] font-bold text-accent underline flex items-center gap-1"
                         >
                           <Sparkles size={11} /> Retry Analysis
                         </button>
                       </div>
                     ) : (
-                      <div className="space-y-2.5 text-xs">
-                        <p className="text-secondary-light dark:text-secondary-dark leading-relaxed font-medium">
+                      <div className="space-y-2.5 text-xs leading-relaxed">
+                        <p className="font-medium">
                           {spendingAiAnalysis.summary}
                         </p>
                         {spendingAiAnalysis.tips && (
-                          <div className="space-y-1.5 pt-1 border-t border-amber-500/20">
-                            <span className="font-semibold text-amber-700 dark:text-amber-300 block text-[11px]">Where to spend less:</span>
+                          <div className="space-y-1.5 pt-2 border-t border-m3-peach-badge/40 dark:border-m3-peach-darkBadge/40">
+                            <span className="font-bold block text-[11px] uppercase tracking-wider font-mono opacity-85">Where to spend less:</span>
                             {spendingAiAnalysis.tips.map((tip: string, idx: number) => (
-                              <div key={idx} className="flex items-start gap-1.5 text-secondary-light dark:text-secondary-dark">
-                                <span className="text-amber-500 font-bold">•</span>
+                              <div key={idx} className="flex items-start gap-1.5 opacity-90">
+                                <span className="font-bold">•</span>
                                 <span>{tip}</span>
                               </div>
                             ))}
@@ -744,16 +787,16 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 )}
 
                 {/* Month Summary Bar */}
-                <div className="flex items-center justify-between bg-bg-light dark:bg-bg-dark/50 p-3 rounded-xl border border-border-light dark:border-border-dark">
+                <div className="flex items-center justify-between bg-black/[0.02] dark:bg-white/[0.03] p-3.5 rounded-[18px] border border-border-light dark:border-border-dark">
                   <div>
-                    <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark block">Total Spent</span>
-                    <span className="font-bold text-base text-primary-light dark:text-primary-dark">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block font-mono">Total Spent</span>
+                    <span className="font-black text-lg text-primary-light dark:text-primary-dark font-sans">
                       ₹{spendingMonthTotal.toLocaleString('en-IN')}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark block">Transactions</span>
-                    <span className="font-mono text-sm font-semibold text-secondary-light dark:text-secondary-dark">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block font-mono">Transactions</span>
+                    <span className="font-mono text-xs font-bold text-secondary-light dark:text-secondary-dark">
                       {filteredSpendingLogs.length} items
                     </span>
                   </div>
@@ -763,29 +806,29 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 {spendingByCategory.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {spendingByCategory.map(([cat, amt]) => (
-                      <span key={cat} className="text-[11px] px-2.5 py-1 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-medium">
-                        {cat}: <strong className="text-primary-light dark:text-primary-dark">₹{amt.toLocaleString('en-IN')}</strong>
+                      <span key={cat} className="text-xs px-3 py-1 rounded-full bg-black/[0.025] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-semibold">
+                        {cat}: <strong className="text-primary-light dark:text-primary-dark font-mono">₹{amt.toLocaleString('en-IN')}</strong>
                       </span>
                     ))}
                   </div>
                 )}
 
                 {/* Expense List */}
-                <div className="space-y-2 pt-1 max-h-72 overflow-y-auto pr-1">
+                <div className="space-y-1.5 pt-1 max-h-72 overflow-y-auto pr-1">
                   {filteredSpendingLogs.length === 0 ? (
-                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4">No spending logged for this month.</p>
+                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4 font-medium">No spending logged for this month.</p>
                   ) : (
                     filteredSpendingLogs.map((exp) => (
-                      <div key={exp.id} className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-between gap-3">
+                      <div key={exp.id} className="p-3 rounded-[16px] bg-black/[0.02] dark:bg-white/[0.03] border border-border-light/60 dark:border-border-dark/60 flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                            {exp.category} {exp.note && `· ${exp.note}`}
+                            {exp.category} {exp.note && <span className="font-normal text-secondary-light dark:text-secondary-dark">· {exp.note}</span>}
                           </p>
-                          <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">
+                          <p className="text-[10px] font-mono text-muted-light dark:text-muted-dark mt-0.5">
                             {exp.date}
                           </p>
                         </div>
-                        <span className="font-mono font-bold text-sm text-amber-600 dark:text-amber-400 shrink-0">
+                        <span className="font-mono font-bold text-sm text-primary-light dark:text-primary-dark shrink-0">
                           ₹{Number(exp.amount).toLocaleString('en-IN')}
                         </span>
                       </div>
@@ -800,36 +843,36 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       {/* TO-DO List History Section */}
-      <motion.div variants={item} className="card overflow-hidden">
+      <motion.div variants={item} className="rounded-[28px] overflow-hidden bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
         <button
           onClick={() => setTodoHistoryOpen(!todoHistoryOpen)}
-          className="w-full flex items-center justify-between p-5 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
+          className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] active:bg-black/[0.04] dark:active:bg-white/[0.05] transition-all"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-500">
-              <ListTodo size={16} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-blue-100 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 shadow-sm">
+              <ListTodo size={20} />
             </div>
             <div className="text-left">
-              <p className="font-bold text-sm text-primary-light dark:text-primary-dark">TO-DO List History</p>
-              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">View completed tasks & productivity</p>
+              <p className="font-black text-base text-primary-light dark:text-primary-dark font-sans">TO-DO List History</p>
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">View completed tasks & productivity</p>
             </div>
           </div>
-          {todoHistoryOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
+          {todoHistoryOpen ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
         </button>
 
         <AnimatePresence>
           {todoHistoryOpen && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-              <div className="px-5 pb-5 border-t border-border-light dark:border-border-dark pt-4 space-y-4">
+              <div className="px-6 pb-6 border-t border-border-light/70 dark:border-border-dark/70 pt-5 space-y-5">
                 
                 {/* Filter Header */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary-light dark:text-primary-dark">
-                    <Calendar size={16} className="text-secondary-light dark:text-secondary-dark" />
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3.5 py-1.5 rounded-full border border-border-light dark:border-border-dark">
+                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark" />
                     <select 
                       value={selectedTodoMonth}
                       onChange={(e) => setSelectedTodoMonth(e.target.value)}
-                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer"
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs"
                     >
                       {uniqueTodoMonths.map(m => {
                         const [y, mo] = m.split('-');
@@ -840,7 +883,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                       })}
                     </select>
                   </div>
-                  <span className="label-mono text-xs font-bold text-emerald-500">
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 px-3.5 py-1.5 rounded-full bg-emerald-500/10">
                     {completedTodoCount}/{filteredTodoTasks.length} done
                   </span>
                 </div>
@@ -848,23 +891,23 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 {/* Tasks List */}
                 <div className="space-y-2 pt-1 max-h-72 overflow-y-auto pr-1">
                   {filteredTodoTasks.length === 0 ? (
-                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4">No tasks found for this month.</p>
+                    <p className="text-xs text-secondary-light dark:text-secondary-dark italic text-center py-4 font-medium">No tasks found for this month.</p>
                   ) : (
                     filteredTodoTasks.map((t) => (
-                      <div key={t.id} className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-start gap-2.5">
-                        <div className={`w-4 h-4 rounded mt-0.5 border flex items-center justify-center flex-shrink-0 ${t.completed ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark' : 'border-border-light dark:border-border-dark'}`}>
-                          {t.completed && <Check size={10} className="text-surface-light dark:text-surface-dark stroke-[3]" />}
+                      <div key={t.id} className="p-3.5 rounded-[18px] bg-black/[0.02] dark:bg-white/[0.03] border border-border-light/60 dark:border-border-dark/60 flex items-start gap-3.5">
+                        <div className={`w-5 h-5 rounded-[8px] mt-0.5 border flex items-center justify-center flex-shrink-0 ${t.completed ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark' : 'border-border-light dark:border-border-dark'}`}>
+                          {t.completed && <Check size={12} className="text-surface-light dark:text-surface-dark stroke-[3]" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className={`text-xs font-medium block truncate ${t.completed ? 'line-through text-muted-light dark:text-muted-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                          <span className={`text-xs font-bold block truncate ${t.completed ? 'line-through text-muted-light dark:text-muted-dark' : 'text-primary-light dark:text-primary-dark'}`}>
                             {t.text}
                           </span>
                           {t.subtask && (
-                            <span className="text-[10px] text-secondary-light dark:text-secondary-dark block truncate mt-0.5">
+                            <span className="text-[11px] text-secondary-light dark:text-secondary-dark block truncate mt-0.5">
                               {t.subtask}
                             </span>
                           )}
-                          <span className="label-mono text-[9px] text-muted-light dark:text-muted-dark block mt-0.5">
+                          <span className="text-[10px] font-mono text-muted-light dark:text-muted-dark block mt-0.5">
                             {t.date}
                           </span>
                         </div>
@@ -880,21 +923,26 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       {/* Account Settings */}
-      <motion.div variants={item} className="card p-5 space-y-4">
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
         <div className="flex items-center justify-between gap-4">
-          <div className="min-w-0">
-            <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Account</p>
-            <p className="text-sm font-medium text-primary-light dark:text-primary-dark truncate" title={auth.currentUser?.email || ''}>{auth.currentUser?.email}</p>
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-12 h-12 rounded-[18px] bg-black/[0.04] dark:bg-white/[0.06] border border-border-light dark:border-border-dark flex items-center justify-center text-base font-black text-primary-light dark:text-primary-dark font-sans shadow-sm">
+              {(auth.currentUser?.email || 'U')[0].toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">Signed In Account</p>
+              <p className="text-sm font-bold text-primary-light dark:text-primary-dark truncate font-sans mt-0.5" title={auth.currentUser?.email || ''}>{auth.currentUser?.email}</p>
+            </div>
           </div>
-          <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => {
                 navigate('/');
                 signOut(auth);
               }}
-              className="whitespace-nowrap flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
+              className="rounded-full px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 active:scale-95 transition-all text-xs font-bold flex items-center gap-1.5"
             >
-              <LogOut size={16} />
+              <LogOut size={14} />
               Sign Out
             </button>
             <button
@@ -907,17 +955,17 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                   }
                 }
               }}
-              className="whitespace-nowrap flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors text-xs font-medium"
+              className="rounded-full px-3.5 py-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 active:scale-95 transition-all text-xs font-bold flex items-center gap-1"
             >
-              <AlertTriangle size={14} />
-              Reset Data
+              <AlertTriangle size={13} />
+              Reset
             </button>
           </div>
         </div>
       </motion.div>
 
       <motion.div variants={item} className="text-center py-4">
-        <p className="label-mono text-muted-light dark:text-muted-dark">LifeOS v1.3</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.3 · Material 3 Expressive</p>
       </motion.div>
     </motion.div>
   );

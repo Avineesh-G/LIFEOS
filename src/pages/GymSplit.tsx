@@ -99,20 +99,23 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between">
-        <button onClick={() => navigate('/gym')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
+      <div className="flex items-center justify-between pt-1">
+        <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono">
           <ChevronLeft size={16} /> Back
         </button>
-        <button onPointerDown={() => triggerHaptic('save')} onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 active:scale-[0.98] transition-all shadow-sm">
+        <button onPointerDown={() => triggerHaptic('save')} onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold hover:opacity-90 active:scale-[0.96] transition-all shadow-sm">
           <Save size={16} /> Save
         </button>
       </div>
 
-      <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">Weekly Split</h1>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Routine Customization</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Weekly Split</h1>
+      </div>
 
       {/* Day Tabs */}
-      <div className="flex gap-1 overflow-x-auto no-scrollbar pb-1">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {DAYS.map(day => (
           <button
             key={day}
@@ -120,10 +123,10 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
               triggerHaptic(5);
               setActiveDay(day);
             }}
-            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+            className={`px-4 py-2.5 rounded-[18px] text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
               activeDay === day 
-                ? 'bg-accent text-white' 
-                : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-black/5 dark:hover:bg-white/5'
+                ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm' 
+                : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
             }`}
           >
             {day}
@@ -132,8 +135,8 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
       </div>
 
       {/* Workout Type */}
-      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4 space-y-3">
-        <label className="block text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">Workout Type</label>
+      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-6 sm:p-7 shadow-sm space-y-4">
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">Workout Type</label>
         <div className="flex gap-2">
           <input
             type="text"

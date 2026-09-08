@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, ChevronRight, Play, Settings, UtensilsCrossed, Flame, Sparkles, Loader2, Check } from 'lucide-react';
+import { Dumbbell, ChevronRight, Play, Settings, Flame, Sparkles, Loader2, Check, Zap, ArrowUpRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { AnimatedMoon } from '../components/AnimatedIcons';
@@ -13,21 +13,21 @@ interface GymProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.48, ease: 'easeOut' } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: 'easeOut' } } };
 
 export default function Gym({ data, updateData }: GymProps) {
   const navigate = useNavigate();
   const [generatingCardio, setGeneratingCardio] = useState(false);
-  const today    = format(new Date(), 'EEEE');
+  const today = format(new Date(), 'EEEE');
   const todayDate = format(new Date(), 'yyyy-MM-dd');
   const shortDay = ({ Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' } as Record<string, string>)[today] || '';
   const todayPlan = data.workoutPlans.find(p => p.day === shortDay);
-  const todayLog  = data.workoutLogs.find(w => w.date === todayDate);
+  const todayLog = data.workoutLogs.find(w => w.date === todayDate);
   const isCompletedToday = !!todayLog?.isSaved;
 
   const totalWorkouts = (data.workoutLogs || []).length;
-  const thisWeekLogs  = (data.workoutLogs || []).filter(w => {
+  const thisWeekLogs = (data.workoutLogs || []).filter(w => {
     const diff = (Date.now() - new Date(w.date).getTime()) / 86400000;
     return diff <= 7;
   });
@@ -42,7 +42,7 @@ export default function Gym({ data, updateData }: GymProps) {
     try {
       const apiKey = data.geminiApiKey || GEMINI_API_KEY;
       const aiPlan = await getAiWorkoutPlan('CARDIO', data.profile, apiKey);
-      
+
       const newExercises: Exercise[] = aiPlan.exercises.map(ex => ({
         id: crypto.randomUUID(),
         name: ex.name,
@@ -54,15 +54,13 @@ export default function Gym({ data, updateData }: GymProps) {
         iconKey: ex.iconKey,
       }));
 
-      // Update today's plan in workoutPlans to CARDIO with new exercises
-      const updatedPlans = data.workoutPlans.map(p => 
+      const updatedPlans = data.workoutPlans.map(p =>
         p.day === shortDay ? { ...p, type: 'CARDIO', exercises: newExercises } : p
       );
 
-      // If a log already existed for today, update it to the new cardio exercises
       let updatedLogs = data.workoutLogs;
       if (todayLog) {
-        updatedLogs = data.workoutLogs.map(w => 
+        updatedLogs = data.workoutLogs.map(w =>
           w.id === todayLog.id ? {
             ...w,
             type: 'CARDIO',
@@ -88,135 +86,202 @@ export default function Gym({ data, updateData }: GymProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
 
-      {/* Header */}
-      <motion.div variants={item} className="flex items-end justify-between pt-2">
-        <div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">
-            {today} · {todayPlan?.type || 'Rest'}
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">Gym</h1>
+      {/* Material 3 Expressive Mint Hero Card */}
+      <motion.div
+        variants={item}
+        className="rounded-[32px] p-6 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle"
+      >
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <span className="w-11 h-11 rounded-[16px] bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
+              <Dumbbell size={22} className="text-m3-mint-text dark:text-m3-mint-darkText" />
+            </span>
+            <div>
+              <p className="text-xs font-bold tracking-wider uppercase opacity-75">
+                {today} · Workout Target
+              </p>
+              <h2 className="text-sm sm:text-base font-bold opacity-90">Daily Protocol</h2>
+            </div>
+          </div>
+          <span className="rounded-full bg-white/70 dark:bg-black/25 px-3.5 py-1.5 text-xs font-bold shadow-sm">
+            {todayPlan?.type || 'Rest'}
+          </span>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => navigate('/gym/split')}
-            className="btn-ghost-pill flex items-center gap-1.5 px-3.5 py-2.5 text-sm"
-          >
-            <Settings size={14} /> Split
-          </button>
-          {isCompletedToday ? (
+
+        <div className="flex items-baseline justify-between gap-4 mt-3">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none font-sans">
+              {todayPlan?.type || 'Rest Day'}
+            </h1>
+            <p className="text-xs font-bold opacity-80 mt-1.5 font-mono">
+              {(todayPlan?.exercises || []).length} exercises scheduled
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={() => navigate('/gym/workout')}
-              className="btn-pill flex items-center gap-1.5 px-4 py-2.5 text-sm bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm"
+              onClick={() => navigate('/gym/split')}
+              className="rounded-full bg-white/70 dark:bg-black/25 text-m3-mint-text dark:text-m3-mint-darkText font-bold px-4 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
             >
-              <Check size={14} className="stroke-[2.5]" /> Completed
+              <Settings size={15} /> Split
             </button>
-          ) : (
-            <button
-              onClick={() => navigate('/gym/workout')}
-              className="btn-pill flex items-center gap-2 px-5 py-2.5 text-sm"
-            >
-              <Play size={14} fill="currentColor" /> {todayLog ? 'Resume' : 'Start'}
-            </button>
-          )}
+            {isCompletedToday ? (
+              <button
+                onClick={() => navigate('/gym/workout')}
+                className="rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold px-4 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
+              >
+                <Check size={16} className="stroke-[3]" /> Done
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/gym/workout')}
+                className="rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold px-5 py-3 text-xs sm:text-sm flex items-center gap-2 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
+              >
+                <Play size={15} fill="currentColor" /> {todayLog ? 'Resume' : 'Start'}
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
       {/* Stats grid */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
-        <div className="card p-4">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-2">Total Workouts</p>
-          <p className="text-3xl font-bold tracking-tight">{totalWorkouts}</p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1">all time</p>
+      <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
+        <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+              Total Workouts
+            </p>
+            <span className="w-7 h-7 rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 flex items-center justify-center text-m3-mint-text dark:text-m3-mint-darkText">
+              <Zap size={14} />
+            </span>
+          </div>
+          <p className="text-2xl sm:text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-sans">
+            {totalWorkouts}
+          </p>
+          <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">All time logged</p>
         </div>
-        <div className="card p-4">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-2">This Week</p>
-          <p className="text-3xl font-bold tracking-tight">{thisWeekLogs.length}</p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1">sessions</p>
+
+        <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+              This Week
+            </p>
+            <span className="w-7 h-7 rounded-full bg-m3-lavender-badge/60 dark:bg-m3-lavender-darkBadge/60 flex items-center justify-center text-m3-lavender-text dark:text-m3-lavender-darkText">
+              <ArrowUpRight size={14} />
+            </span>
+          </div>
+          <p className="text-2xl sm:text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-sans">
+            {thisWeekLogs.length}
+          </p>
+          <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">Sessions completed</p>
         </div>
       </motion.div>
 
-      {/* Today's workout card */}
-      <motion.div variants={item} className="card p-5">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark mb-4">
-          Today · {todayPlan?.type || 'Rest'}
-        </p>
+      {/* Today's workout exercises card */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+            Today's Routine · {todayPlan?.type || 'Rest'}
+          </p>
+          {todayPlan?.type !== 'REST' && (
+            <span className="text-xs font-bold text-muted-light dark:text-muted-dark">
+              {(todayPlan?.exercises || []).length} items
+            </span>
+          )}
+        </div>
 
         {todayPlan && todayPlan.type !== 'REST' && (todayPlan.exercises || []).length > 0 ? (
           <div className="space-y-3">
             {(todayPlan.exercises || []).map((ex, i) => {
-              const logged        = todayLog?.exercises?.find(e => e.name === ex.name);
+              const logged = todayLog?.exercises?.find(e => e.name === ex.name);
               const completedSets = (logged?.sets || []).filter(s => s?.completed).length;
-              const targetSets    = Number(ex?.sets) || 0;
-              const done          = targetSets > 0 && completedSets >= targetSets;
+              const targetSets = Number(ex?.sets) || 0;
+              const done = targetSets > 0 && completedSets >= targetSets;
               return (
-                <div key={i} className="flex items-center justify-between py-2.5 border-b border-border-light dark:border-border-dark last:border-0">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 rounded-[16px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all border border-border-light/60 dark:border-border-dark/60"
+                >
                   <div>
-                    <p className="font-medium text-sm text-primary-light dark:text-primary-dark">{ex.name}</p>
-                    <p className="label-mono text-muted-light dark:text-muted-dark mt-0.5">
-                      {ex.sets}×{ex.reps} · {ex.weight}kg
+                    <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{ex.name}</p>
+                    <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">
+                      {ex.sets} sets × {ex.reps} reps · {ex.weight} kg
                     </p>
                   </div>
                   {todayLog ? (
-                    <span className={`text-sm font-semibold ${done ? 'text-emerald-500' : 'text-secondary-light dark:text-secondary-dark'}`}>
-                      {completedSets}/{ex.sets}
+                    <span
+                      className={`text-xs font-bold px-3 py-1 rounded-full font-mono ${
+                        done
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark'
+                      }`}
+                    >
+                      {completedSets}/{ex.sets} sets
                     </span>
                   ) : (
-                    <span className="label-mono text-muted-light dark:text-muted-dark">Pending</span>
+                    <span className="text-[11px] font-mono text-muted-light dark:text-muted-dark px-2 py-1 rounded-full bg-black/5 dark:bg-white/5">
+                      Pending
+                    </span>
                   )}
                 </div>
               );
             })}
+
             {isCompletedToday ? (
-              <div className="flex items-center justify-between p-3 mt-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <Check size={16} className="stroke-[2.5]" />
+              <div className="flex items-center justify-between p-3.5 mt-2 rounded-[20px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300">
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <Check size={16} className="stroke-[3]" />
                   <span>Workout completed & saved for today</span>
                 </div>
-                <span className="label-mono text-[11px] opacity-80 font-medium">
+                <span className="text-[11px] font-mono font-bold opacity-85">
                   {totalSets} sets done
                 </span>
               </div>
             ) : todayLog ? (
-              <p className="label-mono text-muted-light dark:text-muted-dark pt-1">
-                {totalSets} sets completed
+              <p className="text-xs font-mono font-semibold text-muted-light dark:text-muted-dark pt-1">
+                {totalSets} sets completed so far
               </p>
             ) : null}
           </div>
         ) : (
-          <div className="py-8 text-center">
-            <div className="flex justify-center text-3xl mb-2"><AnimatedMoon size={32} /></div>
-            <p className="label-mono text-secondary-light dark:text-secondary-dark">
-              {todayPlan?.type === 'REST' ? 'Rest day — recover well' : 'No exercises planned'}
+          <div className="py-10 text-center">
+            <div className="flex justify-center text-3xl mb-2"><AnimatedMoon size={36} /></div>
+            <p className="text-sm font-semibold text-secondary-light dark:text-secondary-dark">
+              {todayPlan?.type === 'REST' ? 'Rest day — recover and rebuild' : 'No exercises planned for today'}
             </p>
           </div>
         )}
       </motion.div>
 
-      {/* Cardio Only AI Card */}
-      <motion.div variants={item} className="card p-5 border border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-transparent to-amber-500/5 relative overflow-hidden">
-        <div className="flex items-start justify-between gap-4">
+      {/* Material 3 Expressive Cardio Only Session (Rose Tonal Container) */}
+      <motion.div
+        variants={item}
+        className="rounded-[28px] p-5 sm:p-6 bg-m3-rose-container dark:bg-m3-rose-darkContainer text-m3-rose-text dark:text-m3-rose-darkText border border-m3-rose-badge/50 dark:border-m3-rose-darkBadge/50 shadow-m3-subtle space-y-4"
+      >
+        <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center">
-                <Flame size={18} />
+              <span className="w-9 h-9 rounded-[14px] bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
+                <Flame size={18} className="text-rose-600 dark:text-rose-400" />
               </span>
-              <p className="font-bold text-base text-primary-light dark:text-primary-dark">Cardio Only Session</p>
+              <h3 className="font-black text-base font-sans">Cardio Only Session</h3>
             </div>
-            <p className="text-xs text-secondary-light dark:text-secondary-dark pt-1 leading-relaxed">
+            <p className="text-xs opacity-85 leading-relaxed pt-1">
               Want to do cardio today? Generate an AI-powered cardio routine (HIIT, Treadmill, Cycling & Core intervals) customized for you.
             </p>
           </div>
         </div>
-        <div className="mt-4 pt-3 border-t border-border-light dark:border-border-dark flex items-center justify-between">
-          <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark flex items-center gap-1">
-            <Sparkles size={11} className="text-rose-500" /> AI Customized
+
+        <div className="pt-3 border-t border-m3-rose-badge/40 dark:border-m3-rose-darkBadge/40 flex items-center justify-between">
+          <span className="text-[11px] font-mono font-bold flex items-center gap-1 opacity-75">
+            <Sparkles size={12} className="text-rose-600 dark:text-rose-400" /> AI Customized
           </span>
           <button
             onClick={handleGenerateCardio}
             disabled={generatingCardio}
-            className="btn-pill px-4 py-2 text-xs flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/20 disabled:opacity-50"
+            className="rounded-full px-4 py-2 text-xs font-bold flex items-center gap-1.5 bg-[#8C2B42] dark:bg-[#FFB2B8] text-white dark:text-[#2C1B20] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-50"
           >
             {generatingCardio ? (
               <>
@@ -233,25 +298,31 @@ export default function Gym({ data, updateData }: GymProps) {
 
       {/* Recent workouts */}
       {Array.isArray(data.workoutLogs) && data.workoutLogs.length > 0 && (
-        <motion.div variants={item} className="card p-5">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-4">Recent Workouts</p>
-          <div className="space-y-1">
+        <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+              Recent Workouts
+            </p>
+            <span className="text-xs text-muted-light dark:text-muted-dark font-medium">History</span>
+          </div>
+
+          <div className="space-y-1.5">
             {(data.workoutLogs || []).slice().reverse().slice(0, 5).map(w => (
               <button
                 key={w.id}
                 onClick={() => navigate(`/gym/history/${encodeURIComponent(w.exercises?.[0]?.name || '')}`)}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-bg-light dark:hover:bg-bg-dark active:scale-[0.985] transition-all text-left"
+                className="w-full flex items-center gap-3.5 p-3 rounded-[18px] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] active:scale-[0.985] transition-all text-left"
               >
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center flex-shrink-0">
-                  <Dumbbell size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <div className="w-10 h-10 rounded-[14px] bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText flex items-center justify-center flex-shrink-0">
+                  <Dumbbell size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-primary-light dark:text-primary-dark">{w.type}</p>
-                  <p className="label-mono text-muted-light dark:text-muted-dark">
-                    {w.date} · {(w.exercises || []).reduce((s, e) => s + ((e?.sets || []).filter(st => st?.completed).length), 0)} sets
+                  <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{w.type}</p>
+                  <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">
+                    {w.date} · {(w.exercises || []).reduce((s, e) => s + ((e?.sets || []).filter(st => st?.completed).length), 0)} sets logged
                   </p>
                 </div>
-                <ChevronRight size={14} className="text-muted-light dark:text-muted-dark flex-shrink-0" />
+                <ChevronRight size={16} className="text-muted-light dark:text-muted-dark flex-shrink-0" />
               </button>
             ))}
           </div>

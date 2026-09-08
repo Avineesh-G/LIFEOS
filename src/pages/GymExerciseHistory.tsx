@@ -28,33 +28,36 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const bestReps = Math.max(...sessions.map(s => s.bestSet?.reps || 0), 0);
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <button onClick={() => navigate('/gym')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
-        <ChevronLeft size={16} /> Back
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
+      <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono pt-1">
+        <ChevronLeft size={16} /> Back to Gym
       </button>
 
-      <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">{decodedName || 'Exercise History'}</h1>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Strength Analytics</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">{decodedName || 'Exercise History'}</h1>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-2 sm:p-4 text-center">
-          <div className="text-xl sm:text-2xl font-semibold">{sessions.length}</div>
-          <div className="text-[10px] sm:text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Sessions</div>
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{sessions.length}</div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Sessions</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-2 sm:p-4 text-center">
-          <div className="text-xl sm:text-2xl font-semibold">{bestWeight}<span className="text-xs">kg</span></div>
-          <div className="text-[10px] sm:text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Best Weight</div>
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestWeight}<span className="text-xs ml-0.5">kg</span></div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Best Weight</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-2 sm:p-4 text-center">
-          <div className="text-xl sm:text-2xl font-semibold">{bestReps}</div>
-          <div className="text-[10px] sm:text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Best Reps</div>
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestReps}</div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Best Reps</div>
         </div>
       </div>
 
       {/* Sessions */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         {sessions.map((s, i) => (
-          <div key={i} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4">
+          <div key={i} className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-medium">{format(new Date(s.date), 'EEEE, MMM d')}</div>
               <div className="text-xs text-secondary-light dark:text-secondary-dark">{s.sets.length} sets</div>

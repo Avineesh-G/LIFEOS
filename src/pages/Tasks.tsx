@@ -18,6 +18,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const [newSubtask, setNewSubtask] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const today = format(new Date(), 'yyyy-MM-dd');
+
   const todayTasks     = data.tasks.filter(t => t.date === today);
   const completedCount = todayTasks.filter(t => t.completed).length;
   const pct = todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
@@ -49,43 +50,98 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
 
       {/* Header */}
       <motion.div variants={item} className="flex items-end justify-between pt-2">
         <div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Today</p>
-          <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">TO-DO List</h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold tracking-wider uppercase mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse" />
+            Today
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark">
+            TO-DO List
+          </h1>
         </div>
-        <button onClick={() => setShowAdd(true)} className="btn-pill flex items-center gap-2 px-5 py-2.5 text-sm">
-          <Plus size={14} strokeWidth={2.5} /> Add
+        <button 
+          onClick={() => setShowAdd(true)} 
+          className="rounded-full flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold bg-[#6750A4] dark:bg-[#D0BCFF] text-white dark:text-[#21005D] shadow-sm hover:opacity-95 active:scale-95 transition-all"
+        >
+          <Plus size={16} strokeWidth={2.5} /> Add Task
         </button>
       </motion.div>
 
-      {/* Progress card */}
-      {todayTasks.length > 0 && (
-        <motion.div variants={item} className="card p-5">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Progress</p>
-              <div className="flex items-end gap-1.5">
-                <span className="text-4xl font-bold tracking-tight">{pct}</span>
-                <span className="text-lg text-muted-light dark:text-muted-dark mb-0.5 font-medium">%</span>
-              </div>
-            </div>
-            <span className="label-mono text-muted-light dark:text-muted-dark">{completedCount}/{todayTasks.length}</span>
+      {/* Segmented task progress bar — each task gets its own color */}
+      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-bold tracking-wider text-muted-light dark:text-muted-dark uppercase">
+            Today's Tasks
+          </span>
+          <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+            pct === 100
+              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+              : pct >= 50
+                ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300'
+                : todayTasks.length === 0
+                  ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
+                  : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+          }`}>
+            {pct === 100 ? 'All Done' : pct >= 50 ? 'On Track' : todayTasks.length === 0 ? 'No Tasks' : 'In Progress'}
+          </span>
+        </div>
+
+        {/* Segmented bar — one segment per task */}
+        {todayTasks.length > 0 ? (
+          <div className="flex items-center gap-1">
+            {todayTasks.map((task, i) => {
+              // Cycle through a vibrant palette — same aesthetic as home page pillars
+              const palette = [
+                'bg-purple-500',
+                'bg-indigo-500',
+                'bg-emerald-500',
+                'bg-amber-500',
+                'bg-rose-500',
+                'bg-cyan-500',
+                'bg-orange-500',
+                'bg-teal-500',
+                'bg-pink-500',
+                'bg-violet-500',
+              ];
+              const color = palette[i % palette.length];
+              return (
+                <motion.div
+                  key={task.id}
+                  className={`h-2 flex-1 rounded-full transition-colors duration-300 ${
+                    task.completed
+                      ? color
+                      : 'bg-neutral-100 dark:bg-neutral-800'
+                  }`}
+                  initial={{ scaleX: 0, originX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.35, delay: i * 0.04, ease: 'easeOut' }}
+                />
+              );
+            })}
           </div>
-          <div className="h-1.5 bg-bg-light dark:bg-bg-dark rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary-light dark:bg-primary-dark rounded-full transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-        </motion.div>
-      )}
+        ) : (
+          <div className="w-full h-2 rounded-full bg-neutral-100 dark:bg-neutral-800" />
+        )}
+
+        {/* Count below */}
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-[11px] font-mono font-medium text-muted-light dark:text-muted-dark">
+            {completedCount}/{todayTasks.length} done
+          </span>
+          <span className="text-[11px] font-mono font-medium text-muted-light dark:text-muted-dark">
+            {pct}%
+          </span>
+        </div>
+      </motion.div>
+
+
 
       {/* Task list */}
-      <motion.div variants={item} className="space-y-2">
+      <motion.div variants={item} className="space-y-3">
         <AnimatePresence>
           {todayTasks.map(task => (
             <motion.div
@@ -94,18 +150,18 @@ export default function Tasks({ data, updateData }: TasksProps) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="card flex items-center gap-3 p-4 group active:scale-[0.985] transition-transform"
+              transition={{ duration: 0.3 }}
+              className="rounded-[22px] bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex items-center gap-4 p-4.5 group active:scale-[0.985] transition-all"
             >
               <button
                 onClick={() => toggleTask(task.id)}
-                className={`w-5 h-5 rounded border-[1.5px] flex-shrink-0 flex items-center justify-center transition-all ${
+                className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
                   task.completed
-                    ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark'
-                    : 'border-border-light dark:border-border-dark hover:border-primary-light dark:hover:border-primary-dark'
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent'
                 }`}
               >
-                {task.completed && <Check size={11} className="text-surface-light dark:text-surface-dark" strokeWidth={3} />}
+                {task.completed && <Check size={16} className="stroke-[3]" />}
               </button>
               <div className="flex-1 min-w-0">
                 <span className={`text-sm leading-snug truncate block font-medium ${
@@ -127,9 +183,9 @@ export default function Tasks({ data, updateData }: TasksProps) {
               </div>
               <button
                 onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950 text-red-400 transition-all"
+                className="opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-red-500 transition-all"
               >
-                <Trash2 size={13} />
+                <Trash2 size={14} />
               </button>
             </motion.div>
           ))}

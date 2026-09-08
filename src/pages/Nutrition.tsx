@@ -14,10 +14,10 @@ interface NutritionProps {
 }
 
 const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: string; dotColor: string }[] = [
-  { slot: 'breakfast', label: 'Breakfast', icon: <Sunrise size={16} className="text-amber-500" />,    time: '7:00–9:00 AM',    dotColor: 'bg-amber-400' },
-  { slot: 'lunch',     label: 'Lunch',     icon: <Sun size={16} className="text-orange-500" />,        time: '12:30–2:00 PM',  dotColor: 'bg-orange-400' },
-  { slot: 'snacks',    label: 'Snacks',    icon: <Cloud size={16} className="text-sky-500" />,          time: '5:00–6:00 PM',   dotColor: 'bg-sky-400' },
-  { slot: 'dinner',    label: 'Dinner',    icon: <Moon size={16} className="text-indigo-500" />,        time: '7:30–9:00 PM',   dotColor: 'bg-indigo-400' },
+  { slot: 'breakfast', label: 'Breakfast', icon: <Sunrise size={16} className="text-amber-500" />, time: '7:00–9:00 AM', dotColor: 'bg-amber-400' },
+  { slot: 'lunch', label: 'Lunch', icon: <Sun size={16} className="text-orange-500" />, time: '12:30–2:00 PM', dotColor: 'bg-orange-400' },
+  { slot: 'snacks', label: 'Snacks', icon: <Cloud size={16} className="text-sky-500" />, time: '5:00–6:00 PM', dotColor: 'bg-sky-400' },
+  { slot: 'dinner', label: 'Dinner', icon: <Moon size={16} className="text-indigo-500" />, time: '7:30–9:00 PM', dotColor: 'bg-indigo-400' },
 ];
 
 const getCurrentMealSlot = (): MealSlot => {
@@ -38,7 +38,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const todayDayOfMonth = new Date().getDate();
   const todayMenu = MONTHLY_MESS_MENU.find(m => m.date === todayDayOfMonth) || MONTHLY_MESS_MENU[0];
-  
+
   const [coachAdvice, setCoachAdvice] = useState<any>(null);
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
@@ -52,7 +52,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [foodDoubtAnswer, setFoodDoubtAnswer] = useState<string | null>(null);
   const [foodDoubtLoading, setFoodDoubtLoading] = useState(false);
   const [foodDoubtError, setFoodDoubtError] = useState<string | null>(null);
-  
+
   // Free text extra items per slot
   const [extraTexts, setExtraTexts] = useState<Record<string, string>>({});
   const [estimatingSlot, setEstimatingSlot] = useState<MealSlot | null>(null);
@@ -110,9 +110,9 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     } catch (err: any) {
       console.error(err);
       if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
-         setCoachAdvice({ error: "Please enter your Groq API Key in Settings to use the AI Coach." });
+        setCoachAdvice({ error: "Please enter your Groq API Key in Settings to use the AI Coach." });
       } else {
-         setCoachAdvice({ error: "Failed to load advice. Please try again." });
+        setCoachAdvice({ error: "Failed to load advice. Please try again." });
       }
     } finally {
       setFetchingAdvice(false);
@@ -152,7 +152,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     setDraftLog(prev => {
       const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
       const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-      
+
       let mealLog;
       if (mealIdx >= 0) {
         mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
@@ -201,10 +201,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
       // Update portion
       item.portion += change;
-      
+
       // Prevent portion dropping below 0
       if (item.portion <= 0) {
-         mealLog.items.splice(itemIdx, 1);
+        mealLog.items.splice(itemIdx, 1);
       }
 
       newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
@@ -216,21 +216,21 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const handleAddExtraItem = async (mealSlot: MealSlot) => {
     const txt = extraTexts[mealSlot] || '';
     if (!txt.trim()) return;
-    
+
     setEstimatingSlot(mealSlot);
     triggerHaptic(10);
-    
+
     try {
       const prompt = `Estimate the calories for this food item eaten: "${txt}".
 Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized name"}. No markdown, no backticks.`;
-      
+
       const res = await getCoachTip(prompt, data.geminiApiKey || GEMINI_API_KEY);
       const parsed = JSON.parse(res);
-      
+
       setDraftLog(prev => {
         const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
         const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-        
+
         let mealLog;
         if (mealIdx >= 0) {
           mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
@@ -239,7 +239,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           mealLog = { slot: mealSlot, items: [] };
           newLog.mealsEaten.push(mealLog);
         }
-        
+
         mealLog.items.push({
           id: Date.now().toString(),
           name: parsed.name,
@@ -247,19 +247,19 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           portion: 1,
           isExtra: true
         });
-        
+
         newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
         newLog.isSaved = false;
         return newLog;
       });
-      
+
       setExtraTexts(prev => ({ ...prev, [mealSlot]: '' }));
     } catch (err: any) {
       console.error(err);
       if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
-         alert("Please enter your Groq API Key in Settings to estimate calories.");
+        alert("Please enter your Groq API Key in Settings to estimate calories.");
       } else {
-         alert("Failed to estimate calories. Please try again.");
+        alert("Failed to estimate calories. Please try again.");
       }
     } finally {
       setEstimatingSlot(null);
@@ -268,16 +268,16 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
 
   const handleDeleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
     setDraftLog(prev => {
-        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-        if (mealIdx >= 0) {
-            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-            newLog.mealsEaten[mealIdx] = mealLog;
-            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
-        }
-        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-        newLog.isSaved = false;
-        return newLog;
+      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+      if (mealIdx >= 0) {
+        const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+        newLog.mealsEaten[mealIdx] = mealLog;
+        mealLog.items = mealLog.items.filter(i => i.id !== itemId);
+      }
+      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      newLog.isSaved = false;
+      return newLog;
     });
   }
 
@@ -286,7 +286,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     setDraftLog(prev => {
       const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
       const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-      
+
       let mealLog;
       if (mealIdx >= 0) {
         mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
@@ -298,15 +298,15 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
 
       const skippedIdx = mealLog.items.findIndex(i => i.id === 'skipped');
       if (skippedIdx >= 0) {
-         mealLog.items.splice(skippedIdx, 1);
+        mealLog.items.splice(skippedIdx, 1);
       } else {
-         mealLog.items = [{
-           id: 'skipped',
-           name: 'Meal Skipped',
-           calories: 0,
-           portion: 1,
-           isExtra: false
-         }];
+        mealLog.items = [{
+          id: 'skipped',
+          name: 'Meal Skipped',
+          calories: 0,
+          portion: 1,
+          isExtra: false
+        }];
       }
 
       newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
@@ -318,26 +318,26 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   const saveEditedExtraItem = (mealSlot: MealSlot, itemId: string) => {
     triggerHaptic(5);
     const parsedCals = parseInt(editExtraCals);
-    
+
     setDraftLog(prev => {
-        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-        if (mealIdx >= 0) {
-            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-            newLog.mealsEaten[mealIdx] = mealLog;
-            
-            const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
-            if (itemIdx >= 0) {
-                const item = { ...mealLog.items[itemIdx] };
-                mealLog.items[itemIdx] = item;
-                
-                if (editExtraName.trim()) item.name = editExtraName.trim();
-                if (!isNaN(parsedCals) && parsedCals >= 0) item.calories = parsedCals;
-            }
+      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+      if (mealIdx >= 0) {
+        const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+        newLog.mealsEaten[mealIdx] = mealLog;
+
+        const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
+        if (itemIdx >= 0) {
+          const item = { ...mealLog.items[itemIdx] };
+          mealLog.items[itemIdx] = item;
+
+          if (editExtraName.trim()) item.name = editExtraName.trim();
+          if (!isNaN(parsedCals) && parsedCals >= 0) item.calories = parsedCals;
         }
-        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-        newLog.isSaved = false;
-        return newLog;
+      }
+      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+      newLog.isSaved = false;
+      return newLog;
     });
     setEditingExtraId(null);
   }
@@ -347,10 +347,10 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     const finalLog = { ...draftLog, isSaved: true };
     setDraftLog(finalLog);
     setIsLocked(true);
-    
+
     setShowSavedFeedback(true);
     setTimeout(() => setShowSavedFeedback(false), 2000);
-    
+
     const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== today);
     await updateData({ nutritionLogs: [...otherLogs, finalLog] });
   };
@@ -360,76 +360,86 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-24">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-24">
       {/* Header */}
       <motion.div variants={item} className="flex items-center justify-between pt-2">
         <button
           onClick={() => { triggerHaptic(10); navigate('/'); }}
-          className="w-9 h-9 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-85 active:scale-95 transition-all shadow-sm"
         >
           <ArrowLeft size={18} />
         </button>
         <div className="text-center">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark text-[10px]">{format(new Date(), 'EEEE, d MMM')}</p>
-          <h1 className="text-lg font-bold text-primary-light dark:text-primary-dark">Nutrition</h1>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">{format(new Date(), 'EEEE, d MMM')}</p>
+          <h1 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Nutrition Protocol</h1>
         </div>
-        <div className="w-9" />
+        <div className="w-10" />
       </motion.div>
 
-      {/* Progress */}
-      <motion.div variants={item} className="card p-5 flex items-center gap-5">
+      {/* Material 3 Expressive Peach/Mint Tonal Calorie Hero Container */}
+      <motion.div
+        variants={item}
+        className="rounded-[28px] p-6 bg-m3-peach-container dark:bg-m3-peach-darkContainer text-m3-peach-text dark:text-m3-peach-darkText border border-m3-peach-badge/50 dark:border-m3-peach-darkBadge/50 shadow-m3-subtle flex items-center gap-6"
+      >
         <div className="relative flex-shrink-0">
-          <svg width="96" height="96" viewBox="0 0 96 96">
-            <circle cx="48" cy="48" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-bg-light dark:text-bg-dark" />
+          <svg width="104" height="104" viewBox="0 0 104 104">
+            <circle cx="52" cy="52" r="44" fill="none" stroke="currentColor" strokeWidth="9" className="text-black/10 dark:text-white/10" />
             <circle
-              cx="48" cy="48" r="42"
+              cx="52" cy="52" r="44"
               fill="none"
               stroke={ringColor}
-              strokeWidth="8"
+              strokeWidth="9"
               strokeLinecap="round"
               strokeDasharray={`${strokeDash} ${circumference}`}
-              transform="rotate(-90 48 48)"
-              style={{ transition: 'stroke-dasharray 0.4s ease' }}
+              transform="rotate(-90 52 52)"
+              style={{ transition: 'stroke-dasharray 0.5s ease' }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-extrabold font-mono text-primary-light dark:text-primary-dark leading-none">{Math.round(totalConsumed)}</span>
-            <span className="label-mono text-muted-light dark:text-muted-dark" style={{ fontSize: 8 }}>kcal</span>
+            <span className="text-2xl font-black font-sans leading-none">{Math.round(totalConsumed)}</span>
+            <span className="text-[10px] font-bold tracking-wider uppercase opacity-75 font-mono mt-0.5">kcal</span>
           </div>
         </div>
-        <div className="flex-1 space-y-2">
+
+        <div className="flex-1 space-y-2.5">
           <div className="flex items-baseline justify-between">
-            <span className="label-mono text-secondary-light dark:text-secondary-dark">Target</span>
-            <span className="font-bold text-sm text-primary-light dark:text-primary-dark">{targetCals} kcal</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono">Target</span>
+            <span className="font-mono font-bold text-sm">{targetCals} kcal</span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="label-mono text-secondary-light dark:text-secondary-dark">Remaining</span>
-            <span className={`font-bold text-sm ${totalConsumed > targetCals ? 'text-red-500' : 'text-emerald-500'}`}>
+            <span className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono">Remaining</span>
+            <span className={`font-mono font-bold text-sm ${totalConsumed > targetCals ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
               {Math.round(Math.max(0, targetCals - totalConsumed))} kcal
             </span>
+          </div>
+          <div className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, ringPct)}%`, backgroundColor: ringColor }}
+            />
           </div>
         </div>
       </motion.div>
 
       {/* ── Food Doubt Card (Can I eat this?) ── */}
-      <motion.div variants={item} className="card p-4 sm:p-5 border border-border-light dark:border-border-dark space-y-3">
+      <motion.div variants={item} className="card p-5 space-y-3.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
-              <Sparkles size={16} />
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-[14px] bg-m3-lavender-badge/70 dark:bg-m3-lavender-darkBadge/70 text-m3-lavender-text dark:text-m3-lavender-darkText flex items-center justify-center shadow-sm">
+              <Sparkles size={18} />
             </div>
             <div>
               <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Food Doubt · Can I eat this?</h3>
-              <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">Instant AI verdict for foods outside your mess meal</p>
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark">Instant AI verdict for items outside your meal</p>
             </div>
           </div>
           {foodDoubtAnswer && (
-            <button 
+            <button
               onClick={() => {
                 setFoodDoubtAnswer(null);
                 setFoodDoubtQuery('');
               }}
-              className="text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark"
+              className="text-xs font-bold text-accent hover:underline"
             >
               Ask Another
             </button>
@@ -480,7 +490,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         <motion.div variants={item} className="space-y-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
-            <button 
+            <button
               onPointerDown={() => triggerHaptic('ai')}
               onClick={handleGetAdvice}
               className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors"
@@ -500,7 +510,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   <h3 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-3 text-sm">
                     <Sparkles size={16} /> Personalized Advice
                   </h3>
-                  
+
                   {fetchingAdvice ? (
                     <div className="flex flex-col items-center justify-center py-6 gap-3">
                       <Loader2 size={24} className="animate-spin text-emerald-500" />
@@ -537,8 +547,8 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             const mealData = todayMenu.meals.find((m: any) => m.slot === mealObj.slot);
             const mealLog = draftLog.mealsEaten.find(m => m.slot === mealObj.slot);
             const isOpen = expanded === mealObj.slot;
-            
-                            // Calculate total calories for this slot
+
+            // Calculate total calories for this slot
             const slotCals = mealLog ? mealLog.items.reduce((s, i) => s + (i.calories * i.portion), 0) : 0;
             const isSkipped = mealLog?.items.some(i => i.id === 'skipped');
 
@@ -571,7 +581,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                     {isOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
                   </div>
                 </button>
-                
+
                 <AnimatePresence>
                   {isOpen && mealData && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
@@ -579,185 +589,184 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">Menu</h4>
                           <button onClick={() => handleSkipMeal(mealObj.slot)} className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${isSkipped ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-bg-light dark:hover:bg-bg-dark text-secondary-light dark:text-secondary-dark'}`}>
-                              {isSkipped ? 'Undo Skip' : 'Skip Meal'}
+                            {isSkipped ? 'Undo Skip' : 'Skip Meal'}
                           </button>
                         </div>
-                        
+
                         {isSkipped ? (
-                           <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                             <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped this meal</p>
-                           </div>
+                          <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                            <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped this meal</p>
+                          </div>
                         ) : (
                           <>
                             {/* Standard Menu Items */}
                             <div className="space-y-2 mb-4">
-                          {mealData.items.map((item: any) => {
-                            const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
-                            const isSelected = !!loggedItem;
-                            
-                            const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
-                            const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
-                            
-                            return (
-                              <div
-                                key={item.name}
-                                className={`w-full flex flex-col p-3 rounded-xl border transition-all ${
-                                  isSelected 
-                                    ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30' 
-                                    : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
-                                }`}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <button
-                                      className="flex items-center gap-3 flex-1 text-left"
-                                      onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
+                              {mealData.items.map((item: any) => {
+                                const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
+                                const isSelected = !!loggedItem;
+
+                                const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
+                                const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
+
+                                return (
+                                  <div
+                                    key={item.name}
+                                    className={`w-full flex flex-col p-3 rounded-xl border transition-all ${isSelected
+                                        ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30'
+                                        : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
+                                      }`}
                                   >
-                                    <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
-                                      <Check size={12} strokeWidth={3} />
-                                    </div>
-                                    <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
-                                      {item.name}
-                                      {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
-                                      {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
-                                    </span>
-                                  </button>
-                                  
-                                  {/* Item Portions Stepper */}
-                                  {isSelected && (
-                                    <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
-                                      <button 
-                                        className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                        onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
+                                    <div className="flex items-center justify-between">
+                                      <button
+                                        className="flex items-center gap-3 flex-1 text-left"
+                                        onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
                                       >
-                                        -
+                                        <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
+                                          <Check size={12} strokeWidth={3} />
+                                        </div>
+                                        <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                                          {item.name}
+                                          {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
+                                          {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
+                                        </span>
                                       </button>
-                                      <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
-                                      <button 
-                                        className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                        onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
-                                      >
-                                        +
-                                      </button>
+
+                                      {/* Item Portions Stepper */}
+                                      {isSelected && (
+                                        <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
+                                          <button
+                                            className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                            onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
+                                          >
+                                            -
+                                          </button>
+                                          <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
+                                          <button
+                                            className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                            onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
+                                          >
+                                            +
+                                          </button>
+                                        </div>
+                                      )}
+                                      {!isSelected && (
+                                        <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
+                                          {item.estCalories} kcal
+                                        </span>
+                                      )}
                                     </div>
-                                  )}
-                                  {!isSelected && (
-                                    <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
-                                      {item.estCalories} kcal
-                                    </span>
-                                  )}
-                                </div>
-                                {isSelected && (
-                                    <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
+                                    {isSelected && (
+                                      <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
                                         Total: {Math.round(loggedItem.calories * loggedItem.portion)} kcal
-                                    </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Extra Items List for this slot */}
-                        {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
-                            <div className="mt-4 mb-4 space-y-2">
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Extra Items List for this slot */}
+                            {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
+                              <div className="mt-4 mb-4 space-y-2">
                                 <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">Extra Items</h4>
                                 {mealLog.items.filter(i => i.isExtra).map((extra) => (
-                                    <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
-                                        {editingExtraId === extra.id ? (
-                                            <div className="space-y-3">
-                                                <input 
-                                                    type="text" 
-                                                    value={editExtraName}
-                                                    onChange={(e) => setEditExtraName(e.target.value)}
-                                                    className="input-field text-sm w-full py-1.5 px-3"
-                                                    placeholder="Item name"
-                                                />
-                                                <div className="flex gap-2">
-                                                    <input 
-                                                        type="number" 
-                                                        value={editExtraCals}
-                                                        onChange={(e) => setEditExtraCals(e.target.value)}
-                                                        className="input-field text-sm flex-1 py-1.5 px-3"
-                                                        placeholder="Calories for 1 portion"
-                                                    />
-                                                    <button onClick={() => saveEditedExtraItem(mealObj.slot, extra.id)} className="btn-primary py-1 px-3 text-xs">Save</button>
-                                                    <button onClick={() => setEditingExtraId(null)} className="btn-secondary py-1 px-3 text-xs">Cancel</button>
-                                                </div>
+                                  <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
+                                    {editingExtraId === extra.id ? (
+                                      <div className="space-y-3">
+                                        <input
+                                          type="text"
+                                          value={editExtraName}
+                                          onChange={(e) => setEditExtraName(e.target.value)}
+                                          className="input-field text-sm w-full py-1.5 px-3"
+                                          placeholder="Item name"
+                                        />
+                                        <div className="flex gap-2">
+                                          <input
+                                            type="number"
+                                            value={editExtraCals}
+                                            onChange={(e) => setEditExtraCals(e.target.value)}
+                                            className="input-field text-sm flex-1 py-1.5 px-3"
+                                            placeholder="Calories for 1 portion"
+                                          />
+                                          <button onClick={() => saveEditedExtraItem(mealObj.slot, extra.id)} className="btn-primary py-1 px-3 text-xs">Save</button>
+                                          <button onClick={() => setEditingExtraId(null)} className="btn-secondary py-1 px-3 text-xs">Cancel</button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-col">
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-sm font-medium text-primary-light dark:text-primary-dark">{extra.name}</span>
+                                          <div className="flex items-center gap-1">
+                                            {/* Extra Item Portions Stepper */}
+                                            <div className="flex items-center gap-2 bg-bg-light dark:bg-bg-dark rounded-lg px-2 py-0.5">
+                                              <button
+                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, -0.5); }}
+                                              >
+                                                -
+                                              </button>
+                                              <span className="text-xs font-bold w-6 text-center">{extra.portion}</span>
+                                              <button
+                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, 0.5); }}
+                                              >
+                                                +
+                                              </button>
                                             </div>
-                                        ) : (
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm font-medium text-primary-light dark:text-primary-dark">{extra.name}</span>
-                                                    <div className="flex items-center gap-1">
-                                                        {/* Extra Item Portions Stepper */}
-                                                        <div className="flex items-center gap-2 bg-bg-light dark:bg-bg-dark rounded-lg px-2 py-0.5">
-                                                            <button 
-                                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, -0.5); }}
-                                                            >
-                                                                -
-                                                            </button>
-                                                            <span className="text-xs font-bold w-6 text-center">{extra.portion}</span>
-                                                            <button 
-                                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, 0.5); }}
-                                                            >
-                                                                +
-                                                            </button>
-                                                        </div>
-                                                        
-                                                        <button onClick={() => { setEditingExtraId(extra.id); setEditExtraName(extra.name); setEditExtraCals(extra.calories.toString()); }} className="p-1.5 text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
-                                                            <Edit2 size={14} />
-                                                        </button>
-                                                        <button onClick={() => handleDeleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[10px] text-muted-light dark:text-muted-dark mt-1 font-mono">
-                                                    {extra.calories} kcal/portion • Total: {Math.round(extra.calories * extra.portion)} kcal
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
 
-                        {/* Add Extra Item Input */}
-                        <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
-                            <div className="flex items-center gap-2 mb-2">
+                                            <button onClick={() => { setEditingExtraId(extra.id); setEditExtraName(extra.name); setEditExtraCals(extra.calories.toString()); }} className="p-1.5 text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+                                              <Edit2 size={14} />
+                                            </button>
+                                            <button onClick={() => handleDeleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
+                                              <Trash2 size={14} />
+                                            </button>
+                                          </div>
+                                        </div>
+                                        <div className="text-[10px] text-muted-light dark:text-muted-dark mt-1 font-mono">
+                                          {extra.calories} kcal/portion • Total: {Math.round(extra.calories * extra.portion)} kcal
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Add Extra Item Input */}
+                            <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
+                              <div className="flex items-center gap-2 mb-2">
                                 <Sparkles size={14} className="text-purple-500" />
                                 <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">Ate something else?</span>
-                            </div>
-                            <div className="flex gap-2">
+                              </div>
+                              <div className="flex gap-2">
                                 <input
-                                    type="text"
-                                    placeholder="e.g. 2 slices of pizza, 1 apple"
-                                    value={extraTexts[mealObj.slot] || ''}
-                                    onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
-                                    className="input-field flex-1 text-sm py-2 px-3"
-                                    disabled={estimatingSlot === mealObj.slot}
+                                  type="text"
+                                  placeholder="e.g. 2 slices of pizza, 1 apple"
+                                  value={extraTexts[mealObj.slot] || ''}
+                                  onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
+                                  className="input-field flex-1 text-sm py-2 px-3"
+                                  disabled={estimatingSlot === mealObj.slot}
                                 />
                                 <button
-                                    onClick={() => handleAddExtraItem(mealObj.slot)}
-                                    disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
-                                    className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl disabled:opacity-50"
+                                  onClick={() => handleAddExtraItem(mealObj.slot)}
+                                  disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
+                                  className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl disabled:opacity-50"
                                 >
-                                    {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
+                                  {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
                                 </button>
+                              </div>
                             </div>
-                        </div>
-                        </>
+                          </>
                         )}
                       </div>
                     </motion.div>
                   )}
                   {isOpen && !mealData && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                       <div className="px-4 pb-4 text-center">
-                         <p className="text-sm text-secondary-light dark:text-secondary-dark">No menu items parsed for this meal.</p>
-                       </div>
+                      <div className="px-4 pb-4 text-center">
+                        <p className="text-sm text-secondary-light dark:text-secondary-dark">No menu items parsed for this meal.</p>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -799,20 +808,20 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             </div>
           </div>
         ) : (
-          <button 
+          <button
             onPointerDown={() => triggerHaptic('save')}
             onClick={handleSaveDay}
             className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
           >
             <AnimatePresence mode="wait">
               {showSavedFeedback ? (
-                 <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                   <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
-                 </motion.div>
+                <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
+                  <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
+                </motion.div>
               ) : (
-                 <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                   <Save size={20} /> Save Day's Nutrition
-                 </motion.div>
+                <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
+                  <Save size={20} /> Save Day's Nutrition
+                </motion.div>
               )}
             </AnimatePresence>
           </button>

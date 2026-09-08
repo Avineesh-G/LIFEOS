@@ -10,6 +10,21 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 
 ---
 
+## What is New in Version 1.4
+
+### Premium Modern UI Overhaul
+- **Global Typography Upgrade:** Transitioned the primary application font to **Google Sans Flex**, delivering a premium, highly legible, and fluid typographic experience across all device sizes.
+- **Dynamic Background System:** Introduced a lightweight, frosted glass aesthetic utilizing high-resolution ambient backgrounds (e.g., misty mountains) with intelligent CSS backdrop-filter overlays, automatically adapting to light and dark modes.
+- **Enhanced Navigation Dock:** Refined the bottom navigation bar with a macOS-style click-bounce interaction and removed hover lifts for a seamless mobile-first tactile feel.
+
+### Tasks & Visual Progress
+- **Segmented Completion Bar:** Upgraded the TO-DO tasks progress bar from a monochrome fill to a dynamic, segmented multi-color track. Each individual task completion progressively fills a segment using a curated, vibrant color palette.
+
+### Robust AI Fallback Waterfall
+- **Multi-Model Resilience:** Re-engineered the Groq AI coach pipeline to prevent downtime during free-tier API rate limits (HTTP 429). The system now employs an intelligent 4-model waterfall fallback mechanism, automatically gracefully degrading from `qwen/qwen3.8-27b` to smaller, faster models (`llama-3.3-70b-versatile`, `llama3-8b-8192`, `gemma2-9b-it`) with staggered retry delays.
+
+---
+
 ## What is New in Version 1.3
 
 ### Real-Time Device Theme Synchronization
@@ -132,7 +147,7 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 ## Typography Standards
 
 LifeOS adheres to strict typographical guidelines:
-- **90% Plus Jakarta Sans**: Applied to all structural headings, body text, buttons, and navigation for a friendly, modern feel.
+- **90% Google Sans Flex**: Applied to all structural headings, body text, buttons, and navigation for a premium, highly legible, and fluid typographic experience.
 - **10% JetBrains Mono**: Reserved exclusively for numeric indicators, timestamps, weights, sets, reps, and counters to ensure instant scannability.
 
 ---

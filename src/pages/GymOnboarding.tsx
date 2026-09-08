@@ -111,32 +111,32 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 max-w-xl mx-auto pb-10">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-28 sm:pb-32">
 
       {/* Header & Progress Bar */}
       <motion.div variants={item} className="flex items-center justify-between pt-2">
         <button
           onClick={handleBack}
-          className="w-9 h-9 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-all"
+          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-all shadow-sm"
         >
           <ArrowLeft size={18} />
         </button>
 
         {/* Segmented progress bar */}
-        <div className="flex-1 mx-4 flex items-center gap-0.5">
+        <div className="flex-1 mx-4 flex items-center gap-1">
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
                 i + 1 <= step
                   ? 'bg-primary-light dark:bg-primary-dark'
-                  : 'bg-border-light dark:bg-border-dark'
+                  : 'bg-border-light dark:border-border-dark'
               }`}
             />
           ))}
         </div>
 
-        <span className="label-mono text-muted-light dark:text-muted-dark w-10 text-right">{step}/{totalSteps}</span>
+        <span className="label-mono font-bold text-xs text-muted-light dark:text-muted-dark w-12 text-right">{step}/{totalSteps}</span>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -145,13 +145,13 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
         {step === 1 && (
           <motion.div key="s1" {...stepVariant} className="space-y-5">
             <div>
-              <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Step 1 · Goal</p>
-              <h1 className="text-3xl font-bold tracking-tight text-primary-light dark:text-primary-dark leading-tight">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Step 1 · Goal</p>
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
                 What's your fitness goal?
               </h1>
-              <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Your goal is our roadmap — let's make it happen!</p>
+              <p className="text-xs text-muted-light dark:text-muted-dark mt-2 font-medium">Your goal is our roadmap — let's make it happen!</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3.5">
               {FITNESS_GOALS.map((g) => {
                 const sel = goal === g.id;
                 return (

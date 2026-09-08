@@ -39,20 +39,44 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
     });
   };
 
-  let response: Response;
-  try {
-    response = await tryCall('qwen/qwen3.8-27b', activeKey);
-    // If 401 and activeKey was a custom key, fallback to default key
-    if (response.status === 401 && activeKey !== GEMINI_API_KEY) {
-      activeKey = GEMINI_API_KEY;
-      response = await tryCall('qwen/qwen3.8-27b', activeKey);
+  // Model waterfall — fastest/largest first, lighter fallbacks on rate limit
+  const MODELS = [
+    'qwen/qwen3.8-27b',
+    'llama-3.3-70b-versatile',
+    'llama3-8b-8192',
+    'gemma2-9b-it',
+  ];
+
+  let response: Response = null!;
+  let lastError = '';
+
+  for (let i = 0; i < MODELS.length; i++) {
+    try {
+      response = await tryCall(MODELS[i], activeKey);
+      if (response.ok) break; // success — stop waterfall
+
+      if (response.status === 401 && activeKey !== GEMINI_API_KEY) {
+        // Custom key rejected — retry same model with default key
+        activeKey = GEMINI_API_KEY;
+        response = await tryCall(MODELS[i], activeKey);
+        if (response.ok) break;
+      }
+
+      if (response.status === 429 || response.status === 503) {
+        // Rate limited — wait briefly then try next model
+        lastError = `Model ${MODELS[i]} rate limited (${response.status})`;
+        console.warn(`[AI] ${lastError}, trying next model...`);
+        if (i < MODELS.length - 1) {
+          await new Promise(r => setTimeout(r, 800));
+          continue;
+        }
+      }
+
+      // Other error — stop waterfall
+      break;
+    } catch (netErr: any) {
+      throw new Error(`Network error communicating with AI: ${netErr.message}`);
     }
-    // If model rate limited or temporarily unavailable, fallback to qwen/qwen3.6-27b
-    if (!response.ok && (response.status === 429 || response.status === 503)) {
-      response = await tryCall('qwen/qwen3.6-27b', activeKey);
-    }
-  } catch (netErr: any) {
-    throw new Error(`Network error communicating with AI: ${netErr.message}`);
   }
 
   if (!response.ok) {

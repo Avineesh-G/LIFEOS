@@ -323,27 +323,30 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()];
 
   return (
-    <div className="space-y-5 max-w-2xl mx-auto pb-28">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
 
       {/* Header */}
       <div className="flex items-center justify-between pt-1">
-        <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors active:scale-95">
-          <ChevronLeft size={15} /> Back
+        <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono">
+          <ChevronLeft size={16} /> Back to Gym
         </button>
-        <div className="label-mono text-secondary-light dark:text-secondary-dark">{completedSets}/{totalSets} sets</div>
+        <div className="label-mono font-bold text-xs text-secondary-light dark:text-secondary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1 rounded-full border border-border-light dark:border-border-dark">
+          {completedSets}/{totalSets} sets
+        </div>
       </div>
 
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-3xl font-bold tracking-tight text-primary-light dark:text-primary-dark">{workoutType}</h1>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">{today} · Live Session</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">{workoutType}</h1>
             {!isRest && pct === 100 && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center">
-                <Check size={14} className="text-white" />
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
+                <Check size={16} className="text-white stroke-[3]" />
               </motion.div>
             )}
           </div>
-          {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-0.5 capitalize">{muscles}</p>}
+          {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-1 capitalize font-medium">{muscles}</p>}
         </div>
         <button 
           onClick={() => {

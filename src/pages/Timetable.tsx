@@ -16,12 +16,12 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const SHORT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const BLOCK_COLORS = [
-  'bg-indigo-100 dark:bg-indigo-950 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
-  'bg-emerald-100 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300',
-  'bg-amber-100 dark:bg-amber-950 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300',
-  'bg-rose-100 dark:bg-rose-950 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300',
-  'bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300',
-  'bg-cyan-100 dark:bg-cyan-950 border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-300',
+  'bg-m3-lavender-container dark:bg-m3-lavender-darkContainer border-m3-lavender-badge/60 dark:border-m3-lavender-darkBadge/60 text-m3-lavender-text dark:text-m3-lavender-darkText',
+  'bg-m3-mint-container dark:bg-m3-mint-darkContainer border-m3-mint-badge/60 dark:border-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText',
+  'bg-m3-peach-container dark:bg-m3-peach-darkContainer border-m3-peach-badge/60 dark:border-m3-peach-darkBadge/60 text-m3-peach-text dark:text-m3-peach-darkText',
+  'bg-m3-rose-container dark:bg-m3-rose-darkContainer border-m3-rose-badge/60 dark:border-m3-rose-darkBadge/60 text-m3-rose-text dark:text-m3-rose-darkText',
+  'bg-sky-50 dark:bg-[#1B252E] border-sky-200 dark:border-[#2C3B49] text-sky-800 dark:text-sky-200',
+  'bg-amber-50 dark:bg-[#2A2315] border-amber-200 dark:border-[#3F3520] text-amber-800 dark:text-amber-200',
 ];
 
 function getBlockColor(subject: string) {
@@ -102,11 +102,16 @@ export default function Timetable({ data, updateData }: TimetableProps) {
     setShowModal(true);
   };
 
+  const handleDelete = async (id: string) => {
+    triggerHaptic(15);
+    await updateData({ timetable: data.timetable.filter(b => b.id !== id) });
+  };
+
   const handleSave = async () => {
     if (!subject.trim()) return;
-    triggerHaptic(15);
+    triggerHaptic('save');
     const block: TimetableBlock = {
-      id: editingBlock?.id || crypto.randomUUID(),
+      id: editingBlock ? editingBlock.id : crypto.randomUUID(),
       subject: subject.trim(),
       day,
       startTime,
@@ -115,18 +120,14 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       teacher: teacher.trim() || undefined,
       room: room.trim() || undefined,
       courseCode: courseCode.trim() || undefined,
+      topicsByDate: editingBlock?.topicsByDate || {},
     };
-    const updated = editingBlock
-      ? data.timetable.map(b => b.id === block.id ? block : b)
-      : [...data.timetable, block];
-    await updateData({ timetable: updated });
-    setShowModal(false);
-  };
 
-  const handleDelete = async () => {
-    if (!editingBlock) return;
-    triggerHaptic([20, 10, 20]);
-    await updateData({ timetable: data.timetable.filter(b => b.id !== editingBlock.id) });
+    const updated = editingBlock
+      ? data.timetable.map(b => (b.id === editingBlock.id ? block : b))
+      : [...data.timetable, block];
+
+    await updateData({ timetable: updated });
     setShowModal(false);
   };
 
@@ -141,43 +142,48 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   const getDuration = (start: string, end: string) => {
     const [sh, sm] = start.split(':').map(Number);
     const [eh, em] = end.split(':').map(Number);
-    return (eh * 60 + em) - (sh * 60 + sm);
+    const mins = (eh * 60 + em) - (sh * 60 + sm);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
-
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-28 sm:pb-32">
       {/* Header */}
       <motion.div variants={item} className="flex items-end justify-between pt-2">
         <div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">{today}</p>
-          <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">Timetable</h1>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">{today} · Schedule</p>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Timetable</h1>
         </div>
-        <button onClick={openAdd} className="btn-pill flex items-center gap-2 px-5 py-2.5 text-sm">
-          <Plus size={14} strokeWidth={2.5} /> Add
+        <button onClick={openAdd} className="rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light font-bold px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm active:scale-[0.96] transition-all">
+          <Plus size={15} strokeWidth={2.5} /> Add Block
         </button>
       </motion.div>
 
-      {/* Day Selector Pills */}
-      <motion.div variants={item} className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      {/* Material 3 Expressive Day Selector Chips */}
+      <motion.div variants={item} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
         {DAYS.map((d, i) => {
           const blocks = getBlocksForDay(d);
           const isToday = d === today;
+          const isSelected = activeDay === i;
           return (
             <button
               key={d}
               onClick={() => { triggerHaptic(8); setActiveDay(i); }}
-              className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-2xl border transition-all text-xs ${
-                activeDay === i
+              className={`flex-shrink-0 flex flex-col items-center px-4 py-3 rounded-[22px] border transition-all text-xs active:scale-95 ${
+                isSelected
                   ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-primary-light dark:border-primary-dark shadow-sm'
-                  : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
+                  : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
               }`}
             >
-              <span className="label-mono">{SHORT_DAYS[i]}</span>
-              {isToday && <span className="w-1 h-1 rounded-full bg-emerald-500 mt-1" />}
+              <span className="font-mono font-bold text-[11px]">{SHORT_DAYS[i]}</span>
+              {isToday && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1" />}
               {blocks.length > 0 && (
-                <span className={`mt-0.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${
-                  activeDay === i ? 'bg-white/20' : 'bg-bg-light dark:bg-bg-dark'
+                <span className={`mt-1 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${
+                  isSelected ? 'bg-white/25 text-white dark:text-black' : 'bg-black/5 dark:bg-white/10'
                 }`}>
                   {blocks.length}
                 </span>
@@ -188,8 +194,8 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       </motion.div>
 
       {/* Active Day Blocks */}
-      <motion.div variants={item} className="card p-5">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark mb-4">
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <p className="label-mono text-secondary-light dark:text-secondary-dark">
           {DAYS[activeDay]} · {activeDayBlocks.length} blocks
         </p>
 
@@ -419,8 +425,8 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
       {/* Today's Schedule (if different day is selected) */}
       {activeDay !== todayIndex && todayBlocks.length > 0 && (
-        <motion.div variants={item} className="card p-5">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-4">Today · {today}</p>
+        <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+          <p className="label-mono text-secondary-light dark:text-secondary-dark">Today · {today}</p>
           <div className="space-y-3.5">
             {todayBlocks.map(block => {
               const dur = getDuration(block.startTime, block.endTime);
@@ -487,14 +493,14 @@ export default function Timetable({ data, updateData }: TimetableProps) {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-3xl p-6 pb-10"
+              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-7 pb-10 shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6" />
+              <div className="w-10 h-1.5 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6 opacity-60" />
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-semibold">{editingBlock ? 'Edit Block' : 'Add Block'}</h2>
-                <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-light dark:bg-bg-dark">
-                  <X size={15} />
+                <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">{editingBlock ? 'Edit Block' : 'Add Block'}</h2>
+                <button onClick={() => setShowModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-light dark:bg-bg-dark text-secondary-light dark:text-secondary-dark hover:opacity-80">
+                  <X size={16} />
                 </button>
               </div>
               <div className="space-y-4">
@@ -597,7 +603,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   </button>
                   {editingBlock && (
                     <button
-                      onClick={handleDelete}
+                      onClick={() => {
+                        handleDelete(editingBlock.id);
+                        setShowModal(false);
+                      }}
                       className="w-12 flex items-center justify-center rounded-2xl border border-red-200 dark:border-red-800 text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
                     >
                       <Trash2 size={16} />

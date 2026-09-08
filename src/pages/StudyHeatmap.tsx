@@ -49,31 +49,34 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <button onClick={() => navigate('/study')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
+      <button onClick={() => navigate('/study')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1">
         <ChevronLeft size={16} /> Back to Study
       </button>
 
-      <h1 className="text-3xl md:text-[40px] font-semibold tracking-tight">Heatmap</h1>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-sans mb-1.5">Academics & Consistency</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Heatmap</h1>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4 text-center">
-          <div className="text-2xl font-semibold">{totalHours}h</div>
-          <div className="text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Total</div>
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{totalHours}h</div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Total</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4 text-center">
-          <div className="text-2xl font-semibold">{avgMinutes}m</div>
-          <div className="text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Daily Avg</div>
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{avgMinutes}m</div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Daily Avg</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-4 text-center">
-          <div className="text-2xl font-semibold">{bestDay ? Math.round(bestDay[1] / 60 * 10) / 10 : 0}h</div>
-          <div className="text-xs text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider">Best Day</div>
+        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestDay ? Math.round(bestDay[1] / 60 * 10) / 10 : 0}h</div>
+          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Best Day</div>
         </div>
       </div>
 
       {/* Heatmap Grid */}
-      <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-5 overflow-x-auto">
+      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-6 sm:p-7 shadow-sm overflow-x-auto">
         <div className="flex gap-1 min-w-max">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-1">

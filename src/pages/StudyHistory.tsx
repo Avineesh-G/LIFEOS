@@ -86,12 +86,15 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <button onClick={() => navigate('/study')} className="flex items-center gap-2 text-sm text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
+      <button onClick={() => navigate('/study')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1">
         <ChevronLeft size={16} /> Back to Study
       </button>
 
-      <h1 className="text-3xl md:text-[40px] font-semibold tracking-tight">Study History</h1>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-sans mb-1.5">Academics & Focus</p>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Study History</h1>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
@@ -99,10 +102,10 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
           <button
             key={p}
             onClick={() => setFilter(p)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 ${
               filter === p 
-                ? 'bg-accent text-white' 
-                : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-black/5 dark:hover:bg-white/5'
+                ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm' 
+                : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
             }`}
           >
             {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -111,7 +114,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
         <select
           value={subjectFilter}
           onChange={(e) => setSubjectFilter(e.target.value)}
-          className="px-3 py-1.5 rounded-lg text-sm bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark focus:outline-none focus:ring-2 focus:ring-accent/30"
+          className="px-4 py-2 rounded-full text-xs font-bold bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark cursor-pointer"
         >
           <option value="">All Subjects</option>
           {subjects.map(s => <option key={s} value={s}>{s}</option>)}

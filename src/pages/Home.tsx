@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, TrendingUp } from 'lucide-react';
+import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, ArrowUpRight, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 
 interface HomeProps {
@@ -10,11 +11,12 @@ interface HomeProps {
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
+
 const item = {
-  hidden: { opacity: 0, y: 14 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 12 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
 export default function Home({ data }: HomeProps) {
@@ -58,201 +60,317 @@ export default function Home({ data }: HomeProps) {
   const spendScore   = todayExpenses.length > 0 ? 25 : 0;
   const dayScore     = Math.round(studyScore + gymScore + taskScore + spendScore);
 
-  // ── Greeting ──
+  // Dynamic Status Badge
+  const getScoreBadge = () => {
+    if (dayScore >= 80) return { label: 'Optimal Pace', color: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' };
+    if (dayScore >= 50) return { label: 'On Track', color: 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300' };
+    if (dayScore >= 25) return { label: 'Building Up', color: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' };
+    return { label: 'Starting Day', color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300' };
+  };
+  const scoreBadge = getScoreBadge();
+
+  // Greeting
   const h = now.getHours();
   let greetWord = 'Evening';
   if (h < 12) greetWord = 'Morning';
   else if (h === 12) greetWord = 'Noon';
   else if (h < 17) greetWord = 'Afternoon';
 
-  return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+  // Arc Gauge Constants (radius 76, arc length ≈ 238.76)
+  const arcLength = 238.76;
+  const strokeOffset = arcLength * (1 - Math.min(100, Math.max(0, dayScore)) / 100);
 
-      {/* ── Hero greeting ── */}
-      <motion.div variants={item} className="pt-2 pb-1">
-        <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">
-          {format(now, 'EEEE, MMMM d')}
-        </p>
-        <h1 className="text-4xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">
-          Good{' '}
-          <span className="text-accent">
-            {greetWord}
+  return (
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
+
+      {/* ── Expressive Hero Greeting ── */}
+      <motion.div variants={item} className="pt-2 px-1">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm mb-3">
+          <Calendar size={13} className="text-accent" />
+          <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
+            {format(now, 'EEEE, MMMM d')}
           </span>
+        </div>
+        <h1 className="text-[34px] sm:text-4xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
+          Good <span className="text-accent">{greetWord}</span>
         </h1>
       </motion.div>
 
-      {/* ── Day Score card ── */}
-      <motion.div variants={item} className="card p-5 shadow-card">
-        <div className="flex items-start justify-between mb-4">
+      {/* ── M3 Expressive Day Score Card ── */}
+      <motion.div
+        variants={item}
+        className="rounded-[32px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle relative overflow-hidden"
+      >
+        {/* Card Header Row */}
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Day Score</p>
-            <div className="flex items-end gap-1.5">
-              <span className="text-5xl font-bold tracking-tight leading-none text-primary-light dark:text-primary-dark">
+            <span className="text-xs font-bold tracking-wider text-muted-light dark:text-muted-dark uppercase block">
+              Daily Progress
+            </span>
+            <span className="text-xs text-secondary-light dark:text-secondary-dark font-medium">
+              Overall execution balance
+            </span>
+          </div>
+          <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-sm ${scoreBadge.color}`}>
+            {scoreBadge.label}
+          </span>
+        </div>
+
+        {/* Semi-Circle Arc Gauge */}
+        <div className="relative flex flex-col items-center justify-center my-2">
+          <svg className="w-56 h-32 overflow-visible" viewBox="0 0 200 115">
+            <defs>
+              <linearGradient id="m3ScoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#818CF8" />
+                <stop offset="50%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#4F46E5" />
+              </linearGradient>
+            </defs>
+            {/* Background Track */}
+            <path
+              d="M 24 100 A 76 76 0 0 1 176 100"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="14"
+              strokeLinecap="round"
+              className="text-neutral-100 dark:text-neutral-800"
+            />
+            {/* Active Filled Track */}
+            <path
+              d="M 24 100 A 76 76 0 0 1 176 100"
+              fill="none"
+              stroke="url(#m3ScoreGradient)"
+              strokeWidth="14"
+              strokeLinecap="round"
+              strokeDasharray={arcLength}
+              strokeDashoffset={strokeOffset}
+              style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}
+            />
+          </svg>
+
+          {/* Central Score Typography */}
+          <div className="absolute bottom-1 flex flex-col items-center">
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl sm:text-5xl font-extrabold font-mono tracking-tight text-primary-light dark:text-primary-dark">
                 {dayScore}
               </span>
-              <span className="text-lg text-muted-light dark:text-muted-dark mb-1 font-medium">/100</span>
+              <span className="text-base font-semibold text-muted-light dark:text-muted-dark font-mono">
+                /100
+              </span>
             </div>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-bg-light dark:bg-bg-dark flex items-center justify-center">
-            <TrendingUp size={20} className="text-secondary-light dark:text-secondary-dark" />
-          </div>
-        </div>
-        {/* Segmented score bar */}
-        <div className="flex gap-1">
-          {[
-            { score: studyScore,  max: 25 },
-            { score: gymScore,    max: 25 },
-            { score: taskScore,   max: 25 },
-            { score: spendScore,  max: 25 },
-          ].map((seg, i) => (
-            <div key={i} className="flex-1 h-1.5 rounded-full bg-bg-light dark:bg-bg-dark overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary-light dark:bg-primary-dark transition-all duration-700"
-                style={{ width: `${Math.round((seg.score / seg.max) * 100)}%` }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-1 mt-1.5">
-          {['Study', 'Gym', 'Tasks', 'Money'].map(l => (
-            <span key={l} className="flex-1 label-mono text-muted-light dark:text-muted-dark text-center" style={{ fontSize: 8 }}>
-              {l}
+            <span className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
+              Target Index
             </span>
+          </div>
+        </div>
+
+        {/* 4 Pillars Chunky Segment Indicators */}
+        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-border-light/40 dark:border-border-dark/40">
+          {[
+            { label: 'Study', score: Math.round(studyScore), max: 25, color: 'bg-indigo-500' },
+            { label: 'Gym', score: Math.round(gymScore), max: 25, color: 'bg-emerald-500' },
+            { label: 'Tasks', score: Math.round(taskScore), max: 25, color: 'bg-purple-500' },
+            { label: 'Money', score: Math.round(spendScore), max: 25, color: 'bg-amber-500' },
+          ].map((col) => (
+            <div key={col.label} className="flex flex-col items-center text-center">
+              <span className="text-[10px] font-mono font-semibold uppercase text-secondary-light dark:text-secondary-dark mb-1">
+                {col.label}
+              </span>
+              <div className="w-full h-2 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden mb-1">
+                <div
+                  className={`h-full rounded-full ${col.color} transition-all duration-500`}
+                  style={{ width: `${Math.round((col.score / col.max) * 100)}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-mono font-medium text-muted-light dark:text-muted-dark">
+                {col.score}/{col.max}
+              </span>
+            </div>
           ))}
         </div>
       </motion.div>
 
-      {/* ── 2×2 stat grid ── */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3">
+      {/* ── 2×2 Tonal Expressive Cards ── */}
+      <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
 
-        {/* Study */}
-        <button
+        {/* 1. Study Card (Soft Lavender) */}
+        <motion.button
+          whileTap={{ scale: 0.975 }}
+          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/study')}
-          className="card p-4 text-left hover:shadow-card-hover active:scale-[0.975] transition-all duration-150 group"
+          className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-lavender-container dark:bg-m3-lavender-darkContainer border border-m3-lavender-badge/50 dark:border-m3-lavender-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center">
-              <BookOpen size={15} className="text-indigo-600 dark:text-indigo-400" />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-[16px] bg-m3-lavender-badge dark:bg-m3-lavender-darkBadge flex items-center justify-center text-m3-lavender-text dark:text-m3-lavender-darkText shadow-sm">
+                <BookOpen size={20} strokeWidth={2.2} />
+              </div>
+              <ArrowUpRight size={17} className="text-m3-lavender-text/50 dark:text-m3-lavender-darkText/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </div>
-            <ChevronRight size={14} className="text-muted-light dark:text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="text-xs font-bold uppercase tracking-wider text-m3-lavender-text dark:text-m3-lavender-darkText block mb-1.5">
+              Study
+            </span>
+            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark">
+              {todayStudyHours}<span className="text-sm font-semibold">h</span>{' '}
+              {todayStudyMins}<span className="text-sm font-semibold">m</span>
+            </p>
           </div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Study</p>
-          <p className="text-2xl font-bold tracking-tight text-primary-light dark:text-primary-dark">
-            {todayStudyHours}<span className="text-sm font-medium">h</span>{' '}
-            {todayStudyMins}<span className="text-sm font-medium">m</span>
-          </p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1">
-            {todaySessions.length} session{todaySessions.length !== 1 ? 's' : ''}
-          </p>
-        </button>
 
-        {/* Gym */}
-        <button
+          <div className="mt-4 pt-3 border-t border-m3-lavender-badge/40 dark:border-m3-lavender-darkBadge/40 flex items-center justify-between">
+            <span className="text-xs font-medium text-m3-lavender-text dark:text-m3-lavender-darkText">
+              {todaySessions.length} session{todaySessions.length !== 1 ? 's' : ''}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-m3-lavender-badge/60 dark:bg-m3-lavender-darkBadge/60 text-m3-lavender-text dark:text-m3-lavender-darkText">
+              Deep Work
+            </span>
+          </div>
+        </motion.button>
+
+        {/* 2. Gym Card (Fresh Pistachio Mint) */}
+        <motion.button
+          whileTap={{ scale: 0.975 }}
+          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/gym')}
-          className="card p-4 text-left hover:shadow-card-hover active:scale-[0.975] transition-all duration-150 group"
+          className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-mint-container dark:bg-m3-mint-darkContainer border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
-              <Dumbbell size={15} className="text-emerald-600 dark:text-emerald-400" />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-[16px] bg-m3-mint-badge dark:bg-m3-mint-darkBadge flex items-center justify-center text-m3-mint-text dark:text-m3-mint-darkText shadow-sm">
+                <Dumbbell size={20} strokeWidth={2.2} />
+              </div>
+              <ArrowUpRight size={17} className="text-m3-mint-text/50 dark:text-m3-mint-darkText/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </div>
-            <ChevronRight size={14} className="text-muted-light dark:text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="text-xs font-bold uppercase tracking-wider text-m3-mint-text dark:text-m3-mint-darkText block mb-1.5">
+              Gym
+            </span>
+            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+              {todayWorkout ? todayPlan?.type || 'Workout' : todayPlan?.type || 'Rest'}
+            </p>
           </div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Gym</p>
-          <p className="text-2xl font-bold tracking-tight text-primary-light dark:text-primary-dark">
-            {todayWorkout ? todayPlan?.type || 'Done' : todayPlan?.type || 'Rest'}
-          </p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1">
-            {todayWorkout
-              ? `${(todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)} sets done`
-              : todayPlan && (todayPlan.exercises || []).length > 0
-                ? `${(todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)} sets planned`
-                : 'Rest day'}
-          </p>
-        </button>
 
-        {/* Spending */}
-        <button
+          <div className="mt-4 pt-3 border-t border-m3-mint-badge/40 dark:border-m3-mint-darkBadge/40 flex items-center justify-between">
+            <span className="text-xs font-medium text-m3-mint-text dark:text-m3-mint-darkText truncate">
+              {todayWorkout
+                ? `${(todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)} sets`
+                : todayPlan && (todayPlan.exercises || []).length > 0
+                  ? `${(todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)} sets`
+                  : 'Rest day'}
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              todayWorkout 
+                ? 'bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200' 
+                : 'bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText'
+            }`}>
+              {todayWorkout ? 'Done' : 'Split'}
+            </span>
+          </div>
+        </motion.button>
+
+        {/* 3. Spending Card (Warm Peach) */}
+        <motion.button
+          whileTap={{ scale: 0.975 }}
+          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/spending')}
-          className="card p-4 text-left hover:shadow-card-hover active:scale-[0.975] transition-all duration-150 group"
+          className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-peach-container dark:bg-m3-peach-darkContainer border border-m3-peach-badge/50 dark:border-m3-peach-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center">
-              <Wallet size={15} className="text-amber-600 dark:text-amber-400" />
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-[16px] bg-m3-peach-badge dark:bg-m3-peach-darkBadge flex items-center justify-center text-m3-peach-text dark:text-m3-peach-darkText shadow-sm">
+                <Wallet size={20} strokeWidth={2.2} />
+              </div>
+              <ArrowUpRight size={17} className="text-m3-peach-text/50 dark:text-m3-peach-darkText/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </div>
-            <ChevronRight size={14} className="text-muted-light dark:text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="text-xs font-bold uppercase tracking-wider text-m3-peach-text dark:text-m3-peach-darkText block mb-1.5">
+              Money
+            </span>
+            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark">
+              ₹{todaySpent.toLocaleString('en-IN')}
+            </p>
           </div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Spending</p>
-          <p className="text-2xl font-bold tracking-tight text-primary-light dark:text-primary-dark">
-            ₹{todaySpent.toLocaleString('en-IN')}
-          </p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1">
-            {todayExpenses.length} transaction{todayExpenses.length !== 1 ? 's' : ''}
-          </p>
-        </button>
 
-        {/* Next / Timetable */}
-        <button
-          onClick={() => nextBlock ? navigate('/study/timer') : navigate('/timetable')}
-          className="card p-4 text-left hover:shadow-card-hover active:scale-[0.975] transition-all duration-150 group"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950 flex items-center justify-center">
-              <Clock size={15} className="text-rose-600 dark:text-rose-400" />
-            </div>
-            <ChevronRight size={14} className="text-muted-light dark:text-muted-dark opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="mt-4 pt-3 border-t border-m3-peach-badge/40 dark:border-m3-peach-darkBadge/40 flex items-center justify-between">
+            <span className="text-xs font-medium text-m3-peach-text dark:text-m3-peach-darkText">
+              {todayExpenses.length} record{todayExpenses.length !== 1 ? 's' : ''}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-m3-peach-badge/60 dark:bg-m3-peach-darkBadge/60 text-m3-peach-text dark:text-m3-peach-darkText">
+              Expenses
+            </span>
           </div>
-          <p className="label-mono text-secondary-light dark:text-secondary-dark mb-1">Next Up</p>
-          {nextBlock ? (
-            <>
-              <p className="text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark leading-tight truncate">
-                {nextBlock.subject}
-              </p>
-              <p className="text-xs text-muted-light dark:text-muted-dark mt-1">
-                {nextBlock.startTime} – {nextBlock.endTime}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark">Free</p>
-              <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Add timetable →</p>
-            </>
-          )}
-        </button>
+        </motion.button>
+
+        {/* 4. Next Up / Timetable Card (Soft Rose) */}
+        <motion.button
+          whileTap={{ scale: 0.975 }}
+          onPointerDown={() => triggerHaptic('light')}
+          onClick={() => nextBlock ? navigate('/study/timer') : navigate('/timetable')}
+          className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-rose-container dark:bg-m3-rose-darkContainer border border-m3-rose-badge/50 dark:border-m3-rose-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-11 h-11 rounded-[16px] bg-m3-rose-badge dark:bg-m3-rose-darkBadge flex items-center justify-center text-m3-rose-text dark:text-m3-rose-darkText shadow-sm">
+                <Clock size={20} strokeWidth={2.2} />
+              </div>
+              <ArrowUpRight size={17} className="text-m3-rose-text/50 dark:text-m3-rose-darkText/50 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-m3-rose-text dark:text-m3-rose-darkText block mb-1.5">
+              Next Up
+            </span>
+            <p className="text-lg sm:text-xl font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+              {nextBlock ? nextBlock.subject : 'Free Period'}
+            </p>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-m3-rose-badge/40 dark:border-m3-rose-darkBadge/40 flex items-center justify-between">
+            <span className="text-xs font-medium text-m3-rose-text dark:text-m3-rose-darkText truncate">
+              {nextBlock ? `${nextBlock.startTime} – ${nextBlock.endTime}` : 'No upcoming class'}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-m3-rose-badge/60 dark:bg-m3-rose-darkBadge/60 text-m3-rose-text dark:text-m3-rose-darkText">
+              Timetable
+            </span>
+          </div>
+        </motion.button>
+
       </motion.div>
 
-      {/* ── Tasks preview ── */}
+      {/* ── Expressive TO-DO Preview ── */}
       {todayTasks.length > 0 && (
-        <motion.div variants={item} className="card p-5">
+        <motion.div variants={item} className="rounded-m3-card p-5 bg-surface-light dark:bg-surface-dark border border-border-light/50 dark:border-border-dark/50 shadow-m3-subtle">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <Calendar size={15} className="text-secondary-light dark:text-secondary-dark" />
-              <p className="label-mono text-secondary-light dark:text-secondary-dark">
-                TO-DO · {completedTasks}/{todayTasks.length}
-              </p>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <Calendar size={14} />
+              </div>
+              <span className="text-xs font-bold font-mono tracking-wider uppercase text-primary-light dark:text-primary-dark">
+                Tasks Today · {completedTasks}/{todayTasks.length}
+              </span>
             </div>
             <button
               onClick={() => navigate('/tasks')}
-              className="text-[11px] font-mono font-medium text-primary-light dark:text-primary-dark flex items-center gap-0.5 hover:opacity-60 transition-opacity"
+              className="px-3 py-1 rounded-full text-[11px] font-semibold bg-neutral-100 dark:bg-neutral-800 text-primary-light dark:text-primary-dark flex items-center gap-1 hover:opacity-80 transition-opacity"
             >
-              All <ChevronRight size={12} />
+              View All <ChevronRight size={12} />
             </button>
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-2.5">
             {todayTasks.slice(0, 4).map(task => (
-              <div key={task.id} className="flex items-center gap-3">
-                <div className={`w-4 h-4 rounded flex-shrink-0 border transition-colors ${
+              <div
+                key={task.id}
+                className="flex items-center gap-3 p-2.5 rounded-[18px] bg-neutral-50/80 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800"
+              >
+                <div className={`w-5 h-5 rounded-[8px] flex-shrink-0 flex items-center justify-center transition-all ${
                   task.completed
-                    ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark'
-                    : 'border-border-light dark:border-border-dark'
-                } flex items-center justify-center`}>
+                    ? 'bg-accent text-white'
+                    : 'border-2 border-neutral-300 dark:border-neutral-600'
+                }`}>
                   {task.completed && (
-                    <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 5L4 7L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className={`text-sm leading-snug block truncate ${
+                  <span className={`text-sm font-medium block truncate ${
                     task.completed
                       ? 'line-through text-muted-light dark:text-muted-dark'
                       : 'text-primary-light dark:text-primary-dark'
@@ -260,9 +378,9 @@ export default function Home({ data }: HomeProps) {
                     {task.text}
                   </span>
                   {task.subtask && (
-                    <span className={`text-xs block truncate ${
+                    <span className={`text-[11px] block truncate ${
                       task.completed
-                        ? 'line-through text-muted-light/70 dark:text-muted-dark/70'
+                        ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
                         : 'text-secondary-light dark:text-secondary-dark'
                     }`}>
                       {task.subtask}
@@ -275,16 +393,35 @@ export default function Home({ data }: HomeProps) {
         </motion.div>
       )}
 
-      {/* ── Stats footer strip ── */}
-      <motion.div variants={item} className="grid grid-cols-3 gap-3 pb-2">
+      {/* ── Expressive Stats Footer Strip ── */}
+      <motion.div variants={item} className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Study streak', value: `${data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length}d` },
-          { label: 'Workouts', value: data.workoutLogs.length.toString() },
-          { label: 'This month', value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(now, 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}` },
+          { 
+            label: 'Study Streak', 
+            value: `${data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length}d`,
+            icon: Sparkles
+          },
+          { 
+            label: 'Workouts', 
+            value: data.workoutLogs.length.toString(),
+            icon: Dumbbell
+          },
+          { 
+            label: 'This Month', 
+            value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(now, 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}`,
+            icon: Wallet
+          },
         ].map(stat => (
-          <div key={stat.label} className="card p-3.5 text-center flex flex-col justify-center items-center overflow-hidden">
-            <p className="text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark truncate w-full">{stat.value}</p>
-            <p className="label-mono text-muted-light dark:text-muted-dark mt-1 truncate w-full" style={{ fontSize: 8 }}>{stat.label}</p>
+          <div
+            key={stat.label}
+            className="rounded-[22px] p-3.5 text-center flex flex-col justify-center items-center bg-surface-light dark:bg-surface-dark border border-border-light/40 dark:border-border-dark/40 shadow-m3-subtle"
+          >
+            <p className="text-base sm:text-lg font-extrabold font-mono tracking-tight text-primary-light dark:text-primary-dark truncate w-full">
+              {stat.value}
+            </p>
+            <p className="text-[10px] font-mono font-medium text-muted-light dark:text-muted-dark mt-0.5 truncate w-full uppercase">
+              {stat.label}
+            </p>
           </div>
         ))}
       </motion.div>
