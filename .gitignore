@@ -12,6 +12,7 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 *.apk
+!public/LifeOS.apk
 *.jks
 *.keystore
 google-services.json
