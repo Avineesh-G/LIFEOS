@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo, Download, RefreshCw, Smartphone } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo, Download, RefreshCw, Smartphone, Key, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
@@ -48,6 +48,18 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Private Groq API Key State
+  const [apiKeyInput, setApiKeyInput] = useState(data.geminiApiKey || '');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeySaved, setApiKeySaved] = useState(false);
+
+  const handleSaveApiKey = async () => {
+    triggerHaptic('save');
+    await updateData({ geminiApiKey: apiKeyInput.trim() });
+    setApiKeySaved(true);
+    setTimeout(() => setApiKeySaved(false), 2500);
+  };
 
   // In-App Update State
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -958,6 +970,81 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             </motion.div>
           )}
         </AnimatePresence>
+      </motion.div>
+
+      {/* Private Groq AI Coach Configuration */}
+      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-[14px] bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-600 dark:text-purple-400">
+              <Key size={20} />
+            </span>
+            <div>
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+                AI Coach Integration
+              </p>
+              <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
+                Groq API Key
+              </h3>
+            </div>
+          </div>
+          {data.geminiApiKey ? (
+            <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold font-mono">
+              Active ✓
+            </span>
+          ) : (
+            <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-bold font-mono">
+              Not Set
+            </span>
+          )}
+        </div>
+
+        <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
+          Your key is saved exclusively in your private account. It is never committed to Git, never visible in the APK, and completely private to you.
+        </p>
+
+        <div className="space-y-2 pt-1">
+          <div className="relative flex items-center">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={apiKeyInput}
+              onChange={e => setApiKeyInput(e.target.value)}
+              placeholder="gsk_..."
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark"
+            />
+            <button
+              type="button"
+              onClick={() => setShowApiKey(!showApiKey)}
+              className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors"
+            >
+              {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <a
+              href="https://console.groq.com/keys"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-accent hover:underline flex items-center gap-1 font-mono"
+            >
+              Get Free Key from Groq →
+            </a>
+            <button
+              onClick={handleSaveApiKey}
+              disabled={!apiKeyInput.trim()}
+              className="btn-pill px-4 py-2 text-xs bg-accent text-white hover:opacity-90 active:scale-95 transition-all shadow-sm disabled:opacity-40 flex items-center gap-1.5"
+            >
+              {apiKeySaved ? (
+                <>
+                  <Check size={14} className="stroke-[3]" /> Saved!
+                </>
+              ) : (
+                'Save Key'
+              )}
+            </button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Account Settings (Mobile-First Ergonomics) */}
