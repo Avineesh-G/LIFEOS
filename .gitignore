@@ -11,3 +11,7 @@ yarn-error.log*
 pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
+*.apk
+*.jks
+*.keystore
+google-services.json

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LifeOS</string>
+    <string name="title_activity_main">LifeOS</string>
+    <string name="package_name">com.avineesh.lifeos</string>
+    <string name="custom_url_scheme">com.avineesh.lifeos</string>
+    <string name="server_client_id">527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com</string>
+</resources>

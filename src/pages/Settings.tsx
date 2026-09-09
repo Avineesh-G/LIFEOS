@@ -10,6 +10,8 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
 
 interface SettingsProps {
@@ -947,6 +949,9 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           <button
             onClick={() => {
               triggerHaptic('medium');
+              if (Capacitor.isNativePlatform()) {
+                GoogleAuth.signOut().catch(() => {});
+              }
               navigate('/');
               signOut(auth);
             }}

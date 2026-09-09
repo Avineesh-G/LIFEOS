@@ -32,6 +32,13 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 ### Robust AI Fallback Waterfall
 - **Multi-Model Resilience:** Re-engineered the Groq AI coach pipeline to prevent downtime during free-tier API rate limits (HTTP 429). The system now employs an intelligent 4-model waterfall fallback mechanism, automatically gracefully degrading from `qwen/qwen3.8-27b` to smaller, faster models (`llama-3.3-70b-versatile`, `llama3-8b-8192`, `gemma2-9b-it`) with staggered retry delays.
 
+### Native Android APK & Google Play Services Integration
+- **Capacitor 8 Native Android Runtime:** Packaged LifeOS into a standalone, installable Android APK (`com.avineesh.lifeos`) with complete offline capabilities and hardware GPU acceleration (`android:hardwareAccelerated="true"`).
+- **Native Google Play Services Authentication:** Eliminated Google OAuth 403 / `disallowed_useragent` WebView restrictions by implementing native Google Play Services bottom-sheet account selection via `@codetrix-studio/capacitor-google-auth`. Automatically issues native ID tokens seamlessly validated by Firebase backend authentication (`signInWithCredential`), maintaining full web compatibility (`signInWithPopup`) on browser runtimes.
+- **Permanent Keystore Signing & Play Protect Trust:** Generated a permanent Android release keystore (`lifeos-release-key.jks`) and linked official SHA-1 and SHA-256 certificate fingerprints with Google Cloud and Firebase. Google Play Protect explicitly verifies the app as safe with zero security blocks.
+- **Clean Architecture & Deployment Model:** Web frontend deployed and hosted exclusively on **Vercel**, with **Firebase** serving strictly as the backend cloud database and identity platform.
+- **Unified Cross-Platform Build Pipeline:** Introduced unified commands (`npm run cap:sync`, `npm run cap:build`, `npm run cap:open`) guaranteeing simultaneous feature parity between web and Android APK releases.
+
 ---
 
 ## What is New in Version 1.3
@@ -146,6 +153,11 @@ LifeOS (branded as Flow) is an all-in-one personal management and execution oper
 - **Lucide React**: Vector iconography for modern mobile interfaces.
 - **Canvas Confetti**: Rewarding completion animations upon goal attainment.
 
+### Mobile & Native Runtime
+- **Capacitor 8**: Native runtime container bridging modern web technologies to Android.
+- **Capacitor Google Auth**: Native Google Play Services authentication plugin.
+- **Android SDK & Gradle 8.14**: Compiles optimized, hardware-accelerated standalone APKs.
+
 ### Cloud and Artificial Intelligence
 - **Firebase Authentication**: Google OAuth authentication.
 - **Cloud Firestore**: Real-time cloud synchronization with offline persistence support.
@@ -166,6 +178,8 @@ LifeOS adheres to strict typographical guidelines:
 ### Prerequisites
 - Node.js 18.x or higher
 - npm 9.x or higher
+- Java 17 (for Android native APK builds)
+- Android SDK (optional, only for building native APKs)
 
 ### Installation
 
@@ -196,7 +210,7 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
 npm run dev
 ```
 
-5. Build production bundle:
+5. Build production web bundle:
 ```bash
 npm run build
 ```
@@ -204,6 +218,11 @@ npm run build
 6. Preview production build:
 ```bash
 npm run preview
+```
+
+7. Build standalone Android APK:
+```bash
+npm run cap:build
 ```
 
 ---
