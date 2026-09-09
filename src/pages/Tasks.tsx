@@ -142,88 +142,103 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
       {/* Task list */}
       <motion.div variants={item} className="space-y-3">
-        <AnimatePresence>
-          {todayTasks.map(task => (
-            <motion.div
-              key={task.id}
-              layout
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="rounded-[22px] bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex items-center gap-4 p-4.5 group active:scale-[0.985] transition-all"
-            >
-              <button
-                onClick={() => toggleTask(task.id)}
-                className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
+        <AnimatePresence mode="popLayout">
+          {todayTasks.map(task => {
+            const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
+            return (
+              <motion.div
+                key={task.id}
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className={`rounded-[22px] border transition-all p-4 flex items-center gap-3.5 group shadow-sm ${
                   task.completed
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent'
+                    ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-border-dark/50 opacity-75'
+                    : 'bg-white dark:bg-[#1A1B1F] border-border-light dark:border-border-dark hover:border-accent/40 shadow-sm'
                 }`}
               >
-                {task.completed && <Check size={16} className="stroke-[3]" />}
-              </button>
-              <div className="flex-1 min-w-0">
-                <span className={`text-sm leading-snug truncate block font-medium ${
-                  task.completed
-                    ? 'line-through text-muted-light dark:text-muted-dark'
-                    : 'text-primary-light dark:text-primary-dark'
-                }`}>
-                  {task.text}
-                </span>
-                {task.subtask && (
-                  <span className={`text-xs block mt-0.5 truncate ${
+                <button
+                  type="button"
+                  onClick={() => toggleTask(task.id)}
+                  className={`w-7 h-7 rounded-[9px] flex-shrink-0 flex items-center justify-center transition-all ${
                     task.completed
-                      ? 'line-through text-muted-light/70 dark:text-muted-dark/70'
-                      : 'text-secondary-light dark:text-secondary-dark'
+                      ? 'bg-accent text-white shadow-sm scale-100'
+                      : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent bg-black/[0.02] dark:bg-white/[0.04]'
+                  }`}
+                >
+                  {task.completed && <Check size={16} className="stroke-[3]" />}
+                </button>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
+                  <span className={`text-sm leading-snug block font-bold transition-all ${
+                    task.completed
+                      ? 'line-through text-muted-light dark:text-muted-dark opacity-60'
+                      : 'text-primary-light dark:text-primary-dark'
                   }`}>
-                    {task.subtask}
+                    {task.text}
                   </span>
-                )}
-              </div>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-red-500 transition-all"
-              >
-                <Trash2 size={14} />
-              </button>
-            </motion.div>
-          ))}
+                  {hasValidSubtask && (
+                    <span className={`text-xs block mt-1 leading-normal font-medium ${
+                      task.completed
+                        ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
+                        : 'text-secondary-light dark:text-secondary-dark'
+                    }`}>
+                      {task.subtask}
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteTask(task.id);
+                  }}
+                  className="opacity-40 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-red-500 transition-all flex-shrink-0"
+                  title="Delete task"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
 
         {todayTasks.length === 0 && (
           <motion.div variants={item} className="card p-10 text-center">
             <p className="text-2xl mb-2">✓</p>
             <p className="label-mono text-secondary-light dark:text-secondary-dark">No TO-DOs yet</p>
-            <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + to add your first TO-DO</p>
+            <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + Add Task to create your first TO-DO</p>
           </motion.div>
         )}
       </motion.div>
 
-      {/* Add Task Sheet */}
+      {/* Add Task Elevated Modal Card (Clears Navigation Bar) */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50 flex items-end justify-center"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-3 sm:p-4"
             onClick={() => setShowAdd(false)}
           >
             <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              initial={{ y: '100%', opacity: 0, scale: 0.95 }} 
+              animate={{ y: 0, opacity: 1, scale: 1 }} 
+              exit={{ y: '100%', opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-3xl p-6 pb-10"
+              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[28px] p-5 sm:p-6 mb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:mb-0 border border-border-light dark:border-border-dark shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6" />
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-semibold">New TO-DO</h2>
-                <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-light dark:bg-bg-dark">
+              <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-4" />
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-primary-light dark:text-primary-dark font-sans">New TO-DO</h2>
+                <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80">
                   <X size={15} />
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
                     Main Task
                   </label>
                   <input
@@ -232,12 +247,12 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     onChange={e => setNewTask(e.target.value)}
                     placeholder="e.g. Physics Assignment 3"
                     autoFocus
-                    className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
                     What to do actually (sub-option / details)
                   </label>
                   <input
@@ -246,18 +261,20 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     onChange={e => setNewSubtask(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && addTask()}
                     placeholder="e.g. Solve problems 1 through 10 and submit PDF"
-                    className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark font-medium"
                   />
                 </div>
 
-                <button
-                  onPointerDown={() => triggerHaptic('save')}
-                  onClick={addTask}
-                  disabled={!newTask.trim()}
-                  className="btn-pill w-full py-3.5 text-sm disabled:opacity-30 mt-2"
-                >
-                  Add TO-DO
-                </button>
+                <div className="pt-2">
+                  <button
+                    onPointerDown={() => triggerHaptic('save')}
+                    onClick={addTask}
+                    disabled={!newTask.trim()}
+                    className="btn-pill w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-30"
+                  >
+                    Add TO-DO
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>

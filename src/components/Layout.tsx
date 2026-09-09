@@ -33,56 +33,36 @@ interface DockItemProps {
   label: string;
   path: string;
   active: boolean;
-  isBouncing: boolean;
   onClick: () => void;
 }
 
-function DockItem({ icon: Icon, label, active, isBouncing, onClick }: DockItemProps) {
+function DockItem({ icon: Icon, label, active, onClick }: DockItemProps) {
   return (
     <button
       onClick={onClick}
       title={label}
-      className="relative flex items-center justify-center flex-shrink-0 select-none focus:outline-none w-10 h-10 sm:w-11 sm:h-11"
+      className="relative flex flex-col items-center justify-center flex-1 min-w-0 h-11 select-none focus:outline-none"
     >
-      {/* App Tile with MacBook Click Bounce */}
       <motion.div
-        animate={
-          isBouncing
-            ? {
-                y: [0, -28, 0, -14, 0, -6, 0],
-                scaleY: [1, 1.18, 0.88, 1.08, 0.95, 1.02, 1],
-                scaleX: [1, 0.88, 1.1, 0.95, 1.05, 0.98, 1],
-              }
-            : { y: 0, scaleY: 1, scaleX: 1 }
-        }
-        transition={
-          isBouncing
-            ? {
-                duration: 0.88,
-                times: [0, 0.22, 0.44, 0.64, 0.8, 0.92, 1],
-                ease: 'easeInOut',
-              }
-            : { duration: 0.15 }
-        }
-        className={`flex items-center justify-center w-full h-full rounded-[14px] transition-colors ${
+        whileTap={{ scale: 0.84 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+        className={`flex items-center justify-center w-8 sm:w-9 h-8 sm:h-9 rounded-[12px] transition-colors ${
           active
-            ? 'bg-accent/15 dark:bg-accent/25 border border-accent/30 text-accent shadow-sm'
+            ? 'bg-accent/15 dark:bg-accent/25 border border-accent/35 text-accent shadow-sm'
             : 'text-secondary-light dark:text-secondary-dark active:bg-black/5 dark:active:bg-white/5'
         }`}
       >
         <Icon
-          strokeWidth={active ? 2.5 : 2}
-          className="transition-all"
-          size={20}
+          strokeWidth={active ? 2.5 : 1.9}
+          className="transition-transform"
+          size={18}
         />
       </motion.div>
 
       {/* Active Indicator Dot */}
       {active && (
-        <motion.span
-          layoutId="macOSActiveDot"
-          className="w-1.5 h-1.5 rounded-full bg-accent absolute -bottom-1.5 shadow-sm"
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-0.5 shadow-sm"
         />
       )}
     </button>
@@ -101,7 +81,6 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [bouncingPath, setBouncingPath] = useState<string | null>(null);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -113,7 +92,7 @@ export default function Layout({ children }: LayoutProps) {
   const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
-    <div className="min-h-screen bg-blobs text-primary-light dark:text-primary-dark transition-colors duration-200">
+    <div className="min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
 
       {/* ── Top header bar ── */}
       <header 
@@ -154,27 +133,19 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </main>
 
-      {/* ── Apple & Pixel style frosted translucent bottom floor ── */}
+      {/* ── Native Gradient Bottom Fade (Zero GPU Overhead) ── */}
       <div 
-        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none"
-        style={{ height: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))' }}
-      >
-        <div 
-          className="w-full h-full bg-surface-light/70 dark:bg-surface-dark/75 backdrop-blur-2xl border-t border-border-light/30 dark:border-border-dark/30"
-          style={{
-            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
-            maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)'
-          }}
-        />
-      </div>
+        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-gradient-to-t from-[#F4F4FB]/95 via-[#F4F4FB]/50 to-transparent dark:from-[#121316]/95 dark:via-[#121316]/50"
+        style={{ height: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
+      />
 
-      {/* ── MacBook Magnifying Dock (Material 3 Expressive) ── */}
+      {/* ── Rigid Fixed Responsive Dock (Locked in place, no horizontal scrolling) ── */}
       <div 
-        className="fixed left-0 right-0 z-40 flex justify-center px-4 pointer-events-none"
-        style={{ bottom: 'calc(1.15rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed left-0 right-0 z-40 flex justify-center px-2.5 sm:px-4 pointer-events-none"
+        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <nav
-          className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-2xl border border-border-light/80 dark:border-border-dark/80 rounded-full px-2 sm:px-3 py-2 sm:py-2.5 shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.38)] overflow-x-auto no-scrollbar max-w-full"
+          className="pointer-events-auto grid grid-cols-8 items-center w-full max-w-md bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border border-border-light/80 dark:border-border-dark/80 rounded-full px-1 sm:px-2 py-1 shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.38)]"
         >
           {navItems.map((item) => (
             <DockItem
@@ -183,17 +154,9 @@ export default function Layout({ children }: LayoutProps) {
               label={item.label}
               path={item.path}
               active={isActive(item.path)}
-              isBouncing={bouncingPath === item.path}
               onClick={() => {
                 triggerHaptic('nav');
-                setBouncingPath(null);
-                requestAnimationFrame(() => {
-                  setBouncingPath(item.path);
-                });
                 navigate(item.path);
-                setTimeout(() => {
-                  setBouncingPath((prev) => (prev === item.path ? null : prev));
-                }, 950);
               }}
             />
           ))}

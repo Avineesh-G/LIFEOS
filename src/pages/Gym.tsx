@@ -88,61 +88,66 @@ export default function Gym({ data, updateData }: GymProps) {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
 
-      {/* Material 3 Expressive Mint Hero Card */}
+      {/* Material 3 Expressive Mint Hero Card (Mobile-Optimized) */}
       <motion.div
         variants={item}
-        className="rounded-[32px] p-6 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle"
+        className="rounded-[32px] p-5 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle space-y-4 sm:space-y-5"
       >
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="w-11 h-11 rounded-[16px] shrink-0 bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
-              <Dumbbell size={22} className="text-m3-mint-text dark:text-m3-mint-darkText" />
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[15px] shrink-0 bg-white/85 dark:bg-black/30 flex items-center justify-center shadow-sm">
+              <Dumbbell size={20} className="text-m3-mint-text dark:text-m3-mint-darkText" />
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-75 break-words">
-                {today} · Workout Target
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase opacity-75 font-mono">
+                {today} · Target Routine
               </p>
-              <h2 className="text-sm sm:text-base font-bold opacity-90 truncate">Daily Protocol</h2>
+              <h2 className="text-xs sm:text-sm font-bold opacity-90 truncate">Daily Protocol</h2>
             </div>
           </div>
-          <span className="rounded-full shrink-0 bg-white/70 dark:bg-black/25 px-3.5 py-1.5 text-xs font-bold shadow-sm text-center">
-            {todayPlan?.type || 'Rest'}
+          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold shadow-sm ${
+            isCompletedToday 
+              ? 'bg-[#146C3E] text-white dark:bg-[#A6EDC2] dark:text-[#19261E]'
+              : 'bg-white/80 dark:bg-black/30 text-m3-mint-text dark:text-m3-mint-darkText'
+          }`}>
+            {isCompletedToday ? 'Completed' : (todayPlan?.type === 'REST' ? 'Rest Day' : 'Incomplete')}
           </span>
         </div>
 
-        <div className="flex items-baseline justify-between gap-4 mt-3">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none font-sans">
-              {todayPlan?.type || 'Rest Day'}
-            </h1>
-            <p className="text-xs font-bold opacity-80 mt-1.5 font-mono">
-              {(todayPlan?.exercises || []).length} exercises scheduled
-            </p>
-          </div>
+        {/* Workout Focus & Exercise Count */}
+        <div className="pt-1">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-sans text-m3-mint-text dark:text-m3-mint-darkText">
+            {todayPlan?.type || 'Rest Day'}
+          </h1>
+          <p className="text-xs font-bold opacity-75 mt-1 font-mono">
+            {(todayPlan?.exercises || []).length} exercises scheduled
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2.5">
+        {/* Action Buttons Row */}
+        <div className="flex items-center gap-2.5 pt-1">
+          <button
+            onClick={() => navigate('/gym/split')}
+            className="flex-1 py-3 rounded-full bg-white/80 dark:bg-black/30 text-m3-mint-text dark:text-m3-mint-darkText font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.97] transition-all hover:bg-white/95 dark:hover:bg-black/40"
+          >
+            <Settings size={15} /> Split
+          </button>
+          {isCompletedToday ? (
             <button
-              onClick={() => navigate('/gym/split')}
-              className="rounded-full bg-white/70 dark:bg-black/25 text-m3-mint-text dark:text-m3-mint-darkText font-bold px-4 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
+              onClick={() => navigate('/gym/workout')}
+              className="flex-[1.4] py-3 rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.97] transition-all"
             >
-              <Settings size={15} /> Split
+              <Check size={16} className="stroke-[3]" /> Completed
             </button>
-            {isCompletedToday ? (
-              <button
-                onClick={() => navigate('/gym/workout')}
-                className="rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold px-4 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
-              >
-                <Check size={16} className="stroke-[3]" /> Done
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate('/gym/workout')}
-                className="rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold px-5 py-3 text-xs sm:text-sm flex items-center gap-2 shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all"
-              >
-                <Play size={15} fill="currentColor" /> {todayLog ? 'Resume' : 'Start'}
-              </button>
-            )}
-          </div>
+          ) : (
+            <button
+              onClick={() => navigate('/gym/workout')}
+              className="flex-[1.4] py-3 rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.97] transition-all"
+            >
+              <Play size={15} fill="currentColor" /> {todayLog ? 'Resume Workout' : 'Start Workout'}
+            </button>
+          )}
         </div>
       </motion.div>
 

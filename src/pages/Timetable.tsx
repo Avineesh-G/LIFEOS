@@ -127,8 +127,8 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       ? data.timetable.map(b => (b.id === editingBlock.id ? block : b))
       : [...data.timetable, block];
 
-    await updateData({ timetable: updated });
     setShowModal(false);
+    await updateData({ timetable: updated });
   };
 
   const getBlocksForDay = (d: string) =>
@@ -229,6 +229,8 @@ export default function Timetable({ data, updateData }: TimetableProps) {
               const handleSaveTopic = async () => {
                 if (!draftTopic.trim()) return;
                 triggerHaptic('save');
+                setTopicSavedFeedback(prev => ({ ...prev, [block.id]: true }));
+                setUnlockedTopics(prev => ({ ...prev, [block.id]: false }));
                 const updatedTopics = {
                   ...(block.topicsByDate || {}),
                   [todayDateStr]: draftTopic.trim(),
@@ -237,8 +239,6 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   b.id === block.id ? { ...b, topicsByDate: updatedTopics } : b
                 );
                 await updateData({ timetable: updatedTimetable });
-                setTopicSavedFeedback(prev => ({ ...prev, [block.id]: true }));
-                setUnlockedTopics(prev => ({ ...prev, [block.id]: false }));
                 setTimeout(() => {
                   setTopicSavedFeedback(prev => ({ ...prev, [block.id]: false }));
                 }, 2000);
@@ -493,7 +493,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-7 pb-10 shadow-2xl"
+              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 shadow-2xl max-h-[85vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-10 h-1.5 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6 opacity-60" />

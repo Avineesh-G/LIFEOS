@@ -27,10 +27,10 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const pageTransition = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -6 },
-  transition: { duration: 0.4, ease: 'easeOut' }
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.15, ease: 'easeOut' }
 };
 
 function AnimatedPage({ children }: { children: React.ReactNode }) {
@@ -77,7 +77,7 @@ function App() {
   return (
     <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor}>
       <ErrorBoundary>
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false}>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
             <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />

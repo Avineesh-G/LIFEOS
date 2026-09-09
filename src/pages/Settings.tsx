@@ -714,16 +714,16 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               <div className="px-6 pb-6 border-t border-border-light/70 dark:border-border-dark/70 pt-5 space-y-5">
                 
                 {/* Filter Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1.5 rounded-full border border-border-light dark:border-border-dark">
-                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark" />
+                <div className="flex items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-primary-light dark:text-primary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-2 rounded-full border border-border-light dark:border-border-dark min-w-0 flex-1">
+                    <Calendar size={14} className="text-secondary-light dark:text-secondary-dark shrink-0" />
                     <select 
                       value={selectedSpendingMonth}
                       onChange={(e) => {
                         setSelectedSpendingMonth(e.target.value);
                         setSpendingAiAnalysis(null);
                       }}
-                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs"
+                      className="bg-transparent border-none font-bold text-primary-light dark:text-primary-dark focus:ring-0 cursor-pointer text-xs w-full truncate"
                     >
                       {uniqueSpendingMonths.map(m => {
                         const [y, mo] = m.split('-');
@@ -738,10 +738,10 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                     onPointerDown={() => triggerHaptic('ai')}
                     onClick={handleAnalyzeSpending}
                     disabled={filteredSpendingLogs.length === 0 || spendingAnalyzing}
-                    className="rounded-full px-3.5 py-1.5 flex items-center gap-1.5 text-xs font-bold bg-[#8F4C1B] dark:bg-[#FFB787] text-white dark:text-[#2B1E17] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-40"
+                    className="shrink-0 whitespace-nowrap rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-1.5 text-xs font-bold bg-[#8F4C1B] dark:bg-[#FFB787] text-white dark:text-[#2B1E17] shadow-sm active:scale-95 transition-all disabled:opacity-40"
                   >
-                    {spendingAnalyzing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                    AI Spend Analysis
+                    {spendingAnalyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    AI Insights
                   </button>
                 </div>
 
@@ -922,45 +922,55 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </AnimatePresence>
       </motion.div>
 
-      {/* Account Settings */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-12 h-12 rounded-[18px] bg-black/[0.04] dark:bg-white/[0.06] border border-border-light dark:border-border-dark flex items-center justify-center text-base font-black text-primary-light dark:text-primary-dark font-sans shadow-sm">
-              {(auth.currentUser?.email || 'U')[0].toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">Signed In Account</p>
-              <p className="text-sm font-bold text-primary-light dark:text-primary-dark truncate font-sans mt-0.5" title={auth.currentUser?.email || ''}>{auth.currentUser?.email}</p>
-            </div>
+      {/* Account Settings (Mobile-First Ergonomics) */}
+      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        {/* User Account Info Header */}
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-[18px] bg-accent/10 border border-accent/25 flex items-center justify-center text-lg font-black text-accent font-sans shadow-sm shrink-0">
+            {(auth.currentUser?.email || 'U')[0].toUpperCase()}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => {
-                navigate('/');
-                signOut(auth);
-              }}
-              className="rounded-full px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 active:scale-95 transition-all text-xs font-bold flex items-center gap-1.5"
-            >
-              <LogOut size={14} />
-              Sign Out
-            </button>
-            <button
-              onClick={async () => {
-                if (window.confirm('Are you sure you want to reset all your data? This cannot be undone.')) {
-                  if (auth.currentUser) {
-                    await deleteDoc(doc(db, 'users', auth.currentUser.uid));
-                    alert('Data reset successfully! The app will now reload.');
-                    window.location.reload();
-                  }
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+              Signed In Account
+            </p>
+            <p className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans break-all mt-0.5 leading-snug">
+              {auth.currentUser?.email || 'Signed In User'}
+            </p>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px w-full bg-border-light/60 dark:bg-border-dark/60" />
+
+        {/* Action Buttons Row */}
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <button
+            onClick={() => {
+              triggerHaptic('medium');
+              navigate('/');
+              signOut(auth);
+            }}
+            className="w-full py-2.5 px-4 rounded-full bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-2 shadow-sm"
+          >
+            <LogOut size={15} />
+            Sign Out
+          </button>
+          <button
+            onClick={async () => {
+              triggerHaptic('heavy');
+              if (window.confirm('Are you sure you want to reset all your data? This cannot be undone.')) {
+                if (auth.currentUser) {
+                  await deleteDoc(doc(db, 'users', auth.currentUser.uid));
+                  alert('Data reset successfully! The app will now reload.');
+                  window.location.reload();
                 }
-              }}
-              className="rounded-full px-3.5 py-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 active:scale-95 transition-all text-xs font-bold flex items-center gap-1"
-            >
-              <AlertTriangle size={13} />
-              Reset
-            </button>
-          </div>
+              }
+            }}
+            className="w-full py-2.5 px-4 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <AlertTriangle size={14} className="text-amber-500" />
+            Reset Data
+          </button>
         </div>
       </motion.div>
 
