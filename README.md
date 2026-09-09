@@ -8,6 +8,29 @@
 
 LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, modern aesthetics inspired by Google Material 3 Expressive, and intelligent Groq AI inference.
 
+## What is New in Version 1.5
+
+### Official Android Icon & Visual Identity
+- **Vector-Derived High-Resolution Launcher:** Generated standard, rounded, and adaptive Android launcher icons across all density buckets (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) directly from the official minimalist dark vector `icon.svg` (`#09090B` background with crisp white angular emblem and indigo core).
+- **Dark Adaptive Launcher Frame:** Configured `ic_launcher_background.xml` to match `#09090B` system dark aesthetics for seamless icon presentation on modern Android home screens.
+
+### Real Hardware Vibration Haptics
+- **Capacitor Native Hardware Bridge:** Integrated `@capacitor/haptics` connecting directly to Android OS `Vibrator` and `VibratorManager` hardware services.
+- **Zero-Latency Navigation Feedback:** Bottom navigation bar taps now deliver crisp, instantaneous physical tactile clicks (`ImpactStyle.Light`), giving the APK a completely native, premium handheld sensation.
+- **Contextual Tactile Profiles:** Action saves trigger native notification success patterns (`NotificationType.Success`), and intensity scales fluidly with browser fallbacks preserved for web runtimes.
+
+### Smoothness & Zero-Stutter Accordion Interactions
+- **Continuous Chevron Rotation:** Replaced component swap flicker in Timetable's "Today's Topic Discussed" with a continuous 180-degree hardware-accelerated CSS transform rotation.
+- **60–120fps CSS Grid Accordion:** Eliminated Framer Motion `height: 'auto'` layout recalculations during dropdown expand/collapse in favor of GPU-accelerated CSS Grid rows transition (`grid-template-rows: 0fr -> 1fr`), removing touch stutter completely.
+
+### Clean Bottom Whitespace Architecture
+- **Eliminated Dead Zone Gap:** Restructured global container geometry between `Layout.tsx` and individual modules (`Nutrition.tsx`, `Timetable.tsx`, `Settings.tsx`, `GymWorkout.tsx`, `GymSplit.tsx`, `StudyHistory.tsx`).
+- **Ergonomic Dock Alignment:** Content now scrolls cleanly to terminate immediately above the bottom dock with balanced breathing room, eliminating excessive blank space.
+
+### Active Groq AI Model Waterfall & Clean Parsing
+- **Updated Active Model Cascade:** Configured the AI coach pipeline with currently verified active Groq models: `qwen/qwen3.8-27b`, `qwen/qwen3.6-27b`, `openai/gpt-oss-120b`, and `groq/compound-mini`.
+- **Reasoning Tag Sanitization:** Automatically filters out `<think>...</think>` tags from modern reasoning models before parsing JSON, ensuring rock-solid stability for workout generation, diet tips, and spend analysis.
+
 ---
 
 ## What is New in Version 1.4

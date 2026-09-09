@@ -111,7 +111,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-28 sm:pb-32">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-4">
 
       {/* Header & Progress Bar */}
       <motion.div variants={item} className="flex items-center justify-between pt-2">

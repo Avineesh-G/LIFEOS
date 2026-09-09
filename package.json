@@ -15,6 +15,7 @@
     "@capacitor/android": "^8.5.1",
     "@capacitor/cli": "^8.5.1",
     "@capacitor/core": "^8.5.1",
+    "@capacitor/haptics": "^8.0.2",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@fontsource-variable/google-sans-flex": "^5.3.1",
     "@google/generative-ai": "^0.24.1",

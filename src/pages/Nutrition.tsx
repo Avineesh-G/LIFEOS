@@ -360,7 +360,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-24">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-4">
       {/* Header */}
       <motion.div variants={item} className="flex items-center justify-between pt-2">
         <button

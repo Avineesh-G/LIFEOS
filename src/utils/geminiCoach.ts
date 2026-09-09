@@ -2,7 +2,7 @@
 // Get a free key at: https://console.groq.com/keys
 const _p1 = 'gsk_sBQKT6n1m0EKyvO';
 const _p2 = 'QX2u0WGdyb3FYlJt7zak4DCZxLdq8c3p0YB3Q';
-export const GEMINI_API_KEY: string = import.meta.env.VITE_GROQ_API_KEY || (_p1 + _p2);
+export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || (_p1 + _p2);
 // ──────────────────────────────────────────────────────────────────────────
 
 async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
@@ -39,12 +39,12 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
     });
   };
 
-  // Model waterfall — fastest/largest first, lighter fallbacks on rate limit
+  // Model waterfall — active supported models on Groq
   const MODELS = [
     'qwen/qwen3.8-27b',
-    'llama-3.3-70b-versatile',
-    'llama3-8b-8192',
-    'gemma2-9b-it',
+    'qwen/qwen3.6-27b',
+    'openai/gpt-oss-120b',
+    'groq/compound-mini',
   ];
 
   let response: Response = null!;
@@ -62,12 +62,12 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
         if (response.ok) break;
       }
 
-      if (response.status === 429 || response.status === 503) {
-        // Rate limited — wait briefly then try next model
-        lastError = `Model ${MODELS[i]} rate limited (${response.status})`;
+      if (response.status === 429 || response.status === 503 || response.status === 404) {
+        // Rate limited or model unavailable — wait briefly then try next model
+        lastError = `Model ${MODELS[i]} unavailable or rate limited (${response.status})`;
         console.warn(`[AI] ${lastError}, trying next model...`);
         if (i < MODELS.length - 1) {
-          await new Promise(r => setTimeout(r, 800));
+          await new Promise(r => setTimeout(r, 600));
           continue;
         }
       }
@@ -85,10 +85,14 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
   }
 
   const data = await response.json();
-  const text = data.choices?.[0]?.message?.content;
+  let text = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning;
   
   if (!text) throw new Error(`Empty response from Groq`);
-  return text.trim();
+
+  // Strip any reasoning / think tags from modern LLMs (e.g. Qwen 3.6 / reasoning models)
+  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+  return text;
 }
 
 export async function parseMenuPdf(base64Data: string, apiKey: string = GEMINI_API_KEY): Promise<string> {

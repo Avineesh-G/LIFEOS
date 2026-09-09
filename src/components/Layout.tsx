@@ -123,7 +123,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* ── Main content ── */}
       <main 
-        className="pb-40 sm:pb-44 min-h-screen"
+        className="pb-24 sm:pb-28 min-h-screen"
         style={{
           paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
         }}
@@ -136,7 +136,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* ── Native Gradient Bottom Fade (Zero GPU Overhead) ── */}
       <div 
         className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-gradient-to-t from-[#F4F4FB]/95 via-[#F4F4FB]/50 to-transparent dark:from-[#121316]/95 dark:via-[#121316]/50"
-        style={{ height: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{ height: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))' }}
       />
 
       {/* ── Rigid Fixed Responsive Dock (Locked in place, no horizontal scrolling) ── */}

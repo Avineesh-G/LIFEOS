@@ -151,7 +151,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-28 sm:pb-32">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-4">
       {/* Header */}
       <motion.div variants={item} className="flex items-end justify-between pt-2">
         <div>
@@ -382,24 +382,25 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                         <button
                           type="button"
                           onClick={() => {
-                            triggerHaptic(5);
+                            triggerHaptic('light');
                             setShowTopicHistory(prev => ({ ...prev, [block.id]: !prev[block.id] }));
                           }}
-                          className="text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center gap-1"
+                          className="text-[11px] text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center gap-1.5 py-0.5 active:opacity-75 transition-colors"
                         >
                           <span>{format(new Date(), 'MMMM yyyy')} Topics ({monthTopics.length})</span>
-                          {isHistoryOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                          <ChevronDown 
+                            size={13} 
+                            className={`transform transition-transform duration-200 ease-out ${isHistoryOpen ? 'rotate-180 text-primary-light dark:text-primary-dark' : 'rotate-0'}`} 
+                          />
                         </button>
 
-                        <AnimatePresence>
-                          {isHistoryOpen && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.25 }}
-                              className="overflow-hidden mt-2 space-y-1.5 bg-surface-light/60 dark:bg-surface-dark/60 p-2.5 rounded-xl border border-border-light/60 dark:border-border-dark/60"
-                            >
+                        <div 
+                          className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
+                            isHistoryOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                          }`}
+                        >
+                          <div className="overflow-hidden min-h-0">
+                            <div className="space-y-1.5 bg-surface-light/60 dark:bg-surface-dark/60 p-2.5 rounded-xl border border-border-light/60 dark:border-border-dark/60">
                               {monthTopics.map(([dateKey, topic]) => (
                                 <div key={dateKey} className="flex items-start justify-between text-xs gap-2">
                                   <span className="font-mono text-[10px] text-muted-light dark:text-muted-dark shrink-0 pt-0.5">
@@ -410,9 +411,9 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                                   </span>
                                 </div>
                               ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>

@@ -1,3 +1,6 @@
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { Capacitor } from '@capacitor/core';
+
 export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'ai' | number | number[];
 
 let audioCtx: AudioContext | null = null;
@@ -46,11 +49,44 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   const now = Date.now();
   // Throttle rapid duplicate events for navigation & light taps (prevents double buzz)
   if (pattern === 'nav' || pattern === 'light') {
-    if (now - lastHapticTime < 80) return;
+    if (now - lastHapticTime < 70) return;
     lastHapticTime = now;
   }
 
-  // Resolve vibration pattern
+  // 1. Android / iOS Native Hardware Vibration via Capacitor Bridge
+  if (Capacitor.isNativePlatform()) {
+    try {
+      if (pattern === 'nav') {
+        Haptics.impact({ style: ImpactStyle.Light });
+        return;
+      } else if (pattern === 'light') {
+        Haptics.impact({ style: ImpactStyle.Light });
+        return;
+      } else if (pattern === 'medium') {
+        Haptics.impact({ style: ImpactStyle.Medium });
+        return;
+      } else if (pattern === 'heavy') {
+        Haptics.impact({ style: ImpactStyle.Heavy });
+        return;
+      } else if (pattern === 'save' || pattern === 'success') {
+        Haptics.notification({ type: NotificationType.Success });
+        return;
+      } else if (pattern === 'ai') {
+        Haptics.impact({ style: ImpactStyle.Medium });
+        return;
+      } else if (typeof pattern === 'number') {
+        Haptics.vibrate({ duration: Math.max(10, Math.min(pattern, 400)) });
+        return;
+      } else if (Array.isArray(pattern)) {
+        Haptics.vibrate({ duration: pattern[0] || 30 });
+        return;
+      }
+    } catch {
+      // Fallback to browser web APIs below if native bridge is not ready
+    }
+  }
+
+  // 2. Web / Browser fallback
   let vibratePattern: number | number[];
 
   if (typeof pattern === 'string') {
@@ -87,7 +123,6 @@ export function triggerHaptic(pattern: HapticType = 'light') {
     vibratePattern = 18;
   }
 
-  // 1. Trigger hardware vibration if available
   let didVibrate = false;
   if ('navigator' in window && typeof navigator.vibrate === 'function') {
     try {
@@ -97,7 +132,7 @@ export function triggerHaptic(pattern: HapticType = 'light') {
     }
   }
 
-  // 2. If vibration failed or not supported (e.g. iOS Safari), use subtle synthetic tactile audio
+  // 3. Synthetic tactile audio fallback for desktop browsers
   if (!didVibrate) {
     const intensity = pattern === 'nav' ? 'nav' : pattern === 'heavy' ? 'heavy' : pattern === 'save' ? 'save' : pattern === 'medium' ? 'medium' : 'light';
     playSyntheticHapticAudio(intensity);

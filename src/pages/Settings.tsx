@@ -263,7 +263,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const completedTodoCount = filteredTodoTasks.filter(t => t.completed).length;
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-28 sm:pb-32">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto pb-4">
       {/* Header */}
       <motion.div variants={item} className="pt-2">
         <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Preferences & System</p>

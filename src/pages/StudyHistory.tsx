@@ -86,7 +86,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-28 sm:pb-32">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-4">
       <button onClick={() => navigate('/study')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1">
         <ChevronLeft size={16} /> Back to Study
       </button>
