@@ -48,7 +48,9 @@ export default function Auth() {
       
       {/* Top Header Section */}
       <div className="flex flex-col items-center text-center mb-10 w-full max-w-sm">
-        <img src="/icon.svg" alt="LifeOS Logo" className="w-20 h-20 rounded-[22px] shadow-m3-subtle mb-5" />
+        <div className="w-20 h-20 rounded-[22px] bg-surface-light dark:bg-surface-dark border border-border-light/80 dark:border-border-dark/80 flex items-center justify-center shadow-m3-subtle mb-5 p-3.5">
+          <img src="/icon-monochrome.svg" alt="LifeOS Logo" className="w-full h-full object-contain dark:invert" />
+        </div>
         <h1 className="text-4xl font-black text-primary-light dark:text-primary-dark mb-2 tracking-tight font-sans">
           LifeOS
         </h1>
