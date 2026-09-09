@@ -19,7 +19,6 @@ const navItems = [
   { icon: Utensils,     label: 'Nutrition', path: '/nutrition' },
   { icon: CheckSquare,  label: 'TO-DO List', path: '/tasks' },
   { icon: BarChart3,    label: 'Progress',  path: '/progress' },
-  { icon: Settings,     label: 'Settings',  path: '/settings' },
 ];
 
 const quickAddOptions = [
@@ -135,12 +134,10 @@ export default function Layout({ children }: LayoutProps) {
           </span>
           <button
             onPointerDown={() => triggerHaptic('light')}
-            onClick={() => {
-              setShowQuickAdd(true);
-            }}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light hover:opacity-85 active:scale-95 transition-all shadow-sm"
+            onClick={() => navigate('/settings')}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 text-secondary-light dark:text-secondary-dark hover:opacity-85 active:scale-95 transition-all shadow-sm"
           >
-            <Plus size={18} strokeWidth={2.5} />
+            <Settings size={18} strokeWidth={2} />
           </button>
         </div>
       </header>

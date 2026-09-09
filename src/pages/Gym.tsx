@@ -93,19 +93,19 @@ export default function Gym({ data, updateData }: GymProps) {
         variants={item}
         className="rounded-[32px] p-6 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle"
       >
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-[16px] bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="w-11 h-11 rounded-[16px] shrink-0 bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
               <Dumbbell size={22} className="text-m3-mint-text dark:text-m3-mint-darkText" />
             </span>
-            <div>
-              <p className="text-xs font-bold tracking-wider uppercase opacity-75">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-75 break-words">
                 {today} · Workout Target
               </p>
-              <h2 className="text-sm sm:text-base font-bold opacity-90">Daily Protocol</h2>
+              <h2 className="text-sm sm:text-base font-bold opacity-90 truncate">Daily Protocol</h2>
             </div>
           </div>
-          <span className="rounded-full bg-white/70 dark:bg-black/25 px-3.5 py-1.5 text-xs font-bold shadow-sm">
+          <span className="rounded-full shrink-0 bg-white/70 dark:bg-black/25 px-3.5 py-1.5 text-xs font-bold shadow-sm text-center">
             {todayPlan?.type || 'Rest'}
           </span>
         </div>

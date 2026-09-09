@@ -347,7 +347,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText font-mono font-bold text-xs px-3.5 py-1.5 shadow-sm">
+          <span className="rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText font-mono font-bold text-xs px-3.5 py-1.5 shadow-sm whitespace-nowrap shrink-0">
             {data.profile?.currentCalorieTarget || 2000} kcal
           </span>
         </div>
@@ -965,7 +965,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <motion.div variants={item} className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.3 · Material 3 Expressive</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.4</p>
       </motion.div>
     </motion.div>
   );

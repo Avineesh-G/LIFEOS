@@ -173,21 +173,21 @@ export default function Timetable({ data, updateData }: TimetableProps) {
             <button
               key={d}
               onClick={() => { triggerHaptic(8); setActiveDay(i); }}
-              className={`flex-shrink-0 flex flex-col items-center px-4 py-3 rounded-[22px] border transition-all text-xs active:scale-95 ${
+              className={`flex-shrink-0 flex flex-col items-center px-4 py-3 rounded-[16px] border transition-all text-xs active:scale-95 ${
                 isSelected
-                  ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-primary-light dark:border-primary-dark shadow-sm'
+                  ? 'bg-accent text-white border-accent shadow-sm'
                   : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
               }`}
             >
               <span className="font-mono font-bold text-[11px]">{SHORT_DAYS[i]}</span>
-              {isToday && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1" />}
               {blocks.length > 0 && (
                 <span className={`mt-1 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${
-                  isSelected ? 'bg-white/25 text-white dark:text-black' : 'bg-black/5 dark:bg-white/10'
+                  isSelected ? 'bg-white/25 text-white' : 'bg-black/5 dark:bg-white/10'
                 }`}>
                   {blocks.length}
                 </span>
               )}
+              {isToday && <span className={`w-1.5 h-1.5 rounded-full mt-1 ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />}
             </button>
           );
         })}

@@ -6,16 +6,18 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 
-LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, glassmorphic aesthetics, and intelligent Groq AI inference.
+LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, modern aesthetics inspired by Google Material 3 Expressive, and intelligent Groq AI inference.
 
 ---
 
 ## What is New in Version 1.4
 
 ### Premium Modern UI Overhaul
+- **Design System Inspiration:** Modern expressive aesthetic inspired by Google Material 3 Expressive, embracing organic container curvature, responsive tactile surfaces, and vivid accented color harmonies.
 - **Global Typography Upgrade:** Transitioned the primary application font to **Google Sans Flex**, delivering a premium, highly legible, and fluid typographic experience across all device sizes.
 - **Dynamic Background System:** Introduced a lightweight, frosted glass aesthetic utilizing high-resolution ambient backgrounds (e.g., misty mountains) with intelligent CSS backdrop-filter overlays, automatically adapting to light and dark modes.
-- **Enhanced Navigation Dock:** Refined the bottom navigation bar with a macOS-style click-bounce interaction and removed hover lifts for a seamless mobile-first tactile feel.
+- **Enhanced Navigation Dock & Header:** Refined the bottom navigation bar with a macOS-style click-bounce interaction and streamlined ergonomics, relocating the Settings shortcut to the top header for optimal thumb-reach and layout balance.
+- **Refined Component Architecture:** Re-engineered Gym workout cards for balanced proportions, enhanced Timetable day selector cards with modern pill geometry and inverted status indicators, and eliminated redundant spacing in Settings body metrics.
 
 ### Tasks & Visual Progress
 - **Segmented Completion Bar:** Upgraded the TO-DO tasks progress bar from a monochrome fill to a dynamic, segmented multi-color track. Each individual task completion progressively fills a segment using a curated, vibrant color palette.
