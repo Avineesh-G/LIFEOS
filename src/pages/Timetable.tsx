@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Plus, Trash2, X, Clock, Sparkles, Edit2, BookOpen, Check, Save, Lock, Unlock, ChevronDown, ChevronUp } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,8 +32,8 @@ function getBlockColor(subject: string) {
   return BLOCK_COLORS[Math.abs(hash) % BLOCK_COLORS.length];
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
+const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } } };
 
 export default function Timetable({ data, updateData }: TimetableProps) {
   const navigate = useNavigate();
@@ -136,8 +136,9 @@ export default function Timetable({ data, updateData }: TimetableProps) {
       .filter(b => b.day === d)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const activeDayBlocks = getBlocksForDay(DAYS[activeDay]);
-  const todayBlocks = getBlocksForDay(today);
+  const activeDayName = DAYS[activeDay];
+  const activeDayBlocks = useMemo(() => getBlocksForDay(activeDayName), [data.timetable, activeDayName]);
+  const todayBlocks = useMemo(() => getBlocksForDay(today), [data.timetable, today]);
 
   const getDuration = (start: string, end: string) => {
     const [sh, sm] = start.split(':').map(Number);

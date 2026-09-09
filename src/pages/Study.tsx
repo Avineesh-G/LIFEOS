@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, History, Grid3X3, ChevronRight, Play, BookOpen, Flame } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
@@ -9,8 +10,8 @@ interface StudyProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: 'easeOut' } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
+const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } } };
 
 const SUBJECT_COLORS = [
   'bg-purple-500',
@@ -22,23 +23,36 @@ const SUBJECT_COLORS = [
 
 export default function Study({ data }: StudyProps) {
   const navigate = useNavigate();
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todaySessions = data.studySessions.filter(s => s.date === today);
-  const todayMinutes = todaySessions.reduce((sum, s) => sum + s.duration, 0);
 
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const weekSessions = data.studySessions.filter(s => {
-    const d = new Date(s.date);
-    return d >= weekStart && d <= addDays(weekStart, 6);
-  });
-  const weekMinutes = weekSessions.reduce((sum, s) => sum + s.duration, 0);
+  const { todaySessions, todayMinutes, weekSessions, weekMinutes, sortedSubjects, maxMins } = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const todaySessions = data.studySessions.filter(s => s.date === todayStr);
+    const todayMins = todaySessions.reduce((sum, s) => sum + s.duration, 0);
 
-  const subjectStats: Record<string, number> = {};
-  data.studySessions.forEach(s => {
-    subjectStats[s.subject] = (subjectStats[s.subject] || 0) + s.duration;
-  });
-  const sortedSubjects = Object.entries(subjectStats).sort((a, b) => b[1] - a[1]);
-  const maxMins = sortedSubjects[0]?.[1] ?? 1;
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekEnd = addDays(weekStart, 6);
+    const weekSessions = data.studySessions.filter(s => {
+      const d = new Date(s.date);
+      return d >= weekStart && d <= weekEnd;
+    });
+    const weekMins = weekSessions.reduce((sum, s) => sum + s.duration, 0);
+
+    const stats: Record<string, number> = {};
+    data.studySessions.forEach(s => {
+      stats[s.subject] = (stats[s.subject] || 0) + s.duration;
+    });
+    const sorted = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+    const max = sorted[0]?.[1] ?? 1;
+
+    return {
+      todaySessions,
+      todayMinutes: todayMins,
+      weekSessions,
+      weekMinutes: weekMins,
+      sortedSubjects: sorted,
+      maxMins: max,
+    };
+  }, [data.studySessions]);
 
   const navLinks = [
     {

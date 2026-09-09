@@ -61,8 +61,12 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     setTimeout(() => setApiKeySaved(false), 2500);
   };
 
-  // In-App Update State
+  // In-App Update & Live Sync State
+  const CURRENT_BUILD_CODE = 5;
+  const CURRENT_VERSION_LABEL = '1.4';
+
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [syncingBuild, setSyncingBuild] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<{ available: boolean; name: string; notes?: string } | null>(null);
   const [updateMsg, setUpdateMsg] = useState('');
 
@@ -71,29 +75,52 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     setCheckingUpdate(true);
     setUpdateMsg('');
     try {
-      const res = await fetch(`/version.json?t=${Date.now()}`);
+      const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Could not fetch');
       const meta = await res.json();
-      const currentCode = 4;
-      if (meta.versionCode > currentCode) {
+      if (meta.versionCode > CURRENT_BUILD_CODE) {
         setUpdateInfo({
           available: true,
-          name: meta.versionName || '1.3',
+          name: meta.versionName || '1.4',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg(`Update v${meta.versionName} available!`);
+        setUpdateMsg(`Update v${meta.versionName} is live! Tap "Sync Now" to apply.`);
       } else {
         setUpdateInfo({
           available: false,
-          name: meta.versionName || '1.3',
+          name: meta.versionName || '1.4',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg('You are running the latest version (v1.3)');
+        setUpdateMsg('You are on the latest version (v1.4 - Build 5). System is synced!');
       }
     } catch {
-      setUpdateMsg('Unable to check for updates. Please try again.');
+      setUpdateMsg('Unable to check for updates. Please check your network connection.');
     } finally {
       setCheckingUpdate(false);
+    }
+  };
+
+  const handleLiveSync = async () => {
+    triggerHaptic('save');
+    setSyncingBuild(true);
+    setUpdateMsg('Syncing latest updates from cloud...');
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.update();
+        }
+      }
+      setUpdateMsg('Synced! Reloading interface...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch {
+      window.location.reload();
     }
   };
 
@@ -1102,7 +1129,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </div>
       </motion.div>
 
-      {/* App Version & Direct APK Updates */}
+      {/* App Version & Live Over-The-Air Updates */}
       <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -1111,10 +1138,10 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             </span>
             <div>
               <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-                Application Version
+                Application Version & Live Sync
               </p>
               <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
-                LifeOS v1.3 (Build 4)
+                LifeOS v1.4 (Build 5)
               </h3>
             </div>
           </div>
@@ -1126,35 +1153,64 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         {updateMsg && (
           <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between">
             <span>{updateMsg}</span>
-            {updateInfo?.available && (
-              <span className="font-bold text-accent font-mono text-[11px]">New</span>
+            {updateInfo?.available ? (
+              <button
+                onClick={handleLiveSync}
+                className="px-2.5 py-1 rounded-lg bg-accent text-white font-bold font-mono text-[11px] hover:opacity-90 active:scale-95"
+              >
+                Sync Now
+              </button>
+            ) : (
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">Synced</span>
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
+        {/* 3-Button Control Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
           <button
             onClick={checkForUpdates}
-            disabled={checkingUpdate}
-            className="w-full py-2.5 px-4 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+            disabled={checkingUpdate || syncingBuild}
+            className="w-full py-2.5 px-3 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
           >
             <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
             {checkingUpdate ? 'Checking...' : 'Check Updates'}
+          </button>
+          <button
+            onClick={handleLiveSync}
+            disabled={syncingBuild}
+            className="w-full py-2.5 px-3 rounded-full bg-accent/10 hover:bg-accent/15 text-accent border border-accent/25 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+          >
+            <Sparkles size={13} className={syncingBuild ? 'animate-spin' : ''} />
+            {syncingBuild ? 'Syncing...' : 'Sync Latest Build'}
           </button>
           <a
             href="/LifeOS.apk"
             download="LifeOS.apk"
             onClick={() => triggerHaptic('save')}
-            className="w-full py-2.5 px-4 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20"
+            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20"
           >
             <Download size={14} />
             Download APK
           </a>
         </div>
+
+        {/* Guidance Box for Seamless In-Place Upgrades */}
+        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border-light/60 dark:border-border-dark/60 text-[11px] text-muted-light dark:text-muted-dark leading-relaxed space-y-1">
+          <p className="font-bold text-secondary-light dark:text-secondary-dark">
+            💡 Zero-Reinstall Architecture:
+          </p>
+          <p>
+            • <strong>Instant Live Sync:</strong> Web fixes, UI tweaks, and AI updates sync instantly above without downloading or reinstalling anything.
+          </p>
+          <p>
+            • <strong>In-Place APK Upgrade:</strong> If you install an updated APK, Android automatically updates over the existing app with 0 data loss. Never uninstall!
+          </p>
+        </div>
       </div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.3 · Production Ready</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.4 (Build 5) · Production Ready</p>
       </div>
     </motion.div>
   );

@@ -1,272 +1,139 @@
-# LifeOS (Flow)
+# LifeOS
 
 [![React](https://img.shields.io/badge/React-18.0-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)](https://capacitorjs.com/)
 
-LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, modern aesthetics inspired by Google Material 3 Expressive, and intelligent Groq AI inference.
-
-## What is New in Version 1.6
-
-### Gym Section Polish & Zero-Blank Screen Architecture
-- **Session Header Completion Alignment:** Re-engineered the workout session header to move completion indicators into the session metadata badge (`ALL DONE`) and set counter pill (`13/13 sets ✓`), eliminating awkward wrapping overlaps with multi-line workout titles (e.g. "Shoulders + Core") and the "Saved & Locked" button.
-- **Robust State Transition & Freeze Fix:** Eliminated fragile Framer Motion `staggerChildren` layout variants from the main Gym dashboard, replacing them with standard high-performance DOM containers. Navigating back to Gym after saving a workout now loads instantly with 0ms latency and zero blank-screen freezes.
-- **Safe Transition Timing:** Configured `App.tsx` `<AnimatePresence>` with `mode="wait"` to guarantee exiting pages cleanly unmount before new routes enter.
-
-### Blazing Smooth Progress & TO-DO Tab Transitions
-- **Memoized Analytics Computation:** Consolidated all synchronous study, gym, and streak computations in `Progress.tsx` within a cached `useMemo` block, eliminating main-thread blocking on route entrance.
-- **Lightweight Task Rendering:** Removed expensive Framer Motion `layout` measurement passes and `mode="popLayout"` from `Tasks.tsx`. Task lists and segmented progress tracks render instantaneously at silky smooth 60–120fps.
-
-### Direct In-App APK Updates & Public Distribution
-- **Direct Web APK Download:** Packaged `LifeOS.apk` as a public web asset served directly from the deployment, allowing instant 1-tap download without requiring local network IP addresses.
-- **In-App Update Detection:** Integrated an automated version check manifest (`version.json`) into the Settings dashboard. Users can check for new updates directly within the application and download the latest release with a single tap.
-
----
-
-## What is New in Version 1.5
-
-### Official Android Icon & Visual Identity
-- **Vector-Derived High-Resolution Launcher:** Generated standard, rounded, and adaptive Android launcher icons across all density buckets (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) directly from the official minimalist dark vector `icon.svg` (`#09090B` background with crisp white angular emblem and indigo core).
-- **Dark Adaptive Launcher Frame:** Configured `ic_launcher_background.xml` to match `#09090B` system dark aesthetics for seamless icon presentation on modern Android home screens.
-
-### Real Hardware Vibration Haptics
-- **Capacitor Native Hardware Bridge:** Integrated `@capacitor/haptics` connecting directly to Android OS `Vibrator` and `VibratorManager` hardware services.
-- **Zero-Latency Navigation Feedback:** Bottom navigation bar taps now deliver crisp, instantaneous physical tactile clicks (`ImpactStyle.Light`), giving the APK a completely native, premium handheld sensation.
-- **Contextual Tactile Profiles:** Action saves trigger native notification success patterns (`NotificationType.Success`), and intensity scales fluidly with browser fallbacks preserved for web runtimes.
-
-### Smoothness & Zero-Stutter Accordion Interactions
-- **Continuous Chevron Rotation:** Replaced component swap flicker in Timetable's "Today's Topic Discussed" with a continuous 180-degree hardware-accelerated CSS transform rotation.
-- **60–120fps CSS Grid Accordion:** Eliminated Framer Motion `height: 'auto'` layout recalculations during dropdown expand/collapse in favor of GPU-accelerated CSS Grid rows transition (`grid-template-rows: 0fr -> 1fr`), removing touch stutter completely.
-
-### Clean Bottom Whitespace Architecture
-- **Eliminated Dead Zone Gap:** Restructured global container geometry between `Layout.tsx` and individual modules (`Nutrition.tsx`, `Timetable.tsx`, `Settings.tsx`, `GymWorkout.tsx`, `GymSplit.tsx`, `StudyHistory.tsx`).
-- **Ergonomic Dock Alignment:** Content now scrolls cleanly to terminate immediately above the bottom dock with balanced breathing room, eliminating excessive blank space.
-
-### Active Groq AI Model Waterfall & Clean Parsing
-- **Updated Active Model Cascade:** Configured the AI coach pipeline with currently verified active Groq models: `qwen/qwen3.8-27b`, `qwen/qwen3.6-27b`, `openai/gpt-oss-120b`, and `groq/compound-mini`.
-- **Reasoning Tag Sanitization:** Automatically filters out `<think>...</think>` tags from modern reasoning models before parsing JSON, ensuring rock-solid stability for workout generation, diet tips, and spend analysis.
+LifeOS is an all-in-one personal operating system built to unify academic schedules, strength training, daily habits, nutrition, expense tracking, and intelligent AI coaching into a single cohesive experience. Designed with a mobile-first philosophy, LifeOS features 120fps hardware-composited transitions, Material 3 Expressive aesthetics, real Android vibration haptics, and a zero-reinstall Live Sync update engine.
 
 ---
 
 ## What is New in Version 1.4
 
-### Zero-Latency Performance & Instant Responsiveness
-- **Synchronous Optimistic State Updates:** Re-engineered the core data pipeline (`useData.ts`) to immediately update React state and persist to local cache synchronously (0ms response time). Checkbox toggles, task additions, and class topic saves respond instantaneously while Firestore synchronization executes seamlessly in the background.
-- **Eliminated 400ms Page Transition Delays:** Removed `mode="wait"` and blocking exit animations from the routing layer (`App.tsx`). Navigation between tabs now mounts immediately (0ms delay) with a snappy 150ms opacity settle.
-- **Truly Fixed, Hardware-Immovable Background:** Re-architected ambient wallpaper rendering directly to top-level `<body>` layers (`#bg-fixed-layer` and `#bg-tint-layer`) with `100lvh` sizing. The background remains 100% stationary and never jitters, moves, or scales during touch scrolling or mobile browser address bar collapse.
-- **GPU-Efficient Native Bottom Gradient:** Replaced expensive `WebkitMaskImage` and double `backdrop-filter` compositing with a lightweight native CSS gradient, delivering fluid 60–120fps scrolling.
+### 1. In-App Live Sync & Zero-Reinstall Architecture
+- **Instant Over-The-Air Web Sync:** Users never need to repeatedly download APKs or uninstall their app. Tapping **"Sync Latest Build"** in Settings flushes client caches and service worker registrations, immediately applying the latest web features and styling updates live.
+- **In-Place APK Upgrade Engine:** When installing updated native binaries, Android automatically applies an in-place upgrade (`versionCode 5`), preserving all local storage, accounts, and workout histories with zero data loss.
+- **Automated Version Checking:** In-app check against `version.json` notifies users when newer builds are deployed and offers one-tap synchronization.
 
-### Premium Modern UI Overhaul
-- **Design System Inspiration:** Modern expressive aesthetic inspired by Google Material 3 Expressive, embracing organic container curvature, responsive tactile surfaces, and vivid accented color harmonies.
-- **Global Typography Upgrade:** Transitioned the primary application font to **Google Sans Flex**, delivering a premium, highly legible, and fluid typographic experience across all device sizes.
-- **Rigid Navigation Dock (Zero Sideways Drift):** Replaced the scrollable bar with a rigid 8-column responsive grid (`grid grid-cols-8 max-w-md`). Every navigation icon is firmly locked in its slot, preventing horizontal sliding or displacement on mobile phone viewports.
-- **TO-DO List Cards & Dock Clearance:** Remade task cards with elevated contrast and depth, automatically suppressed `"NA"` placeholder subtasks, and added bottom clearance to the Add Task modal so save actions never clash with the floating dock.
-- **Gym Daily Protocol Hero Card:** Re-engineered the hero workout card for mobile phone aspect ratios, eliminating duplicate split badges and balancing action buttons (`Routine Split` and `Start / Resume Workout`).
-- **Settings Account & History Polish:** Restructured the user account card into a clean two-tier layout ensuring complete, unclipped email visibility with a balanced 2-column grid for `Sign Out` and `Reset Data`. Aligned history month selectors and `AI Insights` buttons on a single row without text wrapping.
+### 2. Ultra-Fluid 120fps Transitions (Zero Lag, Stuck, or Hang)
+- **Compositor-Only GPU Transforms:** Routed pages through `AnimatedPage` using `translateZ(0)` hardware acceleration and strict compositor-only properties (`opacity`), delivering buttery 120Hz refresh rates on high-refresh-rate mobile displays.
+- **Memoized Computing Engine:** Synchronous calculations across `Home.tsx`, `Study.tsx`, `Spending.tsx`, `Timetable.tsx`, and `Progress.tsx` are consolidated inside `useMemo` blocks, preventing main-thread blocking during tab transitions.
+- **Collision-Free Route Settle:** Configured `App.tsx` `<AnimatePresence mode="wait">` with a swift 120ms curve (`ease: [0.16, 1, 0.3, 1]`) ensuring exiting views cleanly unmount before incoming routes paint.
 
-### Tasks & Visual Progress
-- **Segmented Completion Bar:** Upgraded the TO-DO tasks progress bar from a monochrome fill to a dynamic, segmented multi-color track. Each individual task completion progressively fills a segment using a curated, vibrant color palette.
+### 3. Secure In-App Groq AI Architecture
+- **Client-Managed Secret Isolation:** Eliminates all hardcoded API keys and `.env` build bundling. Users enter their personal Groq API key securely in the Settings UI with show/hide masking.
+- **Encrypted Persistence:** Keys are stored strictly within the user's private Firebase Firestore profile (`users/{uid}`) and device `localStorage`, completely out of Git version control and public JavaScript bundles.
+- **Multi-Model Waterfall Fallback:** Intelligent cascade across active Groq models (`qwen/qwen3.8-27b`, `qwen/qwen3.6-27b`, `openai/gpt-oss-120b`, `groq/compound-mini`) with automated `<think>` reasoning tag sanitization.
 
-### Robust AI Fallback Waterfall
-- **Multi-Model Resilience:** Re-engineered the Groq AI coach pipeline to prevent downtime during free-tier API rate limits (HTTP 429). The system now employs an intelligent 4-model waterfall fallback mechanism, automatically gracefully degrading from `qwen/qwen3.8-27b` to smaller, faster models (`llama-3.3-70b-versatile`, `llama3-8b-8192`, `gemma2-9b-it`) with staggered retry delays.
-
-### Native Android APK & Google Play Services Integration
-- **Capacitor 8 Native Android Runtime:** Packaged LifeOS into a standalone, installable Android APK (`com.avineesh.lifeos`) with complete offline capabilities and hardware GPU acceleration (`android:hardwareAccelerated="true"`).
-- **Native Google Play Services Authentication:** Eliminated Google OAuth 403 / `disallowed_useragent` WebView restrictions by implementing native Google Play Services bottom-sheet account selection via `@codetrix-studio/capacitor-google-auth`. Automatically issues native ID tokens seamlessly validated by Firebase backend authentication (`signInWithCredential`), maintaining full web compatibility (`signInWithPopup`) on browser runtimes.
-- **Permanent Keystore Signing & Play Protect Trust:** Generated a permanent Android release keystore (`lifeos-release-key.jks`) and linked official SHA-1 and SHA-256 certificate fingerprints with Google Cloud and Firebase. Google Play Protect explicitly verifies the app as safe with zero security blocks.
-- **Clean Architecture & Deployment Model:** Web frontend deployed and hosted exclusively on **Vercel**, with **Firebase** serving strictly as the backend cloud database and identity platform.
-- **Unified Cross-Platform Build Pipeline:** Introduced unified commands (`npm run cap:sync`, `npm run cap:build`, `npm run cap:open`) guaranteeing simultaneous feature parity between web and Android APK releases.
+### 4. Gym Section Polish & Zero-Blank Screen Fix
+- **Header Badge Alignment:** Relocated completion indicators into the workout session metadata badge (`ALL DONE`) and sets pill (`13/13 sets ✓`), eliminating overlap collisions on mobile viewports.
+- **State Transition Stabilization:** Removed fragile Framer Motion `staggerChildren` layout passes from the Gym dashboard, guaranteeing instantaneous navigation return without screen freezes.
 
 ---
 
-## What is New in Version 1.3
+## Codebase Structure & Architecture
 
-### Real-Time Device Theme Synchronization
-- **Dynamic System Adaptation:** Integrated an active `prefers-color-scheme` media query listener that automatically detects device-level dark or light mode changes in phone settings and switches the interface immediately without requiring manual selection or page reloads.
-- **Status Bar Matching:** Synchronizes browser and native status bar color metadata (`#09090B` for dark mode and `#FFFFFF` for light mode) to blend seamlessly with the system shell.
-- **Material You Themed Icons:** Configured a dedicated monochrome vector icon in the Web App Manifest (`purpose: "monochrome"`). On Android 13+ devices with Themed Icons enabled, the home screen launcher dynamically tints the app icon with the system wallpaper palette without requiring special permissions.
-
-### Gym Stability and Completion Lifecycle
-- **Defensive Data Normalization:** Implemented automatic sanitization for workout logs and sets across Firestore and local storage, ensuring that corrupted logs or missing fields never cause render crashes or white screens.
-- **Completed vs Resume Status:** Once a workout is saved and locked, the Gym dashboard hero action switches from "Resume" to an emerald "Completed" state with a checkmark badge. When a new calendar day begins, the status automatically returns to "Start".
-- **React Error Boundary:** Wrapped the entire application routing layer in an error boundary to provide a clean recovery view with reload controls in the event of unexpected exceptions.
-
-### Ergonomic Navigation Bar Haptics
-- **Dedicated Navigation Preset:** Added an ultra-light 12ms tactile vibration pulse specifically calibrated for bottom dock navigation switches, accompanied by subtle acoustic feedback (frequency 170Hz, duration 12ms).
-- **Double-Buzz Prevention:** Implemented an event throttle preventing duplicate haptic firings when pointer down and click events trigger in rapid succession.
-
-### Study Session Doubts and In-Depth Inquiry
-- **Session Doubts Drawer:** Deep study logs now feature an integrated inquiry module where users can capture concepts, academic questions, and unresolved doubts directly under any saved study session in Study History.
-- **10,000-Word Capacity:** Equipped with a word limit of up to 10,000 words per session, supported by a live JetBrains Mono word and character counter.
-- **Lock Protection:** Implemented an edit lock once saved to guarantee that notes and queries are not lost or overwritten during fast navigation.
-
-### Global No-Overwrite Protection
-- **Immutable Log State:** Applied systematic safeguard architecture across all modules (Nutrition, Gym Workout, Timetable, and Study Doubts).
-- **Explicit Unlock Controls:** Once an entry is committed and saved, inputs become read-only and actions convert into a secure "Saved & Locked" status. Modifying previously logged entries requires an explicit tap on "Unlock to Edit".
-
-### Streamlined Gym Architecture with Dedicated Cardio
-- **Clean Workout Logging:** Eliminated superfluous timers and start/end time pickers from the daily workout logging interface, focusing on set, repetition, weight, and exercise accuracy.
-- **Cardio Split Integration:** Added a Cardio category directly within the split selection screen alongside Push, Pull, Legs, Upper, Lower, Full Body, and Core.
-- **Circuit Presets:** Integrated quick-start cardio circuits including Zone 2 Base Building, High Intensity Interval Training (HIIT), Incline Treadmill Endurance, and Recovery Flush.
-
-### Settings Spending History and AI Budget Optimizer
-- **Categorized Spending Archive:** Added an interactive spending history accordion in Settings, grouping transactions into calendar months.
-- **AI Spend Insights:** Features an integrated Groq AI budget evaluation model that scans monthly transaction logs, flags non-essential expenses, and provides prioritized, actionable advice on where to cut expenditures.
-
-### Timetable Lecture Topics by Month
-- **Attached Topic Subsection:** Each lecture card now features an expandable "Today's Topic Discussed" subsection to record syllabus coverage and key concepts.
-- **Monthly Topic History:** Automatically structures lecture coverage by calendar month, enabling students to review past discussions prior to examinations.
-
-### Context-Aware Nutrition and Food Doubt Assistant
-- **Automated Meal Slot Focus:** The nutrition screen inspects the current local time on initial load and expands the corresponding meal slot (Breakfast, Lunch, Snacks, or Dinner).
-- **Food Doubt ("Can I eat this?"):** Positioned directly beneath the daily calorie progress indicator, this AI assistant evaluates whether off-menu or external foods fit current macro targets. All responses are plain text and strictly constrained to under 100 characters.
-
-### TO-DO List Actionable Subtasks and Settings Archive
-- **Task Specifics ("What to do actually"):** Tasks now feature an optional subtask descriptor beneath the main title to define clear execution steps.
-- **Home and List Synchronization:** Subtasks render cleanly on both the dedicated TO-DO List interface and the Home dashboard preview.
-- **Task History Accordion:** Settings now includes a TO-DO history accordion detailing completed tasks, categories, and timestamps.
-
-### Ambient UI and Mobile System Integration
-- **Mobile Header Architecture and Safe-Area Geometry:** Restructured the fixed top navigation bar with explicit top safe-area inset padding (`env(safe-area-inset-top)`) and a dedicated 56px content row, ensuring full clearance beneath hardware camera cutouts and dynamic islands.
-- **Natural System Default Status Bar:** Standardized system theme color configuration (`#FFFFFF` in light mode and `#09090B` in dark mode) across `useTheme.ts`, `manifest.json`, and `index.html` to eliminate contrasting black lines and maintain a unified native aesthetic.
-- **Vector App Branding on Login:** Updated the authentication interface (`/auth`) to render the official high-resolution vector emblem (`/icon.svg`) with smooth corner curvature and subtle depth.
-- **PWA Cache Invalidation (v6):** Service worker cache bumped to `lifeos-v6` guaranteeing immediate client-side retrieval of updated interface assets without stale cache delays.
-- **Floating Dock Ergonomics:** Bottom navigation raised slightly with an ambient gradient backdrop blur to ensure comfort across curved and gesture-navigated displays.
-- **Extended Content Clearance:** Page containers provide generous bottom padding to eliminate content occlusion behind the floating navigation bar.
-- **Invisible AI Pipeline:** Removed the manual API key input card in Settings; AI operations utilize a robust background integration.
-
----
-
-## Core Architecture and Features
-
-### 1. Daily TO-DO Management
-- Quick task creation with custom categorization (Academic, Fitness, Personal, Urgent).
-- Actionable subtasks clarifying actual execution requirements.
-- Dynamic completion toggling with vibration haptics.
-- Historical logging with completed task counts and category distributions.
-
-### 2. Physical Training and Gym Engine
-- Comprehensive workout logging tracking exercises, sets, weights, and repetitions.
-- Rapid exercise selection across Chest, Back, Shoulders, Arms, Legs, Core, and Cardio.
-- Split configuration saving routines across seven distinct training archetypes.
-- Monthly workout history in Settings with AI-driven training volume and progressive overload analysis.
-- One-tap quick weight adjustments (+1kg, +2.5kg, +5kg) and auto-select number fields.
-
-### 3. Nutrition and Mess Meal Tracking
-- Interactive calorie and macronutrient rings tracking daily energy budgets.
-- Four daily meal slots: Breakfast (07:30 - 10:00), Lunch (12:00 - 14:30), Snacks (17:00 - 18:30), and Dinner (19:30 - 22:00).
-- Automatic time-slot expansion highlighting the active meal period.
-- AI Dietician analysis evaluating weekly nutrition trends.
-- Quick Food Doubt evaluator delivering advice in under 100 characters.
-
-### 4. Academic Scheduler and Deep Study
-- Schedule mapping with subject names, teacher info, room locations, and time slots.
-- Real-time ongoing class detection with theme color fills and live indicator badges.
-- Monthly lecture topic recording attached to each class.
-- Pomodoro deep-focus timer with background execution and sound alerts.
-- Study history with subject-wise time breakdowns and 10,000-word doubt journals.
-
-### 5. Financial Ledger and Expense Intelligence
-- Rapid expense logging with tags (Food, Academic, Transport, Entertainment, Utility).
-- Monthly spending summaries with category breakdowns.
-- Settings Spending History with AI budget critique and savings suggestions.
-
-### 6. Central Progress Matrix
-- Aggregated monthly streaks and consistency scores.
-- Visual completion graphs powered by Recharts.
-- Subject balance radar and workout frequency metrics.
-
----
-
-## Technical Stack
-
-### Frontend Core
-- **React 18.3**: Declarative UI architecture utilizing custom hooks and memoized context.
-- **TypeScript 5.5**: Strict type safety covering all entity models, session records, and state transitions.
-- **Vite 8.2**: High-speed build tool with hot module replacement and optimized asset pipeline.
-
-### Styling and Animation
-- **Tailwind CSS 3.4**: Utility-first responsive design supporting full dark and light mode adaptation.
-- **Framer Motion 11.18**: Layout animations, spring transitions, gesture interactions, and sheet modals.
-- **Lucide React**: Vector iconography for modern mobile interfaces.
-- **Canvas Confetti**: Rewarding completion animations upon goal attainment.
-
-### Mobile & Native Runtime
-- **Capacitor 8**: Native runtime container bridging modern web technologies to Android.
-- **Capacitor Google Auth**: Native Google Play Services authentication plugin.
-- **Android SDK & Gradle 8.14**: Compiles optimized, hardware-accelerated standalone APKs.
-
-### Cloud and Artificial Intelligence
-- **Firebase Authentication**: Google OAuth authentication.
-- **Cloud Firestore**: Real-time cloud synchronization with offline persistence support.
-- **Groq AI SDK (`qwen/qwen3.8-27b`)**: High-speed LLM inference for workout analysis, dietary coaching, budget reviews, and food evaluations.
-
----
-
-## Typography Standards
-
-LifeOS adheres to strict typographical guidelines:
-- **90% Google Sans Flex**: Applied to all structural headings, body text, buttons, and navigation for a premium, highly legible, and fluid typographic experience.
-- **10% JetBrains Mono**: Reserved exclusively for numeric indicators, timestamps, weights, sets, reps, and counters to ensure instant scannability.
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18.x or higher
-- npm 9.x or higher
-- Java 17 (for Android native APK builds)
-- Android SDK (optional, only for building native APKs)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Avineesh-G/LIFEOS.git
-cd LIFEOS/lifeos
+```
+lifeos/
+├── android/                             # Native Android Studio project
+│   ├── app/
+│   │   ├── build.gradle                 # VersionCode 5, VersionName 1.4, Keystore config
+│   │   ├── lifeos-release-key.jks       # Production release signing keystore
+│   │   └── src/main/
+│   │       ├── AndroidManifest.xml      # Permissions, hardware acceleration
+│   │       └── res/                     # Vector-derived adaptive launcher icons
+├── public/
+│   ├── LifeOS.apk                       # Production-signed release APK package
+│   ├── version.json                     # Release manifest for in-app update checks
+│   ├── icon.svg                         # Master minimalist dark vector icon
+│   └── icon-monochrome.svg              # Android 13+ Material You themed launcher
+├── src/
+│   ├── components/                      # Reusable UI primitives & layouts
+│   │   ├── Layout.tsx                   # Rigid 8-column navigation dock & viewport frame
+│   │   ├── ErrorBoundary.tsx            # Graceful crash handling & recovery
+│   │   ├── BodyProfileForm.tsx          # User biometrics & fitness goals
+│   │   └── AnimatedIcons.tsx            # Lightweight custom SVG icons
+│   ├── data/
+│   │   ├── defaultData.ts               # Fallback initial data structures
+│   │   └── messMenu.ts                  # Monthly campus nutrition menu
+│   ├── hooks/
+│   │   ├── useData.ts                   # Optimistic local-first Firestore synchronization
+│   │   └── useTheme.ts                  # Dynamic system dark/light adaptation
+│   ├── pages/
+│   │   ├── Home.tsx                     # Daily execution score & dashboard metrics
+│   │   ├── Gym.tsx                      # Routine hub & weekly split tracker
+│   │   ├── GymWorkout.tsx               # Active workout logger with rest timers
+│   │   ├── GymSplit.tsx                 # Custom workout split editor
+│   │   ├── GymExerciseHistory.tsx       # Historical weight/rep analytics
+│   │   ├── GymOnboarding.tsx            # Interactive workout setup wizard
+│   │   ├── Nutrition.tsx                # Mess menu tracker & AI food analysis
+│   │   ├── Study.tsx                    # Focus session hub & weekly breakdown
+│   │   ├── StudyTimer.tsx               # Pomodoro & stopwatch timer
+│   │   ├── StudyHistory.tsx             # Logged academic sessions & doubts
+│   │   ├── StudyHeatmap.tsx             # Year-round study activity heatmap
+│   │   ├── Spending.tsx                 # Category budgeting & expense log
+│   │   ├── Timetable.tsx                # Class schedule & topic recorder
+│   │   ├── Tasks.tsx                    # Segmented multi-color TO-DO list
+│   │   ├── Progress.tsx                 # Long-term habit streaks & radar charts
+│   │   ├── Settings.tsx                 # In-App Live Sync, Groq AI key, theme
+│   │   └── Auth.tsx                     # Native Google Play Services authentication
+│   ├── utils/
+│   │   ├── geminiCoach.ts               # Groq AI waterfall coach & diet tips
+│   │   └── haptics.ts                   # Capacitor hardware vibrator integration
+│   ├── App.tsx                          # Top-level routing & 120fps transitions
+│   ├── firebase.ts                      # Cloud Firestore & Auth client
+│   ├── main.tsx                         # React 18 DOM mount point
+│   └── types.ts                         # TypeScript domain models
+├── capacitor.config.ts                  # Capacitor 8 native bridge settings
+├── package.json                         # Dependencies & project scripts
+├── tailwind.config.js                   # M3 Expressive color tokens & surfaces
+└── vite.config.ts                       # Fast Vite bundler configuration
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+---
 
-3. Configure environment variables:
-Create a `.env` file in the root directory:
-```env
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_firebase_app_id
-```
+## Core Technologies
 
-4. Run local development server:
+- **Frontend:** React 18, TypeScript, Tailwind CSS, Framer Motion
+- **Native Runtime:** Capacitor 8 Android with Hardware GPU Acceleration
+- **Backend & Auth:** Google Firebase (Cloud Firestore & Firebase Authentication)
+- **Native Auth:** Google Play Services via `@codetrix-studio/capacitor-google-auth`
+- **Haptics:** Native Android OS Vibration Services via `@capacitor/haptics`
+- **AI Inference:** Groq Cloud API (Llama 3.3, Qwen 3.8, GPT-OSS)
+
+---
+
+## Build & Deployment Commands
+
+### Development Server
 ```bash
 npm run dev
 ```
 
-5. Build production web bundle:
+### Production Web Build
 ```bash
 npm run build
 ```
 
-6. Preview production build:
+### Sync Web Build to Native Android
 ```bash
-npm run preview
+npm run cap:sync
 ```
 
-7. Build standalone Android APK:
+### Compile Signed Release APK
 ```bash
 npm run cap:build
 ```
+The compiled, production-signed binary is generated at:
+`android/app/build/outputs/apk/release/app-release.apk`
+and automatically copied to:
+`public/LifeOS.apk`
 
 ---
 
 ## License
 
-Private project developed for personal life management and academic execution. All rights reserved.
+Private repository. All rights reserved.

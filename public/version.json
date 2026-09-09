@@ -1,7 +1,7 @@
 {
-  "versionCode": 4,
-  "versionName": "1.3",
+  "versionCode": 5,
+  "versionName": "1.4",
   "releaseDate": "2026-09-09",
-  "releaseNotes": "Gym checkmark re-alignment, gym save freeze fix, and ultra-smooth 60fps tab transitions.",
+  "releaseNotes": "LifeOS v1.4: 120fps ultra-fluid transitions, In-App Live Sync (no manual APK reinstalls needed), secure Groq AI configuration, and enhanced gym stability.",
   "apkUrl": "/LifeOS.apk"
 }

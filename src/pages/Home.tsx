@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, ArrowUpRight, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
@@ -11,54 +12,90 @@ interface HomeProps {
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.03 } },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 12 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
 };
 
 export default function Home({ data }: HomeProps) {
   const navigate = useNavigate();
-  const today  = format(new Date(), 'yyyy-MM-dd');
-  const now    = new Date();
+  const now = new Date();
 
-  // ── Study ──
-  const todaySessions      = data.studySessions.filter(s => s.date === today);
-  const todayStudyMinutes  = todaySessions.reduce((sum, s) => sum + s.duration, 0);
-  const todayStudyHours    = Math.floor(todayStudyMinutes / 60);
-  const todayStudyMins     = todayStudyMinutes % 60;
+  const {
+    todaySessions,
+    todayStudyHours,
+    todayStudyMins,
+    todayWorkout,
+    todayPlan,
+    todayExpenses,
+    todaySpent,
+    todayTasks,
+    completedTasks,
+    nextBlock,
+    studyScore,
+    gymScore,
+    taskScore,
+    spendScore,
+    dayScore,
+  } = useMemo(() => {
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const nowDate = new Date();
 
-  // ── Gym ──
-  const todayWorkout = data.workoutLogs.find(w => w.date === today);
-  const todayPlan    = data.workoutPlans.find(p => {
-    const map: Record<string, string> = {
+    // ── Study ──
+    const todaySessions = data.studySessions.filter(s => s.date === todayStr);
+    const todayStudyMinutes = todaySessions.reduce((sum, s) => sum + s.duration, 0);
+    const studyHours = Math.floor(todayStudyMinutes / 60);
+    const studyMins = todayStudyMinutes % 60;
+
+    // ── Gym ──
+    const workout = data.workoutLogs.find(w => w.date === todayStr);
+    const dayMap: Record<string, string> = {
       Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
       Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
     };
-    return map[p.day] === format(now, 'EEEE');
-  });
+    const plan = data.workoutPlans.find(p => dayMap[p.day] === format(nowDate, 'EEEE'));
 
-  // ── Spending ──
-  const todayExpenses = data.expenses.filter(e => e.date === today);
-  const todaySpent    = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+    // ── Spending ──
+    const todayExpenses = data.expenses.filter(e => e.date === todayStr);
+    const spent = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // ── Tasks ──
-  const todayTasks     = data.tasks.filter(t => t.date === today);
-  const completedTasks = todayTasks.filter(t => t.completed).length;
+    // ── Tasks ──
+    const tasks = data.tasks.filter(t => t.date === todayStr);
+    const completed = tasks.filter(t => t.completed).length;
 
-  // ── Next timetable block ──
-  const nextBlock = data.timetable
-    .filter(b => b.day === format(now, 'EEEE') && b.startTime > format(now, 'HH:mm'))
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+    // ── Next timetable block ──
+    const next = data.timetable
+      .filter(b => b.day === format(nowDate, 'EEEE') && b.startTime > format(nowDate, 'HH:mm'))
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
 
-  // ── Day score (4 pillars × 25) ──
-  const studyScore   = Math.min(25, (todayStudyMinutes / 120) * 25);
-  const gymScore     = todayWorkout ? 25 : 0;
-  const taskScore    = todayTasks.length > 0 ? (completedTasks / todayTasks.length) * 25 : 0;
-  const spendScore   = todayExpenses.length > 0 ? 25 : 0;
-  const dayScore     = Math.round(studyScore + gymScore + taskScore + spendScore);
+    // ── Day score (4 pillars × 25) ──
+    const studyScore = Math.min(25, (todayStudyMinutes / 120) * 25);
+    const gymScore = workout ? 25 : 0;
+    const taskScore = tasks.length > 0 ? (completed / tasks.length) * 25 : 0;
+    const spendScore = todayExpenses.length > 0 ? 25 : 0;
+    const score = Math.round(studyScore + gymScore + taskScore + spendScore);
+
+    return {
+      todaySessions,
+      todayStudyHours: studyHours,
+      todayStudyMins: studyMins,
+      todayWorkout: workout,
+      todayPlan: plan,
+      todayExpenses,
+      todaySpent: spent,
+      todayTasks: tasks,
+      completedTasks: completed,
+      nextBlock: next,
+      studyScore,
+      gymScore,
+      taskScore,
+      spendScore,
+      dayScore: score,
+    };
+  }, [data]);
 
   // Dynamic Status Badge
   const getScoreBadge = () => {

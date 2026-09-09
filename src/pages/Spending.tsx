@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Trash2, Wallet, X, ArrowUpRight, TrendingDown } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,8 +45,8 @@ const CAT_STYLES: Record<string, { badge: string; text: string; bar: string }> =
   },
 };
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: 'easeOut' } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
+const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } } };
 
 export default function Spending({ data, updateData }: SpendingProps) {
   const [showAdd, setShowAdd] = useState(false);
@@ -55,18 +55,42 @@ export default function Spending({ data, updateData }: SpendingProps) {
   const [note, setNote] = useState('');
 
   const now = new Date();
-  const monthExpenses = data.expenses.filter(e =>
-    isWithinInterval(parseISO(e.date), { start: startOfMonth(now), end: endOfMonth(now) })
-  );
-  const monthTotal = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const todayTotal = data.expenses
-    .filter(e => e.date === format(now, 'yyyy-MM-dd'))
-    .reduce((sum, e) => sum + e.amount, 0);
 
-  const categoryTotals: Record<string, number> = {};
-  monthExpenses.forEach(e => { categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount; });
-  const sortedCats = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
-  const maxCat = sortedCats[0]?.[1] || 1;
+  const { monthExpenses, monthTotal, todayTotal, sortedCats, maxCat } = useMemo(() => {
+    const nowDate = new Date();
+    const start = startOfMonth(nowDate);
+    const end = endOfMonth(nowDate);
+    const todayStr = format(nowDate, 'yyyy-MM-dd');
+
+    const mExpenses = data.expenses.filter(e => {
+      try {
+        return isWithinInterval(parseISO(e.date), { start, end });
+      } catch {
+        return false;
+      }
+    });
+
+    const mTotal = mExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const tTotal = data.expenses
+      .filter(e => e.date === todayStr)
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    const categoryTotals: Record<string, number> = {};
+    mExpenses.forEach(e => {
+      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+    });
+
+    const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+    const max = sorted[0]?.[1] || 1;
+
+    return {
+      monthExpenses: mExpenses,
+      monthTotal: mTotal,
+      todayTotal: tTotal,
+      sortedCats: sorted,
+      maxCat: max,
+    };
+  }, [data.expenses]);
 
   const handleAdd = async () => {
     if (!amount || parseFloat(amount) <= 0) return;
