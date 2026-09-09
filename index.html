@@ -29,8 +29,8 @@
   <script>
     try {
       const isVercel = window.location.hostname.includes('vercel.app');
-      const preferLive = localStorage.getItem('lifeos_live_sync') === 'true';
-      if (!isVercel && preferLive && navigator.onLine) {
+      if (!isVercel && navigator.onLine) {
+        localStorage.setItem('lifeos_live_sync', 'true');
         window.location.replace('https://lifeos-gujjeti-avineeshs-projects.vercel.app' + window.location.pathname);
       }
     } catch (e) {}

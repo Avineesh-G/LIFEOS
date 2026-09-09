@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo, Download, RefreshCw, Smartphone, Key, Eye, EyeOff } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo, RefreshCw, Smartphone, Key, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
@@ -61,11 +61,11 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     setTimeout(() => setApiKeySaved(false), 2500);
   };
 
-  // In-App Update & Live Sync State
+  // Direct In-App Update & Live Sync State
   const CURRENT_BUILD_CODE = 6;
   const CURRENT_VERSION_LABEL = '1.5';
   const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
-  const CLOUD_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
+  const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
 
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [syncingBuild, setSyncingBuild] = useState(false);
@@ -83,31 +83,29 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       if (meta.versionCode > CURRENT_BUILD_CODE) {
         setUpdateInfo({
           available: true,
-          name: meta.versionName || '1.4',
+          name: meta.versionName || '1.5',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg(`Update v${meta.versionName} is live! Tap below to update.`);
+        setUpdateMsg(`Update v${meta.versionName} is ready! Tap "Update & Apply Now" to update.`);
       } else {
         setUpdateInfo({
           available: false,
-          name: meta.versionName || '1.4',
+          name: meta.versionName || '1.5',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg('You are on the latest version (v1.5 - Build 6). System is synced!');
+        setUpdateMsg('Application is on the latest build (v1.5 - Build 6). All features synced!');
       }
     } catch {
-      setUpdateMsg('Unable to check for updates. Please check your network connection.');
+      setUpdateMsg('Unable to check for updates. Please verify your internet connection.');
     } finally {
       setCheckingUpdate(false);
     }
   };
 
-  const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
-
   const handleLiveSync = async () => {
     triggerHaptic('save');
     setSyncingBuild(true);
-    setUpdateMsg('Applying live cloud build...');
+    setUpdateMsg('Applying latest cloud build directly to app...');
     try {
       localStorage.setItem('lifeos_live_sync', 'true');
       if ('caches' in window) {
@@ -120,11 +118,18 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           await reg.unregister();
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn('Cache clear note:', e);
+    }
 
     setTimeout(() => {
-      window.location.replace(`${CLOUD_LIVE_URL}/settings?t=${Date.now()}`);
-    }, 300);
+      if (window.location.hostname.includes('vercel.app')) {
+        window.location.search = `?sync=${Date.now()}`;
+        window.location.reload();
+      } else {
+        window.location.replace(`${CLOUD_LIVE_URL}/settings?sync=${Date.now()}`);
+      }
+    }, 400);
   };
 
   // Filter logs by selected month and only include saved logs
@@ -1132,7 +1137,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </div>
       </motion.div>
 
-      {/* App Version & Live Over-The-Air Updates */}
+      {/* App Version & Direct In-App Live Updates */}
       <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -1141,7 +1146,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             </span>
             <div>
               <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-                Application Version & Live Sync
+                Direct In-App Updates & Sync
               </p>
               <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
                 LifeOS v1.5 (Build 6)
@@ -1149,28 +1154,25 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             </div>
           </div>
           <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold font-mono">
-            Latest
+            Active
           </span>
         </div>
 
         {updateMsg && (
-          <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between">
+          <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between gap-2">
             <span>{updateMsg}</span>
-            {updateInfo?.available ? (
-              <button
-                onClick={handleLiveSync}
-                className="px-2.5 py-1 rounded-lg bg-accent text-white font-bold font-mono text-[11px] hover:opacity-90 active:scale-95"
-              >
-                Sync Now
-              </button>
-            ) : (
-              <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">Synced</span>
-            )}
+            <button
+              onClick={handleLiveSync}
+              disabled={syncingBuild}
+              className="px-3 py-1 rounded-lg bg-accent text-white font-bold font-mono text-[11px] hover:opacity-90 active:scale-95 disabled:opacity-50 shrink-0"
+            >
+              {syncingBuild ? 'Applying...' : 'Apply Now'}
+            </button>
           </div>
         )}
 
-        {/* 3-Button Control Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+        {/* 2-Button Control Grid: Direct In-App Only */}
+        <div className="grid grid-cols-2 gap-3 pt-1">
           <button
             onClick={checkForUpdates}
             disabled={checkingUpdate || syncingBuild}
@@ -1182,33 +1184,24 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           <button
             onClick={handleLiveSync}
             disabled={syncingBuild}
-            className="w-full py-2.5 px-3 rounded-full bg-accent/10 hover:bg-accent/15 text-accent border border-accent/25 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20 disabled:opacity-50"
           >
             <Sparkles size={13} className={syncingBuild ? 'animate-spin' : ''} />
-            {syncingBuild ? 'Syncing...' : 'Sync Latest Build'}
+            {syncingBuild ? 'Syncing...' : 'Sync & Apply Build'}
           </button>
-          <a
-            href={CLOUD_APK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => triggerHaptic('save')}
-            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20 text-center"
-          >
-            <Download size={14} />
-            Download APK
-          </a>
         </div>
 
-        {/* Guidance Box for Seamless In-Place Upgrades */}
+        {/* Guidance Box for Direct In-App Updating */}
         <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-border-light/60 dark:border-border-dark/60 text-[11px] text-muted-light dark:text-muted-dark leading-relaxed space-y-1">
-          <p className="font-bold text-secondary-light dark:text-secondary-dark">
-            💡 Zero-Reinstall Architecture:
+          <p className="font-bold text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
+            <CheckCircle2 size={13} className="text-emerald-500" />
+            Seamless Direct In-App Updating:
           </p>
           <p>
-            • <strong>Instant Live Sync:</strong> Web fixes, UI tweaks, and AI updates sync instantly above without downloading or reinstalling anything.
+            • <strong>Instant Live Sync:</strong> When new updates are released, tapping <strong>Check Updates</strong> or <strong>Sync & Apply Build</strong> immediately updates the application directly on your phone.
           </p>
           <p>
-            • <strong>In-Place APK Upgrade:</strong> If you install an updated APK, Android automatically updates over the existing app with 0 data loss. Never uninstall!
+            • <strong>No Manual Downloads:</strong> You never have to download or click to install APK files again. Everything applies directly in the app.
           </p>
         </div>
       </div>

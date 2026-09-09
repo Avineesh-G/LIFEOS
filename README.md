@@ -15,8 +15,8 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ### 1. Direct In-App Cloud Stream & Live Sync (Zero-Reinstall Architecture)
 - **Direct Cloud Stream Integration:** The native Android shell is connected directly to the live cloud URL (`https://lifeos-gujjeti-avineeshs-projects.vercel.app`), with an offline-first Service Worker cache fallback. Every future update pushed to GitHub is streamed live over the air directly inside the app without requiring manual APK downloads or reinstallations.
-- **Instant In-App Sync:** Tapping **"Sync Latest Build"** in Settings immediately flushes stale web caches and pulls the latest cloud deployment directly on screen.
-- **In-Place Native Packaging:** Bumped native `versionCode` to `6` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
+- **Direct In-App Updates:** Tapping **"Check Updates"** or **"Sync & Apply Build"** in Settings immediately flushes stale web caches and applies the latest cloud deployment directly to the application on your phone.
+- **In-Place Native Packaging:** Configured native `versionCode` to `6` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
 
 ### 2. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
 - **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.
@@ -40,7 +40,7 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 lifeos/
 ├── android/                             # Native Android Studio project
 │   ├── app/
-│   │   ├── build.gradle                 # VersionCode 5, VersionName 1.4, Keystore config
+│   │   ├── build.gradle                 # VersionCode 6, VersionName 1.5, Keystore config
 │   │   ├── lifeos-release-key.jks       # Production release signing keystore
 │   │   └── src/main/
 │   │       ├── AndroidManifest.xml      # Permissions, hardware acceleration
