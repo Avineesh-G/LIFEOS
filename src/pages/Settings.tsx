@@ -64,6 +64,8 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   // In-App Update & Live Sync State
   const CURRENT_BUILD_CODE = 5;
   const CURRENT_VERSION_LABEL = '1.4';
+  const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
+  const CLOUD_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
 
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [syncingBuild, setSyncingBuild] = useState(false);
@@ -73,9 +75,9 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const checkForUpdates = async () => {
     triggerHaptic('light');
     setCheckingUpdate(true);
-    setUpdateMsg('');
+    setUpdateMsg('Checking cloud for updates...');
     try {
-      const res = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`${CLOUD_VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Could not fetch');
       const meta = await res.json();
       if (meta.versionCode > CURRENT_BUILD_CODE) {
@@ -84,7 +86,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           name: meta.versionName || '1.4',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg(`Update v${meta.versionName} is live! Tap "Sync Now" to apply.`);
+        setUpdateMsg(`Update v${meta.versionName} is live! Tap below to update.`);
       } else {
         setUpdateInfo({
           available: false,
@@ -1185,10 +1187,11 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             {syncingBuild ? 'Syncing...' : 'Sync Latest Build'}
           </button>
           <a
-            href="/LifeOS.apk"
-            download="LifeOS.apk"
+            href={CLOUD_APK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => triggerHaptic('save')}
-            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20"
+            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20 text-center"
           >
             <Download size={14} />
             Download APK
