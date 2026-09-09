@@ -330,23 +330,28 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
         <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono">
           <ChevronLeft size={16} /> Back to Gym
         </button>
-        <div className="label-mono font-bold text-xs text-secondary-light dark:text-secondary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1 rounded-full border border-border-light dark:border-border-dark">
+        <div className="label-mono font-bold text-xs text-secondary-light dark:text-secondary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1 rounded-full border border-border-light dark:border-border-dark flex items-center gap-1.5">
+          {!isRest && pct === 100 && <Check size={12} className="text-emerald-500 stroke-[3]" />}
           {completedSets}/{totalSets} sets
         </div>
       </div>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">{today} · Live Session</p>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">{workoutType}</h1>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+              {today} · Live Session
+            </p>
             {!isRest && pct === 100 && (
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-sm">
-                <Check size={16} className="text-white stroke-[3]" />
-              </motion.div>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono">
+                <Check size={11} className="stroke-[3]" /> ALL DONE
+              </span>
             )}
           </div>
-          {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-1 capitalize font-medium">{muscles}</p>}
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight text-primary-light dark:text-primary-dark font-sans break-words">
+            {workoutType}
+          </h1>
+          {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 capitalize font-medium">{muscles}</p>}
         </div>
         <button 
           onClick={() => {

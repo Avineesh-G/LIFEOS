@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Trash2, X, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,17 +10,20 @@ interface TasksProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
-
 export default function Tasks({ data, updateData }: TasksProps) {
   const [newTask, setNewTask] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
-  const todayTasks     = data.tasks.filter(t => t.date === today);
-  const completedCount = todayTasks.filter(t => t.completed).length;
+  const todayTasks = useMemo(() => {
+    return (data?.tasks || []).filter(t => t?.date === today);
+  }, [data?.tasks, today]);
+
+  const completedCount = useMemo(() => {
+    return todayTasks.filter(t => t.completed).length;
+  }, [todayTasks]);
+
   const pct = todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
 
   const addTask = async () => {
@@ -33,7 +36,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
       completed: false,
       date: today,
     };
-    await updateData({ tasks: [...data.tasks, task] });
+    await updateData({ tasks: [...(data?.tasks || []), task] });
     setNewTask('');
     setNewSubtask('');
     setShowAdd(false);
@@ -41,41 +44,51 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
   const toggleTask = async (id: string) => {
     triggerHaptic('medium');
-    await updateData({ tasks: data.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t) });
+    await updateData({
+      tasks: (data?.tasks || []).map(t => t.id === id ? { ...t, completed: !t.completed } : t)
+    });
   };
 
   const deleteTask = async (id: string) => {
     triggerHaptic('heavy');
-    await updateData({ tasks: data.tasks.filter(t => t.id !== id) });
+    await updateData({
+      tasks: (data?.tasks || []).filter(t => t.id !== id)
+    });
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
+    <div className="space-y-6 sm:space-y-7 pb-4">
 
       {/* Header */}
-      <motion.div variants={item} className="flex items-end justify-between pt-2">
+      <div className="flex items-end justify-between pt-2">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold tracking-wider uppercase mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse" />
             Today
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
             TO-DO List
           </h1>
+          <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 font-medium">
+            Daily execution · Keep moving forward
+          </p>
         </div>
-        <button 
-          onClick={() => setShowAdd(true)} 
-          className="rounded-full flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold bg-[#6750A4] dark:bg-[#D0BCFF] text-white dark:text-[#21005D] shadow-sm hover:opacity-95 active:scale-95 transition-all"
+        <button
+          onClick={() => {
+            triggerHaptic('light');
+            setShowAdd(true);
+          }}
+          className="btn-pill flex items-center gap-1.5 px-4 py-2 text-xs bg-accent text-white shadow-sm hover:opacity-90 active:scale-95 transition-all"
         >
-          <Plus size={16} strokeWidth={2.5} /> Add Task
+          <Plus size={15} /> Add Task
         </button>
-      </motion.div>
+      </div>
 
-      {/* Segmented task progress bar — each task gets its own color */}
-      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-bold tracking-wider text-muted-light dark:text-muted-dark uppercase">
-            Today's Tasks
+      {/* Progress pill card */}
+      <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+            Completion Rate
           </span>
           <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
             pct === 100
@@ -94,7 +107,6 @@ export default function Tasks({ data, updateData }: TasksProps) {
         {todayTasks.length > 0 ? (
           <div className="flex items-center gap-1">
             {todayTasks.map((task, i) => {
-              // Cycle through a vibrant palette — same aesthetic as home page pillars
               const palette = [
                 'bg-purple-500',
                 'bg-indigo-500',
@@ -109,16 +121,13 @@ export default function Tasks({ data, updateData }: TasksProps) {
               ];
               const color = palette[i % palette.length];
               return (
-                <motion.div
+                <div
                   key={task.id}
-                  className={`h-2 flex-1 rounded-full transition-colors duration-300 ${
+                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                     task.completed
                       ? color
                       : 'bg-neutral-100 dark:bg-neutral-800'
                   }`}
-                  initial={{ scaleX: 0, originX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.35, delay: i * 0.04, ease: 'easeOut' }}
                 />
               );
             })}
@@ -136,23 +145,20 @@ export default function Tasks({ data, updateData }: TasksProps) {
             {pct}%
           </span>
         </div>
-      </motion.div>
-
-
+      </div>
 
       {/* Task list */}
-      <motion.div variants={item} className="space-y-3">
-        <AnimatePresence mode="popLayout">
+      <div className="space-y-3">
+        <AnimatePresence>
           {todayTasks.map(task => {
             const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
             return (
               <motion.div
                 key={task.id}
-                layout
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.18 }}
                 className={`rounded-[22px] border transition-all p-4 flex items-center gap-3.5 group shadow-sm ${
                   task.completed
                     ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-border-dark/50 opacity-75'
@@ -205,15 +211,15 @@ export default function Tasks({ data, updateData }: TasksProps) {
         </AnimatePresence>
 
         {todayTasks.length === 0 && (
-          <motion.div variants={item} className="card p-10 text-center">
+          <div className="card p-10 text-center">
             <p className="text-2xl mb-2">✓</p>
-            <p className="label-mono text-secondary-light dark:text-secondary-dark">No TO-DOs yet</p>
+            <p className="label-mono text-secondary-light dark:text-secondary-dark font-bold">No TO-DOs yet</p>
             <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + Add Task to create your first TO-DO</p>
-          </motion.div>
+          </div>
         )}
-      </motion.div>
+      </div>
 
-      {/* Add Task Elevated Modal Card (Clears Navigation Bar) */}
+      {/* Add Task Elevated Modal Card */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
@@ -259,20 +265,24 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     type="text"
                     value={newSubtask}
                     onChange={e => setNewSubtask(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addTask()}
-                    placeholder="e.g. Solve problems 1 through 10 and submit PDF"
+                    placeholder="e.g. Complete questions 1 to 10 from HC Verma"
                     className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark font-medium"
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="flex items-center gap-2 pt-2">
                   <button
-                    onPointerDown={() => triggerHaptic('save')}
+                    onClick={() => setShowAdd(false)}
+                    className="flex-1 py-3 rounded-full border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
                     onClick={addTask}
                     disabled={!newTask.trim()}
-                    className="btn-pill w-full py-3.5 text-sm font-bold shadow-md disabled:opacity-30"
+                    className="flex-[1.5] py-3 rounded-full bg-accent text-white font-bold text-xs shadow-sm hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-40"
                   >
-                    Add TO-DO
+                    Create Task
                   </button>
                 </div>
               </div>
@@ -280,6 +290,6 @@ export default function Tasks({ data, updateData }: TasksProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, History, Calendar, Sparkles, Loader2, ChevronDown, ChevronUp, X, Dumbbell, Timer, Wallet, ListTodo, Download, RefreshCw, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo } from 'react';
@@ -48,6 +48,42 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // In-App Update State
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<{ available: boolean; name: string; notes?: string } | null>(null);
+  const [updateMsg, setUpdateMsg] = useState('');
+
+  const checkForUpdates = async () => {
+    triggerHaptic('light');
+    setCheckingUpdate(true);
+    setUpdateMsg('');
+    try {
+      const res = await fetch(`/version.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error('Could not fetch');
+      const meta = await res.json();
+      const currentCode = 4;
+      if (meta.versionCode > currentCode) {
+        setUpdateInfo({
+          available: true,
+          name: meta.versionName || '1.3',
+          notes: meta.releaseNotes,
+        });
+        setUpdateMsg(`Update v${meta.versionName} available!`);
+      } else {
+        setUpdateInfo({
+          available: false,
+          name: meta.versionName || '1.3',
+          notes: meta.releaseNotes,
+        });
+        setUpdateMsg('You are running the latest version (v1.3)');
+      }
+    } catch {
+      setUpdateMsg('Unable to check for updates. Please try again.');
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
 
   // Filter logs by selected month and only include saved logs
   const filteredLogs = useMemo(() => {
@@ -979,9 +1015,60 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </div>
       </motion.div>
 
-      <motion.div variants={item} className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.4</p>
-      </motion.div>
+      {/* App Version & Direct APK Updates */}
+      <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-[14px] bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+              <Smartphone size={20} />
+            </span>
+            <div>
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+                Application Version
+              </p>
+              <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
+                LifeOS v1.3 (Build 4)
+              </h3>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold font-mono">
+            Latest
+          </span>
+        </div>
+
+        {updateMsg && (
+          <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between">
+            <span>{updateMsg}</span>
+            {updateInfo?.available && (
+              <span className="font-bold text-accent font-mono text-[11px]">New</span>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <button
+            onClick={checkForUpdates}
+            disabled={checkingUpdate}
+            className="w-full py-2.5 px-4 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
+            {checkingUpdate ? 'Checking...' : 'Check Updates'}
+          </button>
+          <a
+            href="/LifeOS.apk"
+            download="LifeOS.apk"
+            onClick={() => triggerHaptic('save')}
+            className="w-full py-2.5 px-4 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20"
+          >
+            <Download size={14} />
+            Download APK
+          </a>
+        </div>
+      </div>
+
+      <div className="text-center py-4">
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.3 · Production Ready</p>
+      </div>
     </motion.div>
   );
 }

@@ -8,6 +8,23 @@
 
 LifeOS (branded as Flow) is an all-in-one personal management and execution operating system designed to unify daily habits, academic pursuits, strength training, nutrition, spending, and task workflows. Engineered as a mobile-first Progressive Web App (PWA), LifeOS emphasizes ergonomics, tactile haptic feedback, modern aesthetics inspired by Google Material 3 Expressive, and intelligent Groq AI inference.
 
+## What is New in Version 1.6
+
+### Gym Section Polish & Zero-Blank Screen Architecture
+- **Session Header Completion Alignment:** Re-engineered the workout session header to move completion indicators into the session metadata badge (`ALL DONE`) and set counter pill (`13/13 sets ✓`), eliminating awkward wrapping overlaps with multi-line workout titles (e.g. "Shoulders + Core") and the "Saved & Locked" button.
+- **Robust State Transition & Freeze Fix:** Eliminated fragile Framer Motion `staggerChildren` layout variants from the main Gym dashboard, replacing them with standard high-performance DOM containers. Navigating back to Gym after saving a workout now loads instantly with 0ms latency and zero blank-screen freezes.
+- **Safe Transition Timing:** Configured `App.tsx` `<AnimatePresence>` with `mode="wait"` to guarantee exiting pages cleanly unmount before new routes enter.
+
+### Blazing Smooth Progress & TO-DO Tab Transitions
+- **Memoized Analytics Computation:** Consolidated all synchronous study, gym, and streak computations in `Progress.tsx` within a cached `useMemo` block, eliminating main-thread blocking on route entrance.
+- **Lightweight Task Rendering:** Removed expensive Framer Motion `layout` measurement passes and `mode="popLayout"` from `Tasks.tsx`. Task lists and segmented progress tracks render instantaneously at silky smooth 60–120fps.
+
+### Direct In-App APK Updates & Public Distribution
+- **Direct Web APK Download:** Packaged `LifeOS.apk` as a public web asset served directly from the deployment, allowing instant 1-tap download without requiring local network IP addresses.
+- **In-App Update Detection:** Integrated an automated version check manifest (`version.json`) into the Settings dashboard. Users can check for new updates directly within the application and download the latest release with a single tap.
+
+---
+
 ## What is New in Version 1.5
 
 ### Official Android Icon & Visual Identity

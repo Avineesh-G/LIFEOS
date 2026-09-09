@@ -77,7 +77,7 @@ function App() {
   return (
     <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor}>
       <ErrorBoundary>
-        <AnimatePresence initial={false}>
+        <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
             <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />

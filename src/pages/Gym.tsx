@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dumbbell, ChevronRight, Play, Settings, Flame, Sparkles, Loader2, Check, Zap, ArrowUpRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
 import { AnimatedMoon } from '../components/AnimatedIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
@@ -13,28 +12,30 @@ interface GymProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: 'easeOut' } } };
-
 export default function Gym({ data, updateData }: GymProps) {
   const navigate = useNavigate();
   const [generatingCardio, setGeneratingCardio] = useState(false);
   const today = format(new Date(), 'EEEE');
   const todayDate = format(new Date(), 'yyyy-MM-dd');
   const shortDay = ({ Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' } as Record<string, string>)[today] || '';
-  const todayPlan = data.workoutPlans.find(p => p.day === shortDay);
-  const todayLog = data.workoutLogs.find(w => w.date === todayDate);
-  const isCompletedToday = !!todayLog?.isSaved;
+  const todayPlan = data?.workoutPlans?.find(p => p.day === shortDay);
+  const todayLog = data?.workoutLogs?.find(w => w.date === todayDate);
+  const isCompletedToday = Boolean(todayLog?.isSaved);
 
-  const totalWorkouts = (data.workoutLogs || []).length;
-  const thisWeekLogs = (data.workoutLogs || []).filter(w => {
-    const diff = (Date.now() - new Date(w.date).getTime()) / 86400000;
-    return diff <= 7;
-  });
+  const totalWorkouts = (data?.workoutLogs || []).length;
+  const thisWeekLogs = useMemo(() => {
+    const now = Date.now();
+    return (data?.workoutLogs || []).filter(w => {
+      if (!w?.date) return false;
+      const t = new Date(w.date).getTime();
+      return !isNaN(t) && (now - t) / 86400000 <= 7;
+    });
+  }, [data?.workoutLogs]);
 
-  const totalSets = todayLog && Array.isArray(todayLog.exercises)
-    ? todayLog.exercises.reduce((s, ex) => s + ((ex?.sets || []).filter(st => st?.completed).length), 0)
-    : 0;
+  const totalSets = useMemo(() => {
+    if (!todayLog || !Array.isArray(todayLog.exercises)) return 0;
+    return todayLog.exercises.reduce((s, ex) => s + ((ex?.sets || []).filter(st => st?.completed).length), 0);
+  }, [todayLog]);
 
   const handleGenerateCardio = async () => {
     triggerHaptic(15);
@@ -86,11 +87,10 @@ export default function Gym({ data, updateData }: GymProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
+    <div className="space-y-6 sm:space-y-7 pb-4">
 
       {/* Material 3 Expressive Mint Hero Card (Mobile-Optimized) */}
-      <motion.div
-        variants={item}
+      <div
         className="rounded-[32px] p-5 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle space-y-4 sm:space-y-5"
       >
         {/* Top Header Row */}
@@ -149,10 +149,10 @@ export default function Gym({ data, updateData }: GymProps) {
             </button>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Stats grid */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 gap-4 sm:gap-5">
         <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
@@ -182,10 +182,10 @@ export default function Gym({ data, updateData }: GymProps) {
           </p>
           <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">Sessions completed</p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Today's workout exercises card */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+      <div className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
             Today's Routine · {todayPlan?.type || 'Rest'}
@@ -258,11 +258,10 @@ export default function Gym({ data, updateData }: GymProps) {
             </p>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Material 3 Expressive Cardio Only Session (Rose Tonal Container) */}
-      <motion.div
-        variants={item}
+      <div
         className="rounded-[28px] p-5 sm:p-6 bg-m3-rose-container dark:bg-m3-rose-darkContainer text-m3-rose-text dark:text-m3-rose-darkText border border-m3-rose-badge/50 dark:border-m3-rose-darkBadge/50 shadow-m3-subtle space-y-4"
       >
         <div className="flex items-start justify-between gap-3">
@@ -299,11 +298,11 @@ export default function Gym({ data, updateData }: GymProps) {
             )}
           </button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Recent workouts */}
       {Array.isArray(data.workoutLogs) && data.workoutLogs.length > 0 && (
-        <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        <div className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
               Recent Workouts
@@ -331,8 +330,8 @@ export default function Gym({ data, updateData }: GymProps) {
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }
