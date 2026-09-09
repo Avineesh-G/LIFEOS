@@ -27,17 +27,17 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const pageTransition = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-  transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] }
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -4 },
+  transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] }
 };
 
 function AnimatedPage({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       {...pageTransition}
-      style={{ willChange: 'opacity', transform: 'translateZ(0)' }}
+      style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
       className="w-full"
     >
       {children}

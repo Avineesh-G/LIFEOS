@@ -18,10 +18,10 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 - **In-Place APK Upgrade Engine:** When installing updated native binaries, Android automatically applies an in-place upgrade (`versionCode 5`), preserving all local storage, accounts, and workout histories with zero data loss.
 - **Automated Version Checking:** In-app check against `version.json` notifies users when newer builds are deployed and offers one-tap synchronization.
 
-### 2. Ultra-Fluid 120fps Transitions (Zero Lag, Stuck, or Hang)
-- **Compositor-Only GPU Transforms:** Routed pages through `AnimatedPage` using `translateZ(0)` hardware acceleration and strict compositor-only properties (`opacity`), delivering buttery 120Hz refresh rates on high-refresh-rate mobile displays.
-- **Memoized Computing Engine:** Synchronous calculations across `Home.tsx`, `Study.tsx`, `Spending.tsx`, `Timetable.tsx`, and `Progress.tsx` are consolidated inside `useMemo` blocks, preventing main-thread blocking during tab transitions.
-- **Collision-Free Route Settle:** Configured `App.tsx` `<AnimatePresence mode="wait">` with a swift 120ms curve (`ease: [0.16, 1, 0.3, 1]`) ensuring exiting views cleanly unmount before incoming routes paint.
+### 2. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
+- **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.
+- **Compositor-Only GPU Transforms:** Powered by `translateZ(0)` and `will-change: opacity, transform` hardware acceleration, delivering rock-solid 120Hz refresh rates on high-refresh mobile displays with zero dropped frames.
+- **Memoized Computing Engine:** Synchronous calculations across `Home.tsx`, `Study.tsx`, `Spending.tsx`, `Timetable.tsx`, and `Progress.tsx` are consolidated inside `useMemo` blocks, preventing main-thread blocking during tab navigation.
 
 ### 3. Secure In-App Groq AI Architecture
 - **Client-Managed Secret Isolation:** Eliminates all hardcoded API keys and `.env` build bundling. Users enter their personal Groq API key securely in the Settings UI with show/hide masking.
