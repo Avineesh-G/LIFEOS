@@ -11,12 +11,12 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ---
 
-## What is New in Version 1.4
+## What is New in Version 1.5 (Build 6)
 
-### 1. In-App Live Sync & Zero-Reinstall Architecture
-- **Instant Over-The-Air Web Sync:** Users never need to repeatedly download APKs or uninstall their app. Tapping **"Sync Latest Build"** in Settings flushes client caches and service worker registrations, immediately applying the latest web features and styling updates live.
-- **In-Place APK Upgrade Engine:** When installing updated native binaries, Android automatically applies an in-place upgrade (`versionCode 5`), preserving all local storage, accounts, and workout histories with zero data loss.
-- **Automated Version Checking:** In-app check against `version.json` notifies users when newer builds are deployed and offers one-tap synchronization.
+### 1. Direct In-App Cloud Stream & Live Sync (Zero-Reinstall Architecture)
+- **Direct Cloud Stream Integration:** The native Android shell is connected directly to the live cloud URL (`https://lifeos-gujjeti-avineeshs-projects.vercel.app`), with an offline-first Service Worker cache fallback. Every future update pushed to GitHub is streamed live over the air directly inside the app without requiring manual APK downloads or reinstallations.
+- **Instant In-App Sync:** Tapping **"Sync Latest Build"** in Settings immediately flushes stale web caches and pulls the latest cloud deployment directly on screen.
+- **In-Place Native Packaging:** Bumped native `versionCode` to `6` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
 
 ### 2. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
 - **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.

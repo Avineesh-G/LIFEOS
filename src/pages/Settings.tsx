@@ -62,8 +62,8 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   };
 
   // In-App Update & Live Sync State
-  const CURRENT_BUILD_CODE = 5;
-  const CURRENT_VERSION_LABEL = '1.4';
+  const CURRENT_BUILD_CODE = 6;
+  const CURRENT_VERSION_LABEL = '1.5';
   const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
   const CLOUD_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
 
@@ -93,7 +93,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           name: meta.versionName || '1.4',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg('You are on the latest version (v1.4 - Build 5). System is synced!');
+        setUpdateMsg('You are on the latest version (v1.5 - Build 6). System is synced!');
       }
     } catch {
       setUpdateMsg('Unable to check for updates. Please check your network connection.');
@@ -1143,7 +1143,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 Application Version & Live Sync
               </p>
               <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
-                LifeOS v1.4 (Build 5)
+                LifeOS v1.5 (Build 6)
               </h3>
             </div>
           </div>
@@ -1213,7 +1213,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.4 (Build 5) · Production Ready</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5 (Build 6) · Production Ready</p>
       </div>
     </motion.div>
   );

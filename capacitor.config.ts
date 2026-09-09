@@ -5,7 +5,10 @@ const config: CapacitorConfig = {
   appName: 'LifeOS',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    url: 'https://lifeos-gujjeti-avineeshs-projects.vercel.app',
+    cleartext: false,
+    androidScheme: 'https',
+    allowNavigation: ['lifeos-gujjeti-avineeshs-projects.vercel.app']
   },
   plugins: {
     GoogleAuth: {
