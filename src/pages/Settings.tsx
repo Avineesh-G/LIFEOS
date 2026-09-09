@@ -102,11 +102,14 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     }
   };
 
+  const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
+
   const handleLiveSync = async () => {
     triggerHaptic('save');
     setSyncingBuild(true);
-    setUpdateMsg('Syncing latest updates from cloud...');
+    setUpdateMsg('Applying live cloud build...');
     try {
+      localStorage.setItem('lifeos_live_sync', 'true');
       if ('caches' in window) {
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
@@ -114,16 +117,14 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const reg of registrations) {
-          await reg.update();
+          await reg.unregister();
         }
       }
-      setUpdateMsg('Synced! Reloading interface...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch {
-      window.location.reload();
-    }
+    } catch {}
+
+    setTimeout(() => {
+      window.location.replace(`${CLOUD_LIVE_URL}/settings?t=${Date.now()}`);
+    }, 300);
   };
 
   // Filter logs by selected month and only include saved logs
