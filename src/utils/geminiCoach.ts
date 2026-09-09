@@ -1,8 +1,5 @@
-// ── Paste your Groq API key here or in Vercel Env Vars ─────────────────
-// Get a free key at: https://console.groq.com/keys
-const _p1 = 'gsk_sBQKT6n1m0EKyvO';
-const _p2 = 'QX2u0WGdyb3FYlJt7zak4DCZxLdq8c3p0YB3Q';
-export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || (_p1 + _p2);
+// ── Load Groq API key from Vercel / .env or user settings in Settings page ──
+export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || '';
 // ──────────────────────────────────────────────────────────────────────────
 
 async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
