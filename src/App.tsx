@@ -83,7 +83,7 @@ function App() {
       <ErrorBoundary>
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<AnimatedPage><Home data={data!} /></AnimatedPage>} />
+            <Route path="/" element={<AnimatedPage><Home data={data!} refresh={refresh} /></AnimatedPage>} />
             <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />
             <Route path="/study/timer" element={<AnimatedPage><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
             <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />

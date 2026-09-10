@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { AppData } from './types';
 
@@ -80,9 +80,18 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
   return merged;
 }
 
-export async function getData(uid: string): Promise<AppData> {
+export async function getData(uid: string, forceServer: boolean = false): Promise<AppData> {
   const docRef = doc(db, 'users', uid);
-  const snap = await getDoc(docRef);
+  let snap;
+  if (forceServer) {
+    try {
+      snap = await getDocFromServer(docRef);
+    } catch {
+      snap = await getDoc(docRef);
+    }
+  } else {
+    snap = await getDoc(docRef);
+  }
   if (snap.exists()) {
     return sanitizeAppData(snap.data() as Partial<AppData>);
   }

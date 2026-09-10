@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, ArrowUpRight, Sparkles } from 'lucide-react';
+import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, ArrowUpRight, Sparkles, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
@@ -8,6 +8,7 @@ import type { AppData } from '../types';
 
 interface HomeProps {
   data: AppData;
+  refresh?: () => Promise<AppData>;
 }
 
 const container = {
@@ -20,9 +21,27 @@ const item = {
   show:   { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
 };
 
-export default function Home({ data }: HomeProps) {
+export default function Home({ data, refresh }: HomeProps) {
   const navigate = useNavigate();
   const now = new Date();
+  const [syncing, setSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
+
+  const handleManualSync = async () => {
+    if (!refresh || syncing) return;
+    triggerHaptic('save');
+    setSyncing(true);
+    try {
+      await refresh();
+      setSyncSuccess(true);
+      triggerHaptic('success');
+      setTimeout(() => setSyncSuccess(false), 2200);
+    } catch {
+      triggerHaptic('heavy');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const {
     todaySessions,
@@ -122,11 +141,30 @@ export default function Home({ data }: HomeProps) {
 
       {/* ── Expressive Hero Greeting ── */}
       <motion.div variants={item} className="pt-2 px-1">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm mb-3">
-          <Calendar size={13} className="text-accent" />
-          <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
-            {format(now, 'EEEE, MMMM d')}
-          </span>
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
+            <Calendar size={13} className="text-accent" />
+            <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
+              {format(now, 'EEEE, MMMM d')}
+            </span>
+          </div>
+
+          {/* Direct Cloud Sync Button beside Day & Date */}
+          <button
+            onClick={handleManualSync}
+            disabled={syncing}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm transition-all text-xs font-bold active:scale-95 disabled:opacity-60 ${
+              syncSuccess
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-surface-light dark:bg-surface-dark border-border-light/70 dark:border-border-dark/70 text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+            }`}
+            title="Sync data with cloud database"
+          >
+            <RefreshCw size={12} className={`text-accent ${syncing ? 'animate-spin' : ''}`} />
+            <span className="font-mono text-[11px] font-semibold">
+              {syncing ? 'Syncing...' : syncSuccess ? 'Synced ✓' : 'Sync'}
+            </span>
+          </button>
         </div>
         <h1 className="text-[34px] sm:text-4xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
           Good <span className="text-accent">{greetWord}</span>

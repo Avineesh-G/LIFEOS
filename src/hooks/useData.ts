@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { getData, saveData, sanitizeAppData, DEFAULT_DATA } from '../db';
 import type { AppData } from '../types';
 import { User } from 'firebase/auth';
@@ -18,6 +20,7 @@ export function useData(user: User | null) {
     }
     return null;
   });
+
   const [loading, setLoading] = useState(!data && !!user);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,43 +38,72 @@ export function useData(user: User | null) {
   }, [data, user]);
 
   useEffect(() => {
-    if (user) {
-      // If we don't have cached data, set loading true
-      if (!dataRef.current) {
+    if (!user) {
+      setData(null);
+      dataRef.current = null;
+      setLoading(false);
+      return;
+    }
+
+    // 1. Immediately hydrate from local storage for this user so UI never blocks
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
+      if (cached) {
+        const parsed = sanitizeAppData(JSON.parse(cached));
+        setData(parsed);
+        dataRef.current = parsed;
+        setLoading(false);
+      } else if (!dataRef.current) {
         setLoading(true);
       }
-      setError(null);
+    } catch {
+      if (!dataRef.current) setLoading(true);
+    }
+    setError(null);
 
-      const timeout = setTimeout(() => {
-        if (!dataRef.current) {
-          console.warn('Firestore took too long, loading with default data');
-          const fallback = sanitizeAppData(DEFAULT_DATA);
-          setData(fallback);
-          setLoading(false);
-        }
-      }, 10000);
-
-      getData(user.uid)
-        .then((fresh) => {
-          clearTimeout(timeout);
+    // 2. Attach real-time Firestore synchronization listener
+    const docRef = doc(db, 'users', user.uid);
+    const unsubscribe = onSnapshot(
+      docRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const fresh = sanitizeAppData(snapshot.data() as Partial<AppData>);
           setData(fresh);
+          dataRef.current = fresh;
+          try {
+            localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(fresh));
+          } catch {}
           setLoading(false);
-        })
-        .catch(err => {
-          clearTimeout(timeout);
-          console.error('Failed to fetch user data:', err);
-          setError(err.message || 'Failed to load data');
+          setError(null);
+        } else {
+          // Document does not exist yet on server; seed initial structure
           if (!dataRef.current) {
-            setData(sanitizeAppData(DEFAULT_DATA));
+            setData(DEFAULT_DATA);
+            dataRef.current = DEFAULT_DATA;
           }
           setLoading(false);
-        });
+        }
+      },
+      (err) => {
+        console.warn('Real-time Firestore listener error, falling back to direct fetch:', err);
+        setError(err.message || 'Sync error');
+        getData(user.uid, false)
+          .then((fresh) => {
+            setData(fresh);
+            dataRef.current = fresh;
+            setLoading(false);
+          })
+          .catch(() => {
+            if (!dataRef.current) {
+              setData(DEFAULT_DATA);
+              dataRef.current = DEFAULT_DATA;
+            }
+            setLoading(false);
+          });
+      }
+    );
 
-      return () => clearTimeout(timeout);
-    } else {
-      setData(null);
-      setLoading(false);
-    }
+    return () => unsubscribe();
   }, [user]);
 
   // Synchronous optimistic update: UI updates at 0ms latency!
@@ -102,11 +134,19 @@ export function useData(user: User | null) {
 
   const refresh = useCallback(async (): Promise<AppData> => {
     if (!user) return DEFAULT_DATA;
-    const fresh = await getData(user.uid);
-    setData(fresh);
-    return fresh;
+    try {
+      const fresh = await getData(user.uid, true); // Force fetch from server
+      setData(fresh);
+      dataRef.current = fresh;
+      try {
+        localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(fresh));
+      } catch {}
+      return fresh;
+    } catch (err) {
+      console.error('Force sync error:', err);
+      return dataRef.current || DEFAULT_DATA;
+    }
   }, [user]);
 
   return { data, loading, updateData, refresh, error };
 }
-

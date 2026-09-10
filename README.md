@@ -11,24 +11,29 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ---
 
-## What is New in Version 1.5 (Build 6)
+## What is New in Version 1.5 (Build 7)
 
-### 1. Direct In-App Cloud Stream & Live Sync (Zero-Reinstall Architecture)
+### 1. Real-Time Bidirectional Firestore Database Sync
+- **Live Snapshot Synchronization:** Powered by Firestore `onSnapshot`, changes made on any device (web browser, laptop, or mobile APK) are pushed instantaneously across all active sessions with zero manual reloads.
+- **Home Screen One-Tap Database Sync:** Added a dedicated, tactile **Sync** button right beside the day and date badge on the Home dashboard. Tapping it triggers a direct server-level fetch (`getDocFromServer`), purges local stale caches, and provides immediate visual and haptic confirmation.
+- **Instant Cache Hydration:** The app instantly hydrates state from localized storage on login before establishing real-time cloud listeners, eliminating blank screens or empty default data fallbacks.
+
+### 2. Direct In-App Cloud Stream & Live Sync (Zero-Reinstall Architecture)
 - **Direct Cloud Stream Integration:** The native Android shell is connected directly to the live cloud URL (`https://lifeos-gujjeti-avineeshs-projects.vercel.app`), with an offline-first Service Worker cache fallback. Every future update pushed to GitHub is streamed live over the air directly inside the app without requiring manual APK downloads or reinstallations.
 - **Direct In-App Updates:** Tapping **"Check Updates"** or **"Sync & Apply Build"** in Settings immediately flushes stale web caches and applies the latest cloud deployment directly to the application on your phone.
-- **In-Place Native Packaging:** Configured native `versionCode` to `6` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
+- **In-Place Native Packaging:** Configured native `versionCode` to `7` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
 
-### 2. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
+### 3. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
 - **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.
 - **Compositor-Only GPU Transforms:** Powered by `translateZ(0)` and `will-change: opacity, transform` hardware acceleration, delivering rock-solid 120Hz refresh rates on high-refresh mobile displays with zero dropped frames.
 - **Memoized Computing Engine:** Synchronous calculations across `Home.tsx`, `Study.tsx`, `Spending.tsx`, `Timetable.tsx`, and `Progress.tsx` are consolidated inside `useMemo` blocks, preventing main-thread blocking during tab navigation.
 
-### 3. Secure In-App Groq AI Architecture
+### 4. Secure In-App Groq AI Architecture
 - **Client-Managed Secret Isolation:** Eliminates all hardcoded API keys and `.env` build bundling. Users enter their personal Groq API key securely in the Settings UI with show/hide masking.
 - **Encrypted Persistence:** Keys are stored strictly within the user's private Firebase Firestore profile (`users/{uid}`) and device `localStorage`, completely out of Git version control and public JavaScript bundles.
 - **Multi-Model Waterfall Fallback:** Intelligent cascade across active Groq models (`qwen/qwen3.8-27b`, `qwen/qwen3.6-27b`, `openai/gpt-oss-120b`, `groq/compound-mini`) with automated `<think>` reasoning tag sanitization.
 
-### 4. Gym Section Polish & Zero-Blank Screen Fix
+### 5. Gym Section Polish & Zero-Blank Screen Fix
 - **Header Badge Alignment:** Relocated completion indicators into the workout session metadata badge (`ALL DONE`) and sets pill (`13/13 sets ✓`), eliminating overlap collisions on mobile viewports.
 - **State Transition Stabilization:** Removed fragile Framer Motion `staggerChildren` layout passes from the Gym dashboard, guaranteeing instantaneous navigation return without screen freezes.
 
@@ -40,7 +45,7 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 lifeos/
 ├── android/                             # Native Android Studio project
 │   ├── app/
-│   │   ├── build.gradle                 # VersionCode 6, VersionName 1.5, Keystore config
+│   │   ├── build.gradle                 # VersionCode 7, VersionName 1.5, Keystore config
 │   │   ├── lifeos-release-key.jks       # Production release signing keystore
 │   │   └── src/main/
 │   │       ├── AndroidManifest.xml      # Permissions, hardware acceleration

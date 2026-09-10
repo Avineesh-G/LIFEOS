@@ -1,7 +1,7 @@
 {
-  "versionCode": 6,
+  "versionCode": 7,
   "versionName": "1.5",
-  "releaseDate": "2026-09-09",
-  "releaseNotes": "LifeOS v1.5 (Build 6): Direct In-App Cloud Stream & Live Sync (no manual APK downloads or reinstalls needed), Material 3 fluid 240ms transitions, and secure Groq AI key management.",
+  "releaseDate": "2026-09-10",
+  "releaseNotes": "LifeOS v1.5 (Build 7): Real-time bidirectional Firestore database sync, Home screen instant sync button beside day/date, and direct in-app build updater.",
   "apkUrl": "/LifeOS.apk"
 }
