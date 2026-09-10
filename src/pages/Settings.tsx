@@ -62,7 +62,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   };
 
   // Direct In-App Update & Live Sync State
-  const CURRENT_BUILD_CODE = 8;
+  const CURRENT_BUILD_CODE = 9;
   const CURRENT_VERSION_LABEL = '1.5';
   const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
   const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
@@ -93,7 +93,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           name: meta.versionName || '1.5',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg('Application is on the latest build (v1.5 - Build 8). All features synced!');
+        setUpdateMsg('Application is running the latest build (v1.5 - Build 9). All features synced!');
       }
     } catch {
       setUpdateMsg('Unable to check for updates. Please verify your internet connection.');
@@ -1152,46 +1152,69 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
                 Direct In-App Updates & Sync
               </p>
               <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
-                LifeOS v1.5 (Build 8)
+                LifeOS v1.5 (Build 9)
               </h3>
             </div>
           </div>
-          <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold font-mono">
-            Active
+          <span className={`px-3 py-1 rounded-full text-xs font-bold font-mono ${
+            updateInfo?.available
+              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+              : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+          }`}>
+            {updateInfo?.available ? 'Update Ready' : 'Up to Date'}
           </span>
         </div>
 
         {updateMsg && (
           <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between gap-2">
-            <span>{updateMsg}</span>
-            <button
-              onClick={handleLiveSync}
-              disabled={syncingBuild}
-              className="px-3 py-1 rounded-lg bg-accent text-white font-bold font-mono text-[11px] hover:opacity-90 active:scale-95 disabled:opacity-50 shrink-0"
-            >
-              {syncingBuild ? 'Applying...' : 'Apply Now'}
-            </button>
+            <span className="flex items-center gap-2">
+              {!updateInfo?.available && <Check size={14} className="text-emerald-500 shrink-0" />}
+              {updateMsg}
+            </span>
+            {/* ONLY show Apply Now button if an actual newer version was found */}
+            {updateInfo?.available && (
+              <button
+                onClick={handleLiveSync}
+                disabled={syncingBuild}
+                className="px-3 py-1 rounded-lg bg-accent text-white font-bold font-mono text-[11px] hover:opacity-90 active:scale-95 disabled:opacity-50 shrink-0 shadow-sm"
+              >
+                {syncingBuild ? 'Applying...' : 'Apply Now'}
+              </button>
+            )}
           </div>
         )}
 
-        {/* 2-Button Control Grid: Direct In-App Only */}
-        <div className="grid grid-cols-2 gap-3 pt-1">
-          <button
-            onClick={checkForUpdates}
-            disabled={checkingUpdate || syncingBuild}
-            className="w-full py-2.5 px-3 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
-          >
-            <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
-            {checkingUpdate ? 'Checking...' : 'Check Updates'}
-          </button>
-          <button
-            onClick={handleLiveSync}
-            disabled={syncingBuild}
-            className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20 disabled:opacity-50"
-          >
-            <Sparkles size={13} className={syncingBuild ? 'animate-spin' : ''} />
-            {syncingBuild ? 'Syncing...' : 'Sync & Apply Build'}
-          </button>
+        {/* Dynamic Controls based on Update State */}
+        <div className="pt-1">
+          {updateInfo?.available ? (
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={checkForUpdates}
+                disabled={checkingUpdate || syncingBuild}
+                className="w-full py-2.5 px-3 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
+                {checkingUpdate ? 'Checking...' : 'Re-Check'}
+              </button>
+              <button
+                onClick={handleLiveSync}
+                disabled={syncingBuild}
+                className="w-full py-2.5 px-3 rounded-full bg-accent text-white hover:opacity-90 active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-accent/20 disabled:opacity-50"
+              >
+                <Sparkles size={13} className={syncingBuild ? 'animate-spin' : ''} />
+                {syncingBuild ? 'Applying...' : 'Apply Update'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={checkForUpdates}
+              disabled={checkingUpdate || syncingBuild}
+              className="w-full py-2.5 px-4 rounded-full bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark active:scale-[0.97] transition-all text-xs font-bold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={checkingUpdate ? 'animate-spin' : ''} />
+              {checkingUpdate ? 'Checking Cloud...' : updateInfo ? '✓ Up to Date · Check Again' : 'Check for Updates'}
+            </button>
+          )}
         </div>
 
         {/* Guidance Box for Direct In-App Updating */}
@@ -1201,16 +1224,16 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
             Seamless Direct In-App Updating:
           </p>
           <p>
-            • <strong>Instant Live Sync:</strong> When new updates are released, tapping <strong>Check Updates</strong> or <strong>Sync & Apply Build</strong> immediately updates the application directly on your phone.
+            • <strong>Instant Live Sync:</strong> When new updates are released, tapping <strong>Check for Updates</strong> detects the build, and <strong>Apply Update</strong> updates the application directly on your phone.
           </p>
           <p>
-            • <strong>No Manual Downloads:</strong> You never have to download or click to install APK files again. Everything applies directly in the app.
+            • <strong>No Manual Downloads:</strong> You never have to download or reinstall APK files. Everything updates directly in the app.
           </p>
         </div>
       </div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5 (Build 8) · Production Ready</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5 (Build 9) · Production Ready</p>
       </div>
     </motion.div>
   );

@@ -1,73 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
-  CheckSquare, BarChart3, Settings, Plus, X,
-  Clock, Dumbbell as DumbbellIcon, Banknote, StickyNote, ChevronRight, Utensils,
-  LucideIcon
+  CheckSquare, BarChart3, Settings, Menu, X,
+  Utensils, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppSettings } from '../types';
 
-const navItems = [
-  { icon: Home,         label: 'Home',      path: '/' },
-  { icon: BookOpen,     label: 'Study',     path: '/study' },
-  { icon: Dumbbell,     label: 'Gym',       path: '/gym' },
-  { icon: Wallet,       label: 'Money',     path: '/spending' },
-  { icon: CalendarDays, label: 'Timetable', path: '/timetable' },
-  { icon: Utensils,     label: 'Nutrition', path: '/nutrition' },
-  { icon: CheckSquare,  label: 'TO-DO List', path: '/tasks' },
-  { icon: BarChart3,    label: 'Progress',  path: '/progress' },
+// Primary centered squircle dock items
+const primaryDockItems = [
+  { icon: Home,     label: 'Home',      path: '/' },
+  { icon: Dumbbell, label: 'Gym',       path: '/gym' },
+  { icon: Utensils, label: 'Nutrition', path: '/nutrition' },
 ];
 
-const quickAddOptions = [
-  { icon: Clock,        label: 'Start Study Timer', path: '/study/timer',  color: 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' },
-  { icon: DumbbellIcon, label: 'Log Workout',        path: '/gym/workout',  color: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' },
-  { icon: Banknote,     label: 'Add Expense',        path: '/spending',     color: 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400' },
-  { icon: StickyNote,   label: 'New TO-DO',          path: '/tasks',        color: 'bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400' },
+// Speed-dial popup items (Photo 2 reference)
+const secondaryMenuItems = [
+  { icon: BookOpen,     label: 'Study',                path: '/study',     color: 'text-indigo-500 dark:text-indigo-400' },
+  { icon: Wallet,       label: 'Spending',             path: '/spending',  color: 'text-amber-500 dark:text-amber-400' },
+  { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
+  { icon: CheckSquare,  label: 'To-Do Tasks',          path: '/tasks',     color: 'text-emerald-500 dark:text-emerald-400' },
+  { icon: BarChart3,    label: 'Progress & Analytics', path: '/progress',  color: 'text-purple-500 dark:text-purple-400' },
+  { icon: Settings,     label: 'Settings',             path: '/settings',  color: 'text-slate-500 dark:text-slate-400' },
 ];
 
-interface DockItemProps {
-  icon: LucideIcon;
-  label: string;
-  path: string;
-  active: boolean;
-  onClick: () => void;
-}
-
-function DockItem({ icon: Icon, label, active, onClick }: DockItemProps) {
-  return (
-    <button
-      onClick={onClick}
-      title={label}
-      className="relative flex flex-col items-center justify-center flex-1 min-w-0 h-11 select-none focus:outline-none"
-    >
-      <motion.div
-        whileTap={{ scale: 0.84 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        className={`flex items-center justify-center w-8 sm:w-9 h-8 sm:h-9 rounded-[12px] transition-colors ${
-          active
-            ? 'bg-accent/15 dark:bg-accent/25 border border-accent/35 text-accent shadow-sm'
-            : 'text-secondary-light dark:text-secondary-dark active:bg-black/5 dark:active:bg-white/5'
-        }`}
-      >
-        <Icon
-          strokeWidth={active ? 2.5 : 1.9}
-          className="transition-transform"
-          size={18}
-        />
-      </motion.div>
-
-      {/* Active Indicator Dot */}
-      {active && (
-        <span
-          className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-0.5 shadow-sm"
-        />
-      )}
-    </button>
-  );
-}
+const allRoutes = [
+  ...primaryDockItems,
+  ...secondaryMenuItems,
+];
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -80,15 +42,22 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close speed dial menu when navigating or pressing escape
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
+  const isSecondaryActive = secondaryMenuItems.some(item => isActive(item.path));
+
   // Current page label for header
-  const currentNav = navItems.find(n => isActive(n.path));
+  const currentNav = allRoutes.find(n => isActive(n.path));
   const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
@@ -115,6 +84,7 @@ export default function Layout({ children }: LayoutProps) {
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => navigate('/settings')}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 text-secondary-light dark:text-secondary-dark hover:opacity-85 active:scale-95 transition-all shadow-sm"
+            aria-label="Settings"
           >
             <Settings size={18} strokeWidth={2} />
           </button>
@@ -123,7 +93,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* ── Main content ── */}
       <main 
-        className="pb-24 sm:pb-28 min-h-screen"
+        className="pb-28 sm:pb-32 min-h-screen"
         style={{
           paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
         }}
@@ -136,89 +106,135 @@ export default function Layout({ children }: LayoutProps) {
       {/* ── Native Gradient Bottom Fade (Zero GPU Overhead) ── */}
       <div 
         className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-gradient-to-t from-[#F4F4FB]/95 via-[#F4F4FB]/50 to-transparent dark:from-[#121316]/95 dark:via-[#121316]/50"
-        style={{ height: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{ height: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
       />
 
-      {/* ── Rigid Fixed Responsive Dock (Locked in place, no horizontal scrolling) ── */}
-      <div 
-        className="fixed left-0 right-0 z-40 flex justify-center px-2.5 sm:px-4 pointer-events-none"
-        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
-      >
-        <nav
-          className="pointer-events-auto grid grid-cols-8 items-center w-full max-w-md bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border border-border-light/80 dark:border-border-dark/80 rounded-full px-1 sm:px-2 py-1 shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.38)]"
-        >
-          {navItems.map((item) => (
-            <DockItem
-              key={item.path}
-              icon={item.icon}
-              label={item.label}
-              path={item.path}
-              active={isActive(item.path)}
-              onClick={() => {
-                triggerHaptic('nav');
-                navigate(item.path);
-              }}
-            />
-          ))}
-        </nav>
-      </div>
-
-      {/* ── Quick Add Sheet ── */}
+      {/* ── Backdrop Overlay for Speed-Dial Menu (Photo 2 Reference) ── */}
       <AnimatePresence>
-        {showQuickAdd && (
+        {menuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center"
-            onClick={() => setShowQuickAdd(false)}
-          >
-            <motion.div
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-3xl p-6 pb-10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Handle bar */}
-              <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6" />
-
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-semibold">Quick Add</h2>
-                <button
-                  onClick={() => setShowQuickAdd(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-bg-light dark:bg-bg-dark hover:opacity-70 transition-opacity"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="space-y-2.5">
-                {quickAddOptions.map((opt) => (
-                  <button
-                    key={opt.path}
-                    onPointerDown={() => triggerHaptic('light')}
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setShowQuickAdd(false);
-                      navigate(opt.path);
-                    }}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-all active:scale-[0.985]"
-                  >
-                    <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${opt.color}`}>
-                      <opt.icon size={18} strokeWidth={2} />
-                    </div>
-                    <span className="flex-1 text-left font-medium text-sm">{opt.label}</span>
-                    <ChevronRight size={15} className="text-muted-light dark:text-muted-dark" />
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
+            transition={{ duration: 0.2 }}
+            onClick={() => {
+              triggerHaptic('light');
+              setMenuOpen(false);
+            }}
+            className="fixed inset-0 bg-black/45 dark:bg-black/65 backdrop-blur-[2px] z-40 pointer-events-auto"
+          />
         )}
       </AnimatePresence>
+
+      {/* ── Speed-Dial Popup Menu Items (Photo 2 Reference) ── */}
+      <AnimatePresence>
+        {menuOpen && (
+          <div
+            className="fixed z-50 pointer-events-none flex flex-col items-center sm:items-end justify-end w-full max-w-sm left-1/2 -translate-x-1/2 px-4"
+            style={{ bottom: 'calc(5.2rem + env(safe-area-inset-bottom, 0px))' }}
+          >
+            <div className="flex flex-col gap-2.5 items-end w-full">
+              {secondaryMenuItems.map((item, index) => {
+                const active = isActive(item.path);
+                const Icon = item.icon;
+                return (
+                  <motion.button
+                    key={item.path}
+                    initial={{ opacity: 0, y: 18, scale: 0.86 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.9 }}
+                    transition={{
+                      duration: 0.22,
+                      delay: (secondaryMenuItems.length - 1 - index) * 0.035,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    onClick={() => {
+                      triggerHaptic('nav');
+                      setMenuOpen(false);
+                      navigate(item.path);
+                    }}
+                    className={`pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg border transition-all active:scale-95 ${
+                      active
+                        ? 'bg-accent text-white border-accent shadow-accent/25'
+                        : 'bg-surface-light dark:bg-[#1C1D24] text-primary-light dark:text-primary-dark border-border-light/80 dark:border-border-dark/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+                    }`}
+                  >
+                    <Icon size={18} className={active ? 'text-white' : item.color} />
+                    <span className="text-xs sm:text-sm font-bold tracking-tight font-sans">
+                      {item.label}
+                    </span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Centered Squircle Dock (Photo 1 Reference) ── */}
+      <div 
+        className="fixed left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+        style={{ bottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <nav
+          className="pointer-events-auto inline-flex items-center gap-2.5 p-2 rounded-[26px] bg-surface-light/95 dark:bg-[#18191E]/95 backdrop-blur-xl border border-border-light/80 dark:border-border-dark/80 shadow-[0_12px_36px_rgba(0,0,0,0.14)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
+          role="navigation"
+          aria-label="Main Navigation"
+        >
+          {/* Home, Gym, Nutrition Squircles */}
+          {primaryDockItems.map((item) => {
+            const active = isActive(item.path);
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  triggerHaptic('nav');
+                  if (menuOpen) setMenuOpen(false);
+                  navigate(item.path);
+                }}
+                title={item.label}
+                className={`relative flex items-center justify-center w-[52px] h-[52px] rounded-[18px] transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+                  active
+                    ? 'bg-accent text-white shadow-md shadow-accent/30 scale-[1.02]'
+                    : 'bg-transparent text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.05]'
+                }`}
+              >
+                <Icon size={21} strokeWidth={active ? 2.5 : 2} />
+                {active && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1.5 shadow-sm" />
+                )}
+              </button>
+            );
+          })}
+
+          {/* 4th Icon: 3 Lines Menu Toggle Button */}
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              setMenuOpen(!menuOpen);
+            }}
+            title="More Sections"
+            className={`relative flex items-center justify-center w-[52px] h-[52px] rounded-[18px] transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+              menuOpen
+                ? 'bg-accent text-white shadow-md shadow-accent/30 rotate-90 scale-[1.02]'
+                : isSecondaryActive
+                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/40 text-accent shadow-sm'
+                : 'bg-transparent text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.05]'
+            }`}
+          >
+            {menuOpen ? (
+              <X size={21} strokeWidth={2.4} />
+            ) : (
+              <Menu size={21} strokeWidth={2.2} />
+            )}
+            {!menuOpen && isSecondaryActive && (
+              <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1.5 shadow-sm" />
+            )}
+          </button>
+        </nav>
+      </div>
+
     </div>
   );
 }

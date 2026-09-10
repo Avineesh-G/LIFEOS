@@ -11,7 +11,23 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ---
 
-## What is New in Version 1.5 (Build 8)
+## What is New in Version 1.5 (Build 9)
+
+### 1. Centered Squircle Floating Dock
+- **Minimalist Floating Cluster:** Refactored bottom navigation into an elegant, centered floating island featuring distinct squircle cards (`w-[52px] h-[52px]` rounded `[18px]`) with backdrop blur, subtle elevation, and reactive haptic feedback.
+- **Primary Modules in Focus:** Front-and-center access to **Home (`/`)**, **Gym (`/gym`)**, and **Nutrition (`/nutrition`)**, plus a dedicated 4th menu button for secondary modules.
+
+### 2. Upward-Expanding Speed-Dial Menu
+- **Stacked Pill Menu:** Tapping the 3-lines menu button triggers a fluid, upward-staggered floating action menu housing **Study**, **Spending**, **Timetable**, **To-Do Tasks**, **Progress & Analytics**, and **Settings**.
+- **Interactive Icon Morphing:** The menu toggle smoothly rotates into an `X` close icon when open, with an ambient backdrop overlay allowing instant dismissal from anywhere on the screen.
+
+### 3. Refined Settings Manual Update UX
+- **Intelligent Update Controls:** If the user is on the latest version, the app displays a clear `✓ Running Latest Version (v1.5 - Build 9)` status with **no redundant Apply button**.
+- **On-Demand Upgrades:** When a new cloud build is released, the "Apply Update" button dynamically appears so users can sync directly with a single tap.
+
+---
+
+## What Was Introduced in Version 1.5 (Build 8)
 
 ### 1. Native Hardware Back Navigation to Home
 - **Android Phone Navigation Interceptor:** Connected the native Android hardware back button (and swipe-to-go-back gesture navigation) using `@capacitor/app`.

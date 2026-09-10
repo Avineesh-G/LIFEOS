@@ -1,7 +1,7 @@
 {
-  "versionCode": 8,
+  "versionCode": 9,
   "versionName": "1.5",
   "releaseDate": "2026-09-10",
-  "releaseNotes": "LifeOS v1.5 (Build 8): Seamless new user auto-seeding, native hardware back-button navigation to Home, icon-only Home sync button with spin animation, and rock-solid Firestore persistence.",
+  "releaseNotes": "LifeOS v1.5 (Build 9): Centered squircle floating dock, speed-dial popup menu for secondary sections, refined update check flow, and performance enhancements.",
   "apkUrl": "/LifeOS.apk"
 }
