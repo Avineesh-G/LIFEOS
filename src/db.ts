@@ -98,10 +98,8 @@ export async function getData(uid: string, forceServer: boolean = false): Promis
   return DEFAULT_DATA;
 }
 
-export async function saveData(uid: string, data: Partial<AppData>, existingData?: AppData): Promise<void> {
-  const existing = existingData || await getData(uid).catch(() => DEFAULT_DATA);
-  const merged = sanitizeAppData({ ...existing, ...data });
-  const cleaned = cleanForFirestore(merged);
+export async function saveData(uid: string, data: Partial<AppData>): Promise<void> {
+  const cleaned = cleanForFirestore(data);
   const docRef = doc(db, 'users', uid);
   await setDoc(docRef, cleaned, { merge: true });
 }

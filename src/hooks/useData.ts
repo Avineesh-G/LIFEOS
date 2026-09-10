@@ -67,7 +67,57 @@ export function useData(user: User | null) {
       docRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          const fresh = sanitizeAppData(snapshot.data() as Partial<AppData>);
+          const serverData = snapshot.data() as Partial<AppData>;
+          const fresh = sanitizeAppData(serverData);
+
+          // Auto-healing protection: preserve local progress if server arrays are empty
+          try {
+            const cachedRaw = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
+            if (cachedRaw) {
+              const localData = JSON.parse(cachedRaw);
+              let needsCloudRestore = false;
+              const recoveryPatch: Partial<AppData> = {};
+
+              if ((localData.workoutLogs?.length || 0) > (fresh.workoutLogs?.length || 0)) {
+                fresh.workoutLogs = localData.workoutLogs;
+                recoveryPatch.workoutLogs = localData.workoutLogs;
+                needsCloudRestore = true;
+              }
+              if ((localData.studySessions?.length || 0) > (fresh.studySessions?.length || 0)) {
+                fresh.studySessions = localData.studySessions;
+                recoveryPatch.studySessions = localData.studySessions;
+                needsCloudRestore = true;
+              }
+              if ((localData.expenses?.length || 0) > (fresh.expenses?.length || 0)) {
+                fresh.expenses = localData.expenses;
+                recoveryPatch.expenses = localData.expenses;
+                needsCloudRestore = true;
+              }
+              if ((localData.tasks?.length || 0) > (fresh.tasks?.length || 0)) {
+                fresh.tasks = localData.tasks;
+                recoveryPatch.tasks = localData.tasks;
+                needsCloudRestore = true;
+              }
+              if ((localData.timetable?.length || 0) > (fresh.timetable?.length || 0)) {
+                fresh.timetable = localData.timetable;
+                recoveryPatch.timetable = localData.timetable;
+                needsCloudRestore = true;
+              }
+              if (localData.profile && !fresh.profile) {
+                fresh.profile = localData.profile;
+                recoveryPatch.profile = localData.profile;
+                needsCloudRestore = true;
+              }
+
+              if (needsCloudRestore) {
+                console.log('Auto-healing: Synchronizing local progress back to Firestore cloud', recoveryPatch);
+                saveData(user.uid, recoveryPatch).catch(err => console.error('Cloud restore error:', err));
+              }
+            }
+          } catch (e) {
+            console.warn('Auto-healing check error:', e);
+          }
+
           setData(fresh);
           dataRef.current = fresh;
           try {
@@ -125,7 +175,7 @@ export function useData(user: User | null) {
     }
 
     // 3. Save to Firestore in background without blocking caller
-    saveData(user.uid, partial, current).catch(err => {
+    saveData(user.uid, partial).catch(err => {
       console.error('Background Firestore sync error:', err);
     });
 
