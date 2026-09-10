@@ -126,26 +126,26 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Speed-Dial Popup Menu Items (Photo 2 Reference) ── */}
+      {/* ── Speed-Dial Popup Menu Items (Photo 2 Reference - Floating above without overlap) ── */}
       <AnimatePresence>
         {menuOpen && (
           <div
-            className="fixed z-50 pointer-events-none flex flex-col items-center sm:items-end justify-end w-full max-w-sm left-1/2 -translate-x-1/2 px-4"
-            style={{ bottom: 'calc(5.2rem + env(safe-area-inset-bottom, 0px))' }}
+            className="fixed z-50 pointer-events-none flex flex-col items-end justify-end w-full max-w-xs left-1/2 -translate-x-1/2 px-3"
+            style={{ bottom: 'calc(6.2rem + env(safe-area-inset-bottom, 0px))' }}
           >
-            <div className="flex flex-col gap-2.5 items-end w-full">
+            <div className="flex flex-col gap-2.5 items-end w-full pr-1">
               {secondaryMenuItems.map((item, index) => {
                 const active = isActive(item.path);
                 const Icon = item.icon;
                 return (
                   <motion.button
                     key={item.path}
-                    initial={{ opacity: 0, y: 18, scale: 0.86 }}
+                    initial={{ opacity: 0, y: 16, scale: 0.88 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 12, scale: 0.9 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
                     transition={{
-                      duration: 0.22,
-                      delay: (secondaryMenuItems.length - 1 - index) * 0.035,
+                      duration: 0.2,
+                      delay: (secondaryMenuItems.length - 1 - index) * 0.03,
                       ease: [0.22, 1, 0.36, 1],
                     }}
                     onClick={() => {
@@ -160,7 +160,7 @@ export default function Layout({ children }: LayoutProps) {
                     }`}
                   >
                     <Icon size={18} className={active ? 'text-white' : item.color} />
-                    <span className="text-xs sm:text-sm font-bold tracking-tight font-sans">
+                    <span className="text-xs sm:text-sm font-bold tracking-tight font-sans whitespace-nowrap">
                       {item.label}
                     </span>
                   </motion.button>
@@ -171,17 +171,17 @@ export default function Layout({ children }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Centered Squircle Dock (Photo 1 Reference) ── */}
+      {/* ── Centered Individual Squircle Blocks (Photo 1 Reference: Single Single Blocks) ── */}
       <div 
         className="fixed left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
         style={{ bottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
       >
-        <nav
-          className="pointer-events-auto inline-flex items-center gap-2.5 p-2 rounded-[26px] bg-surface-light/95 dark:bg-[#18191E]/95 backdrop-blur-xl border border-border-light/80 dark:border-border-dark/80 shadow-[0_12px_36px_rgba(0,0,0,0.14)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
+        <div
+          className="flex items-center gap-3"
           role="navigation"
           aria-label="Main Navigation"
         >
-          {/* Home, Gym, Nutrition Squircles */}
+          {/* Home, Gym, Nutrition: Individual Floating Squircle Blocks */}
           {primaryDockItems.map((item) => {
             const active = isActive(item.path);
             const Icon = item.icon;
@@ -194,13 +194,13 @@ export default function Layout({ children }: LayoutProps) {
                   navigate(item.path);
                 }}
                 title={item.label}
-                className={`relative flex items-center justify-center w-[52px] h-[52px] rounded-[18px] transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-all duration-200 active:scale-90 select-none focus:outline-none ${
                   active
-                    ? 'bg-accent text-white shadow-md shadow-accent/30 scale-[1.02]'
-                    : 'bg-transparent text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.05]'
+                    ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 scale-[1.04]'
+                    : 'bg-surface-light/95 dark:bg-[#1C1D24]/95 border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-accent/40'
                 }`}
               >
-                <Icon size={21} strokeWidth={active ? 2.5 : 2} />
+                <Icon size={22} strokeWidth={active ? 2.5 : 2} />
                 {active && (
                   <span className="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1.5 shadow-sm" />
                 )}
@@ -208,31 +208,31 @@ export default function Layout({ children }: LayoutProps) {
             );
           })}
 
-          {/* 4th Icon: 3 Lines Menu Toggle Button */}
+          {/* 4th Icon: 3 Lines Menu Toggle (Individual Floating Squircle Block) */}
           <button
             onClick={() => {
               triggerHaptic('light');
               setMenuOpen(!menuOpen);
             }}
             title="More Sections"
-            className={`relative flex items-center justify-center w-[52px] h-[52px] rounded-[18px] transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-all duration-200 active:scale-90 select-none focus:outline-none ${
               menuOpen
-                ? 'bg-accent text-white shadow-md shadow-accent/30 rotate-90 scale-[1.02]'
+                ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 rotate-90 scale-[1.04]'
                 : isSecondaryActive
-                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/40 text-accent shadow-sm'
-                : 'bg-transparent text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.05]'
+                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/40 text-accent shadow-md'
+                : 'bg-surface-light/95 dark:bg-[#1C1D24]/95 border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-accent/40'
             }`}
           >
             {menuOpen ? (
-              <X size={21} strokeWidth={2.4} />
+              <X size={22} strokeWidth={2.4} />
             ) : (
-              <Menu size={21} strokeWidth={2.2} />
+              <Menu size={22} strokeWidth={2.2} />
             )}
             {!menuOpen && isSecondaryActive && (
               <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1.5 shadow-sm" />
             )}
           </button>
-        </nav>
+        </div>
       </div>
 
     </div>

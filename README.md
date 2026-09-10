@@ -11,18 +11,26 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ---
 
-## What is New in Version 1.5 (Build 9)
+## What is New in Version 1.5 (Build 10)
+
+### 1. Individual Floating Squircle Blocks (Photo 1 Exact Match)
+- **Zero-Wrapper Architecture:** Completely decoupled the navigation dock from any single capsule container. Each button is now its own independent floating squircle tile (`w-14 h-14 rounded-[20px]`) floating side by side in the bottom center.
+- **Dedicated Drop Shadows & Elevation:** Each squircle block has its own elevated glassmorphic shadow, subtle border, and tap physics (`active:scale-90`).
+
+### 2. Zero-Overlap Speed-Dial Action Menu (Photo 2 Exact Match)
+- **Elevated Floating Stack:** Recalibrated the speed-dial menu positioning to `bottom: calc(6.2rem + env(safe-area-inset-bottom, 0px))`, creating generous, beautiful breathing room between the bottom pill and the floating squircle blocks with zero collisions.
+- **Right-Aligned Fluid Stagger:** The stacked pill menu rises upward from the 4th block with responsive touch dismissals.
+
+---
+
+## What Was Introduced in Version 1.5 (Build 9)
 
 ### 1. Centered Squircle Floating Dock
-- **Minimalist Floating Cluster:** Refactored bottom navigation into an elegant, centered floating island featuring distinct squircle cards (`w-[52px] h-[52px]` rounded `[18px]`) with backdrop blur, subtle elevation, and reactive haptic feedback.
+- **Minimalist Floating Cluster:** Refactored bottom navigation into an elegant, centered floating island featuring distinct squircle cards with backdrop blur, subtle elevation, and reactive haptic feedback.
 - **Primary Modules in Focus:** Front-and-center access to **Home (`/`)**, **Gym (`/gym`)**, and **Nutrition (`/nutrition`)**, plus a dedicated 4th menu button for secondary modules.
 
-### 2. Upward-Expanding Speed-Dial Menu
-- **Stacked Pill Menu:** Tapping the 3-lines menu button triggers a fluid, upward-staggered floating action menu housing **Study**, **Spending**, **Timetable**, **To-Do Tasks**, **Progress & Analytics**, and **Settings**.
-- **Interactive Icon Morphing:** The menu toggle smoothly rotates into an `X` close icon when open, with an ambient backdrop overlay allowing instant dismissal from anywhere on the screen.
-
-### 3. Refined Settings Manual Update UX
-- **Intelligent Update Controls:** If the user is on the latest version, the app displays a clear `✓ Running Latest Version (v1.5 - Build 9)` status with **no redundant Apply button**.
+### 2. Refined Settings Manual Update UX
+- **Intelligent Update Controls:** If the user is on the latest version, the app displays a clear `✓ Running Latest Version (v1.5 - Build 10)` status with **no redundant Apply button**.
 - **On-Demand Upgrades:** When a new cloud build is released, the "Apply Update" button dynamically appears so users can sync directly with a single tap.
 
 ---
