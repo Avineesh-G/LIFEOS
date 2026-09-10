@@ -1,7 +1,7 @@
 {
-  "versionCode": 7,
+  "versionCode": 8,
   "versionName": "1.5",
   "releaseDate": "2026-09-10",
-  "releaseNotes": "LifeOS v1.5 (Build 7): Real-time bidirectional Firestore database sync, Home screen instant sync button beside day/date, and direct in-app build updater.",
+  "releaseNotes": "LifeOS v1.5 (Build 8): Seamless new user auto-seeding, native hardware back-button navigation to Home, icon-only Home sync button with spin animation, and rock-solid Firestore persistence.",
   "apkUrl": "/LifeOS.apk"
 }

@@ -11,17 +11,21 @@ LifeOS is an all-in-one personal operating system built to unify academic schedu
 
 ---
 
-## What is New in Version 1.5 (Build 7)
+## What is New in Version 1.5 (Build 8)
 
-### 1. Real-Time Bidirectional Firestore Database Sync
-- **Live Snapshot Synchronization:** Powered by Firestore `onSnapshot`, changes made on any device (web browser, laptop, or mobile APK) are pushed instantaneously across all active sessions with zero manual reloads.
-- **Home Screen One-Tap Database Sync:** Added a dedicated, tactile **Sync** button right beside the day and date badge on the Home dashboard. Tapping it triggers a direct server-level fetch (`getDocFromServer`), purges local stale caches, and provides immediate visual and haptic confirmation.
-- **Instant Cache Hydration:** The app instantly hydrates state from localized storage on login before establishing real-time cloud listeners, eliminating blank screens or empty default data fallbacks.
+### 1. Native Hardware Back Navigation to Home
+- **Android Phone Navigation Interceptor:** Connected the native Android hardware back button (and swipe-to-go-back gesture navigation) using `@capacitor/app`.
+- **Two-Stage Back Navigation:** When pressing the phone navigation back button from ANY section (Gym, Study, Timetable, Tasks, Expenses, Settings, Progress), the application smoothly navigates back to the **Home dashboard (`/`)**.
+- **Graceful Exit:** If the user is already on the Home dashboard and taps back again, the app cleanly exits or minimizes (`CapApp.exitApp()`) instead of abruptly crashing out from interior pages.
 
-### 2. Direct In-App Cloud Stream & Live Sync (Zero-Reinstall Architecture)
-- **Direct Cloud Stream Integration:** The native Android shell is connected directly to the live cloud URL (`https://lifeos-gujjeti-avineeshs-projects.vercel.app`), with an offline-first Service Worker cache fallback. Every future update pushed to GitHub is streamed live over the air directly inside the app without requiring manual APK downloads or reinstallations.
-- **Direct In-App Updates:** Tapping **"Check Updates"** or **"Sync & Apply Build"** in Settings immediately flushes stale web caches and applies the latest cloud deployment directly to the application on your phone.
-- **In-Place Native Packaging:** Configured native `versionCode` to `7` and `versionName` to `"1.5"`. When installing native binary upgrades, Android executes an in-place upgrade preserving all user data and credentials.
+### 2. Streamlined Icon-Only Home Cloud Sync Button
+- **Minimalist Rotate Icon:** Replaced text label with a sleek, circular rotate button beside the day and date badge on the Home dashboard.
+- **Smooth 360° Spin Animation:** Clicking the rotate symbol animates a crisp continuous spin (`animate-spin`), fetches live Firestore state (`getDocFromServer`), gives native haptic feedback, and highlights subtle emerald confirmation on completion.
+
+### 3. Robust Multi-User Isolation & Auto-Seeding
+- **Zero-Error New User Onboarding:** When a new user (or friend using the APK) signs in, their user document is automatically seeded with default 7-day workout plans, initial settings, and clean arrays.
+- **Strict Partial Diff Syncing:** `saveData` strictly sends the modified diff to Firestore with `{ merge: true }`, ensuring no user action can ever overwrite or wipe another feature's collection.
+- **Automatic Cloud Healing:** If any network discrepancy occurs between cloud and device, local progress is preserved and auto-synced back to Firestore cloud.
 
 ### 3. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
 - **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.

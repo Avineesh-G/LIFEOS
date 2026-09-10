@@ -126,12 +126,15 @@ export function useData(user: User | null) {
           setLoading(false);
           setError(null);
         } else {
-          // Document does not exist yet on server; seed initial structure
-          if (!dataRef.current) {
-            setData(DEFAULT_DATA);
-            dataRef.current = DEFAULT_DATA;
-          }
+          // Document does not exist yet on server (brand new user)
+          const initial = dataRef.current || DEFAULT_DATA;
+          setData(initial);
+          dataRef.current = initial;
           setLoading(false);
+          // Auto-seed initial user document in Firestore cloud so subsequent saves merge seamlessly
+          saveData(user.uid, initial).catch(err => {
+            console.warn('Initial cloud seed notice:', err);
+          });
         }
       },
       (err) => {

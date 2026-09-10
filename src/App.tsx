@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { App as CapApp } from '@capacitor/app';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
@@ -61,10 +62,36 @@ function App() {
 
   const { data, loading: dataLoading, updateData, refresh } = useData(user);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Hardware Back Button: returns to Home ('/') from any screen, or exits if already on Home
+  useEffect(() => {
+    let backListener: any;
+    const registerBackButton = async () => {
+      try {
+        backListener = await CapApp.addListener('backButton', () => {
+          if (location.pathname !== '/' && location.pathname !== '') {
+            navigate('/');
+          } else {
+            CapApp.exitApp();
+          }
+        });
+      } catch {
+        // Safe fallback on desktop browsers where Capacitor App plugin is idle
+      }
+    };
+    registerBackButton();
+
+    return () => {
+      if (backListener) {
+        backListener.remove();
+      }
+    };
+  }, [location.pathname, navigate]);
 
   if (!mounted || authLoading || (user && (dataLoading || !data))) {
     return (
