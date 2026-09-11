@@ -134,7 +134,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
       // Record applied build code so it stays permanently up to date
       localStorage.setItem('lifeos_applied_build', String(targetBuild));
-      localStorage.setItem('lifeos_live_sync', 'true');
+      localStorage.removeItem('lifeos_live_sync');
 
       // Check if native Capacitor environment
       const isNative = typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor.isNativePlatform?.();

@@ -126,11 +126,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
         </div>
       </main>
 
-      {/* ── Solid Bottom Dock Background (100% Opaque - Zero Transparency or Bleed-Through) ── */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-[#F4F4FB] dark:bg-[#121316] border-t border-border-light/60 dark:border-border-dark/60 shadow-lg shadow-black/5"
-        style={{ height: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
-      />
+
 
       {/* ── Backdrop Overlay for Speed-Dial Menu (Photo 2 Reference) ── */}
       <AnimatePresence>
