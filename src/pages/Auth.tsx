@@ -15,8 +15,8 @@ export default function Auth() {
       GoogleAuth.initialize({
         clientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
-        grantOfflineAccess: true,
-      });
+        grantOfflineAccess: false,
+      }).catch(err => console.warn('GoogleAuth init warning:', err));
     }
   }, []);
 
@@ -26,15 +26,22 @@ export default function Auth() {
     setLoading(true);
     try {
       if (Capacitor.isNativePlatform()) {
-        const googleUser = await GoogleAuth.signIn();
-        const idToken = googleUser.authentication.idToken;
+        await GoogleAuth.initialize({
+          clientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
+          scopes: ['profile', 'email'],
+          grantOfflineAccess: false,
+        });
+        await GoogleAuth.signOut().catch(() => {});
+        const googleUser: any = await GoogleAuth.signIn();
+        const idToken = googleUser?.authentication?.idToken || googleUser?.idToken;
         if (!idToken) {
-          throw new Error('Google Sign-In failed to retrieve ID token.');
+          throw new Error('Google Sign-In did not return an ID token.');
         }
         const credential = GoogleAuthProvider.credential(idToken);
         await signInWithCredential(auth, credential);
       } else {
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         await signInWithPopup(auth, provider);
       }
     } catch (err: any) {
