@@ -126,9 +126,9 @@ export default function Layout({ children, refresh }: LayoutProps) {
         </div>
       </main>
 
-      {/* ── Native Gradient Bottom Fade (Zero GPU Overhead) ── */}
+      {/* ── Solid Bottom Dock Background (100% Opaque - Zero Transparency or Bleed-Through) ── */}
       <div 
-        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-gradient-to-t from-[#F4F4FB]/95 via-[#F4F4FB]/50 to-transparent dark:from-[#121316]/95 dark:via-[#121316]/50"
+        className="fixed bottom-0 left-0 right-0 pointer-events-none z-30 select-none bg-[#F4F4FB] dark:bg-[#121316] border-t border-border-light/60 dark:border-border-dark/60 shadow-lg shadow-black/5"
         style={{ height: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))' }}
       />
 
@@ -217,10 +217,10 @@ export default function Layout({ children, refresh }: LayoutProps) {
                   navigate(item.path);
                 }}
                 title={item.label}
-                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
                   active
                     ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 scale-[1.04]'
-                    : 'bg-surface-light/95 dark:bg-[#1C1D24]/95 border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-accent/40'
+                    : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
                 }`}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} />
@@ -238,12 +238,12 @@ export default function Layout({ children, refresh }: LayoutProps) {
               setMenuOpen(!menuOpen);
             }}
             title="More Sections"
-            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
               menuOpen
                 ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 rotate-90 scale-[1.04]'
                 : isSecondaryActive
                 ? 'bg-accent/15 dark:bg-accent/25 border border-accent/40 text-accent shadow-md'
-                : 'bg-surface-light/95 dark:bg-[#1C1D24]/95 border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-accent/40'
+                : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
             }`}
           >
             {menuOpen ? (

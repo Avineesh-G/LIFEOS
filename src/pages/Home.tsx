@@ -148,21 +148,6 @@ export default function Home({ data, refresh }: HomeProps) {
               {format(now, 'EEEE, MMMM d')}
             </span>
           </div>
-
-          {/* Direct Cloud Sync Icon Button beside Day & Date */}
-          <button
-            onClick={handleManualSync}
-            disabled={syncing}
-            className={`inline-flex items-center justify-center w-8 h-8 rounded-full border shadow-sm transition-all active:scale-90 disabled:opacity-60 ${
-              syncSuccess
-                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
-                : 'bg-surface-light dark:bg-surface-dark border-border-light/70 dark:border-border-dark/70 text-secondary-light dark:text-secondary-dark hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
-            }`}
-            title="Sync data with cloud database"
-            aria-label="Sync data with cloud"
-          >
-            <RefreshCw size={13} className={`text-accent transition-transform duration-500 ${syncing ? 'animate-spin' : ''}`} />
-          </button>
         </div>
         <h1 className="text-[34px] sm:text-4xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
           Good <span className="text-accent">{greetWord}</span>

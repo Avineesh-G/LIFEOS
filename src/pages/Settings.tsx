@@ -62,7 +62,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   };
 
   // Direct In-App Update & Live Sync State
-  const CURRENT_BUILD_CODE = 11;
+  const CURRENT_BUILD_CODE = 10;
   const CURRENT_VERSION_LABEL = '1.5.1';
   const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
   const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
@@ -75,7 +75,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
 
   const getEffectiveBuild = () => {
     const applied = Number(localStorage.getItem('lifeos_applied_build') || 0);
-    return Math.max(CURRENT_BUILD_CODE, applied);
+    return Math.max(CURRENT_BUILD_CODE, Math.min(applied, CURRENT_BUILD_CODE));
   };
 
   const checkForUpdates = async () => {
@@ -1198,34 +1198,48 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       {/* App Version & Direct In-App Live Updates */}
       <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-[14px] bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="w-10 h-10 rounded-[14px] bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
               <Smartphone size={20} />
             </span>
-            <div>
-              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono truncate">
                 Direct In-App Updates & Sync
               </p>
-              <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
-                LifeOS v1.5 (Build 10)
+              <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark font-sans truncate">
+                LifeOS v1.5.1 (Build 10)
               </h3>
             </div>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold font-mono ${
+          <div className={`px-3 py-1.5 rounded-full text-xs font-bold font-sans shrink-0 whitespace-nowrap flex items-center gap-1.5 shadow-sm ${
             updateInfo?.available
               ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
               : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
           }`}>
-            {updateInfo?.available ? 'Update Ready' : 'Up to Date'}
-          </span>
+            {updateInfo?.available ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                <span>Update Ready</span>
+              </>
+            ) : (
+              <>
+                <Check size={13} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Up to Date</span>
+              </>
+            )}
+          </div>
         </div>
 
         {updateMsg && (
-          <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2">
-              {!updateInfo?.available && <Check size={14} className="text-emerald-500 shrink-0" />}
-              {updateMsg}
-            </span>
+          <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark text-xs font-medium text-secondary-light dark:text-secondary-dark flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {!updateInfo?.available && (
+                <div className="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Check size={12} strokeWidth={2.5} />
+                </div>
+              )}
+              <span className="leading-snug">{updateMsg}</span>
+            </div>
             {/* ONLY show Apply Now button if an actual newer version was found */}
             {updateInfo?.available && (
               <button
@@ -1288,7 +1302,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5.1 (Build 11) · Production Ready</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5.1 (Build 10) · Production Ready</p>
       </div>
     </motion.div>
   );

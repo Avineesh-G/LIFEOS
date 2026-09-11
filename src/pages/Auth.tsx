@@ -1,12 +1,11 @@
 import { auth } from '../firebase';
-import { GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);
-  const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -52,19 +51,6 @@ export default function Auth() {
     }
   };
 
-  const handleGuestSignIn = async () => {
-    setError('');
-    setGuestLoading(true);
-    try {
-      await signInAnonymously(auth);
-    } catch (err: any) {
-      console.warn('Guest sign-in note:', err);
-      setError('Unable to sign in right now. Please try again.');
-    } finally {
-      setGuestLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-bg-light dark:bg-bg-dark p-6">
       
@@ -104,7 +90,7 @@ export default function Auth() {
           {/* Google Sign-In Button */}
           <button
             onClick={handleGoogleSignIn}
-            disabled={loading || guestLoading}
+            disabled={loading}
             className="w-full flex items-center justify-center gap-3 bg-primary-light dark:bg-primary-dark hover:opacity-90 text-primary-dark dark:text-primary-light rounded-full px-5 py-3.5 font-bold text-sm transition-all disabled:opacity-50 active:scale-[0.97] shadow-sm font-sans"
           >
             {loading ? (
@@ -118,19 +104,6 @@ export default function Auth() {
               </svg>
             )}
             {loading ? 'Authenticating...' : 'Continue with Google'}
-          </button>
-
-          {/* Continue as Guest Button */}
-          <button
-            onClick={handleGuestSignIn}
-            disabled={loading || guestLoading}
-            className="w-full mt-3 flex items-center justify-center gap-2 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark rounded-full px-5 py-3 font-semibold text-xs transition-all active:scale-[0.97] border border-border-light dark:border-border-dark disabled:opacity-50"
-          >
-            {guestLoading ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <span>Continue as Guest</span>
-            )}
           </button>
 
           <p className="mt-6 text-center text-xs text-muted-light dark:text-muted-dark leading-relaxed font-mono">
