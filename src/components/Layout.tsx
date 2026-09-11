@@ -52,15 +52,39 @@ export default function Layout({ children, refresh }: LayoutProps) {
     triggerHaptic('light');
     setIsReloading(true);
     try {
+      // 1. Evict any browser / PWA caches
+      if ('caches' in window) {
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        } catch (e) {
+          console.warn('Cache clear error:', e);
+        }
+      }
+
+      // 2. Unregister / update service workers so newest code is fetched
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const reg of registrations) {
+            await reg.update();
+            await reg.unregister();
+          }
+        } catch (e) {
+          console.warn('SW update error:', e);
+        }
+      }
+
+      // 3. Perform data refresh
       if (refresh) {
         await refresh();
       }
+
+      // 4. Force browser/webview reload from Vercel
+      window.location.reload();
     } catch (err) {
       console.warn('Refresh error:', err);
-    } finally {
-      setTimeout(() => {
-        setIsReloading(false);
-      }, 750);
+      window.location.reload();
     }
   };
 
@@ -193,14 +217,14 @@ export default function Layout({ children, refresh }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Fixed Bottom Navigation Bar with Rounded-Up Top Corners (Photo Reference) ── */}
+      {/* ── Fixed Bottom Navigation (4 Floating Squircle Buttons, No Backside Container) ── */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#121316] border-t border-border-light/70 dark:border-border-dark/70 rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] px-4 pt-3"
-        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-center px-4"
+        style={{ paddingBottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
         role="navigation"
         aria-label="Main Navigation"
       >
-        <div className="flex items-center justify-center gap-3.5 max-w-sm mx-auto">
+        <div className="flex items-center justify-center gap-3.5 pointer-events-auto">
           {/* Home, Gym, Nutrition: Squircle Buttons */}
           {primaryDockItems.map((item) => {
             const active = isActive(item.path);
@@ -214,10 +238,10 @@ export default function Layout({ children, refresh }: LayoutProps) {
                   navigate(item.path);
                 }}
                 title={item.label}
-                className={`relative flex items-center justify-center w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+                className={`relative flex items-center justify-center w-[54px] h-[54px] rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
                   active
-                    ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
-                    : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] hover:border-accent/40'
+                    ? 'bg-white dark:bg-[#1C1D24] border-accent/60 text-accent shadow-[0_6px_20px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] scale-[1.04]'
+                    : 'bg-white dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
                 }`}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} />
@@ -235,12 +259,12 @@ export default function Layout({ children, refresh }: LayoutProps) {
               setMenuOpen(!menuOpen);
             }}
             title="More Sections"
-            className={`relative flex items-center justify-center w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+            className={`relative flex items-center justify-center w-[54px] h-[54px] rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
               menuOpen
-                ? 'bg-accent/25 dark:bg-accent/35 border border-accent/60 text-accent shadow-md shadow-accent/25 rotate-90 scale-[1.04]'
+                ? 'bg-white dark:bg-[#1C1D24] border-accent text-accent shadow-[0_6px_20px_rgba(0,0,0,0.14)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] rotate-90 scale-[1.04]'
                 : isSecondaryActive
-                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
-                : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] hover:border-accent/40'
+                ? 'bg-white dark:bg-[#1C1D24] border-accent/60 text-accent shadow-[0_6px_20px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] scale-[1.04]'
+                : 'bg-white dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
             }`}
           >
             {menuOpen ? (
