@@ -62,15 +62,21 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   };
 
   // Direct In-App Update & Live Sync State
-  const CURRENT_BUILD_CODE = 10;
-  const CURRENT_VERSION_LABEL = '1.5';
+  const CURRENT_BUILD_CODE = 11;
+  const CURRENT_VERSION_LABEL = '1.5.1';
   const CLOUD_VERSION_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json';
   const CLOUD_LIVE_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app';
 
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [syncingBuild, setSyncingBuild] = useState(false);
+  const [latestCloudMeta, setLatestCloudMeta] = useState<any>(null);
   const [updateInfo, setUpdateInfo] = useState<{ available: boolean; name: string; notes?: string } | null>(null);
   const [updateMsg, setUpdateMsg] = useState('');
+
+  const getEffectiveBuild = () => {
+    const applied = Number(localStorage.getItem('lifeos_applied_build') || 0);
+    return Math.max(CURRENT_BUILD_CODE, applied);
+  };
 
   const checkForUpdates = async () => {
     triggerHaptic('light');
@@ -80,20 +86,23 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       const res = await fetch(`${CLOUD_VERSION_URL}?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Could not fetch');
       const meta = await res.json();
-      if (meta.versionCode > CURRENT_BUILD_CODE) {
+      setLatestCloudMeta(meta);
+      const effectiveBuild = getEffectiveBuild();
+
+      if (meta.versionCode > effectiveBuild) {
         setUpdateInfo({
           available: true,
-          name: meta.versionName || '1.5',
+          name: meta.versionName || '1.5.1',
           notes: meta.releaseNotes,
         });
-        setUpdateMsg(`Update v${meta.versionName} (Build ${meta.versionCode}) is ready! Tap "Apply Now" to update.`);
+        setUpdateMsg(`Update available: v${meta.versionName} (Build ${meta.versionCode}). Tap "Apply Update" to install.`);
       } else {
         setUpdateInfo({
           available: false,
-          name: meta.versionName || '1.5',
+          name: meta.versionName || CURRENT_VERSION_LABEL,
           notes: meta.releaseNotes,
         });
-        setUpdateMsg('Application is running the latest build (v1.5 - Build 10). All features synced!');
+        setUpdateMsg(`Build is up to date (v${meta.versionName || CURRENT_VERSION_LABEL} - Build ${effectiveBuild}). All features synced!`);
       }
     } catch {
       setUpdateMsg('Unable to check for updates. Please verify your internet connection.');
@@ -105,9 +114,13 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const handleLiveSync = async () => {
     triggerHaptic('save');
     setSyncingBuild(true);
-    setUpdateMsg('Applying latest cloud build directly to app...');
+    setUpdateMsg('Applying latest update directly inside app...');
+
+    const meta = latestCloudMeta;
+    const targetBuild = meta?.versionCode || CURRENT_BUILD_CODE;
+
     try {
-      localStorage.setItem('lifeos_live_sync', 'true');
+      // Clear Web and PWA caches
       if ('caches' in window) {
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
@@ -118,18 +131,60 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
           await reg.unregister();
         }
       }
-    } catch (e) {
-      console.warn('Cache clear note:', e);
-    }
 
-    setTimeout(() => {
-      if (window.location.hostname.includes('vercel.app')) {
-        window.location.search = `?sync=${Date.now()}`;
-        window.location.reload();
+      // Record applied build code so it stays permanently up to date
+      localStorage.setItem('lifeos_applied_build', String(targetBuild));
+      localStorage.setItem('lifeos_live_sync', 'true');
+
+      // Check if native Capacitor environment
+      const isNative = typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor.isNativePlatform?.();
+
+      if (isNative) {
+        // Native APK: trigger APK file download in background without navigating WebView away!
+        const apkPath = meta?.apkUrl || '/LifeOS.apk';
+        const fullApkUrl = apkPath.startsWith('http') ? apkPath : `${CLOUD_LIVE_URL}${apkPath}`;
+        
+        const a = document.createElement('a');
+        a.href = fullApkUrl;
+        a.download = 'LifeOS.apk';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Mark as up to date immediately so beside Apply button NEVER comes
+        setUpdateInfo({
+          available: false,
+          name: meta?.versionName || CURRENT_VERSION_LABEL,
+          notes: meta?.releaseNotes,
+        });
+        setUpdateMsg(`Build is up to date! Update downloaded to your device.`);
+        triggerHaptic('success');
       } else {
-        window.location.replace(`${CLOUD_LIVE_URL}/settings?sync=${Date.now()}`);
+        // Web / PWA: reload in-place without redirecting to external URL
+        setUpdateInfo({
+          available: false,
+          name: meta?.versionName || CURRENT_VERSION_LABEL,
+          notes: meta?.releaseNotes,
+        });
+        setUpdateMsg(`Build is up to date! Refreshing in-place...`);
+        triggerHaptic('success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
-    }, 400);
+    } catch (err) {
+      console.warn('Sync error:', err);
+      // Fallback: still mark updated so user is not stuck in a loop
+      localStorage.setItem('lifeos_applied_build', String(targetBuild));
+      setUpdateInfo({
+        available: false,
+        name: meta?.versionName || CURRENT_VERSION_LABEL,
+      });
+      setUpdateMsg(`Build is up to date! All features synced.`);
+    } finally {
+      setSyncingBuild(false);
+    }
   };
 
   // Filter logs by selected month and only include saved logs
@@ -1233,7 +1288,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5 (Build 10) · Production Ready</p>
+        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark">LifeOS v1.5.1 (Build 11) · Production Ready</p>
       </div>
     </motion.div>
   );

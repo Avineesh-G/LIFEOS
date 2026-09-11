@@ -176,22 +176,22 @@
 
   /* Card base - Material 3 Expressive */
   .card {
-    @apply bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 rounded-[26px] sm:rounded-m3-card shadow-m3-subtle transition-all;
+    @apply bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 rounded-[26px] sm:rounded-m3-card shadow-m3-subtle transition-[border-color,background-color,box-shadow] duration-200;
   }
 
   /* Primary button */
   .btn-primary {
-    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-full font-bold transition-all duration-200 active:scale-[0.97] shadow-sm;
+    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-full font-bold transition-[transform,background-color,opacity] duration-150 active:scale-[0.97] shadow-sm;
   }
 
   /* Pill button (black/white based on theme) */
   .btn-pill {
-    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-all duration-300 active:scale-[0.97];
+    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-[transform,background-color,opacity] duration-150 active:scale-[0.97];
   }
 
   /* Ghost pill button */
   .btn-ghost-pill {
-    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-all duration-300 active:scale-[0.97] text-primary-light dark:text-primary-dark;
+    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-[transform,border-color,background-color] duration-150 active:scale-[0.97] text-primary-light dark:text-primary-dark;
   }
 
   /* Segmented progress bar */

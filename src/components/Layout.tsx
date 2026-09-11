@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
   CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, LucideIcon
+  Utensils, RotateCw, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppSettings } from '../types';
@@ -37,12 +37,31 @@ interface LayoutProps {
   setTheme: (t: AppSettings['theme']) => void;
   accentColor: string;
   setAccentColor: (c: string) => void;
+  refresh?: () => Promise<any>;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, refresh }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
+
+  const handleReload = async () => {
+    if (isReloading) return;
+    triggerHaptic('light');
+    setIsReloading(true);
+    try {
+      if (refresh) {
+        await refresh();
+      }
+    } catch (err) {
+      console.warn('Refresh error:', err);
+    } finally {
+      setTimeout(() => {
+        setIsReloading(false);
+      }, 750);
+    }
+  };
 
   // Close speed dial menu when navigating or pressing escape
   useEffect(() => {
@@ -82,11 +101,15 @@ export default function Layout({ children }: LayoutProps) {
           </span>
           <button
             onPointerDown={() => triggerHaptic('light')}
-            onClick={() => navigate('/settings')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 text-secondary-light dark:text-secondary-dark hover:opacity-85 active:scale-95 transition-all shadow-sm"
-            aria-label="Settings"
+            onClick={handleReload}
+            disabled={isReloading}
+            className={`w-9 h-9 flex items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 text-secondary-light dark:text-secondary-dark hover:opacity-85 active:scale-95 transition-all shadow-sm ${
+              isReloading ? 'text-accent border-accent/40 bg-accent/5' : ''
+            }`}
+            aria-label="Reload and sync data"
+            title="Reload and sync data"
           >
-            <Settings size={18} strokeWidth={2} />
+            <RotateCw size={17} strokeWidth={2.2} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
           </button>
         </div>
       </header>
@@ -194,7 +217,7 @@ export default function Layout({ children }: LayoutProps) {
                   navigate(item.path);
                 }}
                 title={item.label}
-                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
                   active
                     ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 scale-[1.04]'
                     : 'bg-surface-light/95 dark:bg-[#1C1D24]/95 border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:border-accent/40'
@@ -215,7 +238,7 @@ export default function Layout({ children }: LayoutProps) {
               setMenuOpen(!menuOpen);
             }}
             title="More Sections"
-            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-all duration-200 active:scale-90 select-none focus:outline-none ${
+            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] backdrop-blur-xl border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
               menuOpen
                 ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 rotate-90 scale-[1.04]'
                 : isSecondaryActive

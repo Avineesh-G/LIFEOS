@@ -38,7 +38,6 @@ function AnimatedPage({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
       {...pageTransition}
-      style={{ willChange: 'opacity, transform', transform: 'translateZ(0)' }}
       className="w-full"
     >
       {children}
@@ -106,7 +105,7 @@ function App() {
   }
 
   return (
-    <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor}>
+    <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
       <ErrorBoundary>
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
