@@ -52,10 +52,18 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-bg-light dark:bg-bg-dark p-6">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-6">
+      {/* ── Fixed Ambient Soft Flowing Waves Background ── */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-40 dark:opacity-15 dark:brightness-90"
+        style={{
+          backgroundImage: "url('/bg-soft-waves.jpg')",
+        }}
+        aria-hidden="true"
+      />
       
       {/* Top Header Section */}
-      <div className="flex flex-col items-center text-center mb-10 w-full max-w-sm">
+      <div className="relative z-10 flex flex-col items-center text-center mb-10 w-full max-w-sm">
         <div className="w-20 h-20 rounded-[22px] bg-surface-light dark:bg-surface-dark border border-border-light/80 dark:border-border-dark/80 flex items-center justify-center shadow-m3-subtle mb-5 p-3.5">
           <img src="/icon-monochrome.svg" alt="LifeOS Logo" className="w-full h-full object-contain dark:invert" />
         </div>

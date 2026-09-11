@@ -111,7 +111,16 @@ export default function Layout({ children, refresh }: LayoutProps) {
   const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
-    <div className="min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
+    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
+
+      {/* ── Fixed Ambient Soft Flowing Waves Background ── */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-40 dark:opacity-15 dark:brightness-90"
+        style={{
+          backgroundImage: "url('/bg-soft-waves.jpg')",
+        }}
+        aria-hidden="true"
+      />
 
       {/* ── Top header bar ── */}
       <header 
@@ -150,7 +159,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
 
       {/* ── Main content ── */}
       <main 
-        className="min-h-screen"
+        className="relative z-10 min-h-screen"
         style={{
           paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
           paddingBottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))',
