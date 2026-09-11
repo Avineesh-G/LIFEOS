@@ -19,6 +19,7 @@ import Spending from './pages/Spending';
 import Timetable from './pages/Timetable';
 import Tasks from './pages/Tasks';
 import Progress from './pages/Progress';
+import WorkHistory from './pages/WorkHistory';
 import { Settings } from 'lucide-react'; // Fallback import just in case
 import SettingsPage from './pages/Settings';
 import Auth from './pages/Auth';
@@ -124,6 +125,7 @@ function App() {
             <Route path="/timetable" element={<AnimatedPage><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
             <Route path="/tasks" element={<AnimatedPage><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
             <Route path="/progress" element={<AnimatedPage><Progress data={data!} /></AnimatedPage>} />
+            <Route path="/history" element={<AnimatedPage><WorkHistory data={data!} updateData={updateData} /></AnimatedPage>} />
             <Route path="/settings" element={<AnimatedPage><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
           </Routes>
         </AnimatePresence>

@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History, Lock, Unlock } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History, Lock, Unlock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addDays, subDays } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, askFoodDoubt, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
@@ -18,12 +18,15 @@ const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: strin
   { slot: 'lunch', label: 'Lunch', icon: <Sun size={16} className="text-orange-500" />, time: '12:30–2:00 PM', dotColor: 'bg-orange-400' },
   { slot: 'snacks', label: 'Snacks', icon: <Cloud size={16} className="text-sky-500" />, time: '5:00–6:00 PM', dotColor: 'bg-sky-400' },
   { slot: 'dinner', label: 'Dinner', icon: <Moon size={16} className="text-indigo-500" />, time: '7:30–9:00 PM', dotColor: 'bg-indigo-400' },
+  { slot: 'nightCanteen', label: 'Night Canteen', icon: <Moon size={16} className="text-purple-500" />, time: '10:30 PM–12:30 AM', dotColor: 'bg-purple-400' },
 ];
 
 const getCurrentMealSlot = (): MealSlot => {
   const hour = new Date().getHours();
   const minute = new Date().getMinutes();
   const totalMin = hour * 60 + minute;
+  // 10:30 PM (1350 mins) to 12:30 AM (30 mins)
+  if (totalMin >= 1350 || totalMin < 30) return 'nightCanteen';
   if (totalMin < 630) return 'breakfast';
   if (totalMin < 930) return 'lunch';
   if (totalMin < 1110) return 'snacks';
@@ -35,9 +38,20 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const todayDayOfMonth = new Date().getDate();
-  const todayMenu = MONTHLY_MESS_MENU.find(m => m.date === todayDayOfMonth) || MONTHLY_MESS_MENU[0];
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState(todayStr);
+
+  // Selected date menu resolution
+  const selectedDateObj = useMemo(() => {
+    try {
+      return parseISO(selectedDate);
+    } catch {
+      return new Date();
+    }
+  }, [selectedDate]);
+
+  const selectedDayOfMonth = selectedDateObj.getDate();
+  const todayMenu = MONTHLY_MESS_MENU.find(m => m.date === selectedDayOfMonth) || MONTHLY_MESS_MENU[0];
 
   const [coachAdvice, setCoachAdvice] = useState<any>(null);
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
@@ -62,33 +76,63 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [editExtraName, setEditExtraName] = useState('');
   const [editExtraCals, setEditExtraCals] = useState('');
 
-  // Draft Log initialization
-  const existingTodayLog = (data.nutritionLogs || []).find(l => l.date === today);
-  const [isLocked, setIsLocked] = useState(!!existingTodayLog?.isSaved);
+  // Draft Log initialization for selected date
+  const existingLogForDate = useMemo(() => {
+    return (data.nutritionLogs || []).find(l => l.date === selectedDate);
+  }, [data.nutritionLogs, selectedDate]);
+
+  const [isLocked, setIsLocked] = useState(!!existingLogForDate?.isSaved);
   const [draftLog, setDraftLog] = useState<NutritionLog>(() => {
-    const existing = existingTodayLog;
-    if (existing) {
-      // Migrate old format to new format if needed (if it has itemsSelected)
-      const isOldFormat = existing.mealsEaten.some((m: any) => 'itemsSelected' in m);
+    if (existingLogForDate) {
+      const isOldFormat = existingLogForDate.mealsEaten.some((m: any) => 'itemsSelected' in m);
       if (isOldFormat) {
         return {
-          id: `nut-${today}`,
-          date: today,
+          id: `nut-${selectedDate}`,
+          date: selectedDate,
           isSaved: false,
           mealsEaten: [],
           dailyTotal: 0
         };
       }
-      return existing;
+      return existingLogForDate;
     }
     return {
-      id: `nut-${today}`,
-      date: today,
+      id: `nut-${selectedDate}`,
+      date: selectedDate,
       isSaved: false,
       mealsEaten: [],
       dailyTotal: 0
     };
   });
+
+  // When selectedDate changes, sync draftLog & isLocked with data
+  useEffect(() => {
+    const log = (data.nutritionLogs || []).find(l => l.date === selectedDate);
+    if (log) {
+      const isOldFormat = log.mealsEaten.some((m: any) => 'itemsSelected' in m);
+      if (isOldFormat) {
+        setDraftLog({
+          id: `nut-${selectedDate}`,
+          date: selectedDate,
+          isSaved: false,
+          mealsEaten: [],
+          dailyTotal: 0
+        });
+      } else {
+        setDraftLog(log);
+      }
+      setIsLocked(!!log.isSaved);
+    } else {
+      setDraftLog({
+        id: `nut-${selectedDate}`,
+        date: selectedDate,
+        isSaved: false,
+        mealsEaten: [],
+        dailyTotal: 0
+      });
+      setIsLocked(false);
+    }
+  }, [selectedDate, data.nutritionLogs]);
 
   const targetCals = data.profile?.currentCalorieTarget || 2000;
   const totalConsumed = draftLog.dailyTotal;
@@ -344,20 +388,19 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
 
   const handleSaveDay = async () => {
     triggerHaptic('save');
-    const finalLog = { ...draftLog, isSaved: true };
+    const finalLog = { ...draftLog, date: selectedDate, isSaved: true };
     setDraftLog(finalLog);
     setIsLocked(true);
 
     setShowSavedFeedback(true);
     setTimeout(() => setShowSavedFeedback(false), 2000);
 
-    const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== today);
+    const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== selectedDate);
     await updateData({ nutritionLogs: [...otherLogs, finalLog] });
   };
 
-  const savedHistory = (data.nutritionLogs || [])
-    .filter(l => l.isSaved && l.date !== today)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const isToday = selectedDate === todayStr;
+  const isYesterday = selectedDate === format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-4">
@@ -370,10 +413,77 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           <ArrowLeft size={18} />
         </button>
         <div className="text-center">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">{format(new Date(), 'EEEE, d MMM')}</p>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+            {format(selectedDateObj, 'EEEE, d MMM yyyy')}
+          </p>
           <h1 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Nutrition Protocol</h1>
         </div>
-        <div className="w-10" />
+        <div className="w-10 flex justify-end">
+          {!isToday && (
+            <button
+              onClick={() => {
+                triggerHaptic(5);
+                setSelectedDate(todayStr);
+              }}
+              className="text-[11px] font-bold px-2 py-1 rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all"
+              title="Jump to Today"
+            >
+              Today
+            </button>
+          )}
+        </div>
+      </motion.div>
+
+      {/* ── Date Navigator Bar (Log any particular date) ── */}
+      <motion.div variants={item} className="card p-3 flex items-center justify-between gap-2 shadow-sm border border-border-light/80 dark:border-border-dark/80">
+        <button
+          onClick={() => {
+            triggerHaptic(5);
+            setSelectedDate(prev => format(subDays(parseISO(prev), 1), 'yyyy-MM-dd'));
+          }}
+          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          title="Previous Day"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        {/* Date Selector Pill with Native Date Picker */}
+        <label className="relative flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 cursor-pointer hover:border-accent/40 transition-colors">
+          <Calendar size={15} className="text-accent flex-shrink-0" />
+          <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+            {isToday ? 'Today' : isYesterday ? 'Yesterday' : format(selectedDateObj, 'EEE, d MMM')}
+          </span>
+          <span className="text-[10px] text-muted-light dark:text-muted-dark font-mono">
+            ({format(selectedDateObj, 'yyyy-MM-dd')})
+          </span>
+          {existingLogForDate?.isSaved ? (
+            <span className="ml-1 w-2 h-2 rounded-full bg-emerald-500" title="Saved" />
+          ) : draftLog.dailyTotal > 0 ? (
+            <span className="ml-1 w-2 h-2 rounded-full bg-amber-500" title="Unsaved changes" />
+          ) : null}
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => {
+              if (e.target.value) {
+                triggerHaptic(5);
+                setSelectedDate(e.target.value);
+              }
+            }}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+        </label>
+
+        <button
+          onClick={() => {
+            triggerHaptic(5);
+            setSelectedDate(prev => format(addDays(parseISO(prev), 1), 'yyyy-MM-dd'));
+          }}
+          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          title="Next Day"
+        >
+          <ChevronRight size={18} />
+        </button>
       </motion.div>
 
       {/* Material 3 Expressive Peach/Mint Tonal Calorie Hero Container */}
@@ -583,11 +693,13 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                 </button>
 
                 <AnimatePresence>
-                  {isOpen && mealData && (
+                  {isOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <div className="px-4 pb-4 border-t border-border-light dark:border-border-dark pt-3">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">Menu</h4>
+                          <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
+                            {mealObj.slot === 'nightCanteen' ? 'Night Canteen (10:30 PM–12:30 AM)' : 'Menu Items'}
+                          </h4>
                           <button onClick={() => handleSkipMeal(mealObj.slot)} className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${isSkipped ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-bg-light dark:hover:bg-bg-dark text-secondary-light dark:text-secondary-dark'}`}>
                             {isSkipped ? 'Undo Skip' : 'Skip Meal'}
                           </button>
@@ -595,80 +707,106 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
 
                         {isSkipped ? (
                           <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                            <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped this meal</p>
+                            <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped {mealObj.label.toLowerCase()}</p>
                           </div>
                         ) : (
                           <>
-                            {/* Standard Menu Items */}
-                            <div className="space-y-2 mb-4">
-                              {mealData.items.map((item: any) => {
-                                const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
-                                const isSelected = !!loggedItem;
+                            {/* Standard Menu Items if present */}
+                            {mealData && mealData.items.length > 0 && (
+                              <div className="space-y-2 mb-4">
+                                {mealData.items.map((item: any) => {
+                                  const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
+                                  const isSelected = !!loggedItem;
 
-                                const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
-                                const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
+                                  const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
+                                  const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
 
-                                return (
-                                  <div
-                                    key={item.name}
-                                    className={`w-full flex flex-col p-3 rounded-xl border transition-all ${isSelected
-                                        ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30'
-                                        : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
-                                      }`}
-                                  >
-                                    <div className="flex items-center justify-between">
-                                      <button
-                                        className="flex items-center gap-3 flex-1 text-left"
-                                        onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
-                                      >
-                                        <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
-                                          <Check size={12} strokeWidth={3} />
-                                        </div>
-                                        <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
-                                          {item.name}
-                                          {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
-                                          {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
-                                        </span>
-                                      </button>
+                                  return (
+                                    <div
+                                      key={item.name}
+                                      className={`w-full flex flex-col p-3 rounded-xl border transition-all ${isSelected
+                                          ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30'
+                                          : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
+                                        }`}
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <button
+                                          className="flex items-center gap-3 flex-1 text-left"
+                                          onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
+                                        >
+                                          <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
+                                            <Check size={12} strokeWidth={3} />
+                                          </div>
+                                          <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                                            {item.name}
+                                            {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
+                                            {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
+                                          </span>
+                                        </button>
 
-                                      {/* Item Portions Stepper */}
+                                        {/* Item Portions Stepper */}
+                                        {isSelected && (
+                                          <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
+                                            <button
+                                              className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                              onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
+                                            >
+                                              -
+                                            </button>
+                                            <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
+                                            <button
+                                              className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
+                                              onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        )}
+                                        {!isSelected && (
+                                          <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
+                                            {item.estCalories} kcal
+                                          </span>
+                                        )}
+                                      </div>
                                       {isSelected && (
-                                        <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
-                                          <button
-                                            className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                            onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
-                                          >
-                                            -
-                                          </button>
-                                          <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
-                                          <button
-                                            className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                            onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
-                                          >
-                                            +
-                                          </button>
+                                        <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
+                                          Total: {Math.round(loggedItem.calories * loggedItem.portion)} kcal
                                         </div>
-                                      )}
-                                      {!isSelected && (
-                                        <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
-                                          {item.estCalories} kcal
-                                        </span>
                                       )}
                                     </div>
-                                    {isSelected && (
-                                      <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
-                                        Total: {Math.round(loggedItem.calories * loggedItem.portion)} kcal
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
+                                  );
+                                })}
+                              </div>
+                            )}
 
-                            {/* Extra Items List for this slot */}
+                            {/* Night Canteen Quick Suggestions */}
+                            {mealObj.slot === 'nightCanteen' && (
+                              <div className="mb-3">
+                                <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mb-1.5">Quick Canteen Picks:</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {['Maggi', 'Egg Roll', 'Chicken Roll', 'Cold Coffee', 'Sandwich', 'Tea', 'French Fries'].map(chip => (
+                                    <button
+                                      key={chip}
+                                      type="button"
+                                      onClick={() => {
+                                        triggerHaptic(5);
+                                        setExtraTexts(prev => ({ ...prev, [mealObj.slot]: chip }));
+                                      }}
+                                      className="text-xs px-2.5 py-1 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-accent/40 text-secondary-light dark:text-secondary-dark transition-colors"
+                                    >
+                                      + {chip}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Extra / Logged Items List for this slot */}
                             {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
                               <div className="mt-4 mb-4 space-y-2">
-                                <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">Extra Items</h4>
+                                <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">
+                                  {mealObj.slot === 'nightCanteen' ? 'Logged Canteen Items' : 'Extra Items'}
+                                </h4>
                                 {mealLog.items.filter(i => i.isExtra).map((extra) => (
                                   <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
                                     {editingExtraId === extra.id ? (
@@ -732,16 +870,18 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                               </div>
                             )}
 
-                            {/* Add Extra Item Input */}
+                            {/* Add Extra / Canteen Item Input with AI calorie estimation */}
                             <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
                               <div className="flex items-center gap-2 mb-2">
                                 <Sparkles size={14} className="text-purple-500" />
-                                <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">Ate something else?</span>
+                                <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
+                                  {mealObj.slot === 'nightCanteen' ? 'Ate at Night Canteen? (AI estimates cals)' : 'Ate something else? (AI estimates cals)'}
+                                </span>
                               </div>
                               <div className="flex gap-2">
                                 <input
                                   type="text"
-                                  placeholder="e.g. 2 slices of pizza, 1 apple"
+                                  placeholder={mealObj.slot === 'nightCanteen' ? 'e.g. 1 plate Maggi, 1 cold coffee' : 'e.g. 2 slices of pizza, 1 apple'}
                                   value={extraTexts[mealObj.slot] || ''}
                                   onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
                                   onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
@@ -759,13 +899,6 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                             </div>
                           </>
                         )}
-                      </div>
-                    </motion.div>
-                  )}
-                  {isOpen && !mealData && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 text-center">
-                        <p className="text-sm text-secondary-light dark:text-secondary-dark">No menu items parsed for this meal.</p>
                       </div>
                     </motion.div>
                   )}

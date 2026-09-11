@@ -103,7 +103,7 @@ export interface UserProfile {
 
 // ── Nutrition / Mess types ─────────────────────────────────────────────────
 export type MessType = 'veg' | 'nonveg' | 'special';
-export type MealSlot = 'breakfast' | 'lunch' | 'snacks' | 'dinner';
+export type MealSlot = 'breakfast' | 'lunch' | 'snacks' | 'dinner' | 'nightCanteen';
 export type PortionSize = 0.5 | 1 | 1.5 | 2;
 
 export interface MenuItem {

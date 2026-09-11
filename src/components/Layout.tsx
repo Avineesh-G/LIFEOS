@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
   CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, RotateCw, LucideIcon
+  Utensils, RotateCw, History, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppSettings } from '../types';
@@ -18,6 +18,7 @@ const primaryDockItems = [
 
 // Speed-dial popup items (Photo 2 reference)
 const secondaryMenuItems = [
+  { icon: History,      label: 'History',              path: '/history',   color: 'text-violet-500 dark:text-violet-400' },
   { icon: BookOpen,     label: 'Study',                path: '/study',     color: 'text-indigo-500 dark:text-indigo-400' },
   { icon: Wallet,       label: 'Spending',             path: '/spending',  color: 'text-amber-500 dark:text-amber-400' },
   { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
@@ -89,16 +90,19 @@ export default function Layout({ children, refresh }: LayoutProps) {
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
       >
-        <div className="flex items-center justify-between px-5 h-14">
+        <div className="relative flex items-center justify-between px-5 h-14">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
             <span className="font-bold text-base tracking-tight text-primary-light dark:text-primary-dark font-sans">
               LifeOS
             </span>
           </div>
-          <span className="px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs font-semibold text-secondary-light dark:text-secondary-dark tracking-wide">
+
+          {/* Centered slide / page indicator */}
+          <span className="absolute left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs font-semibold text-secondary-light dark:text-secondary-dark tracking-wide pointer-events-none whitespace-nowrap shadow-sm">
             {pageLabel}
           </span>
+
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={handleReload}
@@ -125,8 +129,6 @@ export default function Layout({ children, refresh }: LayoutProps) {
           {children}
         </div>
       </main>
-
-
 
       {/* ── Backdrop Overlay for Speed-Dial Menu (Photo 2 Reference) ── */}
       <AnimatePresence>
@@ -174,11 +176,11 @@ export default function Layout({ children, refresh }: LayoutProps) {
                     }}
                     className={`pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg border transition-all active:scale-95 ${
                       active
-                        ? 'bg-accent text-white border-accent shadow-accent/25'
+                        ? 'bg-accent/15 dark:bg-accent/25 text-accent border-accent/50 shadow-md shadow-accent/20'
                         : 'bg-surface-light dark:bg-[#1C1D24] text-primary-light dark:text-primary-dark border-border-light/80 dark:border-border-dark/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                     }`}
                   >
-                    <Icon size={18} className={active ? 'text-white' : item.color} />
+                    <Icon size={18} className={active ? 'text-accent' : item.color} />
                     <span className="text-xs sm:text-sm font-bold tracking-tight font-sans whitespace-nowrap">
                       {item.label}
                     </span>
@@ -190,7 +192,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Centered Individual Squircle Blocks (Photo 1 Reference: Single Single Blocks) ── */}
+      {/* ── Centered Individual Squircle Blocks (Liquid Active Style) ── */}
       <div 
         className="fixed left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
         style={{ bottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
@@ -200,7 +202,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
           role="navigation"
           aria-label="Main Navigation"
         >
-          {/* Home, Gym, Nutrition: Individual Floating Squircle Blocks */}
+          {/* Home, Gym, Nutrition: Individual Floating Squircle Blocks (Liquid Active) */}
           {primaryDockItems.map((item) => {
             const active = isActive(item.path);
             const Icon = item.icon;
@@ -215,19 +217,19 @@ export default function Layout({ children, refresh }: LayoutProps) {
                 title={item.label}
                 className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
                   active
-                    ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 scale-[1.04]'
+                    ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
                     : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
                 }`}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} />
                 {active && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1.5 shadow-sm" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1.5 shadow-sm" />
                 )}
               </button>
             );
           })}
 
-          {/* 4th Icon: 3 Lines Menu Toggle (Individual Floating Squircle Block) */}
+          {/* 4th Icon: 3 Lines Menu Toggle (Liquid Style) */}
           <button
             onClick={() => {
               triggerHaptic('light');
@@ -236,9 +238,9 @@ export default function Layout({ children, refresh }: LayoutProps) {
             title="More Sections"
             className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
               menuOpen
-                ? 'bg-accent text-white border-accent shadow-lg shadow-accent/35 rotate-90 scale-[1.04]'
+                ? 'bg-accent/25 dark:bg-accent/35 border border-accent/60 text-accent shadow-md shadow-accent/25 rotate-90 scale-[1.04]'
                 : isSecondaryActive
-                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/40 text-accent shadow-md'
+                ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
                 : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
             }`}
           >
