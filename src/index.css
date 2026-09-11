@@ -15,7 +15,6 @@
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    transform: translateZ(0);
   }
 
   body {
@@ -27,8 +26,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
-    transform: translateZ(0);
-    backface-visibility: hidden;
   }
 
   /* Force Google Sans Flex on every element — including buttons, inputs, selects, back labels */

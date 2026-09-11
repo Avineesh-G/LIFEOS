@@ -120,9 +120,10 @@ export default function Layout({ children, refresh }: LayoutProps) {
 
       {/* ── Main content ── */}
       <main 
-        className="pb-28 sm:pb-32 min-h-screen"
+        className="min-h-screen"
         style={{
           paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+          paddingBottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
         <div className="max-w-xl mx-auto px-4 py-6">
@@ -192,17 +193,15 @@ export default function Layout({ children, refresh }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Centered Individual Squircle Blocks (Liquid Active Style) ── */}
-      <div 
-        className="fixed left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
-        style={{ bottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
+      {/* ── Fixed Bottom Navigation Bar with Rounded-Up Top Corners (Photo Reference) ── */}
+      <nav 
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#121316] border-t border-border-light/70 dark:border-border-dark/70 rounded-t-[32px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] px-4 pt-3"
+        style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+        role="navigation"
+        aria-label="Main Navigation"
       >
-        <div
-          className="flex items-center gap-3"
-          role="navigation"
-          aria-label="Main Navigation"
-        >
-          {/* Home, Gym, Nutrition: Individual Floating Squircle Blocks (Liquid Active) */}
+        <div className="flex items-center justify-center gap-3.5 max-w-sm mx-auto">
+          {/* Home, Gym, Nutrition: Squircle Buttons */}
           {primaryDockItems.map((item) => {
             const active = isActive(item.path);
             const Icon = item.icon;
@@ -215,10 +214,10 @@ export default function Layout({ children, refresh }: LayoutProps) {
                   navigate(item.path);
                 }}
                 title={item.label}
-                className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+                className={`relative flex items-center justify-center w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
                   active
                     ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
-                    : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
+                    : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] hover:border-accent/40'
                 }`}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} />
@@ -229,19 +228,19 @@ export default function Layout({ children, refresh }: LayoutProps) {
             );
           })}
 
-          {/* 4th Icon: 3 Lines Menu Toggle (Liquid Style) */}
+          {/* 4th Icon: 3 Lines Menu Toggle Button */}
           <button
             onClick={() => {
               triggerHaptic('light');
               setMenuOpen(!menuOpen);
             }}
             title="More Sections"
-            className={`pointer-events-auto relative flex items-center justify-center w-14 h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
+            className={`relative flex items-center justify-center w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
               menuOpen
                 ? 'bg-accent/25 dark:bg-accent/35 border border-accent/60 text-accent shadow-md shadow-accent/25 rotate-90 scale-[1.04]'
                 : isSecondaryActive
                 ? 'bg-accent/15 dark:bg-accent/25 border border-accent/50 text-accent shadow-md shadow-accent/20 scale-[1.04]'
-                : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
+                : 'bg-surface-light dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.25)] hover:border-accent/40'
             }`}
           >
             {menuOpen ? (
@@ -254,7 +253,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
             )}
           </button>
         </div>
-      </div>
+      </nav>
 
     </div>
   );
