@@ -49,13 +49,41 @@ function AnimatedPage({ children }: { children: React.ReactNode }) {
 function App() {
   const { theme, setTheme, accentColor, setAccentColor, mounted } = useTheme();
   
-  const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  // Instantly hydrate cached user from localStorage for zero startup delay
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const cached = localStorage.getItem('lifeos_cached_auth_user');
+      return cached ? (JSON.parse(cached) as User) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [authLoading, setAuthLoading] = useState(() => {
+    try {
+      return !localStorage.getItem('lifeos_cached_auth_user');
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
+      try {
+        if (currentUser) {
+          localStorage.setItem('lifeos_cached_auth_user', JSON.stringify({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL,
+          }));
+        } else {
+          localStorage.removeItem('lifeos_cached_auth_user');
+        }
+      } catch {
+        // quota exceeded
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -93,7 +121,7 @@ function App() {
     };
   }, [location.pathname, navigate]);
 
-  if (!mounted || authLoading || (user && (dataLoading || !data))) {
+  if (!mounted || (authLoading && !user) || (user && !data)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />

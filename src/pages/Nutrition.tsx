@@ -21,16 +21,21 @@ const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: strin
   { slot: 'nightCanteen', label: 'Night Canteen', icon: <Moon size={16} className="text-purple-500" />, time: '10:30 PM–12:30 AM', dotColor: 'bg-purple-400' },
 ];
 
-const getCurrentMealSlot = (): MealSlot => {
-  const hour = new Date().getHours();
-  const minute = new Date().getMinutes();
-  const totalMin = hour * 60 + minute;
-  // 10:30 PM (1350 mins) to 12:30 AM (30 mins)
-  if (totalMin >= 1350 || totalMin < 30) return 'nightCanteen';
-  if (totalMin < 630) return 'breakfast';
-  if (totalMin < 930) return 'lunch';
-  if (totalMin < 1110) return 'snacks';
-  return 'dinner';
+// Returns active meal slot ONLY during active mess hours; otherwise returns null (closed)
+const getActiveMessTimeSlot = (): MealSlot | null => {
+  const now = new Date();
+  const totalMin = now.getHours() * 60 + now.getMinutes();
+  // Breakfast: 7:30 AM – 9:45 AM (450 – 585 mins)
+  if (totalMin >= 450 && totalMin <= 585) return 'breakfast';
+  // Lunch: 12:15 PM – 2:45 PM (735 – 885 mins)
+  if (totalMin >= 735 && totalMin <= 885) return 'lunch';
+  // Snacks: 4:15 PM – 6:15 PM (975 – 1095 mins)
+  if (totalMin >= 975 && totalMin <= 1095) return 'snacks';
+  // Dinner: 7:15 PM – 9:30 PM (1155 – 1290 mins)
+  if (totalMin >= 1155 && totalMin <= 1290) return 'dinner';
+  // Night Canteen: 10:30 PM – 12:30 AM (1350 – 1440 or 0 – 30 mins)
+  if (totalMin >= 1350 || totalMin <= 30) return 'nightCanteen';
+  return null;
 };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -57,8 +62,16 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
 
-  // Auto-expand current meal slot based on time
-  const [expanded, setExpanded] = useState<MealSlot | null>(getCurrentMealSlot);
+  // Auto-expand current meal slot ONLY when mess time is active and it hasn't been saved yet
+  const [expanded, setExpanded] = useState<MealSlot | null>(() => {
+    const todayLog = (data.nutritionLogs || []).find(l => l.date === todayStr);
+    if (todayLog?.isSaved) return null;
+    const activeSlot = getActiveMessTimeSlot();
+    if (!activeSlot) return null;
+    const slotLog = todayLog?.mealsEaten?.find(m => m.slot === activeSlot);
+    if (slotLog && slotLog.items && slotLog.items.length > 0) return null;
+    return activeSlot;
+  });
   const [showSavedFeedback, setShowSavedFeedback] = useState(false);
 
   // Food Doubt State (AI Can I eat this?)
@@ -132,7 +145,12 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       });
       setIsLocked(false);
     }
-  }, [selectedDate, data.nutritionLogs]);
+
+    // Always close enlarged state when viewing other days or if day is already saved
+    if (selectedDate !== todayStr || log?.isSaved) {
+      setExpanded(null);
+    }
+  }, [selectedDate, data.nutritionLogs, todayStr]);
 
   const targetCals = data.profile?.currentCalorieTarget || 2000;
   const totalConsumed = draftLog.dailyTotal;
@@ -391,6 +409,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     const finalLog = { ...draftLog, date: selectedDate, isSaved: true };
     setDraftLog(finalLog);
     setIsLocked(true);
+    setExpanded(null); // Close enlarged state so it doesn't stay open after saving
 
     setShowSavedFeedback(true);
     setTimeout(() => setShowSavedFeedback(false), 2000);

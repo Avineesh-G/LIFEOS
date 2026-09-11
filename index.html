@@ -23,25 +23,6 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-  <script>
-    try {
-      localStorage.removeItem('lifeos_live_sync');
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          for (const reg of registrations) {
-            reg.unregister();
-          }
-        }).catch(() => {});
-      }
-      if ('caches' in window) {
-        caches.keys().then((keys) => {
-          for (const key of keys) {
-            caches.delete(key);
-          }
-        }).catch(() => {});
-      }
-    } catch (e) {}
-  </script>
 </body>
 
 </html>

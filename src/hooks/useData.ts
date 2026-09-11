@@ -9,9 +9,18 @@ const CACHE_KEY_PREFIX = 'lifeos_cache_';
 
 export function useData(user: User | null) {
   const [data, setData] = useState<AppData | null>(() => {
-    if (!user) return null;
+    let uid = user?.uid;
+    if (!uid) {
+      try {
+        const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
+        if (cachedUser) {
+          uid = JSON.parse(cachedUser)?.uid;
+        }
+      } catch {}
+    }
+    if (!uid) return null;
     try {
-      const cached = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
+      const cached = localStorage.getItem(CACHE_KEY_PREFIX + uid);
       if (cached) {
         return sanitizeAppData(JSON.parse(cached));
       }

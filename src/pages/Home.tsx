@@ -253,11 +253,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div className="flex items-center gap-2 flex-shrink-0">
             {!isToday(selectedDate) && (
               <button
-                onPointerDown={() => triggerHaptic('light')}
-                onClick={() => {
-                  triggerHaptic('nav');
-                  setSelectedDate(startOfDay(new Date()));
-                }}
+                onClick={() => setSelectedDate(startOfDay(new Date()))}
                 className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-primary-light dark:text-primary-dark hover:bg-neutral-200 dark:hover:bg-neutral-700 active:scale-95 transition-all"
               >
                 Today
@@ -287,11 +283,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             return (
               <button
                 key={d.toISOString()}
-                onPointerDown={() => triggerHaptic('light')}
-                onClick={() => {
-                  triggerHaptic('nav');
-                  setSelectedDate(d);
-                }}
+                onClick={() => setSelectedDate(d)}
                 className={`flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all relative ${
                   isSel
                     ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.03]'
@@ -477,7 +469,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                           className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
                         >
                           <button
-                            onPointerDown={() => triggerHaptic('light')}
                             onClick={() => handleToggleTask(task.id)}
                             className="w-4 h-4 rounded-[6px] border-2 border-neutral-300 dark:border-neutral-600 flex items-center justify-center flex-shrink-0 hover:border-accent transition-colors"
                           />
@@ -631,7 +622,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* 1. Study Card (Soft Lavender) */}
         <motion.button
           whileTap={{ scale: 0.975 }}
-          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/study')}
           className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-lavender-container dark:bg-m3-lavender-darkContainer border border-m3-lavender-badge/50 dark:border-m3-lavender-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
@@ -664,7 +654,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* 2. Gym Card (Fresh Pistachio Mint) */}
         <motion.button
           whileTap={{ scale: 0.975 }}
-          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/gym')}
           className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-mint-container dark:bg-m3-mint-darkContainer border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
@@ -704,7 +693,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* 3. Spending Card (Warm Peach) */}
         <motion.button
           whileTap={{ scale: 0.975 }}
-          onPointerDown={() => triggerHaptic('light')}
           onClick={() => navigate('/spending')}
           className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-peach-container dark:bg-m3-peach-darkContainer border border-m3-peach-badge/50 dark:border-m3-peach-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
@@ -736,7 +724,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* 4. Next Up / Timetable Card (Soft Rose) */}
         <motion.button
           whileTap={{ scale: 0.975 }}
-          onPointerDown={() => triggerHaptic('light')}
           onClick={() => nextBlock ? navigate('/study/timer') : navigate('/timetable')}
           className="rounded-[28px] p-5 sm:p-6 text-left bg-m3-rose-container dark:bg-m3-rose-darkContainer border border-m3-rose-badge/50 dark:border-m3-rose-darkBadge/50 shadow-m3-subtle flex flex-col justify-between group transition-all"
         >
