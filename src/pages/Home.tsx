@@ -1,14 +1,28 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Dumbbell, Wallet, Clock, ChevronRight, Calendar, ArrowUpRight, Sparkles, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
-import { motion } from 'framer-motion';
+import { 
+  BookOpen, 
+  Dumbbell, 
+  Wallet, 
+  Clock, 
+  ChevronRight, 
+  Calendar, 
+  ArrowUpRight, 
+  Sparkles, 
+  CheckCircle2, 
+  Check, 
+  CalendarDays,
+  Plus
+} from 'lucide-react';
+import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startOfDay } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 
 interface HomeProps {
   data: AppData;
   refresh?: () => Promise<AppData>;
+  updateData?: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
 const container = {
@@ -21,11 +35,20 @@ const item = {
   show:   { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
 };
 
-export default function Home({ data, refresh }: HomeProps) {
+export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
   const now = new Date();
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
+
+  // ── Selected Date State (Defaults to Today) ──
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+
+  // 7-day rolling window centered on today: 3 past, today, 3 future
+  const weekDays = useMemo(() => {
+    const today = startOfDay(new Date());
+    return [-3, -2, -1, 0, 1, 2, 3].map(offset => addDays(today, offset));
+  }, []);
 
   const handleManualSync = async () => {
     if (!refresh || syncing) return;
@@ -43,6 +66,87 @@ export default function Home({ data, refresh }: HomeProps) {
     }
   };
 
+  // ── Selected Date Data Calculations ──
+  const selectedDateData = useMemo(() => {
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    const dayOfWeek = format(selectedDate, 'EEEE');
+    const isSelPast = isBefore(selectedDate, startOfDay(new Date()));
+    const isSelToday = isToday(selectedDate);
+    const isSelFuture = isAfter(selectedDate, startOfDay(new Date()));
+
+    // Study
+    const sessions = (data.studySessions || []).filter(s => s.date === dateStr);
+    const studyMinutes = sessions.reduce((sum, s) => sum + s.duration, 0);
+    const studyHours = Math.floor(studyMinutes / 60);
+    const studyMins = studyMinutes % 60;
+
+    // Gym
+    const workoutLog = (data.workoutLogs || []).find(w => w.date === dateStr);
+    const dayMap: Record<string, string> = {
+      Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
+      Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
+    };
+    const plannedWorkout = (data.workoutPlans || []).find(p => dayMap[p.day] === dayOfWeek);
+
+    // Expenses
+    const expenses = (data.expenses || []).filter(e => e.date === dateStr);
+    const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    // Tasks
+    const tasks = (data.tasks || []).filter(t => t.date === dateStr);
+    const completedTasks = tasks.filter(t => t.completed);
+    const pendingTasks = tasks.filter(t => !t.completed);
+
+    // Timetable
+    const timetableBlocks = (data.timetable || [])
+      .filter(b => b.day === dayOfWeek)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    const nowTimeStr = format(new Date(), 'HH:mm');
+    const nextBlockToday = isSelToday
+      ? timetableBlocks.find(b => b.startTime > nowTimeStr) || null
+      : null;
+
+    return {
+      dateStr,
+      dayOfWeek,
+      isSelPast,
+      isSelToday,
+      isSelFuture,
+      sessions,
+      studyMinutes,
+      studyHours,
+      studyMins,
+      workoutLog,
+      plannedWorkout,
+      expenses,
+      totalSpent,
+      tasks,
+      completedTasks,
+      pendingTasks,
+      timetableBlocks,
+      nextBlockToday,
+    };
+  }, [selectedDate, data]);
+
+  // Micro dot indicators for each day
+  const getDayDots = (d: Date) => {
+    const dStr = format(d, 'yyyy-MM-dd');
+    const hasStudy = (data.studySessions || []).some(s => s.date === dStr && s.duration > 0);
+    const hasGym = (data.workoutLogs || []).some(w => w.date === dStr);
+    const hasTasks = (data.tasks || []).some(t => t.date === dStr && t.completed);
+    const hasExpense = (data.expenses || []).some(e => e.date === dStr);
+    return { hasStudy, hasGym, hasTasks, hasExpense };
+  };
+
+  const handleToggleTask = async (taskId: string) => {
+    if (!updateData) return;
+    triggerHaptic('medium');
+    const updated = (data.tasks || []).map(t => t.id === taskId ? { ...t, completed: !t.completed } : t);
+    await updateData({ tasks: updated });
+  };
+
+  // ── Today Stats for 2x2 cards below ──
   const {
     todaySessions,
     todayStudyHours,
@@ -54,48 +158,31 @@ export default function Home({ data, refresh }: HomeProps) {
     todayTasks,
     completedTasks,
     nextBlock,
-    studyScore,
-    gymScore,
-    taskScore,
-    spendScore,
-    dayScore,
   } = useMemo(() => {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const nowDate = new Date();
 
-    // ── Study ──
-    const todaySessions = data.studySessions.filter(s => s.date === todayStr);
+    const todaySessions = (data.studySessions || []).filter(s => s.date === todayStr);
     const todayStudyMinutes = todaySessions.reduce((sum, s) => sum + s.duration, 0);
     const studyHours = Math.floor(todayStudyMinutes / 60);
     const studyMins = todayStudyMinutes % 60;
 
-    // ── Gym ──
-    const workout = data.workoutLogs.find(w => w.date === todayStr);
+    const workout = (data.workoutLogs || []).find(w => w.date === todayStr);
     const dayMap: Record<string, string> = {
       Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
       Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
     };
-    const plan = data.workoutPlans.find(p => dayMap[p.day] === format(nowDate, 'EEEE'));
+    const plan = (data.workoutPlans || []).find(p => dayMap[p.day] === format(nowDate, 'EEEE'));
 
-    // ── Spending ──
-    const todayExpenses = data.expenses.filter(e => e.date === todayStr);
+    const todayExpenses = (data.expenses || []).filter(e => e.date === todayStr);
     const spent = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-    // ── Tasks ──
-    const tasks = data.tasks.filter(t => t.date === todayStr);
+    const tasks = (data.tasks || []).filter(t => t.date === todayStr);
     const completed = tasks.filter(t => t.completed).length;
 
-    // ── Next timetable block ──
-    const next = data.timetable
+    const next = (data.timetable || [])
       .filter(b => b.day === format(nowDate, 'EEEE') && b.startTime > format(nowDate, 'HH:mm'))
       .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
-
-    // ── Day score (4 pillars × 25) ──
-    const studyScore = Math.min(25, (todayStudyMinutes / 120) * 25);
-    const gymScore = workout ? 25 : 0;
-    const taskScore = tasks.length > 0 ? (completed / tasks.length) * 25 : 0;
-    const spendScore = todayExpenses.length > 0 ? 25 : 0;
-    const score = Math.round(studyScore + gymScore + taskScore + spendScore);
 
     return {
       todaySessions,
@@ -108,22 +195,8 @@ export default function Home({ data, refresh }: HomeProps) {
       todayTasks: tasks,
       completedTasks: completed,
       nextBlock: next,
-      studyScore,
-      gymScore,
-      taskScore,
-      spendScore,
-      dayScore: score,
     };
   }, [data]);
-
-  // Dynamic Status Badge
-  const getScoreBadge = () => {
-    if (dayScore >= 80) return { label: 'Optimal Pace', color: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' };
-    if (dayScore >= 50) return { label: 'On Track', color: 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300' };
-    if (dayScore >= 25) return { label: 'Building Up', color: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300' };
-    return { label: 'Starting Day', color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300' };
-  };
-  const scoreBadge = getScoreBadge();
 
   // Greeting
   const h = now.getHours();
@@ -131,10 +204,6 @@ export default function Home({ data, refresh }: HomeProps) {
   if (h < 12) greetWord = 'Morning';
   else if (h === 12) greetWord = 'Noon';
   else if (h < 17) greetWord = 'Afternoon';
-
-  // Arc Gauge Constants (radius 76, arc length ≈ 238.76)
-  const arcLength = 238.76;
-  const strokeOffset = arcLength * (1 - Math.min(100, Math.max(0, dayScore)) / 100);
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
@@ -154,98 +223,406 @@ export default function Home({ data, refresh }: HomeProps) {
         </h1>
       </motion.div>
 
-      {/* ── M3 Expressive Day Score Card ── */}
+      {/* ── Option 1: Interactive 7-Day Dynamic Strip ── */}
       <motion.div
         variants={item}
-        className="rounded-[32px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle relative overflow-hidden"
+        className="rounded-[32px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle relative overflow-hidden"
       >
-        {/* Card Header Row */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className="text-xs font-bold tracking-wider text-muted-light dark:text-muted-dark uppercase block">
-              Daily Progress
-            </span>
-            <span className="text-xs text-secondary-light dark:text-secondary-dark font-medium">
-              Overall execution balance
-            </span>
-          </div>
-          <span className={`px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-sm ${scoreBadge.color}`}>
-            {scoreBadge.label}
-          </span>
-        </div>
-
-        {/* Semi-Circle Arc Gauge */}
-        <div className="relative flex flex-col items-center justify-center my-2">
-          <svg className="w-56 h-32 overflow-visible" viewBox="0 0 200 115">
-            <defs>
-              <linearGradient id="m3ScoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#818CF8" />
-                <stop offset="50%" stopColor="#6366F1" />
-                <stop offset="100%" stopColor="#4F46E5" />
-              </linearGradient>
-            </defs>
-            {/* Background Track */}
-            <path
-              d="M 24 100 A 76 76 0 0 1 176 100"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="14"
-              strokeLinecap="round"
-              className="text-neutral-100 dark:text-neutral-800"
-            />
-            {/* Active Filled Track */}
-            <path
-              d="M 24 100 A 76 76 0 0 1 176 100"
-              fill="none"
-              stroke="url(#m3ScoreGradient)"
-              strokeWidth="14"
-              strokeLinecap="round"
-              strokeDasharray={arcLength}
-              strokeDashoffset={strokeOffset}
-              style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}
-            />
-          </svg>
-
-          {/* Central Score Typography */}
-          <div className="absolute bottom-1 flex flex-col items-center">
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl sm:text-5xl font-extrabold font-mono tracking-tight text-primary-light dark:text-primary-dark">
-                {dayScore}
-              </span>
-              <span className="text-base font-semibold text-muted-light dark:text-muted-dark font-mono">
-                /100
-              </span>
+        {/* Header Row */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center text-accent flex-shrink-0">
+              <CalendarDays size={16} strokeWidth={2.2} />
             </div>
-            <span className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
-              Target Index
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+                {isToday(selectedDate)
+                  ? 'Today'
+                  : isSameDay(selectedDate, subDays(new Date(), 1))
+                  ? 'Yesterday'
+                  : isSameDay(selectedDate, addDays(new Date(), 1))
+                  ? 'Tomorrow'
+                  : format(selectedDate, 'EEEE')}
+              </h2>
+              <p className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                {format(selectedDate, 'MMMM d, yyyy')}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {!isToday(selectedDate) && (
+              <button
+                onPointerDown={() => triggerHaptic('light')}
+                onClick={() => {
+                  triggerHaptic('nav');
+                  setSelectedDate(startOfDay(new Date()));
+                }}
+                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-primary-light dark:text-primary-dark hover:bg-neutral-200 dark:hover:bg-neutral-700 active:scale-95 transition-all"
+              >
+                Today
+              </button>
+            )}
+            <span
+              className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${
+                selectedDateData.isSelToday
+                  ? 'bg-accent/15 dark:bg-accent/25 text-accent'
+                  : selectedDateData.isSelPast
+                  ? 'bg-neutral-100 dark:bg-neutral-800 text-secondary-light dark:text-secondary-dark'
+                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+              }`}
+            >
+              {selectedDateData.isSelToday ? 'Live Today' : selectedDateData.isSelPast ? 'Completed' : 'Upcoming'}
             </span>
           </div>
         </div>
 
-        {/* 4 Pillars Chunky Segment Indicators */}
-        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-border-light/40 dark:border-border-dark/40">
-          {[
-            { label: 'Study', score: Math.round(studyScore), max: 25, color: 'bg-indigo-500' },
-            { label: 'Gym', score: Math.round(gymScore), max: 25, color: 'bg-emerald-500' },
-            { label: 'Tasks', score: Math.round(taskScore), max: 25, color: 'bg-purple-500' },
-            { label: 'Money', score: Math.round(spendScore), max: 25, color: 'bg-amber-500' },
-          ].map((col) => (
-            <div key={col.label} className="flex flex-col items-center text-center">
-              <span className="text-[10px] font-mono font-semibold uppercase text-secondary-light dark:text-secondary-dark mb-1">
-                {col.label}
-              </span>
-              <div className="w-full h-2 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden mb-1">
-                <div
-                  className={`h-full rounded-full ${col.color} transition-all duration-500`}
-                  style={{ width: `${Math.round((col.score / col.max) * 100)}%` }}
-                />
+        {/* 7-Day Interactive Horizontal Strip */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4">
+          {weekDays.map((d) => {
+            const isSel = isSameDay(d, selectedDate);
+            const isCur = isToday(d);
+            const dots = getDayDots(d);
+
+            return (
+              <button
+                key={d.toISOString()}
+                onPointerDown={() => triggerHaptic('light')}
+                onClick={() => {
+                  triggerHaptic('nav');
+                  setSelectedDate(d);
+                }}
+                className={`flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all relative ${
+                  isSel
+                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.03]'
+                    : isCur
+                    ? 'bg-accent/10 dark:bg-accent/15 text-accent font-bold border border-accent/40'
+                    : 'bg-neutral-50/80 dark:bg-neutral-800/40 text-secondary-light dark:text-secondary-dark border border-neutral-100/80 dark:border-neutral-800/60 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                <span className={`text-[10px] sm:text-[11px] font-medium tracking-tight ${
+                  isSel ? 'text-white/90' : isCur ? 'text-accent font-bold' : 'text-muted-light dark:text-muted-dark'
+                }`}>
+                  {format(d, 'EEE')}
+                </span>
+
+                <span className={`text-sm sm:text-base font-bold my-0.5 ${
+                  isSel ? 'text-white' : isCur ? 'text-accent' : 'text-primary-light dark:text-primary-dark'
+                }`}>
+                  {format(d, 'd')}
+                </span>
+
+                {/* Micro Achievement Dots */}
+                <div className="flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
+                  {dots.hasStudy && (
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-indigo-500'}`} />
+                  )}
+                  {dots.hasGym && (
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-emerald-500'}`} />
+                  )}
+                  {dots.hasTasks && (
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-purple-500'}`} />
+                  )}
+                  {dots.hasExpense && (
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-amber-500'}`} />
+                  )}
+                  {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
+                    <span className="w-1 h-1 rounded-full opacity-0" />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Day Insights Area */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedDateData.dateStr}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-3.5 pt-1"
+          >
+            {/* ── 1. WHAT WAS DONE / ACCOMPLISHED ── */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                  {selectedDateData.isSelPast ? 'Accomplished on this day' : selectedDateData.isSelToday ? 'Accomplished so far' : 'Expected focus'}
+                </span>
+                <span className="text-[10px] font-mono font-semibold text-secondary-light dark:text-secondary-dark">
+                  {selectedDateData.dayOfWeek}
+                </span>
               </div>
-              <span className="text-[10px] font-mono font-medium text-muted-light dark:text-muted-dark">
-                {col.score}/{col.max}
-              </span>
+
+              {/* 4 Pillars Mini Grid */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                {/* Study Pillar */}
+                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-[12px] bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                    <BookOpen size={16} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                      {selectedDateData.studyMinutes > 0 
+                        ? `${selectedDateData.studyHours}h ${selectedDateData.studyMins}m`
+                        : selectedDateData.isSelFuture ? 'Scheduled' : '0m logged'}
+                    </p>
+                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                      {selectedDateData.sessions.length > 0 
+                        ? `${selectedDateData.sessions.length} session${selectedDateData.sessions.length !== 1 ? 's' : ''}` 
+                        : 'Study Time'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Gym Pillar */}
+                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-[12px] bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                    <Dumbbell size={16} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                      {selectedDateData.workoutLog 
+                        ? (selectedDateData.workoutLog.type || 'Completed') 
+                        : (selectedDateData.plannedWorkout?.type || 'Rest Day')}
+                    </p>
+                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                      {selectedDateData.workoutLog 
+                        ? 'Workout Done' 
+                        : selectedDateData.plannedWorkout?.type ? 'Split Planned' : 'Recovery'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tasks Pillar */}
+                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-[12px] bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
+                    <CheckCircle2 size={16} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                      {selectedDateData.tasks.length > 0 
+                        ? `${selectedDateData.completedTasks.length}/${selectedDateData.tasks.length} Done`
+                        : '0 Tasks'}
+                    </p>
+                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                      {selectedDateData.pendingTasks.length > 0 
+                        ? `${selectedDateData.pendingTasks.length} pending` 
+                        : selectedDateData.tasks.length > 0 ? 'All finished' : 'No tasks'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Spending Pillar */}
+                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-[12px] bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
+                    <Wallet size={16} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                      ₹{selectedDateData.totalSpent.toLocaleString('en-IN')}
+                    </p>
+                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                      {selectedDateData.expenses.length > 0 
+                        ? `${selectedDateData.expenses.length} record${selectedDateData.expenses.length !== 1 ? 's' : ''}` 
+                        : 'Spending'}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* ── 2. WHAT'S THERE TO DO / UPCOMING SCHEDULE ── */}
+            <div className="pt-2.5 border-t border-border-light/40 dark:border-border-dark/40">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                  {selectedDateData.isSelPast ? 'Completed Task Log' : selectedDateData.isSelToday ? 'Up next / There to do' : 'Scheduled Plan & Timetable'}
+                </span>
+                <span className="text-[10px] font-mono font-semibold text-accent">
+                  {selectedDateData.isSelToday ? 'Active' : selectedDateData.isSelPast ? 'Archived' : 'Upcoming'}
+                </span>
+              </div>
+
+              {/* A: If Today, show Next Class + Pending Tasks */}
+              {selectedDateData.isSelToday && (
+                <div className="space-y-2">
+                  {selectedDateData.nextBlockToday && (
+                    <div 
+                      onClick={() => navigate('/timetable')}
+                      className="p-3 rounded-[18px] bg-m3-rose-container/50 dark:bg-m3-rose-darkContainer/50 border border-m3-rose-badge/40 flex items-center justify-between gap-2 cursor-pointer active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Clock size={16} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                            Next Class: {selectedDateData.nextBlockToday.subject}
+                          </p>
+                          <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                            {selectedDateData.nextBlockToday.startTime} – {selectedDateData.nextBlockToday.endTime}
+                            {selectedDateData.nextBlockToday.room ? ` • Room ${selectedDateData.nextBlockToday.room}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={14} className="text-secondary-light dark:text-secondary-dark flex-shrink-0" />
+                    </div>
+                  )}
+
+                  {selectedDateData.pendingTasks.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {selectedDateData.pendingTasks.slice(0, 3).map(task => (
+                        <div
+                          key={task.id}
+                          className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
+                        >
+                          <button
+                            onPointerDown={() => triggerHaptic('light')}
+                            onClick={() => handleToggleTask(task.id)}
+                            className="w-4 h-4 rounded-[6px] border-2 border-neutral-300 dark:border-neutral-600 flex items-center justify-center flex-shrink-0 hover:border-accent transition-colors"
+                          />
+                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1 min-w-0">
+                            {task.text}
+                          </span>
+                          {task.subtask && (
+                            <span className="text-[10px] text-muted-light dark:text-muted-dark truncate flex-shrink-0">
+                              {task.subtask}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {selectedDateData.pendingTasks.length > 3 && (
+                        <button
+                          onClick={() => navigate('/tasks')}
+                          className="text-[11px] font-semibold text-accent hover:underline block text-center w-full py-1"
+                        >
+                          +{selectedDateData.pendingTasks.length - 3} more tasks to do
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-[18px] bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/50 text-center">
+                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                        {selectedDateData.tasks.length > 0 
+                          ? '🎉 All tasks completed for today!' 
+                          : 'No pending tasks for today · All clear'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* B: If Past Day, show completed summary */}
+              {selectedDateData.isSelPast && (
+                <div className="space-y-2">
+                  {selectedDateData.completedTasks.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {selectedDateData.completedTasks.slice(0, 3).map(task => (
+                        <div
+                          key={task.id}
+                          className="flex items-center gap-2.5 p-2 rounded-[16px] bg-neutral-50/60 dark:bg-neutral-800/30 border border-neutral-100 dark:border-neutral-800/40"
+                        >
+                          <div className="w-4 h-4 rounded-[6px] bg-accent text-white flex items-center justify-center flex-shrink-0">
+                            <Check size={10} strokeWidth={2.5} />
+                          </div>
+                          <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark line-through truncate flex-1 min-w-0">
+                            {task.text}
+                          </span>
+                        </div>
+                      ))}
+                      {selectedDateData.completedTasks.length > 3 && (
+                        <p className="text-[11px] text-secondary-light dark:text-secondary-dark text-center">
+                          +{selectedDateData.completedTasks.length - 3} other tasks completed
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-[18px] bg-neutral-50/70 dark:bg-neutral-800/40 text-center border border-neutral-100 dark:border-neutral-800/60">
+                      <p className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
+                        {selectedDateData.studyMinutes > 0 || selectedDateData.workoutLog
+                          ? 'Day archived with core habits logged.'
+                          : 'No tasks or logs recorded for this day.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* C: If Future Day, show Scheduled Split & Classes */}
+              {selectedDateData.isSelFuture && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div 
+                      onClick={() => navigate('/gym')}
+                      className="p-3 rounded-[18px] bg-m3-mint-container/40 dark:bg-m3-mint-darkContainer/40 border border-m3-mint-badge/40 cursor-pointer active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Dumbbell size={14} className="text-m3-mint-text dark:text-m3-mint-darkText flex-shrink-0" />
+                        <span className="text-[10px] font-mono uppercase font-bold text-m3-mint-text dark:text-m3-mint-darkText">
+                          Split Planned
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                        {selectedDateData.plannedWorkout?.type || 'Rest Day'}
+                      </p>
+                      <p className="text-[10px] text-secondary-light dark:text-secondary-dark truncate">
+                        {selectedDateData.plannedWorkout ? `${(selectedDateData.plannedWorkout.exercises || []).length} exercises in queue` : 'Recovery day'}
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => navigate('/timetable')}
+                      className="p-3 rounded-[18px] bg-m3-rose-container/40 dark:bg-m3-rose-darkContainer/40 border border-m3-rose-badge/40 cursor-pointer active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Clock size={14} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
+                        <span className="text-[10px] font-mono uppercase font-bold text-m3-rose-text dark:text-m3-rose-darkText">
+                          Timetable
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                        {selectedDateData.timetableBlocks.length > 0 
+                          ? `${selectedDateData.timetableBlocks.length} Class${selectedDateData.timetableBlocks.length !== 1 ? 'es' : ''}`
+                          : 'No Classes'}
+                      </p>
+                      <p className="text-[10px] text-secondary-light dark:text-secondary-dark truncate">
+                        {selectedDateData.timetableBlocks.length > 0 
+                          ? selectedDateData.timetableBlocks.map(b => b.subject).slice(0, 2).join(', ')
+                          : 'Free Schedule'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Future Tasks if scheduled */}
+                  {selectedDateData.tasks.length > 0 ? (
+                    <div className="space-y-1.5 mt-2">
+                      {selectedDateData.tasks.map(task => (
+                        <div
+                          key={task.id}
+                          className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
+                        >
+                          <div className="w-4 h-4 rounded-[6px] border-2 border-neutral-300 dark:border-neutral-600 flex-shrink-0" />
+                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1 min-w-0">
+                            {task.text}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => navigate('/tasks')}
+                      className="w-full py-2.5 px-3 rounded-[16px] border border-dashed border-border-light dark:border-border-dark flex items-center justify-center gap-1.5 text-xs font-semibold text-secondary-light dark:text-secondary-dark hover:text-accent hover:border-accent transition-colors"
+                    >
+                      <Plus size={13} />
+                      Plan task for {format(selectedDate, 'EEE, MMM d')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
 
       {/* ── 2×2 Tonal Expressive Cards ── */}
