@@ -7,6 +7,8 @@ import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [unauthorizedDomain, setUnauthorizedDomain] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -20,6 +22,7 @@ export default function Auth() {
 
   const handleGoogleSignIn = async () => {
     setError('');
+    setUnauthorizedDomain(false);
     setLoading(true);
     try {
       if (Capacitor.isNativePlatform()) {
@@ -35,12 +38,20 @@ export default function Auth() {
         await signInWithPopup(auth, provider);
       }
     } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user' && err.message !== 'The user canceled the sign-in flow.') {
+      if (err.code === 'auth/unauthorized-domain' || err.message?.includes('unauthorized-domain')) {
+        setUnauthorizedDomain(true);
+      } else if (err.code !== 'auth/popup-closed-by-user' && err.message !== 'The user canceled the sign-in flow.') {
         setError(err.message || 'Sign-in failed. Please try again.');
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyDomain = () => {
+    navigator.clipboard.writeText(window.location.hostname);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -72,8 +83,37 @@ export default function Auth() {
             Sign in with your Google account to seamlessly sync your gym, study, tasks, and nutrition across all your devices.
           </p>
 
-          {/* Error */}
-          {error && (
+          {/* Unauthorized Domain Error Notice */}
+          {unauthorizedDomain && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/25 rounded-[20px] text-amber-900 dark:text-amber-200 text-xs space-y-2.5">
+              <div className="font-bold flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                <span>⚠️</span> Domain Not Authorized in Firebase
+              </div>
+              <p className="leading-relaxed opacity-90">
+                To sign in on the web, please add this domain to your Firebase Authorized Domains:
+              </p>
+              <div className="flex items-center justify-between gap-2 p-2 bg-black/5 dark:bg-white/5 rounded-xl border border-black/10 dark:border-white/10 font-mono text-[11px] select-all">
+                <span className="truncate">{typeof window !== 'undefined' ? window.location.hostname : 'lifeos-gujjeti-avineeshs-projects.vercel.app'}</span>
+                <button
+                  onClick={handleCopyDomain}
+                  className="px-2.5 py-1 bg-amber-600 text-white rounded-lg font-sans font-bold text-[10px] hover:opacity-90 active:scale-95 shrink-0 shadow-sm"
+                >
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              <a
+                href="https://console.firebase.google.com/project/lifeos-f4de3/authentication/settings"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-bold text-accent hover:underline text-[11px] pt-0.5"
+              >
+                Open Firebase Console &rarr;
+              </a>
+            </div>
+          )}
+
+          {/* Generic Error */}
+          {error && !unauthorizedDomain && (
             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-[18px] text-red-600 dark:text-red-400 text-xs text-center font-bold">
               {error}
             </div>
