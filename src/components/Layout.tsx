@@ -80,8 +80,14 @@ export default function Layout({ children, refresh }: LayoutProps) {
         await refresh();
       }
 
-      // 4. Force browser/webview reload from Vercel
-      window.location.reload();
+      // 4. Force browser/webview reload from Vercel with cache-busting timestamp
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('_t', Date.now().toString());
+        window.location.replace(url.toString());
+      } catch {
+        window.location.reload();
+      }
     } catch (err) {
       console.warn('Refresh error:', err);
       window.location.reload();

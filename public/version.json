@@ -1,7 +1,7 @@
 {
-  "versionCode": 10,
-  "versionName": "1.5.1",
+  "versionCode": 11,
+  "versionName": "1.5.2",
   "releaseDate": "2026-09-11",
-  "releaseNotes": "LifeOS v1.5.1 (Build 10): Pure Google Material 3 Expressive UI, rotating reload button, solid navigation dock, seamless in-app updates, and 60/120fps fluid responsiveness.",
+  "releaseNotes": "LifeOS v1.5.2 (Build 11): Floating squircle navigation bar with transparent background, centered version display, and live sync reload.",
   "apkUrl": "/LifeOS.apk"
 }
