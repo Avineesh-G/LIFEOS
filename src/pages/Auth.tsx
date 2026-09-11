@@ -1,14 +1,13 @@
 import { auth } from '../firebase';
-import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signInWithCredential, signInAnonymously } from 'firebase/auth';
 import { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState('');
-  const [unauthorizedDomain, setUnauthorizedDomain] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -22,7 +21,6 @@ export default function Auth() {
 
   const handleGoogleSignIn = async () => {
     setError('');
-    setUnauthorizedDomain(false);
     setLoading(true);
     try {
       if (Capacitor.isNativePlatform()) {
@@ -45,20 +43,26 @@ export default function Auth() {
         await signInWithPopup(auth, provider);
       }
     } catch (err: any) {
-      if (err.code === 'auth/unauthorized-domain' || err.message?.includes('unauthorized-domain')) {
-        setUnauthorizedDomain(true);
-      } else if (err.code !== 'auth/popup-closed-by-user' && err.message !== 'The user canceled the sign-in flow.') {
-        setError(err.message || 'Sign-in failed. Please try again.');
+      console.warn('Sign-in error:', err);
+      if (err.code !== 'auth/popup-closed-by-user' && !err.message?.includes('canceled') && !err.message?.includes('cancelled')) {
+        setError('Unable to sign in with Google. Please try again.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopyDomain = () => {
-    navigator.clipboard.writeText(window.location.hostname);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleGuestSignIn = async () => {
+    setError('');
+    setGuestLoading(true);
+    try {
+      await signInAnonymously(auth);
+    } catch (err: any) {
+      console.warn('Guest sign-in note:', err);
+      setError('Unable to sign in right now. Please try again.');
+    } finally {
+      setGuestLoading(false);
+    }
   };
 
   return (
@@ -90,38 +94,9 @@ export default function Auth() {
             Sign in with your Google account to seamlessly sync your gym, study, tasks, and nutrition across all your devices.
           </p>
 
-          {/* Unauthorized Domain Error Notice */}
-          {unauthorizedDomain && (
-            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/25 rounded-[20px] text-amber-900 dark:text-amber-200 text-xs space-y-2.5">
-              <div className="font-bold flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                <span>⚠️</span> Domain Not Authorized in Firebase
-              </div>
-              <p className="leading-relaxed opacity-90">
-                To sign in on the web, please add this domain to your Firebase Authorized Domains:
-              </p>
-              <div className="flex items-center justify-between gap-2 p-2 bg-black/5 dark:bg-white/5 rounded-xl border border-black/10 dark:border-white/10 font-mono text-[11px] select-all">
-                <span className="truncate">{typeof window !== 'undefined' ? window.location.hostname : 'lifeos-gujjeti-avineeshs-projects.vercel.app'}</span>
-                <button
-                  onClick={handleCopyDomain}
-                  className="px-2.5 py-1 bg-amber-600 text-white rounded-lg font-sans font-bold text-[10px] hover:opacity-90 active:scale-95 shrink-0 shadow-sm"
-                >
-                  {copied ? '✓ Copied' : 'Copy'}
-                </button>
-              </div>
-              <a
-                href="https://console.firebase.google.com/project/lifeos-f4de3/authentication/settings"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 font-bold text-accent hover:underline text-[11px] pt-0.5"
-              >
-                Open Firebase Console &rarr;
-              </a>
-            </div>
-          )}
-
-          {/* Generic Error */}
-          {error && !unauthorizedDomain && (
-            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-[18px] text-red-600 dark:text-red-400 text-xs text-center font-bold">
+          {/* Clean User-Friendly Error Alert */}
+          {error && (
+            <div className="mb-5 p-3.5 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 text-xs text-center font-medium">
               {error}
             </div>
           )}
@@ -129,7 +104,7 @@ export default function Auth() {
           {/* Google Sign-In Button */}
           <button
             onClick={handleGoogleSignIn}
-            disabled={loading}
+            disabled={loading || guestLoading}
             className="w-full flex items-center justify-center gap-3 bg-primary-light dark:bg-primary-dark hover:opacity-90 text-primary-dark dark:text-primary-light rounded-full px-5 py-3.5 font-bold text-sm transition-all disabled:opacity-50 active:scale-[0.97] shadow-sm font-sans"
           >
             {loading ? (
@@ -145,8 +120,20 @@ export default function Auth() {
             {loading ? 'Authenticating...' : 'Continue with Google'}
           </button>
 
+          {/* Continue as Guest Button */}
+          <button
+            onClick={handleGuestSignIn}
+            disabled={loading || guestLoading}
+            className="w-full mt-3 flex items-center justify-center gap-2 bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark rounded-full px-5 py-3 font-semibold text-xs transition-all active:scale-[0.97] border border-border-light dark:border-border-dark disabled:opacity-50"
+          >
+            {guestLoading ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <span>Continue as Guest</span>
+            )}
+          </button>
+
           <p className="mt-6 text-center text-xs text-muted-light dark:text-muted-dark leading-relaxed font-mono">
-            A Google account is required to use LifeOS.<br/>
             Your data is stored securely in your private cloud partition.
           </p>
         </div>
