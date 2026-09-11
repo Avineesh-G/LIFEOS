@@ -65,61 +65,12 @@
 
   /* Truly Fixed Ambient Background — Immovable on Mobile Scroll */
   body {
-    background-color: #F4F4FB;
+    background-color: #F8F9FA;
     min-height: 100vh;
   }
 
   .dark body {
     background-color: #121316;
-  }
-
-  /* Fixed Background Layer — Sits directly on <body> outside React DOM */
-  #bg-fixed-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100lvh;
-    background-image: url('/bg-m3.jpg');
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-    pointer-events: none;
-    z-index: -999;
-    opacity: 0.9;
-  }
-
-  /* Ambient Tint Layer */
-  #bg-tint-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100lvh;
-    background-color: rgba(244, 244, 251, 0.3);
-    pointer-events: none;
-    z-index: -998;
-  }
-
-  /* Dark mode background transitions */
-  .dark #bg-fixed-layer {
-    opacity: 0;
-  }
-
-  .dark #bg-tint-layer {
-    background-color: #121316;
-    background-image: 
-      radial-gradient(at 10% 15%, rgba(99, 102, 241, 0.14) 0px, transparent 50%),
-      radial-gradient(at 85% 10%, rgba(139, 92, 246, 0.10) 0px, transparent 50%),
-      radial-gradient(at 90% 85%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-      radial-gradient(at 15% 90%, rgba(167, 139, 250, 0.10) 0px, transparent 50%);
-    opacity: 1;
   }
 
   * {
