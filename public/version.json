@@ -1,7 +1,7 @@
 {
-  "versionCode": 11,
-  "versionName": "1.5.2",
-  "releaseDate": "2026-09-11",
-  "releaseNotes": "LifeOS v1.5.2 (Build 11): Floating squircle navigation bar with transparent background, centered version display, and live sync reload.",
+  "versionCode": 13,
+  "versionName": "1.5.3",
+  "releaseDate": "2026-09-12",
+  "releaseNotes": "LifeOS v1.5.3 (Build 13): Upgraded high-quota Groq AI models, rate limit protections, goal-tailored workout & nutrition engine, and fail-safe fallbacks.",
   "apkUrl": "/LifeOS.apk"
 }
