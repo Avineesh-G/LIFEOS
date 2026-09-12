@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar,
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, addDays, subDays } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
-import { getCoachTip, getDietAdvice, askFoodDoubt, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { FITNESS_GOALS } from '../utils/calculations';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
@@ -175,12 +175,11 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       setCoachAdvice(advice);
       triggerHaptic('success');
     } catch (err: any) {
-      console.error(err);
-      if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
-        setCoachAdvice({ error: "Please enter your Groq API Key in Settings to use the AI Coach." });
-      } else {
-        setCoachAdvice({ error: "Failed to load advice. Please try again." });
-      }
+      console.warn('[Nutrition] handleGetAdvice fallback triggered:', err);
+      const p = data.profile || { goalWeight: 70, currentCalorieTarget: 2000, fitnessGoal: 'weight_loss' };
+      const fallback = generateFallbackDietAdvice(todayMenu, p);
+      setCoachAdvice(fallback);
+      triggerHaptic('success');
     } finally {
       setFetchingAdvice(false);
     }
@@ -648,19 +647,25 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             {showCoach && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
                 <div className="card p-4 border border-emerald-500/30 bg-emerald-500/5 relative">
-                  <button onClick={() => setShowCoach(false)} className="absolute top-3 right-3 text-emerald-500/70 hover:text-emerald-500">
-                    <X size={16} />
-                  </button>
-                  <h3 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between gap-2 mb-3 text-sm">
-                    <span className="flex items-center gap-2">
-                      <Sparkles size={16} /> Personalized Advice
-                    </span>
-                    {activeGoalConfig && (
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                        {activeGoalConfig.label}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-sm">
+                        <Sparkles size={16} className="flex-shrink-0" /> Personalized Advice
                       </span>
-                    )}
-                  </h3>
+                      {activeGoalConfig && (
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
+                          {activeGoalConfig.label}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setShowCoach(false)}
+                      className="p-1 rounded-lg text-emerald-500/70 hover:text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-all flex-shrink-0"
+                      aria-label="Close advice"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
 
                   {fetchingAdvice ? (
                     <div className="flex flex-col items-center justify-center py-6 gap-3">

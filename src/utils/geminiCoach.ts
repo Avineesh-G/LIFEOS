@@ -2,12 +2,42 @@
 export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || '';
 // ──────────────────────────────────────────────────────────────────────────
 
+async function callGeminiDirect(prompt: string, apiKey: string, expectJson: boolean = false): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: expectJson ? 0.1 : 0.7,
+        ...(expectJson ? { responseMimeType: 'application/json' } : {})
+      }
+    })
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Gemini API Error: ${res.status} - ${txt}`);
+  }
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  if (!text) throw new Error('Empty response from Gemini');
+  return text.trim();
+}
+
 async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
   let activeKey = (apiKey && apiKey.trim()) || GEMINI_API_KEY;
-  if (!activeKey || !activeKey.trim()) throw new Error('NO_API_KEY');
+  if (!activeKey) throw new Error('NO_API_KEY');
+  activeKey = activeKey.replace(/^["']|["']$/g, '').trim();
+  if (!activeKey) throw new Error('NO_API_KEY');
   
   if (isPdf) {
     throw new Error('Groq API does not support direct PDF uploads. Please use the "Paste Text" option below.');
+  }
+
+  // Automatic provider routing: if user entered a Google Gemini API Key
+  if (activeKey.startsWith('AIza')) {
+    return await callGeminiDirect(prompt, activeKey, expectJson);
   }
 
   const messages: { role: string; content: string }[] = [];
@@ -36,12 +66,12 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
     });
   };
 
-  // Model waterfall — active supported models on Groq
+  // High rate-limit models first to ensure users never hit TPM/RPM quotas
   const MODELS = [
-    'qwen/qwen3.8-27b',
-    'qwen/qwen3.6-27b',
-    'openai/gpt-oss-120b',
-    'groq/compound-mini',
+    'llama-3.1-8b-instant',     // 500,000 TPM limit (virtually impossible to hit limit)
+    'llama-3.3-70b-versatile',  // High intelligence fallback
+    'gemma2-9b-it',             // High speed secondary fallback
+    'mixtral-8x7b-32768',       // Large context fallback
   ];
 
   let response: Response = null!;
@@ -52,7 +82,7 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
       response = await tryCall(MODELS[i], activeKey);
       if (response.ok) break; // success — stop waterfall
 
-      if (response.status === 401 && activeKey !== GEMINI_API_KEY) {
+      if (response.status === 401 && activeKey !== GEMINI_API_KEY && GEMINI_API_KEY) {
         // Custom key rejected — retry same model with default key
         activeKey = GEMINI_API_KEY;
         response = await tryCall(MODELS[i], activeKey);
@@ -60,33 +90,38 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
       }
 
       if (response.status === 429 || response.status === 503 || response.status === 404) {
-        // Rate limited or model unavailable — wait briefly then try next model
-        lastError = `Model ${MODELS[i]} unavailable or rate limited (${response.status})`;
-        console.warn(`[AI] ${lastError}, trying next model...`);
+        // Rate limited or model unavailable — immediately try next model without waiting
+        lastError = `Model ${MODELS[i]} returned status ${response.status}`;
+        console.warn(`[AI] ${lastError}, switching to next model...`);
         if (i < MODELS.length - 1) {
-          await new Promise(r => setTimeout(r, 600));
           continue;
         }
       }
 
-      // Other error — stop waterfall
+      // Other error — try next model if available
+      if (i < MODELS.length - 1) {
+        continue;
+      }
       break;
     } catch (netErr: any) {
+      if (i < MODELS.length - 1) {
+        continue;
+      }
       throw new Error(`Network error communicating with AI: ${netErr.message}`);
     }
   }
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`Groq API Error: ${response.status} - ${errorData}`);
+  if (!response || !response.ok) {
+    const errorData = response ? await response.text() : 'No response';
+    throw new Error(`AI API Error: ${response ? response.status : 'Offline'} - ${errorData}`);
   }
 
   const data = await response.json();
   let text = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning;
   
-  if (!text) throw new Error(`Empty response from Groq`);
+  if (!text) throw new Error(`Empty response from AI`);
 
-  // Strip any reasoning / think tags from modern LLMs (e.g. Qwen 3.6 / reasoning models)
+  // Strip any reasoning / think tags from modern LLMs
   text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
   return text;
@@ -325,7 +360,113 @@ export async function getAiWorkoutPlan(workoutType: string, profile: any, apiKey
   };
 }
 
+export function generateFallbackDietAdvice(dayMenu: any, profile: any): any {
+  const currentWeight = profile?.weightHistory?.[profile.weightHistory.length - 1]?.weight || profile?.weight || 75;
+  const goalConfig = FITNESS_GOALS.find(g => g.id === profile?.fitnessGoal);
+  const goalLabel = goalConfig ? goalConfig.label : 'Weight Loss';
+  const goalId = profile?.fitnessGoal || 'weight_loss';
+
+  const allItems: { name: string; slot: string }[] = [];
+  if (dayMenu?.meals && Array.isArray(dayMenu.meals)) {
+    for (const meal of dayMenu.meals) {
+      if (meal.items && Array.isArray(meal.items)) {
+        for (const itm of meal.items) {
+          if (itm?.name && itm.name.trim()) {
+            allItems.push({ name: itm.name.trim(), slot: meal.slot });
+          }
+        }
+      }
+    }
+  }
+
+  const proteinKeywords = ['paneer', 'egg', 'daal', 'dal', 'chana', 'sprouts', 'soya', 'milk', 'curd', 'dahi', 'chicken', 'fish', 'rajma', 'tofu', 'nutrela', 'peanut', 'moong', 'besan'];
+  const healthyCarbKeywords = ['roti', 'chapati', 'brown rice', 'rice', 'oats', 'poha', 'idli', 'upma', 'khichdi', 'fruits', 'banana', 'apple', 'salad', 'cabbage', 'beans', 'vegetable', 'sabzi', 'palak', 'methi', 'carrot', 'cucumber'];
+  const highFatJunkKeywords = ['puri', 'poori', 'bhature', 'fried', 'deep fried', 'pakoda', 'samosa', 'vada', 'kachori', 'butter', 'mayo', 'gulab jamun', 'halwa', 'jalebi', 'sweet', 'kheer', 'ice cream', 'gravy', 'oil', 'pastry', 'paratha', 'cake', 'sugar'];
+
+  const recommended: { item: string; reason: string }[] = [];
+  const avoid: { item: string; reason: string }[] = [];
+
+  const isLossGoal = goalId === 'weight_loss' || goalId === 'fat_loss_muscle_gain' || goalId === 'body_toning';
+  const isGainGoal = goalId === 'weight_gain' || goalId === 'muscle_building' || goalId === 'strength_building';
+
+  for (const item of allItems) {
+    const lower = item.name.toLowerCase();
+    const isProtein = proteinKeywords.some(k => lower.includes(k));
+    const isHealthyCarb = healthyCarbKeywords.some(k => lower.includes(k));
+    const isHighFatJunk = highFatJunkKeywords.some(k => lower.includes(k));
+
+    if (isLossGoal) {
+      if (isHighFatJunk && avoid.length < 4 && !avoid.some(a => a.item === item.name)) {
+        avoid.push({
+          item: item.name,
+          reason: 'High calorie & oil density; avoid to safeguard your fat-loss deficit.'
+        });
+      } else if ((isProtein || isHealthyCarb) && recommended.length < 5 && !recommended.some(r => r.item === item.name)) {
+        recommended.push({
+          item: item.name,
+          reason: isProtein 
+            ? 'High-satiety protein to preserve lean muscle while burning body fat.'
+            : 'Nutrient-rich fiber & complex carbs for clean, steady metabolic energy.'
+        });
+      }
+    } else if (isGainGoal) {
+      if (isHighFatJunk && (lower.includes('sweet') || lower.includes('sugar')) && avoid.length < 3 && !avoid.some(a => a.item === item.name)) {
+        avoid.push({
+          item: item.name,
+          reason: 'Empty sugars and trans fats. Opt for nutrient-dense caloric surplus.'
+        });
+      } else if ((isProtein || isHealthyCarb || lower.includes('paratha') || lower.includes('rice')) && recommended.length < 5 && !recommended.some(r => r.item === item.name)) {
+        recommended.push({
+          item: item.name,
+          reason: isProtein
+            ? 'Key amino acids necessary to trigger muscle hypertrophy and growth.'
+            : 'Quality carbohydrate energy required to fuel heavy strength progression.'
+        });
+      }
+    } else {
+      if (isHighFatJunk && avoid.length < 3 && !avoid.some(a => a.item === item.name)) {
+        avoid.push({
+          item: item.name,
+          reason: 'High in refined trans fats which hinder athletic conditioning.'
+        });
+      } else if (recommended.length < 5 && !recommended.some(r => r.item === item.name)) {
+        recommended.push({
+          item: item.name,
+          reason: 'Clean balanced source of dietary micronutrients and active vitality.'
+        });
+      }
+    }
+  }
+
+  if (recommended.length === 0) {
+    recommended.push({
+      item: 'Daal / Curd / Eggs / Paneer',
+      reason: `Primary protein sources available in mess to hit your ${goalLabel} targets.`
+    });
+    recommended.push({
+      item: 'Fresh Salad & Green Sabzi',
+      reason: 'Essential micronutrients & fiber to support gut health and active fullness.'
+    });
+  }
+  if (avoid.length === 0) {
+    avoid.push({
+      item: 'Excess Oil Gravies & Fried Foods',
+      reason: `Concentrated calorie density and hydrogenated oils that conflict with ${goalLabel}.`
+    });
+  }
+
+  const strategy = isLossGoal
+    ? `Fill half your plate with salad/sabzi and protein first before taking carbs, and strictly skip extra oily gravies or sweets.`
+    : isGainGoal
+    ? `Prioritize a solid protein portion in every meal and maintain a consistent caloric surplus with dairy, eggs, and whole grains.`
+    : `Maintain portion balance across carbohydrates, lean proteins, and fiber to sustain energy and recovery for ${goalLabel}.`;
+
+  return { recommended, avoid, strategy };
+}
+
 export async function getDietAdvice(dayMenu: any, profile: any, apiKey: string): Promise<any> {
+  if (!dayMenu) return generateFallbackDietAdvice(dayMenu, profile);
+
   const currentWeight = profile.weightHistory?.[profile.weightHistory.length - 1]?.weight || profile.weight || 75;
   const goalConfig = FITNESS_GOALS.find(g => g.id === profile.fitnessGoal);
   const goalLabel = goalConfig ? goalConfig.label : (profile.goalWeight < currentWeight ? 'Weight Loss' : 'Muscle Building');
@@ -363,18 +504,22 @@ Output a valid JSON object in this exact format:
 }`;
 
   try {
-    const raw = await callGroq(prompt, apiKey, 800, true);
-    
+    const raw = await callGroq(prompt, apiKey, 500, true);
+    let parsed: any;
     try {
-      return JSON.parse(raw);
+      parsed = JSON.parse(raw);
     } catch {
       const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('Could not parse diet advice from Groq response');
-      return JSON.parse(match[0]);
+      if (match) parsed = JSON.parse(match[0]);
     }
+
+    if (parsed && Array.isArray(parsed.recommended) && parsed.recommended.length > 0) {
+      return parsed;
+    }
+    return generateFallbackDietAdvice(dayMenu, profile);
   } catch (err) {
-    console.error('Groq diet advice error:', err);
-    throw err;
+    console.warn('[AI Coach] API notice, deploying goal-based fallback diet advice:', err);
+    return generateFallbackDietAdvice(dayMenu, profile);
   }
 }
 
@@ -495,6 +640,27 @@ ${recentItems}
   }
 }
 
+export function generateFallbackFoodDoubt(foodQuery: string, profile: any): string {
+  const goalId = profile?.fitnessGoal || 'weight_loss';
+  const lower = foodQuery.toLowerCase();
+  const isLoss = goalId === 'weight_loss' || goalId === 'fat_loss_muscle_gain' || goalId === 'body_toning';
+  const isGain = goalId === 'weight_gain' || goalId === 'muscle_building' || goalId === 'strength_building';
+
+  const isJunk = ['pizza', 'burger', 'fries', 'soda', 'coke', 'sugar', 'ice cream', 'cake', 'samosa', 'chips', 'fried', 'biscuit', 'maggi'].some(k => lower.includes(k));
+  const isProtein = ['egg', 'chicken', 'paneer', 'fish', 'whey', 'protein', 'soya', 'daal', 'tofu', 'curd'].some(k => lower.includes(k));
+
+  if (isLoss) {
+    if (isJunk) return 'Avoid or strictly portion-control. High calorie density will exceed your deficit.';
+    if (isProtein) return 'Yes! Great protein choice to keep you satiated and spare lean muscle.';
+    return 'In moderation. Track portions carefully to stay within your daily caloric target.';
+  } else if (isGain) {
+    if (isProtein) return 'Yes! Excellent source of amino acids to support muscle recovery and growth.';
+    if (isJunk) return 'In moderation. High calories, but ensure you also hit your daily protein goal.';
+    return 'Yes, good caloric support. Pair with adequate protein for optimal hypertrophy.';
+  }
+  return isJunk ? 'Limit intake. Choose nutrient-dense whole foods for sustained daily energy.' : 'Yes, fits well into a balanced, active nutrition routine.';
+}
+
 export async function askFoodDoubt(foodQuery: string, profile: any, apiKey: string = GEMINI_API_KEY): Promise<string> {
   const target = profile?.currentCalorieTarget || 2000;
   const goalConfig = FITNESS_GOALS.find(g => g.id === profile?.fitnessGoal);
@@ -507,14 +673,13 @@ CRITICAL MANDATORY CONSTRAINT: Your entire output MUST BE strictly under 100 cha
   try {
     const reply = await callGroq(prompt, apiKey, 50, false);
     const cleaned = reply.replace(/\n/g, ' ').trim();
-    // Enforce 100 chars limit
     if (cleaned.length > 100) {
       return cleaned.slice(0, 97) + '...';
     }
     return cleaned;
   } catch (err) {
-    console.error('Groq food doubt error:', err);
-    throw err;
+    console.warn('[AI Coach] Food doubt notice, using goal-based answer:', err);
+    return generateFallbackFoodDoubt(foodQuery, profile);
   }
 }
 
