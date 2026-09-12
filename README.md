@@ -1,171 +1,296 @@
+<div align="center">
+
 # LifeOS
 
-[![React](https://img.shields.io/badge/React-18.0-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
-[![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)](https://capacitorjs.com/)
+**A unified personal operating system for academics, fitness, nutrition, finances, and habits — with an AI coach built in.**
 
-LifeOS is an all-in-one personal operating system built to unify academic schedules, strength training, daily habits, nutrition, expense tracking, and intelligent AI coaching into a single cohesive experience. Designed with a mobile-first philosophy, LifeOS features 120fps hardware-composited transitions, Material 3 Expressive aesthetics, real Android vibration haptics, and a zero-reinstall Live Sync update engine.
+[![React](https://img.shields.io/badge/React-18.0-blue?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Firebase](https://img.shields.io/badge/firebase-ffca28?logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?logo=capacitor&logoColor=white)](https://capacitorjs.com/)
+[![License](https://img.shields.io/badge/license-Private-lightgrey)]()
 
----
+[Live Demo](https://lifeos-iota-one.vercel.app) · [Issues](https://github.com/Avineesh-G/LIFEOS/issues) · [Latest Release](https://github.com/Avineesh-G/LIFEOS/releases)
 
-## What is New in Version 1.5 (Build 10)
-
-### 1. Individual Floating Squircle Blocks (Photo 1 Exact Match)
-- **Zero-Wrapper Architecture:** Completely decoupled the navigation dock from any single capsule container. Each button is now its own independent floating squircle tile (`w-14 h-14 rounded-[20px]`) floating side by side in the bottom center.
-- **Dedicated Drop Shadows & Elevation:** Each squircle block has its own elevated glassmorphic shadow, subtle border, and tap physics (`active:scale-90`).
-
-### 2. Zero-Overlap Speed-Dial Action Menu (Photo 2 Exact Match)
-- **Elevated Floating Stack:** Recalibrated the speed-dial menu positioning to `bottom: calc(6.2rem + env(safe-area-inset-bottom, 0px))`, creating generous, beautiful breathing room between the bottom pill and the floating squircle blocks with zero collisions.
-- **Right-Aligned Fluid Stagger:** The stacked pill menu rises upward from the 4th block with responsive touch dismissals.
+</div>
 
 ---
 
-## What Was Introduced in Version 1.5 (Build 9)
+## Table of Contents
 
-### 1. Centered Squircle Floating Dock
-- **Minimalist Floating Cluster:** Refactored bottom navigation into an elegant, centered floating island featuring distinct squircle cards with backdrop blur, subtle elevation, and reactive haptic feedback.
-- **Primary Modules in Focus:** Front-and-center access to **Home (`/`)**, **Gym (`/gym`)**, and **Nutrition (`/nutrition`)**, plus a dedicated 4th menu button for secondary modules.
-
-### 2. Refined Settings Manual Update UX
-- **Intelligent Update Controls:** If the user is on the latest version, the app displays a clear `✓ Running Latest Version (v1.5 - Build 10)` status with **no redundant Apply button**.
-- **On-Demand Upgrades:** When a new cloud build is released, the "Apply Update" button dynamically appears so users can sync directly with a single tap.
-
----
-
-## What Was Introduced in Version 1.5 (Build 8)
-
-### 1. Native Hardware Back Navigation to Home
-- **Android Phone Navigation Interceptor:** Connected the native Android hardware back button (and swipe-to-go-back gesture navigation) using `@capacitor/app`.
-- **Two-Stage Back Navigation:** When pressing the phone navigation back button from ANY section (Gym, Study, Timetable, Tasks, Expenses, Settings, Progress), the application smoothly navigates back to the **Home dashboard (`/`)**.
-- **Graceful Exit:** If the user is already on the Home dashboard and taps back again, the app cleanly exits or minimizes (`CapApp.exitApp()`) instead of abruptly crashing out from interior pages.
-
-### 2. Streamlined Icon-Only Home Cloud Sync Button
-- **Minimalist Rotate Icon:** Replaced text label with a sleek, circular rotate button beside the day and date badge on the Home dashboard.
-- **Smooth 360° Spin Animation:** Clicking the rotate symbol animates a crisp continuous spin (`animate-spin`), fetches live Firestore state (`getDocFromServer`), gives native haptic feedback, and highlights subtle emerald confirmation on completion.
-
-### 3. Robust Multi-User Isolation & Auto-Seeding
-- **Zero-Error New User Onboarding:** When a new user (or friend using the APK) signs in, their user document is automatically seeded with default 7-day workout plans, initial settings, and clean arrays.
-- **Strict Partial Diff Syncing:** `saveData` strictly sends the modified diff to Firestore with `{ merge: true }`, ensuring no user action can ever overwrite or wipe another feature's collection.
-- **Automatic Cloud Healing:** If any network discrepancy occurs between cloud and device, local progress is preserved and auto-synced back to Firestore cloud.
-
-### 3. Material 3 Fluid Transitions (120fps Zero-Lag Motion)
-- **Fluid Deceleration Curve (240ms):** Tuned `AnimatedPage` with an organic `cubic-bezier(0.22, 1, 0.36, 1)` easing curve and a subtle 6px vertical rise (`y: 6 ➔ 0`) alongside opacity, creating a creamy, luxurious glide that eliminates abrupt cuts while remaining swift and responsive.
-- **Compositor-Only GPU Transforms:** Powered by `translateZ(0)` and `will-change: opacity, transform` hardware acceleration, delivering rock-solid 120Hz refresh rates on high-refresh mobile displays with zero dropped frames.
-- **Memoized Computing Engine:** Synchronous calculations across `Home.tsx`, `Study.tsx`, `Spending.tsx`, `Timetable.tsx`, and `Progress.tsx` are consolidated inside `useMemo` blocks, preventing main-thread blocking during tab navigation.
-
-### 4. Secure In-App Groq AI Architecture
-- **Client-Managed Secret Isolation:** Eliminates all hardcoded API keys and `.env` build bundling. Users enter their personal Groq API key securely in the Settings UI with show/hide masking.
-- **Encrypted Persistence:** Keys are stored strictly within the user's private Firebase Firestore profile (`users/{uid}`) and device `localStorage`, completely out of Git version control and public JavaScript bundles.
-- **Multi-Model Waterfall Fallback:** Intelligent cascade across active Groq models (`qwen/qwen3.8-27b`, `qwen/qwen3.6-27b`, `openai/gpt-oss-120b`, `groq/compound-mini`) with automated `<think>` reasoning tag sanitization.
-
-### 5. Gym Section Polish & Zero-Blank Screen Fix
-- **Header Badge Alignment:** Relocated completion indicators into the workout session metadata badge (`ALL DONE`) and sets pill (`13/13 sets ✓`), eliminating overlap collisions on mobile viewports.
-- **State Transition Stabilization:** Removed fragile Framer Motion `staggerChildren` layout passes from the Gym dashboard, guaranteeing instantaneous navigation return without screen freezes.
+- [Overview](#overview)
+- [Why LifeOS](#why-lifeos)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Build & Deployment](#build--deployment)
+- [Design Philosophy](#design-philosophy)
+- [Data Model & Sync Strategy](#data-model--sync-strategy)
+- [AI Coaching System](#ai-coaching-system)
+- [Release Notes](#release-notes)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
-## Codebase Structure & Architecture
+## Overview
+
+**LifeOS** is a single application that replaces the five or six disconnected apps most people use to manage their life — a gym tracker, a study timer, a budgeting app, a class timetable, a to-do list, and a habit tracker — with one cohesive, mobile-first system. It runs as a React web client backed by Firebase, and compiles into a signed, installable native Android app via Capacitor, complete with hardware haptics, 120fps page transitions, and a zero-reinstall live update engine.
+
+What sets it apart from a typical tracker bundle is the **AI layer**: instead of the user deciding what to log every day, LifeOS tells them — "today is chest day," here's your calorie target, here's what's on the mess menu that fits it — and asks for the actuals afterward.
+
+## Why LifeOS
+
+Most personal trackers are passive: they wait for you to open the app, decide what to do, and enter data. LifeOS inverts that relationship in two specific ways:
+
+1. **The gym module is prescriptive, not just descriptive.** Each day surfaces the planned muscle group from the user's split and prompts for the actual weight/reps/rounds performed, rather than letting the user browse and pick a routine from scratch.
+2. **The nutrition module is goal-driven.** A one-time body profile (age, height, weight, goal weight, activity level) lets the AI calculate a daily calorie target and evaluate the monthly mess menu against it, rather than leaving portion and meal choices entirely up to the user.
+
+## Features
+
+### Home
+- Daily "execution score" summarizing performance across every module
+- One-tap cloud sync with a spinning refresh indicator and haptic confirmation
+- Centered floating squircle navigation dock with a speed-dial menu for secondary modules
+
+### Gym
+- Day-based workout split with a weekly view
+- Active workout session logger with rest timers and set-completion tracking
+- Historical weight/rep analytics per exercise
+- Interactive onboarding wizard to set up an initial split
+- AI-suggested tweaks to the split over time, based on logged performance
+
+### Nutrition
+- Monthly mess-menu ingestion (uploaded as a PDF) with AI-extracted items and estimated calories
+- Meal guidance weighted toward the user's weight-loss/goal-weight target
+
+### Study
+- Pomodoro and stopwatch timers
+- Session history, including logged doubts/questions
+- Year-round study activity heatmap
+
+### Timetable
+- Class schedule and topic recorder
+- Tapping a scheduled block starts a pre-filled study timer session for that subject
+
+### Spending
+- Category-based budgeting
+- Lightweight expense log (deliberately simpler than a dedicated finance app)
+
+### Tasks
+- Segmented, multi-color to-do list
+
+### Progress
+- Long-term habit streaks
+- Radar-chart breakdowns of personal stats over time
+
+### Platform-Level Features
+- Native Android hardware back-button and swipe-gesture interception, routing back to Home from any section, with graceful app exit from Home
+- Real hardware vibration haptics on key interactions
+- Google Play Services sign-in
+- Live Sync: in-app update detection with a clear "running latest version" state and one-tap apply when a new build is available
+- Multi-user isolation with automatic default-data seeding for new sign-ins
+
+## Architecture
+
+```
+┌─────────────────────────────┐
+│         React Client        │
+│  (Pages → Hooks → Firebase) │
+└──────────────┬──────────────┘
+               │ optimistic local-first writes
+               ▼
+┌─────────────────────────────┐
+│   useData (sync hook)       │
+│  - partial diff merge       │
+│  - conflict-safe writes     │
+└──────────────┬──────────────┘
+               ▼
+┌─────────────────────────────┐
+│  Firebase Cloud Firestore   │
+│  users/{uid} → per-user doc │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│   Capacitor Native Bridge   │
+│  (Android haptics, auth,    │
+│   back-navigation, updates) │
+└─────────────────────────────┘
+```
+
+The web build and the native Android shell share one codebase: Capacitor wraps the compiled web app, and platform-specific behavior (haptics, hardware back button, Play Services auth) is layered on through Capacitor plugins rather than a separate native app.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Tailwind CSS, Framer Motion |
+| Bundler | Vite |
+| Native Runtime | Capacitor 8 (Android), GPU-accelerated compositor transforms |
+| Backend & Auth | Google Firebase (Cloud Firestore + Authentication) |
+| Native Auth | Google Play Services via `@codetrix-studio/capacitor-google-auth` |
+| Haptics | `@capacitor/haptics` (native Android vibration service) |
+| Native Navigation | `@capacitor/app` (hardware back button / gesture interception) |
+| AI Inference | Groq Cloud API — waterfall fallback across Qwen, GPT-OSS, and other hosted models |
+
+## Project Structure
 
 ```
 lifeos/
 ├── android/                             # Native Android Studio project
-│   ├── app/
-│   │   ├── build.gradle                 # VersionCode 7, VersionName 1.5, Keystore config
-│   │   ├── lifeos-release-key.jks       # Production release signing keystore
-│   │   └── src/main/
-│   │       ├── AndroidManifest.xml      # Permissions, hardware acceleration
-│   │       └── res/                     # Vector-derived adaptive launcher icons
+│   └── app/
+│       ├── build.gradle                 # Version code/name, keystore config
+│       ├── lifeos-release-key.jks       # Production release signing keystore
+│       └── src/main/
+│           ├── AndroidManifest.xml      # Permissions, hardware acceleration
+│           └── res/                     # Adaptive launcher icons
 ├── public/
-│   ├── LifeOS.apk                       # Production-signed release APK package
+│   ├── LifeOS.apk                       # Production-signed release APK
 │   ├── version.json                     # Release manifest for in-app update checks
-│   ├── icon.svg                         # Master minimalist dark vector icon
-│   └── icon-monochrome.svg              # Android 13+ Material You themed launcher
+│   ├── icon.svg                         # Master vector icon
+│   └── icon-monochrome.svg              # Material You themed launcher icon
 ├── src/
-│   ├── components/                      # Reusable UI primitives & layouts
-│   │   ├── Layout.tsx                   # Rigid 8-column navigation dock & viewport frame
-│   │   ├── ErrorBoundary.tsx            # Graceful crash handling & recovery
-│   │   ├── BodyProfileForm.tsx          # User biometrics & fitness goals
-│   │   └── AnimatedIcons.tsx            # Lightweight custom SVG icons
+│   ├── components/
+│   │   ├── Layout.tsx                   # Navigation dock & viewport frame
+│   │   ├── ErrorBoundary.tsx            # Crash handling & recovery
+│   │   ├── BodyProfileForm.tsx          # Biometrics & fitness goals input
+│   │   └── AnimatedIcons.tsx            # Custom SVG icon set
 │   ├── data/
 │   │   ├── defaultData.ts               # Fallback initial data structures
 │   │   └── messMenu.ts                  # Monthly campus nutrition menu
 │   ├── hooks/
-│   │   ├── useData.ts                   # Optimistic local-first Firestore synchronization
-│   │   └── useTheme.ts                  # Dynamic system dark/light adaptation
+│   │   ├── useData.ts                   # Optimistic local-first Firestore sync
+│   │   └── useTheme.ts                  # Dynamic light/dark/system theming
 │   ├── pages/
-│   │   ├── Home.tsx                     # Daily execution score & dashboard metrics
-│   │   ├── Gym.tsx                      # Routine hub & weekly split tracker
-│   │   ├── GymWorkout.tsx               # Active workout logger with rest timers
-│   │   ├── GymSplit.tsx                 # Custom workout split editor
-│   │   ├── GymExerciseHistory.tsx       # Historical weight/rep analytics
-│   │   ├── GymOnboarding.tsx            # Interactive workout setup wizard
-│   │   ├── Nutrition.tsx                # Mess menu tracker & AI food analysis
-│   │   ├── Study.tsx                    # Focus session hub & weekly breakdown
-│   │   ├── StudyTimer.tsx               # Pomodoro & stopwatch timer
-│   │   ├── StudyHistory.tsx             # Logged academic sessions & doubts
-│   │   ├── StudyHeatmap.tsx             # Year-round study activity heatmap
-│   │   ├── Spending.tsx                 # Category budgeting & expense log
-│   │   ├── Timetable.tsx                # Class schedule & topic recorder
-│   │   ├── Tasks.tsx                    # Segmented multi-color TO-DO list
-│   │   ├── Progress.tsx                 # Long-term habit streaks & radar charts
-│   │   ├── Settings.tsx                 # In-App Live Sync, Groq AI key, theme
-│   │   └── Auth.tsx                     # Native Google Play Services authentication
+│   │   ├── Home.tsx
+│   │   ├── Gym.tsx / GymWorkout.tsx / GymSplit.tsx / GymExerciseHistory.tsx / GymOnboarding.tsx
+│   │   ├── Nutrition.tsx
+│   │   ├── Study.tsx / StudyTimer.tsx / StudyHistory.tsx / StudyHeatmap.tsx
+│   │   ├── Spending.tsx
+│   │   ├── Timetable.tsx
+│   │   ├── Tasks.tsx
+│   │   ├── Progress.tsx
+│   │   ├── Settings.tsx                 # Live Sync, Groq AI key, theme
+│   │   └── Auth.tsx
 │   ├── utils/
-│   │   ├── geminiCoach.ts               # Groq AI waterfall coach & diet tips
-│   │   └── haptics.ts                   # Capacitor hardware vibrator integration
-│   ├── App.tsx                          # Top-level routing & 120fps transitions
-│   ├── firebase.ts                      # Cloud Firestore & Auth client
+│   │   ├── geminiCoach.ts               # AI coaching & diet-tip waterfall
+│   │   └── haptics.ts                   # Capacitor haptic integration
+│   ├── App.tsx                          # Routing & page transitions
+│   ├── firebase.ts                      # Firestore & Auth client
 │   ├── main.tsx                         # React 18 DOM mount point
-│   └── types.ts                         # TypeScript domain models
-├── capacitor.config.ts                  # Capacitor 8 native bridge settings
-├── package.json                         # Dependencies & project scripts
-├── tailwind.config.js                   # M3 Expressive color tokens & surfaces
-└── vite.config.ts                       # Fast Vite bundler configuration
+│   └── types.ts                         # Shared TypeScript domain models
+├── capacitor.config.ts
+├── tailwind.config.js
+└── vite.config.ts
 ```
 
----
+## Getting Started
 
-## Core Technologies
+### Prerequisites
+- Node.js (LTS) and npm
+- A Firebase project with Cloud Firestore and Authentication enabled
+- Android Studio, if building the native APK
+- (Optional) A [Groq](https://groq.com/) API key for AI coaching — entered inside the app's Settings screen, not required to build or run
 
-- **Frontend:** React 18, TypeScript, Tailwind CSS, Framer Motion
-- **Native Runtime:** Capacitor 8 Android with Hardware GPU Acceleration
-- **Backend & Auth:** Google Firebase (Cloud Firestore & Firebase Authentication)
-- **Native Auth:** Google Play Services via `@codetrix-studio/capacitor-google-auth`
-- **Haptics:** Native Android OS Vibration Services via `@capacitor/haptics`
-- **AI Inference:** Groq Cloud API (Llama 3.3, Qwen 3.8, GPT-OSS)
+### Installation
 
----
+```bash
+git clone https://github.com/Avineesh-G/LIFEOS.git
+cd LIFEOS
+npm install
+```
 
-## Build & Deployment Commands
+### Run the Dev Server
 
-### Development Server
 ```bash
 npm run dev
 ```
 
-### Production Web Build
-```bash
-npm run build
-```
+## Configuration
 
-### Sync Web Build to Native Android
-```bash
-npm run cap:sync
-```
+- Firebase project credentials are wired up in `src/firebase.ts`.
+- The Groq API key is **not** an environment variable and is never bundled into the build — each user enters their own key in **Settings**, and it is written only to that user's private Firestore document (`users/{uid}`) plus device `localStorage`, keeping it out of Git history and the public JS bundle.
 
-### Compile Signed Release APK
-```bash
-npm run cap:build
-```
-The compiled, production-signed binary is generated at:
-`android/app/build/outputs/apk/release/app-release.apk`
-and automatically copied to:
-`public/LifeOS.apk`
+## Build & Deployment
 
----
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start the local development server |
+| `npm run build` | Produce a production web build |
+| `npm run cap:sync` | Sync the web build into the native Android project |
+| `npm run cap:build` | Compile a signed release APK |
+
+The signed binary lands at `android/app/build/outputs/apk/release/app-release.apk` and is copied automatically to `public/LifeOS.apk`, where the in-app Live Sync update check reads it from.
+
+The web build is deployed via Vercel at [lifeos-iota-one.vercel.app](https://lifeos-iota-one.vercel.app).
+
+## Design Philosophy
+
+LifeOS follows a minimal, calm, premium aesthetic rather than a heavily animated or skeuomorphic one:
+
+- Typography, spacing, and borders carry the visual hierarchy — not shadows or gradients
+- Framer Motion is used sparingly, for purposeful transitions (page changes, speed-dial menus) rather than decoration
+- Monochrome base palette with a single configurable accent color
+- Full light/dark/system theme support
+- Page transitions use a `cubic-bezier(0.22, 1, 0.36, 1)` deceleration curve with compositor-only GPU transforms (`translateZ(0)`, `will-change`) to hold 120Hz on supported displays
+
+## Data Model & Sync Strategy
+
+- **Local-first, optimistic writes:** UI updates immediately; Firestore sync happens in the background.
+- **Partial diff syncing:** `saveData` sends only the modified fields with `{ merge: true }`, so one feature's write can never overwrite another feature's collection.
+- **Multi-user isolation:** each new sign-in is auto-seeded with default 7-day workout plans, initial settings, and empty data arrays — no shared state leaks between users on the same installed APK.
+- **Automatic cloud healing:** on a detected discrepancy between local and cloud state, local progress is preserved and re-synced to Firestore rather than silently overwritten.
+
+## AI Coaching System
+
+- Coaching and diet-tip generation run through a **waterfall model cascade** on Groq Cloud — if the primary model is unavailable or rate-limited, the request automatically falls through to the next model in the list.
+- Model reasoning tags (e.g. `<think>`) are stripped from responses before display.
+- API keys are user-supplied and stored per-user in Firestore, never hardcoded or bundled at build time.
+- Two coaching surfaces exist today: a **Gym coach** (assigns the day's muscle group, proposes split adjustments over time) and a **Nutrition coach** (extracts and scores the monthly mess menu against the user's calorie target).
+
+## Release Notes
+
+<details>
+<summary><strong>v1.5 (Build 10)</strong> — Floating dock & speed-dial refinement</summary>
+
+- Decoupled the navigation dock into independent floating squircle tiles, each with its own elevation, shadow, and tap physics
+- Recalibrated the speed-dial action menu spacing to eliminate overlap with the floating dock, with a right-aligned staggered rise animation
+
+</details>
+
+<details>
+<summary><strong>v1.5 (Build 9)</strong> — Centered dock & update UX</summary>
+
+- Introduced the centered squircle floating navigation cluster with backdrop blur and haptic feedback
+- Front-and-center access to Home, Gym, and Nutrition, with a secondary menu button for the rest
+- Settings now shows a clear "running latest version" state with no redundant update button, and surfaces an "Apply Update" action only when a new build is actually available
+
+</details>
+
+<details>
+<summary><strong>v1.5 (Build 8)</strong> — Native navigation, sync hardening, AI architecture</summary>
+
+- Native Android hardware back-button and gesture interception, routing back to Home from any section with a graceful exit from Home
+- Icon-only cloud sync button on Home with a 360° spin animation and haptic/emerald confirmation on success
+- Multi-user isolation with automatic seeding for new users, plus strict partial-diff Firestore syncing to prevent cross-feature overwrites
+- 120fps Material-3-style page transitions with compositor-only GPU transforms, memoized per-page computations
+- Migrated AI key handling to a secure, user-supplied, client-managed model with a multi-model Groq waterfall fallback
+- Gym section polish: fixed badge/pill overlap and removed a fragile stagger animation that caused blank-screen freezes on navigation
+
+</details>
+
+## Roadmap
+
+- [ ] iOS build via Capacitor
+- [ ] Expanded AI coach: cross-module insights (e.g. correlating sleep/study time with workout performance)
+- [ ] Export/import for full personal data backup
+- [ ] Web push notifications for scheduled timetable blocks
 
 ## License
 
