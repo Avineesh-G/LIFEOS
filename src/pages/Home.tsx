@@ -26,7 +26,7 @@ interface HomeProps {
 }
 
 const container = {
-  hidden: { opacity: 0 },
+  hidden: {},
   show: { transition: { staggerChildren: 0.03 } },
 };
 
