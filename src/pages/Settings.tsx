@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
+import { FITNESS_GOALS } from '../utils/calculations';
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -119,9 +120,16 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               </p>
             </div>
           </div>
-          <span className="rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText font-mono font-bold text-xs px-3.5 py-1.5 shadow-sm whitespace-nowrap shrink-0">
-            {data.profile?.currentCalorieTarget || 2000} kcal
-          </span>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className="rounded-full bg-m3-mint-badge/60 dark:bg-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText font-mono font-bold text-xs px-3.5 py-1.5 shadow-sm whitespace-nowrap">
+              {data.profile?.currentCalorieTarget || 2000} kcal
+            </span>
+            {data.profile?.fitnessGoal && (
+              <span className="text-[10px] font-mono font-bold text-accent px-2 py-0.5 rounded-full bg-accent/10 whitespace-nowrap">
+                {FITNESS_GOALS.find(g => g.id === data.profile?.fitnessGoal)?.label || data.profile?.fitnessGoal}
+              </span>
+            )}
+          </div>
         </div>
         <BodyProfileForm 
           initialProfile={data.profile} 
@@ -263,7 +271,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.2 (Build 11)</p>
+        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.3 (Build 12)</p>
       </div>
     </motion.div>
   );

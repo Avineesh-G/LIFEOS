@@ -3,7 +3,7 @@ export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && imp
 // ──────────────────────────────────────────────────────────────────────────
 
 async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
-  let activeKey = apiKey && apiKey.trim().startsWith('gsk_') ? apiKey.trim() : GEMINI_API_KEY;
+  let activeKey = (apiKey && apiKey.trim()) || GEMINI_API_KEY;
   if (!activeKey || !activeKey.trim()) throw new Error('NO_API_KEY');
   
   if (isPdf) {
@@ -256,17 +256,22 @@ export interface AiWorkoutPlan {
   exercises: AiExercise[];
 }
 
+import { FITNESS_GOALS } from './calculations';
+
 /** Build Gemini prompt for workout plan */
 export function buildWorkoutPrompt(workoutType: string, profile?: any): string {
   const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()] || workoutType;
   let context = '';
   if (profile) {
     const currentWeight = profile.weightHistory?.[profile.weightHistory.length - 1]?.weight || 75;
-    const goal = profile.goalWeight < currentWeight ? 'Weight Loss (focus on calorie burn, intensity)' : 'Muscle Build (focus on hypertrophy, progressive overload)';
-    context = `\nUser Profile: Age ${profile.age}, Current Weight: ${currentWeight}kg, Goal: ${goal}.`;
+    const goalConfig = FITNESS_GOALS.find(g => g.id === profile.fitnessGoal);
+    const goalLabel = goalConfig ? goalConfig.label : (profile.goalWeight < currentWeight ? 'Weight Loss' : 'Muscle Building');
+    const goalStyle = goalConfig ? goalConfig.splitDescription : 'Progressive overload & balanced training';
+    context = `\nUser Profile: Age ${profile.age || 20}, Current Weight: ${currentWeight}kg, Goal: ${goalLabel} (${goalStyle}). Calorie Target: ${profile.currentCalorieTarget || 2000} kcal, Protein Target: ${profile.dailyProteinTarget || 150}g.`;
   }
 
   return `You are an elite gym coach. Create a ${workoutType} workout plan targeting: ${muscles}.${context}
+Ensure exercise selection, rep ranges, and rest intervals align directly with their primary goal (e.g. 3-6 heavy reps for Strength, 8-12 volume reps for Muscle Building, high-density 10-15 reps with short rest for Weight Loss / Toning).
 Include exactly ONE mandatory Warm-up exercise at the very start, and exactly ONE Cool-down stretch at the very end.
 Recommend a starting weight (in kg) for each exercise based on the user's profile. Use 0 for bodyweight/stretching.
 
@@ -321,17 +326,38 @@ export async function getAiWorkoutPlan(workoutType: string, profile: any, apiKey
 }
 
 export async function getDietAdvice(dayMenu: any, profile: any, apiKey: string): Promise<any> {
-  const prompt = `You are an expert AI Dietician. My goal weight is ${profile.goalWeight} kg, my current weight is ${profile.weightHistory?.[profile.weightHistory.length - 1]?.weight || 'unknown'} kg. I am trying to lose weight. My calorie target is ${profile.currentCalorieTarget} kcal. 
-Here is today's menu: ${JSON.stringify(dayMenu)}
+  const currentWeight = profile.weightHistory?.[profile.weightHistory.length - 1]?.weight || profile.weight || 75;
+  const goalConfig = FITNESS_GOALS.find(g => g.id === profile.fitnessGoal);
+  const goalLabel = goalConfig ? goalConfig.label : (profile.goalWeight < currentWeight ? 'Weight Loss' : 'Muscle Building');
+  const goalDescription = goalConfig ? goalConfig.description : '';
+  const proteinTarget = profile.dailyProteinTarget || Math.round(currentWeight * 1.8);
+  const calTarget = profile.currentCalorieTarget || 2000;
 
-Based strictly on this menu, analyze what I should eat to achieve my weight loss goals.
+  const prompt = `You are an expert AI Dietician. 
+User Profile & Objective:
+- Current Weight: ${currentWeight} kg
+- Goal Weight: ${profile.goalWeight || currentWeight} kg
+- Primary Fitness & Nutrition Goal: ${goalLabel} (${goalDescription})
+- Daily Calorie Target: ${calTarget} kcal
+- Daily Protein Target: ${proteinTarget}g
+
+Here is today's Mess Menu:
+${JSON.stringify(dayMenu)}
+
+Your task:
+Analyze today's mess menu strictly against their goal of "${goalLabel}".
+Identify:
+1. "recommended": Exact dishes from the mess menu that they CAN AND SHOULD EAT to hit their ${goalLabel} goal (e.g. high-protein, clean carbs, or nutrient-dense options) with specific reasons why.
+2. "avoid": Exact dishes from the mess menu that they SHOULD DANGER/AVOID because they conflict with ${goalLabel} (e.g. deep-fried items, high-calorie oily gravies, excessive refined starches, or empty sugar) with specific reasons why.
+3. "strategy": Exactly one actionable, high-impact strategy sentence for eating at the mess today.
+
 Output a valid JSON object in this exact format:
 {
   "recommended": [
-    {"item": "Exact Item Name from menu", "reason": "Why it's good"}
+    {"item": "Exact Item Name from menu", "reason": "Why it fits their goal"}
   ],
   "avoid": [
-    {"item": "Exact Item Name from menu", "reason": "Why to avoid"}
+    {"item": "Exact Item Name from menu", "reason": "Why to avoid for their goal"}
   ],
   "strategy": "A one sentence overarching tip for today."
 }`;
@@ -471,9 +497,11 @@ ${recentItems}
 
 export async function askFoodDoubt(foodQuery: string, profile: any, apiKey: string = GEMINI_API_KEY): Promise<string> {
   const target = profile?.currentCalorieTarget || 2000;
+  const goalConfig = FITNESS_GOALS.find(g => g.id === profile?.fitnessGoal);
+  const goal = goalConfig ? goalConfig.label : 'Health & Fitness';
   const prompt = `You are an expert nutrition coach. The user asks if they can eat this off-menu food: "${foodQuery}".
-Their daily calorie target is ${target} kcal.
-Provide a direct verdict (Yes / In moderation / Avoid) and a quick rationale.
+Their primary fitness goal is: ${goal} (Daily calorie target: ${target} kcal).
+Provide a direct verdict (Yes / In moderation / Avoid) and a quick rationale aligned with their ${goal} goal.
 CRITICAL MANDATORY CONSTRAINT: Your entire output MUST BE strictly under 100 characters total. Plain text only. No markdown formatting.`;
 
   try {

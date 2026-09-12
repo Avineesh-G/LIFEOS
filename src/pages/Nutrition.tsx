@@ -6,6 +6,7 @@ import { format, parseISO, addDays, subDays } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, askFoodDoubt, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
+import { FITNESS_GOALS } from '../utils/calculations';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 
 interface NutritionProps {
@@ -159,13 +160,17 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const circumference = 2 * Math.PI * 42;
   const strokeDash = (ringPct / 100) * circumference;
 
+  const activeGoalConfig = FITNESS_GOALS.find(g => g.id === data.profile?.fitnessGoal);
+  const currentWeight = data.profile?.weightHistory?.[(data.profile.weightHistory.length || 1) - 1]?.weight || 75;
+  const targetProtein = data.profile?.dailyProteinTarget || Math.round(currentWeight * (activeGoalConfig?.proteinMultiplier || 1.8));
+
   const handleGetAdvice = async () => {
     if (!todayMenu) return;
     setFetchingAdvice(true);
     setShowCoach(true);
     triggerHaptic('ai');
     try {
-      const p = data.profile || { goalWeight: 'maintain', currentCalorieTarget: 2000 };
+      const p = data.profile || { goalWeight: 70, currentCalorieTarget: 2000, fitnessGoal: 'weight_loss' };
       const advice = await getDietAdvice(todayMenu, p, data.geminiApiKey || GEMINI_API_KEY);
       setCoachAdvice(advice);
       triggerHaptic('success');
@@ -530,7 +535,17 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           </div>
         </div>
 
-        <div className="flex-1 space-y-2.5">
+        <div className="flex-1 space-y-2">
+          {activeGoalConfig && (
+            <div className="flex items-center justify-between gap-1 pb-1 border-b border-black/10 dark:border-white/10">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10 truncate">
+                {activeGoalConfig.label}
+              </span>
+              <span className="text-[10px] font-mono font-semibold opacity-85 shrink-0">
+                {targetProtein}g Protein
+              </span>
+            </div>
+          )}
           <div className="flex items-baseline justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono">Target</span>
             <span className="font-mono font-bold text-sm">{targetCals} kcal</span>
@@ -636,8 +651,15 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   <button onClick={() => setShowCoach(false)} className="absolute top-3 right-3 text-emerald-500/70 hover:text-emerald-500">
                     <X size={16} />
                   </button>
-                  <h3 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2 mb-3 text-sm">
-                    <Sparkles size={16} /> Personalized Advice
+                  <h3 className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between gap-2 mb-3 text-sm">
+                    <span className="flex items-center gap-2">
+                      <Sparkles size={16} /> Personalized Advice
+                    </span>
+                    {activeGoalConfig && (
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                        {activeGoalConfig.label}
+                      </span>
+                    )}
                   </h3>
 
                   {fetchingAdvice ? (

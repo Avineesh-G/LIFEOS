@@ -91,6 +91,18 @@ export interface WeightLog {
   weight: number;
 }
 
+export type FitnessGoal = 
+  | 'weight_loss'
+  | 'weight_gain'
+  | 'muscle_building'
+  | 'body_recomp'
+  | 'strength_building'
+  | 'conditioning'
+  | 'general_fitness'
+  | 'mobility'
+  | 'endurance'
+  | 'body_toning';
+
 export interface UserProfile {
   age: number;
   height: number; // cm
@@ -99,6 +111,8 @@ export interface UserProfile {
   goalWeight: number; // kg
   weightHistory: WeightLog[];
   currentCalorieTarget: number;
+  fitnessGoal?: FitnessGoal;
+  dailyProteinTarget?: number; // grams
 }
 
 // ── Nutrition / Mess types ─────────────────────────────────────────────────

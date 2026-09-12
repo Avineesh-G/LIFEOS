@@ -1,10 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, ChevronRight, Play, Settings, Flame, Sparkles, Loader2, Check, Zap, ArrowUpRight } from 'lucide-react';
+import { 
+  Dumbbell, Play, Settings, Flame, Sparkles, Check, Zap, ArrowUpRight,
+  TrendingUp, Shield, Heart, Sprout, Compass, Activity, SlidersHorizontal,
+  ChevronRight, Loader2
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { AnimatedMoon } from '../components/AnimatedIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { FITNESS_GOALS } from '../utils/calculations';
 import type { AppData, Exercise } from '../types';
 
 interface GymProps {
@@ -12,15 +17,71 @@ interface GymProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 export default function Gym({ data, updateData }: GymProps) {
   const navigate = useNavigate();
   const [generatingCardio, setGeneratingCardio] = useState(false);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
   const today = format(new Date(), 'EEEE');
   const todayDate = format(new Date(), 'yyyy-MM-dd');
   const shortDay = ({ Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' } as Record<string, string>)[today] || '';
+  const [selectedDay, setSelectedDay] = useState(shortDay);
   const todayPlan = data?.workoutPlans?.find(p => p.day === shortDay);
+  const activePlan = data?.workoutPlans?.find(p => p.day === selectedDay) || todayPlan;
+  const isSelectedToday = selectedDay === shortDay;
   const todayLog = data?.workoutLogs?.find(w => w.date === todayDate);
   const isCompletedToday = Boolean(todayLog?.isSaved);
+
+  const handleAutoGenerateForDay = async (dayToGen: string, typeToGen: string) => {
+    if (typeToGen === 'REST' || !typeToGen.trim()) return;
+    triggerHaptic('ai');
+    setGeneratingPlan(true);
+    try {
+      const apiKey = data.geminiApiKey || GEMINI_API_KEY;
+      const aiPlan = await getAiWorkoutPlan(typeToGen, data.profile, apiKey);
+      const newExercises: Exercise[] = aiPlan.exercises.map((ex: any) => ({
+        id: crypto.randomUUID(),
+        name: ex.name,
+        sets: ex.sets,
+        reps: parseInt(ex.reps) || 10,
+        weight: ex.weight || 0,
+        rest: ex.rest,
+        howTo: ex.howTo,
+        iconKey: ex.iconKey,
+      }));
+
+      const updatedPlans = data.workoutPlans.map(p =>
+        p.day === dayToGen ? { ...p, exercises: newExercises } : p
+      );
+      await updateData({ workoutPlans: updatedPlans });
+      triggerHaptic('success');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate workout plan with AI.');
+    } finally {
+      setGeneratingPlan(false);
+    }
+  };
+
+  const userGoal = data?.profile?.fitnessGoal || 'general_fitness';
+  const goalConfig = FITNESS_GOALS.find(g => g.id === userGoal) || FITNESS_GOALS[6];
+
+  const renderGoalIcon = (iconName: string, size = 16, className = '') => {
+    switch (iconName) {
+      case 'Flame': return <Flame size={size} className={className} />;
+      case 'TrendingUp': return <TrendingUp size={size} className={className} />;
+      case 'Dumbbell': return <Dumbbell size={size} className={className} />;
+      case 'Zap': return <Zap size={size} className={className} />;
+      case 'Shield': return <Shield size={size} className={className} />;
+      case 'Heart': return <Heart size={size} className={className} />;
+      case 'Sprout': return <Sprout size={size} className={className} />;
+      case 'Compass': return <Compass size={size} className={className} />;
+      case 'Activity': return <Activity size={size} className={className} />;
+      case 'Sparkles': return <Sparkles size={size} className={className} />;
+      default: return <Dumbbell size={size} className={className} />;
+    }
+  };
 
   const totalWorkouts = (data?.workoutLogs || []).length;
   const thisWeekLogs = useMemo(() => {
@@ -44,7 +105,7 @@ export default function Gym({ data, updateData }: GymProps) {
       const apiKey = data.geminiApiKey || GEMINI_API_KEY;
       const aiPlan = await getAiWorkoutPlan('CARDIO', data.profile, apiKey);
 
-      const newExercises: Exercise[] = aiPlan.exercises.map(ex => ({
+      const newExercises: Exercise[] = aiPlan.exercises.map((ex: any) => ({
         id: crypto.randomUUID(),
         name: ex.name,
         sets: ex.sets,
@@ -151,6 +212,53 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
       </div>
 
+      {/* Goal Routine Alignment & Customization Freedom Card */}
+      <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/80 dark:border-border-dark/80 shadow-sm space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              {renderGoalIcon(goalConfig.iconName, 14)}
+            </span>
+            <div>
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                Goal Recommendation
+              </p>
+              <h3 className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                {goalConfig.label}
+              </h3>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            Recommended
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/60 dark:border-border-dark/60">
+          <p className="text-sm font-bold text-primary-light dark:text-primary-dark">
+            {goalConfig.recommendedSplit}
+          </p>
+          <p className="text-xs text-secondary-light dark:text-secondary-dark mt-0.5 leading-relaxed">
+            {goalConfig.splitDescription}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between pt-1 text-xs">
+          <span className="text-[11px] text-muted-light dark:text-muted-dark font-medium">
+            100% customizable as you wish
+          </span>
+          <button
+            onClick={() => {
+              triggerHaptic(5);
+              navigate('/gym/split');
+            }}
+            className="flex items-center gap-1.5 font-bold text-accent hover:underline active:scale-95 transition-all text-xs"
+          >
+            <SlidersHorizontal size={13} />
+            <span>Customize Split</span>
+          </button>
+        </div>
+      </div>
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-4 sm:gap-5">
         <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
@@ -184,23 +292,98 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
       </div>
 
-      {/* Today's workout exercises card */}
-      <div className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
-            Today's Routine · {todayPlan?.type || 'Rest'}
-          </p>
-          {todayPlan?.type !== 'REST' && (
-            <span className="text-xs font-bold text-muted-light dark:text-muted-dark">
-              {(todayPlan?.exercises || []).length} items
+      {/* 7-Day Routine Selector Strip */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans flex items-center gap-1.5">
+            <span>Viewing Routine:</span>
+            <span className="text-accent font-black">
+              {isSelectedToday ? `${selectedDay} (Today)` : selectedDay}
             </span>
+            <span className="text-muted-light dark:text-muted-dark font-mono font-normal">
+              · {activePlan?.type || 'Rest'}
+            </span>
+          </p>
+          {!isSelectedToday && (
+            <button
+              onClick={() => {
+                triggerHaptic(5);
+                setSelectedDay(shortDay);
+              }}
+              className="text-[11px] font-bold text-accent hover:underline font-mono"
+            >
+              Back to Today ({shortDay})
+            </button>
           )}
         </div>
 
-        {todayPlan && todayPlan.type !== 'REST' && (todayPlan.exercises || []).length > 0 ? (
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {DAYS.map(day => {
+            const plan = data?.workoutPlans?.find(p => p.day === day);
+            const isSelected = selectedDay === day;
+            const isToday = day === shortDay;
+            const exCount = (plan?.exercises || []).length;
+
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  triggerHaptic(5);
+                  setSelectedDay(day);
+                }}
+                className={`px-3 py-2 rounded-[20px] text-center transition-all active:scale-95 flex flex-col items-center min-w-[76px] border ${
+                  isSelected 
+                    ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-transparent shadow-sm' 
+                    : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                }`}
+              >
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-bold font-sans">{day}</span>
+                  {isToday && (
+                    <span className="text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-emerald-500 text-white leading-tight">
+                      Today
+                    </span>
+                  )}
+                </div>
+                <span className={`text-[10px] font-mono font-bold truncate max-w-[68px] mt-0.5 ${
+                  isSelected ? 'opacity-95' : 'text-primary-light dark:text-primary-dark'
+                }`}>
+                  {plan?.type || 'Rest'}
+                </span>
+                <span className="text-[9px] font-mono opacity-60">
+                  {plan?.type === 'REST' ? 'Rest' : `${exCount} acts`}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Routine Activities Card */}
+      <div className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+              {isSelectedToday ? "Today's Protocol" : `${selectedDay}'s Protocol`} · {activePlan?.type || 'Rest'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-muted-light dark:text-muted-dark font-mono">
+              {(activePlan?.exercises || []).length} activities
+            </span>
+            <button
+              onClick={() => navigate('/gym/split')}
+              className="text-xs font-bold text-accent hover:underline flex items-center gap-1 font-mono"
+            >
+              <Settings size={12} /> Edit Split
+            </button>
+          </div>
+        </div>
+
+        {activePlan && activePlan.type !== 'REST' && (activePlan.exercises || []).length > 0 ? (
           <div className="space-y-3">
-            {(todayPlan.exercises || []).map((ex, i) => {
-              const logged = todayLog?.exercises?.find(e => e.name === ex.name);
+            {(activePlan.exercises || []).map((ex, i) => {
+              const logged = isSelectedToday ? todayLog?.exercises?.find(e => e.name === ex.name) : undefined;
               const completedSets = (logged?.sets || []).filter(s => s?.completed).length;
               const targetSets = Number(ex?.sets) || 0;
               const done = targetSets > 0 && completedSets >= targetSets;
@@ -215,7 +398,7 @@ export default function Gym({ data, updateData }: GymProps) {
                       {ex.sets} sets × {ex.reps} reps · {ex.weight} kg
                     </p>
                   </div>
-                  {todayLog ? (
+                  {isSelectedToday && todayLog ? (
                     <span
                       className={`text-xs font-bold px-3 py-1 rounded-full font-mono ${
                         done
@@ -226,36 +409,63 @@ export default function Gym({ data, updateData }: GymProps) {
                       {completedSets}/{ex.sets} sets
                     </span>
                   ) : (
-                    <span className="text-[11px] font-mono text-muted-light dark:text-muted-dark px-2 py-1 rounded-full bg-black/5 dark:bg-white/5">
-                      Pending
+                    <span className="text-[11px] font-mono text-muted-light dark:text-muted-dark px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5">
+                      {ex.sets} sets
                     </span>
                   )}
                 </div>
               );
             })}
 
-            {isCompletedToday ? (
-              <div className="flex items-center justify-between p-3.5 mt-2 rounded-[20px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300">
-                <div className="flex items-center gap-2 text-xs font-bold">
-                  <Check size={16} className="stroke-[3]" />
-                  <span>Workout completed & saved for today</span>
+            {isSelectedToday ? (
+              isCompletedToday ? (
+                <div className="flex items-center justify-between p-3.5 mt-2 rounded-[20px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300">
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <Check size={16} className="stroke-[3]" />
+                    <span>Workout completed & saved for today</span>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold opacity-85">
+                    {totalSets} sets done
+                  </span>
                 </div>
-                <span className="text-[11px] font-mono font-bold opacity-85">
-                  {totalSets} sets done
-                </span>
-              </div>
-            ) : todayLog ? (
-              <p className="text-xs font-mono font-semibold text-muted-light dark:text-muted-dark pt-1">
-                {totalSets} sets completed so far
+              ) : todayLog ? (
+                <p className="text-xs font-mono font-semibold text-muted-light dark:text-muted-dark pt-1">
+                  {totalSets} sets completed so far today
+                </p>
+              ) : null
+            ) : (
+              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark pt-1">
+                Viewing scheduled routine for {selectedDay}. Switch back to Today ({shortDay}) to log sets.
               </p>
-            ) : null}
+            )}
           </div>
         ) : (
-          <div className="py-10 text-center">
-            <div className="flex justify-center text-3xl mb-2"><AnimatedMoon size={36} /></div>
+          <div className="py-8 text-center space-y-3">
+            <div className="flex justify-center text-3xl mb-1"><AnimatedMoon size={36} /></div>
             <p className="text-sm font-semibold text-secondary-light dark:text-secondary-dark">
-              {todayPlan?.type === 'REST' ? 'Rest day — recover and rebuild' : 'No exercises planned for today'}
+              {activePlan?.type === 'REST' 
+                ? `${selectedDay} is a Rest day — recover and rebuild` 
+                : `No activities scheduled for ${selectedDay} (${activePlan?.type}) yet`}
             </p>
+            {activePlan?.type !== 'REST' && (
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <button
+                  onClick={() => handleAutoGenerateForDay(selectedDay, activePlan?.type || 'FULL BODY')}
+                  disabled={generatingPlan}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                >
+                  {generatingPlan ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                  <span>Auto-Generate {activePlan?.type} with AI</span>
+                </button>
+                <button
+                  onClick={() => navigate('/gym/split')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 active:scale-95 transition-all flex items-center gap-1.5"
+                >
+                  <Settings size={14} />
+                  <span>Customize in Split</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
