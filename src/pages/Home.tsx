@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, 
@@ -26,7 +26,7 @@ interface HomeProps {
 }
 
 const container = {
-  hidden: {},
+  hidden: { opacity: 0 },
   show: { transition: { staggerChildren: 0.03 } },
 };
 
@@ -37,9 +37,14 @@ const item = {
 
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
-  const now = new Date();
+  const [now, setNow] = useState<Date>(() => new Date());
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   // ── Selected Date State (Defaults to Today) ──
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
@@ -198,12 +203,13 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     };
   }, [data]);
 
-  // Greeting
+  // Greeting based on exact time of day
   const h = now.getHours();
-  let greetWord = 'Evening';
-  if (h < 12) greetWord = 'Morning';
-  else if (h === 12) greetWord = 'Noon';
-  else if (h < 17) greetWord = 'Afternoon';
+  let greetWord = 'Night';
+  if (h >= 4 && h < 12) greetWord = 'Morning';
+  else if (h >= 12 && h < 17) greetWord = 'Afternoon';
+  else if (h >= 17 && h < 22) greetWord = 'Evening';
+  else greetWord = 'Night';
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
