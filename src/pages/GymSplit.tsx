@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, Plus, Trash2, GripVertical, Save, Sparkles, Loader2, HeartPulse,
-  Flame, TrendingUp, Dumbbell, Zap, Shield, Heart, Sprout, Compass, Activity
+  Flame, TrendingUp, Dumbbell, Zap, Shield, Heart, Sprout, Compass, Activity, Calendar
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
@@ -26,6 +26,19 @@ const DAY_MAP: Record<string, string> = {
   Sunday: 'Sun'
 };
 const SPLIT_PRESETS = ['PUSH', 'PULL', 'LEGS', 'CARDIO', 'UPPER', 'LOWER', 'FULL BODY', 'REST'];
+
+const getShortSplitLabel = (type: string) => {
+  if (!type || type.toUpperCase() === 'REST') return 'Rest';
+  const t = type.toUpperCase().trim();
+  if (t === 'FULL BODY') return 'Full';
+  if (t === 'SHOULDERS') return 'Shldr';
+  if (t === 'CARDIO') return 'Cardio';
+  if (t === 'UPPER') return 'Upper';
+  if (t === 'LOWER') return 'Lower';
+  if (t === 'CORE') return 'Core';
+  if (t.length > 5) return t.slice(0, 4);
+  return t.charAt(0) + t.slice(1).toLowerCase();
+};
 
 export const GOAL_SPLIT_TEMPLATES: Record<string, { name: string; split: { day: string; type: string }[] }> = {
   muscle_building: {
@@ -314,54 +327,90 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         </div>
       </div>
 
-      {/* Day Tabs with activities and Today badge */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans flex items-center gap-1.5">
-            <span>Selected Day:</span>
-            <span className="text-accent font-black">{activeDay === todayShort ? `${activeDay} (Today)` : activeDay}</span>
-            <span className="text-muted-light dark:text-muted-dark font-mono font-normal">· {activePlan.type || 'Rest'}</span>
-          </p>
-          <span className="text-[10px] font-mono text-muted-light dark:text-muted-dark">
-            {(activePlan?.exercises || []).length} activities scheduled
+      {/* Day Selector & Week Schedule Card */}
+      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-4 sm:p-5 shadow-sm space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent flex items-center justify-center shrink-0">
+              <Calendar size={15} />
+            </span>
+            <div>
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark leading-none">
+                Weekly Schedule
+              </p>
+              <h3 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-1.5 mt-0.5">
+                <span>{activeDay === todayShort ? `${activeDay} (Today)` : activeDay}</span>
+                <span className="text-muted-light dark:text-muted-dark font-normal">·</span>
+                <span className="text-accent font-black">{activePlan.type || 'Rest'}</span>
+              </h3>
+            </div>
+          </div>
+
+          <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark">
+            {activePlan.type === 'REST'
+              ? 'Rest Day'
+              : `${(activePlan?.exercises || []).length} ${(activePlan?.exercises || []).length === 1 ? 'activity' : 'activities'}`}
           </span>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {/* 7-Day Responsive Grid - Perfectly Symmetrical, Zero Cutoff on Mobile */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {DAYS.map(day => {
             const plan = plans.find(p => p.day === day);
             const isSelected = activeDay === day;
             const isToday = day === todayShort;
             const exCount = (plan?.exercises || []).length;
+            const isRest = !plan?.type || plan.type.toUpperCase() === 'REST';
 
             return (
               <button
                 key={day}
+                type="button"
                 onClick={() => {
                   triggerHaptic(5);
                   setActiveDay(day);
                 }}
-                className={`px-3 py-2 rounded-[20px] text-center transition-all active:scale-95 flex flex-col items-center min-w-[78px] border ${
-                  isSelected 
-                    ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-transparent shadow-sm' 
-                    : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                className={`flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-2xl transition-all relative border min-h-[74px] sm:min-h-[80px] ${
+                  isSelected
+                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.03] border-accent ring-2 ring-accent/20 z-10'
+                    : isToday
+                    ? 'bg-accent/10 dark:bg-accent/15 text-accent font-bold border-accent/40 hover:bg-accent/20'
+                    : 'bg-bg-light dark:bg-bg-dark border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark hover:border-accent/40 hover:bg-surface-light dark:hover:bg-surface-dark'
                 }`}
+                title={`${day}: ${plan?.type || 'Rest'} (${exCount} activities)`}
               >
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold font-sans">{day}</span>
+                {/* Day Header with Today indicator */}
+                <div className="flex items-center gap-1 justify-center w-full">
+                  <span className={`text-[11px] sm:text-xs font-bold leading-none ${
+                    isSelected ? 'text-white' : isToday ? 'text-accent' : 'text-primary-light dark:text-primary-dark'
+                  }`}>
+                    {day}
+                  </span>
                   {isToday && (
-                    <span className="text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-emerald-500 text-white leading-tight">
-                      Today
-                    </span>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
                   )}
                 </div>
-                <span className={`text-[10px] font-mono font-bold truncate max-w-[70px] mt-0.5 ${
-                  isSelected ? 'opacity-95' : 'text-primary-light dark:text-primary-dark'
+
+                {/* Split Type Badge */}
+                <span className={`text-[9.5px] sm:text-[10px] font-mono font-bold tracking-tight uppercase truncate max-w-full my-1 ${
+                  isSelected
+                    ? 'text-white/95'
+                    : isRest
+                    ? 'text-muted-light dark:text-muted-dark font-medium'
+                    : 'text-primary-light dark:text-primary-dark'
                 }`}>
-                  {plan?.type || 'Rest'}
+                  {getShortSplitLabel(plan?.type || 'REST')}
                 </span>
-                <span className="text-[9px] font-mono opacity-60">
-                  {plan?.type === 'REST' ? 'Rest' : `${exCount} acts`}
+
+                {/* Exercises Count */}
+                <span className={`text-[8.5px] sm:text-[9px] font-mono leading-none ${
+                  isSelected
+                    ? 'text-white/80'
+                    : isRest
+                    ? 'text-muted-light/60 dark:text-muted-dark/60'
+                    : 'text-secondary-light/70 dark:text-secondary-dark/70'
+                }`}>
+                  {isRest ? 'Off' : `${exCount} acts`}
                 </span>
               </button>
             );

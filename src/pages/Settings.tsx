@@ -271,7 +271,7 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
       </motion.div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.3 (Build 13)</p>
+        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.4 (Build 14)</p>
       </div>
     </motion.div>
   );

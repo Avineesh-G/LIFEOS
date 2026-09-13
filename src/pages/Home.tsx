@@ -18,6 +18,7 @@ import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startO
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
+import DailyQuoteMarquee from '../components/DailyQuoteMarquee';
 
 interface HomeProps {
   data: AppData;
@@ -227,6 +228,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         <h1 className="text-[34px] sm:text-4xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
           Good <span className="text-accent">{greetWord}</span>
         </h1>
+      </motion.div>
+
+      {/* ── Ambient Daily Quote Marquee (Offline No-Repeat Rotation) ── */}
+      <motion.div variants={item} className="px-1 -my-1">
+        <DailyQuoteMarquee />
       </motion.div>
 
       {/* ── Option 1: Interactive 7-Day Dynamic Strip ── */}

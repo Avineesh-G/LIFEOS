@@ -150,4 +150,26 @@
   .progress-segment {
     @apply h-1.5 rounded-full flex-1 transition-all duration-500;
   }
+
+  /* Seamless Marquee Animation */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: marquee var(--marquee-duration, 25s) linear infinite;
+  }
+
+  .animate-marquee:hover,
+  .animate-marquee:active {
+    animation-play-state: paused;
+  }
 }

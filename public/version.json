@@ -1,7 +1,7 @@
 {
-  "versionCode": 13,
-  "versionName": "1.5.3",
-  "releaseDate": "2026-09-12",
-  "releaseNotes": "LifeOS v1.5.3 (Build 13): Upgraded high-quota Groq AI models, rate limit protections, goal-tailored workout & nutrition engine, and fail-safe fallbacks.",
+  "versionCode": 14,
+  "versionName": "1.5.4",
+  "releaseDate": "2026-09-13",
+  "releaseNotes": "LifeOS v1.5.4 (Build 14): Expanded 285+ offline quote pool, bold quotation stream positioned below greeting, and redesigned responsive 7-day gym weekly schedule.",
   "apkUrl": "/LifeOS.apk"
 }
