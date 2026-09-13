@@ -276,8 +276,8 @@ export default function DailyQuoteMarquee() {
 
       {/* ── Interactive Life Pillars Dock & Daily Focus Commitment (Replaces STREAM Marquee) ── */}
       <div className="relative z-10 mt-3 pt-3 border-t border-purple-500/15 dark:border-purple-500/20 space-y-2.5">
-        {/* 5-Pillar Interactive Strip */}
-        <div className="flex items-center justify-between gap-1 sm:gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+        {/* 5-Pillar Interactive Strip - 100% Mobile & APK Visible */}
+        <div className="grid grid-cols-5 gap-1 sm:gap-1.5 w-full">
           {pillars.map((pillar) => {
             const isActive = activeQuote?.category === pillar.key;
             const IconComponent = pillar.icon;
@@ -286,7 +286,7 @@ export default function DailyQuoteMarquee() {
                 key={pillar.key}
                 type="button"
                 onClick={() => handlePillarSelect(pillar.key)}
-                className={`flex-1 min-w-[62px] sm:min-w-0 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-mono font-bold tracking-tight transition-all active:scale-95 border ${
+                className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1.5 px-1 sm:px-2 rounded-xl text-[9.5px] sm:text-[11px] font-mono font-bold tracking-tight transition-all active:scale-95 border ${
                   isActive
                     ? pillar.activeClass
                     : 'bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
@@ -294,18 +294,18 @@ export default function DailyQuoteMarquee() {
                 title={`Explore ${pillar.label} wisdom`}
               >
                 <IconComponent size={12} className={isActive ? 'text-white' : pillar.color} />
-                <span>{pillar.label}</span>
+                <span className="truncate">{pillar.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Action Controls: Commit Focus & Action Mission */}
-        <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 pt-0.5">
           <button
             type="button"
             onClick={handleToggleCommit}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 shadow-xs ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-xs ${
               isCommitted
                 ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
                 : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/25'
@@ -330,7 +330,7 @@ export default function DailyQuoteMarquee() {
               triggerHaptic('light');
               setShowActionPrompt(!showActionPrompt);
             }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 border ${
+            className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 border ${
               showActionPrompt
                 ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/40'
                 : 'bg-black/[0.03] dark:bg-white/[0.05] hover:bg-amber-500/10 text-secondary-light dark:text-secondary-dark hover:text-amber-600 dark:hover:text-amber-300 border-border-light/70 dark:border-border-dark/70'
