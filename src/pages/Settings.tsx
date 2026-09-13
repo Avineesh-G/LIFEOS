@@ -1,8 +1,8 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, getHapticLevel, setHapticLevel, HapticLevel } from '../utils/haptics';
 import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import { FITNESS_GOALS } from '../utils/calculations';
@@ -32,6 +32,37 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const [apiKeyInput, setApiKeyInput] = useState(data.geminiApiKey || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
+
+  // Haptic feedback preference state
+  const [hapticLevel, setHapticLevelState] = useState<HapticLevel>(() => getHapticLevel());
+
+  const handleHapticChange = (level: HapticLevel) => {
+    setHapticLevelState(level);
+    setHapticLevel(level);
+    if (level !== 'off') {
+      setTimeout(() => {
+        triggerHaptic(level === 'high' ? 'heavy' : 'medium');
+      }, 30);
+    }
+  };
+
+  const levelToSliderVal = (level: HapticLevel): number => {
+    switch (level) {
+      case 'off': return 0;
+      case 'medium': return 1;
+      case 'high': return 2;
+      default: return 1;
+    }
+  };
+
+  const sliderValToLevel = (val: number): HapticLevel => {
+    switch (val) {
+      case 0: return 'off';
+      case 1: return 'medium';
+      case 2: return 'high';
+      default: return 'medium';
+    }
+  };
 
   const handleSaveApiKey = async () => {
     triggerHaptic('save');
@@ -101,6 +132,106 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               );
             })}
           </div>
+        </div>
+      </motion.div>
+
+      {/* Haptic Feedback & Vibration Intensity Slider Section */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
+              <Smartphone size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                Haptic Feedback
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                Vibration intensity & tactile response
+              </p>
+            </div>
+          </div>
+          <span className={`text-xs font-bold px-3 py-1 rounded-full font-mono capitalize shadow-sm ${
+            hapticLevel === 'off'
+              ? 'bg-neutral-100 dark:bg-neutral-800 text-muted-light dark:text-muted-dark'
+              : hapticLevel === 'high'
+              ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300'
+              : 'bg-accent/15 text-accent'
+          }`}>
+            {hapticLevel === 'off' ? 'Off' : `${hapticLevel}`}
+          </span>
+        </div>
+
+        {/* Volume-like Slider Toggle */}
+        <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3">
+          <div className="flex items-center justify-between text-xs font-mono font-bold text-secondary-light dark:text-secondary-dark">
+            <span className="flex items-center gap-1.5">
+              <Volume2 size={14} className="text-accent" />
+              <span>Haptic Strength Slider</span>
+            </span>
+            <span className="capitalize text-accent font-black">{hapticLevel}</span>
+          </div>
+
+          <div className="relative pt-1 pb-1">
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="1"
+              value={levelToSliderVal(hapticLevel)}
+              onChange={(e) => {
+                const newLevel = sliderValToLevel(parseInt(e.target.value, 10));
+                handleHapticChange(newLevel);
+              }}
+              className="w-full h-2.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-accent transition-all"
+            />
+          </div>
+
+          {/* Stepped Labels below Slider */}
+          <div className="flex justify-between text-[11px] font-mono font-bold text-muted-light dark:text-muted-dark px-1">
+            <button
+              type="button"
+              onClick={() => handleHapticChange('off')}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'off' ? 'text-accent font-black' : ''}`}
+            >
+              Off
+            </button>
+            <button
+              type="button"
+              onClick={() => handleHapticChange('medium')}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'medium' ? 'text-accent font-black' : ''}`}
+            >
+              Medium
+            </button>
+            <button
+              type="button"
+              onClick={() => handleHapticChange('high')}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'high' ? 'text-accent font-black' : ''}`}
+            >
+              High
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Select Buttons */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {(['off', 'medium', 'high'] as const).map((lvl) => {
+            const active = hapticLevel === lvl;
+            return (
+              <button
+                key={lvl}
+                type="button"
+                onClick={() => handleHapticChange(lvl)}
+                className={`py-2.5 px-3 rounded-xl border text-xs font-bold font-mono uppercase tracking-wider transition-all active:scale-95 ${
+                  active
+                    ? 'bg-accent text-white border-accent shadow-sm'
+                    : 'bg-black/[0.02] dark:bg-white/[0.03] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                }`}
+              >
+                {lvl}
+              </button>
+            );
+          })}
         </div>
       </motion.div>
 

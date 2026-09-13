@@ -43,8 +43,31 @@ function playSyntheticHapticAudio(intensity: 'nav' | 'light' | 'medium' | 'heavy
   }
 }
 
+export type HapticLevel = 'off' | 'medium' | 'high';
+
+export function getHapticLevel(): HapticLevel {
+  if (typeof window === 'undefined') return 'medium';
+  try {
+    const saved = localStorage.getItem('lifeos_haptics_level');
+    if (saved === 'off' || saved === 'medium' || saved === 'high') {
+      return saved;
+    }
+  } catch {}
+  return 'medium';
+}
+
+export function setHapticLevel(level: HapticLevel) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('lifeos_haptics_level', level);
+  } catch {}
+}
+
 export function triggerHaptic(pattern: HapticType = 'light') {
   if (typeof window === 'undefined') return;
+
+  const level = getHapticLevel();
+  if (level === 'off') return;
 
   const now = Date.now();
   // Throttle rapid duplicate events for navigation & light taps (prevents double buzz)
@@ -53,32 +76,42 @@ export function triggerHaptic(pattern: HapticType = 'light') {
     lastHapticTime = now;
   }
 
+  const isHigh = level === 'high';
+
   // 1. Android / iOS Native Hardware Vibration via Capacitor Bridge
   if (Capacitor.isNativePlatform()) {
     try {
       if (pattern === 'nav') {
-        Haptics.impact({ style: ImpactStyle.Light });
+        Haptics.impact({ style: isHigh ? ImpactStyle.Medium : ImpactStyle.Light });
         return;
       } else if (pattern === 'light') {
-        Haptics.impact({ style: ImpactStyle.Light });
+        Haptics.impact({ style: isHigh ? ImpactStyle.Medium : ImpactStyle.Light });
         return;
       } else if (pattern === 'medium') {
-        Haptics.impact({ style: ImpactStyle.Medium });
+        Haptics.impact({ style: isHigh ? ImpactStyle.Heavy : ImpactStyle.Medium });
         return;
       } else if (pattern === 'heavy') {
         Haptics.impact({ style: ImpactStyle.Heavy });
+        if (isHigh) {
+          setTimeout(() => {
+            Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
+          }, 60);
+        }
         return;
       } else if (pattern === 'save' || pattern === 'success') {
         Haptics.notification({ type: NotificationType.Success });
         return;
       } else if (pattern === 'ai') {
-        Haptics.impact({ style: ImpactStyle.Medium });
+        Haptics.impact({ style: isHigh ? ImpactStyle.Heavy : ImpactStyle.Medium });
         return;
       } else if (typeof pattern === 'number') {
-        Haptics.vibrate({ duration: Math.max(10, Math.min(pattern, 400)) });
+        const mult = isHigh ? 1.5 : 1;
+        Haptics.vibrate({ duration: Math.max(10, Math.min(Math.round(pattern * mult), 400)) });
         return;
       } else if (Array.isArray(pattern)) {
-        Haptics.vibrate({ duration: pattern[0] || 30 });
+        const dur = pattern[0] || 30;
+        const mult = isHigh ? 1.5 : 1;
+        Haptics.vibrate({ duration: Math.round(dur * mult) });
         return;
       }
     } catch {
@@ -92,35 +125,35 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   if (typeof pattern === 'string') {
     switch (pattern) {
       case 'nav':
-        vibratePattern = 12; // Ultra-light, gentle feedback specifically for navigation bar
+        vibratePattern = isHigh ? 20 : 12;
         break;
       case 'light':
-        vibratePattern = 18; // Softened subtle click
+        vibratePattern = isHigh ? 26 : 18;
         break;
       case 'medium':
-        vibratePattern = 35;
+        vibratePattern = isHigh ? 50 : 35;
         break;
       case 'heavy':
-        vibratePattern = 55;
+        vibratePattern = isHigh ? 80 : 55;
         break;
       case 'save':
-        vibratePattern = [25, 30, 35]; // Distinct confirmation dual pulse
+        vibratePattern = isHigh ? [35, 40, 50] : [25, 30, 35];
         break;
       case 'success':
-        vibratePattern = [20, 25, 30];
+        vibratePattern = isHigh ? [30, 35, 45] : [20, 25, 30];
         break;
       case 'ai':
-        vibratePattern = [30, 40, 35];
+        vibratePattern = isHigh ? [45, 55, 50] : [30, 40, 35];
         break;
       default:
-        vibratePattern = 18;
+        vibratePattern = isHigh ? 26 : 18;
     }
   } else if (typeof pattern === 'number') {
-    vibratePattern = pattern;
+    vibratePattern = isHigh ? Math.round(pattern * 1.5) : pattern;
   } else if (Array.isArray(pattern)) {
-    vibratePattern = pattern;
+    vibratePattern = isHigh ? pattern.map(n => Math.round(n * 1.5)) : pattern;
   } else {
-    vibratePattern = 18;
+    vibratePattern = isHigh ? 26 : 18;
   }
 
   let didVibrate = false;

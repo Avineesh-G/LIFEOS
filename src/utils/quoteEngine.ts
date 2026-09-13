@@ -27,59 +27,27 @@ function getTodayString(): string {
   return `${year}-${month}-${day}`;
 }
 
+export const PILLARS = ['studies', 'career', 'finance', 'time', 'character'] as const;
+export type PillarType = (typeof PILLARS)[number];
+
 /**
- * Retrieves a daily set of distinct quotes (default 5, spanning multiple pillars)
- * with guaranteed non-repeating rotation across days.
+ * Retrieves a daily set of distinct quotes guaranteed to span all 5 LifeOS pillars:
+ * Studies, Career, Finance, Time, and Character.
+ * Rotates deterministically across days with 0 repeats until the pillar pool is exhausted.
  */
 export function getDailyQuotes(count: number = 5): QuoteItem[] {
   const todayStr = getTodayString();
+  const [y, m, d] = todayStr.split('-').map(Number);
+  const dayNumber = Math.floor(new Date(y, m - 1, d).getTime() / (1000 * 60 * 60 * 24));
 
-  let pool: number[] = [];
-  let currentIndex = 0;
-  let lastShownDate = '';
-
-  try {
-    const savedPool = localStorage.getItem(STORAGE_KEY_POOL);
-    const savedIndex = localStorage.getItem(STORAGE_KEY_INDEX);
-    const savedDate = localStorage.getItem(STORAGE_KEY_DATE);
-
-    if (savedPool) {
-      pool = JSON.parse(savedPool);
-    }
-    if (savedIndex !== null) {
-      currentIndex = parseInt(savedIndex, 10);
-    }
-    if (savedDate) {
-      lastShownDate = savedDate;
-    }
-  } catch (err) {
-    console.warn('[QuoteEngine] Storage read error, using fresh pool:', err);
-  }
-
-  // 1. If pool is uninitialized, empty, or pool size changed (e.g. new quotes added),
-  // generate a fresh Fisher-Yates shuffled list of all IDs
-  const allIds = QUOTES_POOL.map(q => q.id);
-  if (!Array.isArray(pool) || pool.length === 0 || pool.length !== allIds.length) {
-    pool = shuffle(allIds);
-    currentIndex = 0;
-    lastShownDate = todayStr;
-    persist(pool, currentIndex, todayStr);
-  }
-
-  // 2. If it's a new day, advance the index by the count so a fresh set appears
-  if (lastShownDate !== todayStr) {
-    currentIndex = (currentIndex + count) % pool.length;
-    lastShownDate = todayStr;
-    persist(pool, currentIndex, todayStr);
-  }
-
-  // 3. Collect `count` distinct quotes from the current pointer
   const selected: QuoteItem[] = [];
   for (let i = 0; i < count; i++) {
-    const quoteId = pool[(currentIndex + i) % pool.length];
-    const found = QUOTES_POOL.find(q => q.id === quoteId);
-    if (found) {
-      selected.push(found);
+    const pillar = PILLARS[i % PILLARS.length];
+    const pool = QUOTES_POOL.filter(q => q.category === pillar);
+    if (pool.length > 0) {
+      // Deterministic offset per pillar
+      const offset = (Math.abs(dayNumber) + i * 3) % pool.length;
+      selected.push(pool[offset]);
     }
   }
 

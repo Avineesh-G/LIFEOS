@@ -12,7 +12,11 @@ import {
   CheckCircle2, 
   Check, 
   CalendarDays,
-  Plus
+  Plus,
+  Sunrise,
+  Sun,
+  Sunset,
+  Moon
 } from 'lucide-react';
 import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startOfDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -204,34 +208,98 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     };
   }, [data]);
 
-  // Greeting based on exact time of day
-  const h = now.getHours();
-  let greetWord = 'Night';
-  if (h >= 4 && h < 12) greetWord = 'Morning';
-  else if (h >= 12 && h < 17) greetWord = 'Afternoon';
-  else if (h >= 17 && h < 22) greetWord = 'Evening';
-  else greetWord = 'Night';
+  // Contextual Dynamic Greeting Config based on exact time of day
+  const greetingConfig = useMemo(() => {
+    const hour = now.getHours();
+    if (hour >= 4 && hour < 12) {
+      return {
+        word: 'Morning',
+        icon: Sunrise,
+        gradient: 'from-amber-500 via-orange-500 to-rose-500',
+        glowColor: 'bg-amber-500/15',
+        subline: 'Rise with intent · Today is yours to conquer',
+        badge: 'Morning Focus',
+        badgeClass: 'bg-amber-500/15 text-amber-800 dark:text-amber-200 border-amber-500/30',
+        dotClass: 'bg-amber-500',
+      };
+    } else if (hour >= 12 && hour < 17) {
+      return {
+        word: 'Afternoon',
+        icon: Sun,
+        gradient: 'from-blue-500 via-indigo-500 to-purple-600',
+        glowColor: 'bg-blue-500/15',
+        subline: 'Sustain the momentum · High performance mode',
+        badge: 'Peak Energy',
+        badgeClass: 'bg-blue-500/15 text-blue-800 dark:text-blue-200 border-blue-500/30',
+        dotClass: 'bg-blue-500',
+      };
+    } else if (hour >= 17 && hour < 22) {
+      return {
+        word: 'Evening',
+        icon: Sunset,
+        gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+        glowColor: 'bg-indigo-500/15',
+        subline: 'Reflect, execute, and finish your day strong',
+        badge: 'Evening Review',
+        badgeClass: 'bg-indigo-500/15 text-indigo-800 dark:text-indigo-200 border-indigo-500/30',
+        dotClass: 'bg-indigo-500',
+      };
+    } else {
+      return {
+        word: 'Night',
+        icon: Moon,
+        gradient: 'from-purple-400 via-indigo-400 to-cyan-400',
+        glowColor: 'bg-purple-500/15',
+        subline: 'Recharge your mind · Greatness continues tomorrow',
+        badge: 'Night Calm',
+        badgeClass: 'bg-purple-500/15 text-purple-800 dark:text-purple-200 border-purple-500/30',
+        dotClass: 'bg-purple-500',
+      };
+    }
+  }, [now]);
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
 
-      {/* ── Expressive Hero Greeting ── */}
-      <motion.div variants={item} className="pt-2 px-1">
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm">
-            <Calendar size={13} className="text-accent" />
+      {/* ── Expressive Hero Greeting (Contextual Ambient Showcase) ── */}
+      <motion.div variants={item} className="pt-2 px-1 relative">
+        {/* Soft Ambient Hero Radial Glow */}
+        <div className={`absolute -top-6 -left-6 w-48 h-48 rounded-full ${greetingConfig.glowColor} blur-3xl pointer-events-none`} />
+
+        {/* Date & Phase Glass Pill */}
+        <div className="flex items-center gap-2 mb-2.5 flex-wrap relative z-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light/85 dark:bg-surface-dark/85 backdrop-blur-md border border-border-light/80 dark:border-border-dark/80 shadow-xs">
+            <greetingConfig.icon size={13} className="text-accent shrink-0 animate-pulse" />
             <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
               {format(now, 'EEEE, MMMM d')}
             </span>
           </div>
+
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-mono font-bold tracking-wider uppercase border ${greetingConfig.badgeClass}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${greetingConfig.dotClass} animate-ping`} />
+            {greetingConfig.badge}
+          </span>
         </div>
-        <h1 className="text-[34px] sm:text-4xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
-          Good <span className="text-accent">{greetWord}</span>
-        </h1>
+
+        {/* Hero Title with Dynamic Fluid Gradient */}
+        <div className="relative z-10">
+          <h1 className="text-[34px] sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
+            Good{' '}
+            <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
+              {greetingConfig.word}
+            </span>
+          </h1>
+
+          {/* Motivational Subline */}
+          <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1.5 tracking-tight flex items-center gap-1.5">
+            <Sparkles size={12} className="text-accent shrink-0 opacity-80" />
+            <span>{greetingConfig.subline}</span>
+          </p>
+        </div>
       </motion.div>
 
-      {/* ── Ambient Daily Quote Marquee (Offline No-Repeat Rotation) ── */}
-      <motion.div variants={item} className="px-1 -my-1">
+      {/* ── Daily Wisdom Showcase Card (Offline No-Repeat Rotation) ── */}
+      <motion.div variants={item}>
         <DailyQuoteMarquee />
       </motion.div>
 

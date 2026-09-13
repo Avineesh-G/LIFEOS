@@ -162,7 +162,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
         className="relative z-10 min-h-screen"
         style={{
           paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
-          paddingBottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
         <div className="max-w-xl mx-auto px-4 py-6">
@@ -232,65 +232,85 @@ export default function Layout({ children, refresh }: LayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* ── Fixed Bottom Navigation (4 Floating Squircle Buttons, No Backside Container) ── */}
+      {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none flex items-center justify-center px-4"
-        style={{ paddingBottom: 'calc(1.1rem + env(safe-area-inset-bottom, 0px))' }}
+        className="fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4"
+        style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
         role="navigation"
         aria-label="Main Navigation"
       >
-        <div className="flex items-center justify-center gap-3.5 pointer-events-auto">
-          {/* Home, Gym, Nutrition: Squircle Buttons */}
-          {primaryDockItems.map((item) => {
-            const active = isActive(item.path);
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.path}
-                onClick={() => {
-                  triggerHaptic('nav');
-                  if (menuOpen) setMenuOpen(false);
-                  navigate(item.path);
-                }}
-                title={item.label}
-                className={`relative flex items-center justify-center w-[54px] h-[54px] rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
-                  active
-                    ? 'bg-white dark:bg-[#1C1D24] border-accent/60 text-accent shadow-[0_6px_20px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] scale-[1.04]'
-                    : 'bg-white dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
-                }`}
-              >
-                <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-                {active && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1.5 shadow-sm" />
-                )}
-              </button>
-            );
-          })}
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-2.5 max-w-md">
+          {/* Main Divided Segment: Home, Gym, Nutrition */}
+          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-white/95 dark:bg-[#1A1B22]/95 backdrop-blur-2xl border border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_44px_rgba(0,0,0,0.7)]">
+            {primaryDockItems.map((item, idx) => {
+              const active = isActive(item.path);
+              const Icon = item.icon;
+              return (
+                <div key={item.path} className="flex items-center">
+                  {idx > 0 && (
+                    <div className="w-[1px] h-5 bg-black/[0.08] dark:bg-white/[0.12] rounded-full mx-0.5" />
+                  )}
+                  <button
+                    onClick={() => {
+                      triggerHaptic('nav');
+                      if (menuOpen) setMenuOpen(false);
+                      navigate(item.path);
+                    }}
+                    title={item.label}
+                    className={`relative flex flex-col items-center justify-center w-[68px] sm:w-[74px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${
+                      active
+                        ? 'text-accent font-bold'
+                        : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
+                    }`}
+                  >
+                    {active && (
+                      <motion.div
+                        layoutId="activeTabBadge"
+                        className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm"
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                      />
+                    )}
+                    <Icon size={20} strokeWidth={active ? 2.5 : 2} className="relative z-10 transition-transform duration-150" />
+                    <span className={`relative z-10 text-[10px] sm:text-[11px] tracking-tight mt-0.5 ${active ? 'text-accent' : ''}`}>
+                      {item.label}
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
 
-          {/* 4th Icon: 3 Lines Menu Toggle Button */}
-          <button
-            onClick={() => {
-              triggerHaptic('light');
-              setMenuOpen(!menuOpen);
-            }}
-            title="More Sections"
-            className={`relative flex items-center justify-center w-[54px] h-[54px] rounded-[20px] border transition-[transform,background-color,border-color,box-shadow] duration-150 active:scale-90 select-none focus:outline-none ${
-              menuOpen
-                ? 'bg-white dark:bg-[#1C1D24] border-accent text-accent shadow-[0_6px_20px_rgba(0,0,0,0.14)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] rotate-90 scale-[1.04]'
-                : isSecondaryActive
-                ? 'bg-white dark:bg-[#1C1D24] border-accent/60 text-accent shadow-[0_6px_20px_rgba(0,0,0,0.12)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.5)] scale-[1.04]'
-                : 'bg-white dark:bg-[#1C1D24] border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_16px_rgba(0,0,0,0.4)] hover:border-accent/40'
-            }`}
-          >
-            {menuOpen ? (
-              <X size={22} strokeWidth={2.4} />
-            ) : (
-              <Menu size={22} strokeWidth={2.2} />
-            )}
-            {!menuOpen && isSecondaryActive && (
-              <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1.5 shadow-sm" />
-            )}
-          </button>
+          {/* Divided Companion Satellite: More / Menu Launcher */}
+          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-white/95 dark:bg-[#1A1B22]/95 backdrop-blur-2xl border border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_44px_rgba(0,0,0,0.7)]">
+            <button
+              onClick={() => {
+                triggerHaptic('light');
+                setMenuOpen(!menuOpen);
+              }}
+              title="More Sections"
+              className={`relative flex flex-col items-center justify-center w-[58px] sm:w-[64px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${
+                menuOpen || isSecondaryActive
+                  ? 'text-accent font-bold'
+                  : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
+              }`}
+            >
+              {(menuOpen || isSecondaryActive) && (
+                <motion.div
+                  layoutId={!primaryDockItems.some(i => isActive(i.path)) ? "activeTabBadge" : undefined}
+                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              )}
+              {menuOpen ? (
+                <X size={20} strokeWidth={2.4} className="relative z-10 transition-transform duration-150" />
+              ) : (
+                <Menu size={20} strokeWidth={2.2} className="relative z-10 transition-transform duration-150" />
+              )}
+              <span className={`relative z-10 text-[10px] sm:text-[11px] tracking-tight mt-0.5 ${menuOpen || isSecondaryActive ? 'text-accent' : ''}`}>
+                {menuOpen ? 'Close' : 'More'}
+              </span>
+            </button>
+          </div>
         </div>
       </nav>
 

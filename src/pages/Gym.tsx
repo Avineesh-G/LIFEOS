@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Dumbbell, Play, Settings, Flame, Sparkles, Check, Zap, ArrowUpRight,
   TrendingUp, Shield, Heart, Sprout, Compass, Activity, SlidersHorizontal,
-  ChevronRight, Loader2
+  ChevronRight, Loader2, Calendar
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { AnimatedMoon } from '../components/AnimatedIcons';
@@ -18,6 +18,19 @@ interface GymProps {
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const getShortSplitLabel = (type: string) => {
+  if (!type || type.toUpperCase() === 'REST') return 'Rest';
+  const t = type.toUpperCase().trim();
+  if (t === 'FULL BODY') return 'Full';
+  if (t === 'SHOULDERS') return 'Shldr';
+  if (t === 'CARDIO') return 'Cardio';
+  if (t === 'UPPER') return 'Upper';
+  if (t === 'LOWER') return 'Lower';
+  if (t === 'CORE') return 'Core';
+  if (t.length > 5) return t.slice(0, 4);
+  return t.charAt(0) + t.slice(1).toLowerCase();
+};
 
 export default function Gym({ data, updateData }: GymProps) {
   const navigate = useNavigate();
@@ -292,66 +305,103 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
       </div>
 
-      {/* 7-Day Routine Selector Strip */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans flex items-center gap-1.5">
-            <span>Viewing Routine:</span>
-            <span className="text-accent font-black">
-              {isSelectedToday ? `${selectedDay} (Today)` : selectedDay}
+      {/* 7-Day Routine Selector Card - Perfectly Symmetrical, Zero Cutoff on Mobile */}
+      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-4 sm:p-5 shadow-sm space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent flex items-center justify-center shrink-0">
+              <Calendar size={15} />
             </span>
-            <span className="text-muted-light dark:text-muted-dark font-mono font-normal">
-              · {activePlan?.type || 'Rest'}
-            </span>
-          </p>
-          {!isSelectedToday && (
+            <div>
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark leading-none">
+                Weekly Routine
+              </p>
+              <h3 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-1.5 mt-0.5">
+                <span>{isSelectedToday ? `${selectedDay} (Today)` : selectedDay}</span>
+                <span className="text-muted-light dark:text-muted-dark font-normal">·</span>
+                <span className="text-accent font-black">{activePlan?.type || 'Rest'}</span>
+              </h3>
+            </div>
+          </div>
+
+          {!isSelectedToday ? (
             <button
+              type="button"
               onClick={() => {
                 triggerHaptic(5);
                 setSelectedDay(shortDay);
               }}
-              className="text-[11px] font-bold text-accent hover:underline font-mono"
+              className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 active:scale-95 transition-all"
             >
               Back to Today ({shortDay})
             </button>
+          ) : (
+            <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark">
+              {activePlan?.type === 'REST'
+                ? 'Rest Day'
+                : `${(activePlan?.exercises || []).length} ${(activePlan?.exercises || []).length === 1 ? 'activity' : 'activities'}`}
+            </span>
           )}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {/* 7-Day Responsive Grid - Symmetrical & Zero Cutoffs on Mobile */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {DAYS.map(day => {
             const plan = data?.workoutPlans?.find(p => p.day === day);
             const isSelected = selectedDay === day;
             const isToday = day === shortDay;
             const exCount = (plan?.exercises || []).length;
+            const isRest = !plan?.type || plan.type.toUpperCase() === 'REST';
 
             return (
               <button
                 key={day}
+                type="button"
                 onClick={() => {
                   triggerHaptic(5);
                   setSelectedDay(day);
                 }}
-                className={`px-3 py-2 rounded-[20px] text-center transition-all active:scale-95 flex flex-col items-center min-w-[76px] border ${
-                  isSelected 
-                    ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-transparent shadow-sm' 
-                    : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                className={`flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-2xl transition-all relative border min-h-[74px] sm:min-h-[80px] ${
+                  isSelected
+                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.03] border-accent ring-2 ring-accent/20 z-10'
+                    : isToday
+                    ? 'bg-accent/10 dark:bg-accent/15 text-accent font-bold border-accent/40 hover:bg-accent/20'
+                    : 'bg-bg-light dark:bg-bg-dark border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark hover:border-accent/40 hover:bg-surface-light dark:hover:bg-surface-dark'
                 }`}
+                title={`${day}: ${plan?.type || 'Rest'} (${exCount} activities)`}
               >
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold font-sans">{day}</span>
+                {/* Day Header with Today indicator */}
+                <div className="flex items-center gap-1 justify-center w-full">
+                  <span className={`text-[11px] sm:text-xs font-bold leading-none ${
+                    isSelected ? 'text-white' : isToday ? 'text-accent' : 'text-primary-light dark:text-primary-dark'
+                  }`}>
+                    {day}
+                  </span>
                   {isToday && (
-                    <span className="text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded-full bg-emerald-500 text-white leading-tight">
-                      Today
-                    </span>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
                   )}
                 </div>
-                <span className={`text-[10px] font-mono font-bold truncate max-w-[68px] mt-0.5 ${
-                  isSelected ? 'opacity-95' : 'text-primary-light dark:text-primary-dark'
+
+                {/* Split Type Badge */}
+                <span className={`text-[9.5px] sm:text-[10px] font-mono font-bold tracking-tight uppercase truncate max-w-full my-1 ${
+                  isSelected
+                    ? 'text-white/95'
+                    : isRest
+                    ? 'text-muted-light dark:text-muted-dark font-medium'
+                    : 'text-primary-light dark:text-primary-dark'
                 }`}>
-                  {plan?.type || 'Rest'}
+                  {getShortSplitLabel(plan?.type || 'REST')}
                 </span>
-                <span className="text-[9px] font-mono opacity-60">
-                  {plan?.type === 'REST' ? 'Rest' : `${exCount} acts`}
+
+                {/* Exercises Count */}
+                <span className={`text-[8.5px] sm:text-[9px] font-mono leading-none ${
+                  isSelected
+                    ? 'text-white/80'
+                    : isRest
+                    ? 'text-muted-light/60 dark:text-muted-dark/60'
+                    : 'text-secondary-light/70 dark:text-secondary-dark/70'
+                }`}>
+                  {isRest ? 'Off' : `${exCount} acts`}
                 </span>
               </button>
             );
@@ -470,45 +520,7 @@ export default function Gym({ data, updateData }: GymProps) {
         )}
       </div>
 
-      {/* Material 3 Expressive Cardio Only Session (Rose Tonal Container) */}
-      <div
-        className="rounded-[28px] p-5 sm:p-6 bg-m3-rose-container dark:bg-m3-rose-darkContainer text-m3-rose-text dark:text-m3-rose-darkText border border-m3-rose-badge/50 dark:border-m3-rose-darkBadge/50 shadow-m3-subtle space-y-4"
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="w-9 h-9 rounded-[14px] bg-white/80 dark:bg-black/30 flex items-center justify-center shadow-sm">
-                <Flame size={18} className="text-rose-600 dark:text-rose-400" />
-              </span>
-              <h3 className="font-black text-base font-sans">Cardio Only Session</h3>
-            </div>
-            <p className="text-xs opacity-85 leading-relaxed pt-1">
-              Want to do cardio today? Generate an AI-powered cardio routine (HIIT, Treadmill, Cycling & Core intervals) customized for you.
-            </p>
-          </div>
-        </div>
 
-        <div className="pt-3 border-t border-m3-rose-badge/40 dark:border-m3-rose-darkBadge/40 flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold flex items-center gap-1 opacity-75">
-            <Sparkles size={12} className="text-rose-600 dark:text-rose-400" /> AI Customized
-          </span>
-          <button
-            onClick={handleGenerateCardio}
-            disabled={generatingCardio}
-            className="rounded-full px-4 py-2 text-xs font-bold flex items-center gap-1.5 bg-[#8C2B42] dark:bg-[#FFB2B8] text-white dark:text-[#2C1B20] shadow-sm hover:scale-[1.02] active:scale-[0.96] transition-all disabled:opacity-50"
-          >
-            {generatingCardio ? (
-              <>
-                <Loader2 size={13} className="animate-spin" /> Generating...
-              </>
-            ) : (
-              <>
-                <Play size={12} fill="currentColor" /> Start Cardio (AI)
-              </>
-            )}
-          </button>
-        </div>
-      </div>
 
       {/* Recent workouts */}
       {Array.isArray(data.workoutLogs) && data.workoutLogs.length > 0 && (

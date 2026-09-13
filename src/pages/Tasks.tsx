@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, X, Check } from 'lucide-react';
-import { format } from 'date-fns';
+import { Plus, Trash2, X, Check, RotateCcw, Clock, ArrowRight, Calendar } from 'lucide-react';
+import { format, subDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData, Task } from '../types';
@@ -15,9 +15,16 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const [newSubtask, setNewSubtask] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+  const yesterday = useMemo(() => format(subDays(new Date(), 1), 'yyyy-MM-dd'), []);
 
+  // Today's scheduled tasks
   const todayTasks = useMemo(() => {
     return (data?.tasks || []).filter(t => t?.date === today);
+  }, [data?.tasks, today]);
+
+  // Yesterday's & Previous Days' Uncompleted Tasks (rolled over sub-section)
+  const previousPendingTasks = useMemo(() => {
+    return (data?.tasks || []).filter(t => t?.date && t.date < today && !t.completed);
   }, [data?.tasks, today]);
 
   const completedCount = useMemo(() => {
@@ -45,7 +52,37 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const toggleTask = async (id: string) => {
     triggerHaptic('medium');
     await updateData({
-      tasks: (data?.tasks || []).map(t => t.id === id ? { ...t, completed: !t.completed } : t)
+      tasks: (data?.tasks || []).map(t => {
+        if (t.id === id) {
+          const nextCompleted = !t.completed;
+          return {
+            ...t,
+            completed: nextCompleted,
+            // If completing a task from a previous day, roll it to today so today's completion records it
+            date: nextCompleted && t.date < today ? today : t.date,
+          };
+        }
+        return t;
+      })
+    });
+  };
+
+  const moveToToday = async (id: string) => {
+    triggerHaptic('medium');
+    await updateData({
+      tasks: (data?.tasks || []).map(t => (t.id === id ? { ...t, date: today } : t))
+    });
+  };
+
+  const rolloverAllToToday = async () => {
+    triggerHaptic('save');
+    await updateData({
+      tasks: (data?.tasks || []).map(t => {
+        if (t.date && t.date < today && !t.completed) {
+          return { ...t, date: today };
+        }
+        return t;
+      })
     });
   };
 
@@ -146,6 +183,120 @@ export default function Tasks({ data, updateData }: TasksProps) {
           </span>
         </div>
       </div>
+
+      {/* Yesterday's / Overdue Pending Tasks Subsection */}
+      {previousPendingTasks.length > 0 && (
+        <div className="rounded-[26px] p-4 sm:p-5 bg-gradient-to-br from-amber-500/10 via-amber-500/[0.04] to-transparent border border-amber-500/25 dark:border-amber-500/30 shadow-sm space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                <Clock size={15} className="stroke-[2.5]" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-black text-amber-900 dark:text-amber-300 font-sans tracking-tight">
+                    Yesterday's Tasks Are Pending
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                    {previousPendingTasks.length}
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800/80 dark:text-amber-400/80 font-medium truncate">
+                  Unfinished tasks carried forward so you don't forget
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={rolloverAllToToday}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm active:scale-95 transition-all"
+              title="Move all pending tasks to today"
+            >
+              <RotateCcw size={12} className="stroke-[2.5]" />
+              <span className="hidden sm:inline">Forward All</span>
+              <span className="sm:hidden">All</span>
+            </button>
+          </div>
+
+          {/* List of carried-over pending tasks */}
+          <div className="space-y-2 pt-1">
+            <AnimatePresence>
+              {previousPendingTasks.map(task => {
+                const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
+                const isYesterday = task.date === yesterday;
+                return (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="rounded-[18px] border border-amber-500/20 bg-white/90 dark:bg-[#1C1A17] p-3 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-all group"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleTask(task.id)}
+                      className="w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center border-2 border-amber-400 dark:border-amber-500/60 hover:bg-amber-500 hover:text-white transition-all bg-amber-500/5 text-transparent"
+                      title="Mark done and roll to today"
+                    >
+                      <Check size={14} className="stroke-[3] group-hover:text-white" />
+                    </button>
+
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark leading-tight">
+                          {task.text}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 flex-shrink-0">
+                          <Calendar size={9} />
+                          {isYesterday ? 'Yesterday' : task.date ? format(new Date(task.date), 'MMM d') : 'Past'}
+                        </span>
+                      </div>
+                      {hasValidSubtask && (
+                        <span className="text-[11px] block mt-0.5 text-secondary-light dark:text-secondary-dark font-medium">
+                          {task.subtask}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveToToday(task.id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-all"
+                        title="Move to Today"
+                      >
+                        <ArrowRight size={11} className="stroke-[2.5]" />
+                        <span>Today</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTask(task.id);
+                        }}
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-muted-light hover:text-red-500 transition-all"
+                        title="Delete task"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+
+      {/* Today's Section Header if yesterday's tasks exist */}
+      {previousPendingTasks.length > 0 && (
+        <div className="flex items-center justify-between pt-1">
+          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+            Today's Tasks ({todayTasks.length})
+          </h2>
+        </div>
+      )}
 
       {/* Task list */}
       <div className="space-y-3">
