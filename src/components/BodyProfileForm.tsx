@@ -337,11 +337,14 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
             </span>
           </div>
 
-          <div className="p-2.5 rounded-[16px] bg-white/40 dark:bg-black/20 text-[11px] flex items-center gap-2">
-            <Dumbbell size={15} className="shrink-0 text-m3-mint-text dark:text-m3-mint-darkText" />
-            <span className="font-medium truncate">
-              <strong>Gym Recommendation:</strong> {liveTarget.recommendedSplit}
-            </span>
+          <div className="p-3 rounded-[16px] bg-white/50 dark:bg-black/25 text-xs flex items-start gap-2.5 leading-snug">
+            <Dumbbell size={16} className="shrink-0 mt-0.5 text-m3-mint-text dark:text-m3-mint-darkText" />
+            <div className="flex-1 min-w-0">
+              <span className="font-bold block sm:inline">Gym Recommendation: </span>
+              <span className="font-semibold text-emerald-900 dark:text-emerald-200 break-words">
+                {liveTarget.recommendedSplit}
+              </span>
+            </div>
           </div>
         </div>
       )}

@@ -295,7 +295,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-6 pb-8 border border-border-light dark:border-border-dark shadow-xl"
+              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-6 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 border border-border-light dark:border-border-dark shadow-xl max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-12 h-1.5 rounded-full bg-border-light dark:border-border-dark mx-auto mb-5" />
