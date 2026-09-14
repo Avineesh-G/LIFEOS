@@ -42,7 +42,7 @@ export default function AppLockOverlay() {
 
     try {
       const res = await authenticateDeviceLock();
-      if (!res.success && res.error) {
+      if (!res.success && res.error && !res.error.toLowerCase().includes('cancel')) {
         setErrorMessage(res.error);
       }
     } finally {

@@ -227,7 +227,7 @@ npm run dev
 | `npm run cap:build` | Compile a signed release APK (v1.5.4 Build 14) |
 | `npm run cap:open` | Open the native project in Android Studio |
 
-The signed binary lands at `android/app/build/outputs/apk/release/app-release.apk` and is copied automatically to `public/LifeOS.apk`, where the in-app Live Sync update check reads it from. Native builds incorporate Android Jetpack Biometrics with hardware phone lock integration (`BIOMETRIC_STRONG | DEVICE_CREDENTIAL`).
+The signed binary lands at `android/app/build/outputs/apk/release/app-release.apk` and is copied to `public/LifeOS.apk`, where the in-app Live Sync update check reads it from. Native builds incorporate Android Jetpack Biometrics with hardware phone lock integration (`BIOMETRIC_STRONG | DEVICE_CREDENTIAL`) and graceful fallback handling for seamless device security.
 
 The web build is deployed via Vercel at [lifeos-iota-one.vercel.app](https://lifeos-iota-one.vercel.app).
 

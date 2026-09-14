@@ -78,7 +78,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       if (res.success) {
         const updated = saveSecurityConfig({ enabled: false });
         setSecurityConfig(updated);
-      } else if (res.error && res.error !== 'Authentication canceled') {
+      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
         alert(res.error);
       }
     } else {
@@ -86,7 +86,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       if (res.success) {
         const updated = saveSecurityConfig({ enabled: true });
         setSecurityConfig(updated);
-      } else {
+      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
         alert(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
       }
     }

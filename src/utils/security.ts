@@ -1,4 +1,4 @@
-import { registerPlugin, Capacitor } from '@capacitor/core';
+import { registerPlugin, Capacitor, WebPlugin } from '@capacitor/core';
 
 export interface SecurityConfig {
   enabled: boolean;
@@ -9,7 +9,31 @@ interface DeviceLockPlugin {
   authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string; error?: string }>;
 }
 
-export const DeviceLock = registerPlugin<DeviceLockPlugin>('DeviceLock');
+class DeviceLockWeb extends WebPlugin implements DeviceLockPlugin {
+  async isAvailable(): Promise<{ available: boolean; isDeviceSecure?: boolean; hasBiometrics?: boolean; status?: number; error?: string }> {
+    if (Capacitor.isNativePlatform()) {
+      return {
+        available: false,
+        error: 'Native phone screen lock requires the latest LifeOS APK (v1.5.4). Please reinstall or update the app from Settings.',
+      };
+    }
+    return { available: true, isDeviceSecure: true, hasBiometrics: false };
+  }
+
+  async authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string; error?: string }> {
+    if (Capacitor.isNativePlatform()) {
+      return {
+        success: false,
+        error: 'Native phone screen lock requires the latest LifeOS APK (v1.5.4). Please reinstall or update the app from Settings.',
+      };
+    }
+    return { success: true };
+  }
+}
+
+export const DeviceLock = registerPlugin<DeviceLockPlugin>('DeviceLock', {
+  web: () => new DeviceLockWeb(),
+});
 
 const STORAGE_KEY = 'lifeos_app_security_v2';
 const LOCK_STATE_KEY = 'lifeos_is_locked_session';
