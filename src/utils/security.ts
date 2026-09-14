@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import { NativeBiometric, BiometryType } from '@capgo/capacitor-native-biometric';
 
 export interface SecurityConfig {
   enabled: boolean;
@@ -40,7 +40,15 @@ export async function authenticateDeviceLock(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     if (Capacitor.isNativePlatform()) {
-      // 1. Verify availability first
+      // 1. Verify plugin is present on native bridge
+      if (!Capacitor.isPluginAvailable('NativeBiometric')) {
+        return {
+          success: false,
+          error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please download and install the update from Settings.',
+        };
+      }
+
+      // 2. Verify availability first (fallback: true accounts for PIN/pattern/password)
       try {
         const check = await NativeBiometric.isAvailable({ useFallback: true });
         if (!check.isAvailable && !check.deviceIsSecure) {
@@ -53,17 +61,23 @@ export async function authenticateDeviceLock(
         if (err?.message?.includes('not implemented')) {
           return {
             success: false,
-            error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please install the APK update from Settings.',
+            error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please download and install the update from Settings.',
           };
         }
+        console.warn('NativeBiometric.isAvailable warning, proceeding to verifyIdentity:', err);
       }
 
-      // 2. Perform native BiometricPrompt verification
+      // 3. Perform native BiometricPrompt verification
       await NativeBiometric.verifyIdentity({
         title: 'LifeOS Protected',
         subtitle,
         reason: 'Verify your phone lock to proceed',
         negativeButtonText: 'Cancel',
+        allowedBiometryTypes: [
+          BiometryType.FINGERPRINT,
+          BiometryType.FACE_AUTHENTICATION,
+          BiometryType.DEVICE_CREDENTIAL,
+        ],
         useFallback: true,
       });
 
@@ -71,18 +85,23 @@ export async function authenticateDeviceLock(
       return { success: true };
     }
 
-    // 3. Web / Dev environment fallback
+    // 4. Web / Dev environment fallback
     setAppLocked(false);
     return { success: true };
   } catch (err: any) {
     const msg = err?.message || err?.toString() || 'Authentication canceled';
-    if (msg.toLowerCase().includes('cancel') || msg.toLowerCase().includes('user canceled')) {
+    const lower = msg.toLowerCase();
+    if (
+      lower.includes('cancel') ||
+      lower.includes('user canceled') ||
+      lower.includes('cancelled')
+    ) {
       return { success: false, error: 'Authentication canceled' };
     }
     if (msg.includes('not implemented')) {
       return {
         success: false,
-        error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please install the APK update from Settings.',
+        error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please download and install the update from Settings.',
       };
     }
     return { success: false, error: msg };
@@ -91,6 +110,7 @@ export async function authenticateDeviceLock(
 
 export async function isDeviceLockAvailable(): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
+    if (!Capacitor.isPluginAvailable('NativeBiometric')) return false;
     try {
       const res = await NativeBiometric.isAvailable({ useFallback: true });
       return !!(res.isAvailable || res.deviceIsSecure);

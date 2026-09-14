@@ -71,24 +71,50 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
 
   // App Security & Lock state
   const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(() => getSecurityConfig());
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [securityNotice, setSecurityNotice] = useState<string | null>(null);
 
   const handleToggleSecurity = async () => {
-    if (securityConfig.enabled) {
-      const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
-      if (res.success) {
-        const updated = saveSecurityConfig({ enabled: false });
-        setSecurityConfig(updated);
-      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
-        alert(res.error);
+    if (isAuthenticating) return;
+    setIsAuthenticating(true);
+    setSecurityNotice(null);
+    try {
+      if (securityConfig.enabled) {
+        const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
+        if (res.success) {
+          const updated = saveSecurityConfig({ enabled: false });
+          setSecurityConfig(updated);
+        } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
+          setSecurityNotice(res.error);
+        }
+      } else {
+        const res = await authenticateDeviceLock('Confirm your phone lock to enable app protection');
+        if (res.success) {
+          const updated = saveSecurityConfig({ enabled: true });
+          setSecurityConfig(updated);
+        } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
+          setSecurityNotice(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
+        }
       }
-    } else {
-      const res = await authenticateDeviceLock('Confirm your phone lock to enable app protection');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleTestSecurityPrompt = async () => {
+    if (isAuthenticating) return;
+    setIsAuthenticating(true);
+    setSecurityNotice(null);
+    try {
+      const res = await authenticateDeviceLock('Test Verification: Your phone screen lock is active and working properly');
       if (res.success) {
-        const updated = saveSecurityConfig({ enabled: true });
-        setSecurityConfig(updated);
+        setSecurityNotice('Verification successful! Your device screen lock is configured correctly.');
+        setTimeout(() => setSecurityNotice(null), 4000);
       } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
-        alert(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
+        setSecurityNotice(res.error);
       }
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -607,8 +633,9 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           {/* Toggle Switch */}
           <button
             type="button"
+            disabled={isAuthenticating}
             onClick={handleToggleSecurity}
-            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
+            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center disabled:opacity-50 ${
               securityConfig.enabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
             }`}
             aria-label="Toggle Phone Screen Lock"
@@ -621,24 +648,64 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           </button>
         </div>
 
+        {/* Feedback / Alert Notice Banner */}
+        {securityNotice && (
+          <div className="p-3.5 rounded-2xl bg-accent/10 dark:bg-accent/15 border border-accent/25 text-xs text-primary-light dark:text-primary-dark flex items-start justify-between gap-3 animate-fadeIn">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle size={16} className="text-accent shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="font-semibold leading-relaxed">{securityNotice}</p>
+                {securityNotice.includes('updated LifeOS APK') && (
+                  <a
+                    href="/LifeOS.apk"
+                    download="LifeOS.apk"
+                    className="inline-flex items-center gap-1 font-bold text-accent hover:underline pt-0.5"
+                  >
+                    <span>Download Latest APK</span>
+                    <span>→</span>
+                  </a>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSecurityNotice(null)}
+              className="text-secondary-light dark:text-secondary-dark hover:text-primary-light p-1"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Security Details & Status */}
         {securityConfig.enabled ? (
-          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3">
+          <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+              <div className="flex items-center gap-2.5 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <Fingerprint size={16} className="text-accent" />
                 <span>Phone Screen Lock Active</span>
               </div>
-              <span className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase">
+              <span className="text-[10px] font-mono font-black px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
                 Protected
               </span>
             </div>
 
-            <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-              LifeOS is secured using your phone's native lock system. You can unlock using your phone's fingerprint, face unlock, or your phone's lock screen PIN/pattern.
+            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
+              LifeOS is protected by your phone's native hardware security. Unlock smoothly anytime with your phone's Fingerprint, Face Unlock, or Device PIN / Pattern.
             </p>
 
-            <div className="pt-1 flex justify-end">
+            <div className="pt-1 flex flex-wrap items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={isAuthenticating}
+                onClick={handleTestSecurityPrompt}
+                className="px-4 py-2 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-primary-light dark:text-primary-dark text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <Fingerprint size={13} className="text-accent" />
+                <span>Test Lock Prompt</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -652,26 +719,59 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
             </div>
           </div>
         ) : (
-          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-center py-5 space-y-2.5">
-            <div className="w-11 h-11 rounded-2xl bg-accent/10 text-accent mx-auto flex items-center justify-center">
-              <Fingerprint size={22} strokeWidth={2.2} />
+          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-bg-light to-black/[0.01] dark:from-bg-dark dark:to-white/[0.01] border border-border-light/80 dark:border-border-dark/80 text-center space-y-4">
+            {/* Ambient Biometric Icon */}
+            <div className="relative mx-auto w-14 h-14 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-accent/20 blur-md" />
+              <div className="relative w-14 h-14 rounded-2xl bg-accent/10 border border-accent/25 text-accent flex items-center justify-center shadow-sm">
+                <Fingerprint size={28} strokeWidth={2.2} className={isAuthenticating ? 'animate-pulse' : ''} />
+              </div>
             </div>
-            <div className="space-y-0.5">
-              <h4 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
+
+            {/* Title & Description */}
+            <div className="space-y-1.5 max-w-sm mx-auto">
+              <h4 className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
                 Native Biometric & Screen Lock
               </h4>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium max-w-xs mx-auto">
-                Secure LifeOS using your phone's fingerprint, face unlock, or device PIN/pattern. No extra password required.
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
+                Protect LifeOS with your phone's native lock screen. Use your phone's fingerprint, face recognition, or PIN/pattern. No extra password needed.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleToggleSecurity}
-              className="inline-flex items-center gap-1.5 px-4.5 py-2 rounded-full bg-accent text-white text-xs font-bold font-sans transition-transform active:scale-95 shadow-sm mt-1"
-            >
-              <Fingerprint size={14} />
-              <span>Enable Phone Lock</span>
-            </button>
+
+            {/* Feature Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ Instant Fingerprint & Face
+              </span>
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ Phone PIN / Pattern Fallback
+              </span>
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ Hardware Protected
+              </span>
+            </div>
+
+            {/* Improved Enable Phone Lock Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                disabled={isAuthenticating}
+                onClick={handleToggleSecurity}
+                className="w-full sm:w-auto min-w-[240px] py-3.5 px-7 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
+              >
+                {isAuthenticating ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span>Verifying with Phone...</span>
+                  </>
+                ) : (
+                  <>
+                    <Fingerprint size={18} strokeWidth={2.4} />
+                    <span>Enable Phone Lock</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </motion.div>
