@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, ChevronDown, ChevronUp, ShieldCheck, ShieldOff, Lock, Fingerprint } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -531,10 +531,10 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* App Security & Phone Lock Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
-        {/* Card Header - Mobile Optimized */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        {/* Card Header: Icon, Title, Subtitle, and Toggle Switch */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0">
             <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center shadow-sm shrink-0 ${
               securityConfig.enabled
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
@@ -547,7 +547,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
                 App Security & Lock
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                {securityConfig.enabled ? 'Phone Lock Active • 60s cooldown' : 'Protect with phone screen lock'}
+                {securityConfig.enabled ? 'Phone biometric & lock active' : 'Protect with phone screen lock'}
               </p>
             </div>
           </div>
@@ -599,108 +599,85 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           </div>
         )}
 
-        {/* Security Card Details */}
+        {/* Security Card Content */}
         {securityConfig.enabled ? (
-          <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3.5">
-            {/* Status Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <Fingerprint size={16} className="text-emerald-600 dark:text-emerald-400" />
-                <span>Phone Screen Lock Active</span>
+          <div className="space-y-4 pt-1">
+            {/* Status overview tile - Spacious, single border */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-border-light/60 dark:border-border-dark/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+                    Hardware Biometrics Active
+                  </p>
+                  <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                    Fingerprint, Face Unlock or Device PIN
+                  </p>
+                </div>
               </div>
-              <span className="text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider shrink-0">
                 Protected
               </span>
             </div>
 
-            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-              LifeOS is secured by your phone's hardware biometric lock (Fingerprint, Face Unlock, or Device PIN / Pattern).
-            </p>
-
-            {/* Default Cooldown Notice (Fixed in code at 60s) */}
-            <div className="p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 flex items-center justify-between text-xs">
+            {/* Cooldown Information */}
+            <div className="flex items-center justify-between px-2 text-xs">
               <span className="text-secondary-light dark:text-secondary-dark font-medium">
                 Auto-Lock Cooldown:
               </span>
               <span className="font-mono font-bold text-accent">
-                60 seconds (Default)
+                60 seconds after minimize
               </span>
             </div>
 
-            {/* Management Buttons Grid - Perfectly balanced for mobile */}
-            <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 grid grid-cols-2 gap-2.5">
-              {/* Disable Button */}
+            {/* Action: Clean full-width Lock Now button */}
+            <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60">
               <button
                 type="button"
-                disabled={isAuthenticating}
-                onClick={handleDisableSecurity}
-                className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold font-sans transition-all active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setAppLocked(true);
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-accent text-white font-sans text-xs font-bold transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 hover:opacity-95"
               >
-                <ShieldOff size={14} />
-                <span>Disable Lock</span>
-              </button>
-
-              {/* Lock App Now Button */}
-              <button
-                type="button"
-                onClick={() => setAppLocked(true)}
-                className="w-full py-2.5 px-3 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
-              >
-                <Lock size={13} />
-                <span>Lock Now</span>
+                <Lock size={14} />
+                <span>Lock LifeOS Now</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-bg-light to-black/[0.01] dark:from-bg-dark dark:to-white/[0.01] border border-border-light/80 dark:border-border-dark/80 text-center space-y-4">
-            {/* Ambient Biometric Icon */}
-            <div className="relative mx-auto w-14 h-14 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl bg-accent/20 blur-md" />
-              <div className="relative w-14 h-14 rounded-2xl bg-accent/10 border border-accent/25 text-accent flex items-center justify-center shadow-sm">
-                <Fingerprint size={28} strokeWidth={2.2} className={isAuthenticating ? 'animate-pulse' : ''} />
-              </div>
-            </div>
+          <div className="space-y-4 pt-1 text-center">
+            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed max-w-sm mx-auto">
+              Secure your health, gym, and private habit data with your phone's native lock screen (Fingerprint, Face recognition, or device PIN/pattern).
+            </p>
 
-            {/* Title & Description */}
-            <div className="space-y-1.5 max-w-sm mx-auto">
-              <h4 className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-                Native Biometric & Screen Lock
-              </h4>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                Protect LifeOS with your phone's native lock screen (Fingerprint, Face recognition, or device PIN/pattern) with a built-in 60s cooldown.
-              </p>
-            </div>
-
-            {/* Feature Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light/70 dark:border-border-dark/70 text-secondary-light dark:text-secondary-dark">
                 ✓ Fingerprint & Face
               </span>
-              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                ✓ Phone PIN / Pattern
+              <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light/70 dark:border-border-dark/70 text-secondary-light dark:text-secondary-dark">
+                ✓ Device PIN / Pattern
               </span>
-              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                ✓ 60s Cooldown
+              <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light/70 dark:border-border-dark/70 text-secondary-light dark:text-secondary-dark">
+                ✓ 60s Auto-Lock
               </span>
             </div>
 
-            {/* Enable Button */}
-            <div className="pt-1">
+            <div className="pt-2">
               <button
                 type="button"
                 disabled={isAuthenticating}
                 onClick={handleEnableSecurity}
-                className="w-full sm:w-auto min-w-[220px] py-3.5 px-6 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
+                className="w-full sm:w-auto min-w-[220px] py-3 px-6 rounded-xl bg-accent text-white text-xs font-bold font-sans shadow-md shadow-accent/20 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isAuthenticating ? (
                   <>
-                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    <span>Verifying with Phone...</span>
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span>Verifying Lock...</span>
                   </>
                 ) : (
                   <>
-                    <Fingerprint size={18} strokeWidth={2.4} />
+                    <Fingerprint size={16} strokeWidth={2.4} />
                     <span>Enable Phone Lock</span>
                   </>
                 )}
