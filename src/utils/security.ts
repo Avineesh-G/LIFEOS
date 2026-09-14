@@ -1,39 +1,9 @@
-import { registerPlugin, Capacitor, WebPlugin } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 export interface SecurityConfig {
   enabled: boolean;
 }
-
-interface DeviceLockPlugin {
-  isAvailable(): Promise<{ available: boolean; isDeviceSecure?: boolean; hasBiometrics?: boolean; status?: number; error?: string }>;
-  authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string; error?: string }>;
-}
-
-class DeviceLockWeb extends WebPlugin implements DeviceLockPlugin {
-  async isAvailable(): Promise<{ available: boolean; isDeviceSecure?: boolean; hasBiometrics?: boolean; status?: number; error?: string }> {
-    if (Capacitor.isNativePlatform()) {
-      return {
-        available: false,
-        error: 'Native phone screen lock requires the latest LifeOS APK (v1.5.4). Please reinstall or update the app from Settings.',
-      };
-    }
-    return { available: true, isDeviceSecure: true, hasBiometrics: false };
-  }
-
-  async authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string; error?: string }> {
-    if (Capacitor.isNativePlatform()) {
-      return {
-        success: false,
-        error: 'Native phone screen lock requires the latest LifeOS APK (v1.5.4). Please reinstall or update the app from Settings.',
-      };
-    }
-    return { success: true };
-  }
-}
-
-export const DeviceLock = registerPlugin<DeviceLockPlugin>('DeviceLock', {
-  web: () => new DeviceLockWeb(),
-});
 
 const STORAGE_KEY = 'lifeos_app_security_v2';
 const LOCK_STATE_KEY = 'lifeos_is_locked_session';
@@ -44,43 +14,86 @@ const DEFAULT_CONFIG: SecurityConfig = {
 
 // ── Configuration Persistence ──────────────────────────────────────────────
 export function getSecurityConfig(): SecurityConfig {
-  return DEFAULT_CONFIG;
+  if (typeof window === 'undefined') return DEFAULT_CONFIG;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_CONFIG;
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_CONFIG, ...parsed };
+  } catch {
+    return DEFAULT_CONFIG;
+  }
 }
 
 export function saveSecurityConfig(config: Partial<SecurityConfig>): SecurityConfig {
-  return DEFAULT_CONFIG;
+  if (typeof window === 'undefined') return DEFAULT_CONFIG;
+  const current = getSecurityConfig();
+  const updated: SecurityConfig = { ...current, ...config };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('lifeos-security-config-changed', { detail: updated }));
+  return updated;
 }
 
-export async function authenticateDeviceLock(subtitle = 'Unlock with your phone’s fingerprint or screen lock'): Promise<{ success: boolean; error?: string }> {
-  // 1. Android Native Execution
-  if (Capacitor.isNativePlatform()) {
-    try {
-      const res = await DeviceLock.authenticate({
+// ── Authentication Service ─────────────────────────────────────────────────
+export async function authenticateDeviceLock(
+  subtitle = 'Unlock with your phone’s fingerprint or screen lock'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      // 1. Verify availability first
+      try {
+        const check = await NativeBiometric.isAvailable({ useFallback: true });
+        if (!check.isAvailable && !check.deviceIsSecure) {
+          return {
+            success: false,
+            error: 'No phone screen lock set up. Please set a PIN, pattern, or fingerprint in Android Settings.',
+          };
+        }
+      } catch (err: any) {
+        if (err?.message?.includes('not implemented')) {
+          return {
+            success: false,
+            error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please install the APK update from Settings.',
+          };
+        }
+      }
+
+      // 2. Perform native BiometricPrompt verification
+      await NativeBiometric.verifyIdentity({
         title: 'LifeOS Protected',
         subtitle,
+        reason: 'Verify your phone lock to proceed',
+        negativeButtonText: 'Cancel',
+        useFallback: true,
       });
-      if (res && res.success) {
-        setAppLocked(false);
-        return { success: true };
-      } else {
-        const errMsg = res?.error || res?.message || 'Authentication canceled';
-        return { success: false, error: errMsg };
-      }
-    } catch (err: any) {
-      return { success: false, error: err?.message || 'Authentication error' };
-    }
-  }
 
-  // 2. Browser / Localhost Dev Fallback
-  setAppLocked(false);
-  return { success: true };
+      setAppLocked(false);
+      return { success: true };
+    }
+
+    // 3. Web / Dev environment fallback
+    setAppLocked(false);
+    return { success: true };
+  } catch (err: any) {
+    const msg = err?.message || err?.toString() || 'Authentication canceled';
+    if (msg.toLowerCase().includes('cancel') || msg.toLowerCase().includes('user canceled')) {
+      return { success: false, error: 'Authentication canceled' };
+    }
+    if (msg.includes('not implemented')) {
+      return {
+        success: false,
+        error: 'Native phone lock requires installing the updated LifeOS APK on your device. Please install the APK update from Settings.',
+      };
+    }
+    return { success: false, error: msg };
+  }
 }
 
 export async function isDeviceLockAvailable(): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     try {
-      const res = await DeviceLock.isAvailable();
-      return !!res?.available;
+      const res = await NativeBiometric.isAvailable({ useFallback: true });
+      return !!(res.isAvailable || res.deviceIsSecure);
     } catch {
       return false;
     }
@@ -102,12 +115,12 @@ export function setAppLocked(locked: boolean) {
   const config = getSecurityConfig();
   if (!config.enabled && locked) return;
   sessionStorage.setItem(LOCK_STATE_KEY, locked ? 'true' : 'false');
-  lockStateListeners.forEach(listener => listener(locked));
+  lockStateListeners.forEach((listener) => listener(locked));
 }
 
 export function subscribeToLockState(listener: (locked: boolean) => void): () => void {
   lockStateListeners.push(listener);
   return () => {
-    lockStateListeners = lockStateListeners.filter(l => l !== listener);
+    lockStateListeners = lockStateListeners.filter((l) => l !== listener);
   };
 }

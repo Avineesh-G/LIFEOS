@@ -11,7 +11,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(GoogleAuth.class);
-        registerPlugin(DeviceLockPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS
