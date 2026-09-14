@@ -22,6 +22,7 @@ import Progress from './pages/Progress';
 import WorkHistory from './pages/WorkHistory';
 import { Settings } from 'lucide-react'; // Fallback import just in case
 import SettingsPage from './pages/Settings';
+import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
 import { useEffect, useState } from 'react';
 import { auth } from './firebase';
@@ -237,6 +238,10 @@ function App() {
   useEffect(() => {
     return subscribeToLockState(setIsLocked);
   }, []);
+
+  if (location.pathname.toLowerCase().startsWith('/download')) {
+    return <DownloadPage theme={theme} setTheme={setTheme} accentColor={accentColor} />;
+  }
 
   if (!mounted || (authLoading && !user) || (user && !data)) {
     return (
