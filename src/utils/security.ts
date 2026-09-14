@@ -1,14 +1,8 @@
 import { Capacitor } from '@capacitor/core';
 import { NativeBiometric, BiometryType } from '@capgo/capacitor-native-biometric';
 
-export type LockCooldown = 'immediate' | '1min' | '5min' | '15min' | 'session';
-
 export interface SecurityConfig {
   enabled: boolean;
-  cooldown: LockCooldown;
-  customPinEnabled?: boolean;
-  customPin?: string;
-  patternEnabled?: boolean;
 }
 
 const STORAGE_KEY = 'lifeos_app_security_v2';
@@ -16,30 +10,15 @@ const LOCK_STATE_KEY = 'lifeos_is_locked_session';
 const LAST_UNLOCK_KEY = 'lifeos_last_unlock_time';
 const LAST_BACKGROUND_KEY = 'lifeos_last_background_time';
 
+// Hardcoded 60s cooldown grace period in code (not in settings page)
+const COOLDOWN_MS = 60 * 1000;
+
+// Internal flag to prevent Android BiometricPrompt from triggering background/foreground locks
+let isBiometricPromptActive = false;
+
 const DEFAULT_CONFIG: SecurityConfig = {
   enabled: false,
-  cooldown: '1min',
-  customPinEnabled: false,
-  patternEnabled: false,
 };
-
-// ── Cooldown Helper ────────────────────────────────────────────────────────
-export function getCooldownMilliseconds(cooldown: LockCooldown): number {
-  switch (cooldown) {
-    case 'immediate':
-      return 0;
-    case '1min':
-      return 60 * 1000;
-    case '5min':
-      return 5 * 60 * 1000;
-    case '15min':
-      return 15 * 60 * 1000;
-    case 'session':
-      return Infinity;
-    default:
-      return 60 * 1000;
-  }
-}
 
 // ── Configuration Persistence ──────────────────────────────────────────────
 export function getSecurityConfig(): SecurityConfig {
@@ -63,43 +42,45 @@ export function saveSecurityConfig(config: Partial<SecurityConfig>): SecurityCon
   return updated;
 }
 
-// ── Background / Foreground Cooldown Handlers ───────────────────────────────
+// ── Background / Foreground Cooldown Handlers (60s Default) ────────────────
 export function recordUnlockTime() {
   if (typeof window === 'undefined') return;
   const now = Date.now().toString();
   localStorage.setItem(LAST_UNLOCK_KEY, now);
+  // Clear background time so returning doesn't immediately re-lock
+  localStorage.removeItem(LAST_BACKGROUND_KEY);
   sessionStorage.setItem(LOCK_STATE_KEY, 'false');
 }
 
 export function handleAppBackgrounded() {
   if (typeof window === 'undefined') return;
+  // If biometric dialog is active or app is already locked, do not record backgrounding
+  if (isBiometricPromptActive) return;
+  const config = getSecurityConfig();
+  if (!config.enabled) return;
+
   const now = Date.now().toString();
   localStorage.setItem(LAST_BACKGROUND_KEY, now);
 }
 
 export function handleAppForegrounded() {
   if (typeof window === 'undefined') return;
+  // If biometric dialog just finished, do not treat as an app resume
+  if (isBiometricPromptActive) return;
   const config = getSecurityConfig();
   if (!config.enabled) return;
-
-  // Session-only: never lock when returning from background
-  if (config.cooldown === 'session') return;
-
-  // Immediate: lock as soon as app is foregrounded
-  if (config.cooldown === 'immediate') {
-    setAppLocked(true);
-    return;
-  }
 
   const lastBgRaw = localStorage.getItem(LAST_BACKGROUND_KEY);
   if (!lastBgRaw) return;
 
   const lastBg = parseInt(lastBgRaw, 10);
   const elapsed = Date.now() - lastBg;
-  const cooldownMs = getCooldownMilliseconds(config.cooldown);
 
-  // If elapsed time is greater than or equal to cooldown, require unlock again
-  if (elapsed >= cooldownMs) {
+  // Clear the background timestamp once evaluated
+  localStorage.removeItem(LAST_BACKGROUND_KEY);
+
+  // Only lock if minimized for longer than the 60s cooldown
+  if (elapsed >= COOLDOWN_MS) {
     setAppLocked(true);
   }
 }
@@ -108,6 +89,7 @@ export function handleAppForegrounded() {
 export async function authenticateDeviceLock(
   subtitle = 'Unlock with your phone’s fingerprint or screen lock'
 ): Promise<{ success: boolean; error?: string }> {
+  isBiometricPromptActive = true;
   try {
     if (Capacitor.isNativePlatform()) {
       // 1. Verify plugin is present on native bridge
@@ -151,14 +133,18 @@ export async function authenticateDeviceLock(
         useFallback: true,
       });
 
-      setAppLocked(false);
+      localStorage.removeItem(LAST_BACKGROUND_KEY);
+      sessionStorage.setItem(LOCK_STATE_KEY, 'false');
       recordUnlockTime();
+      setAppLocked(false);
       return { success: true };
     }
 
     // 4. Web / Dev environment fallback
-    setAppLocked(false);
+    localStorage.removeItem(LAST_BACKGROUND_KEY);
+    sessionStorage.setItem(LOCK_STATE_KEY, 'false');
     recordUnlockTime();
+    setAppLocked(false);
     return { success: true };
   } catch (err: any) {
     const msg = err?.message || err?.toString() || 'Authentication canceled';
@@ -177,6 +163,11 @@ export async function authenticateDeviceLock(
       };
     }
     return { success: false, error: msg };
+  } finally {
+    // Keep flag true for 600ms buffer while Android window focus stabilizes
+    setTimeout(() => {
+      isBiometricPromptActive = false;
+    }, 600);
   }
 }
 
@@ -193,27 +184,6 @@ export async function isDeviceLockAvailable(): Promise<boolean> {
   return true;
 }
 
-// ── PIN Verification Helpers ───────────────────────────────────────────────
-export function verifyCustomPin(inputPin: string): boolean {
-  const config = getSecurityConfig();
-  if (!config.customPinEnabled || !config.customPin) return false;
-  return config.customPin === inputPin.trim();
-}
-
-export function saveCustomPin(pin: string): SecurityConfig {
-  return saveSecurityConfig({
-    customPin: pin.trim(),
-    customPinEnabled: true,
-  });
-}
-
-export function removeCustomPin(): SecurityConfig {
-  return saveSecurityConfig({
-    customPin: '',
-    customPinEnabled: false,
-  });
-}
-
 // ── Lock State Control (Session) ───────────────────────────────────────────
 let lockStateListeners: Array<(locked: boolean) => void> = [];
 
@@ -223,31 +193,17 @@ export function isAppLocked(): boolean {
 
   const val = sessionStorage.getItem(LOCK_STATE_KEY);
   if (val === 'false') {
-    // Check if cooldown elapsed while backgrounded
-    if (config.cooldown === 'session') return false;
-    const lastBgRaw = localStorage.getItem(LAST_BACKGROUND_KEY);
-    if (lastBgRaw) {
-      const lastBg = parseInt(lastBgRaw, 10);
-      const elapsed = Date.now() - lastBg;
-      const cooldownMs = getCooldownMilliseconds(config.cooldown);
-      if (elapsed >= cooldownMs && cooldownMs > 0) {
-        return true;
-      }
-    }
     return false;
   }
 
-  // Cold launch: check if last unlock happened recently within cooldown
-  if (config.cooldown !== 'immediate') {
-    const lastUnlockRaw = localStorage.getItem(LAST_UNLOCK_KEY);
-    if (lastUnlockRaw) {
-      const lastUnlock = parseInt(lastUnlockRaw, 10);
-      const elapsed = Date.now() - lastUnlock;
-      const cooldownMs = getCooldownMilliseconds(config.cooldown);
-      if (elapsed < cooldownMs) {
-        sessionStorage.setItem(LOCK_STATE_KEY, 'false');
-        return false;
-      }
+  // Cold launch: check if last unlock happened recently within 60s cooldown
+  const lastUnlockRaw = localStorage.getItem(LAST_UNLOCK_KEY);
+  if (lastUnlockRaw) {
+    const lastUnlock = parseInt(lastUnlockRaw, 10);
+    const elapsed = Date.now() - lastUnlock;
+    if (elapsed < COOLDOWN_MS) {
+      sessionStorage.setItem(LOCK_STATE_KEY, 'false');
+      return false;
     }
   }
 

@@ -1,9 +1,9 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, Play, Sparkles, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Clock, KeyRound, Grid, Delete, X } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, Play, Sparkles, ChevronDown, ChevronUp, ShieldCheck, ShieldOff, Lock, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { triggerHaptic, getHapticLevel, setHapticLevel, getHapticIntensity, setHapticIntensity, HapticLevel } from '../utils/haptics';
-import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDeviceLock, SecurityConfig, LockCooldown, saveCustomPin, removeCustomPin } from '../utils/security';
+import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDeviceLock, SecurityConfig } from '../utils/security';
 import type { AppData, AppSettings, TransitionMode } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import { FITNESS_GOALS } from '../utils/calculations';
@@ -73,106 +73,50 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
   const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(() => getSecurityConfig());
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [securityNotice, setSecurityNotice] = useState<string | null>(null);
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
-  const [pinModalOpen, setPinModalOpen] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinConfirmInput, setPinConfirmInput] = useState('');
-  const [pinStep, setPinStep] = useState<'enter' | 'confirm'>('enter');
-  const [pinError, setPinError] = useState('');
 
-  const handleCooldownChange = (cooldown: LockCooldown) => {
-    const updated = saveSecurityConfig({ cooldown });
-    setSecurityConfig(updated);
-  };
-
-  const handleTogglePin = () => {
-    if (securityConfig.customPinEnabled) {
-      const updated = removeCustomPin();
-      setSecurityConfig(updated);
-      setSecurityNotice('In-app PIN disabled.');
-      setTimeout(() => setSecurityNotice(null), 2500);
-    } else {
-      setPinInput('');
-      setPinConfirmInput('');
-      setPinStep('enter');
-      setPinError('');
-      setPinModalOpen(true);
-    }
-  };
-
-  const handlePinKeypadPress = (digit: string) => {
-    if (pinStep === 'enter') {
-      if (pinInput.length < 4) {
-        const next = pinInput + digit;
-        setPinInput(next);
-        setPinError('');
-        if (next.length === 4) {
-          setTimeout(() => {
-            setPinStep('confirm');
-          }, 250);
-        }
-      }
-    } else {
-      if (pinConfirmInput.length < 4) {
-        const next = pinConfirmInput + digit;
-        setPinConfirmInput(next);
-        setPinError('');
-        if (next.length === 4) {
-          if (next === pinInput) {
-            const updated = saveCustomPin(pinInput);
-            setSecurityConfig(updated);
-            setPinModalOpen(false);
-            setSecurityNotice('In-app PIN created successfully!');
-            setTimeout(() => setSecurityNotice(null), 3500);
-          } else {
-            setPinError('PINs do not match. Please try again.');
-            setTimeout(() => {
-              setPinConfirmInput('');
-            }, 600);
-          }
-        }
-      }
-    }
-  };
-
-  const handlePinBackspace = () => {
-    if (pinStep === 'enter') {
-      setPinInput((prev) => prev.slice(0, -1));
-    } else {
-      setPinConfirmInput((prev) => prev.slice(0, -1));
-    }
-    setPinError('');
-  };
-
-  const handleTogglePattern = () => {
-    const updated = saveSecurityConfig({ patternEnabled: !securityConfig.patternEnabled });
-    setSecurityConfig(updated);
-  };
-
-  const handleToggleSecurity = async () => {
+  const handleEnableSecurity = async () => {
     if (isAuthenticating) return;
     setIsAuthenticating(true);
     setSecurityNotice(null);
     try {
-      if (securityConfig.enabled) {
-        const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
-        if (res.success) {
-          const updated = saveSecurityConfig({ enabled: false });
-          setSecurityConfig(updated);
-        } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
-          setSecurityNotice(res.error);
-        }
-      } else {
-        const res = await authenticateDeviceLock('Confirm your phone lock to enable app protection');
-        if (res.success) {
-          const updated = saveSecurityConfig({ enabled: true });
-          setSecurityConfig(updated);
-        } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
-          setSecurityNotice(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
-        }
+      const res = await authenticateDeviceLock('Confirm your phone lock to enable app protection');
+      if (res.success) {
+        const updated = saveSecurityConfig({ enabled: true });
+        setSecurityConfig(updated);
+        setSecurityNotice('Phone Screen Lock enabled successfully! 60s cooldown is active.');
+        setTimeout(() => setSecurityNotice(null), 4000);
+      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
+        setSecurityNotice(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
       }
     } finally {
       setIsAuthenticating(false);
+    }
+  };
+
+  const handleDisableSecurity = async () => {
+    if (isAuthenticating) return;
+    setIsAuthenticating(true);
+    setSecurityNotice(null);
+    try {
+      const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
+      if (res.success) {
+        const updated = saveSecurityConfig({ enabled: false });
+        setSecurityConfig(updated);
+        setSecurityNotice('Phone Screen Lock has been disabled.');
+        setTimeout(() => setSecurityNotice(null), 3000);
+      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
+        setSecurityNotice(res.error);
+      }
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleToggleSecurity = async () => {
+    if (securityConfig.enabled) {
+      await handleDisableSecurity();
+    } else {
+      await handleEnableSecurity();
     }
   };
 
@@ -692,25 +636,38 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
+            <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center shadow-sm ${
+              securityConfig.enabled
+                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                : 'bg-accent/15 text-accent'
+            }`}>
               <ShieldCheck size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
-                App Security & Lock
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                  App Security & Lock
+                </h3>
+                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                  securityConfig.enabled
+                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-muted-light dark:text-muted-dark border border-border-light/60 dark:border-border-dark/60'
+                }`}>
+                  {securityConfig.enabled ? 'Protected' : 'Disabled'}
+                </span>
+              </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
-                Protect with your phone's screen lock & cooldown
+                Native screen lock • 60s auto-lock cooldown
               </p>
             </div>
           </div>
 
-          {/* Toggle Switch */}
+          {/* Header Toggle Switch */}
           <button
             type="button"
             disabled={isAuthenticating}
             onClick={handleToggleSecurity}
-            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center disabled:opacity-50 ${
+            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center disabled:opacity-50 shrink-0 ${
               securityConfig.enabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
             }`}
             aria-label="Toggle Phone Screen Lock"
@@ -752,343 +709,126 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           </div>
         )}
 
-        {/* Security Details & Status */}
+        {/* Security Card Details */}
         {securityConfig.enabled ? (
-          <div className="space-y-4">
-            {/* Active Status Card */}
-            <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+          <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   <Fingerprint size={16} className="text-accent" />
                   <span>Phone Screen Lock Active</span>
                 </div>
-                <span className="text-[10px] font-mono font-black px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
-                  Protected
-                </span>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed pt-0.5">
+                  LifeOS is secured by your phone's hardware lock. Unlocks smoothly with your Fingerprint, Face Unlock, or Device PIN / Pattern.
+                </p>
               </div>
+            </div>
 
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                LifeOS is protected by your phone's native hardware security. Unlock smoothly anytime with your phone's Fingerprint, Face Unlock, or Device PIN / Pattern.
-              </p>
+            {/* Default Cooldown Notice (Fixed in code at 60s) */}
+            <div className="p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 flex items-center justify-between text-xs">
+              <span className="text-secondary-light dark:text-secondary-dark font-medium">
+                Auto-Lock Cooldown:
+              </span>
+              <span className="font-mono font-bold text-accent">
+                60 seconds (Default)
+              </span>
+            </div>
 
-              <div className="pt-1 flex flex-wrap items-center justify-end gap-2.5">
+            {/* Management Buttons Row */}
+            <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 flex flex-wrap items-center justify-between gap-2.5">
+              {/* Disable Button */}
+              <button
+                type="button"
+                disabled={isAuthenticating}
+                onClick={handleDisableSecurity}
+                className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <ShieldOff size={14} />
+                <span>Disable Phone Lock</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                {/* Test Prompt Button */}
                 <button
                   type="button"
                   disabled={isAuthenticating}
                   onClick={handleTestSecurityPrompt}
-                  className="px-4 py-2 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-primary-light dark:text-primary-dark text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5"
+                  className="px-3.5 py-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-primary-light dark:text-primary-dark text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5"
                 >
-                  <Fingerprint size={13} className="text-accent" />
-                  <span>Test Lock Prompt</span>
+                  <Fingerprint size={14} className="text-accent" />
+                  <span>Test Prompt</span>
                 </button>
 
+                {/* Lock App Now Button */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setAppLocked(true);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
+                  onClick={() => setAppLocked(true)}
+                  className="px-4 py-2.5 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
                 >
                   <Lock size={13} />
-                  <span>Lock App Now</span>
+                  <span>Lock Now</span>
                 </button>
-              </div>
-            </div>
-
-            {/* Sub-Section: More Security Options (Cooldown & Password/PIN/Pattern) */}
-            <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light/70 dark:bg-bg-dark/70 border border-border-light/70 dark:border-border-dark/70 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <KeyRound size={16} className="text-accent" />
-                  <h4 className="text-xs sm:text-sm font-black text-primary-light dark:text-primary-dark font-sans">
-                    More Security Options
-                  </h4>
-                </div>
-                <span className="text-[10px] font-mono text-secondary-light dark:text-secondary-dark font-bold">
-                  Cooldown & PIN
-                </span>
-              </div>
-
-              {/* 1. Auto-Lock Cooldown (Grace Period) */}
-              <div className="p-3.5 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock size={15} className="text-accent" />
-                    <span className="text-xs font-bold text-primary-light dark:text-primary-dark">
-                      Auto-Lock Cooldown
-                    </span>
-                  </div>
-                  <span className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded-md bg-accent/15 text-accent">
-                    {securityConfig.cooldown === 'immediate'
-                      ? '0s (Immediate)'
-                      : securityConfig.cooldown === '1min'
-                      ? '1 Minute'
-                      : securityConfig.cooldown === '5min'
-                      ? '5 Minutes'
-                      : securityConfig.cooldown === '15min'
-                      ? '15 Minutes'
-                      : 'Session'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                  When LifeOS is minimized, closed, or switching apps, it will not ask to unlock again if you return within this cooldown time.
-                </p>
-                <div className="grid grid-cols-5 gap-1.5 pt-1">
-                  {[
-                    { id: 'immediate' as const, label: '0s' },
-                    { id: '1min' as const, label: '1m' },
-                    { id: '5min' as const, label: '5m' },
-                    { id: '15min' as const, label: '15m' },
-                    { id: 'session' as const, label: 'Session' },
-                  ].map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => handleCooldownChange(item.id)}
-                      className={`py-2 rounded-xl text-[11px] font-bold font-sans transition-all active:scale-95 ${
-                        securityConfig.cooldown === item.id
-                          ? 'bg-accent text-white shadow-sm'
-                          : 'bg-black/[0.03] dark:bg-white/[0.05] text-secondary-light dark:text-secondary-dark hover:text-primary-light'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. In-App Password / PIN & Pattern Option */}
-              <div className="p-3.5 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <KeyRound size={15} className="text-accent" />
-                    <div>
-                      <span className="text-xs font-bold text-primary-light dark:text-primary-dark block">
-                        In-App Password / PIN
-                      </span>
-                      <span className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium">
-                        Alternative 4-digit code to unlock LifeOS
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleTogglePin}
-                    className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center shrink-0 ${
-                      securityConfig.customPinEnabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                        securityConfig.customPinEnabled ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {securityConfig.customPinEnabled && (
-                  <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-bold font-mono">
-                      <Check size={14} strokeWidth={2.8} />
-                      <span>App PIN Active (••••)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPinInput('');
-                          setPinConfirmInput('');
-                          setPinStep('enter');
-                          setPinError('');
-                          setPinModalOpen(true);
-                        }}
-                        className="text-xs font-bold text-accent hover:underline py-1 px-2 rounded-lg bg-accent/10"
-                      >
-                        Change PIN
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Pattern Option Toggle */}
-                <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Grid size={15} className="text-accent" />
-                    <div>
-                      <span className="text-xs font-bold text-primary-light dark:text-primary-dark block">
-                        Pattern Unlock Option
-                      </span>
-                      <span className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium">
-                        Pattern fallback prompt in lock screen
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleTogglePattern}
-                    className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center shrink-0 ${
-                      securityConfig.patternEnabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200 ${
-                        securityConfig.patternEnabled ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-bg-light to-black/[0.01] dark:from-bg-dark dark:to-white/[0.01] border border-border-light/80 dark:border-border-dark/80 text-center space-y-4">
-              {/* Ambient Biometric Icon */}
-              <div className="relative mx-auto w-14 h-14 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-2xl bg-accent/20 blur-md" />
-                <div className="relative w-14 h-14 rounded-2xl bg-accent/10 border border-accent/25 text-accent flex items-center justify-center shadow-sm">
-                  <Fingerprint size={28} strokeWidth={2.2} className={isAuthenticating ? 'animate-pulse' : ''} />
-                </div>
+          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-bg-light to-black/[0.01] dark:from-bg-dark dark:to-white/[0.01] border border-border-light/80 dark:border-border-dark/80 text-center space-y-4">
+            {/* Ambient Biometric Icon */}
+            <div className="relative mx-auto w-14 h-14 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-accent/20 blur-md" />
+              <div className="relative w-14 h-14 rounded-2xl bg-accent/10 border border-accent/25 text-accent flex items-center justify-center shadow-sm">
+                <Fingerprint size={28} strokeWidth={2.2} className={isAuthenticating ? 'animate-pulse' : ''} />
               </div>
+            </div>
 
-              {/* Title & Description */}
-              <div className="space-y-1.5 max-w-sm mx-auto">
-                <h4 className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-                  Native Biometric & Screen Lock
-                </h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                  Protect LifeOS with your phone's native lock screen. Use your phone's fingerprint, face recognition, or PIN/pattern. No extra password needed.
-                </p>
-              </div>
+            {/* Title & Description */}
+            <div className="space-y-1.5 max-w-sm mx-auto">
+              <h4 className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                Native Biometric & Screen Lock
+              </h4>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
+                Protect LifeOS with your phone's native lock screen. Use Fingerprint, Face recognition, or your device PIN/pattern with a built-in 60s cooldown.
+              </p>
+            </div>
 
-              {/* Feature Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                  ✓ Instant Fingerprint & Face
-                </span>
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                  ✓ Phone PIN / Pattern Fallback
-                </span>
-                <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                  ✓ Cooldown Grace Period
-                </span>
-              </div>
+            {/* Feature Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ Fingerprint & Face
+              </span>
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ Phone PIN / Pattern Fallback
+              </span>
+              <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
+                ✓ 60s Default Cooldown
+              </span>
+            </div>
 
-              {/* Improved Enable Phone Lock Button */}
-              <div className="pt-2">
-                <button
-                  type="button"
-                  disabled={isAuthenticating}
-                  onClick={handleToggleSecurity}
-                  className="w-full sm:w-auto min-w-[240px] py-3.5 px-7 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
-                >
-                  {isAuthenticating ? (
-                    <>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      <span>Verifying with Phone...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Fingerprint size={18} strokeWidth={2.4} />
-                      <span>Enable Phone Lock</span>
-                    </>
-                  )}
-                </button>
-              </div>
+            {/* Enable Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                disabled={isAuthenticating}
+                onClick={handleEnableSecurity}
+                className="w-full sm:w-auto min-w-[240px] py-3.5 px-7 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
+              >
+                {isAuthenticating ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span>Verifying with Phone...</span>
+                  </>
+                ) : (
+                  <>
+                    <Fingerprint size={18} strokeWidth={2.4} />
+                    <span>Enable Phone Lock</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         )}
       </motion.div>
-
-      {/* PIN Setup Modal */}
-      <AnimatePresence>
-        {pinModalOpen && (
-          <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="w-full max-w-xs bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-3xl p-6 shadow-2xl space-y-4 text-center"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10.5px] font-mono font-bold text-accent uppercase tracking-wider">
-                  {pinStep === 'enter' ? 'Step 1 of 2' : 'Step 2 of 2'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPinModalOpen(false)}
-                  className="p-1 rounded-full text-secondary-light dark:text-secondary-dark hover:text-primary-light"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
-                  {pinStep === 'enter' ? 'Create a 4-Digit PIN' : 'Confirm Your PIN'}
-                </h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium">
-                  {pinStep === 'enter'
-                    ? 'Enter 4 numbers for your backup PIN'
-                    : 'Re-enter your 4 numbers to confirm'}
-                </p>
-              </div>
-
-              {/* 4 dot indicators */}
-              <div className="flex items-center justify-center gap-3 py-2">
-                {[0, 1, 2, 3].map((i) => {
-                  const currentLength = pinStep === 'enter' ? pinInput.length : pinConfirmInput.length;
-                  const filled = currentLength > i;
-                  return (
-                    <div
-                      key={i}
-                      className={`w-3.5 h-3.5 rounded-full transition-all duration-150 ${
-                        filled ? 'bg-accent scale-110 shadow-sm' : 'bg-black/15 dark:bg-white/20'
-                      }`}
-                    />
-                  );
-                })}
-              </div>
-
-              {pinError && (
-                <p className="text-xs font-bold text-red-500 animate-fadeIn">
-                  {pinError}
-                </p>
-              )}
-
-              {/* Keypad */}
-              <div className="grid grid-cols-3 gap-2 w-full pt-1">
-                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
-                  <button
-                    key={digit}
-                    type="button"
-                    onClick={() => handlePinKeypadPress(digit)}
-                    className="h-11 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-95 text-base font-black text-primary-light dark:text-primary-dark font-sans transition-all flex items-center justify-center"
-                  >
-                    {digit}
-                  </button>
-                ))}
-                <div />
-                <button
-                  type="button"
-                  onClick={() => handlePinKeypadPress('0')}
-                  className="h-11 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-95 text-base font-black text-primary-light dark:text-primary-dark font-sans transition-all flex items-center justify-center"
-                >
-                  0
-                </button>
-                <button
-                  type="button"
-                  onClick={handlePinBackspace}
-                  className="h-11 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] active:scale-95 text-secondary-light dark:text-secondary-dark font-sans transition-all flex items-center justify-center"
-                >
-                  <Delete size={18} />
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Body Profile Section */}
       <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
