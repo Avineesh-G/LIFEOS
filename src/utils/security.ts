@@ -1,13 +1,12 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
-import { triggerHaptic } from './haptics';
 
 export interface SecurityConfig {
   enabled: boolean;
 }
 
 interface DeviceLockPlugin {
-  isAvailable(): Promise<{ available: boolean; status?: number; error?: string }>;
-  authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string }>;
+  isAvailable(): Promise<{ available: boolean; isDeviceSecure?: boolean; hasBiometrics?: boolean; status?: number; error?: string }>;
+  authenticate(options?: { title?: string; subtitle?: string }): Promise<{ success: boolean; errorCode?: number; message?: string; error?: string }>;
 }
 
 export const DeviceLock = registerPlugin<DeviceLockPlugin>('DeviceLock');
@@ -41,7 +40,6 @@ export function saveSecurityConfig(config: Partial<SecurityConfig>): SecurityCon
   return updated;
 }
 
-// ── Native Phone Screen Lock Authentication ────────────────────────────────
 export async function authenticateDeviceLock(subtitle = 'Unlock with your phone’s fingerprint or screen lock'): Promise<{ success: boolean; error?: string }> {
   // 1. Android Native Execution
   if (Capacitor.isNativePlatform()) {
@@ -51,21 +49,18 @@ export async function authenticateDeviceLock(subtitle = 'Unlock with your phone�
         subtitle,
       });
       if (res && res.success) {
-        triggerHaptic('medium');
         setAppLocked(false);
         return { success: true };
       } else {
-        triggerHaptic('heavy');
-        return { success: false, error: res?.message || 'Authentication canceled' };
+        const errMsg = res?.error || res?.message || 'Authentication canceled';
+        return { success: false, error: errMsg };
       }
     } catch (err: any) {
-      triggerHaptic('heavy');
       return { success: false, error: err?.message || 'Authentication error' };
     }
   }
 
-  // 2. Browser / Localhost Dev Fallback (Windows Hello / Mac TouchID if present or instant unlock)
-  triggerHaptic('medium');
+  // 2. Browser / Localhost Dev Fallback
   setAppLocked(false);
   return { success: true };
 }

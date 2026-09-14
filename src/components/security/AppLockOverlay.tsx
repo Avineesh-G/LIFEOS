@@ -7,7 +7,6 @@ import {
   subscribeToLockState,
   authenticateDeviceLock,
 } from '../../utils/security';
-import { triggerHaptic } from '../../utils/haptics';
 
 export default function AppLockOverlay() {
   const [config, setConfig] = useState(getSecurityConfig());
@@ -83,7 +82,6 @@ export default function AppLockOverlay() {
           transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
           className="relative w-24 h-24 rounded-[32px] bg-accent/15 text-accent border border-accent/25 flex items-center justify-center shadow-xl cursor-pointer"
           onClick={() => {
-            triggerHaptic('light');
             triggerAuth();
           }}
         >
@@ -119,7 +117,6 @@ export default function AppLockOverlay() {
         <motion.button
           whileTap={{ scale: 0.96 }}
           onClick={() => {
-            triggerHaptic('light');
             triggerAuth();
           }}
           disabled={isAuthenticating}

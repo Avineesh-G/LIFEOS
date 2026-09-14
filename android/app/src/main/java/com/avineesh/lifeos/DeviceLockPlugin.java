@@ -1,5 +1,8 @@
 package com.avineesh.lifeos;
 
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
@@ -20,19 +23,23 @@ public class DeviceLockPlugin extends Plugin {
     @PluginMethod
     public void isAvailable(PluginCall call) {
         try {
-            BiometricManager biometricManager = BiometricManager.from(getContext());
-            int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
-            int canAuthenticate = biometricManager.canAuthenticate(authenticators);
+            Context context = getContext();
+            KeyguardManager keyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+            boolean isDeviceSecure = keyguardManager != null && keyguardManager.isDeviceSecure();
+
+            BiometricManager biometricManager = BiometricManager.from(context);
+            int canAuthenticate = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+            boolean hasBiometrics = (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS);
 
             JSObject ret = new JSObject();
-            boolean available = (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS);
-            ret.put("available", available);
-            ret.put("status", canAuthenticate);
+            ret.put("available", isDeviceSecure || hasBiometrics);
+            ret.put("isDeviceSecure", isDeviceSecure);
+            ret.put("hasBiometrics", hasBiometrics);
             call.resolve(ret);
         } catch (Exception e) {
             JSObject ret = new JSObject();
             ret.put("available", false);
-            ret.put("error", e.getMessage());
+            ret.put("error", e.getMessage() != null ? e.getMessage() : "Error checking availability");
             call.resolve(ret);
         }
     }
@@ -41,7 +48,19 @@ public class DeviceLockPlugin extends Plugin {
     public void authenticate(PluginCall call) {
         FragmentActivity activity = getActivity();
         if (activity == null) {
-            call.reject("Activity unavailable");
+            JSObject ret = new JSObject();
+            ret.put("success", false);
+            ret.put("error", "Activity unavailable");
+            call.resolve(ret);
+            return;
+        }
+
+        KeyguardManager keyguardManager = (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
+        if (keyguardManager == null || !keyguardManager.isDeviceSecure()) {
+            JSObject ret = new JSObject();
+            ret.put("success", false);
+            ret.put("error", "No screen lock set up on this device. Please enable a PIN, pattern, or fingerprint in Android Settings.");
+            call.resolve(ret);
             return;
         }
 
@@ -60,6 +79,7 @@ public class DeviceLockPlugin extends Plugin {
                         ret.put("success", false);
                         ret.put("errorCode", errorCode);
                         ret.put("message", errString.toString());
+                        ret.put("error", errString.toString());
                         call.resolve(ret);
                     }
 
@@ -81,15 +101,24 @@ public class DeviceLockPlugin extends Plugin {
 
                 BiometricPrompt.PromptInfo.Builder promptInfoBuilder = new BiometricPrompt.PromptInfo.Builder()
                         .setTitle(title)
-                        .setSubtitle(subtitle)
-                        .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL);
+                        .setSubtitle(subtitle);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    try {
+                        promptInfoBuilder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL);
+                    } catch (Exception ignored) {
+                        promptInfoBuilder.setDeviceCredentialAllowed(true);
+                    }
+                } else {
+                    promptInfoBuilder.setDeviceCredentialAllowed(true);
+                }
 
                 BiometricPrompt.PromptInfo promptInfo = promptInfoBuilder.build();
                 biometricPrompt.authenticate(promptInfo);
             } catch (Exception e) {
                 JSObject ret = new JSObject();
                 ret.put("success", false);
-                ret.put("error", e.getMessage());
+                ret.put("error", e.getMessage() != null ? e.getMessage() : "Authentication prompt failed");
                 call.resolve(ret);
             }
         });

@@ -46,10 +46,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
     setHapticIntensityState(newVal);
     const newLevel: HapticLevel = newVal === 0 ? 'off' : 'medium';
     setHapticLevelState(newLevel);
-    // Tactile audio/vibration feedback tick while dragging slider for volume feel
-    if (newVal > 0 && newVal % 15 === 0) {
-      triggerHaptic(12);
-    }
   };
 
   const handleSaveHaptic = () => {
@@ -58,18 +54,16 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
     const newLevel: HapticLevel = hapticIntensity === 0 ? 'off' : 'medium';
     setHapticLevelState(newLevel);
     setHapticLevel(newLevel);
-    triggerHaptic('save');
     setHapticSaved(true);
     setTimeout(() => setHapticSaved(false), 2500);
   };
 
   const handleTestHaptic = () => {
     if (hapticIntensity === 0) return;
-    triggerHaptic('medium');
+    triggerHaptic('nav');
   };
 
   const handleSaveApiKey = async () => {
-    triggerHaptic('save');
     await updateData({ geminiApiKey: apiKeyInput.trim() });
     setApiKeySaved(true);
     setTimeout(() => setApiKeySaved(false), 2500);
@@ -79,20 +73,21 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
   const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(() => getSecurityConfig());
 
   const handleToggleSecurity = async () => {
-    triggerHaptic('light');
     if (securityConfig.enabled) {
       const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
       if (res.success) {
         const updated = saveSecurityConfig({ enabled: false });
         setSecurityConfig(updated);
-        triggerHaptic('medium');
+      } else if (res.error && res.error !== 'Authentication canceled') {
+        alert(res.error);
       }
     } else {
-      const res = await authenticateDeviceLock('Verify your phone lock to enable app protection');
+      const res = await authenticateDeviceLock('Confirm your phone lock to enable app protection');
       if (res.success) {
         const updated = saveSecurityConfig({ enabled: true });
         setSecurityConfig(updated);
-        triggerHaptic('save');
+      } else {
+        alert(res.error || 'Could not verify phone lock. Please ensure a PIN, pattern, or fingerprint is set in Android Settings.');
       }
     }
   };
@@ -101,23 +96,13 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
   const [expandedTransition, setExpandedTransition] = useState<TransitionMode | null>(null);
   const [previewStep, setPreviewStep] = useState(0);
 
-
-
   const handleTransitionChange = (mode: TransitionMode) => {
-    if (mode === 'fast') triggerHaptic(12);
-    else if (mode === 'efficient') triggerHaptic('medium');
-    else triggerHaptic('light');
-
     if (setTransitionMode) {
       setTransitionMode(mode);
     }
   };
 
   const handleTestTransition = () => {
-    if (transitionMode === 'fast') triggerHaptic(12);
-    else if (transitionMode === 'efficient') triggerHaptic('medium');
-    else triggerHaptic('light');
-
     setPreviewStep((prev) => (prev + 1) % 3);
   };
 
@@ -167,7 +152,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
                 <button
                   key={value}
                   onClick={() => {
-                    triggerHaptic(15);
                     setTheme(value);
                   }}
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[22px] border transition-all duration-150 active:scale-[0.96] ${
@@ -275,7 +259,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
                 <div
                   className="w-full flex items-center justify-between p-4 sm:p-4.5 cursor-pointer active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
                   onClick={() => {
-                    triggerHaptic('light');
                     setExpandedTransition(isOpen ? null : modeItem.id);
                   }}
                 >
@@ -469,10 +452,10 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
             </div>
             <div>
               <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
-                Haptic Feedback
+                Navigation Bar Haptics
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
-                Vibration intensity & tactile response
+                Vibration response for the navigation bar
               </p>
             </div>
           </div>
@@ -497,7 +480,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               ) : (
                 <Volume2 size={16} className="text-accent" />
               )}
-              <span className="font-sans font-bold">Haptic Volume Slider</span>
+              <span className="font-sans font-bold">Nav Dock Vibration</span>
             </span>
             <span className="font-mono font-black text-accent text-sm">{hapticIntensity}%</span>
           </div>
@@ -659,7 +642,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               <button
                 type="button"
                 onClick={() => {
-                  triggerHaptic('save');
                   setAppLocked(true);
                 }}
                 className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
@@ -822,7 +804,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
         <div className="grid grid-cols-2 gap-3 pt-1">
           <button
             onClick={() => {
-              triggerHaptic('medium');
               if (Capacitor.isNativePlatform()) {
                 GoogleAuth.signOut().catch(() => {});
               }
@@ -836,7 +817,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           </button>
           <button
             onClick={async () => {
-              triggerHaptic('heavy');
               if (window.confirm('Are you sure you want to reset all your data? This cannot be undone.')) {
                 if (auth.currentUser) {
                   await deleteDoc(doc(db, 'users', auth.currentUser.uid));

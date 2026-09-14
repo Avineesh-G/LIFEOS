@@ -25,7 +25,6 @@ import {
   shuffleToNextQuote, 
   PillarType 
 } from '../utils/quoteEngine';
-import { triggerHaptic } from '../utils/haptics';
 
 interface DailyQuoteMarqueeProps {
   embedded?: boolean;
@@ -55,23 +54,19 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
   }, [isPaused]);
 
   const handleNext = useCallback(() => {
-    triggerHaptic('light');
     setQuoteState(advanceToNextQuote());
   }, []);
 
   const handlePrev = useCallback(() => {
-    triggerHaptic('light');
     setQuoteState((prev) => getPreviousSeenQuote(prev.seenIndex));
   }, []);
 
   const handleShuffle = useCallback(() => {
-    triggerHaptic('medium');
     setQuoteState(shuffleToNextQuote());
   }, []);
 
   const handleCopy = useCallback(async () => {
     if (!activeQuote) return;
-    triggerHaptic('save');
     try {
       await navigator.clipboard.writeText(`"${activeQuote.quote}" — ${activeQuote.author}`);
       setCopied(true);
@@ -82,7 +77,6 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
   }, [activeQuote]);
 
   const handlePillarSelect = (categoryKey: PillarType) => {
-    triggerHaptic('light');
     setQuoteState(advanceToNextQuote(categoryKey));
   };
 
@@ -90,11 +84,9 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
 
   const handleToggleCommit = () => {
     if (isCommitted) {
-      triggerHaptic('light');
       localStorage.removeItem('lifeos_committed_theme_' + todayKey);
       setCommittedTheme(null);
     } else {
-      triggerHaptic('save');
       localStorage.setItem('lifeos_committed_theme_' + todayKey, activeQuote.category);
       setCommittedTheme(activeQuote.category);
     }
@@ -343,7 +335,6 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
           <button
             type="button"
             onClick={() => {
-              triggerHaptic('light');
               setShowActionPrompt(!showActionPrompt);
             }}
             className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 border ${
