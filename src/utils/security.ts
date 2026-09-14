@@ -44,24 +44,11 @@ const DEFAULT_CONFIG: SecurityConfig = {
 
 // ── Configuration Persistence ──────────────────────────────────────────────
 export function getSecurityConfig(): SecurityConfig {
-  if (typeof window === 'undefined') return DEFAULT_CONFIG;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_CONFIG;
-    const parsed = JSON.parse(raw);
-    return { ...DEFAULT_CONFIG, ...parsed };
-  } catch {
-    return DEFAULT_CONFIG;
-  }
+  return DEFAULT_CONFIG;
 }
 
 export function saveSecurityConfig(config: Partial<SecurityConfig>): SecurityConfig {
-  if (typeof window === 'undefined') return DEFAULT_CONFIG;
-  const current = getSecurityConfig();
-  const updated: SecurityConfig = { ...current, ...config };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  window.dispatchEvent(new CustomEvent('lifeos-security-config-changed', { detail: updated }));
-  return updated;
+  return DEFAULT_CONFIG;
 }
 
 export async function authenticateDeviceLock(subtitle = 'Unlock with your phone’s fingerprint or screen lock'): Promise<{ success: boolean; error?: string }> {

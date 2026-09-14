@@ -587,86 +587,51 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
         </div>
       </motion.div>
 
-      {/* App Security & Phone Lock Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+      {/* App Security & Phone Lock Section - Coming Soon */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
               <ShieldCheck size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
-                App Security & Lock
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                  App Security & Lock
+                </h3>
+              </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
-                Protect with your phone's screen lock
+                Direct phone screen lock & biometric security
               </p>
             </div>
           </div>
 
-          {/* Toggle Switch */}
-          <button
-            type="button"
-            onClick={handleToggleSecurity}
-            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
-              securityConfig.enabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
-            }`}
-            aria-label="Toggle Phone Screen Lock"
-          >
-            <div
-              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
-                securityConfig.enabled ? 'translate-x-5.5' : 'translate-x-0'
-              }`}
-            />
-          </button>
+          <span className="text-[10.5px] font-mono font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+            <Sparkles size={11} className="text-amber-500" />
+            Coming Soon
+          </span>
         </div>
 
-        {/* Security Details & Status */}
-        {securityConfig.enabled ? (
-          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
-                <Fingerprint size={16} className="text-accent" />
-                <span>Phone Screen Lock Active</span>
-              </div>
-              <span className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase">
-                Protected
-              </span>
-            </div>
-
-            <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-              LifeOS is secured using your phone's native lock system. You can unlock using your phone's fingerprint, face unlock, or your phone's lock screen PIN/pattern.
-            </p>
-
-            <div className="pt-1 flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  setAppLocked(true);
-                }}
-                className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
-              >
-                <Lock size={13} />
-                <span>Lock App Now</span>
-              </button>
-            </div>
+        <div className="p-4.5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-center py-5 space-y-2.5">
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent mx-auto flex items-center justify-center">
+            <Fingerprint size={24} strokeWidth={2.2} />
           </div>
-        ) : (
-          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-center py-5 space-y-2">
-            <Lock size={26} className="mx-auto text-secondary-light dark:text-secondary-dark opacity-50" />
-            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium max-w-xs mx-auto">
-              Enable to secure LifeOS with your phone's fingerprint or screen lock. No separate password needed.
+          <div className="space-y-1">
+            <h4 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark font-sans">
+              Native Phone Lock Integration
+            </h4>
+            <p className="text-[11.5px] text-secondary-light dark:text-secondary-dark font-medium max-w-sm mx-auto leading-relaxed">
+              Fingerprint, Face Unlock, and Phone Screen Lock (PIN/pattern) are currently in active development for complete hardware compatibility across all Android devices.
             </p>
-            <button
-              type="button"
-              onClick={handleToggleSecurity}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-xs font-bold font-sans transition-transform active:scale-95 shadow-sm"
-            >
-              <Fingerprint size={14} />
-              <span>Enable Phone Lock</span>
-            </button>
           </div>
-        )}
+
+          <div className="pt-1.5">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.06] text-muted-light dark:text-muted-dark text-[11px] font-mono font-semibold border border-border-light/60 dark:border-border-dark/60">
+              <Lock size={12} />
+              <span>Arriving in next update</span>
+            </span>
+          </div>
+        </div>
       </motion.div>
 
       {/* Body Profile Section */}
