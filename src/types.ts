@@ -80,9 +80,12 @@ export interface DayReview {
   improve: string;
 }
 
+export type TransitionMode = 'fast' | 'efficient' | 'soft';
+
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   accentColor: string;
+  transitionMode?: TransitionMode;
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────

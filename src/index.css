@@ -172,4 +172,30 @@
   .animate-marquee:active {
     animation-play-state: paused;
   }
+
+  /* 120 / 144 FPS Hardware Compositing & Layer Isolation */
+  .gpu-composited {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
+  .contain-paint {
+    contain: paint layout;
+  }
+
+  /* Keypad Error Shake Animation */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
 }

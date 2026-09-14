@@ -27,19 +27,46 @@ import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import type { TransitionMode } from './types';
+import AppLockOverlay from './components/security/AppLockOverlay';
+import { setAppLocked, subscribeToLockState, isAppLocked } from './utils/security';
 
-const pageTransition = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -4 },
-  transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] }
+const getTransitionConfig = (mode: TransitionMode) => {
+  switch (mode) {
+    case 'fast':
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.08, ease: 'easeOut' }
+      };
+    case 'soft':
+      return {
+        initial: { opacity: 0, y: 8, scale: 0.992 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -4, scale: 0.996 },
+        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
+      };
+    case 'efficient':
+    default:
+      return {
+        initial: { opacity: 0, y: 4 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -2 },
+        transition: { duration: 0.16, ease: [0.25, 1, 0.5, 1] }
+      };
+  }
 };
 
-function AnimatedPage({ children }: { children: React.ReactNode }) {
+function AnimatedPage({ children, mode = 'efficient' }: { children: React.ReactNode; mode?: TransitionMode }) {
+  const config = getTransitionConfig(mode);
   return (
     <motion.div
-      {...pageTransition}
-      className="w-full"
+      initial={config.initial}
+      animate={config.animate}
+      exit={config.exit}
+      transition={config.transition}
+      className="w-full gpu-composited contain-paint"
     >
       {children}
     </motion.div>
@@ -47,7 +74,7 @@ function AnimatedPage({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { theme, setTheme, accentColor, setAccentColor, mounted } = useTheme();
+  const { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, mounted } = useTheme();
   
   // Instantly hydrate cached user from localStorage for zero startup delay
   const [user, setUser] = useState<User | null>(() => {
@@ -121,6 +148,32 @@ function App() {
     };
   }, [location.pathname, navigate]);
 
+  // Background auto-lock: lock app whenever sent to background or phone locked
+  useEffect(() => {
+    let stateListener: any;
+    const registerStateListener = async () => {
+      try {
+        stateListener = await CapApp.addListener('appStateChange', (state) => {
+          if (!state.isActive) {
+            setAppLocked(true);
+          }
+        });
+      } catch {}
+    };
+    registerStateListener();
+    return () => {
+      if (stateListener) {
+        stateListener.remove();
+      }
+    };
+  }, []);
+
+  const [isLocked, setIsLocked] = useState(() => isAppLocked());
+
+  useEffect(() => {
+    return subscribeToLockState(setIsLocked);
+  }, []);
+
   if (!mounted || (authLoading && !user) || (user && !data)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
@@ -134,31 +187,43 @@ function App() {
   }
 
   return (
-    <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
-      <ErrorBoundary>
-        <AnimatePresence mode="wait" initial={false}>
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<AnimatedPage><Home data={data!} refresh={refresh} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/study" element={<AnimatedPage><Study data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/study/timer" element={<AnimatedPage><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/study/history" element={<AnimatedPage><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/study/heatmap" element={<AnimatedPage><StudyHeatmap data={data!} /></AnimatedPage>} />
-            <Route path="/gym" element={<AnimatedPage><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/gym/onboarding" element={<AnimatedPage><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/gym/workout" element={<AnimatedPage><GymWorkout data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/gym/split" element={<AnimatedPage><GymSplit data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/gym/history/:exerciseName" element={<AnimatedPage><GymExerciseHistory data={data!} /></AnimatedPage>} />
-            <Route path="/nutrition" element={<AnimatedPage><Nutrition data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/spending" element={<AnimatedPage><Spending data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/timetable" element={<AnimatedPage><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/tasks" element={<AnimatedPage><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/progress" element={<AnimatedPage><Progress data={data!} /></AnimatedPage>} />
-            <Route path="/history" element={<AnimatedPage><WorkHistory data={data!} updateData={updateData} /></AnimatedPage>} />
-            <Route path="/settings" element={<AnimatedPage><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
-          </Routes>
-        </AnimatePresence>
-      </ErrorBoundary>
-    </Layout>
+    <>
+      <AppLockOverlay />
+      <div
+        className="w-full min-h-screen transition-all duration-300 ease-out"
+        style={{
+          filter: isLocked ? 'blur(36px) saturate(40%)' : 'none',
+          opacity: isLocked ? 0.2 : 1,
+          pointerEvents: isLocked ? 'none' : 'auto',
+        }}
+      >
+        <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
+          <ErrorBoundary>
+            <AnimatePresence mode={transitionMode === 'soft' ? 'wait' : 'popLayout'} initial={false}>
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<AnimatedPage mode={transitionMode}><Home data={data!} refresh={refresh} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/study" element={<AnimatedPage mode={transitionMode}><Study data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/study/timer" element={<AnimatedPage mode={transitionMode}><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/study/history" element={<AnimatedPage mode={transitionMode}><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/study/heatmap" element={<AnimatedPage mode={transitionMode}><StudyHeatmap data={data!} /></AnimatedPage>} />
+                <Route path="/gym" element={<AnimatedPage mode={transitionMode}><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/gym/onboarding" element={<AnimatedPage mode={transitionMode}><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/gym/workout" element={<AnimatedPage mode={transitionMode}><GymWorkout data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/gym/split" element={<AnimatedPage mode={transitionMode}><GymSplit data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/gym/history/:exerciseName" element={<AnimatedPage mode={transitionMode}><GymExerciseHistory data={data!} /></AnimatedPage>} />
+                <Route path="/nutrition" element={<AnimatedPage mode={transitionMode}><Nutrition data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/spending" element={<AnimatedPage mode={transitionMode}><Spending data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/timetable" element={<AnimatedPage mode={transitionMode}><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/tasks" element={<AnimatedPage mode={transitionMode}><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/progress" element={<AnimatedPage mode={transitionMode}><Progress data={data!} /></AnimatedPage>} />
+                <Route path="/history" element={<AnimatedPage mode={transitionMode}><WorkHistory data={data!} updateData={updateData} /></AnimatedPage>} />
+                <Route path="/settings" element={<AnimatedPage mode={transitionMode}><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
+              </Routes>
+            </AnimatePresence>
+          </ErrorBoundary>
+        </Layout>
+      </div>
+    </>
   );
 }
 

@@ -1,9 +1,10 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, Play, Sparkles, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { triggerHaptic, getHapticLevel, setHapticLevel, HapticLevel } from '../utils/haptics';
-import type { AppData, AppSettings } from '../types';
+import { triggerHaptic, getHapticLevel, setHapticLevel, getHapticIntensity, setHapticIntensity, HapticLevel } from '../utils/haptics';
+import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDeviceLock, SecurityConfig } from '../utils/security';
+import type { AppData, AppSettings, TransitionMode } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import { FITNESS_GOALS } from '../utils/calculations';
 import { auth, db } from '../firebase';
@@ -17,6 +18,8 @@ interface SettingsProps {
   setTheme: (t: AppSettings['theme']) => void;
   accentColor: string;
   setAccentColor: (c: string) => void;
+  transitionMode?: TransitionMode;
+  setTransitionMode?: (m: TransitionMode) => void;
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
   refresh: () => Promise<AppData>;
@@ -25,7 +28,7 @@ interface SettingsProps {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
-export default function Settings({ theme, setTheme, data, updateData }: SettingsProps) {
+export default function Settings({ theme, setTheme, transitionMode = 'efficient', setTransitionMode, data, updateData }: SettingsProps) {
   const navigate = useNavigate();
 
   // Private Groq API Key State
@@ -33,35 +36,36 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
 
-  // Haptic feedback preference state
+  // Haptic feedback preference state (Volume slider inspired with leverage & save button)
   const [hapticLevel, setHapticLevelState] = useState<HapticLevel>(() => getHapticLevel());
+  const [hapticIntensity, setHapticIntensityState] = useState<number>(() => getHapticIntensity());
+  const [savedHapticIntensity, setSavedHapticIntensity] = useState<number>(() => getHapticIntensity());
+  const [hapticSaved, setHapticSaved] = useState(false);
 
-  const handleHapticChange = (level: HapticLevel) => {
-    setHapticLevelState(level);
-    setHapticLevel(level);
-    if (level !== 'off') {
-      setTimeout(() => {
-        triggerHaptic(level === 'high' ? 'heavy' : 'medium');
-      }, 30);
+  const handleHapticSliderChange = (newVal: number) => {
+    setHapticIntensityState(newVal);
+    const newLevel: HapticLevel = newVal === 0 ? 'off' : 'medium';
+    setHapticLevelState(newLevel);
+    // Tactile audio/vibration feedback tick while dragging slider for volume feel
+    if (newVal > 0 && newVal % 15 === 0) {
+      triggerHaptic(12);
     }
   };
 
-  const levelToSliderVal = (level: HapticLevel): number => {
-    switch (level) {
-      case 'off': return 0;
-      case 'medium': return 1;
-      case 'high': return 2;
-      default: return 1;
-    }
+  const handleSaveHaptic = () => {
+    setHapticIntensity(hapticIntensity);
+    setSavedHapticIntensity(hapticIntensity);
+    const newLevel: HapticLevel = hapticIntensity === 0 ? 'off' : 'medium';
+    setHapticLevelState(newLevel);
+    setHapticLevel(newLevel);
+    triggerHaptic('save');
+    setHapticSaved(true);
+    setTimeout(() => setHapticSaved(false), 2500);
   };
 
-  const sliderValToLevel = (val: number): HapticLevel => {
-    switch (val) {
-      case 0: return 'off';
-      case 1: return 'medium';
-      case 2: return 'high';
-      default: return 'medium';
-    }
+  const handleTestHaptic = () => {
+    if (hapticIntensity === 0) return;
+    triggerHaptic('medium');
   };
 
   const handleSaveApiKey = async () => {
@@ -69,6 +73,52 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
     await updateData({ geminiApiKey: apiKeyInput.trim() });
     setApiKeySaved(true);
     setTimeout(() => setApiKeySaved(false), 2500);
+  };
+
+  // App Security & Lock state
+  const [securityConfig, setSecurityConfig] = useState<SecurityConfig>(() => getSecurityConfig());
+
+  const handleToggleSecurity = async () => {
+    triggerHaptic('light');
+    if (securityConfig.enabled) {
+      const res = await authenticateDeviceLock('Verify your phone lock to disable app protection');
+      if (res.success) {
+        const updated = saveSecurityConfig({ enabled: false });
+        setSecurityConfig(updated);
+        triggerHaptic('medium');
+      }
+    } else {
+      const res = await authenticateDeviceLock('Verify your phone lock to enable app protection');
+      if (res.success) {
+        const updated = saveSecurityConfig({ enabled: true });
+        setSecurityConfig(updated);
+        triggerHaptic('save');
+      }
+    }
+  };
+
+  // Motion & Transition dynamics state
+  const [expandedTransition, setExpandedTransition] = useState<TransitionMode | null>(null);
+  const [previewStep, setPreviewStep] = useState(0);
+
+
+
+  const handleTransitionChange = (mode: TransitionMode) => {
+    if (mode === 'fast') triggerHaptic(12);
+    else if (mode === 'efficient') triggerHaptic('medium');
+    else triggerHaptic('light');
+
+    if (setTransitionMode) {
+      setTransitionMode(mode);
+    }
+  };
+
+  const handleTestTransition = () => {
+    if (transitionMode === 'fast') triggerHaptic(12);
+    else if (transitionMode === 'efficient') triggerHaptic('medium');
+    else triggerHaptic('light');
+
+    setPreviewStep((prev) => (prev + 1) % 3);
   };
 
   return (
@@ -135,7 +185,282 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
         </div>
       </motion.div>
 
-      {/* Haptic Feedback & Vibration Intensity Slider Section */}
+      {/* Motion & Interface Transitions (120/144 FPS) */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
+              <Gauge size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                Interface Transitions
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                120 / 144 FPS adaptive motion engine
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-bold px-3 py-1 rounded-full font-mono uppercase bg-accent/15 text-accent border border-accent/20 shadow-sm">
+            {transitionMode}
+          </span>
+        </div>
+
+        {/* Transition Mode Cards (Enlarge option same as mess cards) */}
+        <div className="space-y-3 pt-1">
+          {[
+            {
+              id: 'fast' as const,
+              title: 'Fast',
+              icon: Zap,
+              badge: '< 100ms',
+              badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+              iconBox: 'bg-amber-500/10 text-amber-500',
+              subtitle: 'Instant Response • Pure Crossfade',
+              description: 'Zero-delay crossfade optimized for immediate touch response. Strips exit delays entirely for snappy navigation.',
+              specs: {
+                pacing: 'Instant (< 100ms)',
+                duration: '0.08s',
+                engine: 'Hardware Composited',
+                physics: 'Linear Ease-Out'
+              }
+            },
+            {
+              id: 'efficient' as const,
+              title: 'Efficient',
+              icon: Gauge,
+              badge: '120 / 144 FPS',
+              badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+              iconBox: 'bg-emerald-500/10 text-emerald-500',
+              recommended: true,
+              subtitle: 'Zero Frame Drops • GPU Acceleration',
+              description: 'Engineered specifically for high refresh rate displays (120Hz / 144Hz). Uses translate3d and CSS layout containment for flawless 0ms stutter-free scrolling.',
+              specs: {
+                pacing: '120 / 144 FPS Lock',
+                duration: '0.16s',
+                engine: 'GPU translate3d Layer',
+                physics: 'Cubic-Bezier [0.25, 1, 0.5, 1]'
+              }
+            },
+            {
+              id: 'soft' as const,
+              title: 'Soft',
+              icon: Waves,
+              badge: 'Silky Motion',
+              badgeClass: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+              iconBox: 'bg-indigo-500/10 text-indigo-500',
+              subtitle: 'Fluid & Organic • Apple-Style Spring',
+              description: 'Silky smooth momentum with gentle depth scaling. Provides a luxurious, tactile feel designed for high visual elegance.',
+              specs: {
+                pacing: 'Smooth 60–120 FPS',
+                duration: '0.28s',
+                engine: 'Scale + Opacity Composite',
+                physics: 'Damped Spring [0.16, 1, 0.3, 1]'
+              }
+            },
+          ].map((modeItem) => {
+            const active = transitionMode === modeItem.id;
+            const isOpen = expandedTransition === modeItem.id;
+            const Icon = modeItem.icon;
+            return (
+              <div
+                key={modeItem.id}
+                className={`card overflow-hidden transition-all duration-200 border ${
+                  active
+                    ? 'border-accent ring-2 ring-accent/20 bg-accent/[0.03] dark:bg-accent/[0.06] shadow-md'
+                    : 'border-border-light/80 dark:border-border-dark/80 bg-surface-light dark:bg-surface-dark hover:border-accent/40'
+                }`}
+              >
+                {/* Header Row - Click to Enlarge / Collapse (same as mess cards) */}
+                <div
+                  className="w-full flex items-center justify-between p-4 sm:p-4.5 cursor-pointer active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setExpandedTransition(isOpen ? null : modeItem.id);
+                  }}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${modeItem.iconBox} shadow-sm`}>
+                      <Icon size={20} strokeWidth={2.4} />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-extrabold text-sm sm:text-base text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                          {modeItem.title}
+                        </span>
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${modeItem.badgeClass}`}>
+                          {modeItem.badge}
+                        </span>
+                        {modeItem.recommended && (
+                          <span className="text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            Recommended
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-secondary-light dark:text-secondary-dark mt-0.5 font-medium truncate">
+                        {modeItem.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions on right: Active Checkmark & Enlarge Chevron */}
+                  <div className="flex items-center gap-2.5 shrink-0 ml-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTransitionChange(modeItem.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5 ${
+                        active
+                          ? 'bg-accent text-white shadow-sm'
+                          : 'bg-black/[0.04] dark:bg-white/[0.06] text-secondary-light dark:text-secondary-dark hover:text-primary-light'
+                      }`}
+                    >
+                      {active ? (
+                        <>
+                          <Check size={13} strokeWidth={2.8} />
+                          <span>Active</span>
+                        </>
+                      ) : (
+                        <span>Select</span>
+                      )}
+                    </button>
+
+                    <div className="text-secondary-light dark:text-secondary-dark p-1 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors">
+                      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enlarged Details Body (same as mess cards) */}
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4.5 pt-2 border-t border-border-light/70 dark:border-border-dark/70 space-y-3.5 bg-black/[0.015] dark:bg-white/[0.015]">
+                        <p className="text-xs leading-relaxed text-secondary-light dark:text-secondary-dark pt-1 font-sans">
+                          {modeItem.description}
+                        </p>
+
+                        {/* Technical Architecture Specs Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Target Pacing</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{modeItem.specs.pacing}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Duration</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{modeItem.specs.duration}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Hardware Engine</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{modeItem.specs.engine}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Physics Curve</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{modeItem.specs.physics}</p>
+                          </div>
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[11px] font-mono text-secondary-light/90 dark:text-secondary-dark/90">
+                            {active ? '● Currently Active Profile' : 'Ready to apply'}
+                          </span>
+                          {!active && (
+                            <button
+                              type="button"
+                              onClick={() => handleTransitionChange(modeItem.id)}
+                              className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-bold font-sans transition-transform active:scale-95 shadow-sm"
+                            >
+                              Activate {modeItem.title}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Live Interactive Transition Sandbox */}
+        <div className="rounded-2xl p-4 bg-black/[0.02] dark:bg-white/[0.02] border border-border-light/60 dark:border-border-dark/60 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-accent" />
+              <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+                Live Dynamics Preview
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleTestTransition}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white font-sans text-xs font-bold shadow-sm transition-transform active:scale-95 hover:opacity-90"
+            >
+              <Play size={12} fill="currentColor" />
+              <span>Test Motion</span>
+            </button>
+          </div>
+
+          <div className="relative h-14 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/50 dark:border-border-dark/50 overflow-hidden flex items-center px-4">
+            <AnimatePresence mode={transitionMode === 'soft' ? 'wait' : 'popLayout'} initial={false}>
+              <motion.div
+                key={previewStep}
+                initial={
+                  transitionMode === 'fast'
+                    ? { opacity: 0 }
+                    : transitionMode === 'soft'
+                    ? { opacity: 0, x: -16, scale: 0.98 }
+                    : { opacity: 0, x: -10 }
+                }
+                animate={
+                  transitionMode === 'fast'
+                    ? { opacity: 1 }
+                    : transitionMode === 'soft'
+                    ? { opacity: 1, x: 0, scale: 1 }
+                    : { opacity: 1, x: 0 }
+                }
+                exit={
+                  transitionMode === 'fast'
+                    ? { opacity: 0 }
+                    : transitionMode === 'soft'
+                    ? { opacity: 0, x: 16, scale: 0.98 }
+                    : { opacity: 0, x: 10 }
+                }
+                transition={
+                  transitionMode === 'fast'
+                    ? { duration: 0.08, ease: 'easeOut' }
+                    : transitionMode === 'soft'
+                    ? { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
+                    : { duration: 0.16, ease: [0.25, 1, 0.5, 1] }
+                }
+                className="w-full flex items-center justify-between text-xs font-bold font-sans text-primary-light dark:text-primary-dark gpu-composited"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-2.5 h-2.5 rounded-full ${
+                    previewStep === 0 ? 'bg-emerald-500' : previewStep === 1 ? 'bg-indigo-500' : 'bg-amber-500'
+                  }`} />
+                  <span>State {previewStep + 1}: {previewStep === 0 ? 'Dashboard Route' : previewStep === 1 ? 'Exercise Log Route' : 'Settings Route'}</span>
+                </div>
+                <span className="font-mono text-[10px] text-secondary-light dark:text-secondary-dark uppercase">
+                  {transitionMode === 'fast' ? '0.08s' : transitionMode === 'soft' ? '0.28s Spring' : '120 FPS GPU'}
+                </span>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Haptic Feedback & Vibration Intensity Slider Section (Volume inspired with smooth leverage & Save button) */}
       <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
@@ -151,88 +476,215 @@ export default function Settings({ theme, setTheme, data, updateData }: Settings
               </p>
             </div>
           </div>
-          <span className={`text-xs font-bold px-3 py-1 rounded-full font-mono capitalize shadow-sm ${
-            hapticLevel === 'off'
+          <span className={`text-xs font-bold px-3 py-1 rounded-full font-mono shadow-sm ${
+            hapticIntensity === 0
               ? 'bg-neutral-100 dark:bg-neutral-800 text-muted-light dark:text-muted-dark'
-              : hapticLevel === 'high'
-              ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300'
               : 'bg-accent/15 text-accent'
           }`}>
-            {hapticLevel === 'off' ? 'Off' : `${hapticLevel}`}
+            {hapticIntensity === 0 ? 'Off (0%)' : `Medium (${hapticIntensity}%)`}
           </span>
         </div>
 
-        {/* Volume-like Slider Toggle */}
-        <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3">
+        {/* Volume-Inspired Slider Container */}
+        <div className="p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
+          {/* Header Row with Dynamic Volume Icon and Readout */}
           <div className="flex items-center justify-between text-xs font-mono font-bold text-secondary-light dark:text-secondary-dark">
-            <span className="flex items-center gap-1.5">
-              <Volume2 size={14} className="text-accent" />
-              <span>Haptic Strength Slider</span>
+            <span className="flex items-center gap-2">
+              {hapticIntensity === 0 ? (
+                <VolumeX size={16} className="text-muted-light dark:text-muted-dark" />
+              ) : hapticIntensity < 50 ? (
+                <Volume1 size={16} className="text-accent" />
+              ) : (
+                <Volume2 size={16} className="text-accent" />
+              )}
+              <span className="font-sans font-bold">Haptic Volume Slider</span>
             </span>
-            <span className="capitalize text-accent font-black">{hapticLevel}</span>
+            <span className="font-mono font-black text-accent text-sm">{hapticIntensity}%</span>
           </div>
 
-          <div className="relative pt-1 pb-1">
+          {/* Interactive Fluid Volume Slider Bar with Full Leverage */}
+          <div className="relative flex items-center h-8">
+            {/* Background Track with Filled Volume Level */}
+            <div className="absolute inset-x-0 h-3 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-accent/70 via-accent to-accent rounded-full transition-[width] duration-75"
+                style={{ width: `${hapticIntensity}%` }}
+              />
+            </div>
+
+            {/* Continuous Range Input with 0–100% Smooth Drag Leverage */}
             <input
               type="range"
               min="0"
-              max="2"
+              max="100"
               step="1"
-              value={levelToSliderVal(hapticLevel)}
-              onChange={(e) => {
-                const newLevel = sliderValToLevel(parseInt(e.target.value, 10));
-                handleHapticChange(newLevel);
-              }}
-              className="w-full h-2.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-accent transition-all"
+              value={hapticIntensity}
+              onChange={(e) => handleHapticSliderChange(parseInt(e.target.value, 10))}
+              className="absolute inset-x-0 w-full h-8 opacity-0 cursor-pointer z-20"
+              aria-label="Adjust Haptic Vibration Intensity"
             />
+
+            {/* Tactile Slider Thumb Indicator */}
+            <div
+              className="absolute h-6 w-6 rounded-full bg-white dark:bg-neutral-100 shadow-md border-2 border-accent pointer-events-none z-10 transition-[left] duration-75 -translate-x-1/2 flex items-center justify-center"
+              style={{ left: `${hapticIntensity}%` }}
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+            </div>
           </div>
 
-          {/* Stepped Labels below Slider */}
+          {/* Stepped Preset Markers (Off to Medium range only) */}
           <div className="flex justify-between text-[11px] font-mono font-bold text-muted-light dark:text-muted-dark px-1">
             <button
               type="button"
-              onClick={() => handleHapticChange('off')}
-              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'off' ? 'text-accent font-black' : ''}`}
+              onClick={() => handleHapticSliderChange(0)}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticIntensity === 0 ? 'text-accent font-black' : ''}`}
             >
-              Off
+              Off (0%)
             </button>
             <button
               type="button"
-              onClick={() => handleHapticChange('medium')}
-              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'medium' ? 'text-accent font-black' : ''}`}
+              onClick={() => handleHapticSliderChange(35)}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticIntensity >= 30 && hapticIntensity < 55 ? 'text-accent font-black' : ''}`}
             >
-              Medium
+              Light (35%)
             </button>
             <button
               type="button"
-              onClick={() => handleHapticChange('high')}
-              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticLevel === 'high' ? 'text-accent font-black' : ''}`}
+              onClick={() => handleHapticSliderChange(65)}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticIntensity >= 55 && hapticIntensity < 85 ? 'text-accent font-black' : ''}`}
             >
-              High
+              Balanced (65%)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleHapticSliderChange(100)}
+              className={`hover:text-primary-light dark:hover:text-primary-dark transition-colors ${hapticIntensity >= 85 ? 'text-accent font-black' : ''}`}
+            >
+              Medium (100%)
+            </button>
+          </div>
+
+          {/* Action Row: Test Vibration & Save Button */}
+          <div className="flex items-center justify-between pt-2 border-t border-border-light/60 dark:border-border-dark/60">
+            <button
+              type="button"
+              onClick={handleTestHaptic}
+              disabled={hapticIntensity === 0}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.09] text-primary-light dark:text-primary-dark font-sans text-xs font-bold transition-transform active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+            >
+              <Play size={12} fill="currentColor" />
+              <span>Test Vibration</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSaveHaptic}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-sans text-xs font-bold transition-all active:scale-95 shadow-sm ${
+                hapticSaved
+                  ? 'bg-emerald-500 text-white shadow-emerald-500/25'
+                  : hapticIntensity !== savedHapticIntensity
+                  ? 'bg-accent text-white hover:opacity-90 ring-2 ring-accent/30'
+                  : 'bg-accent text-white hover:opacity-90'
+              }`}
+            >
+              {hapticSaved ? (
+                <>
+                  <Check size={14} strokeWidth={2.8} />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save size={14} strokeWidth={2.2} />
+                  <span>{hapticIntensity !== savedHapticIntensity ? 'Save Changes' : 'Save Preference'}</span>
+                </>
+              )}
             </button>
           </div>
         </div>
+      </motion.div>
 
-        {/* Quick Select Buttons */}
-        <div className="grid grid-cols-3 gap-2.5">
-          {(['off', 'medium', 'high'] as const).map((lvl) => {
-            const active = hapticLevel === lvl;
-            return (
-              <button
-                key={lvl}
-                type="button"
-                onClick={() => handleHapticChange(lvl)}
-                className={`py-2.5 px-3 rounded-xl border text-xs font-bold font-mono uppercase tracking-wider transition-all active:scale-95 ${
-                  active
-                    ? 'bg-accent text-white border-accent shadow-sm'
-                    : 'bg-black/[0.02] dark:bg-white/[0.03] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
-                }`}
-              >
-                {lvl}
-              </button>
-            );
-          })}
+      {/* App Security & Phone Lock Section */}
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
+              <ShieldCheck size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                App Security & Lock
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                Protect with your phone's screen lock
+              </p>
+            </div>
+          </div>
+
+          {/* Toggle Switch */}
+          <button
+            type="button"
+            onClick={handleToggleSecurity}
+            className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center ${
+              securityConfig.enabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
+            }`}
+            aria-label="Toggle Phone Screen Lock"
+          >
+            <div
+              className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
+                securityConfig.enabled ? 'translate-x-5.5' : 'translate-x-0'
+              }`}
+            />
+          </button>
         </div>
+
+        {/* Security Details & Status */}
+        {securityConfig.enabled ? (
+          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+                <Fingerprint size={16} className="text-accent" />
+                <span>Phone Screen Lock Active</span>
+              </div>
+              <span className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase">
+                Protected
+              </span>
+            </div>
+
+            <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
+              LifeOS is secured using your phone's native lock system. You can unlock using your phone's fingerprint, face unlock, or your phone's lock screen PIN/pattern.
+            </p>
+
+            <div className="pt-1 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('save');
+                  setAppLocked(true);
+                }}
+                className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
+              >
+                <Lock size={13} />
+                <span>Lock App Now</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-center py-5 space-y-2">
+            <Lock size={26} className="mx-auto text-secondary-light dark:text-secondary-dark opacity-50" />
+            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium max-w-xs mx-auto">
+              Enable to secure LifeOS with your phone's fingerprint or screen lock. No separate password needed.
+            </p>
+            <button
+              type="button"
+              onClick={handleToggleSecurity}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent text-white text-xs font-bold font-sans transition-transform active:scale-95 shadow-sm"
+            >
+              <Fingerprint size={14} />
+              <span>Enable Phone Lock</span>
+            </button>
+          </div>
+        )}
       </motion.div>
 
       {/* Body Profile Section */}

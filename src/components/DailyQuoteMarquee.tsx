@@ -14,15 +14,25 @@ import {
   Shield, 
   Target, 
   Zap, 
-  ChevronDown 
+  ChevronDown,
+  LucideIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { getDailyQuotes } from '../utils/quoteEngine';
+import { 
+  getCurrentDailyQuote, 
+  advanceToNextQuote, 
+  getPreviousSeenQuote, 
+  shuffleToNextQuote, 
+  PillarType 
+} from '../utils/quoteEngine';
 import { triggerHaptic } from '../utils/haptics';
 
-export default function DailyQuoteMarquee() {
-  const quotes = useMemo(() => getDailyQuotes(5), []);
-  const [currentIndex, setCurrentIndex] = useState(0);
+interface DailyQuoteMarqueeProps {
+  embedded?: boolean;
+}
+
+export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarqueeProps) {
+  const [quoteState, setQuoteState] = useState(() => getCurrentDailyQuote());
   const [copied, setCopied] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showActionPrompt, setShowActionPrompt] = useState(false);
@@ -32,36 +42,32 @@ export default function DailyQuoteMarquee() {
     return localStorage.getItem('lifeos_committed_theme_' + todayKey);
   });
 
-  const activeQuote = quotes[currentIndex] || quotes[0];
+  const activeQuote = quoteState.quote;
 
   // Auto-advance active quote every 12 seconds unless paused
+  // Guaranteed: Automatically advances to next unseen quote for today without repeating!
   useEffect(() => {
-    if (isPaused || quotes.length <= 1) return;
+    if (isPaused) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % quotes.length);
+      setQuoteState(advanceToNextQuote());
     }, 12000);
     return () => clearInterval(interval);
-  }, [isPaused, quotes.length]);
+  }, [isPaused]);
 
   const handleNext = useCallback(() => {
     triggerHaptic('light');
-    setCurrentIndex((prev) => (prev + 1) % quotes.length);
-  }, [quotes.length]);
+    setQuoteState(advanceToNextQuote());
+  }, []);
 
   const handlePrev = useCallback(() => {
     triggerHaptic('light');
-    setCurrentIndex((prev) => (prev - 1 + quotes.length) % quotes.length);
-  }, [quotes.length]);
+    setQuoteState((prev) => getPreviousSeenQuote(prev.seenIndex));
+  }, []);
 
   const handleShuffle = useCallback(() => {
     triggerHaptic('medium');
-    if (quotes.length <= 1) return;
-    let nextIdx = Math.floor(Math.random() * quotes.length);
-    if (nextIdx === currentIndex) {
-      nextIdx = (nextIdx + 1) % quotes.length;
-    }
-    setCurrentIndex(nextIdx);
-  }, [currentIndex, quotes.length]);
+    setQuoteState(shuffleToNextQuote());
+  }, []);
 
   const handleCopy = useCallback(async () => {
     if (!activeQuote) return;
@@ -75,12 +81,9 @@ export default function DailyQuoteMarquee() {
     }
   }, [activeQuote]);
 
-  const handlePillarSelect = (categoryKey: string) => {
+  const handlePillarSelect = (categoryKey: PillarType) => {
     triggerHaptic('light');
-    const idx = quotes.findIndex(q => q.category === categoryKey);
-    if (idx !== -1) {
-      setCurrentIndex(idx);
-    }
+    setQuoteState(advanceToNextQuote(categoryKey));
   };
 
   const isCommitted = committedTheme === activeQuote?.category;
@@ -125,7 +128,7 @@ export default function DailyQuoteMarquee() {
     },
   };
 
-  const pillars = [
+  const pillars: { key: PillarType; label: string; icon: LucideIcon; color: string; activeClass: string }[] = [
     { key: 'studies', label: 'Studies', icon: GraduationCap, color: 'text-emerald-500', activeClass: 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/25 border-emerald-500' },
     { key: 'career', label: 'Career', icon: Briefcase, color: 'text-indigo-500', activeClass: 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/25 border-indigo-500' },
     { key: 'finance', label: 'Finance', icon: Coins, color: 'text-amber-500', activeClass: 'bg-amber-500 text-white shadow-sm shadow-amber-500/25 border-amber-500' },
@@ -166,14 +169,22 @@ export default function DailyQuoteMarquee() {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 bg-gradient-to-br from-white via-neutral-50/80 to-purple-50/40 dark:from-[#1A1C23] dark:via-[#16171D] dark:to-[#131218] border border-purple-500/20 dark:border-purple-500/25 shadow-sm hover:shadow-md transition-all group select-none"
+      className={
+        embedded
+          ? 'relative z-10 space-y-3.5 select-none'
+          : 'relative overflow-hidden rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 bg-gradient-to-br from-white via-neutral-50/80 to-purple-50/40 dark:from-[#1A1C23] dark:via-[#16171D] dark:to-[#131218] border border-purple-500/20 dark:border-purple-500/25 shadow-sm hover:shadow-md transition-all group select-none'
+      }
     >
-      {/* Decorative Radial Glows & Elegant Watermark */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-2xl pointer-events-none" />
-      <div className="absolute right-4 top-1 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
-        “
-      </div>
+      {!embedded && (
+        <>
+          {/* Decorative Radial Glows & Elegant Watermark */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-2xl pointer-events-none" />
+          <div className="absolute right-4 top-1 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
+            “
+          </div>
+        </>
+      )}
 
       {/* ── Top Header Row ── */}
       <div className="relative z-10 flex items-center justify-between gap-2 mb-3.5 sm:mb-4">
@@ -189,6 +200,11 @@ export default function DailyQuoteMarquee() {
             <span className={`w-1.5 h-1.5 rounded-full ${currentMeta.dotClass}`} />
             {currentMeta.label}
           </span>
+
+          {/* Non-repeating daily counter */}
+          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/5 border border-purple-500/15">
+            Auto-rotating • No Repeats
+          </span>
         </div>
 
         {/* Action Controls */}
@@ -197,7 +213,7 @@ export default function DailyQuoteMarquee() {
             type="button"
             onClick={handleShuffle}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Shuffle quote"
+            title="Shuffle to next unique quote"
           >
             <Shuffle size={13} />
           </button>
@@ -217,7 +233,7 @@ export default function DailyQuoteMarquee() {
             type="button"
             onClick={handlePrev}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Previous quote"
+            title="Previous viewed quote"
           >
             <ChevronLeft size={15} />
           </button>
@@ -226,7 +242,7 @@ export default function DailyQuoteMarquee() {
             type="button"
             onClick={handleNext}
             className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Next quote"
+            title="Next unique quote"
           >
             <ChevronRight size={15} />
           </button>
@@ -237,12 +253,12 @@ export default function DailyQuoteMarquee() {
       <div className="relative z-10 my-1 sm:my-2 min-h-[82px] sm:min-h-[92px] flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeQuote?.id || currentIndex}
+            key={activeQuote?.id || quoteState.seenIndex}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="space-y-2.5"
+            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            className="space-y-2.5 gpu-composited"
           >
             <p className="text-[16px] sm:text-[18px] md:text-[20px] font-extrabold text-primary-light dark:text-primary-dark tracking-tight leading-relaxed sm:leading-snug">
               <span className="text-purple-500 dark:text-purple-400 font-serif mr-1">“</span>
@@ -261,12 +277,12 @@ export default function DailyQuoteMarquee() {
                 type="button"
                 onClick={handleNext}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[11px] font-mono font-bold tracking-wider transition-all active:scale-95 group/pill shrink-0"
-                title="Next principle"
+                title="Next unique quote"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
-                <span>{String(currentIndex + 1).padStart(2, '0')}</span>
-                <span className="opacity-40">/</span>
-                <span className="opacity-60">{String(quotes.length).padStart(2, '0')}</span>
+                <span>#{quoteState.seenIndex + 1}</span>
+                <span className="opacity-40">•</span>
+                <span className="opacity-75 text-[10px] uppercase">Today</span>
                 <ChevronRight size={12} className="opacity-50 group-hover/pill:opacity-100 group-hover/pill:translate-x-0.5 transition-all" />
               </button>
             </div>

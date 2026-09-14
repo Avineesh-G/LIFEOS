@@ -261,46 +261,56 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
 
-      {/* ── Expressive Hero Greeting (Contextual Ambient Showcase) ── */}
-      <motion.div variants={item} className="pt-2 px-1 relative">
-        {/* Soft Ambient Hero Radial Glow */}
-        <div className={`absolute -top-6 -left-6 w-48 h-48 rounded-full ${greetingConfig.glowColor} blur-3xl pointer-events-none`} />
+      {/* ── Expressive Hero Card: Greeting & Daily Wisdom Showcase (Unified Single Card) ── */}
+      <motion.div
+        variants={item}
+        className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 bg-gradient-to-br from-white via-neutral-50/80 to-purple-50/40 dark:from-[#1A1C23] dark:via-[#16171D] dark:to-[#131218] border border-purple-500/20 dark:border-purple-500/25 shadow-sm space-y-4 select-none"
+      >
+        {/* Soft Ambient Hero Radial Glow & Watermark */}
+        <div className={`absolute -top-10 -left-10 w-56 h-56 rounded-full ${greetingConfig.glowColor} blur-3xl pointer-events-none`} />
+        <div className="absolute -bottom-8 -right-8 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute right-4 top-2 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
+          “
+        </div>
 
-        {/* Date & Phase Glass Pill */}
-        <div className="flex items-center gap-2 mb-2.5 flex-wrap relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-light/85 dark:bg-surface-dark/85 backdrop-blur-md border border-border-light/80 dark:border-border-dark/80 shadow-xs">
-            <greetingConfig.icon size={13} className="text-accent shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
-              {format(now, 'EEEE, MMMM d')}
+        {/* ── Top Header Section: Date Pill & Phase Badge ── */}
+        <div className="relative z-10 space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/[0.03] dark:bg-white/[0.06] backdrop-blur-md border border-border-light/80 dark:border-border-dark/80 shadow-xs">
+              <greetingConfig.icon size={13} className="text-accent shrink-0 animate-pulse" />
+              <span className="text-xs font-semibold tracking-wide text-secondary-light dark:text-secondary-dark">
+                {format(now, 'EEEE, MMMM d')}
+              </span>
+            </div>
+
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-mono font-bold tracking-wider uppercase border ${greetingConfig.badgeClass}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${greetingConfig.dotClass} animate-ping`} />
+              {greetingConfig.badge}
             </span>
           </div>
 
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-mono font-bold tracking-wider uppercase border ${greetingConfig.badgeClass}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${greetingConfig.dotClass} animate-ping`} />
-            {greetingConfig.badge}
-          </span>
+          {/* Hero Title with Dynamic Fluid Gradient */}
+          <div>
+            <h1 className="text-[32px] sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
+              Good{' '}
+              <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
+                {greetingConfig.word}
+              </span>
+            </h1>
+
+            {/* Motivational Subline */}
+            <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1 tracking-tight flex items-center gap-1.5">
+              <Sparkles size={12} className="text-accent shrink-0 opacity-80" />
+              <span>{greetingConfig.subline}</span>
+            </p>
+          </div>
         </div>
 
-        {/* Hero Title with Dynamic Fluid Gradient */}
-        <div className="relative z-10">
-          <h1 className="text-[34px] sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight">
-            Good{' '}
-            <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
-              {greetingConfig.word}
-            </span>
-          </h1>
+        {/* ── Subtle Divider within Card ── */}
+        <div className="relative z-10 border-t border-purple-500/15 dark:border-purple-500/20 pt-1" />
 
-          {/* Motivational Subline */}
-          <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1.5 tracking-tight flex items-center gap-1.5">
-            <Sparkles size={12} className="text-accent shrink-0 opacity-80" />
-            <span>{greetingConfig.subline}</span>
-          </p>
-        </div>
-      </motion.div>
-
-      {/* ── Daily Wisdom Showcase Card (Offline No-Repeat Rotation) ── */}
-      <motion.div variants={item}>
-        <DailyQuoteMarquee />
+        {/* ── Daily Wisdom Quote Marquee (Embedded within Unified Card) ── */}
+        <DailyQuoteMarquee embedded />
       </motion.div>
 
       {/* ── Option 1: Interactive 7-Day Dynamic Strip ── */}

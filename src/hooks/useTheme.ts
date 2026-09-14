@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import type { AppSettings } from '../types';
+import type { AppSettings, TransitionMode } from '../types';
 
 export function useTheme() {
   const [theme, setThemeState] = useState<AppSettings['theme']>(
@@ -7,6 +7,9 @@ export function useTheme() {
   );
   const [accentColor, setAccentColorState] = useState(
     () => localStorage.getItem('accentColor') || '#6366F1'
+  );
+  const [transitionMode, setTransitionModeState] = useState<TransitionMode>(
+    () => (localStorage.getItem('transitionMode') as TransitionMode) || 'efficient'
   );
   const [mounted, setMounted] = useState(false);
   const [systemIsDark, setSystemIsDark] = useState(() => 
@@ -54,10 +57,12 @@ export function useTheme() {
     const g = parseInt(accentColor.slice(3, 5), 16) || 102;
     const b = parseInt(accentColor.slice(5, 7), 16) || 241;
     root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+    root.dataset.transitionMode = transitionMode;
 
     localStorage.setItem('theme', theme);
     localStorage.setItem('accentColor', accentColor);
-  }, [theme, accentColor, systemIsDark, mounted]);
+    localStorage.setItem('transitionMode', transitionMode);
+  }, [theme, accentColor, transitionMode, systemIsDark, mounted]);
 
   useEffect(() => {
     applyTheme();
@@ -73,5 +78,13 @@ export function useTheme() {
     localStorage.setItem('accentColor', c);
   };
 
-  return { theme, setTheme, accentColor, setAccentColor, mounted };
+  const setTransitionMode = (m: TransitionMode) => {
+    setTransitionModeState(m);
+    localStorage.setItem('transitionMode', m);
+    if (typeof window !== 'undefined') {
+      window.document.documentElement.dataset.transitionMode = m;
+    }
+  };
+
+  return { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, mounted };
 }

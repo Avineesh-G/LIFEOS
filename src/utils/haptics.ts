@@ -49,8 +49,11 @@ export function getHapticLevel(): HapticLevel {
   if (typeof window === 'undefined') return 'medium';
   try {
     const saved = localStorage.getItem('lifeos_haptics_level');
-    if (saved === 'off' || saved === 'medium' || saved === 'high') {
+    if (saved === 'off' || saved === 'medium') {
       return saved;
+    }
+    if (saved === 'high') {
+      return 'medium';
     }
   } catch {}
   return 'medium';
@@ -60,6 +63,33 @@ export function setHapticLevel(level: HapticLevel) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('lifeos_haptics_level', level);
+  } catch {}
+}
+
+export function getHapticIntensity(): number {
+  if (typeof window === 'undefined') return 100;
+  try {
+    const saved = localStorage.getItem('lifeos_haptics_intensity');
+    if (saved !== null) {
+      const num = parseInt(saved, 10);
+      if (!isNaN(num) && num >= 0 && num <= 100) return num;
+    }
+    const level = getHapticLevel();
+    return level === 'off' ? 0 : 100;
+  } catch {}
+  return 100;
+}
+
+export function setHapticIntensity(intensity: number) {
+  if (typeof window === 'undefined') return;
+  try {
+    const clamped = Math.max(0, Math.min(100, intensity));
+    localStorage.setItem('lifeos_haptics_intensity', String(clamped));
+    if (clamped === 0) {
+      localStorage.setItem('lifeos_haptics_level', 'off');
+    } else {
+      localStorage.setItem('lifeos_haptics_level', 'medium');
+    }
   } catch {}
 }
 
