@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './hooks/useTheme';
@@ -35,41 +35,92 @@ const getTransitionConfig = (mode: TransitionMode) => {
   switch (mode) {
     case 'fast':
       return {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0 },
-        transition: { duration: 0.08, ease: 'easeOut' }
+        initial: { opacity: 0, scale: 0.98 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.99 },
+        transition: { duration: 0.14, ease: 'easeOut' }
       };
     case 'soft':
       return {
-        initial: { opacity: 0, y: 8, scale: 0.992 },
+        initial: { opacity: 0, y: 26, scale: 0.96 },
         animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -4, scale: 0.996 },
+        exit: { opacity: 0, y: -16, scale: 0.98 },
         transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
       };
     case 'efficient':
     default:
       return {
-        initial: { opacity: 0, y: 4 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -2 },
-        transition: { duration: 0.16, ease: [0.25, 1, 0.5, 1] }
+        initial: { opacity: 0, x: 22 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -22 },
+        transition: { duration: 0.20, ease: [0.25, 1, 0.5, 1] }
       };
   }
 };
 
-function AnimatedPage({ children, mode = 'efficient' }: { children: React.ReactNode; mode?: TransitionMode }) {
-  const config = getTransitionConfig(mode);
+function MainContent({
+  data,
+  refresh,
+  updateData,
+  theme,
+  setTheme,
+  accentColor,
+  setAccentColor,
+  transitionMode,
+  setTransitionMode,
+}: {
+  data: any;
+  refresh: () => Promise<any>;
+  updateData: (partial: any) => Promise<any>;
+  theme: any;
+  setTheme: (t: any) => void;
+  accentColor: string;
+  setAccentColor: (c: string) => void;
+  transitionMode: TransitionMode;
+  setTransitionMode: (m: TransitionMode) => void;
+}) {
+  const location = useLocation();
+  const transitionConfig = getTransitionConfig(transitionMode);
+
+  const routeElements = useRoutes(
+    [
+      { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
+      { path: '/study', element: <Study data={data} updateData={updateData} /> },
+      { path: '/study/timer', element: <StudyTimer data={data} updateData={updateData} /> },
+      { path: '/study/history', element: <StudyHistory data={data} updateData={updateData} /> },
+      { path: '/study/heatmap', element: <StudyHeatmap data={data} /> },
+      { path: '/gym', element: <Gym data={data} updateData={updateData} /> },
+      { path: '/gym/onboarding', element: <GymOnboarding data={data} updateData={updateData} /> },
+      { path: '/gym/workout', element: <GymWorkout data={data} updateData={updateData} /> },
+      { path: '/gym/split', element: <GymSplit data={data} updateData={updateData} /> },
+      { path: '/gym/history/:exerciseName', element: <GymExerciseHistory data={data} /> },
+      { path: '/nutrition', element: <Nutrition data={data} updateData={updateData} /> },
+      { path: '/spending', element: <Spending data={data} updateData={updateData} /> },
+      { path: '/timetable', element: <Timetable data={data} updateData={updateData} /> },
+      { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
+      { path: '/progress', element: <Progress data={data} /> },
+      { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
+      { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
+      { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
+    ],
+    location
+  );
+
   return (
-    <motion.div
-      initial={config.initial}
-      animate={config.animate}
-      exit={config.exit}
-      transition={config.transition}
-      className="w-full gpu-composited contain-paint"
-    >
-      {children}
-    </motion.div>
+    <AnimatePresence mode="wait">
+      {routeElements && (
+        <motion.div
+          key={location.pathname}
+          initial={transitionConfig.initial}
+          animate={transitionConfig.animate}
+          exit={transitionConfig.exit}
+          transition={transitionConfig.transition}
+          className="w-full overflow-x-hidden will-change-[transform,opacity]"
+        >
+          {routeElements}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -212,27 +263,17 @@ function App() {
       >
         <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
           <ErrorBoundary>
-            <AnimatePresence mode={transitionMode === 'soft' ? 'wait' : 'popLayout'} initial={false}>
-              <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<AnimatedPage mode={transitionMode}><Home data={data!} refresh={refresh} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/study" element={<AnimatedPage mode={transitionMode}><Study data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/study/timer" element={<AnimatedPage mode={transitionMode}><StudyTimer data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/study/history" element={<AnimatedPage mode={transitionMode}><StudyHistory data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/study/heatmap" element={<AnimatedPage mode={transitionMode}><StudyHeatmap data={data!} /></AnimatedPage>} />
-                <Route path="/gym" element={<AnimatedPage mode={transitionMode}><Gym data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/gym/onboarding" element={<AnimatedPage mode={transitionMode}><GymOnboarding data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/gym/workout" element={<AnimatedPage mode={transitionMode}><GymWorkout data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/gym/split" element={<AnimatedPage mode={transitionMode}><GymSplit data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/gym/history/:exerciseName" element={<AnimatedPage mode={transitionMode}><GymExerciseHistory data={data!} /></AnimatedPage>} />
-                <Route path="/nutrition" element={<AnimatedPage mode={transitionMode}><Nutrition data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/spending" element={<AnimatedPage mode={transitionMode}><Spending data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/timetable" element={<AnimatedPage mode={transitionMode}><Timetable data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/tasks" element={<AnimatedPage mode={transitionMode}><Tasks data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/progress" element={<AnimatedPage mode={transitionMode}><Progress data={data!} /></AnimatedPage>} />
-                <Route path="/history" element={<AnimatedPage mode={transitionMode}><WorkHistory data={data!} updateData={updateData} /></AnimatedPage>} />
-                <Route path="/settings" element={<AnimatedPage mode={transitionMode}><SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data!} updateData={updateData} refresh={refresh} /></AnimatedPage>} />
-              </Routes>
-            </AnimatePresence>
+            <MainContent
+              data={data}
+              refresh={refresh}
+              updateData={updateData}
+              theme={theme}
+              setTheme={setTheme}
+              accentColor={accentColor}
+              setAccentColor={setAccentColor}
+              transitionMode={transitionMode}
+              setTransitionMode={setTransitionMode}
+            />
           </ErrorBoundary>
         </Layout>
       </div>

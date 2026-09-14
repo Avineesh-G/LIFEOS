@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, Play, Sparkles, ChevronDown, ChevronUp, ShieldCheck, ShieldOff, Lock, Fingerprint } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, ChevronDown, ChevronUp, ShieldCheck, ShieldOff, Lock, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -58,11 +58,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
     setTimeout(() => setHapticSaved(false), 2500);
   };
 
-  const handleTestHaptic = () => {
-    if (hapticIntensity === 0) return;
-    triggerHaptic('nav');
-  };
-
   const handleSaveApiKey = async () => {
     await updateData({ geminiApiKey: apiKeyInput.trim() });
     setApiKeySaved(true);
@@ -120,35 +115,14 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
     }
   };
 
-  const handleTestSecurityPrompt = async () => {
-    if (isAuthenticating) return;
-    setIsAuthenticating(true);
-    setSecurityNotice(null);
-    try {
-      const res = await authenticateDeviceLock('Test Verification: Your phone screen lock is active and working properly');
-      if (res.success) {
-        setSecurityNotice('Verification successful! Your device screen lock is configured correctly.');
-        setTimeout(() => setSecurityNotice(null), 4000);
-      } else if (res.error && !res.error.toLowerCase().includes('cancel')) {
-        setSecurityNotice(res.error);
-      }
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
-
   // Motion & Transition dynamics state
   const [expandedTransition, setExpandedTransition] = useState<TransitionMode | null>(null);
-  const [previewStep, setPreviewStep] = useState(0);
 
   const handleTransitionChange = (mode: TransitionMode) => {
     if (setTransitionMode) {
       setTransitionMode(mode);
+      triggerHaptic('light');
     }
-  };
-
-  const handleTestTransition = () => {
-    setPreviewStep((prev) => (prev + 1) % 3);
   };
 
   return (
@@ -242,16 +216,16 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               id: 'fast' as const,
               title: 'Fast',
               icon: Zap,
-              badge: '< 100ms',
+              badge: '< 150ms',
               badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
               iconBox: 'bg-amber-500/10 text-amber-500',
-              subtitle: 'Instant Response • Pure Crossfade',
-              description: 'Zero-delay crossfade optimized for immediate touch response. Strips exit delays entirely for snappy navigation.',
+              subtitle: 'Snappy Response • Micro-Scale Fade',
+              description: 'High-speed micro-scale crossfade optimized for immediate touch response. Strips exit delays for ultra-crisp screen switches.',
               specs: {
-                pacing: 'Instant (< 100ms)',
-                duration: '0.08s',
-                engine: 'Hardware Composited',
-                physics: 'Linear Ease-Out'
+                pacing: 'Instant (< 150ms)',
+                duration: '0.14s',
+                engine: 'Scale + Opacity Composite',
+                physics: 'Ease-Out Deceleration'
               }
             },
             {
@@ -262,11 +236,11 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
               iconBox: 'bg-emerald-500/10 text-emerald-500',
               recommended: true,
-              subtitle: 'Zero Frame Drops • GPU Acceleration',
-              description: 'Engineered specifically for high refresh rate displays (120Hz / 144Hz). Uses translate3d and CSS layout containment for flawless 0ms stutter-free scrolling.',
+              subtitle: 'Fluid Slide • GPU Acceleration',
+              description: 'Silky smooth horizontal page motion engineered for high refresh rate displays. Delivers native OS navigation feel with zero stutter.',
               specs: {
                 pacing: '120 / 144 FPS Lock',
-                duration: '0.16s',
+                duration: '0.20s',
                 engine: 'GPU translate3d Layer',
                 physics: 'Cubic-Bezier [0.25, 1, 0.5, 1]'
               }
@@ -279,7 +253,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               badgeClass: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
               iconBox: 'bg-indigo-500/10 text-indigo-500',
               subtitle: 'Fluid & Organic • Apple-Style Spring',
-              description: 'Silky smooth momentum with gentle depth scaling. Provides a luxurious, tactile feel designed for high visual elegance.',
+              description: 'Silky smooth momentum with gentle depth scaling and upward float. Provides a luxurious, tactile feel designed for high visual elegance.',
               specs: {
                 pacing: 'Smooth 60–120 FPS',
                 duration: '0.28s',
@@ -420,72 +394,6 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
           })}
         </div>
 
-        {/* Live Interactive Transition Sandbox */}
-        <div className="rounded-2xl p-4 bg-black/[0.02] dark:bg-white/[0.02] border border-border-light/60 dark:border-border-dark/60 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles size={14} className="text-accent" />
-              <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
-                Live Dynamics Preview
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleTestTransition}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white font-sans text-xs font-bold shadow-sm transition-transform active:scale-95 hover:opacity-90"
-            >
-              <Play size={12} fill="currentColor" />
-              <span>Test Motion</span>
-            </button>
-          </div>
-
-          <div className="relative h-14 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/50 dark:border-border-dark/50 overflow-hidden flex items-center px-4">
-            <AnimatePresence mode={transitionMode === 'soft' ? 'wait' : 'popLayout'} initial={false}>
-              <motion.div
-                key={previewStep}
-                initial={
-                  transitionMode === 'fast'
-                    ? { opacity: 0 }
-                    : transitionMode === 'soft'
-                    ? { opacity: 0, x: -16, scale: 0.98 }
-                    : { opacity: 0, x: -10 }
-                }
-                animate={
-                  transitionMode === 'fast'
-                    ? { opacity: 1 }
-                    : transitionMode === 'soft'
-                    ? { opacity: 1, x: 0, scale: 1 }
-                    : { opacity: 1, x: 0 }
-                }
-                exit={
-                  transitionMode === 'fast'
-                    ? { opacity: 0 }
-                    : transitionMode === 'soft'
-                    ? { opacity: 0, x: 16, scale: 0.98 }
-                    : { opacity: 0, x: 10 }
-                }
-                transition={
-                  transitionMode === 'fast'
-                    ? { duration: 0.08, ease: 'easeOut' }
-                    : transitionMode === 'soft'
-                    ? { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
-                    : { duration: 0.16, ease: [0.25, 1, 0.5, 1] }
-                }
-                className="w-full flex items-center justify-between text-xs font-bold font-sans text-primary-light dark:text-primary-dark gpu-composited"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-2.5 h-2.5 rounded-full ${
-                    previewStep === 0 ? 'bg-emerald-500' : previewStep === 1 ? 'bg-indigo-500' : 'bg-amber-500'
-                  }`} />
-                  <span>State {previewStep + 1}: {previewStep === 0 ? 'Dashboard Route' : previewStep === 1 ? 'Exercise Log Route' : 'Settings Route'}</span>
-                </div>
-                <span className="font-mono text-[10px] text-secondary-light dark:text-secondary-dark uppercase">
-                  {transitionMode === 'fast' ? '0.08s' : transitionMode === 'soft' ? '0.28s Spring' : '120 FPS GPU'}
-                </span>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
       </motion.div>
 
       {/* Haptic Feedback & Vibration Intensity Slider Section (Volume inspired with smooth leverage & Save button) */}
@@ -593,22 +501,12 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
             </button>
           </div>
 
-          {/* Action Row: Test Vibration & Save Button */}
-          <div className="flex items-center justify-between pt-2 border-t border-border-light/60 dark:border-border-dark/60">
-            <button
-              type="button"
-              onClick={handleTestHaptic}
-              disabled={hapticIntensity === 0}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] hover:bg-black/[0.06] dark:hover:bg-white/[0.09] text-primary-light dark:text-primary-dark font-sans text-xs font-bold transition-transform active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
-            >
-              <Play size={12} fill="currentColor" />
-              <span>Test Vibration</span>
-            </button>
-
+          {/* Action Row: Save Button */}
+          <div className="flex items-center justify-end pt-2 border-t border-border-light/60 dark:border-border-dark/60">
             <button
               type="button"
               onClick={handleSaveHaptic}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-sans text-xs font-bold transition-all active:scale-95 shadow-sm ${
+              className={`inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl font-sans text-xs font-bold transition-all active:scale-95 shadow-sm ${
                 hapticSaved
                   ? 'bg-emerald-500 text-white shadow-emerald-500/25'
                   : hapticIntensity !== savedHapticIntensity
@@ -633,31 +531,23 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* App Security & Phone Lock Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center shadow-sm ${
+      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+        {/* Card Header - Mobile Optimized */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center shadow-sm shrink-0 ${
               securityConfig.enabled
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : 'bg-accent/15 text-accent'
             }`}>
               <ShieldCheck size={22} strokeWidth={2.2} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
-                  App Security & Lock
-                </h3>
-                <span className={`text-[10px] font-mono font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                  securityConfig.enabled
-                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
-                    : 'bg-black/[0.04] dark:bg-white/[0.06] text-muted-light dark:text-muted-dark border border-border-light/60 dark:border-border-dark/60'
-                }`}>
-                  {securityConfig.enabled ? 'Protected' : 'Disabled'}
-                </span>
-              </div>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
-                Native screen lock • 60s auto-lock cooldown
+            <div className="min-w-0">
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+                App Security & Lock
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+                {securityConfig.enabled ? 'Phone Lock Active • 60s cooldown' : 'Protect with phone screen lock'}
               </p>
             </div>
           </div>
@@ -711,19 +601,22 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
 
         {/* Security Card Details */}
         {securityConfig.enabled ? (
-          <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <Fingerprint size={16} className="text-accent" />
-                  <span>Phone Screen Lock Active</span>
-                </div>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed pt-0.5">
-                  LifeOS is secured by your phone's hardware lock. Unlocks smoothly with your Fingerprint, Face Unlock, or Device PIN / Pattern.
-                </p>
+          <div className="p-4.5 sm:p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-3.5">
+            {/* Status Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <Fingerprint size={16} className="text-emerald-600 dark:text-emerald-400" />
+                <span>Phone Screen Lock Active</span>
               </div>
+              <span className="text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
+                Protected
+              </span>
             </div>
+
+            <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
+              LifeOS is secured by your phone's hardware biometric lock (Fingerprint, Face Unlock, or Device PIN / Pattern).
+            </p>
 
             {/* Default Cooldown Notice (Fixed in code at 60s) */}
             <div className="p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 flex items-center justify-between text-xs">
@@ -735,41 +628,28 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               </span>
             </div>
 
-            {/* Management Buttons Row */}
-            <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 flex flex-wrap items-center justify-between gap-2.5">
+            {/* Management Buttons Grid - Perfectly balanced for mobile */}
+            <div className="pt-2 border-t border-border-light/60 dark:border-border-dark/60 grid grid-cols-2 gap-2.5">
               {/* Disable Button */}
               <button
                 type="button"
                 disabled={isAuthenticating}
                 onClick={handleDisableSecurity}
-                className="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
+                className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold font-sans transition-all active:scale-95 flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 <ShieldOff size={14} />
-                <span>Disable Phone Lock</span>
+                <span>Disable Lock</span>
               </button>
 
-              <div className="flex items-center gap-2">
-                {/* Test Prompt Button */}
-                <button
-                  type="button"
-                  disabled={isAuthenticating}
-                  onClick={handleTestSecurityPrompt}
-                  className="px-3.5 py-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-primary-light dark:text-primary-dark text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5"
-                >
-                  <Fingerprint size={14} className="text-accent" />
-                  <span>Test Prompt</span>
-                </button>
-
-                {/* Lock App Now Button */}
-                <button
-                  type="button"
-                  onClick={() => setAppLocked(true)}
-                  className="px-4 py-2.5 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center gap-1.5"
-                >
-                  <Lock size={13} />
-                  <span>Lock Now</span>
-                </button>
-              </div>
+              {/* Lock App Now Button */}
+              <button
+                type="button"
+                onClick={() => setAppLocked(true)}
+                className="w-full py-2.5 px-3 rounded-xl bg-accent text-white text-xs font-bold font-sans transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1.5"
+              >
+                <Lock size={13} />
+                <span>Lock Now</span>
+              </button>
             </div>
           </div>
         ) : (
@@ -788,7 +668,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
                 Native Biometric & Screen Lock
               </h4>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                Protect LifeOS with your phone's native lock screen. Use Fingerprint, Face recognition, or your device PIN/pattern with a built-in 60s cooldown.
+                Protect LifeOS with your phone's native lock screen (Fingerprint, Face recognition, or device PIN/pattern) with a built-in 60s cooldown.
               </p>
             </div>
 
@@ -798,20 +678,20 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
                 ✓ Fingerprint & Face
               </span>
               <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                ✓ Phone PIN / Pattern Fallback
+                ✓ Phone PIN / Pattern
               </span>
               <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                ✓ 60s Default Cooldown
+                ✓ 60s Cooldown
               </span>
             </div>
 
             {/* Enable Button */}
-            <div className="pt-2">
+            <div className="pt-1">
               <button
                 type="button"
                 disabled={isAuthenticating}
                 onClick={handleEnableSecurity}
-                className="w-full sm:w-auto min-w-[240px] py-3.5 px-7 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
+                className="w-full sm:w-auto min-w-[220px] py-3.5 px-6 rounded-2xl bg-gradient-to-r from-accent via-indigo-600 to-accent bg-[length:200%_auto] hover:bg-[position:right_center] text-white text-xs sm:text-sm font-black font-sans shadow-lg shadow-accent/25 active:scale-[0.97] transition-all duration-300 inline-flex items-center justify-center gap-2.5 disabled:opacity-75 disabled:cursor-not-allowed mx-auto"
               >
                 {isAuthenticating ? (
                   <>
