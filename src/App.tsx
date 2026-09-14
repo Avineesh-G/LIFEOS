@@ -29,7 +29,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import type { TransitionMode } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
-import { setAppLocked, subscribeToLockState, isAppLocked } from './utils/security';
+import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 
 const getTransitionConfig = (mode: TransitionMode) => {
   switch (mode) {
@@ -148,23 +148,36 @@ function App() {
     };
   }, [location.pathname, navigate]);
 
-  // Background auto-lock: lock app whenever sent to background or phone locked
+  // Background auto-lock & Cooldown: handle app minimize & resume
   useEffect(() => {
     let stateListener: any;
     const registerStateListener = async () => {
       try {
         stateListener = await CapApp.addListener('appStateChange', (state) => {
           if (!state.isActive) {
-            setAppLocked(true);
+            handleAppBackgrounded();
+          } else {
+            handleAppForegrounded();
           }
         });
       } catch {}
     };
     registerStateListener();
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleAppBackgrounded();
+      } else {
+        handleAppForegrounded();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       if (stateListener) {
         stateListener.remove();
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 

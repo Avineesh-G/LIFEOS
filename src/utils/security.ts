@@ -1,16 +1,45 @@
 import { Capacitor } from '@capacitor/core';
 import { NativeBiometric, BiometryType } from '@capgo/capacitor-native-biometric';
 
+export type LockCooldown = 'immediate' | '1min' | '5min' | '15min' | 'session';
+
 export interface SecurityConfig {
   enabled: boolean;
+  cooldown: LockCooldown;
+  customPinEnabled?: boolean;
+  customPin?: string;
+  patternEnabled?: boolean;
 }
 
 const STORAGE_KEY = 'lifeos_app_security_v2';
 const LOCK_STATE_KEY = 'lifeos_is_locked_session';
+const LAST_UNLOCK_KEY = 'lifeos_last_unlock_time';
+const LAST_BACKGROUND_KEY = 'lifeos_last_background_time';
 
 const DEFAULT_CONFIG: SecurityConfig = {
   enabled: false,
+  cooldown: '1min',
+  customPinEnabled: false,
+  patternEnabled: false,
 };
+
+// ── Cooldown Helper ────────────────────────────────────────────────────────
+export function getCooldownMilliseconds(cooldown: LockCooldown): number {
+  switch (cooldown) {
+    case 'immediate':
+      return 0;
+    case '1min':
+      return 60 * 1000;
+    case '5min':
+      return 5 * 60 * 1000;
+    case '15min':
+      return 15 * 60 * 1000;
+    case 'session':
+      return Infinity;
+    default:
+      return 60 * 1000;
+  }
+}
 
 // ── Configuration Persistence ──────────────────────────────────────────────
 export function getSecurityConfig(): SecurityConfig {
@@ -32,6 +61,47 @@ export function saveSecurityConfig(config: Partial<SecurityConfig>): SecurityCon
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('lifeos-security-config-changed', { detail: updated }));
   return updated;
+}
+
+// ── Background / Foreground Cooldown Handlers ───────────────────────────────
+export function recordUnlockTime() {
+  if (typeof window === 'undefined') return;
+  const now = Date.now().toString();
+  localStorage.setItem(LAST_UNLOCK_KEY, now);
+  sessionStorage.setItem(LOCK_STATE_KEY, 'false');
+}
+
+export function handleAppBackgrounded() {
+  if (typeof window === 'undefined') return;
+  const now = Date.now().toString();
+  localStorage.setItem(LAST_BACKGROUND_KEY, now);
+}
+
+export function handleAppForegrounded() {
+  if (typeof window === 'undefined') return;
+  const config = getSecurityConfig();
+  if (!config.enabled) return;
+
+  // Session-only: never lock when returning from background
+  if (config.cooldown === 'session') return;
+
+  // Immediate: lock as soon as app is foregrounded
+  if (config.cooldown === 'immediate') {
+    setAppLocked(true);
+    return;
+  }
+
+  const lastBgRaw = localStorage.getItem(LAST_BACKGROUND_KEY);
+  if (!lastBgRaw) return;
+
+  const lastBg = parseInt(lastBgRaw, 10);
+  const elapsed = Date.now() - lastBg;
+  const cooldownMs = getCooldownMilliseconds(config.cooldown);
+
+  // If elapsed time is greater than or equal to cooldown, require unlock again
+  if (elapsed >= cooldownMs) {
+    setAppLocked(true);
+  }
 }
 
 // ── Authentication Service ─────────────────────────────────────────────────
@@ -82,11 +152,13 @@ export async function authenticateDeviceLock(
       });
 
       setAppLocked(false);
+      recordUnlockTime();
       return { success: true };
     }
 
     // 4. Web / Dev environment fallback
     setAppLocked(false);
+    recordUnlockTime();
     return { success: true };
   } catch (err: any) {
     const msg = err?.message || err?.toString() || 'Authentication canceled';
@@ -121,13 +193,64 @@ export async function isDeviceLockAvailable(): Promise<boolean> {
   return true;
 }
 
+// ── PIN Verification Helpers ───────────────────────────────────────────────
+export function verifyCustomPin(inputPin: string): boolean {
+  const config = getSecurityConfig();
+  if (!config.customPinEnabled || !config.customPin) return false;
+  return config.customPin === inputPin.trim();
+}
+
+export function saveCustomPin(pin: string): SecurityConfig {
+  return saveSecurityConfig({
+    customPin: pin.trim(),
+    customPinEnabled: true,
+  });
+}
+
+export function removeCustomPin(): SecurityConfig {
+  return saveSecurityConfig({
+    customPin: '',
+    customPinEnabled: false,
+  });
+}
+
 // ── Lock State Control (Session) ───────────────────────────────────────────
 let lockStateListeners: Array<(locked: boolean) => void> = [];
 
 export function isAppLocked(): boolean {
   const config = getSecurityConfig();
   if (!config.enabled) return false;
+
   const val = sessionStorage.getItem(LOCK_STATE_KEY);
+  if (val === 'false') {
+    // Check if cooldown elapsed while backgrounded
+    if (config.cooldown === 'session') return false;
+    const lastBgRaw = localStorage.getItem(LAST_BACKGROUND_KEY);
+    if (lastBgRaw) {
+      const lastBg = parseInt(lastBgRaw, 10);
+      const elapsed = Date.now() - lastBg;
+      const cooldownMs = getCooldownMilliseconds(config.cooldown);
+      if (elapsed >= cooldownMs && cooldownMs > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Cold launch: check if last unlock happened recently within cooldown
+  if (config.cooldown !== 'immediate') {
+    const lastUnlockRaw = localStorage.getItem(LAST_UNLOCK_KEY);
+    if (lastUnlockRaw) {
+      const lastUnlock = parseInt(lastUnlockRaw, 10);
+      const elapsed = Date.now() - lastUnlock;
+      const cooldownMs = getCooldownMilliseconds(config.cooldown);
+      if (elapsed < cooldownMs) {
+        sessionStorage.setItem(LOCK_STATE_KEY, 'false');
+        return false;
+      }
+    }
+  }
+
   return val === null ? true : val === 'true';
 }
 
@@ -135,6 +258,9 @@ export function setAppLocked(locked: boolean) {
   const config = getSecurityConfig();
   if (!config.enabled && locked) return;
   sessionStorage.setItem(LOCK_STATE_KEY, locked ? 'true' : 'false');
+  if (!locked) {
+    recordUnlockTime();
+  }
   lockStateListeners.forEach((listener) => listener(locked));
 }
 
