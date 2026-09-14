@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Download, 
   Smartphone, 
@@ -21,7 +21,17 @@ import {
   Calendar, 
   Check, 
   ExternalLink,
-  Heart
+  Heart,
+  QrCode,
+  Share2,
+  Play,
+  Pause,
+  RotateCcw,
+  Wifi,
+  Battery,
+  ChevronDown,
+  X,
+  Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -42,6 +52,75 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
     return true;
   });
 
+  // Interactive Study Timer State
+  const [timerSeconds, setTimerSeconds] = useState(25 * 60 - 12); // 24:48
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  useEffect(() => {
+    let interval: any = null;
+    if (isTimerRunning) {
+      interval = setInterval(() => {
+        setTimerSeconds(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning]);
+
+  const formatTimer = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Interactive Gym Sets Completion State
+  const [gymSets, setGymSets] = useState([
+    { id: 1, prev: '80 kg × 10', weight: '85 kg', reps: '10', completed: true },
+    { id: 2, prev: '85 kg × 8', weight: '90 kg', reps: '8', completed: true },
+    { id: 3, prev: '90 kg × 6', weight: '95 kg', reps: '6', completed: false },
+  ]);
+
+  const toggleSet = (id: number) => {
+    setGymSets(prev => prev.map(s => s.id === id ? { ...s, completed: !s.completed } : s));
+  };
+
+  // Interactive Subscription / Fatigue Calculator State
+  const [selectedApps, setSelectedApps] = useState<Record<string, { cost: number; name: string; checked: boolean }>>({
+    gym: { name: 'Premium Gym & Workout Tracker', cost: 12, checked: true },
+    study: { name: 'Pomodoro Study & Heatmap App', cost: 6, checked: true },
+    budget: { name: 'Finance & Expense Tracker', cost: 8, checked: true },
+    timetable: { name: 'Class Schedule & Routine App', cost: 4, checked: true },
+  });
+
+  const toggleAppSelection = (key: string) => {
+    setSelectedApps(prev => ({
+      ...prev,
+      [key]: { ...prev[key], checked: !prev[key].checked }
+    }));
+  };
+
+  const monthlySavings = Object.values(selectedApps).reduce((acc, a) => a.checked ? acc + a.cost : acc, 0);
+  const yearlySavings = monthlySavings * 12;
+  const activeAppsCount = Object.values(selectedApps).filter(a => a.checked).length;
+
+  // Real-time Mockup Phone Clock
+  const [phoneTime, setPhoneTime] = useState('09:41');
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      setPhoneTime(`${hours}:${minutes}`);
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // UI Modals & Toast State
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   const toggleTheme = () => {
     const nextDark = !isDarkLocal;
     setIsDarkLocal(nextDark);
@@ -53,6 +132,14 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
       } else {
         document.documentElement.classList.remove('dark');
       }
+    }
+  };
+
+  const copyShareLink = () => {
+    if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedToast(true);
+      setTimeout(() => setCopiedToast(false), 2500);
     }
   };
 
@@ -71,41 +158,44 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
       badge: "Overview",
       icon: Layers,
       renderMockup: () => (
-        <div className="space-y-3.5 text-left text-xs">
+        <div className="space-y-3 text-left text-xs">
           {/* Header */}
           <div className="flex items-center justify-between pb-1 border-b border-border-light/40 dark:border-border-dark/40">
             <div>
               <p className="text-[10px] uppercase font-bold tracking-wider text-muted-light dark:text-muted-dark">MONDAY • SEP 14</p>
               <h4 className="text-sm font-black text-primary-light dark:text-primary-dark">Welcome back, Scholar 👋</h4>
             </div>
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 font-bold text-[11px] border border-orange-500/20">
-              <Flame size={12} className="fill-orange-500" />
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 font-bold text-[11px] border border-orange-500/20"
+            >
+              <Flame size={12} className="fill-orange-500 animate-pulse" />
               <span>18 Day Streak</span>
-            </div>
+            </motion.div>
           </div>
 
           {/* Quick Metrics */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark/90 border border-border-light dark:border-border-dark/80 shadow-sm">
+            <motion.div whileHover={{ y: -2 }} className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark/90 border border-border-light dark:border-border-dark/80 shadow-sm">
               <div className="flex items-center justify-between text-muted-light dark:text-muted-dark mb-1">
                 <span className="text-[10px] font-semibold">Deep Study</span>
                 <Clock size={12} className="text-accent" />
               </div>
               <div className="text-base font-black text-primary-light dark:text-primary-dark">3h 45m</div>
               <div className="text-[10px] text-emerald-500 font-medium mt-0.5">85% of daily goal</div>
-            </div>
-            <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark/90 border border-border-light dark:border-border-dark/80 shadow-sm">
+            </motion.div>
+            <motion.div whileHover={{ y: -2 }} className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark/90 border border-border-light dark:border-border-dark/80 shadow-sm">
               <div className="flex items-center justify-between text-muted-light dark:text-muted-dark mb-1">
                 <span className="text-[10px] font-semibold">Gym Split</span>
                 <Dumbbell size={12} className="text-rose-500" />
               </div>
               <div className="text-base font-black text-primary-light dark:text-primary-dark">Push Day</div>
               <div className="text-[10px] text-rose-500 font-medium mt-0.5">Chest & Triceps</div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Next Lecture Alert */}
-          <div className="p-3 rounded-2xl bg-accent/10 border border-accent/25 flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.01 }} className="p-3 rounded-2xl bg-accent/10 border border-accent/25 flex items-center justify-between">
             <div className="space-y-0.5">
               <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-accent text-white">UPCOMING CLASS</span>
               <p className="font-bold text-primary-light dark:text-primary-dark text-xs pt-1">Advanced Algorithm Design</p>
@@ -114,7 +204,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <div className="text-right">
               <span className="text-[11px] font-black text-accent">In 24m</span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Daily Quote Card */}
           <div className="p-3 rounded-2xl bg-surface-light/60 dark:bg-surface-dark/50 border border-border-light/60 dark:border-border-dark/60 italic text-[10px] text-secondary-light dark:text-secondary-dark leading-relaxed">
@@ -126,30 +216,59 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
     },
     study: {
       title: "Focus & Academics",
-      tagline: "Pomodoro Timers, Revision Tracking & Heatmaps",
-      description: "Lock in with customizable countdown/stopwatch study timers. Watch your consistency compound with GitHub-style annual activity heatmaps and subject logs.",
+      tagline: "Live Pomodoro, Revision Tracking & Heatmaps",
+      description: "Lock in with interactive countdown study timers. Tap 'Start / Pause' below to try it live! Consistency compiles into GitHub-style annual heatmaps.",
       badge: "Deep Work",
       icon: BookOpen,
       renderMockup: () => (
-        <div className="space-y-3.5 text-left text-xs">
-          {/* Active Timer Display */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-accent/15 via-surface-light dark:via-surface-dark to-surface-light dark:to-surface-dark border border-accent/30 text-center space-y-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-accent">
-              FOCUS SESSION ACTIVE
-            </span>
-            <div className="text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-mono">
-              24:48
+        <div className="space-y-3 text-left text-xs">
+          {/* Active Timer Display - INTERACTIVE */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-accent/15 via-surface-light dark:via-surface-dark to-surface-light dark:to-surface-dark border border-accent/30 text-center space-y-2 relative overflow-hidden">
+            <div className="flex items-center justify-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isTimerRunning ? 'bg-emerald-500 animate-ping' : 'bg-accent'}`} />
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                {isTimerRunning ? 'TIMER RUNNING' : 'INTERACTIVE FOCUS TIMER'}
+              </span>
             </div>
-            <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-medium">
+            
+            <div className="text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-mono">
+              {formatTimer(timerSeconds)}
+            </div>
+
+            <p className="text-[10px] text-secondary-light dark:text-secondary-dark font-medium">
               Subject: <span className="font-bold text-primary-light dark:text-primary-dark">Operating Systems (Memory Mgt)</span>
             </p>
-            <div className="w-full bg-border-light dark:bg-border-dark h-1.5 rounded-full overflow-hidden">
-              <div className="bg-accent h-full rounded-full" style={{ width: '62%' }} />
+
+            {/* Interactive Control Buttons */}
+            <div className="flex items-center justify-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsTimerRunning(!isTimerRunning)}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-accent text-white font-bold text-[11px] hover:opacity-90 shadow-sm transition-transform active:scale-95"
+              >
+                {isTimerRunning ? <Pause size={12} /> : <Play size={12} />}
+                <span>{isTimerRunning ? 'Pause' : 'Start Focus'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsTimerRunning(false); setTimerSeconds(25 * 60); }}
+                className="p-1 rounded-xl border border-border-light dark:border-border-dark text-muted-light hover:text-primary-light transition-colors"
+                title="Reset timer"
+              >
+                <RotateCcw size={13} />
+              </button>
+            </div>
+
+            <div className="w-full bg-border-light dark:bg-border-dark h-1.5 rounded-full overflow-hidden mt-1">
+              <div 
+                className="bg-accent h-full rounded-full transition-all duration-300" 
+                style={{ width: `${((25 * 60 - timerSeconds) / (25 * 60)) * 100}%` }} 
+              />
             </div>
           </div>
 
           {/* Activity Heatmap Mock */}
-          <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-2">
+          <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-primary-light dark:text-primary-dark">Study Consistency Heatmap</span>
               <span className="text-[10px] text-emerald-500 font-bold">142 Total Hours</span>
@@ -176,16 +295,6 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 );
               })}
             </div>
-            <div className="flex items-center justify-between text-[9px] text-muted-light dark:text-muted-dark pt-1">
-              <span>Less</span>
-              <div className="flex gap-1">
-                <span className="w-2 h-2 rounded-xs bg-border-light/40 dark:bg-border-dark/40" />
-                <span className="w-2 h-2 rounded-xs bg-emerald-300 dark:bg-emerald-950" />
-                <span className="w-2 h-2 rounded-xs bg-emerald-500 dark:bg-emerald-600" />
-                <span className="w-2 h-2 rounded-xs bg-emerald-600 dark:bg-emerald-400" />
-              </div>
-              <span>More</span>
-            </div>
           </div>
         </div>
       )
@@ -193,7 +302,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
     gym: {
       title: "Gym & Hypertrophy",
       tagline: "Track Splits, Sets, Reps & 1RM Records",
-      description: "Full workout companion built for serious lifters. Log Push/Pull/Legs splits, record weights and RPE, and track progressive overload automatically.",
+      description: "Full workout companion. Tap any set checkmark below to mark it completed! Includes 1RM estimation, rest timer, and progressive overload graphs.",
       badge: "Discipline",
       icon: Dumbbell,
       renderMockup: () => (
@@ -206,7 +315,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               </div>
               <div>
                 <p className="font-extrabold text-primary-light dark:text-primary-dark">Push Day A</p>
-                <p className="text-[10px] text-rose-500 font-medium">Exercise 2 of 5</p>
+                <p className="text-[10px] text-rose-500 font-medium">Exercise 2 of 5 • Chest & Shoulders</p>
               </div>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-500">
@@ -214,12 +323,12 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </span>
           </div>
 
-          {/* Exercise Log Item */}
+          {/* Exercise Log Item - INTERACTIVE CHECKMARKS */}
           <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-2">
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-bold text-primary-light dark:text-primary-dark">Incline Barbell Bench Press</h5>
-                <p className="text-[10px] text-muted-light dark:text-muted-dark">Target: 3 Sets • Chest Hypertrophy</p>
+                <p className="text-[9px] text-muted-light dark:text-muted-dark">Target: 3 Sets • Tap right box to toggle set</p>
               </div>
               <span className="text-[10px] font-extrabold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-md border border-emerald-500/20">
                 PR: 95 kg
@@ -230,26 +339,33 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <div className="space-y-1.5 pt-1">
               <div className="grid grid-cols-4 text-[9px] font-bold text-muted-light dark:text-muted-dark px-1">
                 <span>SET</span>
-                <span>PREVIOUS</span>
+                <span>PREV</span>
                 <span>WEIGHT</span>
-                <span className="text-right">REPS</span>
+                <span className="text-right">REPS / LOG</span>
               </div>
-              <div className="grid grid-cols-4 items-center text-[10px] p-1.5 rounded-xl bg-bg-light dark:bg-bg-dark font-medium">
-                <span className="font-bold text-accent">1</span>
-                <span className="text-muted-light dark:text-muted-dark">80 kg × 10</span>
-                <span className="font-bold text-primary-light dark:text-primary-dark">85 kg</span>
-                <span className="text-right font-bold text-emerald-500 flex items-center justify-end gap-1">
-                  10 <Check size={11} />
-                </span>
-              </div>
-              <div className="grid grid-cols-4 items-center text-[10px] p-1.5 rounded-xl bg-bg-light dark:bg-bg-dark font-medium border border-accent/40">
-                <span className="font-bold text-accent">2</span>
-                <span className="text-muted-light dark:text-muted-dark">85 kg × 8</span>
-                <span className="font-bold text-primary-light dark:text-primary-dark">90 kg</span>
-                <span className="text-right font-bold text-emerald-500 flex items-center justify-end gap-1">
-                  8 <Check size={11} />
-                </span>
-              </div>
+              {gymSets.map((s) => (
+                <div 
+                  key={s.id} 
+                  onClick={() => toggleSet(s.id)}
+                  className={`grid grid-cols-4 items-center text-[10px] p-1.5 rounded-xl cursor-pointer transition-all ${
+                    s.completed 
+                      ? 'bg-emerald-500/10 border border-emerald-500/30' 
+                      : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark'
+                  }`}
+                >
+                  <span className="font-bold text-accent">{s.id}</span>
+                  <span className="text-muted-light dark:text-muted-dark text-[9px]">{s.prev}</span>
+                  <span className="font-bold text-primary-light dark:text-primary-dark">{s.weight}</span>
+                  <span className="text-right font-bold flex items-center justify-end gap-1">
+                    <span>{s.reps}</span>
+                    <span className={`w-4 h-4 rounded-md flex items-center justify-center text-[10px] transition-all ${
+                      s.completed ? 'bg-emerald-500 text-white' : 'border border-border-light dark:border-border-dark text-transparent'
+                    }`}>
+                      ✓
+                    </span>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -268,7 +384,6 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <span className="text-[10px] font-bold text-accent">Week B (Odd Sem)</span>
           </div>
 
-          {/* Period 1: Done */}
           <div className="p-2.5 rounded-xl bg-surface-light/40 dark:bg-surface-dark/40 border border-border-light/40 dark:border-border-dark/40 opacity-60 flex items-center justify-between">
             <div>
               <p className="font-semibold text-[11px] line-through text-primary-light dark:text-primary-dark">Linear Algebra & Matrices</p>
@@ -277,8 +392,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">Done</span>
           </div>
 
-          {/* Period 2: Live Right Now */}
-          <div className="p-3 rounded-2xl bg-accent/15 border-2 border-accent text-primary-light dark:text-primary-dark shadow-sm space-y-1">
+          <motion.div whileHover={{ scale: 1.01 }} className="p-3 rounded-2xl bg-accent/15 border-2 border-accent text-primary-light dark:text-primary-dark shadow-sm space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-accent text-white animate-pulse">
                 CURRENT LECTURE
@@ -287,9 +401,8 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </div>
             <p className="font-black text-xs pt-1">Computer Networks & Sockets</p>
             <p className="text-[10px] text-secondary-light dark:text-secondary-dark">Room 402 • Lab Section A • Prof. Sharma</p>
-          </div>
+          </motion.div>
 
-          {/* Period 3: Next */}
           <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-between">
             <div>
               <p className="font-bold text-[11px] text-primary-light dark:text-primary-dark">Database Systems Lab</p>
@@ -308,7 +421,6 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
       icon: Utensils,
       renderMockup: () => (
         <div className="space-y-3 text-left text-xs">
-          {/* Calorie Dial & Macros */}
           <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-primary-light dark:text-primary-dark">Daily Macro Balance</span>
@@ -334,7 +446,6 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </div>
           </div>
 
-          {/* Today's Mess Menu */}
           <div className="p-3 rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-primary-light dark:text-primary-dark">Today's Mess Schedule</span>
@@ -356,9 +467,13 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
       icon: ShieldCheck,
       renderMockup: () => (
         <div className="space-y-4 text-center py-4 text-xs">
-          <div className="w-14 h-14 mx-auto rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
-            <Lock size={26} className="text-accent animate-pulse" />
-          </div>
+          <motion.div 
+            animate={{ scale: [1, 1.06, 1] }} 
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-14 h-14 mx-auto rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shadow-lg shadow-accent/20"
+          >
+            <Lock size={26} className="text-accent" />
+          </motion.div>
           <div>
             <h5 className="font-black text-sm text-primary-light dark:text-primary-dark">LifeOS Is Locked</h5>
             <p className="text-[10px] text-secondary-light dark:text-secondary-dark mt-1 max-w-[200px] mx-auto">
@@ -375,28 +490,99 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
   };
 
   return (
-    <div className="min-h-screen bg-bg-light dark:bg-bg-dark text-primary-light dark:text-primary-dark font-sans selection:bg-accent selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-bg-light dark:bg-bg-dark text-primary-light dark:text-primary-dark font-sans selection:bg-accent selection:text-white transition-colors duration-300 relative overflow-x-hidden">
       
-      {/* Glow Ambient Blobs */}
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {copiedToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-pill-light dark:bg-pill-dark text-white dark:text-black text-xs font-bold shadow-2xl flex items-center gap-2 border border-white/10"
+          >
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            <span>Link copied to clipboard! Share it with friends.</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* QR Code Modal for Desktop to Mobile Sideload */}
+      <AnimatePresence>
+        {showQrModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="w-full max-w-sm p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-2xl text-center space-y-4 relative"
+            >
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-border-light/60 dark:hover:bg-border-dark/60 text-muted-light hover:text-primary-light transition-colors"
+              >
+                <X size={18} />
+              </button>
+              
+              <div className="w-12 h-12 rounded-2xl bg-accent/15 text-accent flex items-center justify-center mx-auto">
+                <QrCode size={24} />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Scan to Download on Phone</h3>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1">
+                  Point your phone's camera at this QR code to download <strong className="text-primary-light dark:text-primary-dark">LifeOS.apk</strong> directly.
+                </p>
+              </div>
+
+              {/* High-Contrast Crisp QR Code Vector */}
+              <div className="p-4 bg-white rounded-2xl inline-block shadow-inner border border-neutral-200">
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://lifeos-iota-one.vercel.app/LifeOS.apk&format=svg" 
+                  alt="Download LifeOS APK QR Code" 
+                  className="w-44 h-44 object-contain"
+                />
+              </div>
+
+              <p className="text-[11px] text-muted-light dark:text-muted-dark">
+                Direct URL: <code className="bg-bg-light dark:bg-bg-dark px-1.5 py-0.5 rounded text-[10px]">lifeos-iota-one.vercel.app/LifeOS.apk</code>
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Dynamic Ambient Background Glow Blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div 
-          className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full blur-[140px] opacity-25 dark:opacity-20 transition-all duration-700"
-          style={{ background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)` }}
+        <motion.div 
+          animate={{
+            scale: [1, 1.12, 1],
+            opacity: [0.22, 0.32, 0.22]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[15%] left-1/2 -translate-x-1/2 w-[720px] h-[520px] rounded-full blur-[140px]"
+          style={{ background: `radial-gradient(circle, ${accentColor} 0%, #8B5CF6 50%, transparent 70%)` }}
         />
-        <div 
-          className="absolute top-[60%] -left-[10%] w-[500px] h-[400px] rounded-full blur-[130px] opacity-15 dark:opacity-10"
+        <motion.div 
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.12, 0.22, 0.12]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[50%] -left-[15%] w-[550px] h-[450px] rounded-full blur-[140px]"
           style={{ background: `radial-gradient(circle, #EC4899 0%, transparent 70%)` }}
         />
       </div>
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-bg-light/80 dark:bg-bg-dark/80 border-b border-border-light/60 dark:border-border-dark/60">
+      {/* Top Sticky Glass Navbar */}
+      <header className="sticky top-0 z-40 backdrop-blur-2xl bg-bg-light/80 dark:bg-bg-dark/80 border-b border-border-light/60 dark:border-border-dark/60 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img 
               src="/icon.svg" 
               alt="LifeOS Logo" 
-              className="w-9 h-9 rounded-xl object-contain shadow-md shadow-accent/20 border border-border-light/80 dark:border-border-dark/80" 
+              className="w-9 h-9 rounded-xl object-contain shadow-md shadow-accent/20 border border-border-light/80 dark:border-border-dark/80 transition-transform hover:scale-105" 
             />
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg tracking-tight">LifeOS</span>
@@ -408,39 +594,50 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-secondary-light dark:text-secondary-dark">
             <a href="#purpose" className="hover:text-accent transition-colors">The Purpose</a>
-            <a href="#screenshots" className="hover:text-accent transition-colors">Screenshots</a>
-            <a href="#features" className="hover:text-accent transition-colors">Pillars</a>
+            <a href="#screenshots" className="hover:text-accent transition-colors">Live Demo</a>
+            <a href="#calculator" className="hover:text-accent transition-colors">Savings</a>
             <a href="#install" className="hover:text-accent transition-colors">Install Guide</a>
           </nav>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            {/* Share / Copy Link Button */}
+            <button
+              onClick={copyShareLink}
+              className="p-2 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:bg-border-light/40 dark:hover:bg-border-dark/40 transition-colors text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+              title="Share / Copy Link"
+            >
+              <Share2 size={16} />
+            </button>
+
+            {/* QR Code Modal Trigger */}
+            <button
+              onClick={() => setShowQrModal(true)}
+              className="hidden sm:inline-flex p-2 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:bg-border-light/40 dark:hover:bg-border-dark/40 transition-colors text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+              title="Scan QR to Download"
+            >
+              <QrCode size={16} />
+            </button>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:bg-border-light/40 dark:hover:bg-border-dark/40 transition-colors"
               title="Toggle theme"
             >
-              {isDarkLocal ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} className="text-indigo-600" />}
+              {isDarkLocal ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-indigo-600" />}
             </button>
 
-            {/* Open Web App Link */}
-            <a
-              href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-border-light dark:border-border-dark hover:border-accent/40 bg-surface-light dark:bg-surface-dark text-primary-light dark:text-primary-dark transition-all"
-            >
-              <span>Launch Web</span>
-              <ExternalLink size={13} className="text-secondary-light dark:text-secondary-dark" />
-            </a>
-
-            {/* Quick Download Button in Nav */}
-            <a
+            {/* Download APK Button */}
+            <motion.a
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               href="/LifeOS.apk"
               download="LifeOS.apk"
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-xl bg-accent hover:opacity-95 text-white shadow-md shadow-accent/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-xl bg-accent hover:opacity-95 text-white shadow-md shadow-accent/20 transition-all"
             >
               <Download size={14} />
               <span>Download APK</span>
-            </a>
+            </motion.a>
           </div>
         </div>
       </header>
@@ -449,17 +646,23 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
       <main className="relative z-10">
 
         {/* Hero Section */}
-        <section className="pt-16 pb-20 px-4 sm:px-6 text-center max-w-4xl mx-auto space-y-8">
+        <section className="pt-16 pb-16 px-4 sm:px-6 text-center max-w-4xl mx-auto space-y-8">
+          
+          {/* Live Pulsing Radar Badge */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/25 text-xs font-bold text-accent"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs font-bold text-emerald-600 dark:text-emerald-400"
           >
-            <Sparkles size={14} />
-            <span>Universal Android Build • 100% Free & Open</span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>v1.5.4 Live Release • 100% Free & Universal</span>
           </motion.div>
 
+          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -472,6 +675,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </span>
           </motion.h1>
 
+          {/* Subtitle */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -486,43 +690,45 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </p>
           </motion.div>
 
-          {/* Download Action Area */}
+          {/* Hero Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.24 }}
-            className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            {/* Direct APK Download Button */}
-            <a
+            {/* Primary Direct Download Button */}
+            <motion.a
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               href="/LifeOS.apk"
               download="LifeOS.apk"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-extrabold text-base shadow-xl shadow-accent/25 transition-all hover:scale-[1.03] active:scale-[0.98] group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-extrabold text-base shadow-xl shadow-accent/25 transition-all group"
             >
               <Smartphone size={20} className="group-hover:-translate-y-0.5 transition-transform" />
               <div className="text-left">
                 <div className="text-sm font-black leading-tight">Download LifeOS for Android</div>
-                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.4 • Free</div>
+                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.4 • ~7.5 MB Free</div>
               </div>
               <Download size={18} className="ml-1 opacity-80" />
-            </a>
+            </motion.a>
 
-            {/* Secondary: Web App / Read Story */}
-            <a
-              href="#purpose"
+            {/* QR Code Quick Trigger */}
+            <button
+              onClick={() => setShowQrModal(true)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-accent/40 font-bold text-sm text-primary-light dark:text-primary-dark transition-all"
             >
-              <span>Why We Built This</span>
-              <ArrowRight size={16} className="text-accent" />
-            </a>
+              <QrCode size={18} className="text-accent" />
+              <span>Scan QR Code</span>
+            </button>
           </motion.div>
 
-          {/* Highlights Row */}
+          {/* Key Feature Metric Badges */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.32 }}
-            className="pt-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-secondary-light dark:text-secondary-dark"
+            className="pt-4 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-secondary-light dark:text-secondary-dark"
           >
             <span className="flex items-center gap-1.5"><ShieldCheck size={15} className="text-emerald-500" /> Biometric App Lock</span>
             <span className="flex items-center gap-1.5"><Zap size={15} className="text-amber-500" /> 0ms Instant Startup</span>
@@ -532,9 +738,14 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
         </section>
 
         {/* The Purpose / Why We Built LifeOS Section */}
-        <section id="purpose" className="py-16 px-4 sm:px-6 bg-surface-light/40 dark:bg-surface-dark/40 border-y border-border-light/60 dark:border-border-dark/60">
+        <section id="purpose" className="py-20 px-4 sm:px-6 bg-surface-light/40 dark:bg-surface-dark/40 border-y border-border-light/60 dark:border-border-dark/60">
           <div className="max-w-5xl mx-auto space-y-12">
-            <div className="text-center space-y-3">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center space-y-3"
+            >
               <span className="text-xs font-black tracking-wider uppercase text-accent px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
                 The Philosophy
               </span>
@@ -544,13 +755,19 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <p className="text-secondary-light dark:text-secondary-dark text-sm sm:text-base max-w-2xl mx-auto">
                 The modern mobile app ecosystem is broken for disciplined students and high-achievers. Here is the exact problem LifeOS solves.
               </p>
-            </div>
+            </motion.div>
 
-            {/* Before vs After Comparison Grid */}
+            {/* Before vs After Comparison Cards */}
             <div className="grid md:grid-cols-2 gap-6">
               
               {/* Problem Card */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 space-y-4">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -3 }}
+                className="p-6 sm:p-8 rounded-3xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 space-y-4 shadow-sm"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-2xl bg-rose-500/20 text-rose-500 font-bold">
                     ✕
@@ -578,10 +795,16 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                     <span><strong>Privacy Invasions:</strong> Your personal schedule, habits, and notes uploaded and sold to marketing data brokers.</span>
                   </li>
                 </ul>
-              </div>
+              </motion.div>
 
               {/* Solution Card */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-accent/5 dark:bg-accent/10 border border-accent/25 space-y-4">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -3 }}
+                className="p-6 sm:p-8 rounded-3xl bg-accent/5 dark:bg-accent/10 border border-accent/25 space-y-4 shadow-sm"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-2xl bg-accent text-white font-bold">
                     ✓
@@ -609,12 +832,17 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                     <span><strong>Fortified Biometric Security:</strong> Lock your app with fingerprint or PIN so roommates and passersby cannot snoop your logs.</span>
                   </li>
                 </ul>
-              </div>
+              </motion.div>
 
             </div>
 
             {/* Creator Statement Quote */}
-            <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-center space-y-2 max-w-2xl mx-auto shadow-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-center space-y-2 max-w-2xl mx-auto shadow-sm"
+            >
               <Heart size={20} className="text-rose-500 mx-auto fill-rose-500/20" />
               <p className="text-xs sm:text-sm text-secondary-light dark:text-secondary-dark italic leading-relaxed">
                 "LifeOS was created because I wanted a tool that actually respected my attention and time. No social algorithms, no subscription fees—just pure, uncompromising tools to build daily discipline."
@@ -622,25 +850,30 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <p className="text-xs font-bold text-primary-light dark:text-primary-dark pt-1">
                 — Gujjeti Avineesh & the LifeOS Project
               </p>
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Interactive App Screenshots Showcase */}
+        {/* Interactive App Screenshots Showcase with Floating Orbit Badges */}
         <section id="screenshots" className="py-20 px-4 sm:px-6 max-w-5xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center space-y-3"
+          >
             <span className="text-xs font-black tracking-wider uppercase text-accent px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
-              Visual Tour
+              Interactive Visual Tour
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-primary-light dark:text-primary-dark">
-              Explore the Real Application
+              Experience the Real Interface
             </h2>
             <p className="text-secondary-light dark:text-secondary-dark text-sm max-w-xl mx-auto">
-              Tap each tab below to see how every module of LifeOS is crafted for instant speed, clarity, and ergonomics.
+              Tap the tabs below to test live interactive widgets (try starting the study timer or checking gym sets!).
             </p>
-          </div>
+          </motion.div>
 
-          {/* Tab Selection Bar */}
+          {/* Tab Selection Bar with Animated Background Indicator */}
           <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {(Object.keys(screenshots) as TabType[]).map((tabKey) => {
               const tab = screenshots[tabKey];
@@ -650,12 +883,19 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 <button
                   key={tabKey}
                   onClick={() => setActiveTab(tabKey)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+                  className={`relative flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-[1.03]'
+                      ? 'text-white'
                       : 'bg-surface-light dark:bg-surface-dark text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark hover:border-accent/40'
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabPill"
+                      className="absolute inset-0 rounded-2xl bg-accent shadow-lg shadow-accent/30 -z-10"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
                   <Icon size={15} />
                   <span>{tab.badge}</span>
                 </button>
@@ -663,7 +903,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             })}
           </div>
 
-          {/* Interactive Screen Device Mockup */}
+          {/* Interactive Screen Device Mockup with Orbiting Badges */}
           <div className="grid lg:grid-cols-12 gap-8 items-center pt-4">
             
             {/* Left: Tab Explanatory Content */}
@@ -681,28 +921,97 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 {screenshots[activeTab].description}
               </p>
               
-              <div className="pt-2">
-                <a
+              <div className="pt-2 flex items-center gap-3">
+                <motion.a
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   href="/LifeOS.apk"
                   download="LifeOS.apk"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-accent/40 text-xs font-bold text-accent transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/20 transition-all"
                 >
                   <Download size={13} />
                   <span>Get this on your phone</span>
-                </a>
+                </motion.a>
+
+                <button
+                  onClick={() => setShowQrModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-xs font-semibold text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+                >
+                  <QrCode size={13} />
+                  <span>Scan QR</span>
+                </button>
               </div>
             </div>
 
-            {/* Right: Realistic Phone Frame */}
-            <div className="lg:col-span-7 flex justify-center">
-              <div className="relative w-full max-w-[340px] rounded-[44px] p-3 bg-neutral-900 shadow-2xl border-4 border-neutral-700/80 ring-1 ring-white/10">
-                {/* Speaker Grill & Dynamic Island / Camera */}
+            {/* Right: Phone Frame with Floating Orbit Badges */}
+            <div className="lg:col-span-7 flex justify-center relative">
+              
+              {/* Floating Orbit Chip 1 (Top Left) */}
+              <motion.div
+                animate={{ y: [-6, 6, -6] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="hidden sm:flex absolute -top-4 -left-8 z-30 p-2.5 rounded-2xl bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-xl border border-border-light dark:border-border-dark shadow-xl items-center gap-2 text-xs font-bold"
+              >
+                <div className="w-7 h-7 rounded-xl bg-orange-500/15 text-orange-500 flex items-center justify-center">
+                  <Flame size={14} className="fill-orange-500" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black text-primary-light dark:text-primary-dark">18 Day Streak</div>
+                  <div className="text-[9px] text-emerald-500 font-semibold">Active & Consistent</div>
+                </div>
+              </motion.div>
+
+              {/* Floating Orbit Chip 2 (Bottom Left) */}
+              <motion.div
+                animate={{ y: [6, -6, 6] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                className="hidden sm:flex absolute -bottom-4 -left-6 z-30 p-2.5 rounded-2xl bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-xl border border-border-light dark:border-border-dark shadow-xl items-center gap-2 text-xs font-bold"
+              >
+                <div className="w-7 h-7 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center">
+                  <Dumbbell size={14} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black text-primary-light dark:text-primary-dark">New 1RM PR</div>
+                  <div className="text-[9px] text-rose-500 font-semibold">95 kg Bench Press</div>
+                </div>
+              </motion.div>
+
+              {/* Floating Orbit Chip 3 (Top Right) */}
+              <motion.div
+                animate={{ y: [-5, 5, -5] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                className="hidden sm:flex absolute top-12 -right-6 z-30 p-2.5 rounded-2xl bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-xl border border-border-light dark:border-border-dark shadow-xl items-center gap-2 text-xs font-bold"
+              >
+                <div className="w-7 h-7 rounded-xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center">
+                  <Clock size={14} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black text-primary-light dark:text-primary-dark">Class in 24m</div>
+                  <div className="text-[9px] text-accent font-semibold">Room 304 (Lab A)</div>
+                </div>
+              </motion.div>
+
+              {/* The Phone Chassis */}
+              <div className="relative w-full max-w-[340px] rounded-[44px] p-3 bg-neutral-900 shadow-2xl border-4 border-neutral-700/80 ring-1 ring-white/10 transition-transform duration-300 hover:scale-[1.01]">
+                
+                {/* Speaker Grill & Dynamic Island */}
                 <div className="absolute top-5 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-30 flex items-center justify-center">
                   <div className="w-2.5 h-2.5 rounded-full bg-neutral-800" />
                 </div>
 
                 {/* Inner Screen Surface */}
-                <div className="relative rounded-[36px] overflow-hidden bg-bg-light dark:bg-bg-dark border border-border-light/20 dark:border-border-dark/30 pt-9 pb-6 px-4 min-h-[460px] flex flex-col justify-between">
+                <div className="relative rounded-[36px] overflow-hidden bg-bg-light dark:bg-bg-dark border border-border-light/20 dark:border-border-dark/30 pt-7 pb-5 px-4 min-h-[460px] flex flex-col justify-between">
+                  
+                  {/* Real-time Status Bar */}
+                  <div className="flex items-center justify-between text-[10px] font-bold text-secondary-light dark:text-secondary-dark px-1 mb-2">
+                    <span>{phoneTime}</span>
+                    <div className="flex items-center gap-1.5 opacity-80">
+                      <Wifi size={11} />
+                      <Battery size={13} className="text-emerald-500" />
+                    </div>
+                  </div>
+
+                  {/* Animated Tab Screen Content */}
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeTab}
@@ -716,8 +1025,8 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                     </motion.div>
                   </AnimatePresence>
 
-                  {/* Android Home Indicator Bar */}
-                  <div className="pt-4 flex justify-center">
+                  {/* Android Gesture Bar */}
+                  <div className="pt-3 flex justify-center">
                     <div className="w-28 h-1 rounded-full bg-neutral-400/40 dark:bg-neutral-600/60" />
                   </div>
                 </div>
@@ -727,87 +1036,152 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
           </div>
         </section>
 
-        {/* The 5 Core Pillars Grid */}
-        <section id="features" className="py-16 px-4 sm:px-6 bg-surface-light/30 dark:bg-surface-dark/30 border-t border-border-light/60 dark:border-border-dark/60">
-          <div className="max-w-5xl mx-auto space-y-12">
-            <div className="text-center space-y-3">
-              <span className="text-xs font-black tracking-wider uppercase text-accent px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
-                Architecture
+        {/* Interactive Subscription & App-Fatigue Calculator */}
+        <section id="calculator" className="py-20 px-4 sm:px-6 bg-surface-light/30 dark:bg-surface-dark/30 border-y border-border-light/60 dark:border-border-dark/60">
+          <div className="max-w-4xl mx-auto space-y-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center space-y-3"
+            >
+              <span className="text-xs font-black tracking-wider uppercase text-emerald-500 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                Cost & Clutter Eliminator
               </span>
               <h2 className="text-3xl sm:text-4xl font-black text-primary-light dark:text-primary-dark">
-                Engineered for Every Angle of Life
+                How Much Are You Wasting on Other Apps?
               </h2>
-            </div>
+              <p className="text-secondary-light dark:text-secondary-dark text-sm max-w-xl mx-auto">
+                Toggle the apps you currently juggle to calculate your yearly financial savings and mental clarity gained with LifeOS.
+              </p>
+            </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid md:grid-cols-12 gap-6 items-center">
               
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold">
-                  <BookOpen size={20} />
-                </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Focus & Academics</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Pomodoro timers, deep work session logs, and GitHub-style visual heatmaps to track your daily study consistency over the semester.
-                </p>
+              {/* Checkboxes Area */}
+              <div className="md:col-span-7 space-y-3">
+                {Object.entries(selectedApps).map(([key, app]) => (
+                  <motion.div
+                    key={key}
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => toggleAppSelection(key)}
+                    className={`p-3.5 rounded-2xl border cursor-pointer flex items-center justify-between transition-all ${
+                      app.checked 
+                        ? 'bg-surface-light dark:bg-surface-dark border-accent/40 shadow-sm' 
+                        : 'bg-surface-light/40 dark:bg-surface-dark/40 border-border-light/40 dark:border-border-dark/40 opacity-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold transition-colors ${
+                        app.checked ? 'bg-accent text-white' : 'border border-border-light dark:border-border-dark'
+                      }`}>
+                        {app.checked ? '✓' : ''}
+                      </div>
+                      <span className="font-bold text-xs sm:text-sm text-primary-light dark:text-primary-dark">{app.name}</span>
+                    </div>
+                    <span className="text-xs font-extrabold text-rose-500">${app.cost}/mo</span>
+                  </motion.div>
+                ))}
               </div>
 
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-bold">
-                  <Dumbbell size={20} />
+              {/* Results Total Card */}
+              <div className="md:col-span-5 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-accent/15 via-surface-light dark:via-surface-dark to-surface-light dark:to-surface-dark border border-accent/30 text-center space-y-4 shadow-xl">
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-accent">YOUR YEARLY SAVINGS</span>
+                  <div className="text-4xl sm:text-5xl font-black text-emerald-500 mt-1">
+                    ${yearlySavings}
+                  </div>
+                  <p className="text-xs text-secondary-light dark:text-secondary-dark mt-0.5">
+                    Saved each year • ($0 LifeOS fee)
+                  </p>
                 </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Gym Hypertrophy</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Push/Pull/Legs splits, workout set/rep logging, 1RM calculator, and progressive overload graphs to ensure real physical growth.
-                </p>
-              </div>
 
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
-                  <Utensils size={20} />
+                <div className="pt-2 border-t border-border-light dark:border-border-dark space-y-1.5 text-xs text-secondary-light dark:text-secondary-dark">
+                  <div className="flex justify-between font-semibold">
+                    <span>Apps Replaced:</span>
+                    <strong className="text-primary-light dark:text-primary-dark">{activeAppsCount} separate apps</strong>
+                  </div>
+                  <div className="flex justify-between font-semibold">
+                    <span>Mental Friction:</span>
+                    <strong className="text-emerald-500">Zero notification ads</strong>
+                  </div>
                 </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Nutrition & Mess Menus</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Log protein, carbs, calories, and keep track of your hostel mess schedule so you never miss breakfast or special meals.
-                </p>
-              </div>
 
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
-                  <Calendar size={20} />
-                </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Real-Time Timetable</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Dynamic class schedules that highlight the current lecture in progress, classroom numbers, and countdowns to your next period.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold">
-                  <Wallet size={20} />
-                </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Spending & Budget</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Log student daily expenses, track where your allowance goes, and stay disciplined with visual category breakdowns.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/40 transition-colors">
-                <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center font-bold">
-                  <ShieldCheck size={20} />
-                </div>
-                <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">Biometric Privacy</h4>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Native Android biometric fingerprint protection, encrypted offline sandbox, zero trackers, and zero external ad SDKs.
-                </p>
+                <motion.a
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  href="/LifeOS.apk"
+                  download="LifeOS.apk"
+                  className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-accent text-white font-extrabold text-xs shadow-md shadow-accent/25"
+                >
+                  <Download size={14} />
+                  <span>Eliminate Clutter — Download APK</span>
+                </motion.a>
               </div>
 
             </div>
           </div>
         </section>
 
+        {/* The 5 Core Pillars Grid with Hover Lighting */}
+        <section id="features" className="py-20 px-4 sm:px-6 max-w-5xl mx-auto space-y-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center space-y-3"
+          >
+            <span className="text-xs font-black tracking-wider uppercase text-accent px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
+              Architecture
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-primary-light dark:text-primary-dark">
+              Engineered for Every Angle of Life
+            </h2>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            
+            {[
+              { icon: BookOpen, color: 'text-indigo-500', bg: 'bg-indigo-500/10', title: 'Focus & Academics', desc: 'Pomodoro timers, deep work session logs, and GitHub-style visual heatmaps to track your daily study consistency over the semester.' },
+              { icon: Dumbbell, color: 'text-rose-500', bg: 'bg-rose-500/10', title: 'Gym Hypertrophy', desc: 'Push/Pull/Legs splits, workout set/rep logging, 1RM calculator, and progressive overload graphs to ensure real physical growth.' },
+              { icon: Utensils, color: 'text-amber-500', bg: 'bg-amber-500/10', title: 'Nutrition & Mess Menus', desc: 'Log protein, carbs, calories, and keep track of your hostel mess schedule so you never miss breakfast or special meals.' },
+              { icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-500/10', title: 'Real-Time Timetable', desc: 'Dynamic class schedules that highlight the current lecture in progress, classroom numbers, and countdowns to your next period.' },
+              { icon: Wallet, color: 'text-purple-500', bg: 'bg-purple-500/10', title: 'Spending & Budget', desc: 'Log student daily expenses, track where your allowance goes, and stay disciplined with visual category breakdowns.' },
+              { icon: ShieldCheck, color: 'text-cyan-500', bg: 'bg-cyan-500/10', title: 'Biometric Privacy', desc: 'Native Android biometric fingerprint protection, encrypted offline sandbox, zero trackers, and zero external ad SDKs.' }
+            ].map((feature, idx) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.06 }}
+                  whileHover={{ y: -5, scale: 1.01 }}
+                  className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 hover:border-accent/50 transition-all shadow-sm"
+                >
+                  <div className={`w-10 h-10 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center font-bold`}>
+                    <Icon size={20} />
+                  </div>
+                  <h4 className="text-base font-extrabold text-primary-light dark:text-primary-dark">{feature.title}</h4>
+                  <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </motion.div>
+              );
+            })}
+
+          </div>
+        </section>
+
         {/* 3-Step Sideloading / Installation Guide */}
         <section id="install" className="py-20 px-4 sm:px-6 max-w-4xl mx-auto space-y-12">
-          <div className="text-center space-y-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center space-y-3"
+          >
             <span className="text-xs font-black tracking-wider uppercase text-accent px-3 py-1 rounded-full bg-accent/10 border border-accent/20">
               Installation Guide
             </span>
@@ -817,39 +1191,39 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <p className="text-secondary-light dark:text-secondary-dark text-sm max-w-xl mx-auto">
               Installing an APK directly is fast and safe. Here are the 3 quick steps to get LifeOS running on your phone.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
             
-            <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
-              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm">
+            <motion.div whileHover={{ y: -3 }} className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
+              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm shadow-md shadow-accent/20">
                 1
               </span>
               <h4 className="text-base font-black text-primary-light dark:text-primary-dark">Tap Download</h4>
               <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                Click the <strong className="text-primary-light dark:text-primary-dark font-semibold">Download APK</strong> button. Your browser will begin downloading the <code className="text-[11px] bg-bg-light dark:bg-bg-dark px-1.5 py-0.5 rounded border border-border-light dark:border-border-dark">LifeOS.apk</code> package.
+                Click the <strong className="text-primary-light dark:text-primary-dark font-semibold">Download APK</strong> button. Your browser will download the lightweight <code className="text-[11px] bg-bg-light dark:bg-bg-dark px-1.5 py-0.5 rounded border border-border-light dark:border-border-dark">LifeOS.apk</code> package.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
-              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm">
+            <motion.div whileHover={{ y: -3 }} className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
+              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm shadow-md shadow-accent/20">
                 2
               </span>
               <h4 className="text-base font-black text-primary-light dark:text-primary-dark">Allow Unknown Source</h4>
               <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
                 Chrome may ask: <em>"File might be harmful"</em>. Tap <strong className="text-emerald-500 font-semibold">Download anyway</strong>. (Google flags all non-Play Store independent builds this way).
               </p>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
-              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm">
+            <motion.div whileHover={{ y: -3 }} className="p-6 rounded-3xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark space-y-3 relative">
+              <span className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-black text-sm shadow-md shadow-accent/20">
                 3
               </span>
               <h4 className="text-base font-black text-primary-light dark:text-primary-dark">Open & Install</h4>
               <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
                 Tap the completed download notification or open your <strong className="text-primary-light dark:text-primary-dark font-semibold">Downloads</strong> app. Tap <strong className="text-accent font-semibold">Install</strong> and launch your operating system!
               </p>
-            </div>
+            </motion.div>
 
           </div>
 
@@ -867,7 +1241,12 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
 
         {/* Final Bottom Download Call-to-Action */}
         <section className="py-20 px-4 sm:px-6 text-center">
-          <div className="max-w-3xl mx-auto p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-surface-light to-bg-light dark:from-surface-dark dark:to-bg-dark border border-border-light dark:border-border-dark shadow-2xl space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.96 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-surface-light to-bg-light dark:from-surface-dark dark:to-bg-dark border border-border-light dark:border-border-dark shadow-2xl space-y-6"
+          >
             <img 
               src="/icon.svg" 
               alt="LifeOS Logo" 
@@ -883,28 +1262,30 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 href="/LifeOS.apk"
                 download="LifeOS.apk"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-black text-base shadow-xl shadow-accent/25 transition-all hover:scale-[1.03] active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-black text-base shadow-xl shadow-accent/25 transition-all"
               >
                 <Download size={18} />
                 <span>Download LifeOS.apk (v1.5.4)</span>
-              </a>
+              </motion.a>
 
-              <a
-                href="/"
+              <button
+                onClick={() => setShowQrModal(true)}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark font-bold text-sm text-primary-light dark:text-primary-dark hover:border-accent/40 transition-all"
               >
-                <span>Launch Web Version</span>
-                <ExternalLink size={14} className="text-secondary-light dark:text-secondary-dark" />
-              </a>
+                <QrCode size={16} className="text-accent" />
+                <span>Scan QR Code</span>
+              </button>
             </div>
 
             <div className="text-[11px] text-muted-light dark:text-muted-dark pt-2">
               Android 8.0+ Required • ARM64 / Universal Build • Completely Safe & Free
             </div>
-          </div>
+          </motion.div>
         </section>
 
       </main>
@@ -915,7 +1296,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
           LifeOS — Your Daily Life, Engineered.
         </p>
         <p className="text-[11px] text-muted-light dark:text-muted-dark">
-          Built with dedication for student performance and daily discipline. All rights reserved.
+          Built with dedication for student performance and daily discipline by Gujjeti Avineesh.
         </p>
       </footer>
 
