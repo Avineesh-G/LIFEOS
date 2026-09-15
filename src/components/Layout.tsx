@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
   CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, RotateCw, History, LucideIcon
+  Utensils, RotateCw, History, ShieldCheck, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppSettings } from '../types';
@@ -16,14 +16,15 @@ const primaryDockItems = [
   { icon: Utensils, label: 'Nutrition', path: '/nutrition' },
 ];
 
-// Speed-dial popup items (Photo 2 reference)
+// Speed-dial popup items (ordered from bottom to top as requested)
 const secondaryMenuItems = [
+  { icon: BarChart3,    label: 'Progress & Analytics', path: '/progress',  color: 'text-purple-500 dark:text-purple-400' },
   { icon: History,      label: 'History',              path: '/history',   color: 'text-violet-500 dark:text-violet-400' },
+  { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
   { icon: BookOpen,     label: 'Study',                path: '/study',     color: 'text-indigo-500 dark:text-indigo-400' },
   { icon: Wallet,       label: 'Spending',             path: '/spending',  color: 'text-amber-500 dark:text-amber-400' },
-  { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
   { icon: CheckSquare,  label: 'To-Do Tasks',          path: '/tasks',     color: 'text-emerald-500 dark:text-emerald-400' },
-  { icon: BarChart3,    label: 'Progress & Analytics', path: '/progress',  color: 'text-purple-500 dark:text-purple-400' },
+  { icon: ShieldCheck,  label: 'Vault',                path: '/vault',     color: 'text-emerald-500 dark:text-emerald-400' },
   { icon: Settings,     label: 'Settings',             path: '/settings',  color: 'text-slate-500 dark:text-slate-400' },
 ];
 
@@ -99,6 +100,16 @@ export default function Layout({ children, refresh }: LayoutProps) {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // Sync menu open state for Android hardware back button handling
+  useEffect(() => {
+    (window as any).__lifeos_menu_open = menuOpen;
+    const handleCloseMenu = () => setMenuOpen(false);
+    window.addEventListener('lifeos-close-menu', handleCloseMenu);
+    return () => {
+      window.removeEventListener('lifeos-close-menu', handleCloseMenu);
+    };
+  }, [menuOpen]);
+
   // Hide floating navigation dock when mobile virtual keyboard is open
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
@@ -162,7 +173,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
 
       {/* ── Top header bar ── */}
       <header 
-        className="fixed top-0 left-0 right-0 z-30 bg-white/90 dark:bg-[#121316]/90 backdrop-blur-md border-b border-border-light/60 dark:border-border-dark/60"
+        className="fixed top-0 left-0 right-0 z-30 bg-white/90 dark:bg-[#121316]/90 backdrop-blur-md border-b border-border-light/60 dark:border-border-dark/60 gpu-composited"
         style={{
           paddingTop: 'env(safe-area-inset-top, 0px)',
         }}
@@ -215,7 +226,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             onClick={() => {
               triggerHaptic('light');
               setMenuOpen(false);
@@ -239,13 +250,13 @@ export default function Layout({ children, refresh }: LayoutProps) {
                 return (
                   <motion.button
                     key={item.path}
-                    initial={{ opacity: 0, y: 16, scale: 0.88 }}
+                    initial={{ opacity: 0, y: 14, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     transition={{
-                      duration: 0.2,
-                      delay: (secondaryMenuItems.length - 1 - index) * 0.03,
-                      ease: [0.22, 1, 0.36, 1],
+                      duration: 0.12,
+                      delay: (secondaryMenuItems.length - 1 - index) * 0.015,
+                      ease: [0.16, 1, 0.3, 1],
                     }}
                     onClick={() => {
                       triggerHaptic('nav');
@@ -272,7 +283,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
 
       {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
       <nav 
-        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-200 ${
+        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-200 gpu-composited ${
           isKeyboardOpen ? 'opacity-0 translate-y-24 pointer-events-none' : 'opacity-100 translate-y-0'
         }`}
         style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
@@ -335,10 +346,8 @@ export default function Layout({ children, refresh }: LayoutProps) {
               }`}
             >
               {(menuOpen || isSecondaryActive) && (
-                <motion.div
-                  layoutId={!primaryDockItems.some(i => isActive(i.path)) ? "activeTabBadge" : undefined}
-                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm"
-                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                <div
+                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm transition-opacity duration-150"
                 />
               )}
               {menuOpen ? (

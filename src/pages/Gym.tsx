@@ -108,7 +108,10 @@ export default function Gym({ data, updateData }: GymProps) {
 
   const totalSets = useMemo(() => {
     if (!todayLog || !Array.isArray(todayLog.exercises)) return 0;
-    return todayLog.exercises.reduce((s, ex) => s + ((ex?.sets || []).filter(st => st?.completed).length), 0);
+    return todayLog.exercises.reduce((s, ex) => {
+      const setsArr = Array.isArray(ex?.sets) ? ex.sets : [];
+      return s + setsArr.filter(st => st?.completed).length;
+    }, 0);
   }, [todayLog]);
 
   const handleGenerateCardio = async () => {
@@ -434,7 +437,8 @@ export default function Gym({ data, updateData }: GymProps) {
           <div className="space-y-3">
             {(activePlan.exercises || []).map((ex, i) => {
               const logged = isSelectedToday ? todayLog?.exercises?.find(e => e.name === ex.name) : undefined;
-              const completedSets = (logged?.sets || []).filter(s => s?.completed).length;
+              const loggedSetsArr = Array.isArray(logged?.sets) ? logged.sets : [];
+              const completedSets = loggedSetsArr.filter(s => s?.completed).length;
               const targetSets = Number(ex?.sets) || 0;
               const done = targetSets > 0 && completedSets >= targetSets;
               return (
@@ -545,7 +549,10 @@ export default function Gym({ data, updateData }: GymProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{w.type}</p>
                   <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mt-0.5">
-                    {w.date} · {(w.exercises || []).reduce((s, e) => s + ((e?.sets || []).filter(st => st?.completed).length), 0)} sets logged
+                    {w.date} · {(w.exercises || []).reduce((s, e) => {
+                      const exSets = Array.isArray(e?.sets) ? e.sets : [];
+                      return s + exSets.filter(st => st?.completed).length;
+                    }, 0)} sets logged
                   </p>
                 </div>
                 <ChevronRight size={16} className="text-muted-light dark:text-muted-dark flex-shrink-0" />

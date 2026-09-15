@@ -24,6 +24,8 @@ const DEFAULT_DATA: AppData = {
   nutritionLogs: [],
   messPreference: 'nonveg',
   geminiApiKey: '',
+  vaultItems: [],
+  vaultConfig: null,
 };
 
 function cleanForFirestore(obj: any): any {
@@ -76,6 +78,19 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
   merged.reviews = merged.reviews || [];
   merged.nutritionLogs = merged.nutritionLogs || [];
   merged.menuMonths = merged.menuMonths || [];
+  merged.vaultItems = (merged.vaultItems || []).map(v => ({
+    id: v?.id || `vault_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    title: v?.title || 'Untitled',
+    category: v?.category || 'personal',
+    usernameOrEmail: v?.usernameOrEmail || '',
+    encryptedPassword: v?.encryptedPassword || '',
+    iv: v?.iv || '',
+    websiteUrl: v?.websiteUrl || '',
+    notes: v?.notes || '',
+    createdAt: v?.createdAt || new Date().toISOString(),
+    updatedAt: v?.updatedAt || new Date().toISOString(),
+  }));
+  merged.vaultConfig = merged.vaultConfig || null;
 
   return merged;
 }

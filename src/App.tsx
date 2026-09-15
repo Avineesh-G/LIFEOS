@@ -22,6 +22,7 @@ import Progress from './pages/Progress';
 import WorkHistory from './pages/WorkHistory';
 import { Settings } from 'lucide-react'; // Fallback import just in case
 import SettingsPage from './pages/Settings';
+import Vault from './pages/Vault';
 import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
 import { useEffect, useState } from 'react';
@@ -31,30 +32,28 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import type { TransitionMode } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
+import { DEFAULT_DATA } from './db';
 
 const getTransitionConfig = (mode: TransitionMode) => {
   switch (mode) {
     case 'fast':
       return {
-        initial: { opacity: 0, scale: 0.98 },
-        animate: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.99 },
-        transition: { duration: 0.14, ease: 'easeOut' }
+        initial: { opacity: 0.98 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.05, ease: 'easeOut' }
       };
     case 'soft':
       return {
-        initial: { opacity: 0, y: 26, scale: 0.96 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -16, scale: 0.98 },
-        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
+        initial: { opacity: 0.92, y: 6 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] }
       };
     case 'efficient':
     default:
       return {
-        initial: { opacity: 0, x: 22 },
-        animate: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: -22 },
-        transition: { duration: 0.20, ease: [0.25, 1, 0.5, 1] }
+        initial: { opacity: 0.96 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.08, ease: 'easeOut' }
       };
   }
 };
@@ -102,26 +101,22 @@ function MainContent({
       { path: '/progress', element: <Progress data={data} /> },
       { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
       { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
+      { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
       { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
     ],
     location
   );
 
   return (
-    <AnimatePresence mode="wait">
-      {routeElements && (
-        <motion.div
-          key={location.pathname}
-          initial={transitionConfig.initial}
-          animate={transitionConfig.animate}
-          exit={transitionConfig.exit}
-          transition={transitionConfig.transition}
-          className="w-full overflow-x-hidden will-change-[transform,opacity]"
-        >
-          {routeElements}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <motion.div
+      key={location.pathname}
+      initial={transitionConfig.initial}
+      animate={transitionConfig.animate}
+      transition={transitionConfig.transition}
+      className="w-full overflow-x-hidden gpu-composited"
+    >
+      {routeElements}
+    </motion.div>
   );
 }
 
@@ -181,6 +176,11 @@ function App() {
     const registerBackButton = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
+          // If speed dial menu is currently open, close it first without navigating away
+          if ((window as any).__lifeos_menu_open) {
+            window.dispatchEvent(new CustomEvent('lifeos-close-menu'));
+            return;
+          }
           if (location.pathname !== '/' && location.pathname !== '') {
             navigate('/');
           } else {
@@ -243,7 +243,7 @@ function App() {
     return <DownloadPage theme={theme} setTheme={setTheme} accentColor={accentColor} />;
   }
 
-  if (!mounted || (authLoading && !user) || (user && !data)) {
+  if (authLoading && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
         <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -255,13 +255,15 @@ function App() {
     return <Auth />;
   }
 
+  const safeData = data || DEFAULT_DATA;
+
   return (
     <>
       <AppLockOverlay />
       <div
-        className="w-full min-h-screen transition-all duration-300 ease-out"
+        className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
         style={{
-          filter: isLocked ? 'blur(36px) saturate(40%)' : 'none',
+          filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
           opacity: isLocked ? 0.2 : 1,
           pointerEvents: isLocked ? 'none' : 'auto',
         }}
@@ -269,7 +271,7 @@ function App() {
         <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
           <ErrorBoundary>
             <MainContent
-              data={data}
+              data={safeData}
               refresh={refresh}
               updateData={updateData}
               theme={theme}

@@ -852,7 +852,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       <div className="text-center py-4">
-        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.4 (Build 14)</p>
+        <p className="text-xs font-bold text-muted-light dark:text-muted-dark tracking-wide">LifeOS v1.5.5 (Build 15)</p>
       </div>
     </motion.div>
   );

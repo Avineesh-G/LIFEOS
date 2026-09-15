@@ -59,7 +59,16 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
         {sessions.map((s, i) => (
           <div key={i} className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-medium">{format(new Date(s.date), 'EEEE, MMM d')}</div>
+              <div className="text-sm font-medium">
+                {(() => {
+                  try {
+                    const d = new Date(s.date);
+                    return isNaN(d.getTime()) ? s.date : format(d, 'EEEE, MMM d');
+                  } catch {
+                    return s.date;
+                  }
+                })()}
+              </div>
               <div className="text-xs text-secondary-light dark:text-secondary-dark">{s.sets.length} sets</div>
             </div>
             <div className="space-y-1.5">

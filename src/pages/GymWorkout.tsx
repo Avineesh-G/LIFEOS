@@ -317,8 +317,14 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
     }
   };
 
-  const completedSets = (exercises || []).reduce((s, e) => s + (e?.sets || []).filter(x => x?.completed).length, 0);
-  const totalSets = (exercises || []).reduce((s, e) => s + (e?.sets || []).length, 0);
+  const completedSets = (exercises || []).reduce((s, e) => {
+    const setsArr = Array.isArray(e?.sets) ? e.sets : [];
+    return s + setsArr.filter(x => x?.completed).length;
+  }, 0);
+  const totalSets = (exercises || []).reduce((s, e) => {
+    const setsArr = Array.isArray(e?.sets) ? e.sets : [];
+    return s + setsArr.length;
+  }, 0);
   const pct = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
   const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()];
 
@@ -468,7 +474,8 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           {exercises.length > 0 && <p className="label-mono text-secondary-light dark:text-secondary-dark">Your Workout</p>}
 
           {exercises.map((ex, ei) => {
-            const allDone = ex.sets.every(s => s.completed);
+            const setsList = Array.isArray(ex?.sets) ? ex.sets : [];
+            const allDone = setsList.length > 0 && setsList.every(s => s?.completed);
             return (
               <motion.div
                 key={ei}
@@ -499,7 +506,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
                 </div>
 
                 <div className="space-y-2">
-                  {ex.sets.map((set, si) => (
+                  {setsList.map((set, si) => (
                     <motion.div key={si} layout className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
                         {si + 1}

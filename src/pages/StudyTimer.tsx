@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Play, Pause, Square, RotateCcw, ChevronLeft, Check, Sparkles, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { triggerHaptic } from '../utils/haptics';
 import type { AppData, StudySession } from '../types';
 
 interface StudyTimerProps {
@@ -12,27 +13,115 @@ interface StudyTimerProps {
 
 type TimerState = 'idle' | 'running' | 'paused';
 
+const STORAGE_KEY = 'lifeos_active_study_timer_v2';
+
+interface PersistedTimer {
+  timerState: TimerState;
+  subject: string;
+  topic: string;
+  accumulatedSeconds: number;
+  lastStartTimestamp: number | null;
+  startTimeStr: string;
+}
+
 export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const prefillSubject = searchParams.get('subject') || '';
 
-  const [subject, setSubject] = useState(prefillSubject);
-  const [topic, setTopic] = useState('');
-  const [timerState, setTimerState] = useState<TimerState>('idle');
-  const [seconds, setSeconds] = useState(0);
+  // Initialize from persisted storage if an active timer was running
+  const [persisted] = useState<PersistedTimer | null>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  });
+
+  const [subject, setSubject] = useState(() => persisted?.subject || prefillSubject);
+  const [topic, setTopic] = useState(() => persisted?.topic || '');
+  const [timerState, setTimerState] = useState<TimerState>(() => persisted?.timerState || 'idle');
+
+  // Calculate initial seconds based on wall-clock elapsed time
+  const [seconds, setSeconds] = useState<number>(() => {
+    if (!persisted) return 0;
+    if (persisted.timerState === 'running' && persisted.lastStartTimestamp) {
+      const elapsed = Math.floor((Date.now() - persisted.lastStartTimestamp) / 1000);
+      return Math.max(0, persisted.accumulatedSeconds + elapsed);
+    }
+    return persisted.accumulatedSeconds || 0;
+  });
+
   const [showSummary, setShowSummary] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const startTimeRef = useRef<string>('');
+  const startTimeRef = useRef<string>(persisted?.startTimeStr || '');
+  const accumulatedRef = useRef<number>(persisted?.accumulatedSeconds || 0);
+  const lastStartRef = useRef<number | null>(persisted?.lastStartTimestamp || null);
 
+  // Sync state to localStorage
+  const saveTimerState = useCallback((state: TimerState, acc: number, startTs: number | null, subj: string, top: string, startStr: string) => {
+    try {
+      if (state === 'idle') {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        const payload: PersistedTimer = {
+          timerState: state,
+          subject: subj,
+          topic: top,
+          accumulatedSeconds: acc,
+          lastStartTimestamp: startTs,
+          startTimeStr: startStr,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      }
+    } catch {}
+  }, []);
+
+  // Recalculate true elapsed seconds from wall clock
+  const syncElapsedSeconds = useCallback(() => {
+    if (timerState === 'running' && lastStartRef.current) {
+      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
+      const currentTotal = accumulatedRef.current + Math.max(0, elapsed);
+      setSeconds(currentTotal);
+    }
+  }, [timerState]);
+
+  // Main timer loop based on Wall-Clock time so it never stops when phone screen turns off
   useEffect(() => {
     if (timerState === 'running') {
-      intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      if (!lastStartRef.current) {
+        lastStartRef.current = Date.now();
+      }
+      syncElapsedSeconds();
+
+      intervalRef.current = setInterval(() => {
+        syncElapsedSeconds();
+      }, 500); // 500ms intervals for smooth, drift-free display
     } else {
       clearInterval(intervalRef.current);
     }
+
     return () => clearInterval(intervalRef.current);
-  }, [timerState]);
+  }, [timerState, syncElapsedSeconds]);
+
+  // Handle phone screen off / on (visibilitychange & window focus)
+  useEffect(() => {
+    const handleWake = () => {
+      syncElapsedSeconds();
+    };
+
+    document.addEventListener('visibilitychange', handleWake);
+    window.addEventListener('focus', handleWake);
+    window.addEventListener('pageshow', handleWake);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleWake);
+      window.removeEventListener('focus', handleWake);
+      window.removeEventListener('pageshow', handleWake);
+    };
+  }, [syncElapsedSeconds]);
 
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -43,41 +132,82 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
 
   const handleStart = () => {
     if (!subject.trim()) return;
+    triggerHaptic('light');
+    const now = Date.now();
+    const startStr = format(new Date(), 'HH:mm');
+    startTimeRef.current = startStr;
+    accumulatedRef.current = 0;
+    lastStartRef.current = now;
+    setSeconds(0);
     setTimerState('running');
-    startTimeRef.current = format(new Date(), 'HH:mm');
+    saveTimerState('running', 0, now, subject.trim(), topic.trim(), startStr);
   };
 
-  const handlePause = () => setTimerState('paused');
-  const handleResume = () => setTimerState('running');
+  const handlePause = () => {
+    triggerHaptic('light');
+    if (lastStartRef.current) {
+      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
+      accumulatedRef.current += Math.max(0, elapsed);
+      lastStartRef.current = null;
+    }
+    setSeconds(accumulatedRef.current);
+    setTimerState('paused');
+    saveTimerState('paused', accumulatedRef.current, null, subject, topic, startTimeRef.current);
+  };
+
+  const handleResume = () => {
+    triggerHaptic('light');
+    const now = Date.now();
+    lastStartRef.current = now;
+    setTimerState('running');
+    saveTimerState('running', accumulatedRef.current, now, subject, topic, startTimeRef.current);
+    syncElapsedSeconds();
+  };
 
   const handleStop = async () => {
+    triggerHaptic('medium');
     clearInterval(intervalRef.current);
+    if (lastStartRef.current) {
+      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
+      accumulatedRef.current += Math.max(0, elapsed);
+    }
+    setSeconds(accumulatedRef.current);
     setTimerState('idle');
+    saveTimerState('idle', 0, null, '', '', '');
     setShowSummary(true);
   };
 
   const handleSave = async () => {
+    triggerHaptic('save');
+    const finalMinutes = Math.max(1, Math.round(seconds / 60));
     const session: StudySession = {
       id: crypto.randomUUID(),
       subject: subject.trim(),
       topic: topic.trim() || undefined,
       date: format(new Date(), 'yyyy-MM-dd'),
       startTime: startTimeRef.current || format(new Date(), 'HH:mm'),
-      duration: Math.max(1, Math.round(seconds / 60)),
+      duration: finalMinutes,
     };
     await updateData({ studySessions: [...data.studySessions, session] });
     setShowSummary(false);
     setSeconds(0);
+    accumulatedRef.current = 0;
+    lastStartRef.current = null;
     setSubject('');
     setTopic('');
+    localStorage.removeItem(STORAGE_KEY);
     navigate('/study');
   };
 
   const handleCancel = () => {
+    triggerHaptic('light');
     clearInterval(intervalRef.current);
     setTimerState('idle');
     setSeconds(0);
+    accumulatedRef.current = 0;
+    lastStartRef.current = null;
     setShowSummary(false);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   const subjects = [...new Set(data.studySessions.map(s => s.subject))];

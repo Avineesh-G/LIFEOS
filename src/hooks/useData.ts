@@ -6,9 +6,10 @@ import type { AppData } from '../types';
 import { User } from 'firebase/auth';
 
 const CACHE_KEY_PREFIX = 'lifeos_cache_';
+const GLOBAL_CACHE_KEY = 'lifeos_cached_app_data';
 
 export function useData(user: User | null) {
-  const [data, setData] = useState<AppData | null>(() => {
+  const [data, setData] = useState<AppData>(() => {
     let uid = user?.uid;
     if (!uid) {
       try {
@@ -18,38 +19,44 @@ export function useData(user: User | null) {
         }
       } catch {}
     }
-    if (!uid) return null;
-    try {
-      const cached = localStorage.getItem(CACHE_KEY_PREFIX + uid);
-      if (cached) {
-        return sanitizeAppData(JSON.parse(cached));
+    if (uid) {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY_PREFIX + uid);
+        if (cached) {
+          return sanitizeAppData(JSON.parse(cached));
+        }
+      } catch {
+        // ignore parsing error
       }
-    } catch {
-      // ignore parsing error
     }
-    return null;
+    try {
+      const globalCached = localStorage.getItem(GLOBAL_CACHE_KEY);
+      if (globalCached) {
+        return sanitizeAppData(JSON.parse(globalCached));
+      }
+    } catch {}
+    return DEFAULT_DATA;
   });
 
-  const [loading, setLoading] = useState(!data && !!user);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Keep a ref to current data to avoid stale closures in optimistic updates
-  const dataRef = useRef<AppData | null>(data);
+  const dataRef = useRef<AppData>(data);
   useEffect(() => {
     dataRef.current = data;
-    if (user && data) {
-      try {
+    try {
+      localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify(data));
+      if (user) {
         localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(data));
-      } catch {
-        // quota exceeded or private mode
       }
+    } catch {
+      // quota exceeded or private mode
     }
   }, [data, user]);
 
   useEffect(() => {
     if (!user) {
-      setData(null);
-      dataRef.current = null;
       setLoading(false);
       return;
     }

@@ -10,7 +10,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Firebase](https://img.shields.io/badge/firebase-ffca28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Capacitor](https://img.shields.io/badge/Capacitor-Android_8.0+-119EFF?logo=capacitor&logoColor=white)](https://capacitorjs.com/)
-[![Release](https://img.shields.io/badge/Version-v1.5.4-6366F1)](https://lifeos-iota-one.vercel.app/download)
+[![Release](https://img.shields.io/badge/Version-v1.5.5-6366F1)](https://lifeos-iota-one.vercel.app/download)
 
 ### [🚀 Download & Explore LifeOS](https://lifeos-iota-one.vercel.app/download) · [🌐 Web Version](https://lifeos-iota-one.vercel.app) · [🐛 Report Issues](https://github.com/Avineesh-G/LIFEOS/issues)
 
@@ -278,6 +278,17 @@ Whenever changes are pushed to the `main` branch of `https://github.com/Avineesh
 ## Release Notes
 
 <details open>
+<summary><strong>v1.5.5 (Build 15)</strong> — Biometric Password Vault, Persistent Background Timer & Instant Startup</summary>
+
+- **Biometric Password & Credentials Vault**: AES-256-GCM encrypted vault protected directly by your phone's native biometrics and screen lock (fingerprint, face, PIN/pattern). Zero master passwords to forget.
+- **Persistent Wall-Clock Study Timer**: Timer accurately tracks elapsed time using hardware wall-clock timestamps and foreground resume hooks, ensuring the timer never freezes or pauses when the phone screen turns off.
+- **Direct 0ms Instant Startup**: Synchronous cache hydration eliminates startup delay; the home dashboard loads immediately with zero loading spinner.
+- **Smooth 60/120fps GPU Navigation**: Removed blocking unmount transitions and fixed the white screen issue when returning from 3-dots speed-dial interfaces.
+- **Gym & Activity Crash Fixes**: Resolved form saving blank screen glitches and improved table rendering across all modules.
+
+</details>
+
+<details>
 <summary><strong>v1.5.4</strong> — Dedicated Showcase Website & Rich Interactive Tour</summary>
 
 - Launched the standalone, public-facing **Product Showcase & APK Download Website** at `/download`.

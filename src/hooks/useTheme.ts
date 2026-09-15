@@ -11,7 +11,7 @@ export function useTheme() {
   const [transitionMode, setTransitionModeState] = useState<TransitionMode>(
     () => (localStorage.getItem('transitionMode') as TransitionMode) || 'efficient'
   );
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(true);
   const [systemIsDark, setSystemIsDark] = useState(() => 
     typeof window !== 'undefined' ? window.matchMedia('(prefers-color-scheme: dark)').matches : false
   );

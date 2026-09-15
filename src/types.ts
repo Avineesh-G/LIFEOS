@@ -167,6 +167,29 @@ export interface NutritionLog {
   }[];
   dailyTotal: number;
 }
+// ── Vault / Password Keeper Types ──────────────────────────────────────────
+export type VaultCategory = 'study' | 'social' | 'work' | 'finance' | 'personal' | 'other';
+
+export interface VaultItem {
+  id: string;
+  title: string;
+  category: VaultCategory;
+  usernameOrEmail: string;
+  encryptedPassword: string; // Base64 ciphertext
+  iv: string;                // Base64 12-byte IV
+  websiteUrl?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VaultConfig {
+  hasMasterPin?: boolean;
+  salt: string;
+  hashedMasterPin?: string;
+  useBiometrics?: boolean;
+  useSystemLock?: boolean;
+}
 // ──────────────────────────────────────────────────────────────────────────
 
 export interface AppData {
@@ -185,4 +208,8 @@ export interface AppData {
   nutritionLogs: NutritionLog[];
   messPreference: MessType;
   geminiApiKey: string;
+
+  // Vault / Password Keeper Module
+  vaultItems?: VaultItem[];
+  vaultConfig?: VaultConfig | null;
 }

@@ -1,7 +1,7 @@
 {
-  "versionCode": 14,
-  "versionName": "1.5.4",
-  "releaseDate": "2026-09-13",
-  "releaseNotes": "LifeOS v1.5.4 (Build 14): Divided split-island navigation bar, carried-over pending tasks section, customizable haptics slider, executive wisdom showcase card, and responsive 7-day gym schedule.",
+  "versionCode": 15,
+  "versionName": "1.5.5",
+  "releaseDate": "2026-09-15",
+  "releaseNotes": "LifeOS v1.5.5 (Build 15): Biometric password vault with device screen lock, persistent background study timer, zero startup delay (instant 0ms launch), buttery 60/120fps GPU navigation, and resolution of the 3-dots exit white screen bug.",
   "apkUrl": "/LifeOS.apk"
 }
