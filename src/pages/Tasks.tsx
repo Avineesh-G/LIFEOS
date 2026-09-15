@@ -370,32 +370,46 @@ export default function Tasks({ data, updateData }: TasksProps) {
         )}
       </div>
 
-      {/* Add Task Elevated Modal Card */}
+      {/* Add Task Elevated Bottom Sheet / Modal */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-3 sm:p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setShowAdd(false)}
           >
             <motion.div
-              initial={{ y: '100%', opacity: 0, scale: 0.95 }} 
-              animate={{ y: 0, opacity: 1, scale: 1 }} 
-              exit={{ y: '100%', opacity: 0, scale: 0.95 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[28px] p-5 sm:p-6 mb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:mb-0 border border-border-light dark:border-border-dark shadow-2xl"
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 340 }}
+              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[28px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-border-light/80 dark:border-border-dark/80 shadow-[0_-16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_-16px_48px_rgba(0,0,0,0.6)]"
               onClick={e => e.stopPropagation()}
             >
-              <div className="w-10 h-1 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-4" />
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-primary-light dark:text-primary-dark font-sans">New TO-DO</h2>
-                <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80">
-                  <X size={15} />
+              {/* Top Drag Indicator */}
+              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700 mx-auto mb-5" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                  New TO-DO
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowAdd(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80 active:scale-95 transition-all"
+                  aria-label="Close"
+                >
+                  <X size={16} />
                 </button>
               </div>
-              <div className="space-y-3.5">
+
+              {/* Form Fields */}
+              <div className="space-y-4">
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
                     Main Task
                   </label>
                   <input
@@ -404,34 +418,36 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     onChange={e => setNewTask(e.target.value)}
                     placeholder="e.g. Physics Assignment 3"
                     autoFocus
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark font-medium"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
-                    What to do actually (sub-option / details)
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
+                    Details & Subtasks (Optional)
                   </label>
                   <input
                     type="text"
                     value={newSubtask}
                     onChange={e => setNewSubtask(e.target.value)}
                     placeholder="e.g. Complete questions 1 to 10 from HC Verma"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark font-medium"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
+                <div className="grid grid-cols-2 gap-3 pt-2">
                   <button
+                    type="button"
                     onClick={() => setShowAdd(false)}
-                    className="flex-1 py-3 rounded-full border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                    className="w-full py-3.5 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] transition-all"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={addTask}
                     disabled={!newTask.trim()}
-                    className="flex-[1.5] py-3 rounded-full bg-accent text-white font-bold text-xs shadow-sm hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-40"
+                    className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-40 disabled:shadow-none"
                   >
                     Create Task
                   </button>

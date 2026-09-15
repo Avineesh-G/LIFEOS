@@ -287,7 +287,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 flex items-end justify-center p-0 sm:p-4"
+            className="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setShowAdd(false)}
           >
             <motion.div
@@ -295,7 +295,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-6 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 border border-border-light dark:border-border-dark shadow-xl max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[28px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:pb-8 border-t sm:border border-border-light dark:border-border-dark shadow-xl max-h-[90vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-12 h-1.5 rounded-full bg-border-light dark:border-border-dark mx-auto mb-5" />

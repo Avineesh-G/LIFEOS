@@ -489,13 +489,13 @@ export default function Timetable({ data, updateData }: TimetableProps) {
         {showModal && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50 flex items-end justify-center"
+            className="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setShowModal(false)}
           >
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[32px] p-6 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 shadow-2xl max-h-[85vh] overflow-y-auto"
+              className="w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[28px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:pb-8 shadow-2xl max-h-[85vh] overflow-y-auto"
               onClick={e => e.stopPropagation()}
             >
               <div className="w-10 h-1.5 rounded-full bg-border-light dark:bg-border-dark mx-auto mb-6 opacity-60" />

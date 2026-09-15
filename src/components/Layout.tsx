@@ -99,6 +99,44 @@ export default function Layout({ children, refresh }: LayoutProps) {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // Hide floating navigation dock when mobile virtual keyboard is open
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.visualViewport) {
+        const isShrunk = window.visualViewport.height < window.innerHeight - 120;
+        setIsKeyboardOpen(isShrunk);
+      }
+    };
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setTimeout(() => {
+        const active = document.activeElement as HTMLElement;
+        if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && !active.isContentEditable)) {
+          setIsKeyboardOpen(false);
+        }
+      }, 100);
+    };
+
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -234,7 +272,9 @@ export default function Layout({ children, refresh }: LayoutProps) {
 
       {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
       <nav 
-        className="fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4"
+        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-200 ${
+          isKeyboardOpen ? 'opacity-0 translate-y-24 pointer-events-none' : 'opacity-100 translate-y-0'
+        }`}
         style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
         role="navigation"
         aria-label="Main Navigation"
