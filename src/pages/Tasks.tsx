@@ -4,6 +4,7 @@ import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
+import { BottomSheet, Modal } from '../components/BottomSheet';
 import type { AppData, Task } from '../types';
 
 interface TasksProps {
@@ -516,183 +517,148 @@ export default function Tasks({ data, updateData }: TasksProps) {
         )}
       </div>
 
-      {/* ── Long Press Delete Confirmation Dialog ── */}
-      <AnimatePresence>
+      {/* ── Long Press Delete Confirmation Dialog (Rendered via Portal) ── */}
+      <Modal isOpen={!!taskToDelete} onClose={() => setTaskToDelete(null)} maxWidth="max-w-sm">
         {taskToDelete && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[150] flex items-center justify-center p-5"
-            onClick={() => setTaskToDelete(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm liquid-glass rounded-[32px] p-6 border border-white/80 dark:border-white/[0.12] shadow-2xl text-center space-y-4"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
-                <X size={24} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Task?</h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium line-clamp-2">
-                  "{taskToDelete.text}"
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setTaskToDelete(null)}
-                  className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-                >
-                  Keep Task
-                </button>
-                <button
-                  type="button"
-                  onClick={confirmDeleteTask}
-                  className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
-                >
-                  Delete
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
+              <X size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Task?</h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium line-clamp-2">
+                "{taskToDelete.text}"
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setTaskToDelete(null)}
+                className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+              >
+                Keep Task
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteTask}
+                className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </Modal>
 
-      {/* ── Add Task Elevated Modal with Date Picker & Start/End Time ── */}
-      <AnimatePresence>
-        {showAdd && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/35 dark:bg-black/65 backdrop-blur-md z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      {/* ── Add Task Elevated Modal with Date Picker & Start/End Time (Rendered via Portal) ── */}
+      <BottomSheet isOpen={showAdd} onClose={() => setShowAdd(false)}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+              New TO-DO
+            </h2>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
+              Scheduled
+            </span>
+          </div>
+          <button
+            type="button"
             onClick={() => setShowAdd(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
           >
-            <motion.div
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-white/80 dark:border-white/[0.12] shadow-2xl"
-              onClick={e => e.stopPropagation()}
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-3.5">
+          {/* Task Name */}
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+              Task Title
+            </label>
+            <input
+              type="text"
+              value={newTask}
+              onChange={e => setNewTask(e.target.value)}
+              placeholder="e.g. Complete Machine Learning assignment"
+              autoFocus
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+            />
+          </div>
+
+          {/* Subtask */}
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+              Subtask / Note (Optional)
+            </label>
+            <input
+              type="text"
+              value={newSubtask}
+              onChange={e => setNewSubtask(e.target.value)}
+              placeholder="e.g. Submit PDF to LMS portal"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+            />
+          </div>
+
+          {/* Date Selector */}
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+              <CalendarIcon size={11} className="text-accent" /> Date
+            </label>
+            <input
+              type="date"
+              value={newDate}
+              onChange={e => setNewDate(e.target.value)}
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+            />
+          </div>
+
+          {/* Time: Start & End */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+                <Clock size={11} className="text-accent" /> Start Time
+              </label>
+              <input
+                type="time"
+                value={newStartTime}
+                onChange={e => setNewStartTime(e.target.value)}
+                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+                <Clock size={11} className="text-accent" /> End Time
+              </label>
+              <input
+                type="time"
+                value={newEndTime}
+                onChange={e => setNewEndTime(e.target.value)}
+                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-3">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              className="py-3 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
             >
-              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700 mx-auto mb-4" />
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-                    New TO-DO
-                  </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
-                    Scheduled
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAdd(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="space-y-3.5">
-                {/* Task Name */}
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
-                    Task Title
-                  </label>
-                  <input
-                    type="text"
-                    value={newTask}
-                    onChange={e => setNewTask(e.target.value)}
-                    placeholder="e.g. Complete Machine Learning assignment"
-                    autoFocus
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
-                  />
-                </div>
-
-                {/* Subtask */}
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
-                    Details / Subtasks (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={newSubtask}
-                    onChange={e => setNewSubtask(e.target.value)}
-                    placeholder="e.g. Problems 1 to 5 from chapter 4"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
-                  />
-                </div>
-
-                {/* Calendar Date Picker */}
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1.5">
-                    <CalendarIcon size={12} className="text-accent" /> Due / Schedule Date
-                  </label>
-                  <input
-                    type="date"
-                    value={newDate}
-                    onChange={e => setNewDate(e.target.value)}
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-                  />
-                </div>
-
-                {/* Start Time & End Time side by side */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
-                      <Clock size={11} className="text-accent" /> Start Time
-                    </label>
-                    <input
-                      type="time"
-                      value={newStartTime}
-                      onChange={e => setNewStartTime(e.target.value)}
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
-                      <Clock size={11} className="text-accent" /> End Time
-                    </label>
-                    <input
-                      type="time"
-                      value={newEndTime}
-                      onChange={e => setNewEndTime(e.target.value)}
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowAdd(false)}
-                    className="py-3 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={addTask}
-                    disabled={!newTask.trim()}
-                    className="py-3 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40"
-                  >
-                    Save TO-DO
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={addTask}
+              disabled={!newTask.trim()}
+              className="py-3 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40"
+            >
+              Save TO-DO
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Plus, Trash2, Wallet, X, ArrowUpRight, TrendingDown } from 'lucide-reac
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedWallet } from '../components/AnimatedIcons';
+import { BottomSheet } from '../components/BottomSheet';
 import type { AppData, Expense } from '../types';
 
 interface SpendingProps {
@@ -297,117 +298,96 @@ export default function Spending({ data, updateData }: SpendingProps) {
         )}
       </motion.div>
 
-      {/* Add Expense Fluid Spring Capsule Sheet */}
-      <AnimatePresence>
-        {showAdd && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 dark:bg-black/70 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      {/* Add Expense Fluid Spring Capsule Sheet (Rendered via Portal) */}
+      <BottomSheet isOpen={showAdd} onClose={() => setShowAdd(false)}>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+              New Entry
+            </p>
+            <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Add Expense</h2>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.88 }}
             onClick={() => setShowAdd(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors"
           >
-            <motion.div
-              initial={{ y: '100%', scale: 0.96 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: '100%', scale: 0.96 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:pb-8 shadow-2xl max-h-[90vh] overflow-y-auto"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-12 h-1.5 rounded-full bg-black/10 dark:bg-white/20 mx-auto mb-5" />
+            <X size={16} />
+          </motion.button>
+        </div>
 
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-                    New Entry
-                  </p>
-                  <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Add Expense</h2>
-                </div>
-                <motion.button
-                  whileTap={{ scale: 0.88 }}
-                  onClick={() => setShowAdd(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors"
-                >
-                  <X size={16} />
-                </motion.button>
-              </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
+              Amount (₹)
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-light dark:text-muted-dark">
+                ₹
+              </span>
+              <input
+                type="number"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                placeholder="0"
+                autoFocus
+                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-[22px] pl-10 pr-4 py-3.5 text-2xl font-black focus:outline-none focus:ring-2 focus:ring-accent/40 text-primary-light dark:text-primary-dark font-sans"
+              />
+            </div>
+          </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Amount (₹)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-light dark:text-muted-dark">
-                      ₹
-                    </span>
-                    <input
-                      type="number"
-                      value={amount}
-                      onChange={e => setAmount(e.target.value)}
-                      placeholder="0"
-                      autoFocus
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-[22px] pl-10 pr-4 py-3.5 text-2xl font-black focus:outline-none focus:ring-2 focus:ring-accent/40 text-primary-light dark:text-primary-dark font-sans"
-                    />
-                  </div>
-                </div>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
+              Category
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(c => {
+                const isSelected = category === c;
+                return (
+                  <motion.button
+                    key={c}
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.92 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 24 }}
+                    onClick={() => setCategory(c)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      isSelected
+                        ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm'
+                        : 'bg-black/[0.03] dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                    }`}
+                  >
+                    {c}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
 
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Category
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {CATEGORIES.map(c => {
-                      const isSelected = category === c;
-                      return (
-                        <motion.button
-                          key={c}
-                          whileHover={{ scale: 1.04 }}
-                          whileTap={{ scale: 0.92 }}
-                          transition={{ type: 'spring', stiffness: 450, damping: 24 }}
-                          onClick={() => setCategory(c)}
-                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                            isSelected
-                              ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm'
-                              : 'bg-black/[0.03] dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:border-accent/40'
-                          }`}
-                        >
-                          {c}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
+              Note (Optional)
+            </label>
+            <input
+              type="text"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="e.g. Lunch, Uber, Groceries"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-[20px] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 text-primary-light dark:text-primary-dark"
+            />
+          </div>
 
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Note (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={note}
-                    onChange={e => setNote(e.target.value)}
-                    placeholder="e.g. Lunch, Uber, Groceries"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-[20px] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 text-primary-light dark:text-primary-dark"
-                  />
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.015 }}
-                  whileTap={{ scale: 0.96 }}
-                  transition={{ type: 'spring', stiffness: 450, damping: 24 }}
-                  onClick={handleAdd}
-                  disabled={!amount || parseFloat(amount) <= 0}
-                  className="w-full py-4 rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md mt-2"
-                >
-                  Save Transaction
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <motion.button
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 24 }}
+            onClick={handleAdd}
+            disabled={!amount || parseFloat(amount) <= 0}
+            className="w-full py-4 rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md mt-2"
+          >
+            Save Transaction
+          </motion.button>
+        </div>
+      </BottomSheet>
     </motion.div>
   );
 }

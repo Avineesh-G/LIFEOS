@@ -10,6 +10,7 @@ import {
 import { triggerHaptic } from '../utils/haptics';
 import { authenticateDeviceLock, isDeviceLockAvailable } from '../utils/security';
 import { auth } from '../firebase';
+import { BottomSheet, Modal } from '../components/BottomSheet';
 import {
   deriveVaultKey,
   generateRandomSalt,
@@ -846,22 +847,11 @@ export default function Vault({ data, updateData }: VaultProps) {
       {/* ───────────────────────────────────────────────────────────────────────
           ADD / EDIT CREDENTIAL MODAL
       ──────────────────────────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              className="relative w-full max-w-md max-h-[88vh] overflow-y-auto rounded-[28px] p-5 sm:p-6 bg-white dark:bg-[#171922] border border-black/10 dark:border-white/10 shadow-2xl z-10 no-scrollbar"
-            >
+      <BottomSheet
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        maxWidth="sm:max-w-md"
+      >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
@@ -1041,30 +1031,16 @@ export default function Vault({ data, updateData }: VaultProps) {
                   </button>
                 </div>
               </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      </BottomSheet>
 
       {/* ───────────────────────────────────────────────────────────────────────
           PASSWORD GENERATOR MODAL TOOL
       ──────────────────────────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isGenModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsGenModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              className="relative w-full max-w-sm rounded-[28px] p-5 bg-white dark:bg-[#171922] border border-black/10 dark:border-white/10 shadow-2xl z-10"
-            >
+      <Modal
+        isOpen={isGenModalOpen}
+        onClose={() => setIsGenModalOpen(false)}
+        maxWidth="max-w-sm"
+      >
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-500 flex items-center justify-center">
@@ -1190,10 +1166,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   Use Password
                 </button>
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      </Modal>
     </div>
   );
 }

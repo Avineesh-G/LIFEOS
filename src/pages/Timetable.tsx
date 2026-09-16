@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '../utils/haptics';
 import { AnimatedCalendar } from '../components/AnimatedIcons';
+import { BottomSheet } from '../components/BottomSheet';
 import { syncTimetableNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import type { AppData, TimetableBlock } from '../types';
 
@@ -524,21 +525,12 @@ export default function Timetable({ data, updateData }: TimetableProps) {
         </motion.div>
       )}
 
-      {/* Add / Edit Block Fluid Sheet */}
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 dark:bg-black/70 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
-            onClick={() => setShowModal(false)}
-          >
-            <motion.div
-              initial={{ y: '100%', scale: 0.96 }} animate={{ y: 0, scale: 1 }} exit={{ y: '100%', scale: 0.96 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-              className="w-full max-w-xl liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:pb-8 shadow-2xl max-h-[85vh] overflow-y-auto"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-10 h-1.5 rounded-full bg-black/10 dark:bg-white/20 mx-auto mb-6" />
+      {/* Add / Edit Block Fluid Sheet (Rendered via Portal) */}
+      <BottomSheet
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        maxWidth="sm:max-w-xl"
+      >
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">{editingBlock ? 'Edit Block' : 'Add Block'}</h2>
                 <motion.button
@@ -669,10 +661,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   )}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </BottomSheet>
     </motion.div>
   );
 }

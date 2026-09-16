@@ -3,6 +3,7 @@ import { Shirt, Plus, Minus, Check, Calendar, Clock, AlertCircle, X, ChevronDown
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { BottomSheet, Modal } from '../components/BottomSheet';
 import type { AppData, LaundryBatch, LaundryItemCount } from '../types';
 
 interface LaundryProps {
@@ -381,224 +382,188 @@ export default function Laundry({ data, updateData }: LaundryProps) {
         )}
       </div>
 
-      {/* ── New Batch Creation Modal ── */}
-      <AnimatePresence>
-        {showAddModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-md z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      {/* ── New Batch Creation Modal (Rendered via Portal) ── */}
+      <BottomSheet isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
+        {/* Modal Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+              Log Laundry Batch
+            </h2>
+            <p className="text-xs text-muted-light dark:text-muted-dark font-medium">
+              Total clothes: <strong className="text-teal-600 dark:text-teal-400 font-bold">{totalClothesInNewBatch}</strong>
+            </p>
+          </div>
+          <button
+            type="button"
             onClick={() => setShowAddModal(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
           >
-            <motion.div
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 max-h-[88vh] overflow-y-auto no-scrollbar border-t sm:border border-white/80 dark:border-white/[0.12] shadow-2xl"
-              onClick={e => e.stopPropagation()}
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Dates Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono flex items-center gap-1">
+                <Calendar size={11} className="text-teal-500" /> Submit Date
+              </label>
+              <input
+                type="date"
+                value={submitDate}
+                onChange={e => setSubmitDate(e.target.value)}
+                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono flex items-center gap-1">
+                <Clock size={11} className="text-teal-500" /> Return Date
+              </label>
+              <input
+                type="date"
+                value={returnDate}
+                onChange={e => setReturnDate(e.target.value)}
+                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark"
+              />
+            </div>
+          </div>
+
+          {/* Clothes Category Breakdown Grid */}
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
+              Separate Clothes by Count
+            </label>
+
+            <div className="grid grid-cols-2 gap-2.5 max-h-[36vh] overflow-y-auto pr-1 no-scrollbar">
+              {[...DEFAULT_CATEGORIES, ...customCategories].map(cat => {
+                const count = itemCounts[cat] || 0;
+                return (
+                  <div
+                    key={cat}
+                    className="flex items-center justify-between p-2.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5"
+                  >
+                    <span className="text-xs font-bold text-primary-light dark:text-primary-dark truncate pr-1">
+                      {cat}
+                    </span>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => updateItemCount(cat, -1)}
+                        disabled={count === 0}
+                        className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-primary-light dark:text-primary-dark disabled:opacity-30 active:scale-90 transition-all"
+                      >
+                        <Minus size={12} />
+                      </button>
+
+                      <span className="w-5 text-center font-mono font-bold text-xs text-teal-600 dark:text-teal-400">
+                        {count}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => updateItemCount(cat, 1)}
+                        className="w-6 h-6 rounded-lg bg-teal-600 text-white flex items-center justify-center active:scale-90 transition-all shadow-xs"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Add Custom Cloth Option */}
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={customItemName}
+              onChange={e => setCustomItemName(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomCategory(); } }}
+              placeholder="Add custom item (e.g. Jacket, Hoodie)..."
+              className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+            />
+            <button
+              type="button"
+              onClick={addCustomCategory}
+              disabled={!customItemName.trim()}
+              className="px-3.5 py-2 rounded-2xl text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 disabled:opacity-40 hover:bg-teal-500/25 transition-all"
             >
-              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700 mx-auto mb-4" />
+              + Add
+            </button>
+          </div>
 
-              {/* Modal Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-                    Log Laundry Batch
-                  </h2>
-                  <p className="text-xs text-muted-light dark:text-muted-dark font-medium">
-                    Total clothes: <strong className="text-teal-600 dark:text-teal-400 font-bold">{totalClothesInNewBatch}</strong>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+          {/* Optional Notes */}
+          <div>
+            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
+              Notes / Slip Number (Optional)
+            </label>
+            <input
+              type="text"
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="e.g. Receipt #104 · Light starch on shirts"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+            />
+          </div>
 
-              <div className="space-y-4">
-                {/* Dates Selection */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono flex items-center gap-1">
-                      <Calendar size={11} className="text-teal-500" /> Submit Date
-                    </label>
-                    <input
-                      type="date"
-                      value={submitDate}
-                      onChange={e => setSubmitDate(e.target.value)}
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark"
-                    />
-                  </div>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="py-3.5 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleCreateBatch}
+              disabled={totalClothesInNewBatch === 0}
+              className="py-3.5 rounded-2xl bg-teal-600 dark:bg-teal-500 text-white text-xs font-bold shadow-md shadow-teal-500/25 disabled:opacity-40 transition-all"
+            >
+              Save Batch ({totalClothesInNewBatch})
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
 
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono flex items-center gap-1">
-                      <Clock size={11} className="text-purple-500" /> Return Date
-                    </label>
-                    <input
-                      type="date"
-                      value={returnDate}
-                      onChange={e => setReturnDate(e.target.value)}
-                      placeholder="Expected Return"
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark"
-                    />
-                  </div>
-                </div>
-
-                {/* Clothes Category Breakdown Grid */}
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Separate Clothes by Count
-                  </label>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[...DEFAULT_CATEGORIES, ...customCategories].map(cat => {
-                      const count = itemCounts[cat] || 0;
-                      return (
-                        <div
-                          key={cat}
-                          className="flex items-center justify-between p-2.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5"
-                        >
-                          <span className="text-xs font-bold text-primary-light dark:text-primary-dark truncate pr-1">
-                            {cat}
-                          </span>
-
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => updateItemCount(cat, -1)}
-                              disabled={count === 0}
-                              className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center text-primary-light dark:text-primary-dark disabled:opacity-30 active:scale-90 transition-all"
-                            >
-                              <Minus size={12} />
-                            </button>
-
-                            <span className="w-5 text-center font-mono font-bold text-xs text-teal-600 dark:text-teal-400">
-                              {count}
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={() => updateItemCount(cat, 1)}
-                              className="w-6 h-6 rounded-lg bg-teal-600 text-white flex items-center justify-center active:scale-90 transition-all shadow-xs"
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Add Custom Cloth Option */}
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="text"
-                    value={customItemName}
-                    onChange={e => setCustomItemName(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomCategory(); } }}
-                    placeholder="Add custom item (e.g. Jacket, Hoodie)..."
-                    className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3.5 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomCategory}
-                    disabled={!customItemName.trim()}
-                    className="px-3.5 py-2 rounded-2xl text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 disabled:opacity-40 hover:bg-teal-500/25 transition-all"
-                  >
-                    + Add
-                  </button>
-                </div>
-
-                {/* Optional Notes */}
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
-                    Notes / Slip Number (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="e.g. Receipt #104 · Light starch on shirts"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="py-3.5 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCreateBatch}
-                    disabled={totalClothesInNewBatch === 0}
-                    className="py-3.5 rounded-2xl bg-teal-600 dark:bg-teal-500 text-white text-xs font-bold shadow-md shadow-teal-500/25 disabled:opacity-40 transition-all"
-                  >
-                    Save Batch ({totalClothesInNewBatch})
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Delete Confirmation Dialog ── */}
-      <AnimatePresence>
+      {/* ── Delete Confirmation Dialog (Rendered via Portal) ── */}
+      <Modal isOpen={!!batchToDelete} onClose={() => setBatchToDelete(null)} maxWidth="max-w-sm">
         {batchToDelete && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[150] flex items-center justify-center p-5"
-            onClick={() => setBatchToDelete(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm liquid-glass rounded-[32px] p-6 border border-white/80 dark:border-white/[0.12] shadow-2xl text-center space-y-4"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
-                <X size={24} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Batch?</h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium">
-                  Laundry batch with {batchToDelete.totalClothes} clothes will be removed.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setBatchToDelete(null)}
-                  className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark"
-                >
-                  Keep
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteBatch}
-                  className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
-                >
-                  Delete
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
+              <X size={24} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Batch?</h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium">
+                Laundry batch with {batchToDelete.totalClothes} clothes will be removed.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setBatchToDelete(null)}
+                className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark"
+              >
+                Keep
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteBatch}
+                className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </Modal>
 
     </div>
   );
