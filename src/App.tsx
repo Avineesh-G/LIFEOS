@@ -34,33 +34,6 @@ import AppLockOverlay from './components/security/AppLockOverlay';
 import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 
-const getTransitionConfig = (mode: TransitionMode) => {
-  switch (mode) {
-    case 'fast':
-      return {
-        initial: { opacity: 0, scale: 0.98 },
-        animate: { opacity: 1, scale: 1 },
-        exit: { opacity: 0, scale: 0.98 },
-        transition: { duration: 0.12, ease: 'easeOut' }
-      };
-    case 'soft':
-      return {
-        initial: { opacity: 0, y: 24, scale: 0.96 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -16, scale: 0.97 },
-        transition: { duration: 0.30, ease: [0.16, 1, 0.3, 1] }
-      };
-    case 'efficient':
-    default:
-      return {
-        initial: { opacity: 0, x: 28 },
-        animate: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: -28 },
-        transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1] }
-      };
-  }
-};
-
 function MainContent({
   data,
   refresh,
@@ -71,8 +44,6 @@ function MainContent({
   setAccentColor,
   transitionMode,
   setTransitionMode,
-  fluidIntensity,
-  setFluidIntensity,
 }: {
   data: any;
   refresh: () => Promise<any>;
@@ -83,50 +54,33 @@ function MainContent({
   setAccentColor: (c: string) => void;
   transitionMode: TransitionMode;
   setTransitionMode: (m: TransitionMode) => void;
-  fluidIntensity: FluidIntensity;
-  setFluidIntensity: (i: FluidIntensity) => void;
 }) {
-  const location = useLocation();
-  const transitionConfig = getTransitionConfig(transitionMode);
-
-  const routeElements = useRoutes(
-    [
-      { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
-      { path: '/study', element: <Study data={data} updateData={updateData} /> },
-      { path: '/study/timer', element: <StudyTimer data={data} updateData={updateData} /> },
-      { path: '/study/history', element: <StudyHistory data={data} updateData={updateData} /> },
-      { path: '/study/heatmap', element: <StudyHeatmap data={data} /> },
-      { path: '/gym', element: <Gym data={data} updateData={updateData} /> },
-      { path: '/gym/onboarding', element: <GymOnboarding data={data} updateData={updateData} /> },
-      { path: '/gym/workout', element: <GymWorkout data={data} updateData={updateData} /> },
-      { path: '/gym/split', element: <GymSplit data={data} updateData={updateData} /> },
-      { path: '/gym/history/:exerciseName', element: <GymExerciseHistory data={data} /> },
-      { path: '/nutrition', element: <Nutrition data={data} updateData={updateData} /> },
-      { path: '/spending', element: <Spending data={data} updateData={updateData} /> },
-      { path: '/timetable', element: <Timetable data={data} updateData={updateData} /> },
-      { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
-      { path: '/progress', element: <Progress data={data} /> },
-      { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
-      { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} fluidIntensity={fluidIntensity} setFluidIntensity={setFluidIntensity} data={data} updateData={updateData} refresh={refresh} /> },
-      { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
-      { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
-    ],
-    location
-  );
+  const routeElements = useRoutes([
+    { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
+    { path: '/study', element: <Study data={data} updateData={updateData} /> },
+    { path: '/study/timer', element: <StudyTimer data={data} updateData={updateData} /> },
+    { path: '/study/history', element: <StudyHistory data={data} updateData={updateData} /> },
+    { path: '/study/heatmap', element: <StudyHeatmap data={data} /> },
+    { path: '/gym', element: <Gym data={data} updateData={updateData} /> },
+    { path: '/gym/onboarding', element: <GymOnboarding data={data} updateData={updateData} /> },
+    { path: '/gym/workout', element: <GymWorkout data={data} updateData={updateData} /> },
+    { path: '/gym/split', element: <GymSplit data={data} updateData={updateData} /> },
+    { path: '/gym/history/:exerciseName', element: <GymExerciseHistory data={data} /> },
+    { path: '/nutrition', element: <Nutrition data={data} updateData={updateData} /> },
+    { path: '/spending', element: <Spending data={data} updateData={updateData} /> },
+    { path: '/timetable', element: <Timetable data={data} updateData={updateData} /> },
+    { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
+    { path: '/progress', element: <Progress data={data} /> },
+    { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
+    { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
+    { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
+    { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
+  ]);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={transitionConfig.initial}
-        animate={transitionConfig.animate}
-        exit={transitionConfig.exit}
-        transition={transitionConfig.transition}
-        className="w-full overflow-x-hidden gpu-composited"
-      >
-        {routeElements}
-      </motion.div>
-    </AnimatePresence>
+    <div className="w-full overflow-x-hidden gpu-composited">
+      {routeElements}
+    </div>
   );
 }
 
@@ -290,8 +244,6 @@ function App() {
               setAccentColor={setAccentColor}
               transitionMode={transitionMode}
               setTransitionMode={setTransitionMode}
-              fluidIntensity={fluidIntensity}
-              setFluidIntensity={setFluidIntensity}
             />
           </ErrorBoundary>
         </Layout>
