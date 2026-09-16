@@ -3,7 +3,7 @@ import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon,
 import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
-import { syncTaskNotifications } from '../utils/notifications';
+import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import type { AppData, Task } from '../types';
 
 interface TasksProps {
@@ -24,11 +24,15 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
   const yesterday = useMemo(() => format(subDays(new Date(), 1), 'yyyy-MM-dd'), []);
 
-  // Sync native OS notification center reminders on mount or task update
+  // Sync native OS notification center reminders on mount or task update, prompting phone permission if not yet allowed
   useEffect(() => {
-    if (data?.settings?.notificationsEnabled !== false && data?.tasks) {
-      syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-    }
+    checkNotificationPermission().then(granted => {
+      if (!granted) {
+        requestAndSyncNotifications(data, updateData);
+      } else if (data?.tasks) {
+        syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+      }
+    });
   }, [data?.tasks, data?.settings?.notificationLeadMinutes, data?.settings?.notificationsEnabled]);
 
   // Tasks for the selected calendar date

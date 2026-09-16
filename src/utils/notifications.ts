@@ -14,20 +14,22 @@ async function ensureNotificationChannels() {
       id: TIMETABLE_CHANNEL_ID,
       name: 'Timetable Reminders',
       description: 'Alerts before upcoming classes and lectures',
-      importance: 4, // High importance -> shows heads-up & notification shade
-      visibility: 1, // Public
+      importance: 5, // 5 = High/Max importance -> shows heads-up banner & stays in notification center
+      visibility: 1, // Public visibility on lockscreen and shade
       vibration: true,
-      sound: undefined,
+      lights: true,
+      lightColor: '#4F46E5',
     });
 
     await LocalNotifications.createChannel({
       id: TASKS_CHANNEL_ID,
       name: 'To-Do & Tasks Reminders',
       description: 'Reminders for scheduled tasks and deadlines',
-      importance: 4,
+      importance: 5,
       visibility: 1,
       vibration: true,
-      sound: undefined,
+      lights: true,
+      lightColor: '#10B981',
     });
     channelCreated = true;
   } catch (err) {
@@ -36,7 +38,7 @@ async function ensureNotificationChannels() {
 }
 
 /**
- * Requests permission to show notifications in the mobile notification center.
+ * Requests permission directly from the phone operating system to show notifications in the phone notification center.
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
@@ -50,6 +52,48 @@ export async function requestNotificationPermission(): Promise<boolean> {
     }
   } catch (err) {
     console.warn('[Notifications] requestPermission error:', err);
+  }
+  return false;
+}
+
+/**
+ * Requests system permission from the phone OS, and if granted, immediately syncs timetable & task alerts
+ * and sends an instant confirmation alert directly into the phone's notification center.
+ */
+export async function requestAndSyncNotifications(
+  data?: any,
+  updateData?: (partial: any) => Promise<any>
+): Promise<boolean> {
+  const granted = await requestNotificationPermission();
+  if (granted) {
+    if (updateData && data) {
+      try {
+        await updateData({
+          settings: {
+            ...data.settings,
+            notificationsEnabled: true,
+            timetableNotificationsEnabled: true,
+            taskNotificationsEnabled: true,
+          },
+        });
+      } catch (e) {
+        console.warn('[Notifications] Failed to update settings:', e);
+      }
+    }
+
+    if (data?.timetable) {
+      await syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+    }
+    if (data?.tasks) {
+      await syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+    }
+
+    // Fire instant alert into the actual phone notification center so user sees it right away
+    await sendInstantTestNotification(
+      'LifeOS Notifications Active 🔔',
+      'Time Table & TO-DO Task reminders will appear here in your notification center.'
+    );
+    return true;
   }
   return false;
 }

@@ -7,12 +7,14 @@ import android.view.WindowManager;
 import com.getcapacitor.BridgeActivity;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import ee.forgr.biometric.NativeBiometric;
+import com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(GoogleAuth.class);
         registerPlugin(NativeBiometric.class);
+        registerPlugin(LocalNotificationsPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS

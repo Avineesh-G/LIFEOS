@@ -4,11 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
   CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, RotateCw, History, ShieldCheck, Shirt, LucideIcon
+  Utensils, RotateCw, History, ShieldCheck, Shirt, Bell, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
-import { requestNotificationPermission } from '../utils/notifications';
-import type { AppSettings } from '../types';
+import {
+  checkNotificationPermission,
+  requestAndSyncNotifications,
+  syncTimetableNotifications,
+  syncTaskNotifications,
+} from '../utils/notifications';
+import type { AppData, AppSettings } from '../types';
 
 // Primary centered squircle dock items
 const primaryDockItems = [
@@ -42,24 +47,52 @@ interface LayoutProps {
   accentColor: string;
   setAccentColor: (c: string) => void;
   refresh?: () => Promise<any>;
+  data?: AppData;
+  updateData?: (partial: Partial<AppData>) => Promise<any>;
 }
 
-export default function Layout({ children, refresh }: LayoutProps) {
+export default function Layout({ children, refresh, data, updateData }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
+  const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
+
+  useEffect(() => {
+    async function checkPermission() {
+      const granted = await checkNotificationPermission();
+      setHasNotificationPermission(granted);
+
+      // If phone permission is not yet granted, request permission from the phone OS
+      if (!granted) {
+        const timer = setTimeout(async () => {
+          const res = await requestAndSyncNotifications(data, updateData);
+          setHasNotificationPermission(res);
+        }, 1200);
+        return () => clearTimeout(timer);
+      } else {
+        // Sync timetable & task reminders in native OS notification center
+        if (data?.timetable) syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+        if (data?.tasks) syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+      }
+    }
+    checkPermission();
+  }, [data?.timetable, data?.tasks]);
 
   const handleReload = async () => {
     if (isReloading) return;
     triggerHaptic('light');
     setIsReloading(true);
     try {
-      // 0. Prompt for OS notification permission after clicking reload/update
-      try {
-        await requestNotificationPermission();
-      } catch (e) {
-        console.warn('Notification permission request error:', e);
+      // 0. Ensure notification permissions are requested from the phone system if not granted
+      const hasPerm = await checkNotificationPermission();
+      if (!hasPerm) {
+        const granted = await requestAndSyncNotifications(data, updateData);
+        setHasNotificationPermission(granted);
+      } else {
+        // Sync upcoming reminders
+        if (data?.timetable) await syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+        if (data?.tasks) await syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
       }
 
       // 1. Evict any browser / PWA caches
@@ -90,17 +123,13 @@ export default function Layout({ children, refresh }: LayoutProps) {
         await refresh();
       }
 
-      // 4. Force browser/webview reload with cache-busting timestamp
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('_t', Date.now().toString());
-        window.location.replace(url.toString());
-      } catch {
-        window.location.reload();
-      }
+      // 4. Force reload
+      window.location.reload();
     } catch (err) {
       console.warn('Refresh error:', err);
       window.location.reload();
+    } finally {
+      setIsReloading(false);
     }
   };
 
@@ -219,19 +248,37 @@ export default function Layout({ children, refresh }: LayoutProps) {
             </span>
           </button>
 
-          {/* Right: Floating Minimalist Reload Button */}
-          <button
-            onPointerDown={() => triggerHaptic('light')}
-            onClick={handleReload}
-            disabled={isReloading}
-            className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] ${
-              isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
-            }`}
-            aria-label="Reload and sync data"
-            title="Reload and sync data"
-          >
-            <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
-          </button>
+          {/* Right Controls: Notification Enable Alert (if not granted) + Reload Button */}
+          <div className="pointer-events-auto flex items-center gap-2">
+            {!hasNotificationPermission && (
+              <button
+                onPointerDown={() => triggerHaptic('light')}
+                onClick={async () => {
+                  triggerHaptic('medium');
+                  const granted = await requestAndSyncNotifications(data, updateData);
+                  setHasNotificationPermission(granted);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/15 dark:bg-indigo-500/25 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-bold text-xs active:scale-95 transition-all shadow-xs"
+                title="Allow phone notifications for Timetable & Tasks"
+              >
+                <Bell size={13} className="text-indigo-500 animate-bounce" />
+                <span>Allow Alerts</span>
+              </button>
+            )}
+
+            <button
+              onPointerDown={() => triggerHaptic('light')}
+              onClick={handleReload}
+              disabled={isReloading}
+              className={`w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] ${
+                isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
+              }`}
+              aria-label="Reload and sync data"
+              title="Reload and sync data"
+            >
+              <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
+            </button>
+          </div>
         </div>
       </header>
 

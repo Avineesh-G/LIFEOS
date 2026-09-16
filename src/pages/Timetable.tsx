@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '../utils/haptics';
 import { AnimatedCalendar } from '../components/AnimatedIcons';
-import { syncTimetableNotifications } from '../utils/notifications';
+import { syncTimetableNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import type { AppData, TimetableBlock } from '../types';
 
 interface TimetableProps {
@@ -55,9 +55,13 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   }, []);
 
   useEffect(() => {
-    if (data?.settings?.notificationsEnabled !== false && data?.timetable) {
-      syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
-    }
+    checkNotificationPermission().then(granted => {
+      if (!granted) {
+        requestAndSyncNotifications(data, updateData);
+      } else if (data?.timetable) {
+        syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+      }
+    });
   }, [data?.timetable, data?.settings?.notificationLeadMinutes, data?.settings?.notificationsEnabled]);
 
   const isClassOngoing = (blockDay: string, start: string, end: string) => {

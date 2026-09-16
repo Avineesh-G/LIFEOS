@@ -34,6 +34,7 @@ import type { TransitionMode, FluidIntensity } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
+import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 
 function MainContent({
   data,
@@ -224,6 +225,23 @@ function App() {
 
   const safeData = data || DEFAULT_DATA;
 
+  // Prompt phone OS native notification permission directly on app start if not yet allowed
+  useEffect(() => {
+    if (user) {
+      checkNotificationPermission().then(granted => {
+        if (!granted) {
+          const t = setTimeout(() => {
+            requestAndSyncNotifications(safeData, updateData);
+          }, 1000);
+          return () => clearTimeout(t);
+        } else {
+          if (safeData?.timetable) syncTimetableNotifications(safeData.timetable, safeData.settings?.notificationLeadMinutes || 10);
+          if (safeData?.tasks) syncTaskNotifications(safeData.tasks, safeData.settings?.notificationLeadMinutes || 10);
+        }
+      });
+    }
+  }, [user?.uid]);
+
   return (
     <>
       <AppLockOverlay />
@@ -235,7 +253,7 @@ function App() {
           pointerEvents: isLocked ? 'none' : 'auto',
         }}
       >
-        <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh}>
+        <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh} data={safeData} updateData={updateData}>
           <ErrorBoundary>
             <MainContent
               data={safeData}
