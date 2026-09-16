@@ -128,14 +128,14 @@
 
   /* Card base - Material 3 Expressive */
   .card {
-    @apply bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 rounded-[26px] sm:rounded-m3-card shadow-m3-subtle transition-[border-color,background-color,box-shadow] duration-200;
+    @apply bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-white/[0.08] rounded-[26px] sm:rounded-m3-card shadow-m3-subtle transition-[border-color,background-color,box-shadow] duration-200;
   }
   .dark .card {
-    background: linear-gradient(180deg, rgba(28, 30, 40, 0.88) 0%, rgba(18, 20, 26, 0.94) 100%);
+    background: linear-gradient(180deg, rgba(26, 28, 38, 0.88) 0%, rgba(16, 18, 24, 0.94) 100%);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-color: rgba(255, 255, 255, 0.24);
-    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.35);
+    border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   }
 
   /* Primary button */
@@ -229,11 +229,40 @@
   }
 
   .dark .liquid-glass {
-    background: linear-gradient(150deg, rgba(28, 31, 44, 0.85) 0%, rgba(18, 20, 28, 0.92) 100%);
+    background: linear-gradient(150deg, rgba(26, 29, 40, 0.85) 0%, rgba(16, 18, 26, 0.92) 100%);
     backdrop-filter: blur(32px) saturate(200%);
     -webkit-backdrop-filter: blur(32px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1.5px rgba(255, 255, 255, 0.42), inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.18), inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Fluid Page Transition (Zero Blank-Screen Risk, Native 120fps) */
+  @keyframes pageFluidEnter {
+    0% {
+      opacity: 0.82;
+      transform: translateY(6px) scale(0.993);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0px) scale(1);
+    }
+  }
+
+  .animate-page-fluid {
+    animation: pageFluidEnter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  /* Fluid Shimmer Highlight */
+  @keyframes fluidShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .fluid-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: fluidShimmer 3s ease-in-out infinite;
   }
 
   .fluid-card {

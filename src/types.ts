@@ -71,6 +71,10 @@ export interface Task {
   completed: boolean;
   date: string;
   linkedBlockId?: string;
+  dueDate?: string; // 'YYYY-MM-DD'
+  startTime?: string; // 'HH:mm'
+  endTime?: string; // 'HH:mm'
+  reminderTime?: string; // 'HH:mm'
 }
 
 export interface DayReview {
@@ -88,6 +92,10 @@ export interface AppSettings {
   accentColor: string;
   transitionMode?: TransitionMode;
   fluidIntensity?: FluidIntensity;
+  notificationsEnabled?: boolean;
+  notificationLeadMinutes?: number; // 5 | 10 | 15 | 20 (default 10)
+  taskNotificationsEnabled?: boolean;
+  timetableNotificationsEnabled?: boolean;
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────
@@ -214,4 +222,24 @@ export interface AppData {
   // Vault / Password Keeper Module
   vaultItems?: VaultItem[];
   vaultConfig?: VaultConfig | null;
+
+  // Laundry Module
+  laundryBatches?: LaundryBatch[];
+}
+
+// ── Laundry Module ─────────────────────────────────────────────────────────
+export interface LaundryItemCount {
+  category: string;
+  count: number;
+}
+
+export interface LaundryBatch {
+  id: string;
+  submitDate: string; // 'YYYY-MM-DD'
+  returnDate?: string; // 'YYYY-MM-DD' manual entry of expected/actual return
+  items: LaundryItemCount[];
+  totalClothes: number;
+  status: 'pending' | 'submitted' | 'received';
+  notes?: string;
+  createdAt: string;
 }

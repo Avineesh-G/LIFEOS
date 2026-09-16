@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home, BookOpen, Dumbbell, Wallet, CalendarDays,
   CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, RotateCw, History, ShieldCheck, LucideIcon
+  Utensils, RotateCw, History, ShieldCheck, Shirt, LucideIcon
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
+import { requestNotificationPermission } from '../utils/notifications';
 import type { AppSettings } from '../types';
 
 // Primary centered squircle dock items
@@ -18,6 +19,7 @@ const primaryDockItems = [
 
 // Speed-dial popup items (ordered from bottom to top as requested)
 const secondaryMenuItems = [
+  { icon: Shirt,        label: 'Laundry',              path: '/laundry',   color: 'text-teal-500 dark:text-teal-400' },
   { icon: BarChart3,    label: 'Progress & Analytics', path: '/progress',  color: 'text-purple-500 dark:text-purple-400' },
   { icon: History,      label: 'History',              path: '/history',   color: 'text-violet-500 dark:text-violet-400' },
   { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
@@ -53,6 +55,13 @@ export default function Layout({ children, refresh }: LayoutProps) {
     triggerHaptic('light');
     setIsReloading(true);
     try {
+      // 0. Prompt for OS notification permission after clicking reload/update
+      try {
+        await requestNotificationPermission();
+      } catch (e) {
+        console.warn('Notification permission request error:', e);
+      }
+
       // 1. Evict any browser / PWA caches
       if ('caches' in window) {
         try {
@@ -81,7 +90,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
         await refresh();
       }
 
-      // 4. Force browser/webview reload from Vercel with cache-busting timestamp
+      // 4. Force browser/webview reload with cache-busting timestamp
       try {
         const url = new URL(window.location.href);
         url.searchParams.set('_t', Date.now().toString());
@@ -200,7 +209,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.35)] active:scale-95 transition-all select-none hover:bg-white/95 dark:hover:bg-[#16171D]"
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] active:scale-95 transition-all select-none hover:bg-white/95 dark:hover:bg-[#16171D]"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
@@ -215,7 +224,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
             onPointerDown={() => triggerHaptic('light')}
             onClick={handleReload}
             disabled={isReloading}
-            className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/30 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.35)] ${
+            className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] ${
               isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
             }`}
             aria-label="Reload and sync data"

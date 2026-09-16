@@ -26,6 +26,7 @@ const DEFAULT_DATA: AppData = {
   geminiApiKey: '',
   vaultItems: [],
   vaultConfig: null,
+  laundryBatches: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -91,6 +92,7 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     updatedAt: v?.updatedAt || new Date().toISOString(),
   }));
   merged.vaultConfig = merged.vaultConfig || null;
+  merged.laundryBatches = merged.laundryBatches || [];
 
   return merged;
 }

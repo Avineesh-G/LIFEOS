@@ -1,7 +1,7 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 
-export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'ai' | number | number[];
+export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'ai' | 'selection' | number | number[];
 
 let audioCtx: AudioContext | null = null;
 let lastHapticTime = 0;
@@ -96,14 +96,11 @@ export function setHapticIntensity(intensity: number) {
 export function triggerHaptic(pattern: HapticType = 'light') {
   if (typeof window === 'undefined') return;
 
-  // STRICT REQUIREMENT: Haptics are exclusively restricted to the navigation bar
-  if (pattern !== 'nav') return;
-
   const level = getHapticLevel();
   if (level === 'off') return;
 
   const now = Date.now();
-  if (now - lastHapticTime < 70) return;
+  if (now - lastHapticTime < 45) return;
   lastHapticTime = now;
 
   const isHigh = level === 'high';
@@ -111,7 +108,17 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   // 1. Android / iOS Native Hardware Vibration via Capacitor Bridge
   if (Capacitor.isNativePlatform()) {
     try {
-      Haptics.impact({ style: isHigh ? ImpactStyle.Medium : ImpactStyle.Light });
+      if (pattern === 'heavy') {
+        Haptics.impact({ style: ImpactStyle.Heavy });
+      } else if (pattern === 'medium' || pattern === 'save') {
+        Haptics.impact({ style: ImpactStyle.Medium });
+      } else if (pattern === 'success') {
+        Haptics.notification({ type: NotificationType.Success });
+      } else if (pattern === 'selection') {
+        Haptics.selectionStart();
+      } else {
+        Haptics.impact({ style: isHigh ? ImpactStyle.Medium : ImpactStyle.Light });
+      }
       return;
     } catch {
       // Fallback to browser web APIs below
@@ -121,9 +128,20 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   // 2. Web / Browser fallback
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
-      navigator.vibrate(isHigh ? 20 : 12);
+      if (typeof pattern === 'number') {
+        navigator.vibrate(pattern);
+      } else if (Array.isArray(pattern)) {
+        navigator.vibrate(pattern);
+      } else if (pattern === 'heavy') {
+        navigator.vibrate(30);
+      } else if (pattern === 'medium' || pattern === 'save') {
+        navigator.vibrate(20);
+      } else if (pattern === 'selection') {
+        navigator.vibrate(8);
+      } else {
+        navigator.vibrate(isHigh ? 18 : 12);
+      }
     } catch {}
   }
-
-  playSyntheticHapticAudio('nav');
 }
+

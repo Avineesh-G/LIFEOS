@@ -18,6 +18,7 @@ import Nutrition from './pages/Nutrition';
 import Spending from './pages/Spending';
 import Timetable from './pages/Timetable';
 import Tasks from './pages/Tasks';
+import Laundry from './pages/Laundry';
 import Progress from './pages/Progress';
 import WorkHistory from './pages/WorkHistory';
 import { Settings } from 'lucide-react'; // Fallback import just in case
@@ -55,6 +56,7 @@ function MainContent({
   transitionMode: TransitionMode;
   setTransitionMode: (m: TransitionMode) => void;
 }) {
+  const location = useLocation();
   const routeElements = useRoutes([
     { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
     { path: '/study', element: <Study data={data} updateData={updateData} /> },
@@ -70,6 +72,7 @@ function MainContent({
     { path: '/spending', element: <Spending data={data} updateData={updateData} /> },
     { path: '/timetable', element: <Timetable data={data} updateData={updateData} /> },
     { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
+    { path: '/laundry', element: <Laundry data={data} updateData={updateData} /> },
     { path: '/progress', element: <Progress data={data} /> },
     { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
     { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
@@ -78,7 +81,7 @@ function MainContent({
   ]);
 
   return (
-    <div className="w-full overflow-x-hidden gpu-composited">
+    <div key={location.pathname} className="w-full overflow-x-hidden gpu-composited animate-page-fluid">
       {routeElements}
     </div>
   );

@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Plus, Trash2, X, Check, RotateCcw, Clock, ArrowRight, Calendar } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { syncTaskNotifications } from '../utils/notifications';
 import type { AppData, Task } from '../types';
 
 interface TasksProps {
@@ -13,25 +14,56 @@ interface TasksProps {
 export default function Tasks({ data, updateData }: TasksProps) {
   const [newTask, setNewTask] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
+  const [newDate, setNewDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
+  const [newStartTime, setNewStartTime] = useState('');
+  const [newEndTime, setNewEndTime] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [showAdd, setShowAdd] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
   const yesterday = useMemo(() => format(subDays(new Date(), 1), 'yyyy-MM-dd'), []);
 
-  // Today's scheduled tasks
+  // Sync native OS notification center reminders on mount or task update
+  useEffect(() => {
+    if (data?.settings?.notificationsEnabled !== false && data?.tasks) {
+      syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+    }
+  }, [data?.tasks, data?.settings?.notificationLeadMinutes, data?.settings?.notificationsEnabled]);
+
+  // Tasks for the selected calendar date
+  const filteredTasks = useMemo(() => {
+    return (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === selectedDate);
+  }, [data?.tasks, selectedDate]);
+
+  // Today's scheduled tasks for completion rate
   const todayTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => t?.date === today);
+    return (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === today);
   }, [data?.tasks, today]);
 
-  // Yesterday's & Previous Days' Uncompleted Tasks (rolled over sub-section)
+  // Yesterday's & Previous Days' Uncompleted Tasks
   const previousPendingTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => t?.date && t.date < today && !t.completed);
+    return (data?.tasks || []).filter(t => {
+      const taskD = t?.dueDate || t?.date;
+      return taskD && taskD < today && !t.completed;
+    });
   }, [data?.tasks, today]);
 
   const completedCount = useMemo(() => {
-    return todayTasks.filter(t => t.completed).length;
-  }, [todayTasks]);
+    return filteredTasks.filter(t => t.completed).length;
+  }, [filteredTasks]);
 
-  const pct = todayTasks.length > 0 ? Math.round((completedCount / todayTasks.length) * 100) : 0;
+  const pct = filteredTasks.length > 0 ? Math.round((completedCount / filteredTasks.length) * 100) : 0;
+
+  // Weekdays carousel around selected date
+  const weekDates = useMemo(() => {
+    const current = parseISO(selectedDate);
+    const dates = [];
+    for (let i = -3; i <= 3; i++) {
+      dates.push(addDays(current, i));
+    }
+    return dates;
+  }, [selectedDate]);
 
   const addTask = async () => {
     if (!newTask.trim()) return;
@@ -41,11 +73,18 @@ export default function Tasks({ data, updateData }: TasksProps) {
       text: newTask.trim(),
       subtask: newSubtask.trim() || undefined,
       completed: false,
-      date: today,
+      date: newDate,
+      dueDate: newDate,
+      startTime: newStartTime.trim() || undefined,
+      endTime: newEndTime.trim() || undefined,
+      reminderTime: newStartTime.trim() || undefined,
     };
     await updateData({ tasks: [...(data?.tasks || []), task] });
     setNewTask('');
     setNewSubtask('');
+    setNewStartTime('');
+    setNewEndTime('');
+    setNewDate(today);
     setShowAdd(false);
   };
 
@@ -55,11 +94,12 @@ export default function Tasks({ data, updateData }: TasksProps) {
       tasks: (data?.tasks || []).map(t => {
         if (t.id === id) {
           const nextCompleted = !t.completed;
+          const currentTaskDate = t.dueDate || t.date;
           return {
             ...t,
             completed: nextCompleted,
-            // If completing a task from a previous day, roll it to today so today's completion records it
-            date: nextCompleted && t.date < today ? today : t.date,
+            date: nextCompleted && currentTaskDate < today ? today : t.date,
+            dueDate: nextCompleted && currentTaskDate < today ? today : t.dueDate,
           };
         }
         return t;
@@ -70,7 +110,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const moveToToday = async (id: string) => {
     triggerHaptic('medium');
     await updateData({
-      tasks: (data?.tasks || []).map(t => (t.id === id ? { ...t, date: today } : t))
+      tasks: (data?.tasks || []).map(t => (t.id === id ? { ...t, date: today, dueDate: today } : t))
     });
   };
 
@@ -78,72 +118,200 @@ export default function Tasks({ data, updateData }: TasksProps) {
     triggerHaptic('save');
     await updateData({
       tasks: (data?.tasks || []).map(t => {
-        if (t.date && t.date < today && !t.completed) {
-          return { ...t, date: today };
+        const taskD = t.dueDate || t.date;
+        if (taskD && taskD < today && !t.completed) {
+          return { ...t, date: today, dueDate: today };
         }
         return t;
       })
     });
   };
 
-  const deleteTask = async (id: string) => {
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
     triggerHaptic('heavy');
     await updateData({
-      tasks: (data?.tasks || []).filter(t => t.id !== id)
+      tasks: (data?.tasks || []).filter(t => t.id !== taskToDelete.id)
     });
+    setTaskToDelete(null);
+  };
+
+  // Long-press handler ref
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressActive = useRef<boolean>(false);
+
+  const handlePointerDown = (task: Task) => {
+    isLongPressActive.current = false;
+    pressTimer.current = setTimeout(() => {
+      isLongPressActive.current = true;
+      triggerHaptic('heavy');
+      setTaskToDelete(task);
+    }, 550);
+  };
+
+  const handlePointerUp = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  const handlePointerCancel = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  const formatTimeRange = (start?: string, end?: string) => {
+    if (!start && !end) return null;
+    if (start && end) return `${start} → ${end}`;
+    if (start) return `Starts ${start}`;
+    return `Ends ${end}`;
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7 pb-4">
+    <div className="space-y-6 pb-4">
 
       {/* Header */}
-      <div className="flex items-end justify-between pt-2">
+      <div className="flex items-end justify-between pt-1">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold tracking-wider uppercase mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse" />
-            Today
+            {selectedDate === today ? 'Today' : format(parseISO(selectedDate), 'EEEE, MMM d')}
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
             TO-DO List
           </h1>
           <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 font-medium">
-            Daily execution · Keep moving forward
+            Daily execution · Long-press any task to delete
           </p>
         </div>
         <button
           onClick={() => {
             triggerHaptic('light');
+            setNewDate(selectedDate);
             setShowAdd(true);
           }}
-          className="btn-pill flex items-center gap-1.5 px-4 py-2 text-xs bg-accent text-white shadow-sm hover:opacity-90 active:scale-95 transition-all"
+          className="bouncy-tap flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-accent text-white shadow-md shadow-accent/20 hover:opacity-95"
         >
-          <Plus size={15} /> Add Task
+          <Plus size={16} strokeWidth={2.5} /> Add Task
         </button>
       </div>
 
-      {/* Progress pill card */}
-      <div className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-sm space-y-3.5">
+      {/* ── Fluid Calendar Strip ── */}
+      <div className="liquid-glass rounded-[28px] p-3 border border-white/80 dark:border-white/[0.08] shadow-sm">
+        <div className="flex items-center justify-between px-2 mb-2">
+          <div className="flex items-center gap-2">
+            <CalendarIcon size={14} className="text-accent" />
+            <span className="text-xs font-bold text-primary-light dark:text-primary-dark">
+              {format(parseISO(selectedDate), 'MMMM yyyy')}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                triggerHaptic('selection');
+                setSelectedDate(format(addDays(parseISO(selectedDate), -1), 'yyyy-MM-dd'));
+              }}
+              className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-secondary-light dark:text-secondary-dark"
+              aria-label="Previous day"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={() => {
+                triggerHaptic('selection');
+                setSelectedDate(today);
+              }}
+              className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-black/5 dark:bg-white/10 text-primary-light dark:text-primary-dark"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => {
+                triggerHaptic('selection');
+                setSelectedDate(format(addDays(parseISO(selectedDate), 1), 'yyyy-MM-dd'));
+              }}
+              className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-secondary-light dark:text-secondary-dark"
+              aria-label="Next day"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Day Pills Carousel */}
+        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-1">
+          {weekDates.map(d => {
+            const dateStr = format(d, 'yyyy-MM-dd');
+            const isSelected = dateStr === selectedDate;
+            const isTodayDate = dateStr === today;
+            const tasksOnDay = (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === dateStr);
+            const hasTasks = tasksOnDay.length > 0;
+            const allDone = hasTasks && tasksOnDay.every(t => t.completed);
+
+            return (
+              <button
+                key={dateStr}
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setSelectedDate(dateStr);
+                }}
+                className={`flex-1 min-w-[42px] py-2 px-1 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-center ${
+                  isSelected
+                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.04]'
+                    : isTodayDate
+                      ? 'bg-accent/10 dark:bg-accent/20 text-accent font-bold'
+                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-secondary-light dark:text-secondary-dark'
+                }`}
+              >
+                <span className="text-[10px] uppercase font-bold tracking-tight opacity-75">
+                  {format(d, 'EEE')}
+                </span>
+                <span className="text-sm font-black leading-tight">
+                  {format(d, 'd')}
+                </span>
+                <div className="h-1 flex items-center justify-center mt-0.5">
+                  {hasTasks && (
+                    <span className={`w-1 h-1 rounded-full ${
+                      isSelected
+                        ? 'bg-white'
+                        : allDone
+                          ? 'bg-emerald-500'
+                          : 'bg-accent'
+                    }`} />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Completion Progress Card */}
+      <div className="rounded-[30px] p-5 liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-            Completion Rate
+            {selectedDate === today ? "Today's Completion" : "Day's Progress"}
           </span>
-          <span className={`px-3.5 py-1 rounded-full text-xs font-bold shadow-xs border ${
-            pct === 100
+          <span className={`px-3 py-0.5 rounded-full text-xs font-bold shadow-xs border ${
+            pct === 100 && filteredTasks.length > 0
               ? 'bg-emerald-500/15 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
               : pct >= 50
                 ? 'bg-indigo-500/15 border-indigo-500/25 text-indigo-700 dark:text-indigo-300'
-                : todayTasks.length === 0
+                : filteredTasks.length === 0
                   ? 'bg-neutral-500/10 border-neutral-500/20 text-neutral-600 dark:text-neutral-400'
                   : 'bg-amber-500/15 border-amber-500/25 text-amber-700 dark:text-amber-300'
           }`}>
-            {pct === 100 ? 'All Done' : pct >= 50 ? 'On Track' : todayTasks.length === 0 ? 'No Tasks' : 'In Progress'}
+            {filteredTasks.length === 0 ? 'No Tasks' : pct === 100 ? 'Completed' : `${pct}% Done`}
           </span>
         </div>
 
-        {/* Segmented bar — one segment per task */}
-        {todayTasks.length > 0 ? (
+        {/* Segmented bar */}
+        {filteredTasks.length > 0 ? (
           <div className="flex items-center gap-1.5 py-1">
-            {todayTasks.map((task, i) => {
+            {filteredTasks.map((task, i) => {
               const palette = [
                 'bg-purple-500',
                 'bg-indigo-500',
@@ -153,40 +321,33 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 'bg-cyan-500',
                 'bg-orange-500',
                 'bg-teal-500',
-                'bg-pink-500',
-                'bg-violet-500',
               ];
               const color = palette[i % palette.length];
               return (
                 <div
                   key={task.id}
-                  className={`h-2.5 flex-1 rounded-full transition-all duration-300 shadow-xs ${
+                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                     task.completed
                       ? `${color} opacity-100`
-                      : 'bg-black/5 dark:bg-white/10'
+                      : 'bg-black/10 dark:bg-white/10'
                   }`}
                 />
               );
             })}
           </div>
         ) : (
-          <div className="w-full h-2.5 rounded-full bg-black/5 dark:bg-white/10" />
+          <div className="w-full h-2 rounded-full bg-black/5 dark:bg-white/10" />
         )}
 
-        {/* Count below */}
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-[11px] font-mono font-semibold text-muted-light dark:text-muted-dark">
-            {completedCount}/{todayTasks.length} done
-          </span>
-          <span className="text-[11px] font-mono font-bold text-accent">
-            {pct}%
-          </span>
+        <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-muted-light dark:text-muted-dark">
+          <span>{completedCount} of {filteredTasks.length} finished</span>
+          <span>{filteredTasks.length - completedCount} remaining</span>
         </div>
       </div>
 
-      {/* Yesterday's / Overdue Pending Tasks Subsection */}
-      {previousPendingTasks.length > 0 && (
-        <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-amber-500/30 glow-peach shadow-sm space-y-3.5">
+      {/* Yesterday's / Overdue Pending Tasks (Rollover subsection) */}
+      {selectedDate === today && previousPendingTasks.length > 0 && (
+        <div className="rounded-[30px] p-5 liquid-glass border border-amber-500/30 glow-peach shadow-sm space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/25">
@@ -207,277 +368,321 @@ export default function Tasks({ data, updateData }: TasksProps) {
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.94 }}
+            <button
               onClick={rolloverAllToToday}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors"
+              className="bouncy-tap flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors"
               title="Move all pending tasks to today"
             >
               <RotateCcw size={12} className="stroke-[2.5]" />
-              <span className="hidden sm:inline">Forward All</span>
-              <span className="sm:hidden">All</span>
-            </motion.button>
+              <span>Forward All</span>
+            </button>
           </div>
 
-          {/* List of carried-over pending tasks */}
           <div className="space-y-2 pt-1">
-            <AnimatePresence>
-              {previousPendingTasks.map(task => {
-                const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
-                const isYesterday = task.date === yesterday;
-                return (
-                  <motion.div
-                    key={task.id}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    whileHover={{ scale: 1.01, y: -1 }}
-                    whileTap={{ scale: 0.985 }}
-                    transition={{ duration: 0.15 }}
-                    className="rounded-[22px] border border-amber-500/20 bg-white/80 dark:bg-white/[0.04] p-3.5 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-colors group"
+            {previousPendingTasks.map(task => {
+              const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
+              const isYesterday = (task.dueDate || task.date) === yesterday;
+              return (
+                <div
+                  key={task.id}
+                  onPointerDown={() => handlePointerDown(task)}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerCancel}
+                  className="rounded-[22px] border border-amber-500/20 bg-white/80 dark:bg-white/[0.04] p-3.5 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-colors select-none"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleTask(task.id)}
+                    className="w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center border-2 border-amber-400 dark:border-amber-500/60 hover:bg-amber-500 hover:text-white transition-all bg-amber-500/5 text-transparent"
                   >
-                    <motion.button
-                      type="button"
-                      whileTap={{ scale: 0.82 }}
-                      onClick={() => toggleTask(task.id)}
-                      className="w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center border-2 border-amber-400 dark:border-amber-500/60 hover:bg-amber-500 hover:text-white transition-all bg-amber-500/5 text-transparent"
-                      title="Mark done and roll to today"
-                    >
-                      <Check size={14} className="stroke-[3] group-hover:text-white" />
-                    </motion.button>
+                    <Check size={14} className="stroke-[3]" />
+                  </button>
 
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark leading-tight">
-                          {task.text}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 flex-shrink-0">
-                          <Calendar size={9} />
-                          {isYesterday ? 'Yesterday' : task.date ? format(new Date(task.date), 'MMM d') : 'Past'}
-                        </span>
-                      </div>
-                      {hasValidSubtask && (
-                        <span className="text-[11px] block mt-0.5 text-secondary-light dark:text-secondary-dark font-medium">
-                          {task.subtask}
-                        </span>
-                      )}
+                  <div className="flex-1 min-w-0" onClick={() => toggleTask(task.id)}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark leading-tight">
+                        {task.text}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                        <CalendarIcon size={9} />
+                        {isYesterday ? 'Yesterday' : (task.dueDate || task.date)}
+                      </span>
                     </div>
+                    {hasValidSubtask && (
+                      <span className="text-[11px] block mt-0.5 text-secondary-light dark:text-secondary-dark font-medium">
+                        {task.subtask}
+                      </span>
+                    )}
+                  </div>
 
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.92 }}
-                        onClick={() => moveToToday(task.id)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-colors"
-                        title="Move to Today"
-                      >
-                        <ArrowRight size={11} className="stroke-[2.5]" />
-                        <span>Today</span>
-                      </motion.button>
-                      <motion.button
-                        type="button"
-                        whileTap={{ scale: 0.88 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteTask(task.id);
-                        }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-muted-light hover:text-red-500 transition-colors"
-                        title="Delete task"
-                      >
-                        <Trash2 size={13} />
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                  <button
+                    type="button"
+                    onClick={() => moveToToday(task.id)}
+                    className="bouncy-tap inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-colors"
+                  >
+                    <ArrowRight size={11} className="stroke-[2.5]" />
+                    <span>Today</span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Today's Section Header if yesterday's tasks exist */}
-      {previousPendingTasks.length > 0 && (
-        <div className="flex items-center justify-between pt-1">
-          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
-            Today's Tasks ({todayTasks.length})
-          </h2>
-        </div>
-      )}
-
-      {/* Task list with Bouncy Checkboxes and Fluid Squircle Cards */}
+      {/* Main Task List: NO TRASH ICON, LONG-PRESS TO DELETE, TIME RANGE BESIDE TASK */}
       <div className="space-y-3">
-        <AnimatePresence>
-          {todayTasks.map(task => {
-            const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
-            return (
-              <motion.div
-                key={task.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                whileHover={{ scale: 1.012, y: -1, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
-                whileTap={{ scale: 0.985 }}
-                transition={{ duration: 0.18 }}
-                className={`rounded-[26px] border transition-colors p-4 flex items-center gap-3.5 group shadow-xs ${
+        {filteredTasks.map(task => {
+          const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
+          const timeRange = formatTimeRange(task.startTime, task.endTime);
+
+          return (
+            <div
+              key={task.id}
+              onPointerDown={() => handlePointerDown(task)}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerCancel}
+              onContextMenu={e => {
+                e.preventDefault();
+                setTaskToDelete(task);
+              }}
+              className={`rounded-[26px] border p-4 flex items-center gap-3.5 transition-all select-none ${
+                task.completed
+                  ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-white/[0.04] opacity-75'
+                  : 'liquid-glass border-white/80 dark:border-white/[0.09] hover:border-accent/30 shadow-xs'
+              }`}
+            >
+              {/* Bouncy Spring Pop Checkbox */}
+              <button
+                type="button"
+                onClick={() => toggleTask(task.id)}
+                className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
                   task.completed
-                    ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-border-dark/50 opacity-75'
-                    : 'liquid-glass border-white/80 dark:border-white/10 hover:border-accent/40 shadow-xs'
+                    ? 'bg-accent text-white shadow-sm'
+                    : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent bg-black/[0.02] dark:bg-white/[0.04]'
                 }`}
               >
-                {/* Bouncy Spring Pop Checkbox */}
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.82 }}
-                  onClick={() => toggleTask(task.id)}
-                  className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
-                    task.completed
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent bg-black/[0.02] dark:bg-white/[0.04]'
-                  }`}
-                >
-                  {task.completed && (
-                    <motion.div
-                      initial={{ scale: 0.4 }}
-                      animate={{ scale: [0.4, 1.35, 0.95, 1] }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-                    >
-                      <Check size={15} strokeWidth={3} />
-                    </motion.div>
-                  )}
-                </motion.button>
+                {task.completed && <Check size={15} strokeWidth={3} />}
+              </button>
 
-                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
-                  <span className={`text-sm leading-snug block font-bold transition-all ${
+              <div
+                className="flex-1 min-w-0 cursor-pointer"
+                onClick={() => {
+                  if (!isLongPressActive.current) toggleTask(task.id);
+                }}
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className={`text-sm leading-snug font-bold transition-all ${
                     task.completed
                       ? 'line-through text-muted-light dark:text-muted-dark opacity-60'
                       : 'text-primary-light dark:text-primary-dark'
                   }`}>
                     {task.text}
                   </span>
-                  {hasValidSubtask && (
-                    <span className={`text-xs block mt-1 leading-normal font-medium ${
-                      task.completed
-                        ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
-                        : 'text-secondary-light dark:text-secondary-dark'
-                    }`}>
-                      {task.subtask}
+
+                  {/* Start time → End time Range Capsule beside task */}
+                  {timeRange && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-300 flex-shrink-0">
+                      <Clock size={10} className="stroke-[2.5]" />
+                      {timeRange}
                     </span>
                   )}
                 </div>
 
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.88 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteTask(task.id);
-                  }}
-                  className="opacity-40 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-red-500 transition-all flex-shrink-0"
-                  title="Delete task"
-                >
-                  <Trash2 size={15} />
-                </motion.button>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                {hasValidSubtask && (
+                  <span className={`text-xs block mt-1 leading-normal font-medium ${
+                    task.completed
+                      ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
+                      : 'text-secondary-light dark:text-secondary-dark'
+                  }`}>
+                    {task.subtask}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
 
-        {todayTasks.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/10">
-            <p className="text-2xl mb-2">✓</p>
-            <p className="label-mono text-secondary-light dark:text-secondary-dark font-bold">No TO-DOs yet</p>
-            <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + Add Task to create your first TO-DO</p>
+        {filteredTasks.length === 0 && (
+          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/[0.08]">
+            <p className="text-2xl mb-2">✨</p>
+            <p className="text-sm font-bold text-secondary-light dark:text-secondary-dark">No tasks for this day</p>
+            <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Tap "+ Add Task" to schedule something</p>
           </div>
         )}
       </div>
 
-      {/* Add Task Elevated Bottom Sheet / Modal */}
+      {/* ── Long Press Delete Confirmation Dialog ── */}
+      <AnimatePresence>
+        {taskToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[150] flex items-center justify-center p-5"
+            onClick={() => setTaskToDelete(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-sm liquid-glass rounded-[32px] p-6 border border-white/80 dark:border-white/[0.12] shadow-2xl text-center space-y-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
+                <X size={24} strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Task?</h3>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium line-clamp-2">
+                  "{taskToDelete.text}"
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTaskToDelete(null)}
+                  className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                >
+                  Keep Task
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteTask}
+                  className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Add Task Elevated Modal with Date Picker & Start/End Time ── */}
       <AnimatePresence>
         {showAdd && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-md z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4"
+            className="fixed inset-0 bg-black/35 dark:bg-black/65 backdrop-blur-md z-[130] flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setShowAdd(false)}
           >
             <motion.div
               initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 340 }}
-              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-white/80 dark:border-white/15 shadow-[0_-16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_-16px_48px_rgba(0,0,0,0.6)]"
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-white/80 dark:border-white/[0.12] shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
-              {/* Top Drag Indicator */}
-              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700 mx-auto mb-5" />
+              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-700 mx-auto mb-4" />
 
-              {/* Header */}
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-                  New TO-DO
-                </h2>
-                <motion.button
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                    New TO-DO
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
+                    Scheduled
+                  </span>
+                </div>
+                <button
                   type="button"
-                  whileTap={{ scale: 0.9 }}
                   onClick={() => setShowAdd(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80 transition-opacity"
-                  aria-label="Close"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
                 >
                   <X size={16} />
-                </motion.button>
+                </button>
               </div>
 
-              {/* Form Fields */}
-              <div className="space-y-4">
+              <div className="space-y-3.5">
+                {/* Task Name */}
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Main Task
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+                    Task Title
                   </label>
                   <input
                     type="text"
                     value={newTask}
                     onChange={e => setNewTask(e.target.value)}
-                    placeholder="e.g. Physics Assignment 3"
+                    placeholder="e.g. Complete Machine Learning assignment"
                     autoFocus
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
                   />
                 </div>
 
+                {/* Subtask */}
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">
-                    Details & Subtasks (Optional)
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+                    Details / Subtasks (Optional)
                   </label>
                   <input
                     type="text"
                     value={newSubtask}
                     onChange={e => setNewSubtask(e.target.value)}
-                    placeholder="e.g. Complete questions 1 to 10 from HC Verma"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+                    placeholder="e.g. Problems 1 to 5 from chapter 4"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <motion.button
+                {/* Calendar Date Picker */}
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1.5">
+                    <CalendarIcon size={12} className="text-accent" /> Due / Schedule Date
+                  </label>
+                  <input
+                    type="date"
+                    value={newDate}
+                    onChange={e => setNewDate(e.target.value)}
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                  />
+                </div>
+
+                {/* Start Time & End Time side by side */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+                      <Clock size={11} className="text-accent" /> Start Time
+                    </label>
+                    <input
+                      type="time"
+                      value={newStartTime}
+                      onChange={e => setNewStartTime(e.target.value)}
+                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+                      <Clock size={11} className="text-accent" /> End Time
+                    </label>
+                    <input
+                      type="time"
+                      value={newEndTime}
+                      onChange={e => setNewEndTime(e.target.value)}
+                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-3">
+                  <button
                     type="button"
-                    whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAdd(false)}
-                    className="w-full py-3.5 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                    className="py-3 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                   >
                     Cancel
-                  </motion.button>
-                  <motion.button
+                  </button>
+                  <button
                     type="button"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.95 }}
                     onClick={addTask}
                     disabled={!newTask.trim()}
-                    className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40 disabled:shadow-none"
+                    className="py-3 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40"
                   >
-                    Create Task
-                  </motion.button>
+                    Save TO-DO
+                  </button>
                 </div>
               </div>
             </motion.div>
