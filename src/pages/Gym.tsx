@@ -6,6 +6,7 @@ import {
   ChevronRight, Loader2, Calendar
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import { AnimatedMoon } from '../components/AnimatedIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
@@ -166,15 +167,17 @@ export default function Gym({ data, updateData }: GymProps) {
   return (
     <div className="space-y-6 sm:space-y-7 pb-4">
 
-      {/* Material 3 Expressive Mint Hero Card (Mobile-Optimized) */}
-      <div
-        className="rounded-[32px] p-5 sm:p-7 bg-m3-mint-container dark:bg-m3-mint-darkContainer text-m3-mint-text dark:text-m3-mint-darkText border border-m3-mint-badge/50 dark:border-m3-mint-darkBadge/50 shadow-m3-subtle space-y-4 sm:space-y-5"
+      {/* Bioluminescent Mint Liquid Spring Capsule Hero Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 liquid-glass glow-mint border border-emerald-200/50 dark:border-emerald-800/40 text-m3-mint-text dark:text-m3-mint-darkText shadow-sm space-y-4 sm:space-y-5 relative overflow-hidden"
       >
         {/* Top Header Row */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[15px] shrink-0 bg-white/85 dark:bg-black/30 flex items-center justify-center shadow-sm">
-              <Dumbbell size={20} className="text-m3-mint-text dark:text-m3-mint-darkText" />
+            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] shrink-0 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center justify-center shadow-xs">
+              <Dumbbell size={20} className="text-emerald-700 dark:text-emerald-300" />
             </span>
             <div className="min-w-0">
               <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase opacity-75 font-mono">
@@ -183,17 +186,17 @@ export default function Gym({ data, updateData }: GymProps) {
               <h2 className="text-xs sm:text-sm font-bold opacity-90 truncate">Daily Protocol</h2>
             </div>
           </div>
-          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold shadow-sm ${
+          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold shadow-xs border ${
             isCompletedToday 
-              ? 'bg-[#146C3E] text-white dark:bg-[#A6EDC2] dark:text-[#19261E]'
-              : 'bg-white/80 dark:bg-black/30 text-m3-mint-text dark:text-m3-mint-darkText'
+              ? 'bg-emerald-600 text-white dark:bg-emerald-400 dark:text-emerald-950 border-emerald-500/30'
+              : 'bg-emerald-500/15 border-emerald-500/25 text-emerald-800 dark:text-emerald-200'
           }`}>
             {isCompletedToday ? 'Completed' : (todayPlan?.type === 'REST' ? 'Rest Day' : 'Incomplete')}
           </span>
         </div>
 
         {/* Workout Focus & Exercise Count */}
-        <div className="pt-1">
+        <div className="pt-1 relative z-10">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-sans text-m3-mint-text dark:text-m3-mint-darkText">
             {todayPlan?.type || 'Rest Day'}
           </h1>
@@ -202,34 +205,49 @@ export default function Gym({ data, updateData }: GymProps) {
           </p>
         </div>
 
-        {/* Action Buttons Row */}
-        <div className="flex items-center gap-2.5 pt-1">
-          <button
-            onClick={() => navigate('/gym/split')}
-            className="flex-1 py-3 rounded-full bg-white/80 dark:bg-black/30 text-m3-mint-text dark:text-m3-mint-darkText font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.97] transition-all hover:bg-white/95 dark:hover:bg-black/40"
+        {/* Bouncy Action Buttons Row */}
+        <div className="flex items-center gap-2.5 pt-1 relative z-10">
+          <motion.button
+            whileHover={{ scale: 1.025 }}
+            whileTap={{ scale: 0.94 }}
+            onClick={() => {
+              triggerHaptic('light');
+              navigate('/gym/split');
+            }}
+            className="flex-1 py-3 rounded-full bg-white/85 dark:bg-white/10 text-emerald-900 dark:text-emerald-100 border border-emerald-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs transition-colors"
           >
             <Settings size={15} /> Split
-          </button>
+          </motion.button>
           {isCompletedToday ? (
-            <button
-              onClick={() => navigate('/gym/workout')}
-              className="flex-[1.4] py-3 rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.97] transition-all"
+            <motion.button
+              whileHover={{ scale: 1.025 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => {
+                triggerHaptic('light');
+                navigate('/gym/workout');
+              }}
+              className="flex-[1.4] py-3 rounded-full bg-emerald-600 dark:bg-emerald-400 text-white dark:text-emerald-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm transition-colors"
             >
               <Check size={16} className="stroke-[3]" /> Completed
-            </button>
+            </motion.button>
           ) : (
-            <button
-              onClick={() => navigate('/gym/workout')}
-              className="flex-[1.4] py-3 rounded-full bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-[0.97] transition-all"
+            <motion.button
+              whileHover={{ scale: 1.025 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => {
+                triggerHaptic('medium');
+                navigate('/gym/workout');
+              }}
+              className="flex-[1.4] py-3 rounded-full bg-emerald-600 dark:bg-emerald-400 text-white dark:text-emerald-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-colors"
             >
               <Play size={15} fill="currentColor" /> {todayLog ? 'Resume Workout' : 'Start Workout'}
-            </button>
+            </motion.button>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Goal Routine Alignment & Customization Freedom Card */}
-      <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/80 dark:border-border-dark/80 shadow-sm space-y-3">
+      <div className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-xs space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -347,8 +365,8 @@ export default function Gym({ data, updateData }: GymProps) {
           )}
         </div>
 
-        {/* 7-Day Responsive Grid - Symmetrical & Zero Cutoffs on Mobile */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+        {/* 7-Day Responsive Grid with Fluid Spring Capsule */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 rounded-2xl bg-neutral-100/60 dark:bg-neutral-900/40 border border-black/5 dark:border-white/5">
           {DAYS.map(day => {
             const plan = data?.workoutPlans?.find(p => p.day === day);
             const isSelected = selectedDay === day;
@@ -361,21 +379,29 @@ export default function Gym({ data, updateData }: GymProps) {
                 key={day}
                 type="button"
                 onClick={() => {
-                  triggerHaptic(5);
+                  triggerHaptic('light');
                   setSelectedDay(day);
                 }}
-                className={`flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-2xl transition-all relative border min-h-[74px] sm:min-h-[80px] ${
-                  isSelected
-                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.03] border-accent ring-2 ring-accent/20 z-10'
-                    : isToday
-                    ? 'bg-accent/10 dark:bg-accent/15 text-accent font-bold border-accent/40 hover:bg-accent/20'
-                    : 'bg-bg-light dark:bg-bg-dark border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark hover:border-accent/40 hover:bg-surface-light dark:hover:bg-surface-dark'
+                className={`relative flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-xl transition-all min-h-[74px] sm:min-h-[80px] select-none focus:outline-none ${
+                  !isSelected && isToday
+                    ? 'border border-accent/40 bg-accent/10 dark:bg-accent/15'
+                    : !isSelected
+                    ? 'hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                    : ''
                 }`}
                 title={`${day}: ${plan?.type || 'Rest'} (${exCount} activities)`}
               >
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeGymDayCapsule"
+                    className="absolute inset-0 rounded-xl bg-accent shadow-md shadow-accent/25"
+                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                  />
+                )}
+
                 {/* Day Header with Today indicator */}
-                <div className="flex items-center gap-1 justify-center w-full">
-                  <span className={`text-[11px] sm:text-xs font-bold leading-none ${
+                <div className="relative z-10 flex items-center gap-1 justify-center w-full">
+                  <span className={`text-[11px] sm:text-xs font-bold leading-none transition-colors ${
                     isSelected ? 'text-white' : isToday ? 'text-accent' : 'text-primary-light dark:text-primary-dark'
                   }`}>
                     {day}
@@ -386,9 +412,9 @@ export default function Gym({ data, updateData }: GymProps) {
                 </div>
 
                 {/* Split Type Badge */}
-                <span className={`text-[9.5px] sm:text-[10px] font-mono font-bold tracking-tight uppercase truncate max-w-full my-1 ${
+                <span className={`relative z-10 text-[9.5px] sm:text-[10px] font-mono font-bold tracking-tight uppercase truncate max-w-full my-1 transition-colors ${
                   isSelected
-                    ? 'text-white/95'
+                    ? 'text-white/95 font-black'
                     : isRest
                     ? 'text-muted-light dark:text-muted-dark font-medium'
                     : 'text-primary-light dark:text-primary-dark'
@@ -397,7 +423,7 @@ export default function Gym({ data, updateData }: GymProps) {
                 </span>
 
                 {/* Exercises Count */}
-                <span className={`text-[8.5px] sm:text-[9px] font-mono leading-none ${
+                <span className={`relative z-10 text-[8.5px] sm:text-[9px] font-mono leading-none transition-colors ${
                   isSelected
                     ? 'text-white/80'
                     : isRest
@@ -412,8 +438,8 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
       </div>
 
-      {/* Routine Activities Card */}
-      <div className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+      {/* Routine Activities Liquid Spring Capsule Card */}
+      <div className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-white/80 dark:border-white/10 shadow-xs space-y-4">
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
@@ -425,7 +451,10 @@ export default function Gym({ data, updateData }: GymProps) {
               {(activePlan?.exercises || []).length} activities
             </span>
             <button
-              onClick={() => navigate('/gym/split')}
+              onClick={() => {
+                triggerHaptic('light');
+                navigate('/gym/split');
+              }}
               className="text-xs font-bold text-accent hover:underline flex items-center gap-1 font-mono"
             >
               <Settings size={12} /> Edit Split
@@ -442,9 +471,11 @@ export default function Gym({ data, updateData }: GymProps) {
               const targetSets = Number(ex?.sets) || 0;
               const done = targetSets > 0 && completedSets >= targetSets;
               return (
-                <div
+                <motion.div
                   key={i}
-                  className="flex items-center justify-between p-3 rounded-[16px] hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-all border border-border-light/60 dark:border-border-dark/60"
+                  whileHover={{ scale: 1.012, y: -1, transition: { type: 'spring', stiffness: 400, damping: 25 } }}
+                  whileTap={{ scale: 0.985 }}
+                  className="flex items-center justify-between p-3.5 rounded-[20px] bg-white/60 dark:bg-white/[0.04] border border-black/5 dark:border-white/5 transition-colors shadow-xs"
                 >
                   <div>
                     <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{ex.name}</p>
@@ -454,20 +485,20 @@ export default function Gym({ data, updateData }: GymProps) {
                   </div>
                   {isSelectedToday && todayLog ? (
                     <span
-                      className={`text-xs font-bold px-3 py-1 rounded-full font-mono ${
+                      className={`text-xs font-bold px-3 py-1 rounded-full font-mono border ${
                         done
-                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark'
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-black/5 dark:bg-white/10 border-transparent text-secondary-light dark:text-secondary-dark'
                       }`}
                     >
                       {completedSets}/{ex.sets} sets
                     </span>
                   ) : (
-                    <span className="text-[11px] font-mono text-muted-light dark:text-muted-dark px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5">
+                    <span className="text-[11px] font-mono font-semibold text-muted-light dark:text-muted-dark px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/5">
                       {ex.sets} sets
                     </span>
                   )}
-                </div>
+                </motion.div>
               );
             })}
 

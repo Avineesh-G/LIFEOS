@@ -1,10 +1,10 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, Waves, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Sparkles, Droplets, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { triggerHaptic, getHapticLevel, setHapticLevel, getHapticIntensity, setHapticIntensity, HapticLevel } from '../utils/haptics';
 import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDeviceLock, SecurityConfig } from '../utils/security';
-import type { AppData, AppSettings, TransitionMode } from '../types';
+import type { AppData, AppSettings, TransitionMode, FluidIntensity } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import { FITNESS_GOALS } from '../utils/calculations';
 import { auth, db } from '../firebase';
@@ -20,6 +20,8 @@ interface SettingsProps {
   setAccentColor: (c: string) => void;
   transitionMode?: TransitionMode;
   setTransitionMode?: (m: TransitionMode) => void;
+  fluidIntensity?: FluidIntensity;
+  setFluidIntensity?: (i: FluidIntensity) => void;
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
   refresh: () => Promise<AppData>;
@@ -28,7 +30,16 @@ interface SettingsProps {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
 
-export default function Settings({ theme, setTheme, transitionMode = 'efficient', setTransitionMode, data, updateData }: SettingsProps) {
+export default function Settings({
+  theme,
+  setTheme,
+  transitionMode = 'efficient',
+  setTransitionMode,
+  fluidIntensity = 'balanced',
+  setFluidIntensity,
+  data,
+  updateData
+}: SettingsProps) {
   const navigate = useNavigate();
 
   // Private Groq API Key State
@@ -125,6 +136,16 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
     }
   };
 
+  // Fluid Intensity dynamics state
+  const [expandedFluid, setExpandedFluid] = useState<FluidIntensity | null>(null);
+
+  const handleFluidIntensityChange = (intensity: FluidIntensity) => {
+    if (setFluidIntensity) {
+      setFluidIntensity(intensity);
+      triggerHaptic('light');
+    }
+  };
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-28">
       
@@ -139,7 +160,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* Theme Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/10 text-amber-500 shadow-sm">
@@ -160,27 +181,35 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
         </div>
 
         <div className="pt-2">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2 p-1.5 rounded-[26px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10">
             {[
-              { value: 'light' as const, icon: Sun, label: 'Light', activeClass: 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-primary-light dark:border-primary-dark shadow-md' },
-              { value: 'dark' as const, icon: Moon, label: 'Dark', activeClass: 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light border-primary-light dark:border-primary-dark shadow-md' },
-              { value: 'system' as const, icon: Monitor, label: 'System', activeClass: 'bg-accent/15 text-accent border-accent/40 shadow-sm' },
-            ].map(({ value, icon: Icon, label, activeClass }) => {
+              { value: 'light' as const, icon: Sun, label: 'Light' },
+              { value: 'dark' as const, icon: Moon, label: 'Dark' },
+              { value: 'system' as const, icon: Monitor, label: 'System' },
+            ].map(({ value, icon: Icon, label }) => {
               const active = theme === value;
               return (
                 <button
                   key={value}
                   onClick={() => {
+                    triggerHaptic('light');
                     setTheme(value);
                   }}
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-[22px] border transition-all duration-150 active:scale-[0.96] ${
+                  className={`relative flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-[20px] transition-all duration-150 active:scale-[0.96] select-none focus:outline-none ${
                     active
-                      ? activeClass
-                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                      ? 'text-primary-dark dark:text-primary-light font-bold'
+                      : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
                   }`}
                 >
-                  <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-                  <span className="text-xs font-bold font-sans">{label}</span>
+                  {active && (
+                    <motion.div
+                      layoutId="activeThemeCapsule"
+                      className="absolute inset-0 rounded-[20px] bg-primary-light dark:bg-primary-dark shadow-md"
+                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <Icon size={20} strokeWidth={active ? 2.5 : 1.8} className={`relative z-10 transition-colors ${active ? 'text-primary-dark dark:text-primary-light' : ''}`} />
+                  <span className={`relative z-10 text-xs font-bold font-sans transition-colors ${active ? 'text-primary-dark dark:text-primary-light' : ''}`}>{label}</span>
                 </button>
               );
             })}
@@ -188,8 +217,254 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
         </div>
       </motion.div>
 
+      {/* Fluid Intensity (Glass Blurs, Halos & Spring Physics) */}
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400 shadow-sm">
+              <Sparkles size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans">
+                Fluid Intensity
+              </h3>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5">
+                Glass refraction, halo glow & card spring physics
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-bold px-3 py-1 rounded-full font-mono uppercase bg-accent/15 text-accent border border-accent/20 shadow-sm capitalize">
+            {fluidIntensity}
+          </span>
+        </div>
+
+        {/* Quick Segmented Toggle Capsule */}
+        <div className="pt-1">
+          <div className="grid grid-cols-3 gap-2 p-1.5 rounded-[26px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10">
+            {[
+              { value: 'subtle' as const, icon: Droplets, label: 'Subtle' },
+              { value: 'balanced' as const, icon: Sparkles, label: 'Balanced' },
+              { value: 'vivid' as const, icon: Flame, label: 'Vivid' },
+            ].map(({ value, icon: Icon, label }) => {
+              const active = fluidIntensity === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => handleFluidIntensityChange(value)}
+                  className={`relative flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] transition-all duration-150 active:scale-[0.96] select-none focus:outline-none ${
+                    active
+                      ? 'text-primary-dark dark:text-primary-light font-bold'
+                      : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
+                  }`}
+                >
+                  {active && (
+                    <motion.div
+                      layoutId="activeFluidCapsule"
+                      className="absolute inset-0 rounded-[20px] bg-primary-light dark:bg-primary-dark shadow-md"
+                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <Icon size={18} strokeWidth={active ? 2.5 : 1.8} className={`relative z-10 transition-colors ${active ? 'text-primary-dark dark:text-primary-light' : ''}`} />
+                  <div className="relative z-10 flex items-center gap-1">
+                    <span className={`text-xs font-bold font-sans transition-colors ${active ? 'text-primary-dark dark:text-primary-light' : ''}`}>{label}</span>
+                    {value === 'balanced' && (
+                      <span className={`text-[9px] font-mono uppercase ${active ? 'opacity-80' : 'opacity-50'}`}>• Def</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Fluid Intensity Cards with Enlarge Option */}
+        <div className="space-y-3 pt-1">
+          {[
+            {
+              id: 'subtle' as const,
+              title: 'Subtle',
+              icon: Droplets,
+              badge: '< 15px Blur',
+              badgeClass: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30',
+              iconBox: 'bg-sky-500/10 text-sky-500 dark:bg-sky-500/20 dark:text-sky-400',
+              subtitle: 'Clean Minimal • Low Glow • Gentle Tap',
+              description: 'Streamlined glass refraction with soft 14px blur and subdued glow halos. Maximizes power efficiency and keeps edge contrast ultra-clean on AMOLED screens.',
+              specs: {
+                blur: '14px Soft Gaussian',
+                glow: '12px Subtle Rim',
+                tapScale: '0.98x Light Tap',
+                specular: '14% Clean Border'
+              }
+            },
+            {
+              id: 'balanced' as const,
+              title: 'Balanced',
+              icon: Sparkles,
+              badge: '28px Organic',
+              badgeClass: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
+              iconBox: 'bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-400',
+              recommended: true,
+              subtitle: 'Signature Fluid • Bioluminescent Halos',
+              description: 'The definitive LifeOS tactile experience. Deep 28px frosted glass refraction, dynamic accent glow rings, and responsive spring bounce on card taps.',
+              specs: {
+                blur: '28px Frosted Glass',
+                glow: '24px Ambient Halo',
+                tapScale: '0.95x Spring Pop',
+                specular: '26% Specular Edge'
+              }
+            },
+            {
+              id: 'vivid' as const,
+              title: 'Vivid',
+              icon: Flame,
+              badge: '38px Deep Glow',
+              badgeClass: 'bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/30',
+              iconBox: 'bg-fuchsia-500/10 text-fuchsia-500 dark:bg-fuchsia-500/20 dark:text-fuchsia-400',
+              subtitle: 'Hyper-Tactile • Ultra-Luminous Halos',
+              description: 'Maximized depth sensation. Rich 38px multi-stage refraction, dramatic glowing auras that bleed organically off card edges, and deep tactile spring bounces.',
+              specs: {
+                blur: '38px Hyper Glass',
+                glow: '42px Neon Aura',
+                tapScale: '0.93x Punchy Spring',
+                specular: '38% Vivid Laser Rim'
+              }
+            },
+          ].map((item) => {
+            const active = fluidIntensity === item.id;
+            const isOpen = expandedFluid === item.id;
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.id}
+                className={`card overflow-hidden transition-all duration-200 border ${
+                  active
+                    ? 'border-accent ring-2 ring-accent/20 bg-accent/[0.03] dark:bg-accent/[0.06] shadow-md'
+                    : 'border-border-light/80 dark:border-border-dark/80 bg-surface-light dark:bg-surface-dark hover:border-accent/40'
+                }`}
+              >
+                {/* Header Row - Click to Enlarge / Collapse */}
+                <div
+                  className="w-full flex items-center justify-between p-4 sm:p-4.5 cursor-pointer active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
+                  onClick={() => {
+                    setExpandedFluid(isOpen ? null : item.id);
+                  }}
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${item.iconBox} shadow-sm`}>
+                      <Icon size={20} strokeWidth={2.4} />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-extrabold text-sm sm:text-base text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                          {item.title}
+                        </span>
+                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${item.badgeClass}`}>
+                          {item.badge}
+                        </span>
+                        {item.recommended && (
+                          <span className="text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-secondary-light dark:text-secondary-dark mt-0.5 font-medium truncate">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions on right: Active Checkmark & Enlarge Chevron */}
+                  <div className="flex items-center gap-2.5 shrink-0 ml-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleFluidIntensityChange(item.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold font-sans transition-all active:scale-95 flex items-center gap-1.5 ${
+                        active
+                          ? 'bg-accent text-white shadow-sm'
+                          : 'bg-black/[0.04] dark:bg-white/[0.06] text-secondary-light dark:text-secondary-dark hover:text-primary-light'
+                      }`}
+                    >
+                      {active ? (
+                        <>
+                          <Check size={13} strokeWidth={2.8} />
+                          <span>Active</span>
+                        </>
+                      ) : (
+                        <span>Select</span>
+                      )}
+                    </button>
+
+                    <div className="text-secondary-light dark:text-secondary-dark p-1 rounded-full hover:bg-black/[0.04] dark:hover:bg-white/[0.05] transition-colors">
+                      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enlarged Details Body */}
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 pb-4.5 pt-2 border-t border-border-light/70 dark:border-border-dark/70 space-y-3.5 bg-black/[0.015] dark:bg-white/[0.015]">
+                        <p className="text-xs leading-relaxed text-secondary-light dark:text-secondary-dark pt-1 font-sans">
+                          {item.description}
+                        </p>
+
+                        {/* Technical Architecture Specs Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Glass Refraction</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{item.specs.blur}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Ambient Halos</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{item.specs.glow}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Spring Tap Pop</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{item.specs.tapScale}</p>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-2xs">
+                            <p className="text-[9.5px] font-mono uppercase tracking-wider text-muted-light dark:text-muted-dark font-bold">Specular Rim</p>
+                            <p className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans mt-0.5">{item.specs.specular}</p>
+                          </div>
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[11px] font-mono text-secondary-light/90 dark:text-secondary-dark/90">
+                            {active ? '● Currently Active Profile' : 'Ready to apply globally'}
+                          </span>
+                          {!active && (
+                            <button
+                              type="button"
+                              onClick={() => handleFluidIntensityChange(item.id)}
+                              className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-bold font-sans transition-transform active:scale-95 shadow-sm"
+                            >
+                              Activate {item.title}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+
       {/* Motion & Interface Transitions (120/144 FPS) */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
@@ -397,7 +672,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* Haptic Feedback & Vibration Intensity Slider Section (Volume inspired with smooth leverage & Save button) */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm">
@@ -422,7 +697,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
         </div>
 
         {/* Volume-Inspired Slider Container */}
-        <div className="p-5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 space-y-4">
+        <div className="p-5 rounded-[24px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 space-y-4">
           {/* Header Row with Dynamic Volume Icon and Readout */}
           <div className="flex items-center justify-between text-xs font-mono font-bold text-secondary-light dark:text-secondary-dark">
             <span className="flex items-center gap-2">
@@ -531,7 +806,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* App Security & Phone Lock Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-5">
         {/* Card Header: Icon, Title, Subtitle, and Toggle Switch */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
@@ -688,7 +963,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* Body Profile Section */}
-      <motion.div variants={item} className="rounded-[28px] p-6 sm:p-7 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-5">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-m3-mint-badge/70 dark:bg-m3-mint-darkBadge/70 text-m3-mint-text dark:text-m3-mint-darkText shadow-sm">
@@ -721,7 +996,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* Private Groq AI Coach Configuration */}
-      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="w-10 h-10 rounded-[14px] bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-600 dark:text-purple-400">
@@ -758,7 +1033,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
               value={apiKeyInput}
               onChange={e => setApiKeyInput(e.target.value)}
               placeholder="gsk_..."
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-[20px] px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow text-primary-light dark:text-primary-dark"
             />
             <button
               type="button"
@@ -796,7 +1071,7 @@ export default function Settings({ theme, setTheme, transitionMode = 'efficient'
       </motion.div>
 
       {/* Account Settings */}
-      <motion.div variants={item} className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-4">
+      <motion.div variants={item} className="rounded-[32px] p-6 sm:p-7 liquid-glass shadow-sm space-y-4">
         {/* User Account Info Header */}
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-[18px] bg-accent/10 border border-accent/25 flex items-center justify-center text-lg font-black text-accent font-sans shadow-sm shrink-0">

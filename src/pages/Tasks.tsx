@@ -122,19 +122,19 @@ export default function Tasks({ data, updateData }: TasksProps) {
       </div>
 
       {/* Progress pill card */}
-      <div className="rounded-[28px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm space-y-3">
+      <div className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-sm space-y-3.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             Completion Rate
           </span>
-          <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+          <span className={`px-3.5 py-1 rounded-full text-xs font-bold shadow-xs border ${
             pct === 100
-              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+              ? 'bg-emerald-500/15 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
               : pct >= 50
-                ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300'
+                ? 'bg-indigo-500/15 border-indigo-500/25 text-indigo-700 dark:text-indigo-300'
                 : todayTasks.length === 0
-                  ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
-                  : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+                  ? 'bg-neutral-500/10 border-neutral-500/20 text-neutral-600 dark:text-neutral-400'
+                  : 'bg-amber-500/15 border-amber-500/25 text-amber-700 dark:text-amber-300'
           }`}>
             {pct === 100 ? 'All Done' : pct >= 50 ? 'On Track' : todayTasks.length === 0 ? 'No Tasks' : 'In Progress'}
           </span>
@@ -142,7 +142,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
         {/* Segmented bar — one segment per task */}
         {todayTasks.length > 0 ? (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5 py-1">
             {todayTasks.map((task, i) => {
               const palette = [
                 'bg-purple-500',
@@ -160,25 +160,25 @@ export default function Tasks({ data, updateData }: TasksProps) {
               return (
                 <div
                   key={task.id}
-                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                  className={`h-2.5 flex-1 rounded-full transition-all duration-300 shadow-xs ${
                     task.completed
-                      ? color
-                      : 'bg-neutral-100 dark:bg-neutral-800'
+                      ? `${color} opacity-100`
+                      : 'bg-black/5 dark:bg-white/10'
                   }`}
                 />
               );
             })}
           </div>
         ) : (
-          <div className="w-full h-2 rounded-full bg-neutral-100 dark:bg-neutral-800" />
+          <div className="w-full h-2.5 rounded-full bg-black/5 dark:bg-white/10" />
         )}
 
         {/* Count below */}
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-[11px] font-mono font-medium text-muted-light dark:text-muted-dark">
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-[11px] font-mono font-semibold text-muted-light dark:text-muted-dark">
             {completedCount}/{todayTasks.length} done
           </span>
-          <span className="text-[11px] font-mono font-medium text-muted-light dark:text-muted-dark">
+          <span className="text-[11px] font-mono font-bold text-accent">
             {pct}%
           </span>
         </div>
@@ -186,18 +186,18 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
       {/* Yesterday's / Overdue Pending Tasks Subsection */}
       {previousPendingTasks.length > 0 && (
-        <div className="rounded-[26px] p-4 sm:p-5 bg-gradient-to-br from-amber-500/10 via-amber-500/[0.04] to-transparent border border-amber-500/25 dark:border-amber-500/30 shadow-sm space-y-3">
+        <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-amber-500/30 glow-peach shadow-sm space-y-3.5">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-                <Clock size={15} className="stroke-[2.5]" />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/25">
+                <Clock size={16} className="stroke-[2.5]" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-black text-amber-900 dark:text-amber-300 font-sans tracking-tight">
                     Yesterday's Tasks Are Pending
                   </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/25">
                     {previousPendingTasks.length}
                   </span>
                 </div>
@@ -207,15 +207,17 @@ export default function Tasks({ data, updateData }: TasksProps) {
               </div>
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
               onClick={rolloverAllToToday}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm active:scale-95 transition-all"
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors"
               title="Move all pending tasks to today"
             >
               <RotateCcw size={12} className="stroke-[2.5]" />
               <span className="hidden sm:inline">Forward All</span>
               <span className="sm:hidden">All</span>
-            </button>
+            </motion.button>
           </div>
 
           {/* List of carried-over pending tasks */}
@@ -230,17 +232,20 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ scale: 1.01, y: -1 }}
+                    whileTap={{ scale: 0.985 }}
                     transition={{ duration: 0.15 }}
-                    className="rounded-[18px] border border-amber-500/20 bg-white/90 dark:bg-[#1C1A17] p-3 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-all group"
+                    className="rounded-[22px] border border-amber-500/20 bg-white/80 dark:bg-white/[0.04] p-3.5 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-colors group"
                   >
-                    <button
+                    <motion.button
                       type="button"
+                      whileTap={{ scale: 0.82 }}
                       onClick={() => toggleTask(task.id)}
                       className="w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center border-2 border-amber-400 dark:border-amber-500/60 hover:bg-amber-500 hover:text-white transition-all bg-amber-500/5 text-transparent"
                       title="Mark done and roll to today"
                     >
                       <Check size={14} className="stroke-[3] group-hover:text-white" />
-                    </button>
+                    </motion.button>
 
                     <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
                       <div className="flex items-center gap-2">
@@ -260,26 +265,29 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     </div>
 
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
+                      <motion.button
                         type="button"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.92 }}
                         onClick={() => moveToToday(task.id)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-all"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-colors"
                         title="Move to Today"
                       >
                         <ArrowRight size={11} className="stroke-[2.5]" />
                         <span>Today</span>
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
                         type="button"
+                        whileTap={{ scale: 0.88 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteTask(task.id);
                         }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-muted-light hover:text-red-500 transition-all"
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-red-50 dark:hover:bg-red-950/60 text-muted-light hover:text-red-500 transition-colors"
                         title="Delete task"
                       >
                         <Trash2 size={13} />
-                      </button>
+                      </motion.button>
                     </div>
                   </motion.div>
                 );
@@ -298,7 +306,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
         </div>
       )}
 
-      {/* Task list */}
+      {/* Task list with Bouncy Checkboxes and Fluid Squircle Cards */}
       <div className="space-y-3">
         <AnimatePresence>
           {todayTasks.map(task => {
@@ -306,27 +314,40 @@ export default function Tasks({ data, updateData }: TasksProps) {
             return (
               <motion.div
                 key={task.id}
-                initial={{ opacity: 0, y: 6 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
+                whileHover={{ scale: 1.012, y: -1, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
+                whileTap={{ scale: 0.985 }}
                 transition={{ duration: 0.18 }}
-                className={`rounded-[22px] border transition-all p-4 flex items-center gap-3.5 group shadow-sm ${
+                className={`rounded-[26px] border transition-colors p-4 flex items-center gap-3.5 group shadow-xs ${
                   task.completed
                     ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-border-dark/50 opacity-75'
-                    : 'bg-white dark:bg-[#1A1B1F] border-border-light dark:border-border-dark hover:border-accent/40 shadow-sm'
+                    : 'liquid-glass border-white/80 dark:border-white/10 hover:border-accent/40 shadow-xs'
                 }`}
               >
-                <button
+                {/* Bouncy Spring Pop Checkbox */}
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.82 }}
                   onClick={() => toggleTask(task.id)}
-                  className={`w-7 h-7 rounded-[9px] flex-shrink-0 flex items-center justify-center transition-all ${
+                  className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
                     task.completed
-                      ? 'bg-accent text-white shadow-sm scale-100'
+                      ? 'bg-accent text-white shadow-sm'
                       : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent bg-black/[0.02] dark:bg-white/[0.04]'
                   }`}
                 >
-                  {task.completed && <Check size={16} className="stroke-[3]" />}
-                </button>
+                  {task.completed && (
+                    <motion.div
+                      initial={{ scale: 0.4 }}
+                      animate={{ scale: [0.4, 1.35, 0.95, 1] }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                    >
+                      <Check size={15} strokeWidth={3} />
+                    </motion.div>
+                  )}
+                </motion.button>
+
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleTask(task.id)}>
                   <span className={`text-sm leading-snug block font-bold transition-all ${
                     task.completed
@@ -345,8 +366,10 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     </span>
                   )}
                 </div>
-                <button
+
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.88 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteTask(task.id);
@@ -355,14 +378,14 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   title="Delete task"
                 >
                   <Trash2 size={15} />
-                </button>
+                </motion.button>
               </motion.div>
             );
           })}
         </AnimatePresence>
 
         {todayTasks.length === 0 && (
-          <div className="card p-10 text-center">
+          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/10">
             <p className="text-2xl mb-2">✓</p>
             <p className="label-mono text-secondary-light dark:text-secondary-dark font-bold">No TO-DOs yet</p>
             <p className="text-sm text-muted-light dark:text-muted-dark mt-1">Tap + Add Task to create your first TO-DO</p>
@@ -385,7 +408,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 30, stiffness: 340 }}
-              className="w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-t-[32px] sm:rounded-[28px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-border-light/80 dark:border-border-dark/80 shadow-[0_-16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_-16px_48px_rgba(0,0,0,0.6)]"
+              className="w-full max-w-lg liquid-glass rounded-t-[36px] sm:rounded-[36px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-white/80 dark:border-white/15 shadow-[0_-16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_-16px_48px_rgba(0,0,0,0.6)]"
               onClick={e => e.stopPropagation()}
             >
               {/* Top Drag Indicator */}
@@ -396,14 +419,15 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
                   New TO-DO
                 </h2>
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setShowAdd(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80 active:scale-95 transition-all"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark hover:opacity-80 transition-opacity"
                   aria-label="Close"
                 >
                   <X size={16} />
-                </button>
+                </motion.button>
               </div>
 
               {/* Form Fields */}
@@ -436,21 +460,24 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
-                  <button
+                  <motion.button
                     type="button"
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAdd(false)}
-                    className="w-full py-3.5 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] transition-all"
+                    className="w-full py-3.5 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={addTask}
                     disabled={!newTask.trim()}
-                    className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-40 disabled:shadow-none"
+                    className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40 disabled:shadow-none"
                   >
                     Create Task
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             </motion.div>

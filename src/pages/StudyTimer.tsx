@@ -275,17 +275,17 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-6 space-y-5"
+          className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-white/80 dark:border-white/10 shadow-sm space-y-5"
         >
-          <div className="flex items-center gap-2">
-            <span className="w-9 h-9 rounded-[12px] bg-m3-lavender-badge/70 dark:bg-m3-lavender-darkBadge/70 text-m3-lavender-text dark:text-m3-lavender-darkText flex items-center justify-center">
-              <Clock size={18} />
+          <div className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-[14px] bg-indigo-500/15 border border-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs">
+              <Clock size={19} strokeWidth={2.2} />
             </span>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
                 Focus Session
               </p>
-              <h2 className="text-xl font-black text-primary-light dark:text-primary-dark">Start Timer</h2>
+              <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Start Timer</h2>
             </div>
           </div>
 
@@ -299,7 +299,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
               onChange={(e) => setSubject(e.target.value)}
               placeholder="e.g. DSA, Operating Systems, Math"
               list="subjects"
-              className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-[18px] px-4 py-3.5 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
             />
             <datalist id="subjects">
               {subjects.map(s => <option key={s} value={s} />)}
@@ -313,18 +313,22 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
               </p>
               <div className="flex flex-wrap gap-2">
                 {subjects.slice(0, 5).map(s => (
-                  <button
+                  <motion.button
                     key={s}
                     type="button"
-                    onClick={() => setSubject(s)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setSubject(s);
+                    }}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors ${
                       subject === s
-                        ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light'
-                        : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark'
+                        ? 'bg-accent text-white shadow-xs'
+                        : 'bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
                     }`}
                   >
                     {s}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -339,26 +343,28 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. Binary Search Trees, Chapter 4"
-              className="w-full bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-[18px] px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
             />
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleStart}
             disabled={!subject.trim()}
-            className="w-full py-4 rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-full bg-accent text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-accent/25 flex items-center justify-center gap-2"
           >
             <Play size={16} fill="currentColor" /> Start Focus Session
-          </button>
+          </motion.button>
         </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-[32px] p-8 text-center bg-m3-lavender-container dark:bg-m3-lavender-darkContainer text-m3-lavender-text dark:text-m3-lavender-darkText border border-m3-lavender-badge/50 dark:border-m3-lavender-darkBadge/50 shadow-m3-subtle space-y-6"
+          className="rounded-[36px] p-8 text-center liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 text-m3-lavender-text dark:text-m3-lavender-darkText shadow-sm space-y-6 relative overflow-hidden"
         >
-          <div className="space-y-1">
-            <span className="rounded-full bg-white/70 dark:bg-black/25 px-3.5 py-1 text-xs font-bold inline-block shadow-sm">
+          <div className="space-y-1 relative z-10">
+            <span className="rounded-full bg-indigo-500/15 border border-indigo-500/25 px-4 py-1.5 text-xs font-bold inline-block shadow-xs text-indigo-900 dark:text-indigo-200">
               {subject} {topic ? `· ${topic}` : ''}
             </span>
             <p className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono pt-2">
@@ -366,44 +372,52 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
             </p>
           </div>
 
-          <div className="text-6xl sm:text-7xl font-black tracking-tight font-mono py-4">
+          <div className="text-6xl sm:text-7xl font-black tracking-tight font-mono py-4 text-primary-light dark:text-primary-dark relative z-10">
             {formatTime(seconds)}
           </div>
 
-          <div className="flex items-center justify-center gap-4 pt-2">
+          <div className="flex items-center justify-center gap-4 pt-2 relative z-10">
             {timerState === 'running' ? (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={handlePause}
-                className="w-16 h-16 rounded-[22px] bg-white dark:bg-black/30 text-m3-lavender-text dark:text-m3-lavender-darkText flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md"
+                className="w-16 h-16 rounded-[24px] bg-white dark:bg-white/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center transition-colors shadow-sm"
                 title="Pause"
               >
                 <Pause size={24} fill="currentColor" />
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={handleResume}
-                className="w-16 h-16 rounded-[22px] bg-[#4F378B] dark:bg-[#D0BCFF] text-white dark:text-[#231E2E] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md"
+                className="w-16 h-16 rounded-[24px] bg-indigo-600 dark:bg-indigo-400 text-white dark:text-indigo-950 flex items-center justify-center transition-colors shadow-md shadow-indigo-500/25"
                 title="Resume"
               >
                 <Play size={24} fill="currentColor" />
-              </button>
+              </motion.button>
             )}
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={handleStop}
-              className="w-16 h-16 rounded-[22px] bg-rose-500 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md"
+              className="w-16 h-16 rounded-[24px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-md shadow-rose-500/25"
               title="Stop & Save"
             >
               <Square size={22} fill="currentColor" />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
               onClick={handleCancel}
-              className="w-12 h-12 rounded-[18px] bg-white/60 dark:bg-black/20 text-m3-lavender-text dark:text-m3-lavender-darkText flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+              className="w-12 h-12 rounded-[20px] bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark flex items-center justify-center transition-colors"
               title="Reset"
             >
               <RotateCcw size={18} />
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       )}

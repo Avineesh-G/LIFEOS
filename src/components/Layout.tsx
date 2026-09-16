@@ -162,59 +162,79 @@ export default function Layout({ children, refresh }: LayoutProps) {
   return (
     <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
 
-      {/* ── Fixed Ambient Soft Flowing Waves Background ── */}
+      {/* ── Fixed Ambient Minimal Flowing Waves Background ── */}
+      {/* Light Mode Minimalist Waves */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-40 dark:opacity-15 dark:brightness-90"
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-40 dark:hidden"
         style={{
-          backgroundImage: "url('/bg-soft-waves.jpg')",
+          backgroundImage: "url('/bg-light-waves.jpg')",
         }}
         aria-hidden="true"
       />
 
-      {/* ── Top header bar ── */}
-      <header 
-        className="fixed top-0 left-0 right-0 z-30 bg-white/90 dark:bg-[#121316]/90 backdrop-blur-md border-b border-border-light/60 dark:border-border-dark/60 gpu-composited"
+      {/* Dark Mode Minimalist Waves (Deep Obsidian Base + Glowing Aurora Ribbons) */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-60 hidden dark:block"
         style={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
+          backgroundImage: "url('/bg-dark-waves.jpg')",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ── Dark Ambient Bioluminescent Auras (Extra Refraction sources for dark liquid glass) ── */}
+      <div className="hidden dark:block pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-32 -left-20 w-[420px] h-[420px] rounded-full bg-indigo-600/15 blur-[130px] -translate-z-0" />
+        <div className="absolute top-1/3 -right-24 w-[380px] h-[380px] rounded-full bg-emerald-600/12 blur-[130px] -translate-z-0" />
+        <div className="absolute -bottom-24 left-1/4 w-[360px] h-[360px] rounded-full bg-rose-600/12 blur-[140px] -translate-z-0" />
+      </div>
+
+      {/* ── Top In-Page Minimalist Controls (Option B: Pure Floating · Moves with page scroll) ── */}
+      <header 
+        className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited"
+        style={{
+          paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))',
         }}
       >
-        <div className="relative flex items-center justify-between px-5 h-14">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
-            <span className="font-bold text-base tracking-tight text-primary-light dark:text-primary-dark font-sans">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-9 max-w-xl mx-auto">
+          {/* Left: LifeOS Floating Micro-Badge */}
+          <button
+            onPointerDown={() => triggerHaptic('light')}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.35)] active:scale-95 transition-all select-none hover:bg-white/95 dark:hover:bg-[#16171D]"
+            title="Scroll to top"
+            aria-label="LifeOS, scroll to top"
+          >
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span className="font-bold text-xs tracking-tight text-primary-light dark:text-primary-dark font-sans">
               LifeOS
             </span>
-          </div>
+          </button>
 
-          {/* Centered slide / page indicator */}
-          <span className="absolute left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-xs font-semibold text-secondary-light dark:text-secondary-dark tracking-wide pointer-events-none whitespace-nowrap shadow-sm">
-            {pageLabel}
-          </span>
-
+          {/* Right: Floating Minimalist Reload Button */}
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={handleReload}
             disabled={isReloading}
-            className={`w-9 h-9 flex items-center justify-center rounded-full bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 text-secondary-light dark:text-secondary-dark hover:opacity-85 active:scale-95 transition-all shadow-sm ${
-              isReloading ? 'text-accent border-accent/40 bg-accent/5' : ''
+            className={`pointer-events-auto w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/30 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_1.5px_rgba(255,255,255,0.35)] ${
+              isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
             }`}
             aria-label="Reload and sync data"
             title="Reload and sync data"
           >
-            <RotateCw size={17} strokeWidth={2.2} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
+            <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
           </button>
         </div>
       </header>
 
-      {/* ── Main content ── */}
+      {/* ── Main content (Reframed with Edge-to-Edge Fluid Flow & Spacious Breathing Room) ── */}
       <main 
         className="relative z-10 min-h-screen"
         style={{
-          paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))',
           paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        <div className="max-w-xl mx-auto px-4 py-6">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 pt-2 sm:pt-4 pb-8">
           {children}
         </div>
       </main>
@@ -292,14 +312,14 @@ export default function Layout({ children, refresh }: LayoutProps) {
       >
         <div className="pointer-events-auto flex items-center gap-2 sm:gap-2.5 max-w-md">
           {/* Main Divided Segment: Home, Gym, Nutrition */}
-          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-white/95 dark:bg-[#1A1B22]/95 backdrop-blur-2xl border border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_44px_rgba(0,0,0,0.7)]">
+          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-white/95 dark:bg-[#16171E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/35 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.5)]">
             {primaryDockItems.map((item, idx) => {
               const active = isActive(item.path);
               const Icon = item.icon;
               return (
                 <div key={item.path} className="flex items-center">
                   {idx > 0 && (
-                    <div className="w-[1px] h-5 bg-black/[0.08] dark:bg-white/[0.12] rounded-full mx-0.5" />
+                    <div className="w-[1px] h-5 bg-black/[0.08] dark:bg-white/20 rounded-full mx-0.5" />
                   )}
                   <button
                     onClick={() => {
@@ -317,7 +337,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
                     {active && (
                       <motion.div
                         layoutId="activeTabBadge"
-                        className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm"
+                        className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/25 border border-accent/40 dark:border-accent/60 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)]"
                         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                       />
                     )}
@@ -332,7 +352,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
           </div>
 
           {/* Divided Companion Satellite: More / Menu Launcher */}
-          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-white/95 dark:bg-[#1A1B22]/95 backdrop-blur-2xl border border-black/10 dark:border-white/15 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_44px_rgba(0,0,0,0.7)]">
+          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-white/95 dark:bg-[#16171E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/35 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.5)]">
             <button
               onClick={() => {
                 triggerHaptic('light');
@@ -347,7 +367,7 @@ export default function Layout({ children, refresh }: LayoutProps) {
             >
               {(menuOpen || isSecondaryActive) && (
                 <div
-                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/22 border border-accent/35 shadow-sm transition-opacity duration-150"
+                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/25 border border-accent/40 dark:border-accent/60 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-opacity duration-150"
                 />
               )}
               {menuOpen ? (

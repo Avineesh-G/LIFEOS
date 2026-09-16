@@ -597,20 +597,27 @@ export default function Vault({ data, updateData }: VaultProps) {
         </button>
       </div>
 
-      {/* ── Category Chips (Clean Mobile Layout with NO SCROLLBAR) ── */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 touch-pan-x">
+      {/* ── Category Chips with Fluid Spring Capsule ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar p-1 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 py-1 touch-pan-x">
         <button
           onClick={() => {
             triggerHaptic('light');
             setSelectedCategory('all');
           }}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-tight whitespace-nowrap transition-all select-none shrink-0 ${
-            selectedCategory === 'all'
-              ? 'bg-emerald-500 text-white shadow-sm'
-              : 'bg-white/60 dark:bg-[#1B1D25]/60 text-secondary-light dark:text-secondary-dark border border-black/5 dark:border-white/5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+          className={`relative px-3 py-1.5 rounded-xl text-xs font-bold tracking-tight whitespace-nowrap transition-all select-none shrink-0 focus:outline-none ${
+            selectedCategory !== 'all' ? 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark' : ''
           }`}
         >
-          All ({vaultItems.length})
+          {selectedCategory === 'all' && (
+            <motion.div
+              layoutId="activeVaultCategoryCapsule"
+              className="absolute inset-0 rounded-xl bg-emerald-500 shadow-md shadow-emerald-500/20"
+              transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+            />
+          )}
+          <span className={`relative z-10 ${selectedCategory === 'all' ? 'text-white' : ''}`}>
+            All ({vaultItems.length})
+          </span>
         </button>
         {(Object.keys(CATEGORY_CONFIG) as VaultCategory[]).map((cat) => {
           const config = CATEGORY_CONFIG[cat];
@@ -624,15 +631,20 @@ export default function Vault({ data, updateData }: VaultProps) {
                 triggerHaptic('light');
                 setSelectedCategory(cat);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-tight whitespace-nowrap transition-all select-none shrink-0 ${
-                active
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'bg-white/60 dark:bg-[#1B1D25]/60 text-secondary-light dark:text-secondary-dark border border-black/5 dark:border-white/5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold tracking-tight whitespace-nowrap transition-all select-none shrink-0 focus:outline-none ${
+                !active ? 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark' : ''
               }`}
             >
-              <Icon size={12} className={active ? 'text-white' : config.color} />
-              <span>{config.shortLabel}</span>
-              {count > 0 && <span className="text-[10px] opacity-80">({count})</span>}
+              {active && (
+                <motion.div
+                  layoutId="activeVaultCategoryCapsule"
+                  className="absolute inset-0 rounded-xl bg-emerald-500 shadow-md shadow-emerald-500/20"
+                  transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                />
+              )}
+              <Icon size={12} className={`relative z-10 transition-colors ${active ? 'text-white' : config.color}`} />
+              <span className={`relative z-10 transition-colors ${active ? 'text-white' : ''}`}>{config.shortLabel}</span>
+              {count > 0 && <span className={`relative z-10 text-[10px] opacity-80 ${active ? 'text-white' : ''}`}>({count})</span>}
             </button>
           );
         })}

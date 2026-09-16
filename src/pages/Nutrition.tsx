@@ -509,10 +509,10 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </button>
       </motion.div>
 
-      {/* Material 3 Expressive Peach/Mint Tonal Calorie Hero Container */}
+      {/* Bioluminescent Peach Liquid Spring Capsule Calorie Hero */}
       <motion.div
         variants={item}
-        className="rounded-[28px] p-6 bg-m3-peach-container dark:bg-m3-peach-darkContainer text-m3-peach-text dark:text-m3-peach-darkText border border-m3-peach-badge/50 dark:border-m3-peach-darkBadge/50 shadow-m3-subtle flex items-center gap-6"
+        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 liquid-glass glow-peach border border-amber-200/50 dark:border-amber-800/40 text-m3-peach-text dark:text-m3-peach-darkText shadow-sm flex items-center gap-6 relative overflow-hidden"
       >
         <div className="relative flex-shrink-0">
           <svg width="104" height="104" viewBox="0 0 104 104">
@@ -564,11 +564,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </div>
       </motion.div>
 
-      {/* ── Food Doubt Card (Can I eat this?) ── */}
-      <motion.div variants={item} className="card p-5 space-y-3.5">
+      {/* ── Food Doubt Card (Liquid Spring Capsule) ── */}
+      <motion.div variants={item} className="liquid-glass rounded-[30px] p-5 sm:p-6 border border-purple-500/25 glow-lavender shadow-sm space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-[14px] bg-m3-lavender-badge/70 dark:bg-m3-lavender-darkBadge/70 text-m3-lavender-text dark:text-m3-lavender-darkText flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-[14px] bg-purple-500/15 border border-purple-500/25 text-purple-700 dark:text-purple-300 flex items-center justify-center shadow-xs">
               <Sparkles size={18} />
             </div>
             <div>
@@ -596,17 +596,19 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             onChange={(e) => setFoodDoubtQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !foodDoubtLoading && handleAskFoodDoubt()}
             placeholder="e.g. 2 slices of pepperoni pizza, iced mocha, samosa..."
-            className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
+            className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.94 }}
             onPointerDown={() => triggerHaptic('ai')}
             onClick={handleAskFoodDoubt}
             disabled={foodDoubtLoading || !foodDoubtQuery.trim()}
-            className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-700 active:scale-95 text-white transition-all disabled:opacity-40 flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-40 flex items-center gap-1.5 shadow-sm"
           >
             {foodDoubtLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
             <span>Ask</span>
-          </button>
+          </motion.button>
         </div>
 
         {foodDoubtError && (
@@ -619,9 +621,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              className="p-3 rounded-xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 text-xs text-primary-light dark:text-primary-dark leading-relaxed flex items-start gap-2.5"
+              className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-primary-light dark:text-primary-dark leading-relaxed flex items-start gap-2.5"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+              <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0" />
               <p className="flex-1 font-medium">{foodDoubtAnswer}</p>
             </motion.div>
           )}
@@ -631,7 +633,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       {/* Menu Cards */}
       {todayMenu && (
         <motion.div variants={item} className="space-y-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1">
             <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
             <button
               onPointerDown={() => triggerHaptic('ai')}
@@ -709,13 +711,16 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             const isSkipped = mealLog?.items.some(i => i.id === 'skipped');
 
             return (
-              <div key={mealObj.slot} className="card overflow-hidden">
+              <div key={mealObj.slot} className="rounded-[28px] liquid-glass border border-white/80 dark:border-white/10 overflow-hidden shadow-xs transition-shadow">
                 <button
-                  className="w-full flex items-center justify-between p-4 active:bg-bg-light dark:active:bg-bg-dark transition-colors"
-                  onClick={() => setExpanded(isOpen ? null : mealObj.slot)}
+                  className="w-full flex items-center justify-between p-4 sm:p-5 active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setExpanded(isOpen ? null : mealObj.slot);
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${mealObj.dotColor} bg-opacity-20 text-current`}>
+                  <div className="flex items-center gap-3.5">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mealObj.dotColor} bg-opacity-20 text-current shadow-xs`}>
                       {mealObj.icon}
                     </div>
                     <div className="text-left">
@@ -725,12 +730,12 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   </div>
                   <div className="flex items-center gap-3">
                     {slotCals > 0 && !isSkipped && (
-                      <span className="text-xs font-bold font-mono text-primary-light dark:text-primary-dark">
+                      <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
                         {Math.round(slotCals)} kcal
                       </span>
                     )}
                     {isSkipped && (
-                      <span className="text-xs font-bold text-amber-500">
+                      <span className="text-xs font-bold text-amber-500 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
                         Skipped
                       </span>
                     )}
@@ -741,7 +746,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 border-t border-border-light dark:border-border-dark pt-3">
+                      <div className="px-4 pb-4 border-t border-black/5 dark:border-white/5 pt-3">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
                             {mealObj.slot === 'nightCanteen' ? 'Night Canteen (10:30 PM–12:30 AM)' : 'Menu Items'}
@@ -770,9 +775,9 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                   return (
                                     <div
                                       key={item.name}
-                                      className={`w-full flex flex-col p-3 rounded-xl border transition-all ${isSelected
-                                          ? 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/30 dark:border-primary-dark/30'
-                                          : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark'
+                                      className={`w-full flex flex-col p-3 rounded-2xl border transition-all ${isSelected
+                                          ? 'bg-accent/10 border-accent/30 shadow-xs'
+                                          : 'bg-white/60 dark:bg-white/[0.03] border-black/5 dark:border-white/5'
                                         }`}
                                     >
                                       <div className="flex items-center justify-between">
@@ -780,36 +785,38 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                           className="flex items-center gap-3 flex-1 text-left"
                                           onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
                                         >
-                                          <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center ${isSelected ? 'border-primary-light dark:border-primary-dark bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark' : 'border-border-light dark:border-border-dark text-transparent'}`}>
+                                          <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center transition-colors ${isSelected ? 'border-accent bg-accent text-white' : 'border-neutral-300 dark:border-neutral-600 text-transparent'}`}>
                                             <Check size={12} strokeWidth={3} />
                                           </div>
-                                          <span className={`text-sm font-medium flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                                          <span className={`text-sm font-semibold flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
                                             {item.name}
-                                            {isRecommended && <Leaf size={14} className={isSelected ? 'text-emerald-500' : 'text-emerald-500'} />}
-                                            {isAvoid && <AlertTriangle size={14} className={isSelected ? 'text-red-500' : 'text-red-500'} />}
+                                            {isRecommended && <Leaf size={14} className="text-emerald-500" />}
+                                            {isAvoid && <AlertTriangle size={14} className="text-red-500" />}
                                           </span>
                                         </button>
 
-                                        {/* Item Portions Stepper */}
+                                        {/* Bouncy Spring Micro-Stepper */}
                                         {isSelected && (
-                                          <div className="flex items-center gap-2 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg px-2 py-1">
-                                            <button
-                                              className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                              onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, -0.5); }}
+                                          <div className="flex items-center gap-1.5 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl px-2 py-1 shadow-xs">
+                                            <motion.button
+                                              whileTap={{ scale: 0.8 }}
+                                              className="w-5 h-5 rounded-lg flex items-center justify-center text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark font-bold text-xs bg-black/5 dark:bg-white/5"
+                                              onClick={(e) => { e.stopPropagation(); triggerHaptic('light'); updateItemPortion(mealObj.slot, item.name, -0.5); }}
                                             >
                                               -
-                                            </button>
-                                            <span className="text-xs font-bold w-6 text-center">{loggedItem.portion}</span>
-                                            <button
-                                              className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                              onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, item.name, 0.5); }}
+                                            </motion.button>
+                                            <span className="text-xs font-bold font-mono w-6 text-center">{loggedItem.portion}</span>
+                                            <motion.button
+                                              whileTap={{ scale: 0.8 }}
+                                              className="w-5 h-5 rounded-lg flex items-center justify-center text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark font-bold text-xs bg-black/5 dark:bg-white/5"
+                                              onClick={(e) => { e.stopPropagation(); triggerHaptic('light'); updateItemPortion(mealObj.slot, item.name, 0.5); }}
                                             >
                                               +
-                                            </button>
+                                            </motion.button>
                                           </div>
                                         )}
                                         {!isSelected && (
-                                          <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2`}>
+                                          <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2 font-mono`}>
                                             {item.estCalories} kcal
                                           </span>
                                         )}

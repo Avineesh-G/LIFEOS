@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import type { AppSettings, TransitionMode } from '../types';
+import type { AppSettings, TransitionMode, FluidIntensity } from '../types';
 
 export function useTheme() {
   const [theme, setThemeState] = useState<AppSettings['theme']>(
@@ -10,6 +10,9 @@ export function useTheme() {
   );
   const [transitionMode, setTransitionModeState] = useState<TransitionMode>(
     () => (localStorage.getItem('transitionMode') as TransitionMode) || 'efficient'
+  );
+  const [fluidIntensity, setFluidIntensityState] = useState<FluidIntensity>(
+    () => (localStorage.getItem('fluidIntensity') as FluidIntensity) || 'balanced'
   );
   const [mounted, setMounted] = useState(true);
   const [systemIsDark, setSystemIsDark] = useState(() => 
@@ -58,11 +61,13 @@ export function useTheme() {
     const b = parseInt(accentColor.slice(5, 7), 16) || 241;
     root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
     root.dataset.transitionMode = transitionMode;
+    root.dataset.fluidIntensity = fluidIntensity;
 
     localStorage.setItem('theme', theme);
     localStorage.setItem('accentColor', accentColor);
     localStorage.setItem('transitionMode', transitionMode);
-  }, [theme, accentColor, transitionMode, systemIsDark, mounted]);
+    localStorage.setItem('fluidIntensity', fluidIntensity);
+  }, [theme, accentColor, transitionMode, fluidIntensity, systemIsDark, mounted]);
 
   useEffect(() => {
     applyTheme();
@@ -86,5 +91,13 @@ export function useTheme() {
     }
   };
 
-  return { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, mounted };
+  const setFluidIntensity = (i: FluidIntensity) => {
+    setFluidIntensityState(i);
+    localStorage.setItem('fluidIntensity', i);
+    if (typeof window !== 'undefined') {
+      window.document.documentElement.dataset.fluidIntensity = i;
+    }
+  };
+
+  return { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, fluidIntensity, setFluidIntensity, mounted };
 }

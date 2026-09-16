@@ -25,6 +25,7 @@ import {
   shuffleToNextQuote, 
   PillarType 
 } from '../utils/quoteEngine';
+import { triggerHaptic } from '../utils/haptics';
 
 interface DailyQuoteMarqueeProps {
   embedded?: boolean;
@@ -163,39 +164,34 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
       onMouseLeave={() => setIsPaused(false)}
       className={
         embedded
-          ? 'relative z-10 space-y-3.5 select-none'
-          : 'relative overflow-hidden rounded-[28px] sm:rounded-[32px] p-5 sm:p-6 bg-gradient-to-br from-white via-neutral-50/80 to-purple-50/40 dark:from-[#1A1C23] dark:via-[#16171D] dark:to-[#131218] border border-purple-500/20 dark:border-purple-500/25 shadow-sm hover:shadow-md transition-all group select-none'
+          ? 'relative z-10 space-y-4 select-none'
+          : 'relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 bg-white/80 dark:bg-[#16171D]/80 backdrop-blur-xl border border-purple-500/20 dark:border-purple-500/25 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] hover:shadow-md transition-all group select-none space-y-4'
       }
     >
       {!embedded && (
         <>
-          {/* Decorative Radial Glows & Elegant Watermark */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-2xl pointer-events-none" />
-          <div className="absolute right-4 top-1 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
+          {/* Decorative Soft Radial Glows & Watermark */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute right-5 top-2 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
             “
           </div>
         </>
       )}
 
-      {/* ── Top Header Row ── */}
-      <div className="relative z-10 flex items-center justify-between gap-2 mb-3.5 sm:mb-4">
+      {/* ── Top Header Row: Clean & Uncluttered ── */}
+      <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           {/* Main Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 dark:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/30 text-[10.5px] sm:text-xs font-mono font-bold tracking-wider uppercase">
-            <Sparkles size={12} className="text-purple-600 dark:text-purple-400 animate-pulse shrink-0" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/15 dark:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/30 text-[11px] sm:text-xs font-mono font-bold tracking-wider uppercase shadow-xs">
+            <Sparkles size={13} className="text-purple-600 dark:text-purple-400 animate-pulse shrink-0" />
             <span>DAILY WISDOM</span>
           </div>
 
           {/* Dynamic Category Pill */}
-          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider border ${currentMeta.badgeClass}`}>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10.5px] sm:text-[11px] font-mono font-bold uppercase tracking-wider border shadow-xs ${currentMeta.badgeClass}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${currentMeta.dotClass}`} />
             {currentMeta.label}
-          </span>
-
-          {/* Non-repeating daily counter */}
-          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-500/5 border border-purple-500/15">
-            Auto-rotating • No Repeats
           </span>
         </div>
 
@@ -203,17 +199,23 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           <button
             type="button"
-            onClick={handleShuffle}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Shuffle to next unique quote"
+            onClick={() => {
+              triggerHaptic('light');
+              handleShuffle();
+            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
+            title="Shuffle quote"
           >
             <Shuffle size={13} />
           </button>
 
           <button
             type="button"
-            onClick={handleCopy}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
+            onClick={() => {
+              triggerHaptic('light');
+              handleCopy();
+            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
             title="Copy quote"
           >
             {copied ? <Check size={13} className="text-emerald-500 stroke-[2.5]" /> : <Copy size={13} />}
@@ -223,18 +225,24 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
 
           <button
             type="button"
-            onClick={handlePrev}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Previous viewed quote"
+            onClick={() => {
+              triggerHaptic('light');
+              handlePrev();
+            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
+            title="Previous quote"
           >
             <ChevronLeft size={15} />
           </button>
 
           <button
             type="button"
-            onClick={handleNext}
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.05] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
-            title="Next unique quote"
+            onClick={() => {
+              triggerHaptic('light');
+              handleNext();
+            }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
+            title="Next quote"
           >
             <ChevronRight size={15} />
           </button>
@@ -250,16 +258,16 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-            className="space-y-2.5 gpu-composited"
+            className="space-y-3 gpu-composited"
           >
-            <p className="text-[16px] sm:text-[18px] md:text-[20px] font-extrabold text-primary-light dark:text-primary-dark tracking-tight leading-relaxed sm:leading-snug">
+            <p className="text-[17px] sm:text-[19px] md:text-[21px] font-extrabold text-primary-light dark:text-primary-dark tracking-tight leading-relaxed sm:leading-snug">
               <span className="text-purple-500 dark:text-purple-400 font-serif mr-1">“</span>
               {activeQuote?.quote}
               <span className="text-purple-500 dark:text-purple-400 font-serif ml-1">”</span>
             </p>
 
             <div className="flex items-center justify-between gap-3 pt-0.5">
-              <div className="flex items-center gap-1.5 text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark/90">
+              <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark/90">
                 <span className="text-purple-500 dark:text-purple-400 font-sans text-sm font-black">—</span>
                 <span>{activeQuote?.author}</span>
               </div>
@@ -267,9 +275,12 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
               {/* Interactive Principle Index Pill */}
               <button
                 type="button"
-                onClick={handleNext}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[11px] font-mono font-bold tracking-wider transition-all active:scale-95 group/pill shrink-0"
-                title="Next unique quote"
+                onClick={() => {
+                  triggerHaptic('light');
+                  handleNext();
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[11px] font-mono font-bold tracking-wider transition-all active:scale-95 group/pill shrink-0 shadow-xs"
+                title="Next quote"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
                 <span>#{quoteState.seenIndex + 1}</span>
@@ -282,10 +293,10 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
         </AnimatePresence>
       </div>
 
-      {/* ── Interactive Life Pillars Dock & Daily Focus Commitment (Replaces STREAM Marquee) ── */}
-      <div className="relative z-10 mt-3 pt-3 border-t border-purple-500/15 dark:border-purple-500/20 space-y-2.5">
-        {/* 5-Pillar Interactive Strip - 100% Mobile & APK Visible */}
-        <div className="grid grid-cols-5 gap-1 sm:gap-1.5 w-full">
+      {/* ── Interactive Life Pillars Dock & Daily Focus Commitment ── */}
+      <div className="relative z-10 mt-3 pt-3 border-t border-purple-500/15 dark:border-purple-500/20 space-y-3">
+        {/* 5-Pillar Interactive Strip with Fluid Spring Capsule */}
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2 w-full p-1 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
           {pillars.map((pillar) => {
             const isActive = activeQuote?.category === pillar.key;
             const IconComponent = pillar.icon;
@@ -293,27 +304,38 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
               <button
                 key={pillar.key}
                 type="button"
-                onClick={() => handlePillarSelect(pillar.key)}
-                className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 py-1.5 px-1 sm:px-2 rounded-xl text-[9.5px] sm:text-[11px] font-mono font-bold tracking-tight transition-all active:scale-95 border ${
-                  isActive
-                    ? pillar.activeClass
-                    : 'bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08]'
-                }`}
+                onClick={() => {
+                  triggerHaptic('light');
+                  handlePillarSelect(pillar.key);
+                }}
+                className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-mono font-bold tracking-tight transition-all active:scale-95 select-none focus:outline-none"
                 title={`Explore ${pillar.label} wisdom`}
               >
-                <IconComponent size={12} className={isActive ? 'text-white' : pillar.color} />
-                <span className="truncate">{pillar.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activePillarCapsule"
+                    className={`absolute inset-0 rounded-xl ${pillar.activeClass} shadow-md`}
+                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <IconComponent size={13} className={`relative z-10 transition-colors duration-150 ${isActive ? 'text-white' : pillar.color}`} />
+                <span className={`relative z-10 truncate transition-colors duration-150 ${isActive ? 'text-white font-bold' : 'text-secondary-light dark:text-secondary-dark'}`}>
+                  {pillar.label}
+                </span>
               </button>
             );
           })}
         </div>
 
         {/* Action Controls: Commit Focus & Action Mission */}
-        <div className="flex items-center justify-between gap-1.5 sm:gap-2 pt-0.5">
+        <div className="flex items-center justify-between gap-2 pt-0.5">
           <button
             type="button"
-            onClick={handleToggleCommit}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-xs ${
+            onClick={() => {
+              triggerHaptic(isCommitted ? 'light' : 'success');
+              handleToggleCommit();
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-xs ${
               isCommitted
                 ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
                 : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/25'
@@ -335,9 +357,10 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
           <button
             type="button"
             onClick={() => {
+              triggerHaptic('light');
               setShowActionPrompt(!showActionPrompt);
             }}
-            className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 border ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 border ${
               showActionPrompt
                 ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/40'
                 : 'bg-black/[0.03] dark:bg-white/[0.05] hover:bg-amber-500/10 text-secondary-light dark:text-secondary-dark hover:text-amber-600 dark:hover:text-amber-300 border-border-light/70 dark:border-border-dark/70'
@@ -359,9 +382,9 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="p-3 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.12] border border-amber-500/25 mt-1 space-y-1">
+              <div className="p-3.5 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.12] border border-amber-500/25 mt-1 space-y-1">
                 <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                  <Zap size={11} className="text-amber-500 fill-amber-500" />
+                  <Zap size={12} className="text-amber-500 fill-amber-500" />
                   <span>{actionMissions[activeQuote?.category]?.title || 'Daily Action Mission'}</span>
                 </div>
                 <p className="text-xs sm:text-[13px] font-medium text-amber-900/90 dark:text-amber-200 leading-snug">

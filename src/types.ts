@@ -81,11 +81,13 @@ export interface DayReview {
 }
 
 export type TransitionMode = 'fast' | 'efficient' | 'soft';
+export type FluidIntensity = 'subtle' | 'balanced' | 'vivid';
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   accentColor: string;
   transitionMode?: TransitionMode;
+  fluidIntensity?: FluidIntensity;
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────

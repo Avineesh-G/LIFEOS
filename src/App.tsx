@@ -29,7 +29,7 @@ import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import type { TransitionMode } from './types';
+import type { TransitionMode, FluidIntensity } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
@@ -38,22 +38,25 @@ const getTransitionConfig = (mode: TransitionMode) => {
   switch (mode) {
     case 'fast':
       return {
-        initial: { opacity: 0.98 },
-        animate: { opacity: 1 },
-        transition: { duration: 0.05, ease: 'easeOut' }
+        initial: { opacity: 0, scale: 0.98 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.98 },
+        transition: { duration: 0.12, ease: 'easeOut' }
       };
     case 'soft':
       return {
-        initial: { opacity: 0.92, y: 6 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] }
+        initial: { opacity: 0, y: 24, scale: 0.96 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -16, scale: 0.97 },
+        transition: { duration: 0.30, ease: [0.16, 1, 0.3, 1] }
       };
     case 'efficient':
     default:
       return {
-        initial: { opacity: 0.96 },
-        animate: { opacity: 1 },
-        transition: { duration: 0.08, ease: 'easeOut' }
+        initial: { opacity: 0, x: 28 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -28 },
+        transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1] }
       };
   }
 };
@@ -68,6 +71,8 @@ function MainContent({
   setAccentColor,
   transitionMode,
   setTransitionMode,
+  fluidIntensity,
+  setFluidIntensity,
 }: {
   data: any;
   refresh: () => Promise<any>;
@@ -78,6 +83,8 @@ function MainContent({
   setAccentColor: (c: string) => void;
   transitionMode: TransitionMode;
   setTransitionMode: (m: TransitionMode) => void;
+  fluidIntensity: FluidIntensity;
+  setFluidIntensity: (i: FluidIntensity) => void;
 }) {
   const location = useLocation();
   const transitionConfig = getTransitionConfig(transitionMode);
@@ -100,7 +107,7 @@ function MainContent({
       { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
       { path: '/progress', element: <Progress data={data} /> },
       { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
-      { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
+      { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} fluidIntensity={fluidIntensity} setFluidIntensity={setFluidIntensity} data={data} updateData={updateData} refresh={refresh} /> },
       { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
       { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
     ],
@@ -108,20 +115,23 @@ function MainContent({
   );
 
   return (
-    <motion.div
-      key={location.pathname}
-      initial={transitionConfig.initial}
-      animate={transitionConfig.animate}
-      transition={transitionConfig.transition}
-      className="w-full overflow-x-hidden gpu-composited"
-    >
-      {routeElements}
-    </motion.div>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={transitionConfig.initial}
+        animate={transitionConfig.animate}
+        exit={transitionConfig.exit}
+        transition={transitionConfig.transition}
+        className="w-full overflow-x-hidden gpu-composited"
+      >
+        {routeElements}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
 function App() {
-  const { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, mounted } = useTheme();
+  const { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, fluidIntensity, setFluidIntensity, mounted } = useTheme();
   
   // Instantly hydrate cached user from localStorage for zero startup delay
   const [user, setUser] = useState<User | null>(() => {
@@ -280,6 +290,8 @@ function App() {
               setAccentColor={setAccentColor}
               transitionMode={transitionMode}
               setTransitionMode={setTransitionMode}
+              fluidIntensity={fluidIntensity}
+              setFluidIntensity={setFluidIntensity}
             />
           </ErrorBoundary>
         </Layout>
