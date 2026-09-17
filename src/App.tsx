@@ -59,6 +59,20 @@ function MainContent({
   setTransitionMode: (m: TransitionMode) => void;
 }) {
   const location = useLocation();
+
+  // Always reset scroll to top immediately when switching interfaces
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    const timer = setTimeout(() => {
+      document.documentElement.style.scrollBehavior = '';
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   const routeElements = useRoutes([
     { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
     { path: '/study', element: <Study data={data} updateData={updateData} /> },

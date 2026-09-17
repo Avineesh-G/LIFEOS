@@ -124,7 +124,7 @@ export async function requestAndSyncNotifications(
 
     // Fire instant alert with app logo into the actual phone notification center
     await sendInstantTestNotification(
-      'LifeOS Notifications Active 🔔',
+      'LifeOS Notifications Active',
       'Timetable, TO-DO, Nutrition alerts, and Study timer will appear here with the LifeOS logo.'
     );
     return true;
@@ -234,7 +234,7 @@ export async function syncTimetableNotifications(
 
           notificationsToSchedule.push({
             id: notifId,
-            title: `📚 ${block.subject || 'Class'} Reminder`,
+            title: `${block.subject || 'Class'} Reminder`,
             body: bodyText,
             channelId: TIMETABLE_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
@@ -308,7 +308,7 @@ export async function syncTaskNotifications(
 
         notificationsToSchedule.push({
           id: notifId,
-          title: `✅ Task Reminder: ${task.text}`,
+          title: `Task Reminder: ${task.text}`,
           body: bodyText,
           channelId: TASKS_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
@@ -353,10 +353,10 @@ export async function syncNutritionNotifications(): Promise<number> {
     }
 
     const MEAL_TIMES = [
-      { slot: 'breakfast', hour: 8,  minute: 0,  title: '🍳 Breakfast Time', body: 'Mess breakfast is serving (7:30–9:45 AM). Fuel your day!' },
-      { slot: 'lunch',     hour: 13, minute: 0,  title: '🍲 Lunch Time',     body: 'Mess lunch is active (12:15–2:45 PM). Don\'t skip your nutrition!' },
-      { slot: 'snacks',    hour: 17, minute: 0,  title: '☕ Evening Snacks', body: 'Evening snacks are ready (4:15–6:15 PM). Grab a healthy bite!' },
-      { slot: 'dinner',    hour: 20, minute: 0,  title: '🍽️ Dinner Time',    body: 'Mess dinner is open (7:15–9:30 PM). Hit your protein and calorie targets!' },
+      { slot: 'breakfast', hour: 8,  minute: 0,  title: 'Breakfast Time', body: 'Mess breakfast is serving (7:30–9:45 AM). Fuel your day!' },
+      { slot: 'lunch',     hour: 13, minute: 0,  title: 'Lunch Time',     body: 'Mess lunch is active (12:15–2:45 PM). Don\'t skip your nutrition!' },
+      { slot: 'snacks',    hour: 17, minute: 0,  title: 'Evening Snacks', body: 'Evening snacks are ready (4:15–6:15 PM). Grab a healthy bite!' },
+      { slot: 'dinner',    hour: 20, minute: 0,  title: 'Dinner Time',    body: 'Mess dinner is open (7:15–9:30 PM). Hit your protein and calorie targets!' },
     ];
 
     const now = new Date();
@@ -416,7 +416,7 @@ export async function showStudyTimerNotification(
     const s = seconds % 60;
     const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
-    const title = isPaused ? `⏸️ Study Paused: ${subject}` : `📖 Deep Work: ${subject}`;
+    const title = isPaused ? `Study Paused: ${subject}` : `Deep Work: ${subject}`;
     const body = `Focus Time: ${timeStr}${topic ? ` • ${topic}` : ''}`;
 
     await LocalNotifications.schedule({

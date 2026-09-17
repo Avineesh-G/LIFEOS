@@ -1,11 +1,13 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import { BottomSheet, Modal } from '../components/BottomSheet';
+import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import type { AppData, Task } from '../types';
+
 
 interface TasksProps {
   data: AppData;
@@ -469,18 +471,13 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   : 'liquid-glass border-white/80 dark:border-white/[0.09] hover:border-accent/30 shadow-xs'
               }`}
             >
-              {/* Bouncy Spring Pop Checkbox */}
-              <button
-                type="button"
-                onClick={() => toggleTask(task.id)}
-                className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
-                  task.completed
-                    ? 'bg-accent text-white shadow-sm'
-                    : 'border-2 border-neutral-300 dark:border-neutral-600 hover:border-accent bg-black/[0.02] dark:bg-white/[0.04]'
-                }`}
-              >
-                {task.completed && <Check size={15} strokeWidth={3} />}
-              </button>
+              {/* Interactive Spring Checkbox */}
+              <InteractiveCheckbox
+                checked={task.completed}
+                onChange={() => toggleTask(task.id)}
+                size={26}
+              />
+
 
               <div
                 className="flex-1 min-w-0 cursor-pointer"
@@ -521,8 +518,10 @@ export default function Tasks({ data, updateData }: TasksProps) {
         })}
 
         {filteredTasks.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/[0.08]">
-            <p className="text-2xl mb-2">✨</p>
+          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/[0.08] flex flex-col items-center">
+            <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-3 shadow-sm shadow-accent/15">
+              <Sparkles size={22} className="animate-pulse" />
+            </div>
             <p className="text-sm font-bold text-secondary-light dark:text-secondary-dark">No tasks for this day</p>
             <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Tap "+ Add Task" to schedule something</p>
           </div>

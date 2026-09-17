@@ -23,6 +23,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 import DailyQuoteMarquee from '../components/DailyQuoteMarquee';
+import AiCoachAvatar from '../components/rive/AiCoachAvatar';
+import StreakIndicator from '../components/rive/StreakIndicator';
+import InteractiveClock from '../components/interactive/InteractiveClock';
+import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
+import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 
 interface HomeProps {
   data: AppData;
@@ -263,7 +268,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
       {/* ── Ambient Executive Greeting Header (Open, Breathable & Fluid) ── */}
       <motion.div variants={item} className="space-y-3 px-1 sm:px-2 pt-1 select-none">
-        {/* Top Header Row: Date Pill & Phase Badge */}
+        {/* Top Header Row: Date Pill, Phase Badge & Streak */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#1E2028]/90 backdrop-blur-md border border-border-light/80 dark:border-white/15 shadow-xs">
             <greetingConfig.icon size={13} className="text-accent shrink-0 animate-pulse" />
@@ -276,22 +281,31 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             <span className={`w-1.5 h-1.5 rounded-full ${greetingConfig.dotClass} animate-ping`} />
             {greetingConfig.badge}
           </span>
+
+          <StreakIndicator
+            streak={data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length || 1}
+            size="sm"
+          />
         </div>
 
-        {/* Hero Title with Dynamic Fluid Gradient */}
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight font-sans">
-            Good{' '}
-            <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
-              {greetingConfig.word}
-            </span>
-          </h1>
+        {/* Hero Title Row with AI Coach Avatar on Right */}
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight font-sans">
+              Good{' '}
+              <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
+                {greetingConfig.word}
+              </span>
+            </h1>
 
-          {/* Motivational Subline */}
-          <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1 tracking-tight flex items-center gap-1.5">
-            <Sparkles size={13} className="text-accent shrink-0 opacity-80" />
-            <span>{greetingConfig.subline}</span>
-          </p>
+            {/* Motivational Subline */}
+            <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1 tracking-tight flex items-center gap-1.5">
+              <Sparkles size={13} className="text-accent shrink-0 opacity-80" />
+              <span>{greetingConfig.subline}</span>
+            </p>
+          </div>
+
+          <AiCoachAvatar state="idle" size={54} />
         </div>
       </motion.div>
 
@@ -441,7 +455,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Study Pillar */}
                 <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-[12px] bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
-                    <BookOpen size={16} strokeWidth={2.2} />
+                    <InteractiveClock size={18} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
@@ -460,7 +474,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Gym Pillar */}
                 <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-[12px] bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                    <Dumbbell size={16} strokeWidth={2.2} />
+                    <InteractiveDumbbell size={18} isCompleted={!!selectedDateData.workoutLog} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
@@ -556,10 +570,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                           key={task.id}
                           className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
                         >
-                          <button
-                            onClick={() => handleToggleTask(task.id)}
-                            className="w-4 h-4 rounded-[6px] border-2 border-neutral-300 dark:border-neutral-600 flex items-center justify-center flex-shrink-0 hover:border-accent transition-colors"
-                          />
+                          <InteractiveCheckbox checked={false} onChange={() => handleToggleTask(task.id)} size={18} />
                           <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1 min-w-0">
                             {task.text}
                           </span>
@@ -581,10 +592,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     </div>
                   ) : (
                     <div className="p-3 rounded-[18px] bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/50 text-center">
-                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                        {selectedDateData.tasks.length > 0 
-                          ? '🎉 All tasks completed for today!' 
-                          : 'No pending tasks for today · All clear'}
+                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-1.5">
+                        {selectedDateData.tasks.length > 0 ? (
+                          <>
+                            <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                            <span>All tasks completed for today</span>
+                          </>
+                        ) : (
+                          'No pending tasks for today · All clear'
+                        )}
                       </p>
                     </div>
                   )}
@@ -720,7 +736,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/30 dark:to-purple-500/30 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs border border-indigo-500/20 shrink-0">
-                <BookOpen size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
+                <InteractiveClock isRunning={todaySessions.length > 0} progressPercent={Math.min((todayStudyHours * 60 + todayStudyMins) / 120 * 100, 100)} size={22} />
               </div>
               <ArrowUpRight size={16} className="text-indigo-600/60 dark:text-indigo-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
@@ -756,7 +772,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/30 dark:to-teal-500/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/20 shrink-0">
-                <Dumbbell size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
+                <InteractiveDumbbell isCompleted={!!todayWorkout} size={22} />
               </div>
               <ArrowUpRight size={16} className="text-emerald-600/60 dark:text-emerald-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>

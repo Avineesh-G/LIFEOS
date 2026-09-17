@@ -216,7 +216,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               <div className="flex items-center gap-2">
                 <span className="text-gray-400 dark:text-gray-500">Latest:</span>
                 <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold">
-                  v{remoteVersion?.versionName || '1.5.6'}
+                  v{remoteVersion?.versionName || '1.5.7'}
                 </span>
               </div>
             </div>

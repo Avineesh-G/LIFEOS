@@ -4,7 +4,9 @@ import { Clock, History, Grid3X3, ChevronRight, Play, BookOpen, Flame } from 'lu
 import { format, startOfWeek, addDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import InteractiveClock from '../components/interactive/InteractiveClock';
 import type { AppData } from '../types';
+
 
 interface StudyProps {
   data: AppData;
@@ -90,8 +92,9 @@ export default function Study({ data }: StudyProps) {
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div className="flex items-center gap-3">
             <span className="w-11 h-11 rounded-[16px] bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shadow-xs text-indigo-700 dark:text-indigo-300">
-              <BookOpen size={22} strokeWidth={2.2} />
+              <InteractiveClock size={24} isRunning={todaySessions.length > 0} progressPercent={Math.min((todayMinutes / 120) * 100, 100)} onClick={() => navigate('/study/timer')} />
             </span>
+
             <div>
               <p className="text-xs font-bold tracking-wider uppercase opacity-75 font-mono">
                 {format(new Date(), 'EEEE, MMM d')}

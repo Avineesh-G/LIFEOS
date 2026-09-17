@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, 
@@ -6,24 +6,13 @@ import {
   ChevronRight, 
   Copy, 
   Check, 
-  Shuffle, 
-  GraduationCap, 
-  Briefcase, 
-  Coins, 
-  Clock, 
-  Shield, 
-  Target, 
-  Zap, 
-  ChevronDown,
-  LucideIcon
+  Shuffle
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { 
   getCurrentDailyQuote, 
   advanceToNextQuote, 
   getPreviousSeenQuote, 
-  shuffleToNextQuote, 
-  PillarType 
+  shuffleToNextQuote 
 } from '../utils/quoteEngine';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -35,17 +24,10 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
   const [quoteState, setQuoteState] = useState(() => getCurrentDailyQuote());
   const [copied, setCopied] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [showActionPrompt, setShowActionPrompt] = useState(false);
-
-  const todayKey = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const [committedTheme, setCommittedTheme] = useState<string | null>(() => {
-    return localStorage.getItem('lifeos_committed_theme_' + todayKey);
-  });
 
   const activeQuote = quoteState.quote;
 
-  // Auto-advance active quote every 12 seconds unless paused
-  // Guaranteed: Automatically advances to next unseen quote for today without repeating!
+  // Auto-advance active quote every 12 seconds unless hovered/paused
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
@@ -55,19 +37,23 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
   }, [isPaused]);
 
   const handleNext = useCallback(() => {
+    triggerHaptic('light');
     setQuoteState(advanceToNextQuote());
   }, []);
 
   const handlePrev = useCallback(() => {
+    triggerHaptic('light');
     setQuoteState((prev) => getPreviousSeenQuote(prev.seenIndex));
   }, []);
 
   const handleShuffle = useCallback(() => {
+    triggerHaptic('light');
     setQuoteState(shuffleToNextQuote());
   }, []);
 
   const handleCopy = useCallback(async () => {
     if (!activeQuote) return;
+    triggerHaptic('light');
     try {
       await navigator.clipboard.writeText(`"${activeQuote.quote}" — ${activeQuote.author}`);
       setCopied(true);
@@ -76,22 +62,6 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
       // Fallback
     }
   }, [activeQuote]);
-
-  const handlePillarSelect = (categoryKey: PillarType) => {
-    setQuoteState(advanceToNextQuote(categoryKey));
-  };
-
-  const isCommitted = committedTheme === activeQuote?.category;
-
-  const handleToggleCommit = () => {
-    if (isCommitted) {
-      localStorage.removeItem('lifeos_committed_theme_' + todayKey);
-      setCommittedTheme(null);
-    } else {
-      localStorage.setItem('lifeos_committed_theme_' + todayKey, activeQuote.category);
-      setCommittedTheme(activeQuote.category);
-    }
-  };
 
   const categoryMeta: Record<string, { label: string; badgeClass: string; dotClass: string }> = {
     studies: {
@@ -121,41 +91,10 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
     },
   };
 
-  const pillars: { key: PillarType; label: string; icon: LucideIcon; color: string; activeClass: string }[] = [
-    { key: 'studies', label: 'Studies', icon: GraduationCap, color: 'text-emerald-500', activeClass: 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/25 border-emerald-500' },
-    { key: 'career', label: 'Career', icon: Briefcase, color: 'text-indigo-500', activeClass: 'bg-indigo-500 text-white shadow-sm shadow-indigo-500/25 border-indigo-500' },
-    { key: 'finance', label: 'Finance', icon: Coins, color: 'text-amber-500', activeClass: 'bg-amber-500 text-white shadow-sm shadow-amber-500/25 border-amber-500' },
-    { key: 'time', label: 'Time', icon: Clock, color: 'text-purple-500', activeClass: 'bg-purple-500 text-white shadow-sm shadow-purple-500/25 border-purple-500' },
-    { key: 'character', label: 'Character', icon: Shield, color: 'text-rose-500', activeClass: 'bg-rose-500 text-white shadow-sm shadow-rose-500/25 border-rose-500' },
-  ];
-
-  const actionMissions: Record<string, { title: string; challenge: string }> = {
-    studies: {
-      title: 'Deep Focus Mission',
-      challenge: 'Dedicate 60–90 minutes of undistracted immersion to your hardest subject today.',
-    },
-    career: {
-      title: 'High-Leverage Mission',
-      challenge: 'Identify the #1 highest-leverage task that drives real outcomes and tackle it first.',
-    },
-    finance: {
-      title: 'Mindful Spending Mission',
-      challenge: 'Delay any impulse purchase by 24 hours and log every single expense today.',
-    },
-    time: {
-      title: 'Time Mastery Mission',
-      challenge: 'Ruthlessly guard your peak morning hours against passive scrolling and trivial distractions.',
-    },
-    character: {
-      title: 'Stoic Composure Mission',
-      challenge: 'When confronted with unexpected friction or delay today, respond with calm poise.',
-    },
-  };
-
   const currentMeta = categoryMeta[activeQuote?.category] || {
     label: 'Wisdom',
-    badgeClass: 'bg-accent/15 text-accent border-accent/25',
-    dotClass: 'bg-accent',
+    badgeClass: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/25',
+    dotClass: 'bg-purple-500',
   };
 
   return (
@@ -165,44 +104,38 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
       className={
         embedded
           ? 'relative z-10 space-y-4 select-none'
-          : 'relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 bg-white/80 dark:bg-[#16171D]/80 backdrop-blur-xl border border-purple-500/20 dark:border-purple-500/25 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] hover:shadow-md transition-all group select-none space-y-4'
+          : 'relative overflow-hidden rounded-[32px] p-5 sm:p-6 bg-white/80 dark:bg-[#16171D]/80 backdrop-blur-xl border border-purple-500/20 dark:border-purple-500/25 shadow-sm hover:shadow-md transition-all group select-none space-y-4'
       }
     >
       {!embedded && (
         <>
-          {/* Decorative Soft Radial Glows & Watermark */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/15 via-indigo-500/10 to-transparent blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-36 h-36 rounded-full bg-gradient-to-tr from-accent/10 to-transparent blur-3xl pointer-events-none" />
-          <div className="absolute right-5 top-2 text-purple-900/[0.04] dark:text-purple-300/[0.04] select-none pointer-events-none font-serif text-8xl leading-none">
-            “
-          </div>
+          {/* Subtle Ambient Radial Glows */}
+          <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-gradient-to-br from-purple-500/12 via-indigo-500/8 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-gradient-to-tr from-purple-500/8 to-transparent blur-3xl pointer-events-none" />
         </>
       )}
 
-      {/* ── Top Header Row: Clean & Uncluttered ── */}
+      {/* ── Top Header Row ── */}
       <div className="relative z-10 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           {/* Main Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/15 dark:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/30 text-[11px] sm:text-xs font-mono font-bold tracking-wider uppercase shadow-xs">
-            <Sparkles size={13} className="text-purple-600 dark:text-purple-400 animate-pulse shrink-0" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 dark:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/30 text-[11px] font-mono font-bold tracking-wider uppercase shadow-xs">
+            <Sparkles size={12} className="text-purple-600 dark:text-purple-400 animate-pulse shrink-0" />
             <span>DAILY WISDOM</span>
           </div>
 
           {/* Dynamic Category Pill */}
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10.5px] sm:text-[11px] font-mono font-bold uppercase tracking-wider border shadow-xs ${currentMeta.badgeClass}`}>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-mono font-bold uppercase tracking-wider border shadow-xs ${currentMeta.badgeClass}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${currentMeta.dotClass}`} />
             {currentMeta.label}
           </span>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              handleShuffle();
-            }}
+            onClick={handleShuffle}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
             title="Shuffle quote"
           >
@@ -211,24 +144,18 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
 
           <button
             type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              handleCopy();
-            }}
+            onClick={handleCopy}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
             title="Copy quote"
           >
             {copied ? <Check size={13} className="text-emerald-500 stroke-[2.5]" /> : <Copy size={13} />}
           </button>
 
-          <div className="h-4 w-px bg-border-light dark:bg-border-dark mx-0.5" />
+          <div className="h-4 w-px bg-border-light dark:bg-border-dark mx-1" />
 
           <button
             type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              handlePrev();
-            }}
+            onClick={handlePrev}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
             title="Previous quote"
           >
@@ -237,10 +164,7 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
 
           <button
             type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              handleNext();
-            }}
+            onClick={handleNext}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-black/[0.03] dark:bg-white/[0.06] hover:bg-purple-500/15 text-secondary-light dark:text-secondary-dark hover:text-purple-600 dark:hover:text-purple-300 active:scale-95 transition-all"
             title="Next quote"
           >
@@ -249,36 +173,33 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
         </div>
       </div>
 
-      {/* ── Featured Hero Quote (The Main Attraction) ── */}
-      <div className="relative z-10 my-1 sm:my-2 min-h-[82px] sm:min-h-[92px] flex flex-col justify-center">
+      {/* ── Featured Hero Quote ── */}
+      <div className="relative z-10 my-1 min-h-[64px] flex flex-col justify-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeQuote?.id || quoteState.seenIndex}
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
-            className="space-y-3 gpu-composited"
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="space-y-3.5 gpu-composited"
           >
-            <p className="text-[17px] sm:text-[19px] md:text-[21px] font-extrabold text-primary-light dark:text-primary-dark tracking-tight leading-relaxed sm:leading-snug">
+            <p className="text-[16px] sm:text-[18px] md:text-[20px] font-extrabold text-primary-light dark:text-primary-dark tracking-tight leading-relaxed sm:leading-relaxed">
               <span className="text-purple-500 dark:text-purple-400 font-serif mr-1">“</span>
               {activeQuote?.quote}
               <span className="text-purple-500 dark:text-purple-400 font-serif ml-1">”</span>
             </p>
 
-            <div className="flex items-center justify-between gap-3 pt-0.5">
-              <div className="flex items-center gap-2 text-xs sm:text-[13px] font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark/90">
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark/90">
                 <span className="text-purple-500 dark:text-purple-400 font-sans text-sm font-black">—</span>
                 <span>{activeQuote?.author}</span>
               </div>
 
-              {/* Interactive Principle Index Pill */}
+              {/* Interactive Index Pill */}
               <button
                 type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  handleNext();
-                }}
+                onClick={handleNext}
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 dark:bg-purple-500/15 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-[11px] font-mono font-bold tracking-wider transition-all active:scale-95 group/pill shrink-0 shadow-xs"
                 title="Next quote"
               >
@@ -290,109 +211,6 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
               </button>
             </div>
           </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ── Interactive Life Pillars Dock & Daily Focus Commitment ── */}
-      <div className="relative z-10 mt-3 pt-3 border-t border-purple-500/15 dark:border-purple-500/20 space-y-3">
-        {/* 5-Pillar Interactive Strip with Fluid Spring Capsule */}
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-2 w-full p-1 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-          {pillars.map((pillar) => {
-            const isActive = activeQuote?.category === pillar.key;
-            const IconComponent = pillar.icon;
-            return (
-              <button
-                key={pillar.key}
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  handlePillarSelect(pillar.key);
-                }}
-                className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-2 rounded-xl text-[10px] sm:text-[11px] font-mono font-bold tracking-tight transition-all active:scale-95 select-none focus:outline-none"
-                title={`Explore ${pillar.label} wisdom`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activePillarCapsule"
-                    className={`absolute inset-0 rounded-xl ${pillar.activeClass} shadow-md`}
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                )}
-                <IconComponent size={13} className={`relative z-10 transition-colors duration-150 ${isActive ? 'text-white' : pillar.color}`} />
-                <span className={`relative z-10 truncate transition-colors duration-150 ${isActive ? 'text-white font-bold' : 'text-secondary-light dark:text-secondary-dark'}`}>
-                  {pillar.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Action Controls: Commit Focus & Action Mission */}
-        <div className="flex items-center justify-between gap-2 pt-0.5">
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic(isCommitted ? 'light' : 'success');
-              handleToggleCommit();
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 shadow-xs ${
-              isCommitted
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20'
-                : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-800 dark:text-purple-200 border border-purple-500/25'
-            }`}
-          >
-            {isCommitted ? (
-              <>
-                <Check size={13} className="stroke-[3]" />
-                <span>Focus Theme Locked</span>
-              </>
-            ) : (
-              <>
-                <Target size={13} className="text-purple-600 dark:text-purple-400" />
-                <span>Commit as Today's Focus</span>
-              </>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              setShowActionPrompt(!showActionPrompt);
-            }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all active:scale-95 border ${
-              showActionPrompt
-                ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200 border-amber-500/40'
-                : 'bg-black/[0.03] dark:bg-white/[0.05] hover:bg-amber-500/10 text-secondary-light dark:text-secondary-dark hover:text-amber-600 dark:hover:text-amber-300 border-border-light/70 dark:border-border-dark/70'
-            }`}
-          >
-            <Zap size={12} className={showActionPrompt ? 'text-amber-500 fill-amber-500' : 'text-amber-500'} />
-            <span>Action Mission</span>
-            <ChevronDown size={12} className={`transition-transform duration-200 ${showActionPrompt ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-
-        {/* Expandable Action Mission Drawer */}
-        <AnimatePresence>
-          {showActionPrompt && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="p-3.5 rounded-2xl bg-amber-500/[0.08] dark:bg-amber-500/[0.12] border border-amber-500/25 mt-1 space-y-1">
-                <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                  <Zap size={12} className="text-amber-500 fill-amber-500" />
-                  <span>{actionMissions[activeQuote?.category]?.title || 'Daily Action Mission'}</span>
-                </div>
-                <p className="text-xs sm:text-[13px] font-medium text-amber-900/90 dark:text-amber-200 leading-snug">
-                  {actionMissions[activeQuote?.category]?.challenge}
-                </p>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
       </div>
     </div>

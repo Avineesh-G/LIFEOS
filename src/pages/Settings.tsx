@@ -9,7 +9,9 @@ import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDevice
 import { requestNotificationPermission, checkNotificationPermission, sendInstantTestNotification, syncTimetableNotifications, syncTaskNotifications } from '../utils/notifications';
 import type { AppData, AppSettings, TransitionMode } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
+import InteractiveBiometricScan from '../components/interactive/InteractiveBiometricScan';
 import { FITNESS_GOALS } from '../utils/calculations';
+
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
@@ -96,7 +98,7 @@ export default function Settings({
   const handleSendTestNotification = async () => {
     triggerHaptic('save');
     const ok = await sendInstantTestNotification(
-      'LifeOS Notification 🔔',
+      'LifeOS Notification',
       `Notifications active! You will be alerted ${leadMinutes}m before timetable classes and tasks.`
     );
     if (ok) {
@@ -598,7 +600,7 @@ export default function Settings({
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : 'bg-accent/15 text-accent'
             }`}>
-              <ShieldCheck size={22} strokeWidth={2.2} />
+              <InteractiveBiometricScan isLocked={securityConfig.enabled} size={24} onScan={handleEnableSecurity} />
             </div>
             <div className="min-w-0">
               <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
@@ -890,11 +892,11 @@ export default function Settings({
                   Software Updates
                 </h3>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                  v1.5.6
+                  v1.5.7
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build 16
+                Direct In-App APK Auto-Updater • Build 17
               </p>
             </div>
           </div>
@@ -908,7 +910,7 @@ export default function Settings({
                 if (res.hasUpdate) {
                   window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
                 } else {
-                  alert('LifeOS is fully up to date! You are on the latest build (v1.5.6).');
+                  alert('LifeOS is fully up to date! You are on the latest build (v1.5.7).');
                 }
               } catch {
                 alert('Could not reach update server. Please check your internet connection.');
@@ -927,7 +929,7 @@ export default function Settings({
 
       <div className="text-center py-2">
         <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark tracking-wide">
-          v1.5.6
+          v1.5.7
         </p>
       </div>
     </div>

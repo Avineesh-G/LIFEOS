@@ -15,6 +15,8 @@ import {
   syncNutritionNotifications,
 } from '../utils/notifications';
 import type { AppData, AppSettings } from '../types';
+import CircadianBackground from './CircadianBackground';
+
 
 // Primary centered squircle dock items
 const primaryDockItems = [
@@ -189,6 +191,50 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     };
   }, []);
 
+  const [navVisible, setNavVisible] = useState(true);
+
+  // Automatically reset nav visibility and close speed dial on route change
+  useEffect(() => {
+    setNavVisible(true);
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const delta = currentScrollY - lastScrollY;
+
+          // Near page top, navigation is always visible
+          if (currentScrollY <= 45) {
+            setNavVisible(true);
+          } else if (Math.abs(delta) > 8) {
+            if (delta > 0) {
+              // Scrolling down -> hide nav
+              setNavVisible(false);
+              setMenuOpen(false);
+            } else {
+              // Scrolling back up -> reveal nav
+              setNavVisible(true);
+            }
+          }
+
+          lastScrollY = Math.max(0, currentScrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -203,31 +249,9 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   return (
     <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
 
-      {/* ── Fixed Ambient Minimal Flowing Waves Background ── */}
-      {/* Light Mode Minimalist Waves */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-40 dark:hidden"
-        style={{
-          backgroundImage: "url('/bg-light-waves.jpg')",
-        }}
-        aria-hidden="true"
-      />
+      {/* ── Circadian Ambient Mesh & Frosted Glass Caustics (Time-Adaptive) ── */}
+      <CircadianBackground />
 
-      {/* Dark Mode Minimalist Waves (Deep Obsidian Base + Glowing Aurora Ribbons) */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 opacity-60 hidden dark:block"
-        style={{
-          backgroundImage: "url('/bg-dark-waves.jpg')",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* ── Dark Ambient Bioluminescent Auras (Extra Refraction sources for dark liquid glass) ── */}
-      <div className="hidden dark:block pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-32 -left-20 w-[420px] h-[420px] rounded-full bg-indigo-600/15 blur-[130px] -translate-z-0" />
-        <div className="absolute top-1/3 -right-24 w-[380px] h-[380px] rounded-full bg-emerald-600/12 blur-[130px] -translate-z-0" />
-        <div className="absolute -bottom-24 left-1/4 w-[360px] h-[360px] rounded-full bg-rose-600/12 blur-[140px] -translate-z-0" />
-      </div>
 
       {/* ── Top In-Page Minimalist Controls (Option B: Pure Floating · Moves with page scroll) ── */}
       <header 
@@ -362,8 +386,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
       <nav 
-        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-200 gpu-composited ${
-          isKeyboardOpen ? 'opacity-0 translate-y-24 pointer-events-none' : 'opacity-100 translate-y-0'
+        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] gpu-composited ${
+          isKeyboardOpen || (!navVisible && !menuOpen)
+            ? 'opacity-0 translate-y-28 pointer-events-none'
+            : 'opacity-100 translate-y-0'
         }`}
         style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
         role="navigation"

@@ -1,7 +1,7 @@
 {
-  "versionCode": 16,
-  "versionName": "1.5.6",
+  "versionCode": 17,
+  "versionName": "1.5.7",
   "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.5.6 (Build 16): Official LifeOS app logo in status bar notifications, instant notification dispatch, daily nutrition meal alerts, live study timer status bar notification, black box card artifact removal, optimized to-do task bar & bottom sheet interactions, and enhanced mobile responsiveness.",
+  "releaseNotes": "LifeOS v1.5.7 (Build 17): Auto-hiding OneStop navigation bar on scroll, instant scroll-to-top interface transitions, fluid page glide entrance animations, end-to-end interactive card micro-interactions (Chrono-Clock, Dumbbell spring plates, fluid checkboxes, water ripple beaker, laundry drum), and time-adaptive Circadian Ambient Mesh background.",
   "apkUrl": "/LifeOS.apk"
 }

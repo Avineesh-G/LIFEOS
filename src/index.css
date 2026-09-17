@@ -246,17 +246,17 @@
   /* Fluid Page Transition (Zero Blank-Screen Risk, Native 120fps) */
   @keyframes pageFluidEnter {
     0% {
-      opacity: 0.82;
-      transform: translateY(6px) scale(0.993);
+      opacity: 0;
+      transform: translateY(18px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0px) scale(1);
+      transform: translateY(0px);
     }
   }
 
   .animate-page-fluid {
-    animation: pageFluidEnter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: pageFluidEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
     will-change: transform, opacity;
   }
 
@@ -371,6 +371,30 @@
   .animate-spring-pop {
     animation: springPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
+
+  /* Circadian Ambient Caustic Drift (100% GPU Composited) */
+  @keyframes ambientDrift1 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(30px, 45px, 0) scale(1.08); }
+  }
+  @keyframes ambientDrift2 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-35px, -30px, 0) scale(1.12); }
+  }
+  @keyframes ambientDrift3 {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(25px, -40px, 0) scale(0.95); }
+  }
+  .animate-ambient-drift-1 {
+    animation: ambientDrift1 28s ease-in-out infinite;
+  }
+  .animate-ambient-drift-2 {
+    animation: ambientDrift2 34s ease-in-out infinite;
+  }
+  .animate-ambient-drift-3 {
+    animation: ambientDrift3 30s ease-in-out infinite;
+  }
 }
+
 
 

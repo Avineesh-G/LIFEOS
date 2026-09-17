@@ -13,7 +13,10 @@ import {
   getSplitTweakAdvice,
   GEMINI_API_KEY,
 } from '../utils/geminiCoach';
+import VictoryModal from '../components/rive/VictoryModal';
+import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import type { AppData, WorkoutLog } from '../types';
+
 
 interface GymWorkoutProps {
   data: AppData;
@@ -143,6 +146,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const [saved, setSaved] = useState(false);
   const [isLocked, setIsLocked] = useState(!!existingLog?.isSaved);
   const [isSavedDay, setIsSavedDay] = useState(!!existingLog?.isSaved);
+  const [showVictoryModal, setShowVictoryModal] = useState(false);
 
   // AI state
   const [preTip, setPreTip] = useState('');
@@ -314,6 +318,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
     setTimeout(() => setSaved(false), 3000);
     if (isComplete) {
       fetchPostSummary(); // auto-trigger post-workout analysis
+      setShowVictoryModal(true);
     }
   };
 
@@ -540,16 +545,11 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
                         />
                         <span className="text-muted-light dark:text-muted-dark text-xs">kg</span>
                       </div>
-                      <button
-                        onClick={() => toggleSet(ei, si)}
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90 ${
-                          set.completed
-                            ? 'bg-emerald-500 text-white shadow-sm'
-                            : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark text-muted-light dark:text-muted-dark hover:text-emerald-500 hover:border-emerald-500'
-                        }`}
-                      >
-                        <Check size={14} />
-                      </button>
+                      <InteractiveCheckbox
+                        checked={set.completed}
+                        onChange={() => toggleSet(ei, si)}
+                        size={30}
+                      />
                       <button onClick={() => removeSet(ei, si)} className="p-1.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition-all active:scale-90">
                         <Minus size={13} />
                       </button>
@@ -659,6 +659,20 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           )}
         </div>
       )}
+
+      <VictoryModal
+        isOpen={showVictoryModal}
+        onClose={() => {
+          setShowVictoryModal(false);
+          navigate('/gym');
+        }}
+        title="Workout Complete"
+        subtitle="Outstanding effort! Your sets, reps, and progressive overload have been recorded."
+        stats={[
+          { label: 'Completed Sets', value: `${completedSets}/${totalSets}` },
+          { label: 'Completion', value: `${Math.round(pct)}%` },
+        ]}
+      />
     </div>
   );
 }

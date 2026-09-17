@@ -4,7 +4,9 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { BottomSheet, Modal } from '../components/BottomSheet';
+import InteractiveLaundryDrum from '../components/interactive/InteractiveLaundryDrum';
 import type { AppData, LaundryBatch, LaundryItemCount } from '../types';
+
 
 interface LaundryProps {
   data: AppData;
@@ -179,9 +181,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
               At Laundry
             </span>
-            <div className="w-7 h-7 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-              <Shirt size={14} />
-            </div>
+            <InteractiveLaundryDrum status={clothesAtLaundry > 0 ? 'laundry' : 'received'} size={24} />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-primary-light dark:text-primary-dark font-sans">
@@ -254,7 +254,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                     </span>
                     <button
                       onClick={() => toggleBatchStatus(batch)}
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border inline-flex items-center gap-1 ${
                         isReturned
                           ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
                           : isSubmitted
@@ -262,7 +262,22 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                             : 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300'
                       }`}
                     >
-                      {isReturned ? '✓ Received' : isSubmitted ? '🧺 At Laundry' : '⏳ Pending'}
+                      {isReturned ? (
+                        <>
+                          <Check size={11} strokeWidth={2.5} />
+                          <span>Received</span>
+                        </>
+                      ) : isSubmitted ? (
+                        <>
+                          <Shirt size={11} strokeWidth={2.5} />
+                          <span>At Laundry</span>
+                        </>
+                      ) : (
+                        <>
+                          <Clock size={11} strokeWidth={2.5} />
+                          <span>Pending</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

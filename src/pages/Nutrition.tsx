@@ -7,7 +7,9 @@ import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { FITNESS_GOALS } from '../utils/calculations';
+import InteractiveWaterGlass from '../components/interactive/InteractiveWaterGlass';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
+
 
 interface NutritionProps {
   data: AppData;
@@ -62,6 +64,34 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [coachAdvice, setCoachAdvice] = useState<any>(null);
   const [fetchingAdvice, setFetchingAdvice] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
+
+  // Daily Water Tracker State
+  const [waterLiters, setWaterLiters] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(`lifeos_water_${selectedDate}`);
+      return saved ? parseFloat(saved) : 1.5;
+    } catch {
+      return 1.5;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`lifeos_water_${selectedDate}`);
+      setWaterLiters(saved ? parseFloat(saved) : 1.5);
+    } catch {}
+  }, [selectedDate]);
+
+  const handleAddWater = () => {
+    setWaterLiters(prev => {
+      const next = Math.round((prev + 0.25) * 100) / 100;
+      try {
+        localStorage.setItem(`lifeos_water_${selectedDate}`, next.toString());
+      } catch {}
+      return next;
+    });
+  };
+
 
   // Auto-expand current meal slot ONLY when mess time is active and it hasn't been saved yet
   const [expanded, setExpanded] = useState<MealSlot | null>(() => {
@@ -563,6 +593,36 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           </div>
         </div>
       </motion.div>
+
+      {/* ── Daily Hydration Card (Interactive Usable Liquid Glass) ── */}
+      <motion.div variants={item} className="liquid-glass rounded-[30px] p-4.5 sm:p-5 border border-cyan-500/25 shadow-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-[14px] bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center shrink-0">
+            <InteractiveWaterGlass currentLiters={waterLiters} targetLiters={3.0} size={28} onAddGlass={handleAddWater} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Hydration Protocol</h3>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
+                {Math.round((waterLiters / 3.0) * 100)}%
+              </span>
+            </div>
+            <p className="text-xs font-mono font-semibold text-secondary-light dark:text-secondary-dark mt-0.5">
+              {waterLiters.toFixed(2)}L / 3.0L target
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddWater}
+          className="bouncy-tap px-3.5 py-2 rounded-full text-xs font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-sm flex items-center gap-1.5 shrink-0"
+        >
+          <Plus size={13} strokeWidth={2.5} />
+          <span>+250ml</span>
+        </button>
+      </motion.div>
+
 
       {/* ── Food Doubt Card (Liquid Spring Capsule) ── */}
       <motion.div variants={item} className="liquid-glass rounded-[30px] p-5 sm:p-6 border border-purple-500/25 glow-lavender shadow-sm space-y-3.5">
