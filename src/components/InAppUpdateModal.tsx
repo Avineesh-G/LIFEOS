@@ -66,19 +66,24 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
     timer = setTimeout(runAutoCheck, 3000);
 
     // Also listen for manual trigger events (e.g. from Settings)
-    const handleManualTrigger = async () => {
+    const handleManualTrigger = async (event?: any) => {
+      if (event?.detail?.remoteVersion) {
+        setRemoteVersion(event.detail.remoteVersion);
+        setStatus('idle');
+        setIsOpen(true);
+        return;
+      }
       setStatus('checking');
       setIsOpen(true);
-      const res = await checkForAppUpdate();
-      if (res.hasUpdate && res.remoteVersion) {
-        setRemoteVersion(res.remoteVersion);
-        setStatus('idle');
-      } else {
-        setStatus('idle');
-        // If no update, let Settings show a toast or alert
-        if (!res.hasUpdate) {
-          setIsOpen(false);
+      try {
+        const res = await checkForAppUpdate();
+        if (res.remoteVersion) {
+          setRemoteVersion(res.remoteVersion);
         }
+      } catch (e) {
+        console.warn('Manual update check failed', e);
+      } finally {
+        setStatus('idle');
       }
     };
 
@@ -229,7 +234,19 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             </div>
 
             {/* Status Views */}
-            {status === 'permission_needed' ? (
+            {status === 'checking' ? (
+              <div className="py-8 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-500 mx-auto flex items-center justify-center animate-spin">
+                  <RefreshCw size={24} />
+                </div>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                  Checking for Updates...
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Connecting to LifeOS release channels
+                </p>
+              </div>
+            ) : status === 'permission_needed' ? (
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <Smartphone className="text-amber-500 shrink-0 mt-0.5" size={18} />
@@ -314,7 +331,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <CheckCircle2 size={14} className="text-emerald-500" /> What's New in this Build:
                   </div>
                   <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal pl-5">
-                    {remoteVersion?.releaseNotes || 'Performance improvements, updated notification icons, and system enhancements.'}
+                    {remoteVersion?.releaseNotes || 'Active notification timer layout with live Chronometer and active status channel, plus seamless in-app auto-updater.'}
                   </p>
                 </div>
 
@@ -342,7 +359,18 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   className="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-98 transition-all flex items-center justify-center gap-2"
                 >
                   <Download size={15} />
-                  <span>Update Now</span>
+                  <span>{remoteVersion && remoteVersion.versionCode > 18 ? 'Update Now' : 'Reinstall / Download'}</span>
+                </button>
+              </div>
+            )}
+            {status === 'checking' && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  className="w-full py-2.5 px-4 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.08] dark:hover:bg-white/[0.09] text-gray-700 dark:text-gray-300 text-xs font-bold transition-all text-center"
+                >
+                  Cancel
                 </button>
               </div>
             )}

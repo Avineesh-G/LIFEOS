@@ -587,7 +587,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg tracking-tight">LifeOS</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
-                v1.5.8
+                v1.5.9
               </span>
             </div>
           </div>
@@ -659,7 +659,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>v1.5.8 Live Release • 100% Free & Universal</span>
+            <span>v1.5.9 Live Release • 100% Free & Universal</span>
           </motion.div>
 
           {/* Headline */}
@@ -708,7 +708,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <Smartphone size={20} className="group-hover:-translate-y-0.5 transition-transform" />
               <div className="text-left">
                 <div className="text-sm font-black leading-tight">Download LifeOS for Android</div>
-                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.8 • ~8.5 MB Free</div>
+                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.9 • ~8.5 MB Free</div>
               </div>
               <Download size={18} className="ml-1 opacity-80" />
             </motion.a>
@@ -1270,7 +1270,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-black text-base shadow-xl shadow-accent/25 transition-all"
               >
                 <Download size={18} />
-                <span>Download LifeOS.apk (v1.5.8)</span>
+                <span>Download LifeOS.apk (v1.5.9)</span>
               </motion.a>
 
               <button

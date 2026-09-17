@@ -1,5 +1,5 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
-import { checkForAppUpdate } from '../utils/updater';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download } from 'lucide-react';
+import { checkForAppUpdate, GITHUB_RAW_APK_URL } from '../utils/updater';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -881,7 +881,7 @@ export default function Settings({
       </div>
 
       {/* ── 9. Software Updates & Release (Card) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm p-5 sm:p-6 overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm p-5 sm:p-6 overflow-hidden space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm shrink-0">
@@ -893,11 +893,11 @@ export default function Settings({
                   Software Updates
                 </h3>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                  v1.5.8
+                  v1.5.9
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build 18
+                Direct In-App APK Auto-Updater • Build 19
               </p>
             </div>
           </div>
@@ -911,20 +911,24 @@ export default function Settings({
               try {
                 const res = await checkForAppUpdate();
                 if (res.hasUpdate && res.remoteVersion) {
-                  window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
+                  window.dispatchEvent(new CustomEvent('lifeos-open-updater', {
+                    detail: { remoteVersion: res.remoteVersion, hasUpdate: true }
+                  }));
+                  setUpdateFeedback({
+                    type: 'success',
+                    message: `Update Available: v${res.remoteVersion.versionName} (Build ${res.remoteVersion.versionCode})! Opening in-app installer...`
+                  });
                 } else {
                   setUpdateFeedback({
                     type: 'success',
-                    message: 'LifeOS is fully up to date! Running latest v1.5.8 (Build 18).'
+                    message: 'LifeOS is fully up to date! Running latest v1.5.9 (Build 19).'
                   });
-                  setTimeout(() => setUpdateFeedback(null), 5000);
                 }
               } catch {
                 setUpdateFeedback({
                   type: 'error',
                   message: 'Could not reach update server. Please check your internet connection.'
                 });
-                setTimeout(() => setUpdateFeedback(null), 5000);
               } finally {
                 setCheckingUpdate(false);
               }
@@ -941,9 +945,9 @@ export default function Settings({
         <AnimatePresence>
           {updateFeedback && (
             <motion.div
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: 'auto', marginTop: 14 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
               className={`p-3 rounded-2xl border text-xs font-semibold flex items-center gap-2.5 overflow-hidden ${
                 updateFeedback.type === 'success'
                   ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
@@ -955,15 +959,42 @@ export default function Settings({
               ) : (
                 <AlertTriangle size={16} className="text-rose-500 shrink-0" />
               )}
-              <span>{updateFeedback.message}</span>
+              <span className="flex-1">{updateFeedback.message}</span>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Quick action buttons row */}
+        <div className="pt-1 flex flex-wrap items-center gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
+            }}
+            className="px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-primary-light dark:text-primary-dark font-bold flex items-center gap-1.5 transition-all"
+          >
+            <Sparkles size={13} className="text-accent" />
+            <span>Open Updater Dialog</span>
+          </button>
+
+          <a
+            href={GITHUB_RAW_APK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            download="LifeOS.apk"
+            onClick={() => triggerHaptic('selection')}
+            className="px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium flex items-center gap-1.5 transition-all"
+          >
+            <Download size={13} />
+            <span>Download APK (Direct)</span>
+          </a>
+        </div>
       </div>
 
       <div className="text-center py-2">
         <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark tracking-wide">
-          v1.5.8
+          v1.5.9
         </p>
       </div>
     </div>

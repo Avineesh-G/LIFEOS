@@ -1,7 +1,7 @@
 {
-  "versionCode": 18,
-  "versionName": "1.5.8",
+  "versionCode": 19,
+  "versionName": "1.5.9",
   "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.5.8 (Build 18): Stability and polish release — scroll-to-top interface transitions, OneStop-style auto-hiding navigation bar, end-to-end interactive card micro-interactions, Circadian Ambient Mesh background, and Rive canvas optimizations.",
+  "releaseNotes": "LifeOS v1.5.9 (Build 19): Active status notification layout with live Chronometer and active status channel, plus seamless in-app auto-updater and direct APK installer.",
   "apkUrl": "/LifeOS.apk"
 }

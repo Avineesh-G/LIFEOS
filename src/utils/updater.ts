@@ -1,13 +1,13 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 
-export const CURRENT_VERSION_CODE = 18;
-export const CURRENT_VERSION_NAME = '1.5.8';
+export const CURRENT_VERSION_CODE = 19;
+export const CURRENT_VERSION_NAME = '1.5.9';
 
 export const GITHUB_RAW_APK_URL = 'https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk';
 export const REMOTE_VERSION_URLS = [
-  'https://raw.githubusercontent.com/Avineesh-G/LIFEOS/main/public/version.json',
+  '/version.json',
   'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json',
-  '/version.json'
+  'https://raw.githubusercontent.com/Avineesh-G/LIFEOS/main/public/version.json'
 ];
 
 export interface AppVersionInfo {
@@ -48,20 +48,23 @@ export const isNativeAndroid = (): boolean => {
 };
 
 /**
- * Fetches version metadata from remote endpoints with fallbacks
+ * Fetches version metadata from remote endpoints with fast fallback & timeout
  */
 export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
   const timestamp = Date.now();
   for (const baseUrl of REMOTE_VERSION_URLS) {
     try {
       const url = `${baseUrl}?t=${timestamp}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       const res = await fetch(url, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
+        signal: controller.signal,
+        cache: 'no-store'
+        // No custom headers to avoid CORS OPTIONS preflight rejections
       });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const data = await res.json();
         if (data && typeof data.versionCode === 'number') {
