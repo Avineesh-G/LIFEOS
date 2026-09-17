@@ -22,6 +22,7 @@ import {
   AppVersionInfo,
   DownloadProgressEvent
 } from '../utils/updater';
+import { sendUpdateAvailableNotification } from '../utils/notifications';
 
 interface InAppUpdateModalProps {
   // Optional manual trigger override
@@ -53,6 +54,12 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
       if (res.hasUpdate && res.remoteVersion) {
         setRemoteVersion(res.remoteVersion);
         setIsOpen(true);
+        // Fire native phone notification so user is alerted even if app is in background
+        sendUpdateAvailableNotification(
+          res.currentVersion,
+          res.remoteVersion.versionName,
+          res.remoteVersion.releaseNotes
+        );
       }
     };
 

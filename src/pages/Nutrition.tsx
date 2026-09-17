@@ -594,34 +594,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </div>
       </motion.div>
 
-      {/* ── Daily Hydration Card (Interactive Usable Liquid Glass) ── */}
-      <motion.div variants={item} className="liquid-glass rounded-[30px] p-4.5 sm:p-5 border border-cyan-500/25 shadow-sm flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-[14px] bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center shrink-0">
-            <InteractiveWaterGlass currentLiters={waterLiters} targetLiters={3.0} size={28} onAddGlass={handleAddWater} />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Hydration Protocol</h3>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
-                {Math.round((waterLiters / 3.0) * 100)}%
-              </span>
-            </div>
-            <p className="text-xs font-mono font-semibold text-secondary-light dark:text-secondary-dark mt-0.5">
-              {waterLiters.toFixed(2)}L / 3.0L target
-            </p>
-          </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={handleAddWater}
-          className="bouncy-tap px-3.5 py-2 rounded-full text-xs font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-sm flex items-center gap-1.5 shrink-0"
-        >
-          <Plus size={13} strokeWidth={2.5} />
-          <span>+250ml</span>
-        </button>
-      </motion.div>
 
 
       {/* ── Food Doubt Card (Liquid Spring Capsule) ── */}

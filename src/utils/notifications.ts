@@ -484,3 +484,44 @@ export async function sendInstantTestNotification(title: string, body: string): 
     return false;
   }
 }
+
+/**
+ * Fires an instant native phone notification when a new LifeOS update is available.
+ * Appears in the Android notification bar/shade immediately.
+ */
+export async function sendUpdateAvailableNotification(
+  currentVersion: string,
+  newVersion: string,
+  releaseNotes?: string
+): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await ensureNotificationChannels();
+    const body = releaseNotes
+      ? releaseNotes.slice(0, 120) + (releaseNotes.length > 120 ? '...' : '')
+      : `Open LifeOS to download v${newVersion} now.`;
+
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: 99999,
+          title: `LifeOS Update Available — v${newVersion}`,
+          body,
+          channelId: TASKS_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: NOTIFICATION_COLOR,
+          schedule: { at: new Date(Date.now() + 100), allowWhileIdle: true },
+          extra: {
+            type: 'update_available',
+            currentVersion,
+            newVersion,
+          },
+        },
+      ],
+    });
+    return true;
+  } catch (err) {
+    console.warn('[Notifications] Update notification failed:', err);
+    return false;
+  }
+}

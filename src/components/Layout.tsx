@@ -385,13 +385,17 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       </AnimatePresence>
 
       {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
-      <nav 
-        className={`fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] gpu-composited ${
-          isKeyboardOpen || (!navVisible && !menuOpen)
-            ? 'opacity-0 translate-y-28 pointer-events-none'
-            : 'opacity-100 translate-y-0'
-        }`}
-        style={{ bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))' }}
+      <nav
+        className="fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 gpu-composited"
+        style={{
+          bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+          transform: isKeyboardOpen || (!navVisible && !menuOpen)
+            ? 'translateY(calc(100% + 2.5rem))'
+            : 'translateY(0)',
+          opacity: isKeyboardOpen || (!navVisible && !menuOpen) ? 0 : 1,
+          transition: 'transform 420ms cubic-bezier(0.32,0,0.67,0), opacity 380ms cubic-bezier(0.32,0,0.67,0)',
+          pointerEvents: isKeyboardOpen || (!navVisible && !menuOpen) ? 'none' : 'auto',
+        }}
         role="navigation"
         aria-label="Main Navigation"
       >
