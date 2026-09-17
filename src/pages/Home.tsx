@@ -704,8 +704,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </AnimatePresence>
       </motion.div>
 
-      {/* ── 2×2 Liquid Spring Capsule Action Cards ── */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
+      {/* ── 2×2 Liquid Spring Capsule Action Cards (Mobile-Optimized & Elegant) ── */}
+      <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-5">
 
         {/* 1. Study Card (Bioluminescent Soft Lavender Capsule) */}
         <motion.button
@@ -715,29 +715,29 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/study');
           }}
-          className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 text-left liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/30 dark:to-purple-500/30 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs border border-indigo-500/20">
-                <BookOpen size={20} strokeWidth={2.2} />
+          <div className="relative z-10 w-full min-w-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/30 dark:to-purple-500/30 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs border border-indigo-500/20 shrink-0">
+                <BookOpen size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={17} className="text-indigo-600/60 dark:text-indigo-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={16} className="text-indigo-600/60 dark:text-indigo-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 block mb-1.5 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 block mb-1 font-mono">
               Study
             </span>
-            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark">
-              {todayStudyHours}<span className="text-sm font-semibold text-secondary-light dark:text-secondary-dark">h</span>{' '}
-              {todayStudyMins}<span className="text-sm font-semibold text-secondary-light dark:text-secondary-dark">m</span>
+            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+              {todayStudyHours}<span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">h</span>{' '}
+              {todayStudyMins}<span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">m</span>
             </p>
           </div>
 
-          <div className="relative z-10 mt-4 pt-3 border-t border-indigo-500/15 dark:border-indigo-400/15 flex items-center justify-between">
-            <span className="text-xs font-semibold text-indigo-800/80 dark:text-indigo-300/80">
-              {todaySessions.length} session{todaySessions.length !== 1 ? 's' : ''}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-indigo-500/15 dark:border-indigo-400/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-indigo-800/80 dark:text-indigo-300/80 truncate">
+              {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shrink-0 whitespace-nowrap">
               Deep Work
             </span>
           </div>
@@ -751,32 +751,32 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/gym');
           }}
-          className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 text-left liquid-glass glow-mint border border-emerald-200/50 dark:border-emerald-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-mint border border-emerald-200/50 dark:border-emerald-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/30 dark:to-teal-500/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/20">
-                <Dumbbell size={20} strokeWidth={2.2} />
+          <div className="relative z-10 w-full min-w-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/30 dark:to-teal-500/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/20 shrink-0">
+                <Dumbbell size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={17} className="text-emerald-600/60 dark:text-emerald-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={16} className="text-emerald-600/60 dark:text-emerald-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block mb-1.5 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block mb-1 font-mono">
               Gym
             </span>
-            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
               {todayWorkout ? todayPlan?.type || 'Workout' : todayPlan?.type || 'Rest'}
             </p>
           </div>
 
-          <div className="relative z-10 mt-4 pt-3 border-t border-emerald-500/15 dark:border-emerald-400/15 flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-800/80 dark:text-emerald-300/80 truncate">
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-emerald-500/15 dark:border-emerald-400/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-emerald-800/80 dark:text-emerald-300/80 truncate">
               {todayWorkout
                 ? `${(todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)} sets`
                 : todayPlan && (todayPlan.exercises || []).length > 0
                   ? `${(todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)} sets`
                   : 'Rest day'}
             </span>
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+            <span className={`px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold border shrink-0 whitespace-nowrap ${
               todayWorkout 
                 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' 
                 : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
@@ -794,28 +794,28 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/spending');
           }}
-          className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 text-left liquid-glass glow-peach border border-amber-200/50 dark:border-amber-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-peach border border-amber-200/50 dark:border-amber-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-amber-500/20 to-orange-500/20 dark:from-amber-500/30 dark:to-orange-500/30 text-amber-700 dark:text-amber-300 flex items-center justify-center shadow-xs border border-amber-500/20">
-                <Wallet size={20} strokeWidth={2.2} />
+          <div className="relative z-10 w-full min-w-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-amber-500/20 to-orange-500/20 dark:from-amber-500/30 dark:to-orange-500/30 text-amber-700 dark:text-amber-300 flex items-center justify-center shadow-xs border border-amber-500/20 shrink-0">
+                <Wallet size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={17} className="text-amber-600/60 dark:text-amber-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={16} className="text-amber-600/60 dark:text-amber-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 block mb-1.5 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 block mb-1 font-mono">
               Money
             </span>
-            <p className="text-2xl sm:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark">
+            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
               ₹{todaySpent.toLocaleString('en-IN')}
             </p>
           </div>
 
-          <div className="relative z-10 mt-4 pt-3 border-t border-amber-500/15 dark:border-amber-400/15 flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-800/80 dark:text-amber-300/80">
-              {todayExpenses.length} record{todayExpenses.length !== 1 ? 's' : ''}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-amber-500/15 dark:border-amber-400/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-amber-800/80 dark:text-amber-300/80 truncate">
+              {todayExpenses.length} {todayExpenses.length === 1 ? 'record' : 'records'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20 shrink-0 whitespace-nowrap">
               Expenses
             </span>
           </div>
@@ -829,28 +829,28 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             nextBlock ? navigate('/study/timer') : navigate('/timetable');
           }}
-          className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 text-left liquid-glass glow-rose border border-rose-200/50 dark:border-rose-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-rose border border-rose-200/50 dark:border-rose-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-rose-500/20 to-pink-500/20 dark:from-rose-500/30 dark:to-pink-500/30 text-rose-700 dark:text-rose-300 flex items-center justify-center shadow-xs border border-rose-500/20">
-                <Clock size={20} strokeWidth={2.2} />
+          <div className="relative z-10 w-full min-w-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-rose-500/20 to-pink-500/20 dark:from-rose-500/30 dark:to-pink-500/30 text-rose-700 dark:text-rose-300 flex items-center justify-center shadow-xs border border-rose-500/20 shrink-0">
+                <Clock size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={17} className="text-rose-600/60 dark:text-rose-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ArrowUpRight size={16} className="text-rose-600/60 dark:text-rose-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 block mb-1.5 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 block mb-1 font-mono">
               Next Up
             </span>
-            <p className="text-lg sm:text-xl font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+            <p className="text-base sm:text-xl font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
               {nextBlock ? nextBlock.subject : 'Free Period'}
             </p>
           </div>
 
-          <div className="relative z-10 mt-4 pt-3 border-t border-rose-500/15 dark:border-rose-400/15 flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-800/80 dark:text-rose-300/80 truncate">
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-rose-500/15 dark:border-rose-400/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-rose-800/80 dark:text-rose-300/80 truncate">
               {nextBlock ? `${nextBlock.startTime} – ${nextBlock.endTime}` : 'No upcoming class'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20 shrink-0 whitespace-nowrap">
               Timetable
             </span>
           </div>

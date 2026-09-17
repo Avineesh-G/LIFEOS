@@ -31,7 +31,10 @@ export default function Tasks({ data, updateData }: TasksProps) {
       if (!granted) {
         requestAndSyncNotifications(data, updateData);
       } else if (data?.tasks) {
-        syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+        // Non-blocking background sync to prevent UI frame hitch
+        setTimeout(() => {
+          syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+        }, 80);
       }
     });
   }, [data?.tasks, data?.settings?.notificationLeadMinutes, data?.settings?.notificationsEnabled]);
@@ -162,6 +165,13 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   const handlePointerCancel = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  const handlePointerMove = () => {
     if (pressTimer.current) {
       clearTimeout(pressTimer.current);
       pressTimer.current = null;
@@ -392,6 +402,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   key={task.id}
                   onPointerDown={() => handlePointerDown(task)}
                   onPointerUp={handlePointerUp}
+                  onPointerMove={handlePointerMove}
                   onPointerCancel={handlePointerCancel}
                   className="rounded-[22px] border border-amber-500/20 bg-white/80 dark:bg-white/[0.04] p-3.5 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-colors select-none"
                 >
@@ -446,6 +457,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
               key={task.id}
               onPointerDown={() => handlePointerDown(task)}
               onPointerUp={handlePointerUp}
+              onPointerMove={handlePointerMove}
               onPointerCancel={handlePointerCancel}
               onContextMenu={e => {
                 e.preventDefault();

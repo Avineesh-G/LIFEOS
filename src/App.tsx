@@ -32,6 +32,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import type { TransitionMode, FluidIntensity } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
+import InAppUpdateModal from './components/InAppUpdateModal';
 import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
@@ -245,6 +246,7 @@ function App() {
   return (
     <>
       <AppLockOverlay />
+      <InAppUpdateModal />
       <div
         className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
         style={{

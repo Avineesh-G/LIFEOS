@@ -15,6 +15,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(GoogleAuth.class);
         registerPlugin(NativeBiometric.class);
         registerPlugin(LocalNotificationsPlugin.class);
+        registerPlugin(ApkInstallerPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS

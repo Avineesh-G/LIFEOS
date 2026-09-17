@@ -4,6 +4,12 @@ import type { Task, TimetableBlock } from '../types';
 
 export const TIMETABLE_CHANNEL_ID = 'lifeos_timetable';
 export const TASKS_CHANNEL_ID = 'lifeos_tasks';
+export const NUTRITION_CHANNEL_ID = 'lifeos_nutrition';
+export const STUDY_CHANNEL_ID = 'lifeos_study';
+
+export const NOTIFICATION_ICON = 'ic_stat_lifeos';
+export const NOTIFICATION_COLOR = '#6366F1';
+export const STUDY_TIMER_NOTIF_ID = 88888;
 
 let channelCreated = false;
 
@@ -14,7 +20,7 @@ async function ensureNotificationChannels() {
       id: TIMETABLE_CHANNEL_ID,
       name: 'Timetable Reminders',
       description: 'Alerts before upcoming classes and lectures',
-      importance: 5, // 5 = High/Max importance -> shows heads-up banner & stays in notification center
+      importance: 5, // High/Max importance -> heads-up banner & stays in notification center
       visibility: 1, // Public visibility on lockscreen and shade
       vibration: true,
       lights: true,
@@ -31,6 +37,29 @@ async function ensureNotificationChannels() {
       lights: true,
       lightColor: '#10B981',
     });
+
+    await LocalNotifications.createChannel({
+      id: NUTRITION_CHANNEL_ID,
+      name: 'Nutrition & Meal Alerts',
+      description: 'Daily breakfast, lunch, snacks, and dinner mess reminders',
+      importance: 4,
+      visibility: 1,
+      vibration: true,
+      lights: true,
+      lightColor: '#F59E0B',
+    });
+
+    await LocalNotifications.createChannel({
+      id: STUDY_CHANNEL_ID,
+      name: 'Active Study Timer',
+      description: 'Ongoing status bar notification showing live study session timer',
+      importance: 3, // Low sound to avoid chiming on status updates
+      visibility: 1,
+      vibration: false,
+      lights: false,
+      lightColor: '#6366F1',
+    });
+
     channelCreated = true;
   } catch (err) {
     console.warn('[Notifications] Failed to create channels:', err);
@@ -74,6 +103,7 @@ export async function requestAndSyncNotifications(
             notificationsEnabled: true,
             timetableNotificationsEnabled: true,
             taskNotificationsEnabled: true,
+            nutritionNotificationsEnabled: true,
           },
         });
       } catch (e) {
@@ -81,17 +111,21 @@ export async function requestAndSyncNotifications(
       }
     }
 
-    if (data?.timetable) {
-      await syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
-    }
-    if (data?.tasks) {
-      await syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-    }
+    // Schedule in non-blocking background queue
+    setTimeout(() => {
+      if (data?.timetable) {
+        syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+      }
+      if (data?.tasks) {
+        syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+      }
+      syncNutritionNotifications();
+    }, 50);
 
-    // Fire instant alert into the actual phone notification center so user sees it right away
+    // Fire instant alert with app logo into the actual phone notification center
     await sendInstantTestNotification(
       'LifeOS Notifications Active 🔔',
-      'Time Table & TO-DO Task reminders will appear here in your notification center.'
+      'Timetable, TO-DO, Nutrition alerts, and Study timer will appear here with the LifeOS logo.'
     );
     return true;
   }
@@ -170,7 +204,7 @@ export async function syncTimetableNotifications(
     const currentDay = now.getDay();
     const notificationsToSchedule: any[] = [];
 
-    // Schedule for next 7 days
+    // Schedule for next 14 days
     for (const block of blocks) {
       if (!block.startTime || !block.day) continue;
       const targetDay = DAY_MAP[block.day];
@@ -179,11 +213,10 @@ export async function syncTimetableNotifications(
       const [hours, minutes] = block.startTime.split(':').map(Number);
       if (isNaN(hours) || isNaN(minutes)) continue;
 
-      // Calculate days ahead (0 to 6)
       let dayDiff = targetDay - currentDay;
       if (dayDiff < 0) dayDiff += 7;
 
-      for (let week = 0; week < 2; week++) { // Next 14 days
+      for (let week = 0; week < 2; week++) {
         const scheduledTime = new Date(now);
         scheduledTime.setDate(now.getDate() + dayDiff + week * 7);
         scheduledTime.setHours(hours, minutes, 0, 0);
@@ -204,6 +237,8 @@ export async function syncTimetableNotifications(
             title: `📚 ${block.subject || 'Class'} Reminder`,
             body: bodyText,
             channelId: TIMETABLE_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: NOTIFICATION_COLOR,
             schedule: { at: triggerTime, allowWhileIdle: true },
             extra: {
               type: 'timetable',
@@ -216,8 +251,7 @@ export async function syncTimetableNotifications(
     }
 
     if (notificationsToSchedule.length > 0) {
-      // Limit to 40 notifications to preserve OS limits
-      const capped = notificationsToSchedule.slice(0, 40);
+      const capped = notificationsToSchedule.slice(0, 35);
       await LocalNotifications.schedule({ notifications: capped });
       return capped.length;
     }
@@ -277,6 +311,8 @@ export async function syncTaskNotifications(
           title: `✅ Task Reminder: ${task.text}`,
           body: bodyText,
           channelId: TASKS_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#10B981',
           schedule: { at: triggerTime, allowWhileIdle: true },
           extra: {
             type: 'task',
@@ -287,7 +323,7 @@ export async function syncTaskNotifications(
     }
 
     if (notificationsToSchedule.length > 0) {
-      const capped = notificationsToSchedule.slice(0, 40);
+      const capped = notificationsToSchedule.slice(0, 35);
       await LocalNotifications.schedule({ notifications: capped });
       return capped.length;
     }
@@ -298,7 +334,132 @@ export async function syncTaskNotifications(
 }
 
 /**
- * Fires an immediate confirmation notification to the device notification center.
+ * Schedules daily Nutrition and Mess meal reminders (Breakfast, Lunch, Snacks, Dinner).
+ */
+export async function syncNutritionNotifications(): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) return 0;
+
+  await ensureNotificationChannels();
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    const nutritionNotifications = pending.notifications.filter(n =>
+      n.extra?.type === 'nutrition'
+    );
+    if (nutritionNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: nutritionNotifications });
+    }
+
+    const MEAL_TIMES = [
+      { slot: 'breakfast', hour: 8,  minute: 0,  title: '🍳 Breakfast Time', body: 'Mess breakfast is serving (7:30–9:45 AM). Fuel your day!' },
+      { slot: 'lunch',     hour: 13, minute: 0,  title: '🍲 Lunch Time',     body: 'Mess lunch is active (12:15–2:45 PM). Don\'t skip your nutrition!' },
+      { slot: 'snacks',    hour: 17, minute: 0,  title: '☕ Evening Snacks', body: 'Evening snacks are ready (4:15–6:15 PM). Grab a healthy bite!' },
+      { slot: 'dinner',    hour: 20, minute: 0,  title: '🍽️ Dinner Time',    body: 'Mess dinner is open (7:15–9:30 PM). Hit your protein and calorie targets!' },
+    ];
+
+    const now = new Date();
+    const notificationsToSchedule: any[] = [];
+
+    // Schedule for next 5 days
+    for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
+      for (const meal of MEAL_TIMES) {
+        const triggerTime = new Date(now);
+        triggerTime.setDate(now.getDate() + dayOffset);
+        triggerTime.setHours(meal.hour, meal.minute, 0, 0);
+
+        if (triggerTime.getTime() > now.getTime() + 60 * 1000) {
+          const notifId = hashStringToInt(`nutri_${meal.slot}_${triggerTime.toISOString().slice(0, 10)}`);
+          notificationsToSchedule.push({
+            id: notifId,
+            title: meal.title,
+            body: meal.body,
+            channelId: NUTRITION_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: '#F59E0B',
+            schedule: { at: triggerTime, allowWhileIdle: true },
+            extra: {
+              type: 'nutrition',
+              slot: meal.slot,
+            },
+          });
+        }
+      }
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      const capped = notificationsToSchedule.slice(0, 20);
+      await LocalNotifications.schedule({ notifications: capped });
+      return capped.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing nutrition notifications:', err);
+  }
+  return 0;
+}
+
+/**
+ * Displays or updates a live, ongoing study timer notification in the phone's notification bar.
+ */
+export async function showStudyTimerNotification(
+  subject: string,
+  seconds: number,
+  topic?: string,
+  isPaused: boolean = false
+): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await ensureNotificationChannels();
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+    const title = isPaused ? `⏸️ Study Paused: ${subject}` : `📖 Deep Work: ${subject}`;
+    const body = `Focus Time: ${timeStr}${topic ? ` • ${topic}` : ''}`;
+
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: STUDY_TIMER_NOTIF_ID,
+          title,
+          body,
+          channelId: STUDY_CHANNEL_ID,
+          ongoing: !isPaused,
+          autoCancel: false,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: NOTIFICATION_COLOR,
+          schedule: { at: new Date(Date.now() + 50) },
+          extra: {
+            type: 'study_timer',
+            subject,
+          },
+        },
+      ],
+    });
+  } catch (err) {
+    console.warn('[Notifications] Failed to show study timer notification:', err);
+  }
+}
+
+/**
+ * Cancels the ongoing study timer notification once a session completes or stops.
+ */
+export async function cancelStudyTimerNotification(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await LocalNotifications.cancel({
+      notifications: [{ id: STUDY_TIMER_NOTIF_ID }],
+    });
+  } catch (err) {
+    console.warn('[Notifications] Failed to cancel study timer notification:', err);
+  }
+}
+
+/**
+ * Fires an immediate confirmation notification to the device notification center with the LifeOS logo.
+ * Instant dispatch without artificial delays.
  */
 export async function sendInstantTestNotification(title: string, body: string): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
@@ -311,7 +472,9 @@ export async function sendInstantTestNotification(title: string, body: string): 
           title,
           body,
           channelId: TASKS_CHANNEL_ID,
-          schedule: { at: new Date(Date.now() + 1000), allowWhileIdle: true },
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: NOTIFICATION_COLOR,
+          schedule: { at: new Date(Date.now() + 50), allowWhileIdle: true },
         },
       ],
     });

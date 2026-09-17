@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <!-- LifeOS Bold 'L' Mark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M140,110h56v236h176v56H140V110z" />
+    <!-- LifeOS Top-Right Accent Dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M372,168m-44,0a44,44 0,1,1 88,0a44,44 0,1,1 -88,0" />
+</vector>

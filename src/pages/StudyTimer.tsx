@@ -4,6 +4,7 @@ import { Play, Pause, Square, RotateCcw, ChevronLeft, Check, Sparkles, Clock } f
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { showStudyTimerNotification, cancelStudyTimerNotification } from '../utils/notifications';
 import type { AppData, StudySession } from '../types';
 
 interface StudyTimerProps {
@@ -59,6 +60,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const startTimeRef = useRef<string>(persisted?.startTimeStr || '');
   const accumulatedRef = useRef<number>(persisted?.accumulatedSeconds || 0);
   const lastStartRef = useRef<number | null>(persisted?.lastStartTimestamp || null);
+  const lastNotifUpdateRef = useRef<number>(0);
 
   // Sync state to localStorage
   const saveTimerState = useCallback((state: TimerState, acc: number, startTs: number | null, subj: string, top: string, startStr: string) => {
@@ -79,14 +81,21 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     } catch {}
   }, []);
 
-  // Recalculate true elapsed seconds from wall clock
+  // Recalculate true elapsed seconds from wall clock and sync notification bar
   const syncElapsedSeconds = useCallback(() => {
     if (timerState === 'running' && lastStartRef.current) {
       const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
       const currentTotal = accumulatedRef.current + Math.max(0, elapsed);
       setSeconds(currentTotal);
+
+      // Periodically update ongoing status bar notification (every 30 seconds)
+      const now = Date.now();
+      if (now - lastNotifUpdateRef.current > 30000) {
+        lastNotifUpdateRef.current = now;
+        showStudyTimerNotification(subject.trim() || 'Deep Work', currentTotal, topic.trim(), false);
+      }
     }
-  }, [timerState]);
+  }, [timerState, subject, topic]);
 
   // Main timer loop based on Wall-Clock time so it never stops when phone screen turns off
   useEffect(() => {
@@ -106,10 +115,15 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     return () => clearInterval(intervalRef.current);
   }, [timerState, syncElapsedSeconds]);
 
-  // Handle phone screen off / on (visibilitychange & window focus)
+  // Handle phone screen off / on (visibilitychange & window focus) & update notification bar immediately
   useEffect(() => {
     const handleWake = () => {
       syncElapsedSeconds();
+      if (timerState === 'running') {
+        const elapsed = lastStartRef.current ? Math.floor((Date.now() - lastStartRef.current) / 1000) : 0;
+        const total = accumulatedRef.current + Math.max(0, elapsed);
+        showStudyTimerNotification(subject.trim() || 'Deep Work', total, topic.trim(), false);
+      }
     };
 
     document.addEventListener('visibilitychange', handleWake);
@@ -121,7 +135,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       window.removeEventListener('focus', handleWake);
       window.removeEventListener('pageshow', handleWake);
     };
-  }, [syncElapsedSeconds]);
+  }, [syncElapsedSeconds, timerState, subject, topic]);
 
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -141,6 +155,8 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     setSeconds(0);
     setTimerState('running');
     saveTimerState('running', 0, now, subject.trim(), topic.trim(), startStr);
+    lastNotifUpdateRef.current = now;
+    showStudyTimerNotification(subject.trim(), 0, topic.trim(), false);
   };
 
   const handlePause = () => {
@@ -153,6 +169,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     setSeconds(accumulatedRef.current);
     setTimerState('paused');
     saveTimerState('paused', accumulatedRef.current, null, subject, topic, startTimeRef.current);
+    showStudyTimerNotification(subject.trim() || 'Deep Work', accumulatedRef.current, topic.trim(), true);
   };
 
   const handleResume = () => {
@@ -161,6 +178,8 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     lastStartRef.current = now;
     setTimerState('running');
     saveTimerState('running', accumulatedRef.current, now, subject, topic, startTimeRef.current);
+    lastNotifUpdateRef.current = now;
+    showStudyTimerNotification(subject.trim() || 'Deep Work', accumulatedRef.current, topic.trim(), false);
     syncElapsedSeconds();
   };
 
@@ -174,6 +193,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     setSeconds(accumulatedRef.current);
     setTimerState('idle');
     saveTimerState('idle', 0, null, '', '', '');
+    cancelStudyTimerNotification();
     setShowSummary(true);
   };
 
@@ -195,6 +215,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     lastStartRef.current = null;
     setSubject('');
     setTopic('');
+    cancelStudyTimerNotification();
     localStorage.removeItem(STORAGE_KEY);
     navigate('/study');
   };
@@ -202,6 +223,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const handleCancel = () => {
     triggerHaptic('light');
     clearInterval(intervalRef.current);
+    cancelStudyTimerNotification();
     setTimerState('idle');
     setSeconds(0);
     accumulatedRef.current = 0;

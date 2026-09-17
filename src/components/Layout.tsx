@@ -12,6 +12,7 @@ import {
   requestAndSyncNotifications,
   syncTimetableNotifications,
   syncTaskNotifications,
+  syncNutritionNotifications,
 } from '../utils/notifications';
 import type { AppData, AppSettings } from '../types';
 
@@ -74,6 +75,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         // Sync timetable & task reminders in native OS notification center
         if (data?.timetable) syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
         if (data?.tasks) syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+        syncNutritionNotifications();
       }
     }
     checkPermission();
@@ -93,6 +95,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         // Sync upcoming reminders
         if (data?.timetable) await syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
         if (data?.tasks) await syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+        await syncNutritionNotifications();
       }
 
       // 1. Evict any browser / PWA caches

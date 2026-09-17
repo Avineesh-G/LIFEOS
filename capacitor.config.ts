@@ -15,6 +15,10 @@ const config: CapacitorConfig = {
       serverClientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
       clientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
       forceCodeForRefreshToken: false
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_lifeos',
+      iconColor: '#6366F1'
     }
   }
 };
