@@ -38,7 +38,7 @@
         </provider>
 
         <service
-            android:name=".timer.TimerForegroundService"
+            android:name=".TimerForegroundService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
     </application>

@@ -1,4 +1,4 @@
-package com.avineesh.lifeos.timer;
+package com.avineesh.lifeos;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -11,9 +11,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 
 import androidx.core.app.NotificationCompat;
-
-import com.avineesh.lifeos.MainActivity;
-import com.avineesh.lifeos.R;
 
 public class TimerForegroundService extends Service {
 

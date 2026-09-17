@@ -8,7 +8,6 @@ import com.getcapacitor.BridgeActivity;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import ee.forgr.biometric.NativeBiometric;
 import com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin;
-import com.avineesh.lifeos.timer.TimerNotificationPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override

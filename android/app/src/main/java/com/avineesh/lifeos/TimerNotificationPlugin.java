@@ -1,4 +1,4 @@
-package com.avineesh.lifeos.timer;
+package com.avineesh.lifeos;
 
 import android.content.Intent;
 import android.os.Build;
