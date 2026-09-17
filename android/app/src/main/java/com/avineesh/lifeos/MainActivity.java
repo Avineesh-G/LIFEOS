@@ -8,6 +8,7 @@ import com.getcapacitor.BridgeActivity;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import ee.forgr.biometric.NativeBiometric;
 import com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin;
+import com.avineesh.lifeos.timer.TimerNotificationPlugin;
 
 public class MainActivity extends BridgeActivity {
     @Override
@@ -16,6 +17,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativeBiometric.class);
         registerPlugin(LocalNotificationsPlugin.class);
         registerPlugin(ApkInstallerPlugin.class);
+        registerPlugin(TimerNotificationPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS

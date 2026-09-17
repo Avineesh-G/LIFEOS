@@ -19,7 +19,7 @@
 
   body {
     font-family: 'Google Sans Flex Variable', 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif;
-    font-weight: 450;
+    font-weight: 500;
     font-optical-sizing: auto;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     letter-spacing: -0.015em;
@@ -247,16 +247,35 @@
   @keyframes pageFluidEnter {
     0% {
       opacity: 0;
-      transform: translateY(18px);
+      transform: translateY(14px) scale(0.985);
+    }
+    60% {
+      opacity: 1;
     }
     100% {
       opacity: 1;
-      transform: translateY(0px);
+      transform: translateY(0px) scale(1);
     }
   }
 
   .animate-page-fluid {
-    animation: pageFluidEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: pageFluidEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+  }
+
+  /* Sub-page / modal enter (slightly faster, from bottom) */
+  @keyframes subPageEnter {
+    0% {
+      opacity: 0;
+      transform: translateY(22px) scale(0.97);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .animate-sub-page {
+    animation: subPageEnter 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
     will-change: transform, opacity;
   }
 

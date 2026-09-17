@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -60,28 +60,39 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [menuOpen, setMenuOpen] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
+  const permissionCheckedRef = useRef(false);
 
+  // ONE-TIME permission check on mount — never re-request if already granted
   useEffect(() => {
-    async function checkPermission() {
+    let cancelled = false;
+    async function checkOnce() {
+      if (permissionCheckedRef.current) return;
+      permissionCheckedRef.current = true;
       const granted = await checkNotificationPermission();
+      if (cancelled) return;
       setHasNotificationPermission(granted);
-
-      // If phone permission is not yet granted, request permission from the phone OS
       if (!granted) {
-        const timer = setTimeout(async () => {
+        // Ask once, after a short delay so the UI is settled
+        setTimeout(async () => {
+          if (cancelled) return;
           const res = await requestAndSyncNotifications(data, updateData);
-          setHasNotificationPermission(res);
-        }, 1200);
-        return () => clearTimeout(timer);
-      } else {
-        // Sync timetable & task reminders in native OS notification center
-        if (data?.timetable) syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
-        if (data?.tasks) syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-        syncNutritionNotifications();
+          if (!cancelled) setHasNotificationPermission(res);
+        }, 1500);
       }
     }
-    checkPermission();
-  }, [data?.timetable, data?.tasks]);
+    checkOnce();
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-sync scheduled notifications whenever timetable / tasks data changes (no permission re-request)
+  useEffect(() => {
+    checkNotificationPermission().then(granted => {
+      if (!granted) return;
+      if (data?.timetable) syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
+      if (data?.tasks) syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
+      syncNutritionNotifications();
+    });
+  }, [data?.timetable, data?.tasks]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReload = async () => {
     if (isReloading) return;

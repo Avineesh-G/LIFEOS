@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Shirt, Plus, Minus, Check, Calendar, Clock, AlertCircle, X, ChevronDown, ChevronUp, Package, Sparkles } from 'lucide-react';
+import { Shirt, Plus, Minus, Check, Calendar, Clock, AlertCircle, X, ChevronDown, ChevronUp, Package, Sparkles, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
@@ -28,6 +28,11 @@ export default function Laundry({ data, updateData }: LaundryProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [batchToDelete, setBatchToDelete] = useState<LaundryBatch | null>(null);
   const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null);
+  const [batchToEdit, setBatchToEdit] = useState<LaundryBatch | null>(null);
+  const [editItemCounts, setEditItemCounts] = useState<Record<string, number>>({});
+  const [editSubmitDate, setEditSubmitDate] = useState('');
+  const [editReturnDate, setEditReturnDate] = useState('');
+  const [editNotes, setEditNotes] = useState('');
 
   // Form State
   const [submitDate, setSubmitDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
@@ -143,6 +148,44 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       laundryBatches: (data?.laundryBatches || []).filter(b => b.id !== batchToDelete.id),
     });
     setBatchToDelete(null);
+  };
+
+  const openEditModal = (batch: LaundryBatch) => {
+    triggerHaptic('light');
+    const counts: Record<string, number> = {};
+    batch.items.forEach(item => { counts[item.category] = item.count; });
+    // Also ensure default categories are present
+    DEFAULT_CATEGORIES.forEach(c => { if (!(c in counts)) counts[c] = 0; });
+    setEditItemCounts(counts);
+    setEditSubmitDate(batch.submitDate);
+    setEditReturnDate(batch.returnDate || '');
+    setEditNotes(batch.notes || '');
+    setBatchToEdit(batch);
+  };
+
+  const updateEditItemCount = (category: string, delta: number) => {
+    triggerHaptic('light');
+    setEditItemCounts(prev => ({
+      ...prev,
+      [category]: Math.max(0, (prev[category] || 0) + delta),
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!batchToEdit) return;
+    triggerHaptic('save');
+    const items: LaundryItemCount[] = Object.entries(editItemCounts)
+      .filter(([_, count]) => count > 0)
+      .map(([category, count]) => ({ category, count }));
+    const totalClothes = items.reduce((a, b) => a + b.count, 0);
+    await updateData({
+      laundryBatches: (data?.laundryBatches || []).map(b =>
+        b.id === batchToEdit.id
+          ? { ...b, items, totalClothes, submitDate: editSubmitDate, returnDate: editReturnDate || undefined, notes: editNotes.trim() || undefined }
+          : b
+      ),
+    });
+    setBatchToEdit(null);
   };
 
   return (
@@ -279,6 +322,17 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                         </>
                       )}
                     </button>
+                    {/* Edit button — hidden once laundry is received/picked up */}
+                    {!isReturned && (
+                      <button
+                        onClick={() => openEditModal(batch)}
+                        className="p-1.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 transition-all active:scale-90"
+                        title="Edit batch"
+                        aria-label="Edit batch"
+                      >
+                        <Pencil size={12} strokeWidth={2.5} />
+                      </button>
+                    )}
                   </div>
 
                   {/* Submit & Return Dates */}
@@ -579,6 +633,65 @@ export default function Laundry({ data, updateData }: LaundryProps) {
           </div>
         )}
       </Modal>
+
+      {/* ── Edit Batch BottomSheet ── */}
+      <BottomSheet isOpen={!!batchToEdit} onClose={() => setBatchToEdit(null)}>
+        {batchToEdit && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+                  Edit Batch
+                </h2>
+                <p className="text-xs text-muted-light dark:text-muted-dark font-medium">
+                  Update clothes count, dates or notes
+                </p>
+              </div>
+              <button type="button" onClick={() => setBatchToEdit(null)} className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">Submit Date</label>
+                  <input type="date" value={editSubmitDate} onChange={e => setEditSubmitDate(e.target.value)} className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark" />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">Return Date</label>
+                  <input type="date" value={editReturnDate} onChange={e => setEditReturnDate(e.target.value)} className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-2 font-mono">Clothes Count</label>
+                <div className="grid grid-cols-2 gap-2.5 max-h-[32vh] overflow-y-auto pr-1 no-scrollbar">
+                  {Object.keys(editItemCounts).map(cat => {
+                    const count = editItemCounts[cat] || 0;
+                    return (
+                      <div key={cat} className="flex items-center justify-between p-2.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                        <span className="text-xs font-bold text-primary-light dark:text-primary-dark truncate pr-1">{cat}</span>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button type="button" onClick={() => updateEditItemCount(cat, -1)} disabled={count === 0} className="w-6 h-6 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center disabled:opacity-30 active:scale-90 transition-all"><Minus size={12} /></button>
+                          <span className="w-5 text-center font-mono font-bold text-xs text-teal-600 dark:text-teal-400">{count}</span>
+                          <button type="button" onClick={() => updateEditItemCount(cat, 1)} className="w-6 h-6 rounded-lg bg-teal-600 text-white flex items-center justify-center active:scale-90 transition-all"><Plus size={12} /></button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">Notes (Optional)</label>
+                <input type="text" value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="e.g. Receipt #104" className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3.5 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 text-primary-light dark:text-primary-dark" />
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <button type="button" onClick={() => setBatchToEdit(null)} className="py-3.5 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all">Cancel</button>
+                <button type="button" onClick={handleSaveEdit} className="py-3.5 rounded-2xl bg-teal-600 dark:bg-teal-500 text-white text-xs font-bold shadow-md shadow-teal-500/25 transition-all">Save Changes</button>
+              </div>
+            </div>
+          </>
+        )}
+      </BottomSheet>
 
     </div>
   );
