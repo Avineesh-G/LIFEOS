@@ -539,14 +539,14 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               {/* High-Contrast Crisp QR Code Vector */}
               <div className="p-4 bg-white rounded-2xl inline-block shadow-inner border border-neutral-200">
                 <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://lifeos-iota-one.vercel.app/LifeOS.apk&format=svg" 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk&format=svg" 
                   alt="Download LifeOS APK QR Code" 
                   className="w-44 h-44 object-contain"
                 />
               </div>
 
-              <p className="text-[11px] text-muted-light dark:text-muted-dark">
-                Direct URL: <code className="bg-bg-light dark:bg-bg-dark px-1.5 py-0.5 rounded text-[10px]">lifeos-iota-one.vercel.app/LifeOS.apk</code>
+              <p className="text-[11px] text-muted-light dark:text-muted-dark break-all">
+                Direct URL: <a href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk" target="_blank" rel="noopener noreferrer" className="bg-bg-light dark:bg-bg-dark px-1.5 py-0.5 rounded text-[10px] text-accent hover:underline">github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk</a>
               </p>
             </motion.div>
           </div>
@@ -587,7 +587,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-lg tracking-tight">LifeOS</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
-                v1.5.7
+                v1.5.8
               </span>
             </div>
           </div>
@@ -631,7 +631,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <motion.a
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              href="/LifeOS.apk"
+              href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
               download="LifeOS.apk"
               className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-xl bg-accent hover:opacity-95 text-white shadow-md shadow-accent/20 transition-all"
             >
@@ -659,7 +659,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>v1.5.7 Live Release • 100% Free & Universal</span>
+            <span>v1.5.8 Live Release • 100% Free & Universal</span>
           </motion.div>
 
           {/* Headline */}
@@ -701,14 +701,14 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
             <motion.a
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              href="/LifeOS.apk"
+              href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
               download="LifeOS.apk"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-extrabold text-base shadow-xl shadow-accent/25 transition-all group"
             >
               <Smartphone size={20} className="group-hover:-translate-y-0.5 transition-transform" />
               <div className="text-left">
                 <div className="text-sm font-black leading-tight">Download LifeOS for Android</div>
-                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.7 • ~7.5 MB Free</div>
+                <div className="text-[11px] font-medium text-white/80">Direct APK • v1.5.8 • ~8.5 MB Free</div>
               </div>
               <Download size={18} className="ml-1 opacity-80" />
             </motion.a>
@@ -925,7 +925,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 <motion.a
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  href="/LifeOS.apk"
+                  href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
                   download="LifeOS.apk"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/20 transition-all"
                 >
@@ -1110,7 +1110,7 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
                 <motion.a
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  href="/LifeOS.apk"
+                  href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
                   download="LifeOS.apk"
                   className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-accent text-white font-extrabold text-xs shadow-md shadow-accent/25"
                 >
@@ -1265,12 +1265,12 @@ export default function DownloadPage({ theme = 'dark', setTheme, accentColor = '
               <motion.a
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                href="/LifeOS.apk"
+                href="https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
                 download="LifeOS.apk"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-accent hover:opacity-95 text-white font-black text-base shadow-xl shadow-accent/25 transition-all"
               >
                 <Download size={18} />
-                <span>Download LifeOS.apk (v1.5.7)</span>
+                <span>Download LifeOS.apk (v1.5.8)</span>
               </motion.a>
 
               <button

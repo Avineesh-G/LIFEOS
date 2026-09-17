@@ -892,11 +892,11 @@ export default function Settings({
                   Software Updates
                 </h3>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                  v1.5.7
+                  v1.5.8
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build 17
+                Direct In-App APK Auto-Updater • Build 18
               </p>
             </div>
           </div>
@@ -910,7 +910,7 @@ export default function Settings({
                 if (res.hasUpdate) {
                   window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
                 } else {
-                  alert('LifeOS is fully up to date! You are on the latest build (v1.5.7).');
+                  alert('LifeOS is fully up to date! You are on the latest build (v1.5.8).');
                 }
               } catch {
                 alert('Could not reach update server. Please check your internet connection.');
@@ -929,7 +929,7 @@ export default function Settings({
 
       <div className="text-center py-2">
         <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark tracking-wide">
-          v1.5.7
+          v1.5.8
         </p>
       </div>
     </div>
