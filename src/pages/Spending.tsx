@@ -124,7 +124,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <span className="w-12 h-12 rounded-[20px] bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
+            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
               <Wallet size={22} className="text-m3-peach-text dark:text-m3-peach-darkText" />
             </span>
             <div>
@@ -134,7 +134,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
               <h2 className="text-sm sm:text-base font-bold opacity-90">Total Spending</h2>
             </div>
           </div>
-          <span className="rounded-full bg-white/70 dark:bg-black/30 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold shadow-sm border border-white/30 dark:border-white/10">
+          <span className="rounded-full bg-white/80 dark:bg-black/50 px-3.5 py-1.5 text-xs font-bold shadow-sm border border-white/30 dark:border-white/10">
             {monthExpenses.length} transactions
           </span>
         </div>

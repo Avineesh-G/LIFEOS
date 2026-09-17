@@ -5,9 +5,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Sans"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        display: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Sans"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        heading: ['"Clash Display"', 'system-ui', '-apple-system', 'sans-serif'],
+        body: ['"Satoshi"', 'system-ui', '-apple-system', 'sans-serif'],
+        stat: ['"Space Grotesk"', 'system-ui', '-apple-system', 'sans-serif'],
+        tag: ['"JetBrains Mono"', 'monospace'],
+        sans: ['"Satoshi"', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Clash Display"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
         accent: {
@@ -28,28 +32,34 @@ export default {
           dark: '#121316',
         },
         surface: {
-          light: '#FFFFFF',
-          dark: '#1A1B1F',
+          DEFAULT: 'var(--bg-card)',
+          light: 'var(--bg-card)',
+          dark: 'var(--bg-card)',
+          elevated: 'var(--bg-card-elevated)',
         },
         border: {
-          light: '#E7E8EC',
-          dark: '#2B2D33',
+          DEFAULT: 'var(--border-card)',
+          light: 'var(--border-card)',
+          dark: 'var(--border-card)',
         },
         primary: {
-          light: '#09090B',
-          dark: '#FAFAFA',
+          DEFAULT: 'var(--text-primary)',
+          light: 'var(--text-primary)',
+          dark: 'var(--text-primary)',
         },
         secondary: {
-          light: '#71717A',
-          dark: '#CBD5E1',
+          DEFAULT: 'var(--text-secondary)',
+          light: 'var(--text-secondary)',
+          dark: 'var(--text-secondary)',
         },
         muted: {
-          light: '#A1A1AA',
-          dark: '#94A3B8',
+          DEFAULT: 'var(--text-muted)',
+          light: 'var(--text-muted)',
+          dark: 'var(--text-muted)',
         },
         pill: {
-          light: '#18181B',
-          dark: '#FAFAFA',
+          light: 'var(--accent)',
+          dark: 'var(--accent)',
         },
         m3: {
           surface: {

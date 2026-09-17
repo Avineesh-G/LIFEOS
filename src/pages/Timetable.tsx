@@ -165,13 +165,27 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-4">
-      {/* Header */}
-      <motion.div variants={item} className="flex items-end justify-between pt-2">
+      {/* Header Hero Card */}
+      <motion.div
+        variants={item}
+        className="rounded-[30px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex items-end justify-between gap-4"
+      >
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">{today} · Schedule</p>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Timetable</h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] text-[10.5px] font-tag font-bold tracking-wider uppercase mb-2 border border-[var(--card-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
+            {today} · Schedule
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-[var(--text-primary)] font-heading">
+            Timetable
+          </h1>
+          <p className="text-xs text-[var(--text-secondary)] mt-1 font-medium">
+            Weekly academic schedule & topics
+          </p>
         </div>
-        <button onClick={openAdd} className="rounded-full bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light font-bold px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-sm active:scale-[0.96] transition-all">
+        <button
+          onClick={openAdd}
+          className="rounded-full bg-[var(--accent-primary)] text-white font-bold px-4 sm:px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-[var(--accent-primary)]/25 active:scale-[0.96] transition-all shrink-0"
+        >
           <Plus size={15} strokeWidth={2.5} /> Add Block
         </button>
       </motion.div>
@@ -513,7 +527,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                     </p>
                   </div>
                   {isOngoing && (
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-emerald-500/30 flex-shrink-0 animate-pulse">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30 flex-shrink-0 animate-pulse">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                       <span>Live</span>
                     </div>

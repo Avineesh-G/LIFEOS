@@ -1,7 +1,7 @@
 {
-  "versionCode": 19,
-  "versionName": "1.5.9",
+  "versionCode": 20,
+  "versionName": "1.6",
   "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.5.9 (Build 19): Active status notification layout with live Chronometer and active status channel, plus seamless in-app auto-updater and direct APK installer.",
-  "apkUrl": "/LifeOS.apk"
+  "releaseNotes": "LifeOS v1.6 (Build 20): All-new Pixel-Native UI across all interfaces with circadian palette harmony, customizable bottom dock navigation, and performance optimizations.",
+  "apkUrl": "https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
 }

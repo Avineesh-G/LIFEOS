@@ -61,22 +61,22 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+        <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
           <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{totalHours}h</div>
           <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Total</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+        <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
           <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{avgMinutes}m</div>
           <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Daily Avg</div>
         </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
+        <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
           <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestDay ? Math.round(bestDay[1] / 60 * 10) / 10 : 0}h</div>
           <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Best Day</div>
         </div>
       </div>
 
       {/* Heatmap Grid */}
-      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-6 sm:p-7 shadow-sm overflow-x-auto">
+      <div className="liquid-glass border border-[var(--card-border)] rounded-[28px] p-6 sm:p-7 shadow-[var(--shadow-card)] overflow-x-auto">
         <div className="flex gap-1 min-w-max">
           {weeks.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-1">

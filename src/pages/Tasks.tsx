@@ -190,17 +190,17 @@ export default function Tasks({ data, updateData }: TasksProps) {
   return (
     <div className="space-y-6 pb-4">
 
-      {/* Header */}
-      <div className="flex items-end justify-between pt-1">
+      {/* Header Hero Card */}
+      <div className="rounded-[30px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold tracking-wider uppercase mb-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-600 dark:bg-purple-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] text-[10.5px] font-tag font-bold tracking-wider uppercase mb-2 border border-[var(--card-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
             {selectedDate === today ? 'Today' : format(parseISO(selectedDate), 'EEEE, MMM d')}
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
-            TO-DO List
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-[var(--text-primary)] font-heading">
+            To-Do List
           </h1>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 font-medium">
+          <p className="text-xs text-[var(--text-secondary)] mt-1.5 font-medium">
             Daily execution · Long-press any task to delete
           </p>
         </div>
@@ -210,14 +210,14 @@ export default function Tasks({ data, updateData }: TasksProps) {
             setNewDate(selectedDate);
             setShowAdd(true);
           }}
-          className="bouncy-tap flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-accent text-white shadow-md shadow-accent/20 hover:opacity-95"
+          className="bouncy-tap flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[var(--accent-primary)] text-white shadow-md shadow-[var(--accent-primary)]/25 hover:opacity-95 shrink-0"
         >
           <Plus size={16} strokeWidth={2.5} /> Add Task
         </button>
       </div>
 
       {/* ── Fluid Calendar Strip ── */}
-      <div className="liquid-glass rounded-[28px] p-3 border border-white/80 dark:border-white/[0.08] shadow-sm">
+      <div className="liquid-glass rounded-[28px] p-3 border border-[var(--card-border)] shadow-sm">
         <div className="flex items-center justify-between px-2 mb-2">
           <div className="flex items-center gap-2">
             <CalendarIcon size={14} className="text-accent" />
@@ -307,7 +307,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
       </div>
 
       {/* Completion Progress Card */}
-      <div className="rounded-[30px] p-5 liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm space-y-3">
+      <div className="rounded-[30px] p-5 liquid-glass border border-[var(--card-border)] shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             {selectedDate === today ? "Today's Completion" : "Day's Progress"}
@@ -467,8 +467,8 @@ export default function Tasks({ data, updateData }: TasksProps) {
               }}
               className={`rounded-[26px] border p-4 flex items-center gap-3.5 transition-all select-none ${
                 task.completed
-                  ? 'bg-surface-light/60 dark:bg-surface-dark/60 border-border-light/50 dark:border-white/[0.04] opacity-75'
-                  : 'liquid-glass border-white/80 dark:border-white/[0.09] hover:border-accent/30 shadow-xs'
+                  ? 'liquid-glass border-[var(--card-border)] bg-[var(--card-surface)]/70'
+                  : 'liquid-glass border-[var(--card-border)] hover:border-[var(--accent-primary)]/40 shadow-xs'
               }`}
             >
               {/* Interactive Spring Checkbox */}
@@ -477,7 +477,6 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 onChange={() => toggleTask(task.id)}
                 size={26}
               />
-
 
               <div
                 className="flex-1 min-w-0 cursor-pointer"
@@ -488,15 +487,15 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <span className={`text-sm leading-snug font-bold transition-all ${
                     task.completed
-                      ? 'line-through text-muted-light dark:text-muted-dark opacity-60'
-                      : 'text-primary-light dark:text-primary-dark'
+                      ? 'line-through text-[var(--text-secondary)] font-semibold'
+                      : 'text-[var(--text-primary)]'
                   }`}>
                     {task.text}
                   </span>
 
                   {/* Start time → End time Range Capsule beside task */}
                   {timeRange && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-300 flex-shrink-0">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] flex-shrink-0">
                       <Clock size={10} className="stroke-[2.5]" />
                       {timeRange}
                     </span>
@@ -506,8 +505,8 @@ export default function Tasks({ data, updateData }: TasksProps) {
                 {hasValidSubtask && (
                   <span className={`text-xs block mt-1 leading-normal font-medium ${
                     task.completed
-                      ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
-                      : 'text-secondary-light dark:text-secondary-dark'
+                      ? 'line-through text-[var(--text-muted)]'
+                      : 'text-[var(--text-secondary)]'
                   }`}>
                     {task.subtask}
                   </span>
@@ -518,7 +517,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
         })}
 
         {filteredTasks.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/[0.08] flex flex-col items-center">
+          <div className="liquid-glass rounded-[32px] p-10 text-center border border-[var(--card-border)] flex flex-col items-center">
             <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-3 shadow-sm shadow-accent/15">
               <Sparkles size={22} className="animate-pulse" />
             </div>

@@ -28,6 +28,8 @@ import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
 import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
+import { useDayTheme } from '../theme/DayThemeProvider';
+import { CATEGORY_COLORS } from '../theme/cardThemeTokens';
 
 interface HomeProps {
   data: AppData;
@@ -47,6 +49,7 @@ const item = {
 
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
+  const { phase } = useDayTheme();
   const [now, setNow] = useState<Date>(() => new Date());
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
@@ -161,7 +164,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     await updateData({ tasks: updated });
   };
 
-  // ── Today Stats for 2x2 cards below ──
+  // ── Today's Core Highlights for Quick Glance ──
   const {
     todaySessions,
     todayStudyHours,
@@ -175,37 +178,37 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     nextBlock,
   } = useMemo(() => {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const nowDate = new Date();
-
-    const todaySessions = (data.studySessions || []).filter(s => s.date === todayStr);
-    const todayStudyMinutes = todaySessions.reduce((sum, s) => sum + s.duration, 0);
-    const studyHours = Math.floor(todayStudyMinutes / 60);
-    const studyMins = todayStudyMinutes % 60;
+    const dayOfWeek = format(new Date(), 'EEEE');
+    const sessions = (data.studySessions || []).filter(s => s.date === todayStr);
+    const studyMinsTotal = sessions.reduce((sum, s) => sum + s.duration, 0);
+    const studyHours = Math.floor(studyMinsTotal / 60);
+    const studyMins = studyMinsTotal % 60;
 
     const workout = (data.workoutLogs || []).find(w => w.date === todayStr);
     const dayMap: Record<string, string> = {
       Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
       Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
     };
-    const plan = (data.workoutPlans || []).find(p => dayMap[p.day] === format(nowDate, 'EEEE'));
+    const plan = (data.workoutPlans || []).find(p => dayMap[p.day] === dayOfWeek);
 
-    const todayExpenses = (data.expenses || []).filter(e => e.date === todayStr);
-    const spent = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const expenses = (data.expenses || []).filter(e => e.date === todayStr);
+    const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
 
     const tasks = (data.tasks || []).filter(t => t.date === todayStr);
     const completed = tasks.filter(t => t.completed).length;
 
+    const nowTimeStr = format(new Date(), 'HH:mm');
     const next = (data.timetable || [])
-      .filter(b => b.day === format(nowDate, 'EEEE') && b.startTime > format(nowDate, 'HH:mm'))
+      .filter(b => b.day === dayOfWeek && b.startTime > nowTimeStr)
       .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
 
     return {
-      todaySessions,
+      todaySessions: sessions,
       todayStudyHours: studyHours,
       todayStudyMins: studyMins,
       todayWorkout: workout,
       todayPlan: plan,
-      todayExpenses,
+      todayExpenses: expenses,
       todaySpent: spent,
       todayTasks: tasks,
       completedTasks: completed,
@@ -213,72 +216,74 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     };
   }, [data]);
 
-  // Contextual Dynamic Greeting Config based on exact time of day
+  // Contextual Dynamic Greeting Config derived directly from phase
   const greetingConfig = useMemo(() => {
-    const hour = now.getHours();
-    if (hour >= 4 && hour < 12) {
-      return {
-        word: 'Morning',
-        icon: Sunrise,
-        gradient: 'from-amber-500 via-orange-500 to-rose-500',
-        glowColor: 'bg-amber-500/15',
-        subline: 'Rise with intent · Today is yours to conquer',
-        badge: 'Morning Focus',
-        badgeClass: 'bg-amber-500/15 text-amber-800 dark:text-amber-200 dark:bg-amber-500/25 border-amber-500/30 dark:border-amber-400/40',
-        dotClass: 'bg-amber-500',
-      };
-    } else if (hour >= 12 && hour < 17) {
-      return {
-        word: 'Afternoon',
-        icon: Sun,
-        gradient: 'from-blue-500 via-indigo-500 to-purple-600',
-        glowColor: 'bg-blue-500/15',
-        subline: 'Sustain the momentum · High performance mode',
-        badge: 'Peak Energy',
-        badgeClass: 'bg-blue-500/15 text-blue-800 dark:text-blue-200 dark:bg-blue-500/25 border-blue-500/30 dark:border-blue-400/40',
-        dotClass: 'bg-blue-500',
-      };
-    } else if (hour >= 17 && hour < 22) {
-      return {
-        word: 'Evening',
-        icon: Sunset,
-        gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-        glowColor: 'bg-indigo-500/15',
-        subline: 'Reflect, execute, and finish your day strong',
-        badge: 'Evening Review',
-        badgeClass: 'bg-indigo-500/15 text-indigo-800 dark:text-indigo-200 dark:bg-indigo-500/25 border-indigo-500/30 dark:border-indigo-400/40',
-        dotClass: 'bg-indigo-500',
-      };
-    } else {
-      return {
-        word: 'Night',
-        icon: Moon,
-        gradient: 'from-purple-400 via-indigo-400 to-cyan-400',
-        glowColor: 'bg-purple-500/15',
-        subline: 'Recharge your mind · Greatness continues tomorrow',
-        badge: 'Night Calm',
-        badgeClass: 'bg-purple-500/15 text-purple-800 dark:text-purple-200 dark:bg-purple-500/25 border-purple-500/30 dark:border-purple-400/40',
-        dotClass: 'bg-purple-500',
-      };
+    switch (phase) {
+      case 'dawn':
+        return {
+          word: 'Dawn',
+          icon: Sunrise,
+          subline: 'A new horizon unfolds · Make every moment count',
+          badge: 'Dawn Awakening',
+        };
+      case 'morning':
+        return {
+          word: 'Morning',
+          icon: Sunrise,
+          subline: 'Rise with intent · Today is yours to conquer',
+          badge: 'Morning Focus',
+        };
+      case 'afternoon':
+        return {
+          word: 'Afternoon',
+          icon: Sun,
+          subline: 'Sustain the momentum · High performance mode',
+          badge: 'Peak Energy',
+        };
+      case 'dusk':
+        return {
+          word: 'Dusk',
+          icon: Sunset,
+          subline: 'Golden hour focus · Wrap up your daily wins',
+          badge: 'Dusk Reflection',
+        };
+      case 'night':
+        return {
+          word: 'Night',
+          icon: Moon,
+          subline: 'Recharge your mind · Greatness continues tomorrow',
+          badge: 'Night Calm',
+        };
+      case 'evening':
+      default:
+        return {
+          word: 'Evening',
+          icon: Sunset,
+          subline: 'Reflect, execute, and finish your day strong',
+          badge: 'Evening Review',
+        };
     }
-  }, [now]);
+  }, [phase]);
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
 
-      {/* ── Ambient Executive Greeting Header (Open, Breathable & Fluid) ── */}
-      <motion.div variants={item} className="space-y-3 px-1 sm:px-2 pt-1 select-none">
+      {/* ── Ambient Executive Greeting Hero Card ── */}
+      <motion.div
+        variants={item}
+        className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] space-y-3.5 select-none"
+      >
         {/* Top Header Row: Date Pill, Phase Badge & Streak */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#1E2028]/90 backdrop-blur-md border border-border-light/80 dark:border-white/15 shadow-xs">
-            <greetingConfig.icon size={13} className="text-accent shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold tracking-wide text-neutral-800 dark:text-neutral-100">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs">
+            <greetingConfig.icon size={13} className="text-[var(--accent-primary)] shrink-0 animate-pulse" />
+            <span className="text-xs font-semibold tracking-wide text-[var(--text-primary)]">
               {format(now, 'EEEE, MMMM d')}
             </span>
           </div>
 
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-mono font-bold tracking-wider uppercase border shadow-xs ${greetingConfig.badgeClass}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${greetingConfig.dotClass} animate-ping`} />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border shadow-xs bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border-[var(--card-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-ping" />
             {greetingConfig.badge}
           </span>
 
@@ -291,16 +296,19 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* Hero Title Row with AI Coach Avatar on Right */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-primary-light dark:text-primary-dark leading-tight font-sans">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-[var(--text-primary)] leading-tight">
               Good{' '}
-              <span className={`bg-gradient-to-r ${greetingConfig.gradient} bg-clip-text text-transparent drop-shadow-xs`}>
+              <span
+                style={{ backgroundImage: 'var(--headline-gradient)' }}
+                className="bg-clip-text text-transparent drop-shadow-xs"
+              >
                 {greetingConfig.word}
               </span>
             </h1>
 
             {/* Motivational Subline */}
-            <p className="text-xs sm:text-[13px] font-medium text-secondary-light dark:text-secondary-dark/90 mt-1 tracking-tight flex items-center gap-1.5">
-              <Sparkles size={13} className="text-accent shrink-0 opacity-80" />
+            <p className="text-xs sm:text-[13px] font-medium text-[var(--text-secondary)] mt-1.5 tracking-tight flex items-center gap-1.5">
+              <Sparkles size={13} className="text-[var(--accent-primary)] shrink-0 opacity-90" />
               <span>{greetingConfig.subline}</span>
             </p>
           </div>
@@ -317,16 +325,16 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       {/* ── Option 1: Interactive 7-Day Dynamic Strip ── */}
       <motion.div
         variants={item}
-        className="rounded-[32px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-border-dark/60 shadow-m3-subtle relative overflow-hidden"
+        className="rounded-[32px] p-5 sm:p-6 liquid-glass relative overflow-hidden transition-all duration-300"
       >
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-accent/10 dark:bg-accent/20 flex items-center justify-center text-accent flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[var(--pill-active-bg)] flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
               <CalendarDays size={16} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+              <h2 className="text-sm font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
                 {isToday(selectedDate)
                   ? 'Today'
                   : isSameDay(selectedDate, subDays(new Date(), 1))
@@ -345,18 +353,18 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             {!isToday(selectedDate) && (
               <button
                 onClick={() => setSelectedDate(startOfDay(new Date()))}
-                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-primary-light dark:text-primary-dark hover:bg-neutral-200 dark:hover:bg-neutral-700 active:scale-95 transition-all"
+                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-85 active:scale-95 transition-all"
               >
                 Today
               </button>
             )}
             <span
-              className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${
+              className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide border ${
                 selectedDateData.isSelToday
-                  ? 'bg-accent/15 dark:bg-accent/25 text-accent'
+                  ? 'bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border-[var(--card-border)]'
                   : selectedDateData.isSelPast
-                  ? 'bg-neutral-100 dark:bg-neutral-800 text-secondary-light dark:text-secondary-dark'
-                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                  ? 'bg-[var(--card-surface)]/60 text-secondary-light dark:text-secondary-dark border-[var(--card-border)]'
+                  : 'bg-emerald-500/12 text-[#22C55E] border-[#22C55E]/20'
               }`}
             >
               {selectedDateData.isSelToday ? 'Live Today' : selectedDateData.isSelPast ? 'Completed' : 'Upcoming'}
@@ -365,7 +373,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </div>
 
         {/* 7-Day Interactive Horizontal Strip with Fluid Spring Capsule */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-neutral-100/60 dark:bg-neutral-900/40 border border-black/5 dark:border-white/5">
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-[var(--card-surface)]/60 border border-[var(--card-border)]">
           {weekDays.map((d) => {
             const isSel = isSameDay(d, selectedDate);
             const isCur = isToday(d);
@@ -380,45 +388,45 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 }}
                 className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all select-none focus:outline-none ${
                   !isSel && isCur
-                    ? 'border border-accent/40 bg-accent/10 dark:bg-accent/15'
+                    ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
                     : !isSel
-                    ? 'hover:bg-neutral-200/50 dark:hover:bg-neutral-800/50'
+                    ? 'hover:bg-[var(--pill-active-bg)]'
                     : ''
                 }`}
               >
                 {isSel && (
                   <motion.div
                     layoutId="activeHomeDatePill"
-                    className="absolute inset-0 rounded-[20px] bg-accent shadow-md shadow-accent/25"
+                    className="absolute inset-0 rounded-[20px] bg-[var(--accent-primary)] shadow-md shadow-[var(--glow)]"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
                 )}
 
                 <span className={`relative z-10 text-[10px] sm:text-[11px] font-medium tracking-tight transition-colors ${
-                  isSel ? 'text-white/90' : isCur ? 'text-accent font-bold' : 'text-muted-light dark:text-muted-dark'
+                  isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-bold' : 'text-muted-light dark:text-muted-dark'
                 }`}>
                   {format(d, 'EEE')}
                 </span>
 
-                <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors ${
-                  isSel ? 'text-white' : isCur ? 'text-accent font-extrabold' : 'text-primary-light dark:text-primary-dark'
+                <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors font-stat ${
+                  isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-extrabold' : 'text-primary-light dark:text-primary-dark'
                 }`}>
                   {format(d, 'd')}
                 </span>
 
-                {/* Micro Achievement Dots */}
+                {/* Micro Achievement Dots using Category Colors */}
                 <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
                   {dots.hasStudy && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-indigo-500'}`} />
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#3B82F6]'}`} />
                   )}
                   {dots.hasGym && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-emerald-500'}`} />
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#22C55E]'}`} />
                   )}
                   {dots.hasTasks && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-purple-500'}`} />
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[var(--accent-primary)]'}`} />
                   )}
                   {dots.hasExpense && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-white' : 'bg-amber-500'}`} />
+                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#F5A623]'}`} />
                   )}
                   {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
                     <span className="w-1 h-1 rounded-full opacity-0" />
@@ -442,10 +450,10 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             {/* ── 1. WHAT WAS DONE / ACCOMPLISHED ── */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                <span className="text-[10px] font-tag font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
                   {selectedDateData.isSelPast ? 'Accomplished on this day' : selectedDateData.isSelToday ? 'Accomplished so far' : 'Expected focus'}
                 </span>
-                <span className="text-[10px] font-mono font-semibold text-secondary-light dark:text-secondary-dark">
+                <span className="text-[10px] font-tag font-semibold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
                   {selectedDateData.dayOfWeek}
                 </span>
               </div>
@@ -453,27 +461,32 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               {/* 4 Pillars Mini Grid */}
               <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 {/* Study Pillar */}
-                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-[12px] bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
+                  <div className="w-8 h-8 rounded-[12px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
                     <InteractiveClock size={18} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                      {selectedDateData.studyMinutes > 0 
-                        ? `${selectedDateData.studyHours}h ${selectedDateData.studyMins}m`
-                        : selectedDateData.isSelFuture ? 'Scheduled' : '0m logged'}
+                      {selectedDateData.studyMinutes > 0 ? (
+                        <>
+                          <span className="font-stat">{selectedDateData.studyHours}</span>h{' '}
+                          <span className="font-stat">{selectedDateData.studyMins}</span>m
+                        </>
+                      ) : selectedDateData.isSelFuture ? 'Scheduled' : '0m logged'}
                     </p>
                     <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
-                      {selectedDateData.sessions.length > 0 
-                        ? `${selectedDateData.sessions.length} session${selectedDateData.sessions.length !== 1 ? 's' : ''}` 
-                        : 'Study Time'}
+                      {selectedDateData.sessions.length > 0 ? (
+                        <>
+                          <span className="font-stat">{selectedDateData.sessions.length}</span> session{selectedDateData.sessions.length !== 1 ? 's' : ''}
+                        </>
+                      ) : 'Study Time'}
                     </p>
                   </div>
                 </div>
 
                 {/* Gym Pillar */}
-                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-[12px] bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
+                  <div className="w-8 h-8 rounded-[12px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
                     <InteractiveDumbbell size={18} isCompleted={!!selectedDateData.workoutLog} />
                   </div>
                   <div className="min-w-0">
@@ -491,37 +504,44 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 </div>
 
                 {/* Tasks Pillar */}
-                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-[12px] bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
+                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
+                  <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-primary)]/12 border border-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
                     <CheckCircle2 size={16} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                      {selectedDateData.tasks.length > 0 
-                        ? `${selectedDateData.completedTasks.length}/${selectedDateData.tasks.length} Done`
-                        : '0 Tasks'}
+                      {selectedDateData.tasks.length > 0 ? (
+                        <>
+                          <span className="font-stat">{selectedDateData.completedTasks.length}</span>/
+                          <span className="font-stat">{selectedDateData.tasks.length}</span> Done
+                        </>
+                      ) : '0 Tasks'}
                     </p>
                     <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
-                      {selectedDateData.pendingTasks.length > 0 
-                        ? `${selectedDateData.pendingTasks.length} pending` 
-                        : selectedDateData.tasks.length > 0 ? 'All finished' : 'No tasks'}
+                      {selectedDateData.pendingTasks.length > 0 ? (
+                        <>
+                          <span className="font-stat">{selectedDateData.pendingTasks.length}</span> pending
+                        </>
+                      ) : selectedDateData.tasks.length > 0 ? 'All finished' : 'No tasks'}
                     </p>
                   </div>
                 </div>
 
                 {/* Spending Pillar */}
-                <div className="p-3 rounded-[20px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-[12px] bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
+                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
+                  <div className="w-8 h-8 rounded-[12px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
                     <Wallet size={16} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                      ₹{selectedDateData.totalSpent.toLocaleString('en-IN')}
+                      ₹<span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
                     </p>
                     <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
-                      {selectedDateData.expenses.length > 0 
-                        ? `${selectedDateData.expenses.length} record${selectedDateData.expenses.length !== 1 ? 's' : ''}` 
-                        : 'Spending'}
+                      {selectedDateData.expenses.length > 0 ? (
+                        <>
+                          <span className="font-stat">{selectedDateData.expenses.length}</span> record{selectedDateData.expenses.length !== 1 ? 's' : ''}
+                        </>
+                      ) : 'Spending'}
                     </p>
                   </div>
                 </div>
@@ -531,10 +551,10 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             {/* ── 2. WHAT'S THERE TO DO / UPCOMING SCHEDULE ── */}
             <div className="pt-2.5 border-t border-border-light/40 dark:border-border-dark/40">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                <span className="text-[10px] font-tag font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
                   {selectedDateData.isSelPast ? 'Completed Task Log' : selectedDateData.isSelToday ? 'Up next / There to do' : 'Scheduled Plan & Timetable'}
                 </span>
-                <span className="text-[10px] font-mono font-semibold text-accent">
+                <span className="text-[10px] font-tag font-semibold text-accent uppercase tracking-wider">
                   {selectedDateData.isSelToday ? 'Active' : selectedDateData.isSelPast ? 'Archived' : 'Upcoming'}
                 </span>
               </div>
@@ -554,7 +574,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                             Next Class: {selectedDateData.nextBlockToday.subject}
                           </p>
                           <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
-                            {selectedDateData.nextBlockToday.startTime} – {selectedDateData.nextBlockToday.endTime}
+                            <span className="font-stat">{selectedDateData.nextBlockToday.startTime}</span> – <span className="font-stat">{selectedDateData.nextBlockToday.endTime}</span>
                             {selectedDateData.nextBlockToday.room ? ` • Room ${selectedDateData.nextBlockToday.room}` : ''}
                           </p>
                         </div>
@@ -653,7 +673,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Dumbbell size={14} className="text-m3-mint-text dark:text-m3-mint-darkText flex-shrink-0" />
-                        <span className="text-[10px] font-mono uppercase font-bold text-m3-mint-text dark:text-m3-mint-darkText">
+                        <span className="text-[10px] font-tag uppercase font-bold text-m3-mint-text dark:text-m3-mint-darkText tracking-wider">
                           Split Planned
                         </span>
                       </div>
@@ -671,7 +691,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <Clock size={14} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
-                        <span className="text-[10px] font-mono uppercase font-bold text-m3-rose-text dark:text-m3-rose-darkText">
+                        <span className="text-[10px] font-tag uppercase font-bold text-m3-rose-text dark:text-m3-rose-darkText tracking-wider">
                           Timetable
                         </span>
                       </div>
@@ -723,7 +743,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       {/* ── 2×2 Liquid Spring Capsule Action Cards (Mobile-Optimized & Elegant) ── */}
       <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-5">
 
-        {/* 1. Study Card (Bioluminescent Soft Lavender Capsule) */}
+        {/* 1. Study Card (Fixed Category: Blue #3B82F6) */}
         <motion.button
           whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
           whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
@@ -731,35 +751,35 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/study');
           }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/30 dark:to-purple-500/30 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs border border-indigo-500/20 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center shadow-xs shrink-0">
                 <InteractiveClock isRunning={todaySessions.length > 0} progressPercent={Math.min((todayStudyHours * 60 + todayStudyMins) / 120 * 100, 100)} size={22} />
               </div>
-              <ArrowUpRight size={16} className="text-indigo-600/60 dark:text-indigo-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ArrowUpRight size={16} className="text-[#3B82F6]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 block mb-1 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] block mb-1 font-tag">
               Study
             </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
-              {todayStudyHours}<span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">h</span>{' '}
-              {todayStudyMins}<span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">m</span>
+            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+              <span className="font-stat">{todayStudyHours}</span><span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">h</span>{' '}
+              <span className="font-stat">{todayStudyMins}</span><span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">m</span>
             </p>
           </div>
 
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-indigo-500/15 dark:border-indigo-400/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-indigo-800/80 dark:text-indigo-300/80 truncate">
-              {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#3B82F6]/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
+              <span className="font-stat">{todaySessions.length}</span> {todaySessions.length === 1 ? 'session' : 'sessions'}
             </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 shrink-0 whitespace-nowrap">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[#3B82F6]/12 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0 whitespace-nowrap tracking-wider">
               Deep Work
             </span>
           </div>
         </motion.button>
 
-        {/* 2. Gym Card (Bioluminescent Fresh Mint Capsule) */}
+        {/* 2. Gym Card (Fixed Category: Green #22C55E) */}
         <motion.button
           whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
           whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
@@ -767,42 +787,44 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/gym');
           }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-mint border border-emerald-200/50 dark:border-emerald-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/30 dark:to-teal-500/30 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-xs border border-emerald-500/20 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 text-[#22C55E] flex items-center justify-center shadow-xs shrink-0">
                 <InteractiveDumbbell isCompleted={!!todayWorkout} size={22} />
               </div>
-              <ArrowUpRight size={16} className="text-emerald-600/60 dark:text-emerald-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ArrowUpRight size={16} className="text-[#22C55E]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 block mb-1 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#22C55E] block mb-1 font-tag">
               Gym
             </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
               {todayWorkout ? todayPlan?.type || 'Workout' : todayPlan?.type || 'Rest'}
             </p>
           </div>
 
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-emerald-500/15 dark:border-emerald-400/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-emerald-800/80 dark:text-emerald-300/80 truncate">
-              {todayWorkout
-                ? `${(todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)} sets`
-                : todayPlan && (todayPlan.exercises || []).length > 0
-                  ? `${(todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)} sets`
-                  : 'Rest day'}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#22C55E]/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
+              <span className="font-stat">
+                {todayWorkout
+                  ? (todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)
+                  : todayPlan && (todayPlan.exercises || []).length > 0
+                    ? (todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)
+                    : 0}
+              </span> sets
             </span>
-            <span className={`px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold border shrink-0 whitespace-nowrap ${
+            <span className={`px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold border shrink-0 whitespace-nowrap tracking-wider ${
               todayWorkout 
-                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' 
-                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20'
+                ? 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/30' 
+                : 'bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/20'
             }`}>
               {todayWorkout ? 'Done' : 'Split'}
             </span>
           </div>
         </motion.button>
 
-        {/* 3. Spending Card (Bioluminescent Warm Peach Capsule) */}
+        {/* 3. Spending Card (Fixed Category: Orange #F5A623) */}
         <motion.button
           whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
           whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
@@ -810,34 +832,34 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             navigate('/spending');
           }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-peach border border-amber-200/50 dark:border-amber-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-amber-500/20 to-orange-500/20 dark:from-amber-500/30 dark:to-orange-500/30 text-amber-700 dark:text-amber-300 flex items-center justify-center shadow-xs border border-amber-500/20 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 text-[#F5A623] flex items-center justify-center shadow-xs shrink-0">
                 <Wallet size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={16} className="text-amber-600/60 dark:text-amber-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ArrowUpRight size={16} className="text-[#F5A623]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 block mb-1 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#F5A623] block mb-1 font-tag">
               Money
             </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
-              ₹{todaySpent.toLocaleString('en-IN')}
+            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+              ₹<span className="font-stat">{todaySpent.toLocaleString('en-IN')}</span>
             </p>
           </div>
 
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-amber-500/15 dark:border-amber-400/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-amber-800/80 dark:text-amber-300/80 truncate">
-              {todayExpenses.length} {todayExpenses.length === 1 ? 'record' : 'records'}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#F5A623]/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
+              <span className="font-stat">{todayExpenses.length}</span> {todayExpenses.length === 1 ? 'record' : 'records'}
             </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20 shrink-0 whitespace-nowrap">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[#F5A623]/12 text-[#F5A623] border border-[#F5A623]/20 shrink-0 whitespace-nowrap tracking-wider">
               Expenses
             </span>
           </div>
         </motion.button>
 
-        {/* 4. Next Up / Timetable Card (Bioluminescent Soft Rose Capsule) */}
+        {/* 4. Next Up / Timetable Card (Accent Secondary Echo) */}
         <motion.button
           whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
           whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
@@ -845,28 +867,34 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             triggerHaptic('light');
             nextBlock ? navigate('/study/timer') : navigate('/timetable');
           }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass glow-rose border border-rose-200/50 dark:border-rose-800/40 flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
+          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
         >
           <div className="relative z-10 w-full min-w-0">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-gradient-to-br from-rose-500/20 to-pink-500/20 dark:from-rose-500/30 dark:to-pink-500/30 text-rose-700 dark:text-rose-300 flex items-center justify-center shadow-xs border border-rose-500/20 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[var(--accent-secondary)]/12 border border-[var(--accent-secondary)]/20 text-[var(--accent-secondary)] flex items-center justify-center shadow-xs shrink-0">
                 <Clock size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
               </div>
-              <ArrowUpRight size={16} className="text-rose-600/60 dark:text-rose-400/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+              <ArrowUpRight size={16} className="text-[var(--accent-secondary)]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300 block mb-1 font-mono">
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--accent-secondary)] block mb-1 font-tag">
               Next Up
             </span>
-            <p className="text-base sm:text-xl font-black tracking-tight text-primary-light dark:text-primary-dark truncate">
+            <p className="text-base sm:text-xl font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
               {nextBlock ? nextBlock.subject : 'Free Period'}
             </p>
           </div>
 
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-rose-500/15 dark:border-rose-400/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-rose-800/80 dark:text-rose-300/80 truncate">
-              {nextBlock ? `${nextBlock.startTime} – ${nextBlock.endTime}` : 'No upcoming class'}
+          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[var(--accent-secondary)]/15 flex items-center justify-between gap-1.5 min-w-0">
+            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
+              {nextBlock ? (
+                <>
+                  <span className="font-stat">{nextBlock.startTime}</span> – <span className="font-stat">{nextBlock.endTime}</span>
+                </>
+              ) : (
+                'No upcoming class'
+              )}
             </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20 shrink-0 whitespace-nowrap">
+            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[var(--accent-secondary)]/12 text-[var(--accent-secondary)] border border-[var(--accent-secondary)]/20 shrink-0 whitespace-nowrap tracking-wider">
               Timetable
             </span>
           </div>
@@ -876,14 +904,14 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
       {/* ── Expressive Fluid TO-DO Preview ── */}
       {todayTasks.length > 0 && (
-        <motion.div variants={item} className="liquid-glass rounded-[32px] p-5 sm:p-6 border border-white/70 dark:border-white/10 shadow-sm">
+        <motion.div variants={item} className="liquid-glass rounded-[32px] p-5 sm:p-6 border border-[var(--card-border)]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/25 flex items-center justify-center text-purple-600 dark:text-purple-400">
+              <div className="w-8 h-8 rounded-xl bg-[var(--accent-primary)]/12 border border-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)]">
                 <Calendar size={15} />
               </div>
-              <span className="text-xs font-bold font-mono tracking-wider uppercase text-primary-light dark:text-primary-dark">
-                Tasks Today · {completedTasks}/{todayTasks.length}
+              <span className="text-xs font-bold font-tag tracking-wider uppercase text-primary-light dark:text-primary-dark">
+                Tasks Today · <span className="font-stat">{completedTasks}</span>/<span className="font-stat">{todayTasks.length}</span>
               </span>
             </div>
             <button
@@ -891,7 +919,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 triggerHaptic('light');
                 navigate('/tasks');
               }}
-              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-neutral-100 dark:bg-neutral-800 text-primary-light dark:text-primary-dark flex items-center gap-1 hover:opacity-85 active:scale-95 transition-all"
+              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] flex items-center gap-1 hover:opacity-85 active:scale-95 transition-all"
             >
               View All <ChevronRight size={12} />
             </button>
@@ -904,14 +932,14 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 whileHover={{ scale: 1.01, y: -1 }}
                 whileTap={{ scale: 0.985 }}
                 onClick={() => handleToggleTask(task.id)}
-                className="flex items-center gap-3 p-3 rounded-[20px] bg-white/60 dark:bg-white/[0.04] border border-black/5 dark:border-white/10 cursor-pointer transition-colors shadow-xs"
+                className="flex items-center gap-3 p-3 rounded-[20px] bg-[var(--card-surface)]/60 border border-[var(--card-border)] cursor-pointer transition-colors shadow-xs"
               >
                 <button
                   type="button"
                   className={`w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center transition-all ${
                     task.completed
-                      ? 'bg-accent text-white shadow-xs'
-                      : 'border-2 border-neutral-300 dark:border-neutral-600'
+                      ? 'bg-[var(--accent-primary)] text-white shadow-xs'
+                      : 'border-2 border-[var(--card-border)]'
                   }`}
                 >
                   {task.completed && (
@@ -967,12 +995,18 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             key={stat.label}
             whileHover={{ scale: 1.03, y: -2, transition: { type: 'spring', stiffness: 400 } }}
             whileTap={{ scale: 0.96 }}
-            className="rounded-[24px] p-3.5 text-center flex flex-col justify-center items-center liquid-glass border border-white/70 dark:border-white/10 shadow-xs"
+            className="rounded-[24px] p-3.5 text-center flex flex-col justify-center items-center liquid-glass border border-[var(--card-border)]"
           >
-            <p className="text-base sm:text-lg font-black font-mono tracking-tight text-primary-light dark:text-primary-dark truncate w-full">
-              {stat.value}
+            <p className="text-base sm:text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark truncate w-full">
+              {stat.value.startsWith('₹') ? (
+                <>₹<span className="font-stat">{stat.value.replace('₹', '')}</span></>
+              ) : stat.value.endsWith('d') ? (
+                <><span className="font-stat">{stat.value.replace('d', '')}</span><span className="text-xs font-semibold">d</span></>
+              ) : (
+                <span className="font-stat">{stat.value}</span>
+              )}
             </p>
-            <p className="text-[10px] font-mono font-bold text-muted-light dark:text-muted-dark mt-0.5 truncate w-full uppercase">
+            <p className="text-[10px] font-tag font-bold text-muted-light dark:text-muted-dark mt-0.5 truncate w-full uppercase tracking-wider">
               {stat.label}
             </p>
           </motion.div>

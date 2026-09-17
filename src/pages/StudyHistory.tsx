@@ -145,7 +145,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
                   const isSaved = !!savedFeedback[s.id];
 
                   return (
-                    <div key={s.id} className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl overflow-hidden transition-all shadow-sm">
+                    <div key={s.id} className="liquid-glass border border-[var(--card-border)] rounded-2xl overflow-hidden transition-all shadow-[var(--shadow-card)]">
                       <div 
                         onClick={() => toggleExpand(s.id, s.doubts)}
                         className="p-4 flex items-center gap-4 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
@@ -187,7 +187,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="overflow-hidden border-t border-border-light dark:border-border-dark bg-bg-light/50 dark:bg-bg-dark/30 px-4 py-4 space-y-3"
+                            className="overflow-hidden border-t border-white/[0.05] bg-black/[0.02] dark:bg-white/[0.02] px-4 py-4 space-y-3"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">

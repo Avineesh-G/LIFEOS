@@ -302,7 +302,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-white/80 dark:border-white/10 shadow-sm space-y-5"
+          className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-[var(--card-border)] shadow-sm space-y-5"
         >
           <div className="flex items-center gap-3">
             <span className="w-10 h-10 rounded-[14px] bg-indigo-500/15 border border-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs">

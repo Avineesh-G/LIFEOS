@@ -1,7 +1,7 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 
-export const CURRENT_VERSION_CODE = 19;
-export const CURRENT_VERSION_NAME = '1.5.9';
+export const CURRENT_VERSION_CODE = 20;
+export const CURRENT_VERSION_NAME = '1.6';
 
 export const GITHUB_RAW_APK_URL = 'https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk';
 export const REMOTE_VERSION_URLS = [

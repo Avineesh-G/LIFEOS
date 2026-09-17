@@ -212,43 +212,49 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-6">
-      {/* ── Header ── */}
-      <motion.div variants={item} className="flex items-center justify-between pt-2">
+      {/* ── Header Card ── */}
+      <motion.div
+        variants={item}
+        className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
+      >
         <button
           onClick={() => { triggerHaptic(10); navigate(-1); }}
-          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-85 active:scale-95 transition-all shadow-sm"
+          className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
+          aria-label="Go Back"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} strokeWidth={2.2} />
         </button>
-        <div className="text-center">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+        <div className="text-center min-w-0 flex-1">
+          <p className="text-[10px] sm:text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-0.5 truncate">
             Logs & Analytics
           </p>
-          <h1 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">
+          <h1 className="text-lg sm:text-xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight truncate">
             Activity History
           </h1>
         </div>
-        <div className="w-10" />
+        <div className="w-10 flex justify-end shrink-0">
+          <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent-primary)]/80 mr-3" />
+        </div>
       </motion.div>
 
       {/* ── Month Selector Bar ── */}
-      <motion.div variants={item} className="card p-3 flex items-center justify-between gap-2 shadow-sm">
+      <motion.div variants={item} className="rounded-[24px] p-2.5 liquid-glass border border-[var(--card-border)] flex items-center justify-between gap-2 shadow-xs">
         <button
           onClick={handlePrevMonth}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Previous Month"
         >
           <ChevronLeft size={18} />
         </button>
 
-        <div className="flex items-center gap-2 py-1 px-3 rounded-xl bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark font-sans font-bold text-sm text-primary-light dark:text-primary-dark">
+        <div className="flex items-center gap-2 py-1.5 px-4 rounded-[16px] bg-[var(--card-surface)] border border-[var(--card-border)] font-heading font-bold text-xs sm:text-sm text-primary-light dark:text-primary-dark">
           <Calendar size={15} className="text-accent" />
           <span>{format(monthDate, 'MMMM yyyy')}</span>
         </div>
 
         <button
           onClick={handleNextMonth}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Next Month"
         >
           <ChevronRight size={18} />
@@ -257,7 +263,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
       {/* ── 4 Symbols Only Switcher (Requirement: Just add their symbols instead of names) ── */}
       <motion.div variants={item} className="w-full">
-        <div className="grid grid-cols-4 gap-2.5 w-full p-1.5 rounded-2xl bg-surface-light dark:bg-[#1C1D24] border border-border-light/80 dark:border-border-dark/80 shadow-sm">
+        <div className="grid grid-cols-4 gap-2.5 w-full p-2 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-xs">
           {TABS.map(tab => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
@@ -536,12 +542,12 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     </div>
 
                     {/* Exercises list */}
-                    <div className="space-y-1.5 pt-1 border-t border-border-light dark:border-border-dark">
+                    <div className="space-y-1.5 pt-1 border-t border-white/[0.05]">
                       {(log.exercises || []).map((ex, idx) => {
                         const completedCount = (ex.sets || []).filter(s => s.completed).length;
                         const topWeight = Math.max(...(ex.sets || []).map(s => s.weight || 0), 0);
                         return (
-                          <div key={idx} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-bg-light dark:bg-bg-dark">
+                          <div key={idx} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
                             <span className="font-medium text-primary-light dark:text-primary-dark">{ex.name}</span>
                             <span className="font-mono text-[11px] text-secondary-light dark:text-secondary-dark">
                               {completedCount} sets {topWeight > 0 ? `· max ${topWeight}kg` : ''}

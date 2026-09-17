@@ -49,7 +49,7 @@ export function BottomSheet({
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={onClose}
             onTouchMove={e => e.preventDefault()}
-            className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-[4px] gpu-composited"
+            className="fixed inset-0 bg-black/60 dark:bg-black/75 gpu-composited"
             style={{ width: '100vw', height: '100vh' }}
           />
 
@@ -72,7 +72,7 @@ export function BottomSheet({
                 onClose();
               }
             }}
-            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-white/80 dark:border-white/[0.12] shadow-2xl overflow-y-auto no-scrollbar gpu-composited touch-pan-y ${className}`}
+            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-[var(--card-border)] shadow-2xl overflow-y-auto no-scrollbar gpu-composited touch-pan-y ${className}`}
             style={{
               maxHeight,
               willChange: 'transform',
@@ -134,7 +134,7 @@ export function Modal({
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={onClose}
             onTouchMove={e => e.preventDefault()}
-            className="fixed inset-0 bg-black/60 dark:bg-black/75 backdrop-blur-[4px] gpu-composited"
+            className="fixed inset-0 bg-black/60 dark:bg-black/75 gpu-composited"
             style={{ width: '100vw', height: '100vh' }}
           />
 
@@ -149,7 +149,7 @@ export function Modal({
               stiffness: 320,
               mass: 0.8,
             }}
-            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-[32px] p-6 border border-white/80 dark:border-white/[0.12] shadow-2xl text-center gpu-composited ${className}`}
+            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-[32px] p-6 border border-[var(--card-border)] shadow-2xl text-center gpu-composited ${className}`}
             style={{
               willChange: 'transform, opacity',
               transform: 'translate3d(0, 0, 0)',

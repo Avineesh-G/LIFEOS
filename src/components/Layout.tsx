@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home, BookOpen, Dumbbell, Wallet, CalendarDays,
-  CheckSquare, BarChart3, Settings, Menu, X,
-  Utensils, RotateCw, History, ShieldCheck, Shirt, Bell, LucideIcon
+  Home, Menu, X, RotateCw, Bell, LucideIcon, Check, ArrowLeftRight
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -14,41 +12,22 @@ import {
   syncTaskNotifications,
   syncNutritionNotifications,
 } from '../utils/notifications';
+import {
+  NAV_MODULE_REGISTRY,
+  NavConfig,
+  getModuleById,
+  NavModuleId
+} from '../config/navRegistry';
+import { loadNavConfig, saveNavConfig } from '../utils/navStorage';
+import { NavSlotPickerModal } from './NavSlotPickerModal';
 import type { AppData, AppSettings } from '../types';
-import CircadianBackground from './CircadianBackground';
-
-
-// Primary centered squircle dock items
-const primaryDockItems = [
-  { icon: Home,     label: 'Home',      path: '/' },
-  { icon: Dumbbell, label: 'Gym',       path: '/gym' },
-  { icon: Utensils, label: 'Nutrition', path: '/nutrition' },
-];
-
-// Speed-dial popup items (ordered from bottom to top as requested)
-const secondaryMenuItems = [
-  { icon: Shirt,        label: 'Laundry',              path: '/laundry',   color: 'text-teal-500 dark:text-teal-400' },
-  { icon: BarChart3,    label: 'Progress & Analytics', path: '/progress',  color: 'text-purple-500 dark:text-purple-400' },
-  { icon: History,      label: 'History',              path: '/history',   color: 'text-violet-500 dark:text-violet-400' },
-  { icon: CalendarDays, label: 'Timetable',            path: '/timetable', color: 'text-sky-500 dark:text-sky-400' },
-  { icon: BookOpen,     label: 'Study',                path: '/study',     color: 'text-indigo-500 dark:text-indigo-400' },
-  { icon: Wallet,       label: 'Spending',             path: '/spending',  color: 'text-amber-500 dark:text-amber-400' },
-  { icon: CheckSquare,  label: 'To-Do Tasks',          path: '/tasks',     color: 'text-emerald-500 dark:text-emerald-400' },
-  { icon: ShieldCheck,  label: 'Vault',                path: '/vault',     color: 'text-emerald-500 dark:text-emerald-400' },
-  { icon: Settings,     label: 'Settings',             path: '/settings',  color: 'text-slate-500 dark:text-slate-400' },
-];
-
-const allRoutes = [
-  ...primaryDockItems,
-  ...secondaryMenuItems,
-];
 
 interface LayoutProps {
   children: React.ReactNode;
-  theme: AppSettings['theme'];
-  setTheme: (t: AppSettings['theme']) => void;
-  accentColor: string;
-  setAccentColor: (c: string) => void;
+  theme?: AppSettings['theme'];
+  setTheme?: (t: AppSettings['theme']) => void;
+  accentColor?: string;
+  setAccentColor?: (c: string) => void;
   refresh?: () => Promise<any>;
   data?: AppData;
   updateData?: (partial: Partial<AppData>) => Promise<any>;
@@ -61,6 +40,89 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [isReloading, setIsReloading] = useState(false);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const permissionCheckedRef = useRef(false);
+
+  // Customizable Nav Bar States
+  const [navConfig, setNavConfig] = useState<NavConfig>(loadNavConfig);
+  const [isNavEditing, setIsNavEditing] = useState(false);
+  const [pickerSlot, setPickerSlot] = useState<1 | 2 | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPressTriggeredRef = useRef(false);
+  const pointerStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const slot1Module = getModuleById(navConfig.slot1);
+  const slot2Module = getModuleById(navConfig.slot2);
+
+  const primaryDockItems = [
+    { icon: Home, label: 'Home', path: '/', isFixed: true, slot: 0 },
+    { icon: slot1Module.icon, label: slot1Module.label, path: slot1Module.path, isFixed: false, slot: 1 },
+    { icon: slot2Module.icon, label: slot2Module.label, path: slot2Module.path, isFixed: false, slot: 2 },
+  ];
+
+  const handleSelectModule = (targetSlot: 1 | 2, moduleId: NavModuleId) => {
+    const nextConfig: NavConfig = {
+      ...navConfig,
+      [targetSlot === 1 ? 'slot1' : 'slot2']: moduleId,
+    };
+    setNavConfig(nextConfig);
+    saveNavConfig(nextConfig);
+    triggerHaptic('light');
+  };
+
+  const handleSwapSlots = (targetSlot: 1 | 2) => {
+    const nextConfig: NavConfig = {
+      slot1: navConfig.slot2,
+      slot2: navConfig.slot1,
+    };
+    setNavConfig(nextConfig);
+    saveNavConfig(nextConfig);
+    const otherSlotNumber = targetSlot === 1 ? 2 : 1;
+    triggerHaptic('medium');
+    setToastMessage(`Swapped with Slot ${otherSlotNumber}`);
+  };
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const t = setTimeout(() => {
+      setToastMessage(null);
+    }, 2400);
+    return () => clearTimeout(t);
+  }, [toastMessage]);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    isLongPressTriggeredRef.current = false;
+    pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
+
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressTriggeredRef.current = true;
+      triggerHaptic('medium');
+      setIsNavEditing(true);
+      setMenuOpen(false);
+    }, 600);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const dx = Math.abs(e.clientX - pointerStartPosRef.current.x);
+    const dy = Math.abs(e.clientY - pointerStartPosRef.current.y);
+    if (dx > 10 || dy > 10) {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+    }
+  };
+
+  const handlePointerUpOrLeave = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
 
   // ONE-TIME permission check on mount — never re-request if already granted
   useEffect(() => {
@@ -251,17 +313,26 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     return location.pathname.startsWith(path);
   };
 
-  const isSecondaryActive = secondaryMenuItems.some(item => isActive(item.path));
+  const isPrimaryPath = (path: string) => {
+    if (path === '/') return true;
+    if (path === slot1Module.path) return true;
+    if (path === slot2Module.path) return true;
+    return false;
+  };
+
+  const isSecondaryActive = NAV_MODULE_REGISTRY.some(
+    item => !isPrimaryPath(item.path) && isActive(item.path)
+  );
 
   // Current page label for header
-  const currentNav = allRoutes.find(n => isActive(n.path));
+  const currentNav =
+    location.pathname === '/'
+      ? { label: 'Home' }
+      : NAV_MODULE_REGISTRY.find(n => isActive(n.path));
   const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
     <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
-
-      {/* ── Circadian Ambient Mesh & Frosted Glass Caustics (Time-Adaptive) ── */}
-      <CircadianBackground />
 
 
       {/* ── Top In-Page Minimalist Controls (Option B: Pure Floating · Moves with page scroll) ── */}
@@ -276,7 +347,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] active:scale-95 transition-all select-none hover:bg-white/95 dark:hover:bg-[#16171D]"
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs active:scale-95 transition-all duration-300 select-none hover:bg-[var(--card-surface)]"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
@@ -308,7 +379,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               onPointerDown={() => triggerHaptic('light')}
               onClick={handleReload}
               disabled={isReloading}
-              className={`w-8 h-8 flex items-center justify-center rounded-full bg-white/85 dark:bg-[#16171D]/90 backdrop-blur-xl border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] ${
+              className={`w-8 h-8 flex items-center justify-center rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all duration-300 shadow-xs ${
                 isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
               }`}
               aria-label="Reload and sync data"
@@ -325,7 +396,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         className="relative z-10 min-h-screen"
         style={{
           paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))',
-          paddingBottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(8.5rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
         <div className="max-w-xl mx-auto px-4 sm:px-6 pt-2 sm:pt-4 pb-8">
@@ -333,7 +404,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         </div>
       </main>
 
-      {/* ── Backdrop Overlay for Speed-Dial Menu (Photo 2 Reference) ── */}
+      {/* ── Backdrop Overlay for Speed-Dial Menu ── */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -345,53 +416,102 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               triggerHaptic('light');
               setMenuOpen(false);
             }}
-            className="fixed inset-0 bg-black/45 dark:bg-black/65 backdrop-blur-[2px] z-40 pointer-events-auto"
+            className="fixed inset-0 bg-black/40 dark:bg-black/65 z-40 pointer-events-auto"
           />
         )}
       </AnimatePresence>
 
-      {/* ── Speed-Dial Popup Menu Items (Photo 2 Reference - Floating above without overlap) ── */}
+      {/* ── Speed-Dial Popup Menu Panel (Three Dots Navigation Hub) ── */}
       <AnimatePresence>
         {menuOpen && (
           <div
-            className="fixed z-50 pointer-events-none flex flex-col items-end justify-end w-full max-w-xs left-1/2 -translate-x-1/2 px-3"
-            style={{ bottom: 'calc(6.2rem + env(safe-area-inset-bottom, 0px))' }}
+            className="fixed z-50 pointer-events-none flex flex-col items-end justify-end w-full max-w-xs left-1/2 -translate-x-1/2 px-4"
+            style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))' }}
           >
-            <div className="flex flex-col gap-2.5 items-end w-full pr-1">
-              {secondaryMenuItems.map((item, index) => {
-                const active = isActive(item.path);
-                const Icon = item.icon;
-                return (
-                  <motion.button
-                    key={item.path}
-                    initial={{ opacity: 0, y: 14, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{
-                      duration: 0.12,
-                      delay: (secondaryMenuItems.length - 1 - index) * 0.015,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    onClick={() => {
-                      triggerHaptic('nav');
-                      setMenuOpen(false);
-                      navigate(item.path);
-                    }}
-                    className={`pointer-events-auto flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg border transition-all active:scale-95 ${
-                      active
-                        ? 'bg-accent/15 dark:bg-accent/25 text-accent border-accent/50 shadow-md shadow-accent/20'
-                        : 'bg-surface-light dark:bg-[#1C1D24] text-primary-light dark:text-primary-dark border-border-light/80 dark:border-border-dark/80 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
-                    }`}
-                  >
-                    <Icon size={18} className={active ? 'text-accent' : item.color} />
-                    <span className="text-xs sm:text-sm font-bold tracking-tight font-sans whitespace-nowrap">
-                      {item.label}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.95 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="pointer-events-auto w-full rounded-[28px] p-2.5 liquid-glass border border-[var(--card-border)] shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] space-y-1"
+            >
+              <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--card-border)]/60">
+                <span className="label-mono text-[10px] font-bold tracking-wider uppercase text-[var(--text-muted)]">
+                  Navigation Hub
+                </span>
+                <span className="text-[10px] font-bold text-[var(--pill-active-text)] bg-[var(--pill-active-bg)] px-2 py-0.5 rounded-full border border-[var(--card-border)]">
+                  {pageLabel}
+                </span>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-1 py-1">
+                {NAV_MODULE_REGISTRY.map((item) => {
+                  const active = isActive(item.path);
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        triggerHaptic('nav');
+                        setMenuOpen(false);
+                        navigate(item.path);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-[20px] transition-all active:scale-[0.98] select-none ${
+                        active
+                          ? 'bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] font-bold shadow-xs'
+                          : 'hover:bg-[var(--card-surface)] text-[var(--text-primary)] font-semibold'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                          active
+                            ? 'bg-[var(--accent-primary)] text-white shadow-xs'
+                            : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
+                        }`}>
+                          <Icon size={16} strokeWidth={2.2} />
+                        </div>
+                        <span className="text-xs sm:text-sm tracking-tight truncate font-sans">
+                          {item.label}
+                        </span>
+                      </div>
+
+                      {active ? (
+                        <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] shrink-0 mr-1" />
+                      ) : (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--card-border)] shrink-0 mr-1 opacity-60" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Edit Mode Outside Click Dismiss Backdrop ── */}
+      {isNavEditing && !pickerSlot && (
+        <div
+          className="fixed inset-0 z-[95] pointer-events-auto bg-black/20 dark:bg-black/40"
+          onClick={() => {
+            triggerHaptic('light');
+            setIsNavEditing(false);
+          }}
+        />
+      )}
+
+      {/* ── Toast Notification for Slot Swapping ── */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 14, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-full bg-black/90 dark:bg-white/95 text-white dark:text-black text-xs font-bold shadow-xl flex items-center gap-2 border border-white/20 dark:border-black/10 pointer-events-none select-none whitespace-nowrap"
+          >
+            <ArrowLeftRight size={13} strokeWidth={2.4} className="text-[var(--accent-primary)]" />
+            <span>{toastMessage}</span>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -410,64 +530,138 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         role="navigation"
         aria-label="Main Navigation"
       >
-        <div className="pointer-events-auto flex items-center gap-2 sm:gap-2.5 max-w-md">
-          {/* Main Divided Segment: Home, Gym, Nutrition */}
-          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-white/95 dark:bg-[#16171E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/35 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.5)]">
+        <div className="relative pointer-events-auto flex items-center gap-2 sm:gap-2.5 max-w-md">
+          {/* Edit Mode Done / Hint Floating Affordance */}
+          <AnimatePresence>
+            {isNavEditing && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                className="absolute -top-11 left-0 right-0 flex items-center justify-between px-2 pointer-events-auto select-none"
+              >
+                <span className="text-[10px] sm:text-[11px] font-bold font-mono text-[var(--accent-primary)] bg-[var(--card-surface)] px-2.5 py-1 rounded-full border border-[var(--card-border)] shadow-xs">
+                  Tap slot to change
+                </span>
+                <button
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setIsNavEditing(false);
+                  }}
+                  className="px-3.5 py-1 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold shadow-md flex items-center gap-1.5 active:scale-95 transition-transform"
+                >
+                  <Check size={12} strokeWidth={3} />
+                  <span>Done</span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Main Divided Segment: Home, Slot 1, Slot 2 */}
+          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-[var(--card-surface)] border border-[var(--card-border)] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-colors duration-300">
             {primaryDockItems.map((item, idx) => {
               const active = isActive(item.path);
               const Icon = item.icon;
+              const isEditable = !item.isFixed;
+              const wiggleClass = isNavEditing && isEditable
+                ? (item.slot === 1 ? 'animate-nav-wiggle-1 nav-slot-editable-active' : 'animate-nav-wiggle-2 nav-slot-editable-active')
+                : '';
+
               return (
-                <div key={item.path} className="flex items-center">
+                <div key={item.slot} className="flex items-center">
                   {idx > 0 && (
-                    <div className="w-[1px] h-5 bg-black/[0.08] dark:bg-white/20 rounded-full mx-0.5" />
+                    <div className="w-[1px] h-5 bg-[var(--card-border)] rounded-full mx-0.5 opacity-80" />
                   )}
                   <button
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUpOrLeave}
+                    onPointerLeave={handlePointerUpOrLeave}
+                    onPointerCancel={handlePointerUpOrLeave}
                     onClick={() => {
+                      if (isLongPressTriggeredRef.current) {
+                        isLongPressTriggeredRef.current = false;
+                        return;
+                      }
+                      if (isNavEditing) {
+                        if (isEditable) {
+                          triggerHaptic('light');
+                          setPickerSlot(item.slot as 1 | 2);
+                        } else {
+                          triggerHaptic('light');
+                        }
+                        return;
+                      }
                       triggerHaptic('nav');
                       if (menuOpen) setMenuOpen(false);
                       navigate(item.path);
                     }}
-                    title={item.label}
-                    className={`relative flex flex-col items-center justify-center w-[68px] sm:w-[74px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${
-                      active
-                        ? 'text-accent font-bold'
-                        : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
+                    title={isNavEditing && isEditable ? `Customize ${item.label}` : item.label}
+                    className={`relative flex flex-col items-center justify-center w-[68px] sm:w-[74px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${wiggleClass} ${
+                      active && !isNavEditing
+                        ? 'text-[var(--pill-active-text)] font-bold'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold'
                     }`}
                   >
-                    {active && (
+                    {active && !isNavEditing && (
                       <motion.div
                         layoutId="activeTabBadge"
-                        className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/25 border border-accent/40 dark:border-accent/60 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)]"
+                        className="absolute inset-0 rounded-[18px] bg-[var(--pill-active-bg)] border border-[var(--card-border)] shadow-xs"
                         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                       />
                     )}
-                    <Icon size={20} strokeWidth={active ? 2.5 : 2} className="relative z-10 transition-transform duration-150" />
-                    <span className={`relative z-10 text-[10px] sm:text-[11px] tracking-tight mt-0.5 ${active ? 'text-accent' : ''}`}>
-                      {item.label}
-                    </span>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={item.path}
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.85 }}
+                        transition={{ duration: 0.15 }}
+                        className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
+                      >
+                        <Icon size={20} strokeWidth={active && !isNavEditing ? 2.5 : 2.2} className="transition-transform duration-150" />
+                        <span className="text-[10.5px] sm:text-[11px] tracking-tight mt-0.5 leading-none">
+                          {item.label}
+                        </span>
+                      </motion.div>
+                    </AnimatePresence>
                   </button>
                 </div>
               );
             })}
           </div>
 
-          {/* Divided Companion Satellite: More / Menu Launcher */}
-          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-white/95 dark:bg-[#16171E]/95 backdrop-blur-2xl border border-black/10 dark:border-white/35 shadow-[0_12px_36px_rgba(0,0,0,0.18)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_1.5px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.5)]">
+          {/* Divided Companion Satellite: More / Menu Launcher (Three Dots) */}
+          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-[var(--card-surface)] border border-[var(--card-border)] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-colors duration-300">
             <button
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUpOrLeave}
+              onPointerLeave={handlePointerUpOrLeave}
+              onPointerCancel={handlePointerUpOrLeave}
               onClick={() => {
+                if (isLongPressTriggeredRef.current) {
+                  isLongPressTriggeredRef.current = false;
+                  return;
+                }
+                if (isNavEditing) {
+                  triggerHaptic('light');
+                  return;
+                }
                 triggerHaptic('light');
                 setMenuOpen(!menuOpen);
               }}
               title="More Sections"
+              aria-expanded={menuOpen}
               className={`relative flex flex-col items-center justify-center w-[58px] sm:w-[64px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${
                 menuOpen || isSecondaryActive
-                  ? 'text-accent font-bold'
-                  : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
+                  ? 'text-[var(--pill-active-text)] font-bold'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold'
               }`}
             >
               {(menuOpen || isSecondaryActive) && (
                 <div
-                  className="absolute inset-0 rounded-[18px] bg-accent/12 dark:bg-accent/25 border border-accent/40 dark:border-accent/60 shadow-sm dark:shadow-[0_0_12px_rgba(99,102,241,0.25),inset_0_1px_1px_rgba(255,255,255,0.3)] transition-opacity duration-150"
+                  className="absolute inset-0 rounded-[18px] bg-[var(--pill-active-bg)] border border-[var(--card-border)] shadow-xs transition-opacity duration-150"
                 />
               )}
               {menuOpen ? (
@@ -475,13 +669,24 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               ) : (
                 <Menu size={20} strokeWidth={2.2} className="relative z-10 transition-transform duration-150" />
               )}
-              <span className={`relative z-10 text-[10px] sm:text-[11px] tracking-tight mt-0.5 ${menuOpen || isSecondaryActive ? 'text-accent' : ''}`}>
+              <span className="relative z-10 text-[10.5px] sm:text-[11px] tracking-tight mt-0.5 leading-none">
                 {menuOpen ? 'Close' : 'More'}
               </span>
             </button>
           </div>
         </div>
       </nav>
+
+      {/* ── Slot Picker BottomSheet Modal ── */}
+      <NavSlotPickerModal
+        isOpen={pickerSlot !== null}
+        onClose={() => setPickerSlot(null)}
+        targetSlot={pickerSlot || 1}
+        currentSlotModuleId={pickerSlot === 1 ? navConfig.slot1 : navConfig.slot2}
+        otherSlotModuleId={pickerSlot === 1 ? navConfig.slot2 : navConfig.slot1}
+        onSelectModule={handleSelectModule}
+        onSwapSlots={handleSwapSlots}
+      />
 
     </div>
   );

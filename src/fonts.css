@@ -1,0 +1,42 @@
+/* ==========================================================================
+   LifeOS Typography System — Offline-First Self-Hosted Fonts
+   Loaded from /assets/fonts/ (bundled in public/ & dist/ for Capacitor native Android)
+   ========================================================================== */
+
+/* 1. Main Headings: Clash Display (Variable) */
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/assets/fonts/ClashDisplay-Variable.woff2') format('woff2-variations'),
+       url('/assets/fonts/ClashDisplay-Variable.woff2') format('woff2');
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. Body / General Text: Satoshi (Variable) */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/assets/fonts/Satoshi-Variable.woff2') format('woff2-variations'),
+       url('/assets/fonts/Satoshi-Variable.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 3. Numbers & Stats: Space Grotesk (Fixed Medium 500) */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/assets/fonts/SpaceGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 4. Small Uppercase Tags / Pills: JetBrains Mono (Fixed Medium 500) */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/assets/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

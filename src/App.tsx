@@ -1,6 +1,5 @@
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
 import Layout from './components/Layout';
@@ -21,7 +20,6 @@ import Tasks from './pages/Tasks';
 import Laundry from './pages/Laundry';
 import Progress from './pages/Progress';
 import WorkHistory from './pages/WorkHistory';
-import { Settings } from 'lucide-react'; // Fallback import just in case
 import SettingsPage from './pages/Settings';
 import Vault from './pages/Vault';
 import DownloadPage from './pages/DownloadPage';
@@ -30,10 +28,12 @@ import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import type { TransitionMode, FluidIntensity } from './types';
+import type { TransitionMode } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
-import { setAppLocked, subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
+import PixelSkyCanvas from './components/PixelSkyCanvas';
+import { DayThemeProvider } from './theme/DayThemeProvider';
+import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 
@@ -41,20 +41,12 @@ function MainContent({
   data,
   refresh,
   updateData,
-  theme,
-  setTheme,
-  accentColor,
-  setAccentColor,
   transitionMode,
   setTransitionMode,
 }: {
   data: any;
   refresh: () => Promise<any>;
   updateData: (partial: any) => Promise<any>;
-  theme: any;
-  setTheme: (t: any) => void;
-  accentColor: string;
-  setAccentColor: (c: string) => void;
   transitionMode: TransitionMode;
   setTransitionMode: (m: TransitionMode) => void;
 }) {
@@ -91,7 +83,7 @@ function MainContent({
     { path: '/laundry', element: <Laundry data={data} updateData={updateData} /> },
     { path: '/progress', element: <Progress data={data} /> },
     { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
-    { path: '/settings', element: <SettingsPage theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
+    { path: '/settings', element: <SettingsPage transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
     { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
     { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
   ]);
@@ -104,7 +96,7 @@ function MainContent({
 }
 
 function App() {
-  const { theme, setTheme, accentColor, setAccentColor, transitionMode, setTransitionMode, fluidIntensity, setFluidIntensity, mounted } = useTheme();
+  const { transitionMode, setTransitionMode } = useTheme();
   
   // Instantly hydrate cached user from localStorage for zero startup delay
   const [user, setUser] = useState<User | null>(() => {
@@ -223,19 +215,31 @@ function App() {
   }, []);
 
   if (location.pathname.toLowerCase().startsWith('/download')) {
-    return <DownloadPage theme={theme} setTheme={setTheme} accentColor={accentColor} />;
+    return (
+      <DayThemeProvider>
+        <DownloadPage />
+      </DayThemeProvider>
+    );
   }
 
   if (authLoading && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
-        <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-      </div>
+      <DayThemeProvider>
+        <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
+          <PixelSkyCanvas />
+          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      </DayThemeProvider>
     );
   }
 
   if (!user) {
-    return <Auth />;
+    return (
+      <DayThemeProvider>
+        <PixelSkyCanvas />
+        <Auth />
+      </DayThemeProvider>
+    );
   }
 
   const safeData = data || DEFAULT_DATA;
@@ -258,7 +262,8 @@ function App() {
   }, [user?.uid]);
 
   return (
-    <>
+    <DayThemeProvider>
+      <PixelSkyCanvas />
       <AppLockOverlay />
       <InAppUpdateModal />
       <div
@@ -269,23 +274,19 @@ function App() {
           pointerEvents: isLocked ? 'none' : 'auto',
         }}
       >
-        <Layout theme={theme} setTheme={setTheme} accentColor={accentColor} setAccentColor={setAccentColor} refresh={refresh} data={safeData} updateData={updateData}>
+        <Layout refresh={refresh} data={safeData} updateData={updateData}>
           <ErrorBoundary>
             <MainContent
               data={safeData}
               refresh={refresh}
               updateData={updateData}
-              theme={theme}
-              setTheme={setTheme}
-              accentColor={accentColor}
-              setAccentColor={setAccentColor}
               transitionMode={transitionMode}
               setTransitionMode={setTransitionMode}
             />
           </ErrorBoundary>
         </Layout>
       </div>
-    </>
+    </DayThemeProvider>
   );
 }
 

@@ -191,17 +191,17 @@ export default function Laundry({ data, updateData }: LaundryProps) {
   return (
     <div className="space-y-6 pb-6">
 
-      {/* Header */}
-      <div className="flex items-end justify-between pt-1">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 text-xs font-bold tracking-wider uppercase mb-2">
-            <Shirt size={13} className="text-teal-600 dark:text-teal-400" />
+      {/* Hero Header Card */}
+      <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] text-xs font-tag font-bold tracking-wider uppercase mb-2 shadow-xs">
+            <Shirt size={13} className="text-[var(--accent-primary)]" />
             Wardrobe Care
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
             Laundry Hub
           </h1>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 font-medium">
+          <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium truncate">
             Clothes inventory & return date tracking
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             triggerHaptic('light');
             setShowAddModal(true);
           }}
-          className="bouncy-tap flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-teal-600 dark:bg-teal-500 text-white shadow-md shadow-teal-500/20 hover:opacity-95"
+          className="bouncy-tap flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold bg-[var(--accent-primary)] text-white shadow-md shadow-black/10 hover:opacity-95 shrink-0"
         >
           <Plus size={16} strokeWidth={2.5} /> Log Clothes
         </button>
@@ -219,15 +219,15 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
       {/* ── Status Overview Grid ── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="liquid-glass rounded-[28px] p-4 sm:p-5 border border-white/80 dark:border-white/[0.08] shadow-sm space-y-2">
+        <div className="liquid-glass rounded-[28px] p-4 sm:p-5 border border-[var(--card-border)] shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+            <span className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
               At Laundry
             </span>
             <InteractiveLaundryDrum status={clothesAtLaundry > 0 ? 'laundry' : 'received'} size={24} />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-primary-light dark:text-primary-dark font-sans">
+            <span className="text-3xl font-black font-stat text-primary-light dark:text-primary-dark">
               {clothesAtLaundry}
             </span>
             <span className="text-xs font-semibold text-secondary-light dark:text-secondary-dark">clothes</span>
@@ -237,9 +237,9 @@ export default function Laundry({ data, updateData }: LaundryProps) {
           </p>
         </div>
 
-        <div className="liquid-glass rounded-[28px] p-4 sm:p-5 border border-white/80 dark:border-white/[0.08] shadow-sm space-y-2">
+        <div className="liquid-glass rounded-[28px] p-4 sm:p-5 border border-[var(--card-border)] shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+            <span className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
               Total Batches
             </span>
             <div className="w-7 h-7 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center">
@@ -247,7 +247,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-primary-light dark:text-primary-dark font-sans">
+            <span className="text-3xl font-black font-stat text-primary-light dark:text-primary-dark">
               {batches.length}
             </span>
             <span className="text-xs font-semibold text-secondary-light dark:text-secondary-dark">logged</span>
@@ -284,8 +284,8 @@ export default function Laundry({ data, updateData }: LaundryProps) {
               }}
               className={`rounded-[30px] p-5 border transition-all liquid-glass ${
                 isReturned
-                  ? 'border-white/60 dark:border-white/[0.05] opacity-80'
-                  : 'border-teal-500/25 dark:border-teal-500/30 shadow-md shadow-teal-500/5'
+                  ? 'border-[var(--card-border)]'
+                  : 'border-[var(--card-border)] shadow-md shadow-black/5'
               }`}
             >
               {/* Top Row: Dates & Status Pill */}
@@ -381,7 +381,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="pt-4 border-t border-black/5 dark:border-white/10 mt-3 space-y-3"
+                    className="pt-4 border-t border-white/[0.05] mt-3 space-y-3"
                   >
                     {/* Manual Return Date Editor */}
                     <div>
@@ -430,7 +430,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
         })}
 
         {batches.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-10 text-center border border-white/70 dark:border-white/[0.08]">
+          <div className="liquid-glass rounded-[32px] p-10 text-center border border-[var(--card-border)]">
             <div className="w-12 h-12 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto mb-3">
               <Shirt size={24} />
             </div>

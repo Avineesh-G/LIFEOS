@@ -171,25 +171,25 @@ export default function Gym({ data, updateData }: GymProps) {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 liquid-glass glow-mint border border-emerald-200/50 dark:border-emerald-800/40 text-m3-mint-text dark:text-m3-mint-darkText shadow-sm space-y-4 sm:space-y-5 relative overflow-hidden"
+        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 liquid-glass glow-mint border border-emerald-500/30 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-100 shadow-[var(--shadow-card)] space-y-4 sm:space-y-5 relative overflow-hidden"
       >
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] shrink-0 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 flex items-center justify-center shadow-xs">
-              <Dumbbell size={20} className="text-emerald-700 dark:text-emerald-300" />
+            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] shrink-0 bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 flex items-center justify-center shadow-xs">
+              <Dumbbell size={20} className="text-emerald-800 dark:text-emerald-200" />
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase opacity-75 font-mono">
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-emerald-900 dark:text-emerald-300 font-mono">
                 {today} · Target Routine
               </p>
-              <h2 className="text-xs sm:text-sm font-bold opacity-90 truncate">Daily Protocol</h2>
+              <h2 className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-white truncate">Daily Protocol</h2>
             </div>
           </div>
           <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold shadow-xs border ${
             isCompletedToday 
               ? 'bg-emerald-600 text-white dark:bg-emerald-400 dark:text-emerald-950 border-emerald-500/30'
-              : 'bg-emerald-500/15 border-emerald-500/25 text-emerald-800 dark:text-emerald-200'
+              : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-900 dark:text-emerald-200'
           }`}>
             {isCompletedToday ? 'Completed' : (todayPlan?.type === 'REST' ? 'Rest Day' : 'Incomplete')}
           </span>
@@ -197,10 +197,10 @@ export default function Gym({ data, updateData }: GymProps) {
 
         {/* Workout Focus & Exercise Count */}
         <div className="pt-1 relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-sans text-m3-mint-text dark:text-m3-mint-darkText">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-sans text-emerald-950 dark:text-white">
             {todayPlan?.type || 'Rest Day'}
           </h1>
-          <p className="text-xs font-bold opacity-75 mt-1 font-mono">
+          <p className="text-xs font-bold text-emerald-900/80 dark:text-emerald-300 mt-1 font-mono">
             {(todayPlan?.exercises || []).length} exercises scheduled
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function Gym({ data, updateData }: GymProps) {
       </motion.div>
 
       {/* Goal Routine Alignment & Customization Freedom Card */}
-      <div className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-xs space-y-3">
+      <div className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -267,7 +267,7 @@ export default function Gym({ data, updateData }: GymProps) {
           </span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-bg-light dark:bg-bg-dark border border-border-light/60 dark:border-border-dark/60">
+        <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-white/[0.05]">
           <p className="text-sm font-bold text-primary-light dark:text-primary-dark">
             {goalConfig.recommendedSplit}
           </p>
@@ -295,7 +295,7 @@ export default function Gym({ data, updateData }: GymProps) {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-4 sm:gap-5">
-        <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
+        <div className="rounded-[26px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
               Total Workouts
@@ -310,7 +310,7 @@ export default function Gym({ data, updateData }: GymProps) {
           <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">All time logged</p>
         </div>
 
-        <div className="rounded-[26px] p-5 sm:p-6 bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 shadow-sm flex flex-col justify-between">
+        <div className="rounded-[26px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
               This Week
@@ -327,20 +327,20 @@ export default function Gym({ data, updateData }: GymProps) {
       </div>
 
       {/* 7-Day Routine Selector Card - Perfectly Symmetrical, Zero Cutoff on Mobile */}
-      <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-4 sm:p-5 shadow-sm space-y-3.5">
+      <div className="liquid-glass border border-[var(--card-border)] rounded-[30px] p-4 sm:p-5 shadow-[var(--shadow-card)] space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-full bg-accent/15 text-accent flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-full bg-[var(--pill-active-bg)] text-[var(--accent-primary)] flex items-center justify-center shrink-0 border border-[var(--card-border)]">
               <Calendar size={15} />
             </span>
             <div>
-              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark leading-none">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--text-muted)] leading-none">
                 Weekly Routine
               </p>
-              <h3 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-1.5 mt-0.5">
+              <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 mt-0.5">
                 <span>{isSelectedToday ? `${selectedDay} (Today)` : selectedDay}</span>
-                <span className="text-muted-light dark:text-muted-dark font-normal">·</span>
-                <span className="text-accent font-black">{activePlan?.type || 'Rest'}</span>
+                <span className="text-[var(--text-muted)] font-normal">·</span>
+                <span className="text-[var(--pill-active-text)] font-black">{activePlan?.type || 'Rest'}</span>
               </h3>
             </div>
           </div>
@@ -352,12 +352,12 @@ export default function Gym({ data, updateData }: GymProps) {
                 triggerHaptic(5);
                 setSelectedDay(shortDay);
               }}
-              className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 active:scale-95 transition-all"
+              className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] active:scale-95 transition-all"
             >
               Back to Today ({shortDay})
             </button>
           ) : (
-            <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark">
+            <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-[var(--text-secondary)]">
               {activePlan?.type === 'REST'
                 ? 'Rest Day'
                 : `${(activePlan?.exercises || []).length} ${(activePlan?.exercises || []).length === 1 ? 'activity' : 'activities'}`}
@@ -366,7 +366,7 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
 
         {/* 7-Day Responsive Grid with Fluid Spring Capsule */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 rounded-2xl bg-neutral-100/60 dark:bg-neutral-900/40 border border-black/5 dark:border-white/5">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1.5 rounded-[22px] bg-[var(--card-surface)] border border-[var(--card-border)]">
           {DAYS.map(day => {
             const plan = data?.workoutPlans?.find(p => p.day === day);
             const isSelected = selectedDay === day;
@@ -439,7 +439,7 @@ export default function Gym({ data, updateData }: GymProps) {
       </div>
 
       {/* Routine Activities Liquid Spring Capsule Card */}
-      <div className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-white/80 dark:border-white/10 shadow-xs space-y-4">
+      <div className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-[var(--card-border)] shadow-xs space-y-4">
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">

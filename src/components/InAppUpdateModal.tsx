@@ -168,7 +168,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          className="absolute inset-0 bg-black/60"
           onClick={status === 'downloading' || status === 'installing' ? undefined : handleDismiss}
         />
 

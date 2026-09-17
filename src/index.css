@@ -1,5 +1,5 @@
+@import './fonts.css';
 @import '@fontsource-variable/google-sans-flex';
-
 
 @tailwind base;
 @tailwind components;
@@ -7,8 +7,31 @@
 
 @layer base {
   :root {
-    --accent: #6366F1;
-    --accent-rgb: 99, 102, 241;
+    --card-surface: rgba(241, 238, 247, 0.52);
+    --card-surface-hex: #F1EEF7;
+    --card-border: rgba(255, 255, 255, 0.06);
+    --text-primary: #211F33;
+    --text-secondary: #57536E;
+    --text-muted: #8B87A0;
+    --accent-primary: #6C5CE7;
+    --accent-secondary: #EE5A9E;
+    --pill-active-bg: rgba(108, 92, 231, 0.12);
+    --pill-active-text: #6C5CE7;
+    --glow: rgba(108, 92, 231, 0.12);
+    --shadow-glow: rgba(108, 92, 231, 0.12);
+    --headline-gradient: linear-gradient(to right, var(--text-primary), var(--accent-primary), var(--accent-secondary));
+
+    /* System & Tailwind compatibility aliases */
+    --bg-card: var(--card-surface);
+    --bg-card-elevated: var(--card-surface);
+    --border-card: var(--card-border);
+    --shadow-card: 0 8px 32px var(--glow);
+    --accent: var(--accent-primary);
+    --accent-contrast: #FFFFFF;
+    --accent-soft: var(--pill-active-bg);
+    --accent-rgb: 108, 92, 231;
+    --font-weight-heading: 600;
+    --font-weight-body: 400;
   }
 
   html {
@@ -18,22 +41,28 @@
   }
 
   body {
-    font-family: 'Google Sans Flex Variable', 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif;
-    font-weight: 500;
-    font-optical-sizing: auto;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    letter-spacing: -0.015em;
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+    font-weight: var(--font-weight-body, 400);
+    font-variation-settings: 'wght' var(--font-weight-body, 400);
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
   }
 
-  /* Force Google Sans Flex on every element — including buttons, inputs, selects, back labels */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Clash Display', system-ui, -apple-system, sans-serif;
+    font-weight: var(--font-weight-heading, 600);
+    font-variation-settings: 'wght' var(--font-weight-heading, 600);
+    letter-spacing: -0.015em;
+  }
+
+  /* Force font inheritance across nested elements */
   *, *::before, *::after {
     font-family: inherit;
   }
 
-  /* Browsers override font-family on form controls by default — fix that */
+  /* Browsers override font-family on form controls by default — set to Satoshi */
   button,
   input,
   select,
@@ -41,22 +70,20 @@
   optgroup,
   option,
   label {
-    font-family: 'Google Sans Flex Variable', 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif;
-    font-optical-sizing: auto;
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
   }
 
   /* Buttons should NEVER use monospace — they're navigation, not code */
   button.font-mono {
-    font-family: 'Google Sans Flex Variable', 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif !important;
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif !important;
   }
 
-  /* Section header labels (p, span, div) with font-mono used as label style should use sans */
-  /* This targets the uppercase tracking label pattern used throughout sub-pages */
+  /* Section header labels (p, span, div) with font-tag / label-mono */
   .label-mono {
-    font-family: 'Google Sans Flex Variable', 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+    font-weight: 500;
+    letter-spacing: 0.065em;
     text-transform: uppercase;
   }
   /* iOS safe area top */
@@ -66,12 +93,12 @@
 
   /* Truly Fixed Ambient Background — Immovable on Mobile Scroll */
   body {
-    background-color: #F8F9FA;
+    background-color: transparent;
     min-height: 100vh;
   }
 
   .dark body {
-    background-color: #0E0F12;
+    background-color: transparent;
   }
 
   * {
@@ -117,43 +144,111 @@
     color: transparent;
   }
 
+  /* Day-Phase Dynamic Typography Utility Roles */
+  .font-heading {
+    font-family: 'Clash Display', system-ui, -apple-system, sans-serif;
+    font-weight: var(--font-weight-heading, 600);
+    font-variation-settings: 'wght' var(--font-weight-heading, 600);
+    letter-spacing: -0.015em;
+  }
+
+  .font-body {
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+    font-weight: var(--font-weight-body, 400);
+    font-variation-settings: 'wght' var(--font-weight-body, 400);
+  }
+
+  .font-stat {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    font-feature-settings: 'tnum' 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .font-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.065em;
+  }
+
   /* Monospace stat label */
   .label-mono {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.065em;
     text-transform: uppercase;
   }
 
-  /* Card base - Material 3 Expressive (Zero black border artifacts) */
-  .card {
-    @apply bg-surface-light dark:bg-surface-dark border border-border-light/60 dark:border-white/[0.08] rounded-[26px] sm:rounded-m3-card shadow-m3-subtle transition-[border-color,background-color,box-shadow] duration-200;
+  /* Pixel-Native Card Primitive (Replaces Liquid Glass) */
+  .card,
+  .pixel-card,
+  .liquid-glass {
+    background-color: var(--card-surface);
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+    background-size: var(--pixel-size, 12px) var(--pixel-size, 12px);
+    border: 1px solid var(--card-border);
+    border-radius: 26px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
     background-clip: padding-box;
     transform: translateZ(0);
+    transition: background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                color 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .dark .card {
-    background: linear-gradient(180deg, rgba(26, 28, 38, 0.90) 0%, rgba(16, 18, 24, 0.95) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  .dark .card,
+  .dark .pixel-card,
+  .dark .liquid-glass {
+    background-color: var(--card-surface);
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: var(--pixel-size, 12px) var(--pixel-size, 12px);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     background-clip: padding-box;
   }
 
   /* Primary button */
   .btn-primary {
-    @apply bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-full font-bold transition-[transform,background-color,opacity] duration-150 active:scale-[0.97] shadow-sm;
+    background-color: var(--accent);
+    color: var(--accent-contrast);
+    border-radius: 9999px;
+    font-weight: 700;
+    transition: transform 150ms ease, background-color 150ms ease, opacity 150ms ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
   }
 
-  /* Pill button (black/white based on theme) */
+  /* Pill button (solid contrast against current theme) */
   .btn-pill {
-    @apply bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light rounded-full font-medium transition-[transform,background-color,opacity] duration-150 active:scale-[0.97];
+    background-color: var(--text-primary);
+    color: var(--card-surface-hex);
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: transform 150ms ease, background-color 150ms ease, opacity 150ms ease;
+  }
+  .btn-pill:active {
+    transform: scale(0.97);
   }
 
-  /* Ghost pill button */
+  /* Ghost pill button (pixel-native surface, zero blur) */
   .btn-ghost-pill {
-    @apply border border-border-light dark:border-border-dark rounded-full font-medium transition-[transform,border-color,background-color] duration-150 active:scale-[0.97] text-primary-light dark:text-primary-dark;
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    background-color: var(--card-surface);
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  }
+  .btn-ghost-pill:active {
+    transform: scale(0.97);
   }
 
   /* Segmented progress bar */
@@ -220,29 +315,6 @@
     scrollbar-width: none;
   }
 
-  /* ── Liquid Spring Capsule Design System Primitives ── */
-  .liquid-glass {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-    border-radius: 30px;
-    background-clip: padding-box;
-    transform: translateZ(0);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .dark .liquid-glass {
-    background: linear-gradient(150deg, rgba(28, 30, 42, 0.90) 0%, rgba(18, 20, 28, 0.95) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.14);
-    background-clip: padding-box;
-    transform: translateZ(0);
-  }
-
   /* Fluid Page Transition (Zero Blank-Screen Risk, Native 120fps) */
   @keyframes pageFluidEnter {
     0% {
@@ -293,6 +365,8 @@
 
   .fluid-card {
     border-radius: 30px;
+    background-color: var(--card-surface);
+    border: 1px solid var(--card-border);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @media (min-width: 640px) {
@@ -303,8 +377,8 @@
 
   .fluid-capsule {
     border-radius: 9999px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background-color: var(--card-surface);
+    border: 1px solid var(--card-border);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -412,6 +486,35 @@
   }
   .animate-ambient-drift-3 {
     animation: ambientDrift3 30s ease-in-out infinite;
+  }
+
+  /* Nav Bar Edit Mode Wiggle Keyframes (iOS-springboard style, staggered timing, GPU-only) */
+  @keyframes navWiggle1 {
+    0% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+    100% { transform: rotate(-2deg); }
+  }
+  @keyframes navWiggle2 {
+    0% { transform: rotate(2deg); }
+    50% { transform: rotate(-2deg); }
+    100% { transform: rotate(2deg); }
+  }
+  .animate-nav-wiggle-1 {
+    animation: navWiggle1 0.28s ease-in-out infinite;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .animate-nav-wiggle-2 {
+    animation: navWiggle2 0.32s ease-in-out infinite;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  /* Nav Slot Edit Mode Glowing Outline */
+  .nav-slot-editable-active {
+    outline: 1.5px dashed var(--accent-primary);
+    outline-offset: -1px;
+    box-shadow: 0 0 14px var(--glow);
   }
 }
 

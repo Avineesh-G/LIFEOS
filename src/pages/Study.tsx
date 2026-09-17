@@ -135,7 +135,7 @@ export default function Study({ data }: StudyProps) {
       <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
         <motion.div
           whileHover={{ scale: 1.02, y: -2, transition: { type: 'spring', stiffness: 400 } }}
-          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-xs flex flex-col justify-between"
+          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs flex flex-col justify-between"
         >
           <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
             Today
@@ -153,7 +153,7 @@ export default function Study({ data }: StudyProps) {
 
         <motion.div
           whileHover={{ scale: 1.02, y: -2, transition: { type: 'spring', stiffness: 400 } }}
-          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-white/80 dark:border-white/10 shadow-xs flex flex-col justify-between"
+          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs flex flex-col justify-between"
         >
           <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
             This Week
@@ -212,36 +212,44 @@ export default function Study({ data }: StudyProps) {
         </motion.div>
       )}
 
-      {/* Navigation links */}
-      <motion.div variants={item} className="space-y-2">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono px-1">
-          Study Tools
-        </p>
-        {navLinks.map(link => (
-          <motion.button
-            key={link.path}
-            whileHover={{ scale: 1.015, y: -1, transition: { type: 'spring', stiffness: 400 } }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              triggerHaptic('light');
-              navigate(link.path);
-            }}
-            className="w-full liquid-glass rounded-[24px] border border-white/80 dark:border-white/10 flex items-center gap-3.5 p-3.5 sm:p-4 shadow-xs transition-colors"
-          >
-            <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center flex-shrink-0 ${link.badge} shadow-xs`}>
-              <link.icon size={18} strokeWidth={2.2} />
-            </div>
-            <div className="flex-1 text-left min-w-0">
-              <span className="font-bold text-sm text-primary-light dark:text-primary-dark block leading-tight">
-                {link.label}
-              </span>
-              <span className="text-xs text-secondary-light dark:text-secondary-dark leading-tight">
-                {link.sub}
-              </span>
-            </div>
-            <ChevronRight size={16} className="text-muted-light dark:text-muted-dark flex-shrink-0" />
-          </motion.button>
-        ))}
+      {/* Navigation links inside Liquid Glass Container */}
+      <motion.div variants={item} className="rounded-[30px] p-4 sm:p-5 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] font-mono">
+            Study Tools
+          </p>
+          <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+            3 utilities
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {navLinks.map(link => (
+            <motion.button
+              key={link.path}
+              whileHover={{ scale: 1.012, y: -1, transition: { type: 'spring', stiffness: 400 } }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                triggerHaptic('light');
+                navigate(link.path);
+              }}
+              className="w-full rounded-[22px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-3.5 p-3.5 sm:p-4 shadow-xs hover:border-[var(--accent-primary)]/40 transition-colors"
+            >
+              <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center flex-shrink-0 ${link.badge} shadow-xs`}>
+                <link.icon size={18} strokeWidth={2.2} />
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <span className="font-bold text-sm text-[var(--text-primary)] block leading-tight">
+                  {link.label}
+                </span>
+                <span className="text-xs text-[var(--text-secondary)] leading-tight mt-0.5 block">
+                  {link.sub}
+                </span>
+              </div>
+              <ChevronRight size={16} className="text-[var(--text-muted)] flex-shrink-0" />
+            </motion.button>
+          ))}
+        </div>
       </motion.div>
     </motion.div>
   );

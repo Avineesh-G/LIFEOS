@@ -17,12 +17,11 @@ import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { useDayPhase } from '../hooks/useDayPhase';
 
 interface SettingsProps {
-  theme: AppSettings['theme'];
-  setTheme: (t: AppSettings['theme']) => void;
-  accentColor: string;
-  setAccentColor: (c: string) => void;
+  accentColor?: string;
+  setAccentColor?: (c: string) => void;
   transitionMode?: TransitionMode;
   setTransitionMode?: (m: TransitionMode) => void;
   data: AppData;
@@ -31,20 +30,18 @@ interface SettingsProps {
 }
 
 export default function Settings({
-  theme,
-  setTheme,
   transitionMode = 'efficient',
   setTransitionMode,
   data,
   updateData
 }: SettingsProps) {
   const navigate = useNavigate();
+  const { phase, nextPhase } = useDayPhase();
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [updateFeedback, setUpdateFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Accordion open/close state for all sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    theme: false,
     notifications: true,
     transitions: false,
     haptics: false,
@@ -205,18 +202,27 @@ export default function Settings({
   return (
     <div className="space-y-4 pb-28">
 
-      {/* Settings Header */}
-      <div className="pt-1 px-1">
-        <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1">
-          Preferences & System
-        </p>
-        <h1 className="text-3xl sm:text-4xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-          Settings
-        </h1>
+      {/* Settings Hero Header Card */}
+      <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] text-xs font-tag font-bold tracking-wider uppercase mb-2 shadow-xs">
+            <Sparkles size={12} className="text-[var(--accent-primary)]" />
+            Preferences & System
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight">
+            Settings
+          </h1>
+          <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium">
+            System tuning, biometrics & offline synchronization
+          </p>
+        </div>
+        <div className="w-11 h-11 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center justify-center text-[var(--accent-primary)] shadow-xs shrink-0">
+          <Gauge size={22} strokeWidth={2.2} />
+        </div>
       </div>
 
       {/* ── 1. Notifications & Reminders (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('notifications')}
@@ -227,7 +233,7 @@ export default function Settings({
               <Bell size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 Notifications & Reminders
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -237,12 +243,16 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border ${
+            <span className={`text-[11px] font-tag font-bold px-2.5 py-1 rounded-full border tracking-wider uppercase ${
               notificationsEnabled
                 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
                 : 'bg-neutral-500/10 border-neutral-500/20 text-neutral-600 dark:text-neutral-400'
             }`}>
-              {notificationsEnabled ? `${leadMinutes}m Lead` : 'Off'}
+              {notificationsEnabled ? (
+                <>
+                  <span className="font-stat">{leadMinutes}</span>m Lead
+                </>
+              ) : 'Off'}
             </span>
             {openSections.notifications ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
           </div>
@@ -256,7 +266,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-4">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
                 {permissionNotice && (
                   <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-800 dark:text-amber-300 font-medium">
                     {permissionNotice}
@@ -292,11 +302,11 @@ export default function Settings({
                 {/* Lead Time Selector (5 / 10 / 15 / 20 min pills) */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-mono font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
+                    <label className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
                       <Clock size={12} className="text-accent" /> Reminder Lead Time
                     </label>
-                    <span className="text-xs font-mono font-bold text-accent">
-                      {leadMinutes} minutes before
+                    <span className="text-xs font-bold text-accent">
+                      <span className="font-stat">{leadMinutes}</span> minutes before
                     </span>
                   </div>
 
@@ -308,13 +318,13 @@ export default function Settings({
                           key={mins}
                           type="button"
                           onClick={() => handleSelectLeadMinutes(mins)}
-                          className={`py-2.5 rounded-2xl font-mono text-xs font-bold transition-all text-center border ${
+                          className={`py-2.5 rounded-2xl text-xs font-bold transition-all text-center border ${
                             active
                               ? 'bg-accent text-white border-accent shadow-md shadow-accent/20 scale-[1.02]'
                               : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:border-accent/40'
                           }`}
                         >
-                          {mins} min
+                          <span className="font-stat">{mins}</span> <span className="font-tag text-[10px]">min</span>
                         </button>
                       );
                     })}
@@ -323,7 +333,7 @@ export default function Settings({
 
                 {/* Notification Channels list */}
                 <div className="space-y-1.5 pt-1">
-                  <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+                  <p className="text-[10px] font-tag font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
                     Active Android Channels
                   </p>
                   <div className="space-y-1 text-xs text-secondary-light dark:text-secondary-dark font-medium">
@@ -339,7 +349,7 @@ export default function Settings({
                 </div>
 
                 {/* Test Notification Button */}
-                <div className="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between">
                   <span className="text-[11px] text-muted-light dark:text-muted-dark font-medium">
                     Test in Android Notification Shade
                   </span>
@@ -363,78 +373,47 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 2. Display & Theme (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
-        <button
-          type="button"
-          onClick={() => toggleSection('theme')}
-          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
-        >
+      {/* ── 2. Circadian Day Theme (Live Clock Sync) ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--border-card)] shadow-[var(--shadow-card)] overflow-hidden">
+        <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/10 text-amber-500 shadow-sm shrink-0">
-              <Sun size={22} strokeWidth={2.2} />
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--accent-soft)] text-accent shadow-sm shrink-0">
+              <Sparkles size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
-                Display & Theme
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+                Circadian Day Theme
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Light, Dark & OLED Obsidian mode
+                Real-time harmony with device clock
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-bold text-accent capitalize font-sans">
-              {theme} Mode
+            <span className="text-xs font-tag font-bold text-accent uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent-soft)] border border-accent/20">
+              {phase} Phase
             </span>
-            {openSections.theme ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
           </div>
-        </button>
+        </div>
 
-        <AnimatePresence>
-          {openSections.theme && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5">
-                <div className="grid grid-cols-3 gap-2 p-1.5 rounded-[24px] bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10">
-                  {[
-                    { value: 'light' as const, icon: Sun, label: 'Light' },
-                    { value: 'dark' as const, icon: Moon, label: 'Dark' },
-                    { value: 'system' as const, icon: Monitor, label: 'System' },
-                  ].map(({ value, icon: Icon, label }) => {
-                    const active = theme === value;
-                    return (
-                      <button
-                        key={value}
-                        onClick={() => {
-                          triggerHaptic('light');
-                          setTheme(value);
-                        }}
-                        className={`relative flex flex-col items-center justify-center gap-2 py-3.5 px-2 rounded-[20px] transition-all active:scale-[0.96] select-none ${
-                          active
-                            ? 'text-primary-dark dark:text-primary-light font-bold bg-primary-light dark:bg-primary-dark shadow-md'
-                            : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
-                        }`}
-                      >
-                        <Icon size={18} strokeWidth={active ? 2.5 : 1.8} className={`relative z-10 ${active ? 'text-primary-dark dark:text-primary-light' : ''}`} />
-                        <span className={`relative z-10 text-xs font-bold font-sans ${active ? 'text-primary-dark dark:text-primary-light' : ''}`}>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
+          <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
+            Cards, borders, text, typography density, and accent colors automatically shift across 6 natural day phases (Dawn, Morning, Afternoon, Dusk, Evening, and Night) in mathematical sync with the live sky background.
+          </p>
+          <div className="flex items-center gap-2 pt-1 flex-wrap">
+            <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--bg-card-elevated)] border border-[var(--border-card)] text-primary-light dark:text-primary-dark uppercase tracking-wider">
+              Active: {phase}
+            </span>
+            <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
+              Next: {nextPhase}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ── 3. Interface Transitions (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('transitions')}
@@ -445,7 +424,7 @@ export default function Settings({
               <Gauge size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 Interface Transitions
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -455,7 +434,7 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full font-mono uppercase bg-accent/15 text-accent border border-accent/20">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full font-tag uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
               {transitionMode}
             </span>
             {openSections.transitions ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
@@ -470,7 +449,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-2.5">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-2.5">
                 {[
                   { id: 'fast' as const, title: 'Fast', icon: Zap, badge: '< 150ms', desc: 'Snappy Response • High-speed micro-scale crossfade' },
                   { id: 'efficient' as const, title: 'Efficient (Default)', icon: Gauge, badge: '180ms', desc: 'Balanced Performance • GPU composited fluid slide' },
@@ -509,7 +488,7 @@ export default function Settings({
       </div>
 
       {/* ── 4. Navigation Bar Haptics (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('haptics')}
@@ -520,7 +499,7 @@ export default function Settings({
               <Smartphone size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 Navigation Bar Haptics
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -530,8 +509,8 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full font-mono bg-accent/15 text-accent">
-              {hapticIntensity}%
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-accent/15 text-accent">
+              <span className="font-stat">{hapticIntensity}</span>%
             </span>
             {openSections.haptics ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
           </div>
@@ -545,14 +524,14 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-4">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
                 <div className="p-4 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/10 space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono font-bold text-secondary-light dark:text-secondary-dark">
-                    <span className="flex items-center gap-2 font-sans">
+                  <div className="flex items-center justify-between text-xs font-bold text-secondary-light dark:text-secondary-dark">
+                    <span className="flex items-center gap-2">
                       {hapticIntensity === 0 ? <VolumeX size={16} /> : <Volume2 size={16} className="text-accent" />}
                       Intensity Slider
                     </span>
-                    <span className="text-accent font-black">{hapticIntensity}%</span>
+                    <span className="text-accent font-bold"><span className="font-stat">{hapticIntensity}</span>%</span>
                   </div>
 
                   <input
@@ -565,7 +544,7 @@ export default function Settings({
                     className="w-full accent-accent cursor-pointer"
                   />
 
-                  <div className="flex justify-between text-[10px] font-mono font-bold text-muted-light dark:text-muted-dark">
+                  <div className="flex justify-between text-[10px] font-tag font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider">
                     <button type="button" onClick={() => handleHapticSliderChange(0)}>Off (0%)</button>
                     <button type="button" onClick={() => handleHapticSliderChange(35)}>Light (35%)</button>
                     <button type="button" onClick={() => handleHapticSliderChange(65)}>Balanced (65%)</button>
@@ -589,7 +568,7 @@ export default function Settings({
       </div>
 
       {/* ── 5. App Security & Phone Lock (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('security')}
@@ -604,7 +583,7 @@ export default function Settings({
               <InteractiveBiometricScan isLocked={securityConfig.enabled} size={24} onScan={handleEnableSecurity} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 App Security & Lock
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -614,7 +593,7 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+            <span className={`text-[11px] font-tag font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
               securityConfig.enabled
                 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
                 : 'bg-neutral-500/10 border-neutral-500/20 text-neutral-600 dark:text-neutral-400'
@@ -633,7 +612,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-3">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
                 {securityConfig.enabled ? (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
@@ -680,7 +659,7 @@ export default function Settings({
       </div>
 
       {/* ── 6. Body Profile & Targets (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('profile')}
@@ -691,7 +670,7 @@ export default function Settings({
               <Dumbbell size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 Body Profile & Targets
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -701,8 +680,8 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-mono font-bold text-accent">
-              {data.profile?.currentCalorieTarget || 2000} kcal
+            <span className="text-xs font-bold text-accent">
+              <span className="font-stat">{data.profile?.currentCalorieTarget || 2000}</span> kcal
             </span>
             {openSections.profile ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
           </div>
@@ -716,7 +695,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05]">
                 <BodyProfileForm
                   initialProfile={data.profile}
                   onSave={profile => updateData({ profile })}
@@ -728,7 +707,7 @@ export default function Settings({
       </div>
 
       {/* ── 7. AI Coach / Groq API Key (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('ai')}
@@ -739,7 +718,7 @@ export default function Settings({
               <Key size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                 AI Coach Integration
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
@@ -749,8 +728,8 @@ export default function Settings({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full ${
-              data.geminiApiKey ? 'bg-emerald-500/15 text-emerald-600' : 'bg-neutral-500/15 text-muted-light'
+            <span className={`text-[10px] font-tag font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+              data.geminiApiKey ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-neutral-500/15 text-muted-light'
             }`}>
               {data.geminiApiKey ? 'Active ✓' : 'Not Set'}
             </span>
@@ -766,7 +745,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-3">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
                 <div className="relative flex items-center">
                   <input
                     type={showApiKey ? 'text' : 'password'}
@@ -809,7 +788,7 @@ export default function Settings({
       </div>
 
       {/* ── 8. Account & Danger Zone (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm overflow-hidden">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('account')}
@@ -842,7 +821,7 @@ export default function Settings({
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-black/5 dark:border-white/5 space-y-3">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <button
                     type="button"
@@ -881,7 +860,7 @@ export default function Settings({
       </div>
 
       {/* ── 9. Software Updates & Release (Card) ── */}
-      <div className="rounded-[30px] liquid-glass border border-white/80 dark:border-white/[0.08] shadow-sm p-5 sm:p-6 overflow-hidden space-y-4">
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm p-5 sm:p-6 overflow-hidden space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm shrink-0">
@@ -889,15 +868,15 @@ export default function Settings({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
                   Software Updates
                 </h3>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                  v1.5.9
+                <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 tracking-wider uppercase">
+                  v<span className="font-stat">1.6</span>
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build 19
+                Direct In-App APK Auto-Updater • Build <span className="font-stat">20</span>
               </p>
             </div>
           </div>
@@ -921,7 +900,7 @@ export default function Settings({
                 } else {
                   setUpdateFeedback({
                     type: 'success',
-                    message: 'LifeOS is fully up to date! Running latest v1.5.9 (Build 19).'
+                    message: 'LifeOS is fully up to date! Running latest v1.6 (Build 20).'
                   });
                 }
               } catch {
@@ -993,8 +972,8 @@ export default function Settings({
       </div>
 
       <div className="text-center py-2">
-        <p className="text-xs font-mono font-bold text-muted-light dark:text-muted-dark tracking-wide">
-          v1.5.9
+        <p className="text-xs font-tag font-bold text-muted-light dark:text-muted-dark tracking-wider uppercase">
+          v<span className="font-stat">1.6</span> · Offline-First
         </p>
       </div>
     </div>

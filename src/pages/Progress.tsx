@@ -112,15 +112,26 @@ export default function Progress({ data }: ProgressProps) {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-6">
-      {/* Header */}
-      <motion.div variants={item} className="pt-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass text-m3-lavender-text dark:text-m3-lavender-darkText text-xs font-bold tracking-wider uppercase mb-2 shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#6750A4] dark:bg-[#D0BCFF] animate-pulse" />
-          {format(now, 'MMMM yyyy')} · Overview
+      {/* Progress Hero Header Card */}
+      <motion.div
+        variants={item}
+        className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-4"
+      >
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] text-xs font-tag font-bold tracking-wider uppercase mb-2 shadow-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
+            {format(now, 'MMMM yyyy')} · Overview
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+            Progress & Analytics
+          </h1>
+          <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium truncate">
+            Cross-pillar velocity, discipline streaks & consistency
+          </p>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">
-          Progress & Analytics
-        </h1>
+        <div className="w-11 h-11 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center justify-center text-[var(--accent-primary)] shadow-xs shrink-0">
+          <TrendingUp size={22} strokeWidth={2.2} />
+        </div>
       </motion.div>
 
       {/* Bioluminescent 2x2 Liquid Squircle Pillars Grid */}
@@ -133,7 +144,7 @@ export default function Progress({ data }: ProgressProps) {
           className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass glow-lavender bg-gradient-to-br from-m3-lavender-container/80 via-m3-lavender-container/40 to-transparent dark:from-m3-lavender-darkContainer/70 dark:via-m3-lavender-darkContainer/35 dark:to-transparent text-m3-lavender-text dark:text-m3-lavender-darkText shadow-md flex flex-col justify-between"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="w-12 h-12 rounded-[20px] bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
+            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
               <BookOpen size={20} />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider opacity-75 font-mono">Study</span>
@@ -155,7 +166,7 @@ export default function Progress({ data }: ProgressProps) {
           className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass glow-mint bg-gradient-to-br from-m3-mint-container/80 via-m3-mint-container/40 to-transparent dark:from-m3-mint-darkContainer/70 dark:via-m3-mint-darkContainer/35 dark:to-transparent text-m3-mint-text dark:text-m3-mint-darkText shadow-md flex flex-col justify-between"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="w-12 h-12 rounded-[20px] bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
+            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
               <Dumbbell size={20} />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider opacity-75 font-mono">Gym</span>
@@ -176,7 +187,7 @@ export default function Progress({ data }: ProgressProps) {
           className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass glow-peach bg-gradient-to-br from-m3-peach-container/80 via-m3-peach-container/40 to-transparent dark:from-m3-peach-darkContainer/70 dark:via-m3-peach-darkContainer/35 dark:to-transparent text-m3-peach-text dark:text-m3-peach-darkText shadow-md flex flex-col justify-between"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="w-12 h-12 rounded-[20px] bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
+            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
               <Wallet size={20} />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider opacity-75 font-mono">Spending</span>
@@ -197,7 +208,7 @@ export default function Progress({ data }: ProgressProps) {
           className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass glow-rose bg-gradient-to-br from-m3-rose-container/80 via-m3-rose-container/40 to-transparent dark:from-m3-rose-darkContainer/70 dark:via-m3-rose-darkContainer/35 dark:to-transparent text-m3-rose-text dark:text-m3-rose-darkText shadow-md flex flex-col justify-between"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="w-12 h-12 rounded-[20px] bg-white/80 dark:bg-black/40 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
+            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
               <Flame size={20} />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider opacity-75 font-mono">Streak</span>

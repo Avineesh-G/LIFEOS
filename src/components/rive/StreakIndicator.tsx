@@ -37,13 +37,13 @@ export default function StreakIndicator({
   const isSmall = size === 'sm';
   const isLarge = size === 'lg';
 
-  // Fallback Vector: Clean, layered SVG flame with ambient amber glow (No emoji)
+  // Fallback Vector: Clean, layered SVG flame with fixed category amber/orange glow (No emoji)
   const fallbackFlame = (
     <div className="relative flex items-center justify-center">
-      <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-md animate-pulse" />
+      <div className="absolute inset-0 bg-[#FF7A45]/20 rounded-full blur-md animate-pulse" />
       <Flame
         size={isSmall ? 14 : isLarge ? 24 : 18}
-        className="relative z-10 text-amber-500 fill-amber-500/20 transition-transform duration-300 group-hover:scale-110"
+        className="relative z-10 text-[#FF7A45] fill-[#FF7A45]/20 transition-transform duration-300 group-hover:scale-110"
       />
     </div>
   );
@@ -52,7 +52,7 @@ export default function StreakIndicator({
     <motion.div
       whileTap={{ scale: 0.95 }}
       onClick={handleTap}
-      className={`group cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-mono shadow-sm select-none ${className}`}
+      className={`group cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#FF7A45]/25 bg-[#FF7A45]/12 text-[#FF7A45] shadow-xs select-none ${className}`}
     >
       <div className={isSmall ? 'w-4 h-4' : isLarge ? 'w-7 h-7' : 'w-5 h-5'}>
         <LifeOSRive
@@ -65,10 +65,10 @@ export default function StreakIndicator({
       </div>
 
       <div className="flex items-center gap-1.5 font-bold tracking-tight">
-        <span className={isSmall ? 'text-xs' : isLarge ? 'text-base' : 'text-sm'}>
+        <span className={`font-stat text-[#FF7A45] ${isSmall ? 'text-xs' : isLarge ? 'text-base' : 'text-sm'}`}>
           {streak}
         </span>
-        <span className="text-[11px] font-sans font-semibold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
+        <span className="text-[10px] font-tag font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
           {label}
         </span>
       </div>

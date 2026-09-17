@@ -457,56 +457,64 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-4">
-      {/* Header */}
-      <motion.div variants={item} className="flex items-center justify-between pt-2">
+      {/* Header Card */}
+      <motion.div
+        variants={item}
+        className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
+      >
         <button
           onClick={() => { triggerHaptic(10); navigate('/'); }}
-          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-85 active:scale-95 transition-all shadow-sm"
+          className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
+          aria-label="Go Back"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} strokeWidth={2.2} />
         </button>
-        <div className="text-center">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+        <div className="text-center min-w-0 flex-1">
+          <p className="text-[10px] sm:text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-0.5 truncate">
             {format(selectedDateObj, 'EEEE, d MMM yyyy')}
           </p>
-          <h1 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Nutrition Protocol</h1>
+          <h1 className="text-lg sm:text-xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight truncate">
+            Nutrition Protocol
+          </h1>
         </div>
-        <div className="w-10 flex justify-end">
-          {!isToday && (
+        <div className="w-10 flex justify-end shrink-0">
+          {!isToday ? (
             <button
               onClick={() => {
                 triggerHaptic(5);
                 setSelectedDate(todayStr);
               }}
-              className="text-[11px] font-bold px-2 py-1 rounded-lg bg-accent/15 text-accent border border-accent/30 hover:bg-accent/25 transition-all"
+              className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-90 active:scale-95 transition-all shadow-xs"
               title="Jump to Today"
             >
               Today
             </button>
+          ) : (
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 mr-3" title="Current Day" />
           )}
         </div>
       </motion.div>
 
       {/* ── Date Navigator Bar (Log any particular date) ── */}
-      <motion.div variants={item} className="card p-3 flex items-center justify-between gap-2 shadow-sm border border-border-light/80 dark:border-border-dark/80">
+      <motion.div variants={item} className="rounded-[24px] p-2.5 liquid-glass border border-[var(--card-border)] flex items-center justify-between gap-2 shadow-xs">
         <button
           onClick={() => {
             triggerHaptic(5);
             setSelectedDate(prev => format(subDays(parseISO(prev), 1), 'yyyy-MM-dd'));
           }}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Previous Day"
         >
           <ChevronLeft size={18} />
         </button>
 
         {/* Date Selector Pill with Native Date Picker */}
-        <label className="relative flex-1 flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-bg-light dark:bg-bg-dark border border-border-light/80 dark:border-border-dark/80 cursor-pointer hover:border-accent/40 transition-colors">
+        <label className="relative flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-[16px] bg-[var(--card-surface)] border border-[var(--card-border)] cursor-pointer hover:border-accent/40 transition-colors">
           <Calendar size={15} className="text-accent flex-shrink-0" />
-          <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-sans">
+          <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-heading">
             {isToday ? 'Today' : isYesterday ? 'Yesterday' : format(selectedDateObj, 'EEE, d MMM')}
           </span>
-          <span className="text-[10px] text-muted-light dark:text-muted-dark font-mono">
+          <span className="text-[10px] text-muted-light dark:text-muted-dark font-tag tracking-wider uppercase">
             ({format(selectedDateObj, 'yyyy-MM-dd')})
           </span>
           {existingLogForDate?.isSaved ? (
@@ -532,7 +540,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             triggerHaptic(5);
             setSelectedDate(prev => format(addDays(parseISO(prev), 1), 'yyyy-MM-dd'));
           }}
-          className="w-9 h-9 rounded-xl flex items-center justify-center bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
+          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Next Day"
         >
           <ChevronRight size={18} />
@@ -744,7 +752,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             const isSkipped = mealLog?.items.some(i => i.id === 'skipped');
 
             return (
-              <div key={mealObj.slot} className="rounded-[28px] liquid-glass border border-white/80 dark:border-white/10 overflow-hidden shadow-xs transition-shadow">
+              <div key={mealObj.slot} className="rounded-[28px] liquid-glass border border-[var(--card-border)] overflow-hidden shadow-xs transition-shadow">
                 <button
                   className="w-full flex items-center justify-between p-4 sm:p-5 active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
                   onClick={() => {
@@ -779,7 +787,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 border-t border-black/5 dark:border-white/5 pt-3">
+                      <div className="px-4 pb-4 border-t border-white/[0.05] pt-3">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
                             {mealObj.slot === 'nightCanteen' ? 'Night Canteen (10:30 PM–12:30 AM)' : 'Menu Items'}

@@ -68,7 +68,7 @@ export default function AppLockOverlay() {
   }
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-[#F8F9FA]/98 dark:bg-[#090A0D]/98 backdrop-blur-[64px] flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden">
+    <div className="fixed inset-0 z-[99999] bg-[#F8F9FA]/98 dark:bg-[#090A0D]/98 flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden">
       {/* Ambient Theme Radial Glows */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
       <div className="absolute bottom-12 right-12 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />

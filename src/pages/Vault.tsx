@@ -437,7 +437,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="relative w-full max-w-sm rounded-[32px] p-6 sm:p-8 bg-white/80 dark:bg-[#16181E]/80 backdrop-blur-2xl border border-black/10 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
+          className="relative w-full max-w-sm rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
         >
           {/* Subtle Ambient Glow Orbs */}
           <div className="absolute -top-16 -left-16 w-44 h-44 bg-emerald-500/15 dark:bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -504,7 +504,7 @@ export default function Vault({ data, updateData }: VaultProps) {
             </span>
           </button>
 
-          <div className="w-full pt-4 border-t border-black/5 dark:border-white/5 flex flex-col gap-2">
+          <div className="w-full pt-4 border-t border-white/[0.05] flex flex-col gap-2">
             <div className="flex items-center justify-center gap-2 text-[11px] text-secondary-light dark:text-secondary-dark/80">
               <Smartphone size={13} className="text-emerald-500" />
               <span>Bound to your device's hardware screen lock</span>
@@ -525,17 +525,17 @@ export default function Vault({ data, updateData }: VaultProps) {
   return (
     <div className="flex flex-col gap-3.5 pb-8 max-w-xl mx-auto">
       {/* ── Compact Mobile Header Bar ── */}
-      <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-white/70 dark:bg-[#181A22]/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-sm">
+      <div className="flex items-center justify-between gap-2 p-3.5 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0">
             <ShieldCheck size={19} strokeWidth={2.2} />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h1 className="text-sm sm:text-base font-black tracking-tight text-primary-light dark:text-primary-dark">
+              <h1 className="text-sm sm:text-base font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark">
                 Vault
               </h1>
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-tag font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {vaultItems.length}
               </span>
@@ -575,7 +575,7 @@ export default function Vault({ data, updateData }: VaultProps) {
             placeholder="Search accounts, usernames..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-white/80 dark:bg-[#181A22]/80 backdrop-blur-md border border-black/10 dark:border-white/10 text-xs sm:text-sm text-primary-light dark:text-primary-dark placeholder-secondary-light dark:placeholder-secondary-dark focus:outline-none focus:border-emerald-500 transition-colors shadow-sm"
+            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-xs sm:text-sm text-primary-light dark:text-primary-dark placeholder-secondary-light dark:placeholder-secondary-dark focus:outline-none focus:border-emerald-500 transition-colors shadow-xs"
           />
           {searchQuery && (
             <button
@@ -590,7 +590,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         {/* Generator Quick Tool Button */}
         <button
           onClick={handleOpenGenerator}
-          className="h-10 px-3 rounded-2xl bg-white/80 dark:bg-[#181A22]/80 border border-black/10 dark:border-white/10 text-cyan-500 flex items-center gap-1.5 text-xs font-bold hover:bg-cyan-500/10 active:scale-95 transition-all shadow-sm shrink-0"
+          className="h-10 px-3 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5 text-xs font-bold hover:bg-cyan-500/10 active:scale-95 transition-all shadow-xs shrink-0"
           title="Password Generator Tool"
         >
           <Sparkles size={14} />
@@ -658,7 +658,7 @@ export default function Vault({ data, updateData }: VaultProps) {
             initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
-            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-black/90 dark:bg-white/95 text-white dark:text-black text-xs font-bold shadow-xl flex items-center gap-2 backdrop-blur-md border border-white/20 dark:border-black/20"
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-black/90 dark:bg-white/95 text-white dark:text-black text-xs font-bold shadow-xl flex items-center gap-2 border border-white/20 dark:border-black/20"
           >
             <Sparkles size={13} className="text-emerald-400 dark:text-emerald-600" />
             <span>{toastMessage}</span>
@@ -710,7 +710,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                className="group relative rounded-2xl p-3 sm:p-3.5 bg-white/80 dark:bg-[#171922]/80 backdrop-blur-xl border border-black/5 dark:border-white/10 hover:border-emerald-500/30 dark:hover:border-emerald-500/30 transition-all shadow-sm flex flex-col gap-2.5"
+                className="group relative rounded-[22px] p-3 sm:p-3.5 liquid-glass border border-[var(--card-border)] hover:border-emerald-500/40 transition-all shadow-xs flex flex-col gap-2.5"
               >
                 {/* 1. Header: Squircle Icon + Title + Category + Edit/Delete */}
                 <div className="flex items-center justify-between gap-2">
