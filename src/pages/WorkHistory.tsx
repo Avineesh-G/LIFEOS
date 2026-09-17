@@ -211,7 +211,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
   const currentTabMeta = TABS.find(t => t.id === activeTab)!;
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
       {/* ── Header Card ── */}
       <motion.div
         variants={item}

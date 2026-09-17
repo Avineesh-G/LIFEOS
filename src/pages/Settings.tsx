@@ -200,7 +200,7 @@ export default function Settings({
   };
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4">
 
       {/* Settings Hero Header Card */}
       <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-4">
@@ -876,7 +876,7 @@ export default function Settings({
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build <span className="font-stat">20</span>
+                Direct In-App APK Auto-Updater • Build <span className="font-stat">21</span>
               </p>
             </div>
           </div>
@@ -900,7 +900,7 @@ export default function Settings({
                 } else {
                   setUpdateFeedback({
                     type: 'success',
-                    message: 'LifeOS is fully up to date! Running latest v1.6 (Build 20).'
+                    message: 'LifeOS is fully up to date! Running latest v1.6 (Build 21).'
                   });
                 }
               } catch {

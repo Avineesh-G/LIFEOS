@@ -334,7 +334,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()];
 
   return (
-    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-4">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between pt-1">

@@ -113,7 +113,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
 
       {/* Fluid Spring Capsule Peach Hero Card */}
       <motion.div

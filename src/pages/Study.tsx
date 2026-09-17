@@ -82,7 +82,7 @@ export default function Study({ data }: StudyProps) {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-8">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
 
       {/* Bioluminescent Lavender Liquid Spring Capsule Hero Container */}
       <motion.div

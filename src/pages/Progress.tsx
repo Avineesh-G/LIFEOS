@@ -111,7 +111,7 @@ export default function Progress({ data }: ProgressProps) {
   }, [data?.studySessions, data?.workoutLogs, data?.expenses, now]);
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
       {/* Progress Hero Header Card */}
       <motion.div
         variants={item}

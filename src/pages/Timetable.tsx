@@ -164,7 +164,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 pb-4">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
       {/* Header Hero Card */}
       <motion.div
         variants={item}

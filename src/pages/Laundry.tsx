@@ -189,7 +189,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-6">
 
       {/* Hero Header Card */}
       <div className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-4">

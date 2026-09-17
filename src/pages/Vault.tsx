@@ -523,7 +523,7 @@ export default function Vault({ data, updateData }: VaultProps) {
   // RENDER: UNLOCKED VAULT DASHBOARD (MOBILE-FIRST RE-ARRANGEMENT)
   // ───────────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-3.5 pb-8 max-w-xl mx-auto">
+    <div className="flex flex-col gap-3.5 max-w-xl mx-auto">
       {/* ── Compact Mobile Header Bar ── */}
       <div className="flex items-center justify-between gap-2 p-3.5 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-sm">
         <div className="flex items-center gap-2.5">

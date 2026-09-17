@@ -456,7 +456,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   const isYesterday = selectedDate === format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto pb-4">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
       {/* Header Card */}
       <motion.div
         variants={item}

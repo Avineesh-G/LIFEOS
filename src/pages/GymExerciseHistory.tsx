@@ -28,7 +28,7 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const bestReps = Math.max(...sessions.map(s => s.bestSet?.reps || 0), 0);
 
   return (
-    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto pb-4">
+    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
       <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono pt-1">
         <ChevronLeft size={16} /> Back to Gym
       </button>

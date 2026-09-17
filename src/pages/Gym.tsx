@@ -165,7 +165,7 @@ export default function Gym({ data, updateData }: GymProps) {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7 pb-4">
+    <div className="space-y-6 sm:space-y-7">
 
       {/* Bioluminescent Mint Liquid Spring Capsule Hero Card */}
       <motion.div

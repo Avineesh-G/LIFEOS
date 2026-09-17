@@ -1,7 +1,7 @@
 {
-  "versionCode": 20,
+  "versionCode": 21,
   "versionName": "1.6",
   "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.6 (Build 20): All-new Pixel-Native UI across all interfaces with circadian palette harmony, customizable bottom dock navigation, and performance optimizations.",
+  "releaseNotes": "LifeOS v1.6 (Build 21): Streamlined interface spacing with optimized bottom dock clearance across all pages.",
   "apkUrl": "https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
 }

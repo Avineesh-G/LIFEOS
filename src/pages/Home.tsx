@@ -266,7 +266,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
   }, [phase]);
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 pb-8">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
       {/* ── Ambient Executive Greeting Hero Card ── */}
       <motion.div

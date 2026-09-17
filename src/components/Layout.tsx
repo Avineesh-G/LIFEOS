@@ -391,15 +391,15 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         </div>
       </header>
 
-      {/* ── Main content (Reframed with Edge-to-Edge Fluid Flow & Spacious Breathing Room) ── */}
+      {/* ── Main content (Streamlined with precise bottom dock clearance) ── */}
       <main 
         className="relative z-10 min-h-screen"
         style={{
           paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))',
-          paddingBottom: 'calc(8.5rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        <div className="max-w-xl mx-auto px-4 sm:px-6 pt-2 sm:pt-4 pb-8">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 pt-2 sm:pt-4">
           {children}
         </div>
       </main>
