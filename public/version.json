@@ -1,7 +1,7 @@
 {
-  "versionCode": 17,
-  "versionName": "1.5.7",
+  "versionCode": 18,
+  "versionName": "1.5.8",
   "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.5.7 (Build 17): Auto-hiding OneStop navigation bar on scroll, instant scroll-to-top interface transitions, fluid page glide entrance animations, end-to-end interactive card micro-interactions (Chrono-Clock, Dumbbell spring plates, fluid checkboxes, water ripple beaker, laundry drum), and time-adaptive Circadian Ambient Mesh background.",
+  "releaseNotes": "LifeOS v1.5.8 (Build 18): Stability and polish release — scroll-to-top interface transitions, OneStop-style auto-hiding navigation bar, end-to-end interactive card micro-interactions, Circadian Ambient Mesh background, and Rive canvas optimizations.",
   "apkUrl": "/LifeOS.apk"
 }
