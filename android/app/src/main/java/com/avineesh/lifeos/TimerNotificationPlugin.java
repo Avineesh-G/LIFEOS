@@ -75,4 +75,19 @@ public class TimerNotificationPlugin extends Plugin {
         result.put("granted", true);
         call.resolve(result);
     }
+
+    @PluginMethod
+    public void getState(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("isRunning", TimerForegroundService.isRunning);
+        long elapsedMs = 0L;
+        if (TimerForegroundService.isRunning) {
+            elapsedMs = Math.max(0L, android.os.SystemClock.elapsedRealtime() - TimerForegroundService.startElapsedRealtime);
+        } else {
+            elapsedMs = TimerForegroundService.pausedOffsetMs;
+        }
+        ret.put("elapsedMs", elapsedMs);
+        ret.put("label", TimerForegroundService.currentLabel);
+        call.resolve(ret);
+    }
 }

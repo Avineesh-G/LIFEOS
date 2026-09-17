@@ -1,4 +1,4 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
 import { checkForAppUpdate } from '../utils/updater';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,6 +40,7 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateFeedback, setUpdateFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Accordion open/close state for all sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -905,15 +906,25 @@ export default function Settings({
             type="button"
             onClick={async () => {
               setCheckingUpdate(true);
+              setUpdateFeedback(null);
+              triggerHaptic('selection');
               try {
                 const res = await checkForAppUpdate();
-                if (res.hasUpdate) {
+                if (res.hasUpdate && res.remoteVersion) {
                   window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
                 } else {
-                  alert('LifeOS is fully up to date! You are on the latest build (v1.5.8).');
+                  setUpdateFeedback({
+                    type: 'success',
+                    message: 'LifeOS is fully up to date! Running latest v1.5.8 (Build 18).'
+                  });
+                  setTimeout(() => setUpdateFeedback(null), 5000);
                 }
               } catch {
-                alert('Could not reach update server. Please check your internet connection.');
+                setUpdateFeedback({
+                  type: 'error',
+                  message: 'Could not reach update server. Please check your internet connection.'
+                });
+                setTimeout(() => setUpdateFeedback(null), 5000);
               } finally {
                 setCheckingUpdate(false);
               }
@@ -925,6 +936,29 @@ export default function Settings({
             <span>{checkingUpdate ? 'Checking...' : 'Check Update'}</span>
           </button>
         </div>
+
+        {/* Dynamic feedback banner */}
+        <AnimatePresence>
+          {updateFeedback && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 14 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              className={`p-3 rounded-2xl border text-xs font-semibold flex items-center gap-2.5 overflow-hidden ${
+                updateFeedback.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/25 text-rose-700 dark:text-rose-300'
+              }`}
+            >
+              {updateFeedback.type === 'success' ? (
+                <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+              ) : (
+                <AlertTriangle size={16} className="text-rose-500 shrink-0" />
+              )}
+              <span>{updateFeedback.message}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="text-center py-2">

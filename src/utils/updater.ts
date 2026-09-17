@@ -3,6 +3,13 @@ import { registerPlugin, Capacitor } from '@capacitor/core';
 export const CURRENT_VERSION_CODE = 18;
 export const CURRENT_VERSION_NAME = '1.5.8';
 
+export const GITHUB_RAW_APK_URL = 'https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk';
+export const REMOTE_VERSION_URLS = [
+  'https://raw.githubusercontent.com/Avineesh-G/LIFEOS/main/public/version.json',
+  'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json',
+  '/version.json'
+];
+
 export interface AppVersionInfo {
   versionCode: number;
   versionName: string;
@@ -41,24 +48,31 @@ export const isNativeAndroid = (): boolean => {
 };
 
 /**
- * Fetches version metadata from /version.json
+ * Fetches version metadata from remote endpoints with fallbacks
  */
 export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
-  try {
-    const res = await fetch(`/version.json?t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-      },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data as AppVersionInfo;
-  } catch (err) {
-    console.warn('[LifeOS Updater] Failed to check /version.json:', err);
-    return null;
+  const timestamp = Date.now();
+  for (const baseUrl of REMOTE_VERSION_URLS) {
+    try {
+      const url = `${baseUrl}?t=${timestamp}`;
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.versionCode === 'number') {
+          return data as AppVersionInfo;
+        }
+      }
+    } catch (err) {
+      console.warn(`[LifeOS Updater] Failed to check ${baseUrl}:`, err);
+    }
   }
+  return null;
 }
 
 /**
@@ -117,7 +131,15 @@ export async function startApkUpdate(
   onProgress: (prog: DownloadProgressEvent) => void,
   onError: (err: string) => void
 ): Promise<void> {
-  const fullUrl = new URL(apkUrl, window.location.origin).href;
+  // Determine full target URL: on native Android, use direct public internet URL
+  let targetUrl: string;
+  if (apkUrl.startsWith('http://') || apkUrl.startsWith('https://')) {
+    targetUrl = apkUrl;
+  } else if (isNativeAndroid()) {
+    targetUrl = GITHUB_RAW_APK_URL;
+  } else {
+    targetUrl = new URL(apkUrl, window.location.origin).href;
+  }
 
   if (isNativeAndroid()) {
     let progressSub: any;
@@ -133,7 +155,7 @@ export async function startApkUpdate(
       });
 
       // Trigger native download and package installer
-      await ApkInstaller.downloadAndInstall({ url: fullUrl });
+      await ApkInstaller.downloadAndInstall({ url: targetUrl });
     } catch (err: any) {
       onError(err.message || 'Failed to start in-app installer');
     } finally {
@@ -145,7 +167,7 @@ export async function startApkUpdate(
     try {
       onProgress({ progress: 100, bytesRead: 1, totalBytes: 1 });
       const a = document.createElement('a');
-      a.href = fullUrl;
+      a.href = targetUrl;
       a.download = 'LifeOS.apk';
       document.body.appendChild(a);
       a.click();

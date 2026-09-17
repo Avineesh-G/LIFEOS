@@ -76,16 +76,22 @@ public class ApkInstallerPlugin extends Plugin {
                 connection.connect();
 
                 int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
-                    responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
-                    responseCode == 307 || responseCode == 308) {
+                int redirectCount = 0;
+                while ((responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                        responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                        responseCode == HttpURLConnection.HTTP_SEE_OTHER ||
+                        responseCode == 307 || responseCode == 308) && redirectCount < 5) {
                     String redirectUrl = connection.getHeaderField("Location");
                     connection.disconnect();
+                    if (redirectUrl == null) break;
                     url = new URL(redirectUrl);
                     connection = (HttpURLConnection) url.openConnection();
+                    connection.setInstanceFollowRedirects(true);
                     connection.setConnectTimeout(30000);
                     connection.setReadTimeout(60000);
                     connection.connect();
+                    responseCode = connection.getResponseCode();
+                    redirectCount++;
                 }
 
                 int fileLength = connection.getContentLength();

@@ -6,6 +6,7 @@ export interface TimerNotificationPlugin {
   resume(options: { label: string; elapsedBaseMs: number }): Promise<void>;
   stop(): Promise<void>;
   requestPermission(): Promise<{ granted: boolean }>;
+  getState(): Promise<{ isRunning: boolean; elapsedMs: number; label: string }>;
 }
 
 export const TimerNotification = registerPlugin<TimerNotificationPlugin>('TimerNotification');
