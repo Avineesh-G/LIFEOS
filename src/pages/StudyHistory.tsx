@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Clock, BookOpen, HelpCircle, Save, Check, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
 import { format, parseISO, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
@@ -49,8 +49,30 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
     return acc;
   }, {} as Record<string, typeof filtered>);
 
+  // ── Windowed list virtualization ──
+  // Renders only WINDOW_SIZE date-groups at a time; sentinel at bottom loads more.
+  const WINDOW_SIZE = 8; // visible date groups
+  const [visibleCount, setVisibleCount] = useState(WINDOW_SIZE);
+  // Reset window when filter changes
+  useEffect(() => { setVisibleCount(WINDOW_SIZE); }, [filter, subjectFilter]);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount(prev => prev + WINDOW_SIZE);
+        }
+      },
+      { rootMargin: '120px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [filtered]);
+
   const toggleExpand = (sessionId: string, currentDoubts?: string) => {
-    triggerHaptic(5);
+    triggerHaptic('light');
     if (expandedSessionId === sessionId) {
       setExpandedSessionId(null);
     } else {
@@ -129,7 +151,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
         </div>
       ) : (
         <div className="space-y-6">
-          {Object.entries(grouped).map(([date, sessions]) => (
+          {Object.entries(grouped).slice(0, visibleCount).map(([date, sessions]) => (
             <div key={date}>
               <div className="text-xs font-semibold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-3">
                 {format(parseISO(date), 'EEEE, MMMM d')}
@@ -273,6 +295,12 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
               </div>
             </div>
           ))}
+          {/* Scroll sentinel — loads more date groups when it enters the viewport */}
+          {visibleCount < Object.keys(grouped).length && (
+            <div ref={sentinelRef} className="h-12 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
       )}
     </div>

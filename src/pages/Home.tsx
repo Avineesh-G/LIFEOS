@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BookOpen, 
@@ -30,6 +30,83 @@ import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import { useDayTheme } from '../theme/DayThemeProvider';
 import { CATEGORY_COLORS } from '../theme/cardThemeTokens';
+import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
+
+// ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
+const LiveClock = memo(function LiveClock({ phase }: { phase: string }) {
+  const greetingIcons: Record<string, any> = { dawn: Sunrise, morning: Sunrise, afternoon: Sun, dusk: Sunset, evening: Sunset, night: Moon };
+  const IconComp = greetingIcons[phase] || Sun;
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs">
+      <IconComp size={13} className="text-[var(--accent-primary)] shrink-0 animate-pulse" />
+      <span className="text-xs font-semibold tracking-wide text-[var(--text-primary)]">
+        {format(now, 'EEEE, MMMM d')}
+      </span>
+    </div>
+  );
+});
+
+// ── DayCell — memoized so selecting one day doesn't re-render all 7 ──
+const DayCell = memo(function DayCell({
+  d, selectedDate, setSelectedDate, getDayDots
+}: {
+  d: Date;
+  selectedDate: Date;
+  setSelectedDate: (d: Date) => void;
+  getDayDots: (d: Date) => { hasStudy: boolean; hasGym: boolean; hasTasks: boolean; hasExpense: boolean };
+}) {
+  const isSel = isSameDay(d, selectedDate);
+  const isCur = isToday(d);
+  const dots = getDayDots(d);
+  return (
+    <button
+      key={d.toISOString()}
+      onClick={() => {
+        triggerHaptic('light');
+        setSelectedDate(d);
+      }}
+      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all select-none focus:outline-none ${
+        !isSel && isCur
+          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
+          : !isSel
+          ? 'hover:bg-[var(--pill-active-bg)]'
+          : ''
+      }`}
+    >
+      {isSel && (
+        <motion.div
+          layoutId="activeHomeDatePill"
+          className="absolute inset-0 rounded-[20px] bg-[var(--accent-primary)] shadow-md shadow-[var(--glow)]"
+          transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+        />
+      )}
+      <span className={`relative z-10 text-[10px] sm:text-[11px] font-medium tracking-tight transition-colors ${
+        isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-bold' : 'text-muted-light dark:text-muted-dark'
+      }`}>
+        {format(d, 'EEE')}
+      </span>
+      <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors font-stat ${
+        isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-extrabold' : 'text-primary-light dark:text-primary-dark'
+      }`}>
+        {format(d, 'd')}
+      </span>
+      <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
+        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#3B82F6]'}`} />}
+        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#22C55E]'}`} />}
+        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[var(--accent-primary)]'}`} />}
+        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#F5A623]'}`} />}
+        {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
+          <span className="w-1 h-1 rounded-full opacity-0" />
+        )}
+      </div>
+    </button>
+  );
+});
 
 interface HomeProps {
   data: AppData;
@@ -50,14 +127,17 @@ const item = {
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
   const { phase } = useDayTheme();
-  const [now, setNow] = useState<Date>(() => new Date());
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
-
+  // 'ready' = data is not DEFAULT_DATA (i.e. real user data has hydrated)
+  const [dataReady, setDataReady] = useState(() => (
+    Array.isArray((data as any)?.studySessions) && (data as any).studySessions.length > 0
+  ));
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!dataReady && data?.studySessions !== undefined) {
+      setDataReady(true);
+    }
+  }, [data]);
 
   // ── Selected Date State (Defaults to Today) ──
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
@@ -266,7 +346,22 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
   }, [phase]);
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+    <SkeletonGate
+      ready={dataReady}
+      skeleton={
+        <div className="space-y-6">
+          <SkeletonHeroCard />
+          <SkeletonCard height="h-28" />
+          <SkeletonCard height="h-44" />
+          <SkeletonStatRow />
+          <div className="grid grid-cols-2 gap-4">
+            <SkeletonCard height="h-32" />
+            <SkeletonCard height="h-32" />
+          </div>
+        </div>
+      }
+    >
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
       {/* ── Ambient Executive Greeting Hero Card ── */}
       <motion.div
@@ -275,12 +370,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       >
         {/* Top Header Row: Date Pill, Phase Badge & Streak */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs">
-            <greetingConfig.icon size={13} className="text-[var(--accent-primary)] shrink-0 animate-pulse" />
-            <span className="text-xs font-semibold tracking-wide text-[var(--text-primary)]">
-              {format(now, 'EEEE, MMMM d')}
-            </span>
-          </div>
+            <LiveClock phase={phase} />
 
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border shadow-xs bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border-[var(--card-border)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-ping" />
@@ -374,67 +464,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
         {/* 7-Day Interactive Horizontal Strip with Fluid Spring Capsule */}
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-[var(--card-surface)]/60 border border-[var(--card-border)]">
-          {weekDays.map((d) => {
-            const isSel = isSameDay(d, selectedDate);
-            const isCur = isToday(d);
-            const dots = getDayDots(d);
-
-            return (
-              <button
-                key={d.toISOString()}
-                onClick={() => {
-                  triggerHaptic('light');
-                  setSelectedDate(d);
-                }}
-                className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all select-none focus:outline-none ${
-                  !isSel && isCur
-                    ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
-                    : !isSel
-                    ? 'hover:bg-[var(--pill-active-bg)]'
-                    : ''
-                }`}
-              >
-                {isSel && (
-                  <motion.div
-                    layoutId="activeHomeDatePill"
-                    className="absolute inset-0 rounded-[20px] bg-[var(--accent-primary)] shadow-md shadow-[var(--glow)]"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                )}
-
-                <span className={`relative z-10 text-[10px] sm:text-[11px] font-medium tracking-tight transition-colors ${
-                  isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-bold' : 'text-muted-light dark:text-muted-dark'
-                }`}>
-                  {format(d, 'EEE')}
-                </span>
-
-                <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors font-stat ${
-                  isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-extrabold' : 'text-primary-light dark:text-primary-dark'
-                }`}>
-                  {format(d, 'd')}
-                </span>
-
-                {/* Micro Achievement Dots using Category Colors */}
-                <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
-                  {dots.hasStudy && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#3B82F6]'}`} />
-                  )}
-                  {dots.hasGym && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#22C55E]'}`} />
-                  )}
-                  {dots.hasTasks && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[var(--accent-primary)]'}`} />
-                  )}
-                  {dots.hasExpense && (
-                    <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#F5A623]'}`} />
-                  )}
-                  {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
-                    <span className="w-1 h-1 rounded-full opacity-0" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
+          {weekDays.map((d) => (
+            <DayCell
+              key={d.toISOString()}
+              d={d}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+              getDayDots={getDayDots}
+            />
+          ))}
         </div>
 
         {/* Dynamic Day Insights Area */}
@@ -987,7 +1025,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           },
           { 
             label: 'This Month', 
-            value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(now, 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}`,
+            value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(new Date(), 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}`,
             icon: Wallet
           },
         ].map(stat => (
@@ -1013,6 +1051,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         ))}
       </motion.div>
 
-    </motion.div>
+      </motion.div>
+    </SkeletonGate>
   );
 }

@@ -214,6 +214,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       duration: finalMinutes,
     };
     await updateData({ studySessions: [...data.studySessions, session] });
+    triggerHaptic('success');
     setShowSummary(false);
     setSeconds(0);
     accumulatedRef.current = 0;

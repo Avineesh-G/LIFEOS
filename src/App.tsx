@@ -1,4 +1,6 @@
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useReducedMotion, getPageMotionProps } from './utils/motionConfig';
 import { App as CapApp } from '@capacitor/app';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
@@ -50,6 +52,7 @@ function MainContent({
   transitionMode: TransitionMode;
   setTransitionMode: (m: TransitionMode) => void;
 }) {
+  const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
 
   // Always reset scroll to top immediately when switching interfaces
@@ -88,10 +91,18 @@ function MainContent({
     { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
   ]);
 
+  const motionProps = getPageMotionProps(prefersReducedMotion);
+
   return (
-    <div key={location.pathname} className="w-full overflow-x-hidden gpu-composited animate-page-fluid">
-      {routeElements}
-    </div>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        className="w-full overflow-x-hidden gpu-composited"
+        {...motionProps}
+      >
+        {routeElements}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

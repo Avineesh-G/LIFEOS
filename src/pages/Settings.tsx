@@ -1,5 +1,5 @@
 import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download } from 'lucide-react';
-import { checkForAppUpdate, GITHUB_RAW_APK_URL } from '../utils/updater';
+import { checkForAppUpdate, VERCEL_APK_URL } from '../utils/updater';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -958,7 +958,7 @@ export default function Settings({
           </button>
 
           <a
-            href={GITHUB_RAW_APK_URL}
+            href={VERCEL_APK_URL}
             target="_blank"
             rel="noopener noreferrer"
             download="LifeOS.apk"

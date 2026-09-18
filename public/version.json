@@ -1,7 +1,8 @@
 {
   "versionCode": 21,
   "versionName": "1.6",
-  "releaseDate": "2026-09-17",
-  "releaseNotes": "LifeOS v1.6 (Build 21): Streamlined interface spacing with optimized bottom dock clearance across all pages.",
-  "apkUrl": "https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk"
+  "releaseDate": "2026-09-18",
+  "releaseNotes": "LifeOS v1.6 (Build 21): High-reliability update engine with Android DownloadManager, SHA-256 verification, and smooth page transitions.",
+  "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
+  "sha256": "d108bc02630a6bae6569649bb0241c59eddbfb94c0594c690cd9e2307c466d03"
 }

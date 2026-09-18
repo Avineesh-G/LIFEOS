@@ -213,7 +213,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   const addExercise = () => {
-    triggerHaptic(5);
+    triggerHaptic('light');
     const newEx: Exercise = { id: crypto.randomUUID(), name: 'New Exercise', sets: 3, reps: 10, weight: 0 };
     updatePlan({ ...activePlan, exercises: [...activePlan.exercises, newEx] });
   };
@@ -367,7 +367,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 key={day}
                 type="button"
                 onClick={() => {
-                  triggerHaptic(5);
+                  triggerHaptic('light');
                   setActiveDay(day);
                 }}
                 className={`flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-2xl transition-all relative border min-h-[74px] sm:min-h-[80px] ${

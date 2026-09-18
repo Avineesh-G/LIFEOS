@@ -51,7 +51,7 @@ function InsightCard({ icon, title, subtitle, content, loading, error, accentCla
     <div className="card overflow-hidden">
       <button
         className="w-full flex items-center gap-3 p-4 text-left active:bg-bg-light dark:active:bg-bg-dark transition-all"
-        onClick={() => { triggerHaptic(5); setOpen(v => !v); }}
+        onClick={() => { triggerHaptic('light'); setOpen(v => !v); }}
       >
         <div className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 ${accentClass}`}>
           {icon}
@@ -257,14 +257,14 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
 
   // ── Exercise log helpers ────────────────────────────────────────────────
   const toggleSet = (ei: number, si: number) => {
-    triggerHaptic(8);
+    triggerHaptic('light');
     const u = [...exercises]; u[ei].sets[si].completed = !u[ei].sets[si].completed; setExercises(u);
   };
   const updateSet = (ei: number, si: number, field: 'reps' | 'weight', val: number) => {
     const u = [...exercises]; u[ei].sets[si][field] = val; setExercises(u);
   };
   const addSet = (ei: number) => {
-    triggerHaptic(8);
+    triggerHaptic('light');
     const u = [...exercises];
     const last = u[ei].sets[u[ei].sets.length - 1];
     u[ei].sets.push({ reps: last?.reps || 10, weight: last?.weight || 0, completed: false });
@@ -277,7 +277,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   };
   const addExercise = () => {
     if (!newExName.trim()) return;
-    triggerHaptic(10);
+    triggerHaptic('light');
     setExercises([...exercises, { name: newExName.trim(), sets: [{ reps: 10, weight: 0, completed: false }] }]);
     setNewExName('');
   };
@@ -312,6 +312,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
       ? (data.workoutLogs || []).map(w => w.id === existingLog.id ? log : w)
       : [...(data.workoutLogs || []), log];
     await updateData({ workoutLogs: updatedLogs });
+    triggerHaptic(isComplete ? 'milestone' : 'success');
     setSaved(true);
     setIsSavedDay(true);
     setIsLocked(true);
@@ -367,7 +368,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
         <button 
           onClick={() => {
             if (isLocked) {
-              triggerHaptic(8);
+              triggerHaptic('light');
               setIsLocked(false);
             } else {
               handleSave(false);
@@ -597,7 +598,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
                 <div className="pt-1 flex gap-2">
                   <button 
                     onClick={() => {
-                      triggerHaptic(10);
+                      triggerHaptic('light');
                       setIsLocked(!isLocked);
                     }}
                     className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"

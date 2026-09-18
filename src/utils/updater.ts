@@ -3,9 +3,11 @@ import { registerPlugin, Capacitor } from '@capacitor/core';
 export const CURRENT_VERSION_CODE = 21;
 export const CURRENT_VERSION_NAME = '1.6';
 
-export const GITHUB_RAW_APK_URL = 'https://github.com/Avineesh-G/LIFEOS/raw/main/public/LifeOS.apk';
+export const VERCEL_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
+export const GITHUB_RAW_APK_URL = VERCEL_APK_URL;
+export const GITHUB_RELEASES_API_URL = 'https://api.github.com/repos/Avineesh-G/LIFEOS/releases/latest';
+
 export const REMOTE_VERSION_URLS = [
-  '/version.json',
   'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json',
   'https://raw.githubusercontent.com/Avineesh-G/LIFEOS/main/public/version.json'
 ];
@@ -16,25 +18,39 @@ export interface AppVersionInfo {
   releaseDate: string;
   releaseNotes: string;
   apkUrl: string;
+  sha256?: string;
 }
 
 export interface DownloadProgressEvent {
   progress: number; // 0 - 100, or -1 if content length unknown
   bytesRead: number;
   totalBytes: number;
+  status?: number;
+}
+
+export interface DownloadErrorEvent {
+  error: string;
+  message?: string;
+  expected?: string;
+  actual?: string;
 }
 
 export interface ApkInstallerPluginType {
   canRequestPackageInstalls(): Promise<{ canInstall: boolean }>;
   openInstallPermissionSettings(): Promise<void>;
-  downloadAndInstall(options: { url: string }): Promise<{ success: boolean; message: string }>;
+  downloadAndInstall(options: { url: string; sha256?: string }): Promise<{ status: string; message?: string }>;
+  installDownloadedApk(): Promise<{ success?: boolean; status?: string; message?: string }>;
   addListener(
     eventName: 'downloadProgress',
     listenerFunc: (data: DownloadProgressEvent) => void
   ): Promise<any>;
   addListener(
     eventName: 'downloadError',
-    listenerFunc: (data: { error: string }) => void
+    listenerFunc: (data: DownloadErrorEvent) => void
+  ): Promise<any>;
+  addListener(
+    eventName: 'permissionNeeded',
+    listenerFunc: (data: any) => void
   ): Promise<any>;
 }
 
@@ -48,7 +64,38 @@ export const isNativeAndroid = (): boolean => {
 };
 
 /**
- * Fetches version metadata from remote endpoints with fast fallback & timeout
+ * Resolves binary download URL from latest GitHub Releases asset if Vercel is unreachable
+ */
+export async function fetchGitHubReleaseApkUrl(): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+    const res = await fetch(GITHUB_RELEASES_API_URL, {
+      signal: controller.signal,
+      headers: { Accept: 'application/vnd.github.v3+json' },
+      cache: 'no-store'
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.assets)) {
+        const apkAsset = data.assets.find((a: any) => a.name && a.name.endsWith('.apk'));
+        if (apkAsset && apkAsset.browser_download_url) {
+          return apkAsset.browser_download_url;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[LifeOS Updater] Failed to resolve GitHub Release asset URL:', e);
+  }
+  return null;
+}
+
+/**
+ * Fetches version metadata from remote endpoints with fast fallback & timeout.
+ * Strips the local bundle check to prevent false-positive reports of current version.
  */
 export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
   const timestamp = Date.now();
@@ -61,7 +108,6 @@ export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
       const res = await fetch(url, {
         signal: controller.signal,
         cache: 'no-store'
-        // No custom headers to avoid CORS OPTIONS preflight rejections
       });
       clearTimeout(timeoutId);
 
@@ -115,7 +161,7 @@ export async function checkCanInstallApk(): Promise<boolean> {
 }
 
 /**
- * Opens system settings page to grant install permission
+ * Opens system settings page to grant install permission for this app package
  */
 export async function openInstallSettings(): Promise<void> {
   if (!isNativeAndroid()) return;
@@ -127,26 +173,46 @@ export async function openInstallSettings(): Promise<void> {
 }
 
 /**
- * Starts in-app download and native package installation
+ * Installs already downloaded and checksum-verified APK (e.g. after permission was granted)
+ */
+export async function installVerifiedApk(): Promise<{ success: boolean; needPermission?: boolean }> {
+  if (!isNativeAndroid()) return { success: true };
+  try {
+    const res = await ApkInstaller.installDownloadedApk();
+    if (res.status === 'permission_needed') {
+      return { success: false, needPermission: true };
+    }
+    return { success: true };
+  } catch (e) {
+    console.error('Failed to trigger install of downloaded APK', e);
+    return { success: false };
+  }
+}
+
+/**
+ * Starts in-app download using Android's native DownloadManager and triggers installation
  */
 export async function startApkUpdate(
-  apkUrl: string,
+  versionInfo: AppVersionInfo,
   onProgress: (prog: DownloadProgressEvent) => void,
-  onError: (err: string) => void
+  onError: (err: string, isChecksumError?: boolean) => void,
+  onPermissionNeeded?: () => void
 ): Promise<void> {
-  // Determine full target URL: on native Android, use direct public internet URL
-  let targetUrl: string;
-  if (apkUrl.startsWith('http://') || apkUrl.startsWith('https://')) {
-    targetUrl = apkUrl;
-  } else if (isNativeAndroid()) {
-    targetUrl = GITHUB_RAW_APK_URL;
-  } else {
-    targetUrl = new URL(apkUrl, window.location.origin).href;
+  // Determine target primary URL: prioritize Vercel static hosting or versionInfo.apkUrl
+  let targetUrl = versionInfo.apkUrl;
+  if (!targetUrl || !targetUrl.startsWith('http')) {
+    targetUrl = VERCEL_APK_URL;
+  }
+
+  // If raw GitHub URL was accidentally passed in versionInfo, replace with Vercel direct static file
+  if (targetUrl.includes('raw.githubusercontent.com') || targetUrl.includes('/raw/main/')) {
+    targetUrl = VERCEL_APK_URL;
   }
 
   if (isNativeAndroid()) {
     let progressSub: any;
     let errorSub: any;
+    let permSub: any;
 
     try {
       progressSub = await ApkInstaller.addListener('downloadProgress', (data) => {
@@ -154,16 +220,32 @@ export async function startApkUpdate(
       });
 
       errorSub = await ApkInstaller.addListener('downloadError', (err) => {
-        onError(err.error || 'Download failed');
+        const isChecksum = err.error === 'checksum_mismatch';
+        onError(err.message || err.error || 'Download failed', isChecksum);
       });
 
-      // Trigger native download and package installer
-      await ApkInstaller.downloadAndInstall({ url: targetUrl });
+      if (onPermissionNeeded) {
+        permSub = await ApkInstaller.addListener('permissionNeeded', () => {
+          onPermissionNeeded();
+        });
+      }
+
+      // Trigger native DownloadManager enqueue & verification
+      const res = await ApkInstaller.downloadAndInstall({
+        url: targetUrl,
+        sha256: versionInfo.sha256
+      });
+
+      if (res.status === 'permission_needed' && onPermissionNeeded) {
+        onPermissionNeeded();
+      }
     } catch (err: any) {
-      onError(err.message || 'Failed to start in-app installer');
+      const isChecksum = err?.message === 'checksum_mismatch' || String(err).includes('checksum_mismatch');
+      onError(err?.message || 'Failed to start in-app installer', isChecksum);
     } finally {
       if (progressSub) progressSub.remove();
       if (errorSub) errorSub.remove();
+      if (permSub) permSub.remove();
     }
   } else {
     // Web / PWA fallback: direct anchor download
@@ -176,7 +258,7 @@ export async function startApkUpdate(
       a.click();
       document.body.removeChild(a);
     } catch (err: any) {
-      onError(err.message || 'Web download failed');
+      onError(err?.message || 'Web download failed', false);
     }
   }
 }

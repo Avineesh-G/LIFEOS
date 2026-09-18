@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -9,6 +9,7 @@ import {
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { SkeletonGate, SkeletonCard } from '../components/Skeleton';
 import type { AppData, NutritionLog, WorkoutLog, Task, Expense } from '../types';
 
 interface WorkHistoryProps {
@@ -54,14 +55,14 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
   }, [selectedMonth]);
 
   const handlePrevMonth = () => {
-    triggerHaptic(5);
+    triggerHaptic('light');
     const d = new Date(monthDate);
     d.setMonth(d.getMonth() - 1);
     setSelectedMonth(format(d, 'yyyy-MM'));
   };
 
   const handleNextMonth = () => {
-    triggerHaptic(5);
+    triggerHaptic('light');
     const d = new Date(monthDate);
     d.setMonth(d.getMonth() + 1);
     setSelectedMonth(format(d, 'yyyy-MM'));
@@ -210,8 +211,48 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
   const currentTabMeta = TABS.find(t => t.id === activeTab)!;
 
+  // ── Windowed list virtualization ──
+  const PAGE_SIZE = 12;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [activeTab, selectedMonth]);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount(prev => prev + PAGE_SIZE);
+        }
+      },
+      { rootMargin: '120px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [activeTab, selectedMonth, monthlyNutritionLogs.length, monthlyGymLogs.length, monthlyTasks.length, monthlyExpenses.length]);
+
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
+    <SkeletonGate
+      ready={!!data}
+      skeleton={
+        <div className="space-y-4 max-w-xl mx-auto">
+          <SkeletonCard height="h-16" />
+          <SkeletonCard height="h-14" />
+          <div className="grid grid-cols-2 gap-2.5">
+            <SkeletonCard height="h-20" />
+            <SkeletonCard height="h-20" />
+            <SkeletonCard height="h-20" />
+            <SkeletonCard height="h-20" />
+          </div>
+          <SkeletonCard height="h-32" />
+          <SkeletonCard height="h-32" />
+        </div>
+      }
+    >
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
       {/* ── Header Card ── */}
       <motion.div
         variants={item}
@@ -271,7 +312,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <button
                 key={tab.id}
                 onClick={() => {
-                  triggerHaptic(5);
+                  triggerHaptic('light');
                   setActiveTab(tab.id);
                 }}
                 className={`relative flex items-center justify-center py-3 rounded-xl border transition-all active:scale-95 ${
@@ -383,7 +424,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 No nutrition logs found for this month.
               </div>
             ) : (
-              monthlyNutritionLogs.map(log => {
+              <>
+                {monthlyNutritionLogs.slice(0, visibleCount).map(log => {
                 const targetCals = data.profile?.currentCalorieTarget || 2000;
                 const pct = Math.min((log.dailyTotal / targetCals) * 100, 100);
                 const isOver = log.dailyTotal > targetCals * 1.1;
@@ -436,7 +478,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     </div>
                   </div>
                 );
-              })
+              })}
+              {visibleCount < monthlyNutritionLogs.length && (
+                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
+              </>
             )}
           </div>
         </motion.div>
@@ -518,7 +566,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 No gym workout logs found for this month.
               </div>
             ) : (
-              monthlyGymLogs.map(log => {
+              <>
+                {monthlyGymLogs.slice(0, visibleCount).map(log => {
                 const totalSets = (log.exercises || []).reduce((s, e) => s + (e.sets?.filter(st => st.completed)?.length || 0), 0);
                 const duration = log.startTime && log.endTime ? Math.round((log.endTime - log.startTime) / 60000) : null;
 
@@ -558,7 +607,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     </div>
                   </div>
                 );
-              })
+              })}
+              {visibleCount < monthlyGymLogs.length && (
+                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
+              </>
             )}
           </div>
         </motion.div>
@@ -597,7 +652,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 No tasks found for this month.
               </div>
             ) : (
-              monthlyTasks.map(task => (
+              <>
+                {monthlyTasks.slice(0, visibleCount).map(task => (
                 <div key={task.id} className="card p-3.5 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center ${task.completed ? 'bg-emerald-500 text-white' : 'border border-border-light dark:border-border-dark text-transparent'}`}>
@@ -616,7 +672,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     {task.date}
                   </span>
                 </div>
-              ))
+              ))}
+              {visibleCount < monthlyTasks.length && (
+                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
+              </>
             )}
           </div>
         </motion.div>
@@ -696,7 +758,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 No expenses logged for this month.
               </div>
             ) : (
-              monthlyExpenses.map(expense => (
+              <>
+                {monthlyExpenses.slice(0, visibleCount).map(expense => (
                 <div key={expense.id} className="card p-3.5 flex items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
@@ -715,11 +778,18 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     ₹{expense.amount}
                   </span>
                 </div>
-              ))
+              ))}
+              {visibleCount < monthlyExpenses.length && (
+                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                </div>
+              )}
+              </>
             )}
           </div>
         </motion.div>
       )}
-    </motion.div>
+      </motion.div>
+    </SkeletonGate>
   );
 }

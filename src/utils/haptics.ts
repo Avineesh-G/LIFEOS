@@ -1,7 +1,7 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 
-export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'ai' | 'selection' | number | number[];
+export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'error' | 'milestone' | 'ai' | 'selection' | number | number[];
 
 let audioCtx: AudioContext | null = null;
 let lastHapticTime = 0;
@@ -108,12 +108,14 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   // 1. Android / iOS Native Hardware Vibration via Capacitor Bridge
   if (Capacitor.isNativePlatform()) {
     try {
-      if (pattern === 'heavy') {
+      if (pattern === 'heavy' || pattern === 'milestone') {
         Haptics.impact({ style: ImpactStyle.Heavy });
       } else if (pattern === 'medium' || pattern === 'save') {
         Haptics.impact({ style: ImpactStyle.Medium });
       } else if (pattern === 'success') {
         Haptics.notification({ type: NotificationType.Success });
+      } else if (pattern === 'error') {
+        Haptics.notification({ type: NotificationType.Error });
       } else if (pattern === 'selection') {
         Haptics.selectionStart();
       } else {
@@ -132,10 +134,13 @@ export function triggerHaptic(pattern: HapticType = 'light') {
         navigator.vibrate(pattern);
       } else if (Array.isArray(pattern)) {
         navigator.vibrate(pattern);
-      } else if (pattern === 'heavy') {
+      } else if (pattern === 'heavy' || pattern === 'milestone') {
         navigator.vibrate(30);
       } else if (pattern === 'medium' || pattern === 'save') {
         navigator.vibrate(20);
+      } else if (pattern === 'error') {
+        // Double-pulse — perceptibly different from success single-pulse
+        navigator.vibrate([20, 60, 20]);
       } else if (pattern === 'selection') {
         navigator.vibrate(8);
       } else {

@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Plus, Trash2, Wallet, X, ArrowUpRight, TrendingDown } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedWallet } from '../components/AnimatedIcons';
 import { BottomSheet } from '../components/BottomSheet';
+import { triggerHaptic } from '../utils/haptics';
+import { SkeletonGate, SkeletonCard, SkeletonStatRow } from '../components/Skeleton';
 import type { AppData, Expense } from '../types';
 
 interface SpendingProps {
@@ -94,7 +96,10 @@ export default function Spending({ data, updateData }: SpendingProps) {
   }, [data.expenses]);
 
   const handleAdd = async () => {
-    if (!amount || parseFloat(amount) <= 0) return;
+    if (!amount || parseFloat(amount) <= 0) {
+      triggerHaptic('error');
+      return;
+    }
     const expense: Expense = {
       id: crypto.randomUUID(),
       amount: parseFloat(amount),
@@ -103,6 +108,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
       date: format(now, 'yyyy-MM-dd'),
     };
     await updateData({ expenses: [...data.expenses, expense] });
+    triggerHaptic('success');
     setAmount('');
     setNote('');
     setShowAdd(false);
@@ -112,8 +118,47 @@ export default function Spending({ data, updateData }: SpendingProps) {
     await updateData({ expenses: data.expenses.filter(e => e.id !== id) });
   };
 
+  // ── Windowed list virtualization for recent expenses ──
+  const PAGE_SIZE = 15;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const allRecentExpenses = useMemo(() => {
+    return [...(data?.expenses || [])].reverse();
+  }, [data?.expenses]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount(prev => prev + PAGE_SIZE);
+        }
+      },
+      { rootMargin: '120px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [allRecentExpenses.length]);
+
+  const isReady = Array.isArray(data?.expenses);
+
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
+    <SkeletonGate
+      ready={isReady}
+      skeleton={
+        <div className="space-y-6 sm:space-y-7">
+          <SkeletonCard height="h-44" />
+          <div className="grid grid-cols-2 gap-4 sm:gap-5">
+            <SkeletonCard height="h-32" />
+            <SkeletonCard height="h-32" />
+          </div>
+          <SkeletonCard height="h-44" />
+          <SkeletonCard height="h-64" />
+        </div>
+      }
+    >
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
 
       {/* Fluid Spring Capsule Peach Hero Card */}
       <motion.div
@@ -247,10 +292,14 @@ export default function Spending({ data, updateData }: SpendingProps) {
           <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             Recent Expenses
           </p>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-muted-light dark:text-muted-dark">Latest 20</span>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/[0.04] dark:bg-white/[0.05] text-muted-light dark:text-muted-dark">
+            {allRecentExpenses.length > PAGE_SIZE
+              ? `Showing ${Math.min(visibleCount, allRecentExpenses.length)} of ${allRecentExpenses.length}`
+              : `${allRecentExpenses.length} total`}
+          </span>
         </div>
 
-        {data.expenses.length === 0 ? (
+        {allRecentExpenses.length === 0 ? (
           <div className="py-10 text-center">
             <div className="flex justify-center text-3xl mb-2"><AnimatedWallet size={36} /></div>
             <p className="text-sm font-semibold text-secondary-light dark:text-secondary-dark">No expenses recorded yet</p>
@@ -258,7 +307,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {data.expenses.slice().reverse().slice(0, 20).map(e => {
+            {allRecentExpenses.slice(0, visibleCount).map(e => {
               const catStyle = CAT_STYLES[e.category] || CAT_STYLES.Other;
               return (
                 <motion.div
@@ -294,6 +343,13 @@ export default function Spending({ data, updateData }: SpendingProps) {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* Scroll sentinel for loading more items */}
+        {visibleCount < allRecentExpenses.length && (
+          <div ref={sentinelRef} className="h-10 flex items-center justify-center mt-3">
+            <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
           </div>
         )}
       </motion.div>
@@ -388,6 +444,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
           </motion.button>
         </div>
       </BottomSheet>
-    </motion.div>
+      </motion.div>
+    </SkeletonGate>
   );
 }
