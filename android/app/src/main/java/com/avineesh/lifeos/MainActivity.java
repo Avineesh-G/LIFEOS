@@ -17,6 +17,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(LocalNotificationsPlugin.class);
         registerPlugin(ApkInstallerPlugin.class);
         registerPlugin(TimerNotificationPlugin.class);
+        registerPlugin(WidgetUpdaterPlugin.class);
         super.onCreate(savedInstanceState);
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS

@@ -1,6 +1,6 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
 
-export const CURRENT_VERSION_CODE = 22;
+export const CURRENT_VERSION_CODE = 23;
 export const CURRENT_VERSION_NAME = '1.6.1';
 
 export const VERCEL_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';

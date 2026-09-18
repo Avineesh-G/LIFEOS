@@ -5,4 +5,6 @@
     <string name="package_name">com.avineesh.lifeos</string>
     <string name="custom_url_scheme">com.avineesh.lifeos</string>
     <string name="server_client_id">527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com</string>
+    <string name="widget_name">LifeOS Daily Overview</string>
+    <string name="widget_description">Shows streak, tasks done today, and study time.</string>
 </resources>

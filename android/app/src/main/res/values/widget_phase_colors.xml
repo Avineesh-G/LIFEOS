@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated automatically from src/utils/pixelSkyPalettes.ts. Do NOT edit directly. -->
+<resources>
+    <!-- DAWN PHASE -->
+    <color name="dawn_card_surface">#FCF9F8</color>
+    <color name="dawn_card_border">#EAD5CD</color>
+    <color name="dawn_text_primary">#171424</color>
+    <color name="dawn_text_secondary">#3A3654</color>
+    <color name="dawn_text_muted">#5F5A7C</color>
+    <color name="dawn_accent">#AA187E</color>
+    <color name="dawn_accent_contrast">#FFFFFF</color>
+
+    <!-- MORNING PHASE -->
+    <color name="morning_card_surface">#FCFBF8</color>
+    <color name="morning_card_border">#EAE1CD</color>
+    <color name="morning_text_primary">#141A24</color>
+    <color name="morning_text_secondary">#364154</color>
+    <color name="morning_text_muted">#5A677C</color>
+    <color name="morning_accent">#1872AA</color>
+    <color name="morning_accent_contrast">#FFFFFF</color>
+
+    <!-- AFTERNOON PHASE -->
+    <color name="afternoon_card_surface">#FCFBF8</color>
+    <color name="afternoon_card_border">#EAE4CD</color>
+    <color name="afternoon_text_primary">#141A24</color>
+    <color name="afternoon_text_secondary">#364254</color>
+    <color name="afternoon_text_muted">#5A687C</color>
+    <color name="afternoon_accent">#186BAA</color>
+    <color name="afternoon_accent_contrast">#FFFFFF</color>
+
+    <!-- DUSK PHASE -->
+    <color name="dusk_card_surface">#FCF9F8</color>
+    <color name="dusk_card_border">#EAD7CD</color>
+    <color name="dusk_text_primary">#1A1424</color>
+    <color name="dusk_text_secondary">#413654</color>
+    <color name="dusk_text_muted">#675A7C</color>
+    <color name="dusk_accent">#AA1874</color>
+    <color name="dusk_accent_contrast">#FFFFFF</color>
+
+    <!-- EVENING PHASE -->
+    <color name="evening_card_surface">#0E1122</color>
+    <color name="evening_card_border">#1F2440</color>
+    <color name="evening_text_primary">#F2F3F8</color>
+    <color name="evening_text_secondary">#AEB2CB</color>
+    <color name="evening_text_muted">#6F759B</color>
+    <color name="evening_accent">#8290ED</color>
+    <color name="evening_accent_contrast">#060810</color>
+
+    <!-- NIGHT PHASE -->
+    <color name="night_card_surface">#0E1322</color>
+    <color name="night_card_border">#1F2640</color>
+    <color name="night_text_primary">#F2F3F8</color>
+    <color name="night_text_secondary">#AEB4CB</color>
+    <color name="night_text_muted">#6F789B</color>
+    <color name="night_accent">#829DED</color>
+    <color name="night_accent_contrast">#060810</color>
+
+</resources>

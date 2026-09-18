@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "cap:sync": "npm run build && npx cap sync android",
+    "generate:widget-colors": "node --experimental-strip-types scripts/generate-widget-colors.js",
+    "cap:sync": "npm run generate:widget-colors && npm run build && npx cap sync android",
     "cap:build": "npm run cap:sync && cd android && gradlew assembleRelease",
     "cap:open": "npx cap open android",
     "release:prep": "node scripts/prepare-release.js"
@@ -19,6 +20,7 @@
     "@capacitor/core": "^8.5.1",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/preferences": "^8.0.1",
     "@capgo/capacitor-native-biometric": "^8.6.8",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@fontsource-variable/google-sans-flex": "^5.3.1",

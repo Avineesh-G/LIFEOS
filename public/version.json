@@ -1,8 +1,8 @@
 {
-  "versionCode": 22,
+  "versionCode": 23,
   "versionName": "1.6.1",
   "releaseDate": "2026-09-18",
-  "releaseNotes": "LifeOS v1.6.1 (Build 22): High-reliability update engine with Android DownloadManager, SHA-256 verification, and smooth page transitions.",
+  "releaseNotes": "LifeOS v1.6.1 (Build 23): Native Android Home Screen Widget with day-phase theming, streak, tasks, study time, and deep-link routing.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "667fbf8f7fa1b59d8586bda539bb27af7eb96a7d7cde2357ac4858dd78de6640"
+  "sha256": "eff966c5c823f91e759a3c6c3333df3bccc8a20205572b73552f259e8703f380"
 }

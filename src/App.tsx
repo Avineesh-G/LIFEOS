@@ -38,6 +38,7 @@ import { DayThemeProvider } from './theme/DayThemeProvider';
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
+import { syncWidgetData } from './utils/widgetBridge';
 
 function MainContent({
   data,
@@ -186,6 +187,44 @@ function App() {
     };
   }, [location.pathname, navigate]);
 
+  // Deep linking for widget tap targets: lifeos://tasks, lifeos://study, lifeos://progress
+  useEffect(() => {
+    let urlListener: any;
+    const registerUrlListener = async () => {
+      try {
+        urlListener = await CapApp.addListener('appUrlOpen', (event) => {
+          if (event?.url) {
+            const raw = event.url.replace(/^lifeos:\/\//i, '').toLowerCase().trim();
+            const clean = raw.startsWith('/') ? raw.slice(1) : raw;
+            if (clean === 'tasks') {
+              navigate('/tasks');
+            } else if (clean === 'study') {
+              navigate('/study');
+            } else if (clean === 'progress') {
+              navigate('/progress');
+            } else if (clean === 'home' || clean === '') {
+              navigate('/');
+            }
+          }
+        });
+      } catch {}
+    };
+    registerUrlListener();
+
+    return () => {
+      if (urlListener) {
+        urlListener.remove();
+      }
+    };
+  }, [navigate]);
+
+  // Sync widget snapshot whenever data changes
+  useEffect(() => {
+    if (data) {
+      syncWidgetData(data);
+    }
+  }, [data]);
+
   // Background auto-lock & Cooldown: handle app minimize & resume
   useEffect(() => {
     let stateListener: any;
@@ -196,6 +235,9 @@ function App() {
             handleAppBackgrounded();
           } else {
             handleAppForegrounded();
+            if (data) {
+              syncWidgetData(data);
+            }
           }
         });
       } catch {}
@@ -207,6 +249,9 @@ function App() {
         handleAppBackgrounded();
       } else {
         handleAppForegrounded();
+        if (data) {
+          syncWidgetData(data);
+        }
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -217,7 +262,7 @@ function App() {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [data]);
 
   const [isLocked, setIsLocked] = useState(() => isAppLocked());
 
