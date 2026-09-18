@@ -5,7 +5,7 @@
 **The Unified Personal Operating System for High-Performance Living**  
 *Academics · Hypertrophy Fitness · Nutrition · Campus Life · Biometric Vault · Home Screen Widget*
 
-[![Version](https://img.shields.io/badge/Version-v1.6.4_(Build_29)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v1.6.5_(Build_30)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript_5-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -14,7 +14,7 @@
 
 <br />
 
-### [📱 Download Direct APK (v1.6.4)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
+### [📱 Download Direct APK (v1.6.5)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
 
 <br />
 
@@ -37,12 +37,19 @@ Modern students and professionals juggle between 5 to 7 fragmented, ad-ridden ap
 
 ---
 
-## ⚡ What's New in v1.6.3 (Build 28)
+## ⚡ What's New in v1.6.5 (Build 30)
 
-- 🎨 **Settings Toggle: Dynamic Theme vs. Full Night Theme**: A centralized toggle in Settings. In *Dynamic* mode (default), the sky canvas, UI cards, borders, and typography weights cycle through 6 day phases based on real device time. In *Full Night* mode, everything locks permanently into the tranquil midnight aesthetic (01:30 AM deep-night progress) while retaining live, procedural star twinkling.
-- 📱 **Native Android Home Screen Widget (4×2)**: Medium-sized widget displaying live streak count, tasks completed today (`x/y`), and today's study focus time. Dynamically themed using the app's native circadian palette with deep-linking directly to `/progress`, `/tasks`, `/study`, or `/home`.
-- 🚀 **Zero-Latency Off-Thread Widget Bridge**: Optimized native Kotlin bridge (`WidgetUpdaterPlugin`) running writes asynchronously (`.apply()`) on a dedicated background worker thread with debounced synchronization, eliminating frame drops during task completions and study sessions.
-- 🔄 **In-App Direct APK Updater**: Self-hosted APK delivery via Vercel Edge CDN and GitHub Releases with automated SHA-256 integrity verification and seamless Android package installer integration.
+- 📱 **Per-Widget Metric Customization (`WidgetConfigActivity`)**: Configure each placed widget instance independently! Select 2 to 3 metrics to display on your home screen:
+  1. 🔥 **Current Streak**: Consecutive study and active habit consistency count.
+  2. ✓ **Tasks Done Today**: Completed vs total scheduled tasks tally (`x/y`).
+  3. ⏱ **Study Time Today**: Formatted focus time tracked today (`1h 30m`).
+  4. 📅 **Next Scheduled Block**: Real-time next class or lecture time and subject from your timetable.
+  5. 💳 **Safe-to-Spend / Today's Spent**: Daily expense tracking and safe-to-spend allowance.
+- 📐 **Adaptive Slot-Based Widget Architecture**: The home screen widget dynamically adapts its layout — rendering a prominent hero left tile alongside either a full-height single right tile (for 2 selected metrics) or two stacked tiles (for 3 selected metrics).
+- 🛠️ **Fixed Stuck Blank Widget (RemoteViews Inflation)**: Resolved launcher host fallback issue caused by unannotated view tags by ensuring 100% `@RemoteView`-compatible view inflation and per-widget isolated error handling.
+- 🧹 **Automatic Orphaned Widget Cleanup (`onDeleted`)**: Unplaced or removed widget instances automatically clean up their corresponding configuration entries from SharedPreferences.
+- 🥗 **Nutrition Navigation Persistence**: Resolved bottom navigation dock visibility when switching between past dates in the Nutrition module.
+- 🎨 **Settings Toggle: Dynamic Theme vs. Full Night Theme**: Centralized toggle locking either dynamic circadian transitions (6 day phases) or tranquil permanent midnight aesthetics.
 
 ---
 

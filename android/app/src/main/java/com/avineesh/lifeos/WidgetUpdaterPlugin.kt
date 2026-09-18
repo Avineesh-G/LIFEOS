@@ -48,6 +48,9 @@ class WidgetUpdaterPlugin : Plugin() {
         val tasksDone = call.getInt("tasksDone", 0) ?: 0
         val tasksTotal = call.getInt("tasksTotal", 0) ?: 0
         val studyMinutes = call.getInt("studyMinutes", 0) ?: 0
+        val nextScheduleTime = call.getString("nextScheduleTime", "") ?: ""
+        val nextScheduleTitle = call.getString("nextScheduleTitle", "") ?: ""
+        val spentToday = call.getString("spentToday", "") ?: ""
 
         // Immediately resolve to guarantee 0ms latency on JS interaction path
         call.resolve()
@@ -67,6 +70,9 @@ class WidgetUpdaterPlugin : Plugin() {
                     .putString("widget_tasks_done", tasksDone.toString())
                     .putString("widget_tasks_total", tasksTotal.toString())
                     .putString("widget_study_minutes_today", studyMinutes.toString())
+                    .putString("widget_next_schedule_time", nextScheduleTime)
+                    .putString("widget_next_schedule_title", nextScheduleTitle)
+                    .putString("widget_spent_today", spentToday)
                     .putString("widget_last_updated", isoDate)
                     .apply()
 

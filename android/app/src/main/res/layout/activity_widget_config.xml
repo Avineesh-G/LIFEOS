@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0D12"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp">
+
+        <!-- Title & Subtitle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LifeOS Widget"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select 2 or 3 metrics to display on this widget."
+            android:textSize="13sp"
+            android:textColor="#94A3B8"
+            android:layout_marginTop="4dp" />
+
+        <!-- Counter / Status Badge -->
+        <TextView
+            android:id="@+id/config_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Selected: 3 / 3 (Ready)"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:textColor="#A78BFA"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 1. STREAK ITEM -->
+        <LinearLayout
+            android:id="@+id/item_streak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_config_card"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_widget_flame"
+                android:contentDescription="@null"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Current Streak"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#F1F5F9" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Consecutive study &amp; activity streak"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_check_streak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- 2. TASKS TODAY ITEM -->
+        <LinearLayout
+            android:id="@+id/item_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_config_card"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_widget_check"
+                android:contentDescription="@null"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tasks Done Today"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#F1F5F9" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tasks completed vs. total scheduled"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_check_tasks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- 3. STUDY TIME TODAY ITEM -->
+        <LinearLayout
+            android:id="@+id/item_study"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_config_card"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_widget_clock"
+                android:contentDescription="@null"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Study Time Today"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#F1F5F9" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Focus &amp; timer duration tracked today"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_check_study"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- 4. SCHEDULE ITEM -->
+        <LinearLayout
+            android:id="@+id/item_schedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_config_card"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_widget_calendar"
+                android:contentDescription="@null"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Next Scheduled Block"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#F1F5F9" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Upcoming class, lecture, or routine time"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_check_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- 5. SPENDING ITEM -->
+        <LinearLayout
+            android:id="@+id/item_spending"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_config_card"
+            android:padding="14dp"
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/ic_widget_wallet"
+                android:contentDescription="@null"
+                android:layout_marginEnd="12dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Safe-to-Spend / Today's Spent"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="#F1F5F9" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Daily expense tracking and allowance"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/config_check_spending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false" />
+        </LinearLayout>
+
+        <!-- Bottom Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/config_btn_cancel"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1.0"
+                android:text="Cancel"
+                android:textColor="#94A3B8"
+                android:background="@drawable/bg_config_btn_cancel"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/config_btn_save"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1.4"
+                android:text="Save &amp; Add Widget"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_config_btn_primary"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

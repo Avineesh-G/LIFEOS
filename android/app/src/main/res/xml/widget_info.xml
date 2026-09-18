@@ -9,4 +9,5 @@
     android:description="@string/widget_description"
     android:previewImage="@mipmap/ic_launcher"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen" />
+    android:widgetCategory="home_screen"
+    android:configure="com.avineesh.lifeos.WidgetConfigActivity" />

@@ -8,6 +8,9 @@ export interface WidgetSnapshotData {
   tasksDone: number;
   tasksTotal: number;
   studyMinutes: number;
+  nextScheduleTime: string;
+  nextScheduleTitle: string;
+  spentToday: string;
 }
 
 export interface WidgetUpdaterPluginType {
@@ -69,7 +72,15 @@ export function calculateWidgetStreak(studySessions: StudySession[] = []): numbe
  */
 export function getWidgetSnapshot(data: AppData | null | undefined): WidgetSnapshotData {
   if (!data) {
-    return { streak: 0, tasksDone: 0, tasksTotal: 0, studyMinutes: 0 };
+    return {
+      streak: 0,
+      tasksDone: 0,
+      tasksTotal: 0,
+      studyMinutes: 0,
+      nextScheduleTime: 'Free',
+      nextScheduleTitle: 'No classes',
+      spentToday: '₹0',
+    };
   }
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -105,11 +116,39 @@ export function getWidgetSnapshot(data: AppData | null | undefined): WidgetSnaps
     }
   }
 
+  // 4. Next scheduled timetable block
+  const dayOfWeek = format(new Date(), 'EEEE');
+  const nowTimeStr = format(new Date(), 'HH:mm');
+
+  const todayBlocks = (data.timetable || [])
+    .filter(b => b.day?.toLowerCase() === dayOfWeek.toLowerCase())
+    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+  const nextBlock = todayBlocks.find(b => b.startTime > nowTimeStr);
+  let nextScheduleTime = 'Free';
+  let nextScheduleTitle = 'No classes left';
+  if (nextBlock) {
+    nextScheduleTime = nextBlock.startTime;
+    nextScheduleTitle = nextBlock.subject || nextBlock.room || 'Class';
+  } else if (todayBlocks.length > 0) {
+    nextScheduleTime = 'Done';
+    nextScheduleTitle = 'Classes done';
+  }
+
+  // 5. Today's spending
+  const todaySpentNum = (data.expenses || [])
+    .filter(e => e.date === today)
+    .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const spentToday = `₹${Math.round(todaySpentNum)}`;
+
   return {
     streak: cachedStreak,
     tasksDone,
     tasksTotal,
     studyMinutes: cachedStudyMinutesToday,
+    nextScheduleTime,
+    nextScheduleTitle,
+    spentToday,
   };
 }
 
@@ -140,6 +179,9 @@ export async function syncWidgetData(data: AppData | null | undefined): Promise<
       Preferences.set({ key: 'widget_tasks_done', value: String(snapshot.tasksDone) }),
       Preferences.set({ key: 'widget_tasks_total', value: String(snapshot.tasksTotal) }),
       Preferences.set({ key: 'widget_study_minutes_today', value: String(snapshot.studyMinutes) }),
+      Preferences.set({ key: 'widget_next_schedule_time', value: snapshot.nextScheduleTime }),
+      Preferences.set({ key: 'widget_next_schedule_title', value: snapshot.nextScheduleTitle }),
+      Preferences.set({ key: 'widget_spent_today', value: snapshot.spentToday }),
       Preferences.set({ key: 'widget_last_updated', value: new Date().toISOString() }),
     ]);
 
