@@ -1,5 +1,5 @@
 import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download } from 'lucide-react';
-import { checkForAppUpdate, VERCEL_APK_URL } from '../utils/updater';
+import { checkForAppUpdate, VERCEL_APK_URL, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -900,7 +900,7 @@ export default function Settings({
                 } else {
                   setUpdateFeedback({
                     type: 'success',
-                    message: 'LifeOS is fully up to date! Running latest v1.6 (Build 21).'
+                    message: `LifeOS is fully up to date! Running latest v${CURRENT_VERSION_NAME} (Build ${CURRENT_VERSION_CODE}).`
                   });
                 }
               } catch {
