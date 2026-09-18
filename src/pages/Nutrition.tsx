@@ -181,6 +181,9 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     if (selectedDate !== todayStr || log?.isSaved) {
       setExpanded(null);
     }
+
+    // Ensure floating bottom navigation dock is visible whenever switching dates
+    window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
   }, [selectedDate, data.nutritionLogs, todayStr]);
 
   const targetCals = data.profile?.currentCalorieTarget || 2000;
@@ -463,7 +466,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
       >
         <button
-          onClick={() => { triggerHaptic(10); navigate('/'); }}
+          onClick={() => {
+            triggerHaptic(10);
+            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
+            navigate('/');
+          }}
           className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
           aria-label="Go Back"
         >
@@ -483,6 +490,8 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
               onClick={() => {
                 triggerHaptic(5);
                 setSelectedDate(todayStr);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
               }}
               className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-90 active:scale-95 transition-all shadow-xs"
               title="Jump to Today"
@@ -501,6 +510,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           onClick={() => {
             triggerHaptic(5);
             setSelectedDate(prev => format(subDays(parseISO(prev), 1), 'yyyy-MM-dd'));
+            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
           }}
           className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Previous Day"
@@ -530,6 +540,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                 triggerHaptic(5);
                 setSelectedDate(e.target.value);
               }
+              e.currentTarget.blur();
+              window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
+            }}
+            onBlur={() => {
+              window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
             }}
             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
           />
@@ -539,6 +554,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           onClick={() => {
             triggerHaptic(5);
             setSelectedDate(prev => format(addDays(parseISO(prev), 1), 'yyyy-MM-dd'));
+            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
           }}
           className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
           title="Next Day"
@@ -1027,7 +1043,10 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/')}
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
+                  navigate('/');
+                }}
                 className="btn-pill flex-1 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
               >
                 Back to Home

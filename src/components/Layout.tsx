@@ -226,6 +226,35 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     };
   }, [menuOpen]);
 
+  // Helper: Determine if element opens a mobile virtual keyboard (excluding date/time/button inputs)
+  const isVirtualKeyboardInput = (el: Element | null): boolean => {
+    if (!el || !(el instanceof HTMLElement)) return false;
+    if (el.tagName === 'TEXTAREA' || el.isContentEditable) return true;
+    if (el.tagName === 'INPUT') {
+      const input = el as HTMLInputElement;
+      const type = (input.type || 'text').toLowerCase();
+      const nonKeyboardTypes = [
+        'date',
+        'time',
+        'datetime-local',
+        'month',
+        'week',
+        'checkbox',
+        'radio',
+        'range',
+        'color',
+        'file',
+        'button',
+        'submit',
+        'reset',
+        'hidden',
+        'image',
+      ];
+      return !nonKeyboardTypes.includes(type) && !input.readOnly && !input.disabled;
+    }
+    return false;
+  };
+
   // Hide floating navigation dock when mobile virtual keyboard is open
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
@@ -233,21 +262,25 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     const handleResize = () => {
       if (window.visualViewport) {
         const isShrunk = window.visualViewport.height < window.innerHeight - 120;
-        setIsKeyboardOpen(isShrunk);
+        if (!isShrunk) {
+          setIsKeyboardOpen(false);
+        } else if (isVirtualKeyboardInput(document.activeElement)) {
+          setIsKeyboardOpen(true);
+        }
       }
     };
 
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      if (isVirtualKeyboardInput(target)) {
         setIsKeyboardOpen(true);
       }
     };
 
     const handleFocusOut = () => {
       setTimeout(() => {
-        const active = document.activeElement as HTMLElement;
-        if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && !active.isContentEditable)) {
+        const active = document.activeElement;
+        if (!isVirtualKeyboardInput(active)) {
           setIsKeyboardOpen(false);
         }
       }, 100);
@@ -266,13 +299,29 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
   const [navVisible, setNavVisible] = useState(true);
 
-  // Automatically reset nav visibility and close speed dial on route change
+  // Global event listener to force reveal nav dock and clear keyboard lock
+  useEffect(() => {
+    const handleShowNav = () => {
+      setNavVisible(true);
+      setIsKeyboardOpen(false);
+    };
+    window.addEventListener('lifeos-show-nav', handleShowNav);
+    return () => {
+      window.removeEventListener('lifeos-show-nav', handleShowNav);
+    };
+  }, []);
+
+  // Automatically reset nav visibility, keyboard state, and close speed dial on route change
   useEffect(() => {
     setNavVisible(true);
     setMenuOpen(false);
+    setIsKeyboardOpen(false);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }, [location.pathname]);
 
-  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up
+  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up or near top/bottom
   useEffect(() => {
     let lastScrollY = window.scrollY;
     let ticking = false;
@@ -282,9 +331,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
           const delta = currentScrollY - lastScrollY;
+          const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 60;
 
-          // Near page top, navigation is always visible
-          if (currentScrollY <= 45) {
+          // Near page top or reached page bottom -> navigation is always visible
+          if (currentScrollY <= 45 || isNearBottom) {
             setNavVisible(true);
           } else if (Math.abs(delta) > 8) {
             if (delta > 0) {
