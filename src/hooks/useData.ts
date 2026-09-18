@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { getData, saveData, sanitizeAppData, DEFAULT_DATA } from '../db';
 import type { AppData } from '../types';
 import { User } from 'firebase/auth';
-import { syncWidgetData } from '../utils/widgetBridge';
+import { scheduleWidgetSync } from '../utils/widgetBridge';
 
 const CACHE_KEY_PREFIX = 'lifeos_cache_';
 const GLOBAL_CACHE_KEY = 'lifeos_cached_app_data';
@@ -137,7 +137,7 @@ export function useData(user: User | null) {
 
           setData(fresh);
           dataRef.current = fresh;
-          syncWidgetData(fresh);
+          scheduleWidgetSync(fresh, 300);
           try {
             localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(fresh));
           } catch {}
@@ -200,9 +200,9 @@ export function useData(user: User | null) {
       console.error('Background Firestore sync error:', err);
     });
 
-    // 4. If tasks or study sessions changed, immediately sync Android Home Screen Widget
+    // 4. If tasks or study sessions changed, schedule non-blocking Android Home Screen Widget sync
     if (partial.tasks || partial.studySessions) {
-      syncWidgetData(optimistic);
+      scheduleWidgetSync(optimistic, 150);
     }
 
     return optimistic;
@@ -214,7 +214,7 @@ export function useData(user: User | null) {
       const fresh = await getData(user.uid, true); // Force fetch from server
       setData(fresh);
       dataRef.current = fresh;
-      syncWidgetData(fresh);
+      scheduleWidgetSync(fresh, 200);
       try {
         localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(fresh));
       } catch {}

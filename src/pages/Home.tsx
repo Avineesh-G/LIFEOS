@@ -237,11 +237,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     return { hasStudy, hasGym, hasTasks, hasExpense };
   };
 
-  const handleToggleTask = async (taskId: string) => {
+  const handleToggleTask = (taskId: string) => {
     if (!updateData) return;
     triggerHaptic('medium');
     const updated = (data.tasks || []).map(t => t.id === taskId ? { ...t, completed: !t.completed } : t);
-    await updateData({ tasks: updated });
+    updateData({ tasks: updated });
   };
 
   // ── Today's Core Highlights for Quick Glance ──

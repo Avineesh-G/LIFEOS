@@ -1,8 +1,8 @@
 {
-  "versionCode": 23,
-  "versionName": "1.6.1",
+  "versionCode": 27,
+  "versionName": "1.6.2",
   "releaseDate": "2026-09-18",
-  "releaseNotes": "LifeOS v1.6.1 (Build 23): Native Android Home Screen Widget with day-phase theming, streak, tasks, study time, and deep-link routing.",
+  "releaseNotes": "LifeOS v1.6.2 (Build 27): Performance fix eliminating frame drops caused by widget refresh calls. Non-blocking off-thread SharedPreferences writes, debounced bridge syncing, and memoized streak calculations.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "eff966c5c823f91e759a3c6c3333df3bccc8a20205572b73552f259e8703f380"
+  "sha256": "181e262098e55187d6c9f9cb1c58693e45af343cfd7aa8f421c35e140e1313b0"
 }

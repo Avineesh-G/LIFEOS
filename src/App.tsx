@@ -38,7 +38,7 @@ import { DayThemeProvider } from './theme/DayThemeProvider';
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
-import { syncWidgetData } from './utils/widgetBridge';
+import { scheduleWidgetSync } from './utils/widgetBridge';
 
 function MainContent({
   data,
@@ -218,13 +218,6 @@ function App() {
     };
   }, [navigate]);
 
-  // Sync widget snapshot whenever data changes
-  useEffect(() => {
-    if (data) {
-      syncWidgetData(data);
-    }
-  }, [data]);
-
   // Background auto-lock & Cooldown: handle app minimize & resume
   useEffect(() => {
     let stateListener: any;
@@ -236,7 +229,7 @@ function App() {
           } else {
             handleAppForegrounded();
             if (data) {
-              syncWidgetData(data);
+              scheduleWidgetSync(data, 500);
             }
           }
         });
@@ -250,7 +243,7 @@ function App() {
       } else {
         handleAppForegrounded();
         if (data) {
-          syncWidgetData(data);
+          scheduleWidgetSync(data, 500);
         }
       }
     };

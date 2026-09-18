@@ -98,23 +98,22 @@ export default function Tasks({ data, updateData }: TasksProps) {
     setShowAdd(false);
   };
 
-  const toggleTask = async (id: string) => {
+  const toggleTask = (id: string) => {
     triggerHaptic('medium');
-    await updateData({
-      tasks: (data?.tasks || []).map(t => {
-        if (t.id === id) {
-          const nextCompleted = !t.completed;
-          const currentTaskDate = t.dueDate || t.date;
-          return {
-            ...t,
-            completed: nextCompleted,
-            date: nextCompleted && currentTaskDate < today ? today : t.date,
-            dueDate: nextCompleted && currentTaskDate < today ? today : t.dueDate,
-          };
-        }
-        return t;
-      })
+    const updatedTasks = (data?.tasks || []).map(t => {
+      if (t.id === id) {
+        const nextCompleted = !t.completed;
+        const currentTaskDate = t.dueDate || t.date;
+        return {
+          ...t,
+          completed: nextCompleted,
+          date: nextCompleted && currentTaskDate < today ? today : t.date,
+          dueDate: nextCompleted && currentTaskDate < today ? today : t.dueDate,
+        };
+      }
+      return t;
     });
+    updateData({ tasks: updatedTasks });
   };
 
   const moveToToday = async (id: string) => {

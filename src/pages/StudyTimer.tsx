@@ -202,7 +202,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     setShowSummary(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     triggerHaptic('save');
     const finalMinutes = Math.max(1, Math.round(seconds / 60));
     const session: StudySession = {
@@ -213,7 +213,6 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       startTime: startTimeRef.current || format(new Date(), 'HH:mm'),
       duration: finalMinutes,
     };
-    await updateData({ studySessions: [...data.studySessions, session] });
     triggerHaptic('success');
     setShowSummary(false);
     setSeconds(0);
@@ -224,6 +223,9 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     if (isNative) TimerNotification.stop();
     localStorage.removeItem(STORAGE_KEY);
     navigate('/study');
+
+    // Save and schedule widget sync non-blocking in background
+    updateData({ studySessions: [...data.studySessions, session] });
   };
 
   const handleCancel = () => {
