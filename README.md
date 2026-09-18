@@ -5,7 +5,7 @@
 **The Unified Personal Operating System for High-Performance Living**  
 *Academics · Hypertrophy Fitness · Nutrition · Campus Life · Biometric Vault · Home Screen Widget*
 
-[![Version](https://img.shields.io/badge/Version-v1.6.3_(Build_28)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v1.6.4_(Build_29)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript_5-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -14,7 +14,7 @@
 
 <br />
 
-### [📱 Download Direct APK (v1.6.3)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
+### [📱 Download Direct APK (v1.6.4)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
 
 <br />
 
@@ -303,7 +303,12 @@ and automatically mirrored to `public/LifeOS.apk` for hosting.
 
 ## 📜 Version History & Changelog
 
-### **v1.6.3 (Build 28)** — *Current Release*
+### **v1.6.4 (Build 29)** — *Current Release*
+- **Nutrition Date Tracking Navigation Fix**: Resolved an issue where opening the date picker or browsing past dates in Nutrition caused the floating bottom navigation bar to remain hidden until a page reload.
+- **Intelligent Virtual Keyboard Detection**: Refined keyboard focus detection in `Layout.tsx` to distinguish actual text input fields from system picker dialogs (`date`, `time`, `checkbox`, `radio`), preventing false keyboard state locks.
+- **Route & Date Change Auto-Reveal**: Navigation dock automatically resets its visibility and clears virtual keyboard locks whenever switching routes or date tabs.
+
+### **v1.6.3 (Build 28)**
 - **Dynamic Day Theme vs. Full Night Theme**: Added a toggle in Settings enabling users to lock the entire application into a tranquil, deep midnight aesthetic (01:30 AM circadian progress) with persistent star twinkle animations.
 - **Preferences-Backed Theme Persistence**: Theme mode persists across cold starts and offline restarts via `@capacitor/preferences`.
 - **Architectural Centralization**: Centralized theme logic into `useDayPhase()`, allowing all downstream consumers (`PixelSkyCanvas`, `DayThemeProvider`, `typography.ts`) to adapt with zero consumer-side code duplication.

@@ -1,8 +1,8 @@
 {
-  "versionCode": 28,
-  "versionName": "1.6.3",
+  "versionCode": 29,
+  "versionName": "1.6.4",
   "releaseDate": "2026-09-18",
-  "releaseNotes": "LifeOS v1.6.3 (Build 28): Added Dynamic Day Theme vs. Full Night Theme toggle in Settings with instant reactive switching, Preferences persistence, and animated star twinkling.",
+  "releaseNotes": "LifeOS v1.6.4 (Build 29): Fixed navigation dock disappearance when browsing past dates in Nutrition protocol.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "42b5eae4ef4e1ef6e10634c78d6dab0edfe8fdb114372f2d0abba7ff16e455c3"
+  "sha256": "107954b4b1e9fadd433cca9d1709dc60ceb97431cd9ffcf6e3b541dfb35031d0"
 }
