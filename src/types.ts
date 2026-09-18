@@ -86,9 +86,11 @@ export interface DayReview {
 
 export type TransitionMode = 'fast' | 'efficient' | 'soft';
 export type FluidIntensity = 'subtle' | 'balanced' | 'vivid';
+export type ThemeMode = 'dynamic' | 'night';
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
+  themeMode?: ThemeMode;
   accentColor: string;
   transitionMode?: TransitionMode;
   fluidIntensity?: FluidIntensity;

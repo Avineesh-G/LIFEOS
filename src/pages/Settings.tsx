@@ -17,7 +17,7 @@ import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { useDayPhase } from '../hooks/useDayPhase';
+import { useDayPhase, useThemeMode, ThemeMode } from '../hooks/useDayPhase';
 
 interface SettingsProps {
   accentColor?: string;
@@ -37,6 +37,22 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const { phase, nextPhase } = useDayPhase();
+  const [themeMode, setThemeMode] = useThemeMode();
+
+  const handleToggleThemeMode = () => {
+    triggerHaptic('selection');
+    const nextMode: ThemeMode = themeMode === 'dynamic' ? 'night' : 'dynamic';
+    setThemeMode(nextMode);
+    if (updateData && data?.settings) {
+      updateData({
+        settings: {
+          ...data.settings,
+          themeMode: nextMode,
+        },
+      }).catch(() => {});
+    }
+  };
+
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [updateFeedback, setUpdateFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -373,7 +389,7 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 2. Circadian Day Theme (Live Clock Sync) ── */}
+      {/* ── 2. Circadian Day Theme (Dynamic vs Full Night Toggle) ── */}
       <div className="rounded-[30px] liquid-glass border border-[var(--border-card)] shadow-[var(--shadow-card)] overflow-hidden">
         <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
           <div className="flex items-center gap-3.5 min-w-0">
@@ -385,29 +401,67 @@ export default function Settings({
                 Circadian Day Theme
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Real-time harmony with device clock
+                {themeMode === 'dynamic' ? 'Real-time harmony with device clock' : 'Locked to tranquil Full Night aesthetic'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-tag font-bold text-accent uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent-soft)] border border-accent/20">
-              {phase} Phase
+              {themeMode === 'dynamic' ? `${phase} Phase` : 'Full Night'}
             </span>
           </div>
         </div>
 
-        <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
+        <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
+          {/* Master Theme Mode Toggle */}
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+            <div className="pr-3">
+              <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                Dynamic Day Theme
+              </p>
+              <p className="text-[11px] text-secondary-light dark:text-secondary-dark mt-0.5 font-medium leading-normal">
+                {themeMode === 'dynamic'
+                  ? 'Background and colors shift automatically through the day'
+                  : 'Locked to a calm, full night look'}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleToggleThemeMode}
+              aria-label="Toggle Dynamic Day Theme"
+              className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center shrink-0 ${
+                themeMode === 'dynamic' ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
+              }`}
+            >
+              <div
+                className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
+                  themeMode === 'dynamic' ? 'translate-x-5.5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
           <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-            Cards, borders, text, typography density, and accent colors automatically shift across 6 natural day phases (Dawn, Morning, Afternoon, Dusk, Evening, and Night) in mathematical sync with the live sky background.
+            {themeMode === 'dynamic'
+              ? 'Cards, borders, text, typography density, and accent colors automatically shift across 6 natural day phases (Dawn, Morning, Afternoon, Dusk, Evening, and Night) in mathematical sync with the live sky background.'
+              : 'Ambient sky, cards, borders, typography weights, and accent colors are permanently locked to the calm night phase. Star twinkle animation remains active.'}
           </p>
+
           <div className="flex items-center gap-2 pt-1 flex-wrap">
             <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--bg-card-elevated)] border border-[var(--border-card)] text-primary-light dark:text-primary-dark uppercase tracking-wider">
-              Active: {phase}
+              {themeMode === 'dynamic' ? `Active: ${phase}` : 'Mode: Full Night'}
             </span>
-            <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
-              Next: {nextPhase}
-            </span>
+            {themeMode === 'dynamic' ? (
+              <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
+                Next: {nextPhase}
+              </span>
+            ) : (
+              <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
+                Twinkle: Active
+              </span>
+            )}
           </div>
         </div>
       </div>
