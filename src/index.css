@@ -80,6 +80,14 @@
   }
 
   /* Button: 15px / 20px / 500 / 0 (Pixel spec: clean, non-700 buttons) */
+  /* touch-action: manipulation removes the 300ms tap delay on Android WebView */
+  /* and disables double-tap-to-zoom on interactive elements. */
+  button,
+  [role="button"],
+  a {
+    touch-action: manipulation;
+  }
+
   button {
     font-size: 15px;
     line-height: 20px;

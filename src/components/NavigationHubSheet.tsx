@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useCallback, startTransition } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -222,7 +222,12 @@ export function NavigationHubSheet({
       triggerHaptic('nav');
       setTimeout(() => {
         onClose();
-        navigate(dest.route);
+        // startTransition marks the new route render as low-priority so the
+        // sheet close animation completes without being blocked by the incoming
+        // page render. This is the primary fix for hub close jank.
+        startTransition(() => {
+          navigate(dest.route);
+        });
       }, 120);
     },
     [navigate, onClose]
@@ -250,7 +255,7 @@ export function NavigationHubSheet({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isDark ? 0.4 : 0.28 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, pointerEvents: 'none' } as any}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={() => {
               triggerHaptic('light');

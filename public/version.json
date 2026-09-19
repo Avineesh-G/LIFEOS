@@ -1,8 +1,8 @@
 {
-  "versionCode": 2,
+  "versionCode": 3,
   "versionName": "1.2.1",
   "releaseDate": "2026-09-19",
-  "releaseNotes": "LifeOS v1.2.1 (Build 2): Pixel-style application typography system (Google Sans Flex, 4-weight hierarchy, 4-level tonal text hierarchy), responsive pill bottom navigation with dedicated squircle More menu, and Android widget enhancements.",
+  "releaseNotes": "LifeOS v1.2.1 (Build 3): Performance optimization release. Eliminates GPU blur on blob (radial-gradient), removes layout-reflow height animations (scaleY+opacity), fixes 300ms tap delay (touch-action:manipulation), removes MutationObserver from main thread, wraps hub navigation in startTransition, fixes More button double-toggle with AnimatePresence popLayout mode and animation guard, and skips service worker in native APK.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "0b33efbe812898c2ac02170a4363c2688d3c2b086d3473fbaf0174725236f0ed"
+  "sha256": ""
 }

@@ -60,6 +60,8 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const isLongPressTriggeredRef = useRef(false);
   const pointerStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const squircleRef = useRef<HTMLButtonElement | null>(null);
+  // Guards against double-toggle during the squircle icon swap animation (~120ms)
+  const squircleAnimatingRef = useRef(false);
 
   const slot1Module = getModuleById(navConfig.slot1);
   const slot2Module = getModuleById(navConfig.slot2);
@@ -389,22 +391,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     window.addEventListener('lifeos-subinterface-open', handleSubOpen);
     window.addEventListener('lifeos-subinterface-close', handleSubClose);
 
-    // MutationObserver fallback to catch any portal/dialog mounted into DOM
-    const observer = new MutationObserver(() => {
-      const hasModal = Boolean(
-        document.body.getAttribute('data-subinterface-open') === 'true' ||
-        document.querySelector('[data-subinterface-open="true"]') ||
-        document.querySelector('.fixed.z-\\[9999\\]')
-      );
-      setSubInterfaceOpen(hasModal);
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    // NOTE: MutationObserver removed — it fired on every DOM mutation,
+    // running synchronously on the main thread at tap time and causing
+    // input delay (janky first frame after tapping the More button).
+    // Custom events are sufficient for all LifeOS sub-interface cases.
 
     return () => {
       window.removeEventListener('lifeos-subinterface-open', handleSubOpen);
       window.removeEventListener('lifeos-subinterface-close', handleSubClose);
-      observer.disconnect();
     };
   }, []);
 
@@ -500,7 +494,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/25 dark:bg-black/40 backdrop-blur-xl border border-white/25 text-white active:scale-95 transition-all select-none shadow-sm"
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
@@ -520,7 +514,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   const granted = await requestAndSyncNotifications(data, updateData);
                   setHasNotificationPermission(granted);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/25 dark:bg-black/40 backdrop-blur-xl border border-white/25 text-white font-bold text-xs active:scale-95 transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm"
                 title="Allow phone notifications for Timetable & Tasks"
               >
                 <Bell size={13} className="text-white animate-bounce" />
@@ -612,6 +606,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
             style={{
               bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
               pointerEvents: isNavHidden ? 'none' : 'auto',
+              touchAction: 'manipulation',
             }}
             className="fixed left-0 right-0 z-[100] flex items-center justify-center px-4 gpu-composited select-none"
             role="navigation"
@@ -672,8 +667,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 whileTap={{ scale: 0.94 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                 onClick={() => {
-                  triggerHaptic('light');
-                  setMenuOpen(!menuOpen);
+                  // Guard: if icon-swap animation is in progress, still toggle
+                  // but skip haptic to avoid double-feedback. Never ignore the tap.
+                  if (!squircleAnimatingRef.current) {
+                    squircleAnimatingRef.current = true;
+                    setTimeout(() => { squircleAnimatingRef.current = false; }, 150);
+                    triggerHaptic('light');
+                  }
+                  setMenuOpen(prev => !prev);
                 }}
                 className="w-[64px] h-[64px] shrink-0 rounded-[28px] flex items-center justify-center border border-white/20 shadow-[0_10px_28px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none focus:outline-none cursor-pointer relative overflow-hidden"
                 style={{
@@ -683,7 +684,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 aria-label="More Menu"
                 aria-expanded={menuOpen}
               >
-                <AnimatePresence mode="wait" initial={false}>
+                <AnimatePresence mode="popLayout" initial={false}>
                   {menuOpen ? (
                     <motion.div
                       key="close"

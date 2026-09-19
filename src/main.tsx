@@ -23,6 +23,19 @@ if (import.meta.env.DEV) {
   }
 }
 
+// ── 1b. Inside the native Capacitor APK, skip SW entirely. ──
+// Assets are bundled locally; the SW only adds stale-cache risk + startup overhead.
+// The web version still benefits from SW caching (handled by vite-plugin-pwa).
+if (typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister().catch(() => {});
+      }
+    }).catch(() => {});
+  }
+}
+
 // ── 2. Vite Preload Error Guard: Auto-recover from outdated optimize-deps chunk failures ──
 window.addEventListener('vite:preloadError', (event) => {
   event.preventDefault();

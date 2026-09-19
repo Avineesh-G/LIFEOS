@@ -278,9 +278,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.notifications && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
@@ -432,9 +434,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.transitions && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-2.5">
@@ -507,9 +511,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.haptics && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
@@ -595,9 +601,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.security && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
@@ -678,9 +686,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.profile && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05]">
@@ -728,9 +738,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.ai && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
@@ -804,9 +816,11 @@ export default function Settings({
         <AnimatePresence>
           {openSections.account && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
@@ -912,9 +926,11 @@ export default function Settings({
         <AnimatePresence>
           {updateFeedback && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
               className={`p-3 rounded-2xl border text-xs font-semibold flex items-center gap-2.5 overflow-hidden ${
                 updateFeedback.type === 'success'
                   ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
