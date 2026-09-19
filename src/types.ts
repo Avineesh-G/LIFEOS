@@ -227,6 +227,9 @@ export interface AppData {
 
   // Laundry Module
   laundryBatches?: LaundryBatch[];
+
+  // Shopping Lists Module
+  shoppingLists?: ShoppingList[];
 }
 
 // ── Laundry Module ─────────────────────────────────────────────────────────
@@ -244,4 +247,23 @@ export interface LaundryBatch {
   status: 'pending' | 'submitted' | 'received';
   notes?: string;
   createdAt: string;
+}
+
+// ── Shopping Lists Module ──────────────────────────────────────────────────
+export interface ShoppingItem {
+  id: string;
+  name: string;
+  quantity?: string; // e.g. "2", "1 bag", "500g"
+  checked: boolean;
+  notes?: string;
+}
+
+export interface ShoppingList {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  isTemplate: boolean;
+  items: ShoppingItem[];
+  category?: string;
 }

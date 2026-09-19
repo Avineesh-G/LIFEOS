@@ -13,38 +13,34 @@ import {
   Check, 
   CalendarDays,
   Plus,
-  Sunrise,
-  Sun,
-  Sunset,
-  Moon
+  Play
 } from 'lucide-react';
 import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startOfDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 import DailyQuoteMarquee from '../components/DailyQuoteMarquee';
+import M3StatWidget from '../components/M3StatWidget';
 import AiCoachAvatar from '../components/rive/AiCoachAvatar';
 import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
 import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { useDayTheme } from '../theme/DayThemeProvider';
 import { CATEGORY_COLORS } from '../theme/cardThemeTokens';
+import { M3_SHAPES } from '../theme/shapes';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
 
 // ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
-const LiveClock = memo(function LiveClock({ phase }: { phase: string }) {
-  const greetingIcons: Record<string, any> = { dawn: Sunrise, morning: Sunrise, afternoon: Sun, dusk: Sunset, evening: Sunset, night: Moon };
-  const IconComp = greetingIcons[phase] || Sun;
+const LiveClock = memo(function LiveClock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs">
-      <IconComp size={13} className="text-[var(--accent-primary)] shrink-0 animate-pulse" />
-      <span className="text-xs font-semibold tracking-wide text-[var(--text-primary)]">
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] shadow-none">
+      <Clock size={13} className="text-[var(--md-primary)] shrink-0" />
+      <span className="text-xs font-semibold tracking-wide text-[var(--md-on-surface)]">
         {format(now, 'EEEE, MMMM d')}
       </span>
     </div>
@@ -70,7 +66,7 @@ const DayCell = memo(function DayCell({
         triggerHaptic('light');
         setSelectedDate(d);
       }}
-      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[20px] transition-all select-none focus:outline-none ${
+      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[var(--md-shape-xl)] transition-all select-none focus:outline-none bouncy-tap ${
         !isSel && isCur
           ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
           : !isSel
@@ -81,17 +77,17 @@ const DayCell = memo(function DayCell({
       {isSel && (
         <motion.div
           layoutId="activeHomeDatePill"
-          className="absolute inset-0 rounded-[20px] bg-[var(--accent-primary)] shadow-md shadow-[var(--glow)]"
+          className="absolute inset-0 rounded-[20px] bg-[var(--md-primary)] shadow-none"
           transition={{ type: 'spring', stiffness: 450, damping: 35 }}
         />
       )}
       <span className={`relative z-10 text-[10px] sm:text-[11px] font-medium tracking-tight transition-colors ${
-        isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-bold' : 'text-muted-light dark:text-muted-dark'
+        isSel ? 'text-[var(--md-on-primary)]' : isCur ? 'text-[var(--md-primary)] font-bold' : 'text-[var(--md-on-surface-variant)]'
       }`}>
         {format(d, 'EEE')}
       </span>
       <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors font-stat ${
-        isSel ? 'text-[var(--accent-contrast)]' : isCur ? 'text-[var(--accent-primary)] font-extrabold' : 'text-primary-light dark:text-primary-dark'
+        isSel ? 'text-[var(--md-on-primary)]' : isCur ? 'text-[var(--md-primary)] font-extrabold' : 'text-[var(--md-on-surface)]'
       }`}>
         {format(d, 'd')}
       </span>
@@ -126,7 +122,6 @@ const item = {
 
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
-  const { phase } = useDayTheme();
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
   // 'ready' = data is not DEFAULT_DATA (i.e. real user data has hydrated)
@@ -296,55 +291,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     };
   }, [data]);
 
-  // Contextual Dynamic Greeting Config derived directly from phase
-  const greetingConfig = useMemo(() => {
-    switch (phase) {
-      case 'dawn':
-        return {
-          word: 'Dawn',
-          icon: Sunrise,
-          subline: 'A new horizon unfolds · Make every moment count',
-          badge: 'Dawn Awakening',
-        };
-      case 'morning':
-        return {
-          word: 'Morning',
-          icon: Sunrise,
-          subline: 'Rise with intent · Today is yours to conquer',
-          badge: 'Morning Focus',
-        };
-      case 'afternoon':
-        return {
-          word: 'Afternoon',
-          icon: Sun,
-          subline: 'Sustain the momentum · High performance mode',
-          badge: 'Peak Energy',
-        };
-      case 'dusk':
-        return {
-          word: 'Dusk',
-          icon: Sunset,
-          subline: 'Golden hour focus · Wrap up your daily wins',
-          badge: 'Dusk Reflection',
-        };
-      case 'night':
-        return {
-          word: 'Night',
-          icon: Moon,
-          subline: 'Recharge your mind · Greatness continues tomorrow',
-          badge: 'Night Calm',
-        };
-      case 'evening':
-      default:
-        return {
-          word: 'Evening',
-          icon: Sunset,
-          subline: 'Reflect, execute, and finish your day strong',
-          badge: 'Evening Review',
-        };
-    }
-  }, [phase]);
-
   return (
     <SkeletonGate
       ready={dataReady}
@@ -363,18 +309,18 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
-      {/* ── Ambient Executive Greeting Hero Card ── */}
+      {/* ── Ambient Executive Greeting Hero Card (M3 Signature Asymmetric Shape) ── */}
       <motion.div
         variants={item}
-        className="rounded-[32px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] space-y-3.5 select-none"
+        className={`${M3_SHAPES.asymmetricHero} p-6 sm:p-7 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-4 select-none`}
       >
-        {/* Top Header Row: Date Pill, Phase Badge & Streak */}
+        {/* Top Header Row: Date Pill, Mode Badge & Streak */}
         <div className="flex items-center gap-2 flex-wrap">
-            <LiveClock phase={phase} />
+          <LiveClock />
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border shadow-xs bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border-[var(--card-border)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-ping" />
-            {greetingConfig.badge}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border-[var(--md-outline-variant)] shadow-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
+            Active Session
           </span>
 
           <StreakIndicator
@@ -386,20 +332,20 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* Hero Title Row with AI Coach Avatar on Right */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold tracking-tight text-[var(--text-primary)] leading-tight">
-              Good{' '}
+            <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-[var(--md-on-surface)] leading-tight">
+              Welcome to{' '}
               <span
                 style={{ backgroundImage: 'var(--headline-gradient)' }}
-                className="bg-clip-text text-transparent drop-shadow-xs"
+                className="bg-clip-text text-transparent"
               >
-                {greetingConfig.word}
+                LifeOS
               </span>
             </h1>
 
             {/* Motivational Subline */}
-            <p className="text-xs sm:text-[13px] font-medium text-[var(--text-secondary)] mt-1.5 tracking-tight flex items-center gap-1.5">
-              <Sparkles size={13} className="text-[var(--accent-primary)] shrink-0 opacity-90" />
-              <span>{greetingConfig.subline}</span>
+            <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
+              <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-90" />
+              <span>Your personal operating system · Focus and execute</span>
             </p>
           </div>
 
@@ -412,19 +358,19 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         <DailyQuoteMarquee />
       </motion.div>
 
-      {/* ── Option 1: Interactive 7-Day Dynamic Strip ── */}
+      {/* ── Option 1: Interactive 7-Day Dynamic Strip (M3 Elevation Level 2) ── */}
       <motion.div
         variants={item}
-        className="rounded-[32px] p-5 sm:p-6 liquid-glass relative overflow-hidden transition-all duration-300"
+        className="rounded-[28px] p-5 sm:p-6 m3-elevation-2 border border-[var(--md-outline-variant)] relative overflow-hidden transition-all duration-300"
       >
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-[var(--pill-active-bg)] flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+            <div className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container-high)] flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
               <CalendarDays size={16} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
+              <h2 className="text-sm font-heading font-bold tracking-tight text-[var(--md-on-surface)] truncate">
                 {isToday(selectedDate)
                   ? 'Today'
                   : isSameDay(selectedDate, subDays(new Date(), 1))
@@ -443,7 +389,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             {!isToday(selectedDate) && (
               <button
                 onClick={() => setSelectedDate(startOfDay(new Date()))}
-                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-85 active:scale-95 transition-all"
+                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] hover:opacity-85 active:scale-95 transition-all select-none"
               >
                 Today
               </button>
@@ -451,9 +397,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             <span
               className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide border ${
                 selectedDateData.isSelToday
-                  ? 'bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border-[var(--card-border)]'
+                  ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-[var(--md-outline-variant)]'
                   : selectedDateData.isSelPast
-                  ? 'bg-[var(--card-surface)]/60 text-secondary-light dark:text-secondary-dark border-[var(--card-border)]'
+                  ? 'bg-[var(--md-surface-container-low)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)]'
                   : 'bg-emerald-500/12 text-[#22C55E] border-[#22C55E]/20'
               }`}
             >
@@ -463,7 +409,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </div>
 
         {/* 7-Day Interactive Horizontal Strip with Fluid Spring Capsule */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-[var(--card-surface)]/60 border border-[var(--card-border)]">
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)]">
           {weekDays.map((d) => (
             <DayCell
               key={d.toISOString()}
@@ -499,12 +445,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               {/* 4 Pillars Mini Grid */}
               <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 {/* Study Pillar */}
-                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
-                  <div className="w-8 h-8 rounded-[12px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
+                <div
+                  onClick={() => { triggerHaptic('nav'); navigate('/study'); }}
+                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                >
+                  <div className="w-8 h-8 rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
                     <InteractiveClock size={18} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
                       {selectedDateData.studyMinutes > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.studyHours}</span>h{' '}
@@ -523,12 +472,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 </div>
 
                 {/* Gym Pillar */}
-                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
-                  <div className="w-8 h-8 rounded-[12px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
+                <div
+                  onClick={() => { triggerHaptic('nav'); navigate('/gym'); }}
+                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                >
+                  <div className="w-8 h-8 rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
                     <InteractiveDumbbell size={18} isCompleted={!!selectedDateData.workoutLog} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
                       {selectedDateData.workoutLog 
                         ? (selectedDateData.workoutLog.type || 'Completed') 
                         : (selectedDateData.plannedWorkout?.type || 'Rest Day')}
@@ -542,12 +494,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 </div>
 
                 {/* Tasks Pillar */}
-                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
-                  <div className="w-8 h-8 rounded-[12px] bg-[var(--accent-primary)]/12 border border-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] flex-shrink-0">
+                <div
+                  onClick={() => { triggerHaptic('nav'); navigate('/tasks'); }}
+                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                >
+                  <div className="w-8 h-8 rounded-[16px] bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
                     <CheckCircle2 size={16} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
                       {selectedDateData.tasks.length > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.completedTasks.length}</span>/
@@ -566,12 +521,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 </div>
 
                 {/* Spending Pillar */}
-                <div className="p-3 rounded-[20px] bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center gap-2.5 transition-colors duration-300">
-                  <div className="w-8 h-8 rounded-[12px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
+                <div
+                  onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
+                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                >
+                  <div className="w-8 h-8 rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
                     <Wallet size={16} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
                       ₹<span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
                     </p>
                     <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
@@ -778,177 +736,63 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </AnimatePresence>
       </motion.div>
 
-      {/* ── 2×2 Liquid Spring Capsule Action Cards (Mobile-Optimized & Elegant) ── */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-5">
+      {/* ── Card 4: Forward-Looking Quick Actions & M3 Widgets ── */}
+      <motion.div variants={item} className="space-y-3 sm:space-y-4">
+        {/* Quick Action Pill Row */}
+        <div className="flex items-center gap-2 p-1.5 sm:p-2 rounded-[24px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+          <button
+            onClick={() => { triggerHaptic('light'); navigate('/study/timer'); }}
+            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+          >
+            <Play size={13} className="fill-current" />
+            <span>Focus</span>
+          </button>
+          <button
+            onClick={() => { triggerHaptic('light'); navigate('/gym'); }}
+            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+          >
+            <Dumbbell size={14} />
+            <span>Workout</span>
+          </button>
+          <button
+            onClick={() => { triggerHaptic('light'); navigate('/spending'); }}
+            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+          >
+            <Wallet size={14} />
+            <span>Expense</span>
+          </button>
+        </div>
 
-        {/* 1. Study Card (Fixed Category: Blue #3B82F6) */}
-        <motion.button
-          whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
-          whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
-          onClick={() => {
-            triggerHaptic('light');
-            navigate('/study');
-          }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
-        >
-          <div className="relative z-10 w-full min-w-0">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center shadow-xs shrink-0">
-                <InteractiveClock isRunning={todaySessions.length > 0} progressPercent={Math.min((todayStudyHours * 60 + todayStudyMins) / 120 * 100, 100)} size={22} />
-              </div>
-              <ArrowUpRight size={16} className="text-[#3B82F6]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] block mb-1 font-tag">
-              Study
-            </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
-              <span className="font-stat">{todayStudyHours}</span><span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">h</span>{' '}
-              <span className="font-stat">{todayStudyMins}</span><span className="text-xs sm:text-sm font-semibold text-secondary-light dark:text-secondary-dark">m</span>
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#3B82F6]/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
-              <span className="font-stat">{todaySessions.length}</span> {todaySessions.length === 1 ? 'session' : 'sessions'}
-            </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[#3B82F6]/12 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0 whitespace-nowrap tracking-wider">
-              Deep Work
-            </span>
-          </div>
-        </motion.button>
-
-        {/* 2. Gym Card (Fixed Category: Green #22C55E) */}
-        <motion.button
-          whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
-          whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
-          onClick={() => {
-            triggerHaptic('light');
-            navigate('/gym');
-          }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
-        >
-          <div className="relative z-10 w-full min-w-0">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 text-[#22C55E] flex items-center justify-center shadow-xs shrink-0">
-                <InteractiveDumbbell isCompleted={!!todayWorkout} size={22} />
-              </div>
-              <ArrowUpRight size={16} className="text-[#22C55E]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#22C55E] block mb-1 font-tag">
-              Gym
-            </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
-              {todayWorkout ? todayPlan?.type || 'Workout' : todayPlan?.type || 'Rest'}
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#22C55E]/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
-              <span className="font-stat">
-                {todayWorkout
-                  ? (todayWorkout.exercises || []).reduce((s, ex) => s + (ex?.sets || []).filter(st => st?.completed).length, 0)
-                  : todayPlan && (todayPlan.exercises || []).length > 0
-                    ? (todayPlan.exercises || []).reduce((s, ex) => s + (Number(ex?.sets) || 0), 0)
-                    : 0}
-              </span> sets
-            </span>
-            <span className={`px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold border shrink-0 whitespace-nowrap tracking-wider ${
-              todayWorkout 
-                ? 'bg-[#22C55E]/20 text-[#22C55E] border-[#22C55E]/30' 
-                : 'bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/20'
-            }`}>
-              {todayWorkout ? 'Done' : 'Split'}
-            </span>
-          </div>
-        </motion.button>
-
-        {/* 3. Spending Card (Fixed Category: Orange #F5A623) */}
-        <motion.button
-          whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
-          whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
-          onClick={() => {
-            triggerHaptic('light');
-            navigate('/spending');
-          }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
-        >
-          <div className="relative z-10 w-full min-w-0">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 text-[#F5A623] flex items-center justify-center shadow-xs shrink-0">
-                <Wallet size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
-              </div>
-              <ArrowUpRight size={16} className="text-[#F5A623]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#F5A623] block mb-1 font-tag">
-              Money
-            </span>
-            <p className="text-xl sm:text-2xl md:text-[26px] font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
-              ₹<span className="font-stat">{todaySpent.toLocaleString('en-IN')}</span>
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[#F5A623]/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
-              <span className="font-stat">{todayExpenses.length}</span> {todayExpenses.length === 1 ? 'record' : 'records'}
-            </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[#F5A623]/12 text-[#F5A623] border border-[#F5A623]/20 shrink-0 whitespace-nowrap tracking-wider">
-              Expenses
-            </span>
-          </div>
-        </motion.button>
-
-        {/* 4. Next Up / Timetable Card (Accent Secondary Echo) */}
-        <motion.button
-          whileHover={{ scale: 1.025, y: -3, transition: { type: 'spring', stiffness: 420, damping: 24 } }}
-          whileTap={{ scale: 0.955, transition: { type: 'spring', stiffness: 500, damping: 28 } }}
-          onClick={() => {
-            triggerHaptic('light');
-            nextBlock ? navigate('/study/timer') : navigate('/timetable');
-          }}
-          className="rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 text-left liquid-glass border border-[var(--card-border)] flex flex-col justify-between group transition-shadow select-none relative overflow-hidden"
-        >
-          <div className="relative z-10 w-full min-w-0">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[14px] sm:rounded-[16px] bg-[var(--accent-secondary)]/12 border border-[var(--accent-secondary)]/20 text-[var(--accent-secondary)] flex items-center justify-center shadow-xs shrink-0">
-                <Clock size={18} strokeWidth={2.2} className="sm:w-5 sm:h-5" />
-              </div>
-              <ArrowUpRight size={16} className="text-[var(--accent-secondary)]/60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--accent-secondary)] block mb-1 font-tag">
-              Next Up
-            </span>
-            <p className="text-base sm:text-xl font-bold tracking-tight text-primary-light dark:text-primary-dark truncate">
-              {nextBlock ? nextBlock.subject : 'Free Period'}
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-3 pt-2.5 sm:mt-4 sm:pt-3 border-t border-[var(--accent-secondary)]/15 flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11px] sm:text-xs font-semibold text-secondary-light dark:text-secondary-dark truncate">
-              {nextBlock ? (
-                <>
-                  <span className="font-stat">{nextBlock.startTime}</span> – <span className="font-stat">{nextBlock.endTime}</span>
-                </>
-              ) : (
-                'No upcoming class'
-              )}
-            </span>
-            <span className="px-2 py-0.5 sm:px-2.5 rounded-full text-[9px] sm:text-[10px] font-tag font-bold bg-[var(--accent-secondary)]/12 text-[var(--accent-secondary)] border border-[var(--accent-secondary)]/20 shrink-0 whitespace-nowrap tracking-wider">
-              Timetable
-            </span>
-          </div>
-        </motion.button>
-
+        {/* M3 Stat Widget Pair (Image 9 Reference) */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <M3StatWidget
+            label="Today's Focus"
+            value={todayStudyHours > 0 || todayStudyMins > 0 ? `${todayStudyHours}h ${todayStudyMins}m` : '0m'}
+            sublabel={`${todaySessions.length} session${todaySessions.length !== 1 ? 's' : ''} logged`}
+            highlight={{ text: 'Deep Work', variant: 'primary' }}
+            icon={<BookOpen size={16} />}
+            onClick={() => { triggerHaptic('nav'); navigate('/study'); }}
+          />
+          <M3StatWidget
+            label="Today's Spend"
+            value={`₹${todaySpent.toLocaleString('en-IN')}`}
+            sublabel={`${todayExpenses.length} transaction${todayExpenses.length !== 1 ? 's' : ''}`}
+            highlight={{ text: 'Finance', variant: 'secondary' }}
+            icon={<Wallet size={16} />}
+            onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
+          />
+        </div>
       </motion.div>
 
-      {/* ── Expressive Fluid TO-DO Preview ── */}
+      {/* ── Card 5: Expressive Fluid TO-DO Preview ── */}
       {todayTasks.length > 0 && (
-        <motion.div variants={item} className="liquid-glass rounded-[32px] p-5 sm:p-6 border border-[var(--card-border)]">
+        <motion.div variants={item} className="rounded-[32px] p-5 sm:p-6 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[var(--accent-primary)]/12 border border-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)]">
+              <div className="w-8 h-8 rounded-xl bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)]">
                 <Calendar size={15} />
               </div>
-              <span className="text-xs font-bold font-tag tracking-wider uppercase text-primary-light dark:text-primary-dark">
+              <span className="text-xs font-bold font-tag tracking-wider uppercase text-[var(--md-on-surface)]">
                 Tasks Today · <span className="font-stat">{completedTasks}</span>/<span className="font-stat">{todayTasks.length}</span>
               </span>
             </div>
@@ -957,7 +801,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 triggerHaptic('light');
                 navigate('/tasks');
               }}
-              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] flex items-center gap-1 hover:opacity-85 active:scale-95 transition-all"
+              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] flex items-center gap-1 hover:opacity-85 active:scale-95 transition-all select-none"
             >
               View All <ChevronRight size={12} />
             </button>
@@ -970,35 +814,22 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 whileHover={{ scale: 1.01, y: -1 }}
                 whileTap={{ scale: 0.985 }}
                 onClick={() => handleToggleTask(task.id)}
-                className="flex items-center gap-3 p-3 rounded-[20px] bg-[var(--card-surface)]/60 border border-[var(--card-border)] cursor-pointer transition-colors shadow-xs"
+                className="flex items-center gap-3 p-3 rounded-[20px] bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] cursor-pointer transition-colors shadow-none select-none"
               >
-                <button
-                  type="button"
-                  className={`w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center transition-all ${
-                    task.completed
-                      ? 'bg-[var(--accent-primary)] text-white shadow-xs'
-                      : 'border-2 border-[var(--card-border)]'
-                  }`}
-                >
-                  {task.completed && (
-                    <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500 }}>
-                      <Check size={13} strokeWidth={3} />
-                    </motion.div>
-                  )}
-                </button>
+                <InteractiveCheckbox checked={task.completed} onChange={() => handleToggleTask(task.id)} size={18} />
                 <div className="flex-1 min-w-0">
                   <span className={`text-sm font-semibold block truncate ${
                     task.completed
-                      ? 'line-through text-muted-light dark:text-muted-dark opacity-70'
-                      : 'text-primary-light dark:text-primary-dark'
+                      ? 'line-through text-[var(--md-on-surface-variant)] opacity-60'
+                      : 'text-[var(--md-on-surface)]'
                   }`}>
                     {task.text}
                   </span>
                   {task.subtask && (
                     <span className={`text-[11px] block truncate ${
                       task.completed
-                        ? 'line-through text-muted-light/60 dark:text-muted-dark/60'
-                        : 'text-secondary-light dark:text-secondary-dark'
+                        ? 'line-through text-[var(--md-on-surface-variant)]/50'
+                        : 'text-[var(--md-on-surface-variant)]'
                     }`}>
                       {task.subtask}
                     </span>
@@ -1009,47 +840,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           </div>
         </motion.div>
       )}
-
-      {/* ── Expressive Stats Footer Strip ── */}
-      <motion.div variants={item} className="grid grid-cols-3 gap-3">
-        {[
-          { 
-            label: 'Study Streak', 
-            value: `${data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length}d`,
-            icon: Sparkles
-          },
-          { 
-            label: 'Workouts', 
-            value: data.workoutLogs.length.toString(),
-            icon: Dumbbell
-          },
-          { 
-            label: 'This Month', 
-            value: `₹${Math.round(data.expenses.filter(e => e.date.startsWith(format(new Date(), 'yyyy-MM'))).reduce((s, e) => s + e.amount, 0)).toLocaleString('en-IN')}`,
-            icon: Wallet
-          },
-        ].map(stat => (
-          <motion.div
-            key={stat.label}
-            whileHover={{ scale: 1.03, y: -2, transition: { type: 'spring', stiffness: 400 } }}
-            whileTap={{ scale: 0.96 }}
-            className="rounded-[24px] p-3.5 text-center flex flex-col justify-center items-center liquid-glass border border-[var(--card-border)]"
-          >
-            <p className="text-base sm:text-lg font-bold tracking-tight text-primary-light dark:text-primary-dark truncate w-full">
-              {stat.value.startsWith('₹') ? (
-                <>₹<span className="font-stat">{stat.value.replace('₹', '')}</span></>
-              ) : stat.value.endsWith('d') ? (
-                <><span className="font-stat">{stat.value.replace('d', '')}</span><span className="text-xs font-semibold">d</span></>
-              ) : (
-                <span className="font-stat">{stat.value}</span>
-              )}
-            </p>
-            <p className="text-[10px] font-tag font-bold text-muted-light dark:text-muted-dark mt-0.5 truncate w-full uppercase tracking-wider">
-              {stat.label}
-            </p>
-          </motion.div>
-        ))}
-      </motion.div>
 
       </motion.div>
     </SkeletonGate>

@@ -1,8 +1,8 @@
 {
-  "versionCode": 30,
-  "versionName": "1.6.5",
-  "releaseDate": "2026-09-18",
-  "releaseNotes": "LifeOS v1.6.5 (Build 30): Fixed stuck blank widget, added native per-widget customization (choose 2-3 stats per widget instance), and automatic cleanup.",
+  "versionCode": 2,
+  "versionName": "1.2.1",
+  "releaseDate": "2026-09-19",
+  "releaseNotes": "LifeOS v1.2.1 (Build 2): Pixel-style application typography system (Google Sans Flex, 4-weight hierarchy, 4-level tonal text hierarchy), responsive pill bottom navigation with dedicated squircle More menu, and Android widget enhancements.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
   "sha256": "9ec2625128caa50e37a50e69abcbedfb71260a2bc8eea60243d6f93674b4bf04"
 }

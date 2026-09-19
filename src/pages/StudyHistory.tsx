@@ -124,9 +124,9 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
           <button
             key={p}
             onClick={() => setFilter(p)}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 ${
+            className={`px-4 py-2 rounded-full text-xs font-medium transition-all active:scale-95 ${
               filter === p 
-                ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm' 
+                ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-sm' 
                 : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
             }`}
           >

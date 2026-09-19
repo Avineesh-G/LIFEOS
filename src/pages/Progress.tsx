@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { BookOpen, Dumbbell, Wallet, Calendar, TrendingUp, Award, Flame, Zap } from 'lucide-react';
 import { format, subDays, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { motion } from 'framer-motion';
+import StreakMilestoneBadge from '../components/m3/StreakMilestoneBadge';
 import type { AppData } from '../types';
 
 interface ProgressProps {
@@ -200,25 +201,22 @@ export default function Progress({ data }: ProgressProps) {
           </div>
         </motion.div>
 
-        {/* Consistency - Rose Fluid Capsule */}
+        {/* Consistency - Streak Milestone */}
         <motion.div
           whileHover={{ scale: 1.025, y: -2 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-          className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass glow-rose bg-gradient-to-br from-m3-rose-container/80 via-m3-rose-container/40 to-transparent dark:from-m3-rose-darkContainer/70 dark:via-m3-rose-darkContainer/35 dark:to-transparent text-m3-rose-text dark:text-m3-rose-darkText shadow-md flex flex-col justify-between"
+          className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] bg-[var(--md-surface-container-low)] shadow-sm flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="w-12 h-12 rounded-[20px] bg-white/85 dark:bg-black/50 flex items-center justify-center shadow-sm border border-white/40 dark:border-white/10">
-              <Flame size={20} />
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider opacity-75 font-mono">Streak</span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">Streak</span>
+            <span className="text-[11px] font-semibold text-[var(--md-primary)] font-stat">{stats.daysTracked} days active</span>
           </div>
-          <div>
-            <p className="text-2xl sm:text-3xl font-black leading-none tracking-tight font-sans">
-              {stats.longestStreak} <span className="text-base font-bold opacity-80">days</span>
-            </p>
-            <p className="text-xs font-semibold opacity-75 mt-2">{stats.daysTracked} days active</p>
-          </div>
+          <StreakMilestoneBadge
+            days={stats.longestStreak}
+            size={48}
+            className="mt-1"
+          />
         </motion.div>
       </motion.div>
 

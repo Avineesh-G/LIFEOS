@@ -99,7 +99,7 @@ export default function Auth() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-primary-light dark:bg-primary-dark hover:opacity-90 text-primary-dark dark:text-primary-light rounded-full px-5 py-3.5 font-bold text-sm transition-all disabled:opacity-50 active:scale-[0.97] shadow-sm font-sans"
+            className="w-full flex items-center justify-center gap-3 bg-[var(--md-primary)] text-[var(--md-on-primary)] hover:opacity-90 rounded-full px-5 py-3.5 font-medium text-sm transition-all disabled:opacity-50 active:scale-[0.97] shadow-sm"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-primary-dark/30 dark:border-primary-light/30 border-t-primary-dark dark:border-t-primary-light rounded-full animate-spin" />

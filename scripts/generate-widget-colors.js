@@ -27,31 +27,28 @@ const targetXmlPath = path.join(
 );
 
 async function generate() {
-  console.log('🎨 [LifeOS Widget] Generating native widget phase colors from pixelSkyPalettes.ts...');
+  console.log('🎨 [LifeOS Widget] Generating native widget phase colors from phaseSeedColors.ts...');
 
-  const { PIXEL_SKY_PALETTES } = await import('../src/utils/pixelSkyPalettes.ts');
+  const { getM3ThemeForPhase } = await import('../src/theme/phaseSeedColors.ts');
   const phases = ['dawn', 'morning', 'afternoon', 'dusk', 'evening', 'night'];
 
   let xml = '<?xml version="1.0" encoding="utf-8"?>\n';
-  xml += '<!-- Generated automatically from src/utils/pixelSkyPalettes.ts. Do NOT edit directly. -->\n';
+  xml += '<!-- Generated automatically from src/theme/phaseSeedColors.ts (Material 3). Do NOT edit directly. -->\n';
   xml += '<resources>\n';
 
   for (const phase of phases) {
-    const config = PIXEL_SKY_PALETTES[phase];
-    if (!config || !config.ui) {
-      console.warn(`⚠️ Warning: Missing config for phase: ${phase}`);
-      continue;
-    }
+    const isDark = phase === 'night';
+    const m3Theme = getM3ThemeForPhase(phase, isDark);
+    const { scheme } = m3Theme;
 
-    const { ui } = config;
-    xml += `    <!-- ${phase.toUpperCase()} PHASE -->\n`;
-    xml += `    <color name="${phase}_card_surface">${ui.cardSurface}</color>\n`;
-    xml += `    <color name="${phase}_card_border">${ui.cardBorder}</color>\n`;
-    xml += `    <color name="${phase}_text_primary">${ui.textPrimary}</color>\n`;
-    xml += `    <color name="${phase}_text_secondary">${ui.textSecondary}</color>\n`;
-    xml += `    <color name="${phase}_text_muted">${ui.textMuted}</color>\n`;
-    xml += `    <color name="${phase}_accent">${ui.accent}</color>\n`;
-    xml += `    <color name="${phase}_accent_contrast">${ui.accentContrast}</color>\n\n`;
+    xml += `    <!-- ${phase.toUpperCase()} PHASE (M3 Seed: ${m3Theme.seedHex}) -->\n`;
+    xml += `    <color name="${phase}_card_surface">${scheme.surfaceContainerLow}</color>\n`;
+    xml += `    <color name="${phase}_card_border">${scheme.outlineVariant}</color>\n`;
+    xml += `    <color name="${phase}_text_primary">${scheme.onSurface}</color>\n`;
+    xml += `    <color name="${phase}_text_secondary">${scheme.onSurfaceVariant}</color>\n`;
+    xml += `    <color name="${phase}_text_muted">${scheme.outline}</color>\n`;
+    xml += `    <color name="${phase}_accent">${scheme.primary}</color>\n`;
+    xml += `    <color name="${phase}_accent_contrast">${scheme.onPrimary}</color>\n\n`;
   }
 
   xml += '</resources>\n';

@@ -17,6 +17,8 @@ import GymExerciseHistory from './pages/GymExerciseHistory';
 import GymOnboarding from './pages/GymOnboarding';
 import Nutrition from './pages/Nutrition';
 import Spending from './pages/Spending';
+import ShoppingLists from './pages/ShoppingLists';
+import ShoppingListDetail from './pages/ShoppingListDetail';
 import Timetable from './pages/Timetable';
 import Tasks from './pages/Tasks';
 import Laundry from './pages/Laundry';
@@ -29,11 +31,10 @@ import Auth from './pages/Auth';
 import { useEffect, useState } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import type { TransitionMode } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
-import PixelSkyCanvas from './components/PixelSkyCanvas';
 import { DayThemeProvider } from './theme/DayThemeProvider';
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
@@ -70,26 +71,28 @@ function MainContent({
   }, [location.pathname]);
 
   const routeElements = useRoutes([
-    { path: '/', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
-    { path: '/study', element: <Study data={data} updateData={updateData} /> },
-    { path: '/study/timer', element: <StudyTimer data={data} updateData={updateData} /> },
-    { path: '/study/history', element: <StudyHistory data={data} updateData={updateData} /> },
-    { path: '/study/heatmap', element: <StudyHeatmap data={data} /> },
-    { path: '/gym', element: <Gym data={data} updateData={updateData} /> },
-    { path: '/gym/onboarding', element: <GymOnboarding data={data} updateData={updateData} /> },
-    { path: '/gym/workout', element: <GymWorkout data={data} updateData={updateData} /> },
-    { path: '/gym/split', element: <GymSplit data={data} updateData={updateData} /> },
-    { path: '/gym/history/:exerciseName', element: <GymExerciseHistory data={data} /> },
-    { path: '/nutrition', element: <Nutrition data={data} updateData={updateData} /> },
-    { path: '/spending', element: <Spending data={data} updateData={updateData} /> },
-    { path: '/timetable', element: <Timetable data={data} updateData={updateData} /> },
-    { path: '/tasks', element: <Tasks data={data} updateData={updateData} /> },
-    { path: '/laundry', element: <Laundry data={data} updateData={updateData} /> },
-    { path: '/progress', element: <Progress data={data} /> },
-    { path: '/history', element: <WorkHistory data={data} updateData={updateData} /> },
-    { path: '/settings', element: <SettingsPage transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /> },
-    { path: '/vault', element: <Vault data={data} updateData={updateData} /> },
-    { path: '*', element: <Home data={data} refresh={refresh} updateData={updateData} /> },
+    { path: '/', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/study', element: <RouteErrorBoundary routeName="Study"><Study data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/study/timer', element: <RouteErrorBoundary routeName="Study Timer"><StudyTimer data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/study/history', element: <RouteErrorBoundary routeName="Study History"><StudyHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/study/heatmap', element: <RouteErrorBoundary routeName="Study Analytics"><StudyHeatmap data={data} /></RouteErrorBoundary> },
+    { path: '/gym', element: <RouteErrorBoundary routeName="Gym"><Gym data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/gym/onboarding', element: <RouteErrorBoundary routeName="Gym Onboarding"><GymOnboarding data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/gym/workout', element: <RouteErrorBoundary routeName="Workout"><GymWorkout data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/gym/split', element: <RouteErrorBoundary routeName="Gym Split"><GymSplit data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/gym/history/:exerciseName', element: <RouteErrorBoundary routeName="Exercise History"><GymExerciseHistory data={data} /></RouteErrorBoundary> },
+    { path: '/nutrition', element: <RouteErrorBoundary routeName="Nutrition"><Nutrition data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/spending', element: <RouteErrorBoundary routeName="Spending"><Spending data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/shopping', element: <RouteErrorBoundary routeName="Shopping Lists"><ShoppingLists data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/shopping/:listId', element: <RouteErrorBoundary routeName="Shopping List Detail"><ShoppingListDetail data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/timetable', element: <RouteErrorBoundary routeName="Timetable"><Timetable data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/tasks', element: <RouteErrorBoundary routeName="Tasks"><Tasks data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/progress', element: <RouteErrorBoundary routeName="Progress"><Progress data={data} /></RouteErrorBoundary> },
+    { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
+    { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '*', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
   ]);
 
   const motionProps = getPageMotionProps(prefersReducedMotion);
@@ -99,6 +102,7 @@ function MainContent({
       <motion.div
         key={location.pathname}
         className="w-full overflow-x-hidden gpu-composited"
+        style={{ minHeight: '100%' }}
         {...motionProps}
       >
         {routeElements}
@@ -128,7 +132,13 @@ function App() {
   });
 
   useEffect(() => {
+    // 5-second timeout safety: never gate render on hanging network auth
+    const timer = setTimeout(() => {
+      setAuthLoading(false);
+    }, 5000);
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      clearTimeout(timer);
       setUser(currentUser);
       setAuthLoading(false);
       try {
@@ -146,7 +156,10 @@ function App() {
         // quota exceeded
       }
     });
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
   }, []);
 
   const { data, loading: dataLoading, updateData, refresh } = useData(user);
@@ -274,8 +287,7 @@ function App() {
   if (authLoading && !user) {
     return (
       <DayThemeProvider>
-        <div className="min-h-screen flex items-center justify-center bg-bg-light dark:bg-bg-dark">
-          <PixelSkyCanvas />
+        <div className="min-h-screen flex items-center justify-center bg-transparent">
           <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </div>
       </DayThemeProvider>
@@ -285,7 +297,6 @@ function App() {
   if (!user) {
     return (
       <DayThemeProvider>
-        <PixelSkyCanvas />
         <Auth />
       </DayThemeProvider>
     );
@@ -312,7 +323,6 @@ function App() {
 
   return (
     <DayThemeProvider>
-      <PixelSkyCanvas />
       <AppLockOverlay />
       <InAppUpdateModal />
       <div

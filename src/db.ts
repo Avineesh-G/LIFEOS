@@ -27,6 +27,7 @@ const DEFAULT_DATA: AppData = {
   vaultItems: [],
   vaultConfig: null,
   laundryBatches: [],
+  shoppingLists: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -93,6 +94,23 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
   }));
   merged.vaultConfig = merged.vaultConfig || null;
   merged.laundryBatches = merged.laundryBatches || [];
+  merged.shoppingLists = (merged.shoppingLists || []).map(list => ({
+    id: list?.id || `list_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    name: list?.name || 'Untitled List',
+    createdAt: list?.createdAt || new Date().toISOString(),
+    updatedAt: list?.updatedAt || new Date().toISOString(),
+    isTemplate: Boolean(list?.isTemplate),
+    category: list?.category || undefined,
+    items: Array.isArray(list?.items)
+      ? list.items.map(item => ({
+          id: item?.id || `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          name: item?.name || '',
+          quantity: item?.quantity || undefined,
+          checked: Boolean(item?.checked),
+          notes: item?.notes || undefined,
+        }))
+      : [],
+  }));
 
   return merged;
 }
@@ -126,9 +144,33 @@ export async function exportData(uid: string): Promise<string> {
   return JSON.stringify(data, null, 2);
 }
 
+export const DATA_SCHEMA_VERSION = 2;
+
+export function migrateAppData(data: any): AppData {
+  if (!data || typeof data !== 'object') return DEFAULT_DATA;
+  const version = typeof data._schemaVersion === 'number' ? data._schemaVersion : 1;
+  const migrated = { ...data };
+
+  // Migrations for schema evolution
+  if (version < 2) {
+    migrated._schemaVersion = 2;
+    if (!Array.isArray(migrated.shoppingLists)) migrated.shoppingLists = [];
+    if (!Array.isArray(migrated.vaultItems)) migrated.vaultItems = [];
+    if (!Array.isArray(migrated.laundryBatches)) migrated.laundryBatches = [];
+  }
+
+  return sanitizeAppData(migrated);
+}
+
 export async function importData(uid: string, json: string): Promise<void> {
-  const data = JSON.parse(json) as AppData;
-  await saveData(uid, data);
+  try {
+    const raw = JSON.parse(json);
+    const migrated = migrateAppData(raw);
+    await saveData(uid, migrated);
+  } catch (e) {
+    console.error('[LifeOS] Failed to parse or import data JSON:', e);
+    throw new Error('Invalid JSON backup file.');
+  }
 }
 
 export async function clearAllData(uid: string): Promise<void> {

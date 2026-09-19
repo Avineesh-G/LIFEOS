@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight, Sparkles, Pencil } from 'lucide-react';
 import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import { BottomSheet, Modal } from '../components/BottomSheet';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
+import M3Button from '../components/m3/M3Button';
 import type { AppData, Task } from '../types';
 
 
@@ -22,6 +23,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const [newEndTime, setNewEndTime] = useState('');
   const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [showAdd, setShowAdd] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
@@ -75,26 +77,46 @@ export default function Tasks({ data, updateData }: TasksProps) {
     return dates;
   }, [selectedDate]);
 
-  const addTask = async () => {
+  const saveTask = async () => {
     if (!newTask.trim()) return;
     triggerHaptic('save');
-    const task: Task = {
-      id: crypto.randomUUID(),
-      text: newTask.trim(),
-      subtask: newSubtask.trim() || undefined,
-      completed: false,
-      date: newDate,
-      dueDate: newDate,
-      startTime: newStartTime.trim() || undefined,
-      endTime: newEndTime.trim() || undefined,
-      reminderTime: newStartTime.trim() || undefined,
-    };
-    await updateData({ tasks: [...(data?.tasks || []), task] });
+    if (editingTaskId) {
+      const updated = (data?.tasks || []).map(t => {
+        if (t.id === editingTaskId) {
+          return {
+            ...t,
+            text: newTask.trim(),
+            subtask: newSubtask.trim() || undefined,
+            date: newDate,
+            dueDate: newDate,
+            startTime: newStartTime.trim() || undefined,
+            endTime: newEndTime.trim() || undefined,
+            reminderTime: newStartTime.trim() || undefined,
+          };
+        }
+        return t;
+      });
+      await updateData({ tasks: updated });
+    } else {
+      const task: Task = {
+        id: crypto.randomUUID(),
+        text: newTask.trim(),
+        subtask: newSubtask.trim() || undefined,
+        completed: false,
+        date: newDate,
+        dueDate: newDate,
+        startTime: newStartTime.trim() || undefined,
+        endTime: newEndTime.trim() || undefined,
+        reminderTime: newStartTime.trim() || undefined,
+      };
+      await updateData({ tasks: [...(data?.tasks || []), task] });
+    }
     setNewTask('');
     setNewSubtask('');
     setNewStartTime('');
     setNewEndTime('');
     setNewDate(today);
+    setEditingTaskId(null);
     setShowAdd(false);
   };
 
@@ -203,16 +225,22 @@ export default function Tasks({ data, updateData }: TasksProps) {
             Daily execution · Long-press any task to delete
           </p>
         </div>
-        <button
+        <M3Button
           onClick={() => {
-            triggerHaptic('light');
+            setEditingTaskId(null);
+            setNewTask('');
+            setNewSubtask('');
             setNewDate(selectedDate);
+            setNewStartTime('');
+            setNewEndTime('');
             setShowAdd(true);
           }}
-          className="bouncy-tap flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-[var(--accent-primary)] text-white shadow-md shadow-[var(--accent-primary)]/25 hover:opacity-95 shrink-0"
+          icon={<Plus size={16} strokeWidth={2.5} />}
+          size="sm"
+          className="shrink-0"
         >
-          <Plus size={16} strokeWidth={2.5} /> Add Task
-        </button>
+          Add Task
+        </M3Button>
       </div>
 
       {/* ── Fluid Calendar Strip ── */}
@@ -511,6 +539,29 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   </span>
                 )}
               </div>
+
+              {/* Task Edit Button */}
+              {!task.completed && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic('light');
+                    setEditingTaskId(task.id);
+                    setNewTask(task.text);
+                    setNewSubtask(task.subtask || '');
+                    setNewDate(task.dueDate || task.date || today);
+                    setNewStartTime(task.startTime || '');
+                    setNewEndTime(task.endTime || '');
+                    setShowAdd(true);
+                  }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-primary)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all shrink-0"
+                  title="Update Task"
+                  aria-label={`Update ${task.text}`}
+                >
+                  <Pencil size={13} strokeWidth={2.2} />
+                </button>
+              )}
             </div>
           );
         })}
@@ -559,20 +610,29 @@ export default function Tasks({ data, updateData }: TasksProps) {
         )}
       </Modal>
 
-      {/* ── Add Task Elevated Modal with Date Picker & Start/End Time (Rendered via Portal) ── */}
-      <BottomSheet isOpen={showAdd} onClose={() => setShowAdd(false)}>
+      {/* ── Add / Update Task Elevated Modal with Date Picker & Start/End Time (Rendered via Portal) ── */}
+      <BottomSheet
+        isOpen={showAdd}
+        onClose={() => {
+          setShowAdd(false);
+          setEditingTaskId(null);
+        }}
+      >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
-              New TO-DO
+              {editingTaskId ? 'Update TO-DO' : 'New TO-DO'}
             </h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
-              Scheduled
+              {editingTaskId ? 'Editing' : 'Scheduled'}
             </span>
           </div>
           <button
             type="button"
-            onClick={() => setShowAdd(false)}
+            onClick={() => {
+              setShowAdd(false);
+              setEditingTaskId(null);
+            }}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
           >
             <X size={16} />
@@ -652,18 +712,21 @@ export default function Tasks({ data, updateData }: TasksProps) {
           <div className="grid grid-cols-2 gap-3 pt-3">
             <button
               type="button"
-              onClick={() => setShowAdd(false)}
+              onClick={() => {
+                setShowAdd(false);
+                setEditingTaskId(null);
+              }}
               className="py-3 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={addTask}
+              onClick={saveTask}
               disabled={!newTask.trim()}
               className="py-3 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40"
             >
-              Save TO-DO
+              {editingTaskId ? 'Update TO-DO' : 'Save TO-DO'}
             </button>
           </div>
         </div>

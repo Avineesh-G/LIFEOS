@@ -1,1 +1,1 @@
-export * from '../utils/pixelSkyPalettes';
+export * from '../theme/phaseSeedColors';

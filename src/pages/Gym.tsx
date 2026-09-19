@@ -11,6 +11,7 @@ import { AnimatedMoon } from '../components/AnimatedIcons';
 import { triggerHaptic } from '../utils/haptics';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { FITNESS_GOALS } from '../utils/calculations';
+import { M3Carousel } from '../components/m3/M3Carousel';
 import type { AppData, Exercise } from '../types';
 
 interface GymProps {
@@ -167,78 +168,81 @@ export default function Gym({ data, updateData }: GymProps) {
   return (
     <div className="space-y-6 sm:space-y-7">
 
-      {/* Bioluminescent Mint Liquid Spring Capsule Hero Card */}
+      {/* Material 3 Expressive Coral/Rose Hero Card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 liquid-glass glow-mint border border-emerald-500/30 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-100 shadow-[var(--shadow-card)] space-y-4 sm:space-y-5 relative overflow-hidden"
+        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none space-y-4 sm:space-y-5 relative overflow-hidden"
       >
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-3 relative z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] shrink-0 bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 flex items-center justify-center shadow-xs">
-              <Dumbbell size={20} className="text-emerald-800 dark:text-emerald-200" />
+            <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-[16px] shrink-0 bg-[var(--md-surface-container)] text-[var(--md-primary)] border border-[var(--md-outline-variant)] flex items-center justify-center">
+              <Dumbbell size={20} />
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-emerald-900 dark:text-emerald-300 font-mono">
+              <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag">
                 {today} · Target Routine
               </p>
-              <h2 className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-white truncate">Daily Protocol</h2>
+              <h2 className="text-xs sm:text-sm font-bold text-[var(--md-on-surface)] truncate">Daily Protocol</h2>
             </div>
           </div>
-          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold shadow-xs border ${
+          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold border font-tag ${
             isCompletedToday 
-              ? 'bg-emerald-600 text-white dark:bg-emerald-400 dark:text-emerald-950 border-emerald-500/30'
-              : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-900 dark:text-emerald-200'
+              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)]'
+              : 'bg-[var(--md-surface-container)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
           }`}>
             {isCompletedToday ? 'Completed' : (todayPlan?.type === 'REST' ? 'Rest Day' : 'Incomplete')}
           </span>
         </div>
 
-        {/* Workout Focus & Exercise Count */}
+        {/* Workout Focus & Exercise Count with Clamp Sizing */}
         <div className="pt-1 relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-sans text-emerald-950 dark:text-white">
+          <h1 className="m3-headline-l-emphasized text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-[var(--md-on-surface)]">
             {todayPlan?.type || 'Rest Day'}
           </h1>
-          <p className="text-xs font-bold text-emerald-900/80 dark:text-emerald-300 mt-1 font-mono">
-            {(todayPlan?.exercises || []).length} exercises scheduled
+          <p className="text-xs font-bold text-[var(--md-on-surface-variant)] mt-1 font-mono">
+            <span className="font-stat">{(todayPlan?.exercises || []).length}</span> exercises scheduled
           </p>
         </div>
 
-        {/* Bouncy Action Buttons Row */}
-        <div className="flex items-center gap-2.5 pt-1 relative z-10">
+        {/* ── M3 Connected Button Group (Segmented Pill Cluster) ── */}
+        <div className="p-1 rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center gap-1.5 shadow-none relative z-10">
           <motion.button
-            whileHover={{ scale: 1.025 }}
-            whileTap={{ scale: 0.94 }}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => {
               triggerHaptic('light');
               navigate('/gym/split');
             }}
-            className="flex-1 py-3 rounded-full bg-white/85 dark:bg-white/10 text-emerald-900 dark:text-emerald-100 border border-emerald-500/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+            className="flex-1 py-2.5 px-4 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors"
           >
             <Settings size={15} /> Split
           </motion.button>
+
+          <div className="w-[1px] h-6 bg-[var(--md-outline-variant)] shrink-0" />
+
           {isCompletedToday ? (
             <motion.button
-              whileHover={{ scale: 1.025 }}
-              whileTap={{ scale: 0.94 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => {
                 triggerHaptic('light');
                 navigate('/gym/workout');
               }}
-              className="flex-[1.4] py-3 rounded-full bg-emerald-600 dark:bg-emerald-400 text-white dark:text-emerald-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm transition-colors"
+              className="flex-[1.4] py-2.5 px-5 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-none transition-transform"
             >
               <Check size={16} className="stroke-[3]" /> Completed
             </motion.button>
           ) : (
             <motion.button
-              whileHover={{ scale: 1.025 }}
-              whileTap={{ scale: 0.94 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => {
                 triggerHaptic('medium');
                 navigate('/gym/workout');
               }}
-              className="flex-[1.4] py-3 rounded-full bg-emerald-600 dark:bg-emerald-400 text-white dark:text-emerald-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-colors"
+              className="flex-[1.4] py-2.5 px-5 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-none transition-transform"
             >
               <Play size={15} fill="currentColor" /> {todayLog ? 'Resume Workout' : 'Start Workout'}
             </motion.button>
@@ -246,8 +250,68 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
       </motion.div>
 
+      {/* ── Gym Interaction Personality: Horizontal Scrollable Stat/Clock Card (Image 11 'Best times' pattern) ── */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[11px] font-bold font-tag uppercase tracking-wider text-[var(--md-on-surface-variant)]">
+            Split Schedule & Best Records
+          </p>
+          <span className="text-[11px] font-medium text-[var(--md-on-surface-variant)] font-stat">
+            Swipe →
+          </span>
+        </div>
+
+        <M3Carousel showControls>
+          {(data.workoutPlans || []).map((plan) => {
+            const isTodayCard = plan.day === shortDay;
+            const exCount = (plan.exercises || []).length;
+            return (
+              <motion.div
+                key={plan.day}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => {
+                  triggerHaptic('light');
+                  setSelectedDay(plan.day);
+                }}
+                className={`min-w-[150px] sm:min-w-[170px] snap-start rounded-[20px] p-4 flex flex-col justify-between border select-none cursor-pointer transition-all ${
+                  isTodayCard
+                    ? 'm3-elevation-2 bg-[var(--md-primary-container)] border-[var(--md-primary)]/40 text-[var(--md-on-primary-container)]'
+                    : 'm3-elevation-1 border-[var(--md-outline-variant)] text-[var(--md-on-surface)]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1 mb-2">
+                  <span className={`text-[10px] font-bold uppercase font-tag tracking-wider px-2 py-0.5 rounded-full ${
+                    isTodayCard
+                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)]'
+                      : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)]'
+                  }`}>
+                    {plan.day}
+                  </span>
+                  <Dumbbell size={14} className="opacity-75" />
+                </div>
+
+                <div className="my-1">
+                  <p className="text-sm font-bold font-heading truncate">
+                    {plan.type || 'Rest'}
+                  </p>
+                  <p className="text-[11px] opacity-75 font-mono mt-0.5">
+                    {exCount > 0 ? `${exCount} exercises` : 'Recovery day'}
+                  </p>
+                </div>
+
+                <div className="mt-2 pt-2 border-t border-current/10 flex items-center justify-between text-[10px] font-stat">
+                  <span>{plan.type === 'REST' ? 'Recharge' : 'Target Volume'}</span>
+                  <span className="font-bold">{exCount > 0 ? `${exCount * 3} sets` : '0 sets'}</span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </M3Carousel>
+      </div>
+
       {/* Goal Routine Alignment & Customization Freedom Card */}
-      <div className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs space-y-3">
+      <div className="rounded-[24px] p-5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">

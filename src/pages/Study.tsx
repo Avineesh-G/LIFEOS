@@ -84,50 +84,75 @@ export default function Study({ data }: StudyProps) {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
 
-      {/* Bioluminescent Lavender Liquid Spring Capsule Hero Container */}
+      {/* Material 3 Expressive Sky Blue Hero Container */}
       <motion.div
         variants={item}
-        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 text-m3-lavender-text dark:text-m3-lavender-darkText shadow-sm relative overflow-hidden"
+        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none relative overflow-hidden"
       >
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-[16px] bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shadow-xs text-indigo-700 dark:text-indigo-300">
+            <span className="w-11 h-11 rounded-[16px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center justify-center text-[var(--md-primary)]">
               <InteractiveClock size={24} isRunning={todaySessions.length > 0} progressPercent={Math.min((todayMinutes / 120) * 100, 100)} onClick={() => navigate('/study/timer')} />
             </span>
 
             <div>
-              <p className="text-xs font-bold tracking-wider uppercase opacity-75 font-mono">
+              <p className="text-xs font-bold tracking-wider uppercase opacity-75 font-tag text-[var(--md-on-surface-variant)]">
                 {format(new Date(), 'EEEE, MMM d')}
               </p>
-              <h2 className="text-sm sm:text-base font-bold opacity-90">Today's Focus</h2>
+              <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)]">Today's Focus</h2>
             </div>
           </div>
-          <span className="rounded-full bg-indigo-500/15 border border-indigo-500/25 px-3.5 py-1.5 text-xs font-bold shadow-xs text-indigo-800 dark:text-indigo-200">
-            {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
+          <span className="rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] px-3.5 py-1.5 text-xs font-bold text-[var(--md-on-surface-variant)] font-tag">
+            <span className="font-stat">{todaySessions.length}</span> {todaySessions.length === 1 ? 'session' : 'sessions'}
           </span>
         </div>
 
-        <div className="flex items-baseline justify-between gap-4 mt-3 relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mt-3 relative z-10">
           <div>
-            <span className="text-4xl sm:text-5xl font-black tracking-tight leading-none font-sans">
+            <span className="stat-clamp-hero font-bold tracking-tight leading-none font-stat text-[var(--md-on-surface)]">
               {Math.floor(todayMinutes / 60)}
-              <span className="text-2xl font-bold opacity-80">h </span>
+              <span className="text-2xl font-bold opacity-75 font-sans">h </span>
               {todayMinutes % 60}
-              <span className="text-2xl font-bold opacity-80">m</span>
+              <span className="text-2xl font-bold opacity-75 font-sans">m</span>
             </span>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.94 }}
-            onClick={() => {
-              triggerHaptic('light');
-              navigate('/study/timer');
-            }}
-            className="rounded-full bg-indigo-600 dark:bg-indigo-400 text-white dark:text-indigo-950 font-bold px-5 py-3 text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-indigo-500/20 transition-colors"
-          >
-            <Play size={16} fill="currentColor" /> Start Timer
-          </motion.button>
+          {/* Pill-Row + Standalone Squircle Action Pattern (Image 1 pattern) */}
+          <div className="flex items-center gap-2">
+            {/* Wide Pill Housing Secondary Actions */}
+            <div className="inline-flex items-center p-1 rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('light'); navigate('/study/history'); }}
+                className="px-3 py-1.5 rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95"
+              >
+                History
+              </button>
+              <button
+                type="button"
+                onClick={() => { triggerHaptic('light'); navigate('/study/heatmap'); }}
+                className="px-3 py-1.5 rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95"
+              >
+                Heatmap
+              </button>
+            </div>
+
+            {/* Standalone Squircle Button Set Apart for Primary Action */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 24 }}
+              onClick={() => {
+                triggerHaptic('medium');
+                navigate('/study/timer');
+              }}
+              className="h-10 px-4 rounded-[14px] bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-none transition-transform"
+              title="Start Timer"
+            >
+              <Play size={15} fill="currentColor" />
+              <span>Timer</span>
+            </motion.button>
+          </div>
         </div>
       </motion.div>
 
@@ -135,37 +160,37 @@ export default function Study({ data }: StudyProps) {
       <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
         <motion.div
           whileHover={{ scale: 1.02, y: -2, transition: { type: 'spring', stiffness: 400 } }}
-          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs flex flex-col justify-between"
+          className="rounded-[28px] p-5 sm:p-6 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] shadow-none flex flex-col justify-between"
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-2 font-tag">
             Today
           </p>
-          <p className="text-2xl sm:text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-sans">
+          <p className="stat-clamp-card font-bold tracking-tight text-[var(--md-on-surface)] font-stat">
             {Math.floor(todayMinutes / 60)}
-            <span className="text-base font-semibold text-muted-light dark:text-muted-dark">h </span>
+            <span className="text-base font-semibold text-[var(--md-on-surface-variant)]">h </span>
             {todayMinutes % 60}
-            <span className="text-base font-semibold text-muted-light dark:text-muted-dark">m</span>
+            <span className="text-base font-semibold text-[var(--md-on-surface-variant)]">m</span>
           </p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">
-            {todaySessions.length} logged today
+          <p className="text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium">
+            <span className="font-stat">{todaySessions.length}</span> logged today
           </p>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02, y: -2, transition: { type: 'spring', stiffness: 400 } }}
-          className="rounded-[28px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-xs flex flex-col justify-between"
+          className="rounded-[28px] p-5 sm:p-6 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] shadow-none flex flex-col justify-between"
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
+          <p className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] mb-2 font-tag">
             This Week
           </p>
-          <p className="text-2xl sm:text-3xl font-black tracking-tight text-primary-light dark:text-primary-dark font-sans">
+          <p className="stat-clamp-card font-bold tracking-tight text-[var(--md-on-surface)] font-stat">
             {Math.floor(weekMinutes / 60)}
-            <span className="text-base font-semibold text-muted-light dark:text-muted-dark">h </span>
+            <span className="text-base font-semibold text-[var(--md-on-surface-variant)]">h </span>
             {weekMinutes % 60}
-            <span className="text-base font-semibold text-muted-light dark:text-muted-dark">m</span>
+            <span className="text-base font-semibold text-[var(--md-on-surface-variant)]">m</span>
           </p>
-          <p className="text-xs text-muted-light dark:text-muted-dark mt-1 font-medium">
-            {weekSessions.length} weekly sessions
+          <p className="text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium">
+            <span className="font-stat">{weekSessions.length}</span> weekly sessions
           </p>
         </motion.div>
       </motion.div>

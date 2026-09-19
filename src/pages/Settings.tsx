@@ -17,7 +17,9 @@ import { signOut } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { useDayPhase, useThemeMode, ThemeMode } from '../hooks/useDayPhase';
+import { useThemeMode, ThemeMode } from '../hooks/useDayPhase';
+import SegmentedTogglePill from '../components/SegmentedTogglePill';
+import M3ToggleChip from '../components/M3ToggleChip';
 
 interface SettingsProps {
   accentColor?: string;
@@ -36,7 +38,6 @@ export default function Settings({
   updateData
 }: SettingsProps) {
   const navigate = useNavigate();
-  const { phase, nextPhase } = useDayPhase();
   const [themeMode, setThemeMode] = useThemeMode();
 
   const handleToggleThemeMode = () => {
@@ -290,61 +291,44 @@ export default function Settings({
                 )}
 
                 {/* Master Notification Toggle */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)]">
                   <div>
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                    <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Enable System Notifications
                     </p>
-                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark mt-0.5 font-medium">
+                    <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                       Receive alerts in mobile notification shade
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleToggleNotifications}
-                    className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center shrink-0 ${
-                      notificationsEnabled ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
-                    }`}
-                  >
-                    <div
-                      className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
-                        notificationsEnabled ? 'translate-x-5.5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
+                  <M3ToggleChip
+                    label={notificationsEnabled ? 'Active' : 'Off'}
+                    checked={notificationsEnabled}
+                    onChange={() => handleToggleNotifications()}
+                  />
                 </div>
 
-                {/* Lead Time Selector (5 / 10 / 15 / 20 min pills) */}
+                {/* Lead Time Selector (Segmented Spring Pills) */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark flex items-center gap-1.5">
-                      <Clock size={12} className="text-accent" /> Reminder Lead Time
+                    <label className="text-[11px] font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] flex items-center gap-1.5">
+                      <Clock size={12} className="text-[var(--md-primary)]" /> Reminder Lead Time
                     </label>
-                    <span className="text-xs font-bold text-accent">
-                      <span className="font-stat">{leadMinutes}</span> minutes before
+                    <span className="text-xs font-bold text-[var(--md-primary)] font-stat">
+                      {leadMinutes} min before
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2">
-                    {[5, 10, 15, 20].map(mins => {
-                      const active = leadMinutes === mins;
-                      return (
-                        <button
-                          key={mins}
-                          type="button"
-                          onClick={() => handleSelectLeadMinutes(mins)}
-                          className={`py-2.5 rounded-2xl text-xs font-bold transition-all text-center border ${
-                            active
-                              ? 'bg-accent text-white border-accent shadow-md shadow-accent/20 scale-[1.02]'
-                              : 'bg-black/[0.02] dark:bg-white/[0.03] border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:border-accent/40'
-                          }`}
-                        >
-                          <span className="font-stat">{mins}</span> <span className="font-tag text-[10px]">min</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <SegmentedTogglePill
+                    options={[
+                      { value: '5', label: '5m' },
+                      { value: '10', label: '10m' },
+                      { value: '15', label: '15m' },
+                      { value: '20', label: '20m' },
+                    ]}
+                    value={String(leadMinutes)}
+                    onChange={(val: string) => handleSelectLeadMinutes(Number(val))}
+                  />
                 </div>
 
                 {/* Notification Channels list */}
@@ -389,79 +373,29 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 2. Circadian Day Theme (Dynamic vs Full Night Toggle) ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--border-card)] shadow-[var(--shadow-card)] overflow-hidden">
+      {/* ── 2. Appearance & Theme ── */}
+      <div className="rounded-[30px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-none overflow-hidden">
         <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--accent-soft)] text-accent shadow-sm shrink-0">
-              <Sparkles size={22} strokeWidth={2.2} />
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shrink-0">
+              <Sun size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
-                Circadian Day Theme
+              <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] truncate">
+                Appearance & Theme
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                {themeMode === 'dynamic' ? 'Real-time harmony with device clock' : 'Locked to tranquil Full Night aesthetic'}
+              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 truncate">
+                Material 3 Expressive surface modes
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-tag font-bold text-accent uppercase tracking-wider px-3 py-1 rounded-full bg-[var(--accent-soft)] border border-accent/20">
-              {themeMode === 'dynamic' ? `${phase} Phase` : 'Full Night'}
-            </span>
-          </div>
-        </div>
-
-        <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
-          {/* Master Theme Mode Toggle */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
-            <div className="pr-3">
-              <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
-                Dynamic Day Theme
-              </p>
-              <p className="text-[11px] text-secondary-light dark:text-secondary-dark mt-0.5 font-medium leading-normal">
-                {themeMode === 'dynamic'
-                  ? 'Background and colors shift automatically through the day'
-                  : 'Locked to a calm, full night look'}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleToggleThemeMode}
-              aria-label="Toggle Dynamic Day Theme"
-              className={`w-12 h-6.5 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none flex items-center shrink-0 ${
-                themeMode === 'dynamic' ? 'bg-accent' : 'bg-neutral-300 dark:bg-neutral-700'
-              }`}
-            >
-              <div
-                className={`w-4.5 h-4.5 rounded-full bg-white shadow-md transform transition-transform duration-200 ease-in-out ${
-                  themeMode === 'dynamic' ? 'translate-x-5.5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-          </div>
-
-          <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-            {themeMode === 'dynamic'
-              ? 'Cards, borders, text, typography density, and accent colors automatically shift across 6 natural day phases (Dawn, Morning, Afternoon, Dusk, Evening, and Night) in mathematical sync with the live sky background.'
-              : 'Ambient sky, cards, borders, typography weights, and accent colors are permanently locked to the calm night phase. Star twinkle animation remains active.'}
-          </p>
-
-          <div className="flex items-center gap-2 pt-1 flex-wrap">
-            <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--bg-card-elevated)] border border-[var(--border-card)] text-primary-light dark:text-primary-dark uppercase tracking-wider">
-              {themeMode === 'dynamic' ? `Active: ${phase}` : 'Mode: Full Night'}
-            </span>
-            {themeMode === 'dynamic' ? (
-              <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
-                Next: {nextPhase}
-              </span>
-            ) : (
-              <span className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-accent border border-accent/30 uppercase tracking-wider">
-                Twinkle: Active
-              </span>
-            )}
+            <M3ToggleChip
+              label={themeMode === 'dynamic' ? 'Light Mode' : 'Dark Mode'}
+              checked={themeMode === 'night'}
+              onChange={() => handleToggleThemeMode()}
+            />
           </div>
         </div>
       </div>

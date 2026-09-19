@@ -22,6 +22,30 @@ export function useReducedMotion(): boolean {
   return reduced;
 }
 
+// ─── Official Material 3 Expressive Motion Schemes ───────────────────────────
+
+/**
+ * Google's M3 Expressive spring motion schemes:
+ * - MotionScheme.standard: calm, settles quickly, minimal overshoot (stiffness ~300, damping ~30)
+ *   Apply to: page transitions, list scrolling, modal open/close
+ * - MotionScheme.expressive: bouncier, visible overshoot, more energy (stiffness ~420, damping ~16)
+ *   Apply to: nav tab switching, toggle/switch morphing, FAB press, streak badge, chip selection
+ */
+export const MotionScheme = {
+  standard: {
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 30,
+    mass: 1,
+  },
+  expressive: {
+    type: 'spring' as const,
+    stiffness: 420,
+    damping: 16,
+    mass: 1,
+  },
+} as const;
+
 // ─── Easing Curves ────────────────────────────────────────────────────────────
 
 /** Primary ease-out spring curve — entering content feels deliberate */
@@ -133,3 +157,46 @@ export const TAP_TRANSITION = {
   damping: 28,
   mass: 0.6,
 };
+
+// ─── Material 3 Expressive Spring Physics ──────────────────────────────────
+
+/** M3 Standard Spring — balanced, responsive for everyday transitions */
+export const M3_SPRING_STANDARD = {
+  type: 'spring' as const,
+  stiffness: 380,
+  damping: 30,
+  mass: 1,
+};
+
+/** M3 Emphasized Spring — energetic, slightly underdamped for expressive moments */
+export const M3_SPRING_EMPHASIZED = {
+  type: 'spring' as const,
+  stiffness: 420,
+  damping: 26,
+  mass: 0.8,
+};
+
+/** M3 Decelerated Spring — smooth settle for incoming elements */
+export const M3_SPRING_DECELERATED = {
+  type: 'spring' as const,
+  stiffness: 320,
+  damping: 32,
+  mass: 1,
+};
+
+/** M3 Celebratory Bounce Spring — for milestone badges and task completion */
+export const M3_SPRING_BOUNCE = {
+  type: 'spring' as const,
+  stiffness: 480,
+  damping: 18,
+  mass: 0.6,
+};
+
+/** M3 Expressive Shape Morph Transition */
+export const M3_SHAPE_TRANSITION = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 25,
+  mass: 0.7,
+};
+

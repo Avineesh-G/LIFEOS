@@ -8,6 +8,7 @@ import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, G
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { FITNESS_GOALS } from '../utils/calculations';
 import InteractiveWaterGlass from '../components/interactive/InteractiveWaterGlass';
+import M3StatWidget from '../components/M3StatWidget';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 
 
@@ -563,10 +564,10 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
         </button>
       </motion.div>
 
-      {/* Bioluminescent Peach Liquid Spring Capsule Calorie Hero */}
+      {/* Material 3 Expressive Amber Calorie Hero Card */}
       <motion.div
         variants={item}
-        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 liquid-glass glow-peach border border-amber-200/50 dark:border-amber-800/40 text-m3-peach-text dark:text-m3-peach-darkText shadow-sm flex items-center gap-6 relative overflow-hidden"
+        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none flex items-center gap-6 relative overflow-hidden"
       >
         <div className="relative flex-shrink-0">
           <svg width="104" height="104" viewBox="0 0 104 104">
@@ -574,7 +575,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             <circle
               cx="52" cy="52" r="44"
               fill="none"
-              stroke={ringColor}
+              stroke="var(--md-primary)"
               strokeWidth="9"
               strokeLinecap="round"
               strokeDasharray={`${strokeDash} ${circumference}`}
@@ -583,39 +584,72 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black font-sans leading-none">{Math.round(totalConsumed)}</span>
-            <span className="text-[10px] font-bold tracking-wider uppercase opacity-75 font-mono mt-0.5">kcal</span>
+            <span className="stat-clamp-tile font-bold font-stat leading-none text-[var(--md-on-surface)]">{Math.round(totalConsumed)}</span>
+            <span className="text-[10px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag mt-0.5">kcal</span>
           </div>
         </div>
 
         <div className="flex-1 space-y-2">
           {activeGoalConfig && (
-            <div className="flex items-center justify-between gap-1 pb-1 border-b border-black/10 dark:border-white/10">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-black/10 dark:bg-white/10 truncate">
+            <div className="flex items-center justify-between gap-1 pb-1 border-b border-[var(--md-outline-variant)]/60">
+              <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate">
                 {activeGoalConfig.label}
               </span>
-              <span className="text-[10px] font-mono font-semibold opacity-85 shrink-0">
+              <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0">
                 {targetProtein}g Protein
               </span>
             </div>
           )}
           <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono">Target</span>
-            <span className="font-mono font-bold text-sm">{targetCals} kcal</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">Target</span>
+            <span className="font-stat font-bold text-sm text-[var(--md-on-surface)]">{targetCals} kcal</span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono">Remaining</span>
-            <span className={`font-mono font-bold text-sm ${totalConsumed > targetCals ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">Remaining</span>
+            <span className={`font-stat font-bold text-sm ${totalConsumed > targetCals ? 'text-red-500' : 'text-emerald-500'}`}>
               {Math.round(Math.max(0, targetCals - totalConsumed))} kcal
             </span>
           </div>
-          <div className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-[var(--md-surface-container)] overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, ringPct)}%`, backgroundColor: ringColor }}
+              className="h-full rounded-full transition-all duration-500 bg-[var(--md-primary)]"
+              style={{ width: `${Math.min(100, ringPct)}%` }}
             />
           </div>
         </div>
+      </motion.div>
+
+      {/* ── Nutrition Interaction Personality: Widget-Style Single-Highlight Stat Cards (Image 9 pattern) ── */}
+      <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-4">
+        <M3StatWidget
+          label="Calories"
+          value={Math.round(totalConsumed)}
+          unit="kcal"
+          sublabel="Daily intake"
+          highlight={{ text: `${Math.round((totalConsumed / targetCals) * 100)}% of goal` }}
+        />
+        <M3StatWidget
+          label="Target Protein"
+          value={targetProtein}
+          unit="g"
+          sublabel="Muscle maintenance"
+          highlight={{ text: activeGoalConfig ? activeGoalConfig.label : 'Target' }}
+        />
+        <M3StatWidget
+          label="Daily Hydration"
+          value={waterLiters}
+          unit="L"
+          sublabel="Hydration target: 2.5L"
+          onClick={handleAddWater}
+          highlight={{ text: '+250ml tap' }}
+        />
+        <M3StatWidget
+          label="Remaining"
+          value={Math.round(Math.max(0, targetCals - totalConsumed))}
+          unit="kcal"
+          sublabel={totalConsumed > targetCals ? 'Exceeded goal' : 'Calorie room left'}
+          highlight={{ text: totalConsumed > targetCals ? 'Over Budget' : 'On Protocol' }}
+        />
       </motion.div>
 
 
@@ -1001,7 +1035,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                 <button
                                   onClick={() => handleAddExtraItem(mealObj.slot)}
                                   disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
-                                  className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-primary-light dark:bg-primary-dark text-bg-light dark:text-bg-dark rounded-xl disabled:opacity-50"
+                                  className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-xl disabled:opacity-50"
                                 >
                                   {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
                                 </button>

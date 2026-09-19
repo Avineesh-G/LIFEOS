@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getData, saveData, sanitizeAppData, DEFAULT_DATA } from '../db';
+import { getData, saveData, sanitizeAppData, migrateAppData, DEFAULT_DATA } from '../db';
 import type { AppData } from '../types';
 import { User } from 'firebase/auth';
 import { scheduleWidgetSync } from '../utils/widgetBridge';
@@ -24,7 +24,7 @@ export function useData(user: User | null) {
       try {
         const cached = localStorage.getItem(CACHE_KEY_PREFIX + uid);
         if (cached) {
-          return sanitizeAppData(JSON.parse(cached));
+          return migrateAppData(JSON.parse(cached));
         }
       } catch {
         // ignore parsing error
@@ -33,7 +33,7 @@ export function useData(user: User | null) {
     try {
       const globalCached = localStorage.getItem(GLOBAL_CACHE_KEY);
       if (globalCached) {
-        return sanitizeAppData(JSON.parse(globalCached));
+        return migrateAppData(JSON.parse(globalCached));
       }
     } catch {}
     return DEFAULT_DATA;
@@ -66,7 +66,7 @@ export function useData(user: User | null) {
     try {
       const cached = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
       if (cached) {
-        const parsed = sanitizeAppData(JSON.parse(cached));
+        const parsed = migrateAppData(JSON.parse(cached));
         setData(parsed);
         dataRef.current = parsed;
         setLoading(false);
@@ -85,7 +85,7 @@ export function useData(user: User | null) {
       (snapshot) => {
         if (snapshot.exists()) {
           const serverData = snapshot.data() as Partial<AppData>;
-          const fresh = sanitizeAppData(serverData);
+          const fresh = migrateAppData(serverData);
 
           // Auto-healing protection: preserve local progress if server arrays are empty
           try {

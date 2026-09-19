@@ -1,42 +1,232 @@
 /* ==========================================================================
-   LifeOS Typography System — Offline-First Self-Hosted Fonts
-   Loaded from /assets/fonts/ (bundled in public/ & dist/ for Capacitor native Android)
+   LifeOS Typography System — Pixel-Style Google Sans Flex
+   
+   Grounded in Google's Pixel notification UI specification:
+   - Rounded, humanist sans-serif letterforms
+   - Moderate-to-high x-height, soft appearance
+   - 4-weight hierarchy: 400 / 500 / 600 (700 rare emphasis)
+   - Restrained letter spacing and generous line heights
+   - Four-level tonal text hierarchy (#F2F3F5, #B8BBC3, #858994, #5F626B)
+   - Zero font mixing
    ========================================================================== */
 
-/* 1. Main Headings: Clash Display (Variable) */
+@import '@fontsource-variable/google-sans-flex/full.css';
+
+/* Local alias mapping "Google Sans Flex" directly to the full variable woff2 */
 @font-face {
-  font-family: 'Clash Display';
-  src: url('/assets/fonts/ClashDisplay-Variable.woff2') format('woff2-variations'),
-       url('/assets/fonts/ClashDisplay-Variable.woff2') format('woff2');
-  font-weight: 200 700;
+  font-family: 'Google Sans Flex';
+  src: local('Google Sans Flex'),
+       local('Google Sans Flex Variable'),
+       url('@fontsource-variable/google-sans-flex/files/google-sans-flex-latin-full-normal.woff2') format('woff2-variations');
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
   font-style: normal;
   font-display: swap;
 }
 
-/* 2. Body / General Text: Satoshi (Variable) */
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/assets/fonts/Satoshi-Variable.woff2') format('woff2-variations'),
-       url('/assets/fonts/Satoshi-Variable.woff2') format('woff2');
-  font-weight: 300 900;
-  font-style: normal;
-  font-display: swap;
+:root {
+  --font-family-primary: "Google Sans Flex", sans-serif;
+  --font-primary: var(--font-family-primary);
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* 4-Level Tonal Hierarchy: Default Dark (Obsidian / Titanium) */
+  --text-primary: #F2F3F5;
+  --text-secondary: #B8BBC3;
+  --text-tertiary: #858994;
+  --text-disabled: #5F626B;
 }
 
-/* 3. Numbers & Stats: Space Grotesk (Fixed Medium 500) */
-@font-face {
-  font-family: 'Space Grotesk';
-  src: url('/assets/fonts/SpaceGrotesk-Medium.woff2') format('woff2');
+/* Light mode tonal overrides: Soft off-dark neutrals, never harsh pure #000000 */
+html:not(.dark) body,
+:root:not(.dark) {
+  --text-primary: #1E2024;
+  --text-secondary: #575B66;
+  --text-tertiary: #808593;
+  --text-disabled: #A6ABB8;
+}
+
+html.dark body {
+  --text-primary: #F2F3F5;
+  --text-secondary: #B8BBC3;
+  --text-tertiary: #858994;
+  --text-disabled: #5F626B;
+}
+
+/* ==========================================================================
+   Pixel Type Scale Utility Classes
+   ========================================================================== */
+
+/* 1. Display (44px / 48px / 600 / -0.6px) — Large hero/dashboard statements */
+.type-display,
+.font-display,
+.font-hero,
+.m3-hero-title,
+.hero-title {
+  font-family: var(--font-family-primary);
+  font-size: 44px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  font-variation-settings: 'wght' 600, 'wdth' 100, 'opsz' 44, 'ROND' 55;
+}
+
+/* 2. Page Title (30px / 36px / 600 / -0.25px) — Primary screen title */
+.type-page-title,
+.font-page-title,
+.font-page-heading,
+.page-heading,
+.m3-headline-l {
+  font-family: var(--font-family-primary);
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.25px;
+  font-variation-settings: 'wght' 600, 'wdth' 100, 'opsz' 30, 'ROND' 55;
+}
+
+/* 3. Section Heading (22px / 28px / 600 / 0) — Major sections inside a page */
+.type-section-heading,
+.font-section-heading,
+.section-heading,
+.m3-title-l {
+  font-family: var(--font-family-primary);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: 0;
+  font-variation-settings: 'wght' 600, 'wdth' 100, 'opsz' 22, 'ROND' 50;
+}
+
+/* 4. Card Title (18px / 24px / 500 / 0) — Cards, panels, lists, notification items */
+.type-card-title,
+.font-card-title,
+.card-title {
+  font-family: var(--font-family-primary);
+  font-size: 18px;
+  line-height: 24px;
   font-weight: 500;
-  font-style: normal;
-  font-display: swap;
+  letter-spacing: 0;
+  font-variation-settings: 'wght' 500, 'wdth' 100, 'opsz' 18, 'ROND' 50;
 }
 
-/* 4. Small Uppercase Tags / Pills: JetBrains Mono (Fixed Medium 500) */
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/assets/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+/* 5. Card Description (15px / 22px / 400 / 0) */
+.type-card-desc,
+.card-desc {
+  font-family: var(--font-family-primary);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  font-variation-settings: 'wght' 400, 'wdth' 100, 'opsz' 15, 'ROND' 40;
+}
+
+/* 6. Body Text (16px / 24px / 400 / 0) — Normal application content */
+.type-body,
+.font-body,
+.body-text,
+.m3-body-l {
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-variation-settings: 'wght' 400, 'wdth' 100, 'opsz' 16, 'ROND' 40;
+}
+
+/* 7. Secondary Body (14px / 20px / 400 / 0) — Supporting descriptions and metadata */
+.type-body-secondary,
+.font-secondary,
+.text-secondary-m3 {
+  font-family: var(--font-family-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  font-variation-settings: 'wght' 400, 'wdth' 100, 'opsz' 14, 'ROND' 40;
+}
+
+/* 8. Labels (13px / 18px / 500 / 0.05px) — Small structural/UI text */
+.type-label,
+.font-label,
+.font-tag,
+.font-small-label,
+.label-small {
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 500;
-  font-style: normal;
-  font-display: swap;
+  letter-spacing: 0.05px;
+  font-variation-settings: 'wght' 500, 'wdth' 100, 'opsz' 13, 'ROND' 45;
+}
+
+/* 9. Button Text (15px / 20px / 500 / 0) — Clean, non-700 buttons */
+.type-button,
+.font-button,
+.m3-btn,
+.btn-primary {
+  font-family: var(--font-family-primary);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variation-settings: 'wght' 500, 'wdth' 100, 'opsz' 15, 'ROND' 50;
+}
+
+/* 10. Navigation (14px / 20px / 500 / 0) */
+.type-navigation,
+.font-nav,
+.m3-label-l,
+.nav-label {
+  font-family: var(--font-family-primary);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variation-settings: 'wght' 500, 'wdth' 100, 'opsz' 14, 'ROND' 50;
+}
+
+/* 11. Statistics / Important Numbers (28px / 32px / 600 / -0.2px) */
+.type-stat,
+.font-stat,
+.font-num,
+.font-numeric,
+.m3-numeral {
+  font-family: var(--font-family-primary);
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'wght' 600, 'wdth' 100, 'opsz' 28, 'ROND' 45;
+}
+
+/* Large dashboard metric variant (32px / 36px / 600 / -0.3px) */
+.type-stat-lg {
+  font-family: var(--font-family-primary);
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'wght' 600, 'wdth' 100, 'opsz' 32, 'ROND' 45;
+}
+
+/* 12. Metadata (13px / 18px / 400 / 0) — Timestamps, captions, helper text */
+.type-metadata,
+.font-metadata,
+.font-caption,
+.caption-text {
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-tertiary);
+  font-variation-settings: 'wght' 400, 'wdth' 100, 'opsz' 13, 'ROND' 40;
 }

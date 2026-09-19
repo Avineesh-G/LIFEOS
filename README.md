@@ -5,7 +5,7 @@
 **The Unified Personal Operating System for High-Performance Living**  
 *Academics · Hypertrophy Fitness · Nutrition · Campus Life · Biometric Vault · Home Screen Widget*
 
-[![Version](https://img.shields.io/badge/Version-v1.6.5_(Build_30)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v1.2.1_(Build_2)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript_5-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -14,7 +14,7 @@
 
 <br />
 
-### [📱 Download Direct APK (v1.6.5)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
+### [📱 Download Direct APK (v1.2.1)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
 
 <br />
 
@@ -37,7 +37,13 @@ Modern students and professionals juggle between 5 to 7 fragmented, ad-ridden ap
 
 ---
 
-## ⚡ What's New in v1.6.5 (Build 30)
+## ⚡ What's New in v1.2.1 (Build 2)
+
+- 🔤 **Pixel-Style Typography System**: Unified `Google Sans Flex` variable typeface across the entire app — zero font mixing. Implements the 4-weight Pixel hierarchy (400 Regular, 500 Medium, 600 SemiBold, 700 Bold-rare) and a 4-level tonal text hierarchy (`#F2F3F5` primary, `#B8BBC3` secondary, `#858994` tertiary, `#5F626B` disabled in dark mode).
+- 🧭 **Navigation Bar Redesign**: Floating pill (icon-only tabs) + separate squircle More button. Both pill and squircle recolor per active interface. Hides on scroll-down, reappears on scroll-up with smooth fade transition. Auto-hides inside sub-interface routes.
+- 📋 **Navigation Hub Sheet**: Compact bottom-sheet More menu opened by the squircle button — 10 destinations in a content-hugging layout (max 60dvh/420px), safe-area aware, drag-to-dismiss with Framer Motion spring physics.
+- 🏠 **Per-Interface Background System**: Each main interface carries its own faintly seed-tinted canvas (`#FDFDFD` light / `#121316` dark at ~5% seed blend) with a single organic blob accent and interface-keyed ambient gradient.
+- 🐛 **Blank Screen Hardening**: Structural fixes to prevent recurring blank-screen-after-HMR issues — lazy import chains, React error boundaries, service worker cache-busting, and HMR stability guards.
 
 - 📱 **Per-Widget Metric Customization (`WidgetConfigActivity`)**: Configure each placed widget instance independently! Select 2 to 3 metrics to display on your home screen:
   1. 🔥 **Current Streak**: Consecutive study and active habit consistency count.

@@ -10,6 +10,7 @@ import {
   CheckSquare,
   ShieldCheck,
   Settings,
+  ShoppingBag,
   LucideIcon
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export type NavModuleId =
   | 'timetable'
   | 'study'
   | 'spending'
+  | 'shopping'
   | 'tasks'
   | 'vault'
   | 'settings';
@@ -83,6 +85,14 @@ export const NAV_MODULE_REGISTRY: NavModuleDefinition[] = [
     icon: Wallet,
     color: 'text-amber-500 dark:text-amber-400',
     description: 'Expense tracking and monthly budget'
+  },
+  {
+    id: 'shopping',
+    label: 'Shopping Lists',
+    path: '/shopping',
+    icon: ShoppingBag,
+    color: 'text-orange-500 dark:text-orange-400',
+    description: 'Checklists, grocery trips, and outing templates'
   },
   {
     id: 'laundry',

@@ -622,7 +622,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                         onClick={() => setDay(d)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                           day === d
-                            ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light shadow-sm'
+                            ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-sm'
                             : 'bg-black/[0.03] dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-secondary-light dark:text-secondary-dark'
                         }`}
                       >

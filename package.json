@@ -1,7 +1,7 @@
 {
   "name": "lifeos",
   "private": true,
-  "version": "1.6.5",
+  "version": "1.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -25,6 +25,7 @@
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
     "@fontsource-variable/google-sans-flex": "^5.3.1",
     "@google/generative-ai": "^0.24.1",
+    "@material/material-color-utilities": "^0.3.0",
     "@rive-app/react-canvas-lite": "^4.34.3",
     "date-fns": "^3.6.0",
     "firebase": "^12.18.0",

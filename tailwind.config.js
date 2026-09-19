@@ -5,13 +5,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['"Clash Display"', 'system-ui', '-apple-system', 'sans-serif'],
-        body: ['"Satoshi"', 'system-ui', '-apple-system', 'sans-serif'],
-        stat: ['"Space Grotesk"', 'system-ui', '-apple-system', 'sans-serif'],
-        tag: ['"JetBrains Mono"', 'monospace'],
-        sans: ['"Satoshi"', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Clash Display"', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        heading: ['"Google Sans Flex"', 'sans-serif'],
+        body: ['"Google Sans Flex"', 'sans-serif'],
+        stat: ['"Google Sans Flex"', 'sans-serif'],
+        tag: ['"Google Sans Flex"', 'sans-serif'],
+        sans: ['"Google Sans Flex"', 'sans-serif'],
+        display: ['"Google Sans Flex"', 'sans-serif'],
+        mono: ['"Google Sans Flex"', 'sans-serif'],
       },
       colors: {
         accent: {
@@ -44,18 +44,34 @@ export default {
         },
         primary: {
           DEFAULT: 'var(--text-primary)',
-          light: 'var(--text-primary)',
-          dark: 'var(--text-primary)',
+          light: '#1E2024',
+          dark: '#F2F3F5',
         },
         secondary: {
           DEFAULT: 'var(--text-secondary)',
-          light: 'var(--text-secondary)',
-          dark: 'var(--text-secondary)',
+          light: '#575B66',
+          dark: '#B8BBC3',
+        },
+        tertiary: {
+          DEFAULT: 'var(--text-tertiary)',
+          light: '#808593',
+          dark: '#858994',
+        },
+        disabled: {
+          DEFAULT: 'var(--text-disabled)',
+          light: '#A6ABB8',
+          dark: '#5F626B',
         },
         muted: {
-          DEFAULT: 'var(--text-muted)',
-          light: 'var(--text-muted)',
-          dark: 'var(--text-muted)',
+          DEFAULT: 'var(--text-tertiary)',
+          light: '#808593',
+          dark: '#858994',
+        },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+          disabled: 'var(--text-disabled)',
         },
         pill: {
           light: 'var(--accent)',

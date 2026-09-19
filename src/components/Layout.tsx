@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home, Menu, X, RotateCw, Bell, LucideIcon, Check, ArrowLeftRight
+  Home, Dumbbell, Utensils, Menu, X, RotateCw, Bell, LucideIcon, Check, ArrowLeftRight
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -20,6 +20,15 @@ import {
 } from '../config/navRegistry';
 import { loadNavConfig, saveNavConfig } from '../utils/navStorage';
 import { NavSlotPickerModal } from './NavSlotPickerModal';
+import { SectionAccentBlob } from './SectionAccentBlob';
+import { NavigationHubSheet } from './NavigationHubSheet';
+import { MotionScheme } from '../utils/motionConfig';
+import {
+  getSectionFromPathname,
+  getNavPillBg,
+  getNavSquircleBg,
+} from '../theme/sectionSeedColors';
+import { useDayTheme } from '../theme/DayThemeProvider';
 import type { AppData, AppSettings } from '../types';
 
 interface LayoutProps {
@@ -50,6 +59,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressTriggeredRef = useRef(false);
   const pointerStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const squircleRef = useRef<HTMLButtonElement | null>(null);
 
   const slot1Module = getModuleById(navConfig.slot1);
   const slot2Module = getModuleById(navConfig.slot2);
@@ -321,28 +331,27 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     }
   }, [location.pathname]);
 
-  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up or near top/bottom
+  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop;
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop;
           const delta = currentScrollY - lastScrollY;
-          const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 60;
 
-          // Near page top or reached page bottom -> navigation is always visible
-          if (currentScrollY <= 45 || isNearBottom) {
+          // When near the top of the page, navigation is always visible
+          if (currentScrollY <= 20) {
             setNavVisible(true);
-          } else if (Math.abs(delta) > 8) {
+          } else if (Math.abs(delta) > 5) {
             if (delta > 0) {
-              // Scrolling down -> hide nav
+              // Scrolling down -> hide nav smoothly
               setNavVisible(false);
               setMenuOpen(false);
             } else {
-              // Scrolling back up -> reveal nav
+              // Scrolling back up -> reveal nav smoothly
               setNavVisible(true);
             }
           }
@@ -355,24 +364,117 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
+  // Detect when any sub-interface (BottomSheet, Modal, Dialog) is open across all interfaces
+  const [subInterfaceOpen, setSubInterfaceOpen] = useState(false);
+
+  useEffect(() => {
+    const handleSubOpen = () => setSubInterfaceOpen(true);
+    const handleSubClose = () => {
+      setTimeout(() => {
+        const hasOpen = Boolean(
+          document.body.getAttribute('data-subinterface-open') === 'true' ||
+          document.querySelector('[data-subinterface-open="true"]')
+        );
+        setSubInterfaceOpen(hasOpen);
+      }, 60);
+    };
+
+    window.addEventListener('lifeos-subinterface-open', handleSubOpen);
+    window.addEventListener('lifeos-subinterface-close', handleSubClose);
+
+    // MutationObserver fallback to catch any portal/dialog mounted into DOM
+    const observer = new MutationObserver(() => {
+      const hasModal = Boolean(
+        document.body.getAttribute('data-subinterface-open') === 'true' ||
+        document.querySelector('[data-subinterface-open="true"]') ||
+        document.querySelector('.fixed.z-\\[9999\\]')
+      );
+      setSubInterfaceOpen(hasModal);
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+    return () => {
+      window.removeEventListener('lifeos-subinterface-open', handleSubOpen);
+      window.removeEventListener('lifeos-subinterface-close', handleSubClose);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Sub-routes where focused task execution happens (workout session, shopping list items, study timer, etc.)
+  const isSubRoute = useMemo(() => {
+    const path = (location.pathname || '').toLowerCase();
+    if (
+      path.startsWith('/study/timer') ||
+      path.startsWith('/study/history') ||
+      path.startsWith('/study/heatmap') ||
+      path.startsWith('/gym/workout') ||
+      path.startsWith('/gym/split') ||
+      path.startsWith('/gym/onboarding') ||
+      path.startsWith('/gym/history/') ||
+      (path.startsWith('/shopping/') && path !== '/shopping')
+    ) {
+      return true;
+    }
+    return false;
+  }, [location.pathname]);
+
+
+  const { isDark } = useDayTheme();
+  const activeSection = getSectionFromPathname(location.pathname);
+  const pillBg = getNavPillBg(activeSection, isDark);
+  const squircleBg = getNavSquircleBg(activeSection, isDark);
+  const solidAccent = squircleBg;
+  // Inactive icons: rendered in a muted tone (roughly 55% opacity of the pill's "on-container" color)
+  const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(15, 23, 42, 0.55)';
+
+  const navTabs = [
+    {
+      id: 'home',
+      path: '/',
+      icon: Home,
+      isActive: location.pathname === '/' || ['/tasks', '/progress', '/history', '/laundry'].includes(location.pathname),
+      label: 'Home',
+    },
+    {
+      id: 'gym',
+      path: '/gym',
+      icon: Dumbbell,
+      isActive: location.pathname.startsWith('/gym'),
+      label: 'Gym',
+    },
+    {
+      id: 'nutrition',
+      path: '/nutrition',
+      icon: Utensils,
+      isActive: location.pathname === '/nutrition',
+      label: 'Nutrition',
+    },
+  ];
+
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === '/') return location.pathname === '/' || ['/tasks', '/progress', '/history', '/laundry'].includes(location.pathname);
     return location.pathname.startsWith(path);
   };
 
   const isPrimaryPath = (path: string) => {
     if (path === '/') return true;
-    if (path === slot1Module.path) return true;
-    if (path === slot2Module.path) return true;
+    if (path === '/gym') return true;
+    if (path === '/nutrition') return true;
     return false;
   };
 
   const isSecondaryActive = NAV_MODULE_REGISTRY.some(
     item => !isPrimaryPath(item.path) && isActive(item.path)
   );
+
 
   // Current page label for header
   const currentNav =
@@ -383,9 +485,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
   return (
     <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
+      {/* ── Material 3 Expressive Background System: Neutral Canvas + Single Off-Canvas Organic Blob ── */}
+      <SectionAccentBlob />
 
-
-      {/* ── Top In-Page Minimalist Controls (Option B: Pure Floating · Moves with page scroll) ── */}
+      {/* ── Top In-Page Minimalist Controls (Floating Minimalist Pill Directly on Wallpaper) ── */}
       <header 
         className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited"
         style={{
@@ -393,21 +496,21 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         }}
       >
         <div className="flex items-center justify-between px-4 sm:px-6 h-9 max-w-xl mx-auto">
-          {/* Left: LifeOS Floating Micro-Badge */}
+          {/* Left: LifeOS Floating Micro-Badge directly on wallpaper */}
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] shadow-xs active:scale-95 transition-all duration-300 select-none hover:bg-[var(--card-surface)]"
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/25 dark:bg-black/40 backdrop-blur-xl border border-white/25 text-white active:scale-95 transition-all select-none shadow-sm"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="font-bold text-xs tracking-tight text-primary-light dark:text-primary-dark font-sans">
+            <span className="w-2 h-2 rounded-full bg-[var(--md-primary)] animate-pulse" />
+            <span className="font-bold text-xs tracking-tight font-sans text-white">
               LifeOS
             </span>
           </button>
 
-          {/* Right Controls: Notification Enable Alert (if not granted) + Reload Button */}
+          {/* Right Controls: Notification Enable Alert + Reload Squircle Button */}
           <div className="pointer-events-auto flex items-center gap-2">
             {!hasNotificationPermission && (
               <button
@@ -417,10 +520,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   const granted = await requestAndSyncNotifications(data, updateData);
                   setHasNotificationPermission(granted);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/15 dark:bg-indigo-500/25 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 font-bold text-xs active:scale-95 transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/25 dark:bg-black/40 backdrop-blur-xl border border-white/25 text-white font-bold text-xs active:scale-95 transition-all shadow-sm"
                 title="Allow phone notifications for Timetable & Tasks"
               >
-                <Bell size={13} className="text-indigo-500 animate-bounce" />
+                <Bell size={13} className="text-white animate-bounce" />
                 <span>Allow Alerts</span>
               </button>
             )}
@@ -429,13 +532,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               onPointerDown={() => triggerHaptic('light')}
               onClick={handleReload}
               disabled={isReloading}
-              className={`w-8 h-8 flex items-center justify-center rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all duration-300 shadow-xs ${
-                isReloading ? 'text-accent border-accent/40 bg-accent/15' : ''
+              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm ${
+                isReloading ? 'border-white/60 bg-white/20' : ''
               }`}
+              style={{ contain: 'paint' }}
               aria-label="Reload and sync data"
               title="Reload and sync data"
             >
-              <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-accent' : ''}`} />
+              <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-white' : ''}`} />
             </button>
           </div>
         </div>
@@ -454,90 +558,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         </div>
       </main>
 
-      {/* ── Backdrop Overlay for Speed-Dial Menu ── */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={() => {
-              triggerHaptic('light');
-              setMenuOpen(false);
-            }}
-            className="fixed inset-0 bg-black/40 dark:bg-black/65 z-40 pointer-events-auto"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ── Speed-Dial Popup Menu Panel (Three Dots Navigation Hub) ── */}
-      <AnimatePresence>
-        {menuOpen && (
-          <div
-            className="fixed z-50 pointer-events-none flex flex-col items-end justify-end w-full max-w-xs left-1/2 -translate-x-1/2 px-4"
-            style={{ bottom: 'calc(6.5rem + env(safe-area-inset-bottom, 0px))' }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.95 }}
-              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-auto w-full rounded-[28px] p-2.5 liquid-glass border border-[var(--card-border)] shadow-[0_20px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] space-y-1"
-            >
-              <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--card-border)]/60">
-                <span className="label-mono text-[10px] font-bold tracking-wider uppercase text-[var(--text-muted)]">
-                  Navigation Hub
-                </span>
-                <span className="text-[10px] font-bold text-[var(--pill-active-text)] bg-[var(--pill-active-bg)] px-2 py-0.5 rounded-full border border-[var(--card-border)]">
-                  {pageLabel}
-                </span>
-              </div>
-
-              <div className="max-h-[60vh] overflow-y-auto no-scrollbar space-y-1 py-1">
-                {NAV_MODULE_REGISTRY.map((item) => {
-                  const active = isActive(item.path);
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.path}
-                      onClick={() => {
-                        triggerHaptic('nav');
-                        setMenuOpen(false);
-                        navigate(item.path);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-[20px] transition-all active:scale-[0.98] select-none ${
-                        active
-                          ? 'bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] font-bold shadow-xs'
-                          : 'hover:bg-[var(--card-surface)] text-[var(--text-primary)] font-semibold'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                          active
-                            ? 'bg-[var(--accent-primary)] text-white shadow-xs'
-                            : 'bg-black/5 dark:bg-white/10 text-[var(--text-secondary)]'
-                        }`}>
-                          <Icon size={16} strokeWidth={2.2} />
-                        </div>
-                        <span className="text-xs sm:text-sm tracking-tight truncate font-sans">
-                          {item.label}
-                        </span>
-                      </div>
-
-                      {active ? (
-                        <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] shrink-0 mr-1" />
-                      ) : (
-                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--card-border)] shrink-0 mr-1 opacity-60" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* ── Compact Material 3 Expressive Navigation Hub Modal Sheet ── */}
+      <NavigationHubSheet
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        activeSection={activeSection}
+        isDark={isDark}
+        returnFocusRef={squircleRef}
+      />
 
       {/* ── Edit Mode Outside Click Dismiss Backdrop ── */}
       {isNavEditing && !pickerSlot && (
@@ -565,167 +593,129 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         )}
       </AnimatePresence>
 
-      {/* ── Fixed Bottom Divided Navigation Bar (Split Island Dynamic Dock) ── */}
-      <nav
-        className="fixed left-0 right-0 z-[100] pointer-events-none flex items-center justify-center px-3 sm:px-4 gpu-composited"
-        style={{
-          bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
-          transform: isKeyboardOpen || (!navVisible && !menuOpen)
-            ? 'translateY(calc(100% + 2.5rem))'
-            : 'translateY(0)',
-          opacity: isKeyboardOpen || (!navVisible && !menuOpen) ? 0 : 1,
-          transition: 'transform 420ms cubic-bezier(0.32,0,0.67,0), opacity 380ms cubic-bezier(0.32,0,0.67,0)',
-          pointerEvents: isKeyboardOpen || (!navVisible && !menuOpen) ? 'none' : 'auto',
-        }}
-        role="navigation"
-        aria-label="Main Navigation"
-      >
-        <div className="relative pointer-events-auto flex items-center gap-2 sm:gap-2.5 max-w-md">
-          {/* Edit Mode Done / Hint Floating Affordance */}
-          <AnimatePresence>
-            {isNavEditing && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                className="absolute -top-11 left-0 right-0 flex items-center justify-between px-2 pointer-events-auto select-none"
+      {/* ── Fixed Bottom Divided Navigation Bar (Pill + Squircle, Per-Interface Color) ── */}
+      {(() => {
+        const isNavHidden = isKeyboardOpen || subInterfaceOpen || isSubRoute || (!navVisible && !menuOpen);
+        return (
+          <motion.nav
+            initial={false}
+            animate={{
+              y: isNavHidden ? 100 : 0,
+              opacity: isNavHidden ? 0 : 1,
+              scale: isNavHidden ? 0.93 : 1,
+            }}
+            transition={{
+              y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
+              opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+              scale: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+            }}
+            style={{
+              bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+              pointerEvents: isNavHidden ? 'none' : 'auto',
+            }}
+            className="fixed left-0 right-0 z-[100] flex items-center justify-center px-4 gpu-composited select-none"
+            role="navigation"
+            aria-label="Main Navigation"
+          >
+            <div className="relative pointer-events-auto flex items-center gap-[14px]">
+              {/* 1. Nav pill (left element): full stadium/pill, fixed height 64px, width sized to content with 20px h-padding */}
+              <div
+                className="h-[64px] px-[20px] rounded-full flex items-center gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none"
+                style={{
+                  backgroundColor: pillBg,
+                  transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
+                }}
               >
-                <span className="text-[10px] sm:text-[11px] font-bold font-mono text-[var(--accent-primary)] bg-[var(--card-surface)] px-2.5 py-1 rounded-full border border-[var(--card-border)] shadow-xs">
-                  Tap slot to change
-                </span>
-                <button
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setIsNavEditing(false);
-                  }}
-                  className="px-3.5 py-1 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold shadow-md flex items-center gap-1.5 active:scale-95 transition-transform"
-                >
-                  <Check size={12} strokeWidth={3} />
-                  <span>Done</span>
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Main Divided Segment: Home, Slot 1, Slot 2 */}
-          <div className="flex items-center px-2 py-1.5 rounded-[28px] bg-[var(--card-surface)] border border-[var(--card-border)] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-colors duration-300">
-            {primaryDockItems.map((item, idx) => {
-              const active = isActive(item.path);
-              const Icon = item.icon;
-              const isEditable = !item.isFixed;
-              const wiggleClass = isNavEditing && isEditable
-                ? (item.slot === 1 ? 'animate-nav-wiggle-1 nav-slot-editable-active' : 'animate-nav-wiggle-2 nav-slot-editable-active')
-                : '';
-
-              return (
-                <div key={item.slot} className="flex items-center">
-                  {idx > 0 && (
-                    <div className="w-[1px] h-5 bg-[var(--card-border)] rounded-full mx-0.5 opacity-80" />
-                  )}
-                  <button
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUpOrLeave}
-                    onPointerLeave={handlePointerUpOrLeave}
-                    onPointerCancel={handlePointerUpOrLeave}
-                    onClick={() => {
-                      if (isLongPressTriggeredRef.current) {
-                        isLongPressTriggeredRef.current = false;
-                        return;
-                      }
-                      if (isNavEditing) {
-                        if (isEditable) {
-                          triggerHaptic('light');
-                          setPickerSlot(item.slot as 1 | 2);
-                        } else {
-                          triggerHaptic('light');
-                        }
-                        return;
-                      }
-                      triggerHaptic('nav');
-                      if (menuOpen) setMenuOpen(false);
-                      navigate(item.path);
-                    }}
-                    title={isNavEditing && isEditable ? `Customize ${item.label}` : item.label}
-                    className={`relative flex flex-col items-center justify-center w-[68px] sm:w-[74px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${wiggleClass} ${
-                      active && !isNavEditing
-                        ? 'text-[var(--pill-active-text)] font-bold'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold'
-                    }`}
-                  >
-                    {active && !isNavEditing && (
-                      <motion.div
-                        layoutId="activeTabBadge"
-                        className="absolute inset-0 rounded-[18px] bg-[var(--pill-active-bg)] border border-[var(--card-border)] shadow-xs"
-                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                {navTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const active = tab.isActive;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        triggerHaptic('nav');
+                        if (menuOpen) setMenuOpen(false);
+                        navigate(tab.path);
+                      }}
+                      className="relative w-[40px] h-[40px] rounded-full flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95"
+                      aria-label={tab.label}
+                    >
+                      {/* Active icon chip: 40px diameter filled circle chip in interface solid accent color */}
+                      {active && (
+                        <motion.div
+                          layoutId="navActiveChip"
+                          className="absolute inset-0 rounded-full shadow-xs"
+                          style={{
+                            backgroundColor: solidAccent,
+                            transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1)',
+                          }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                        />
+                      )}
+                      {/* Icon size: 24px, active in white, inactive in 55% opacity */}
+                      <Icon
+                        size={24}
+                        strokeWidth={active ? 2.5 : 2.2}
+                        className="relative z-10 transition-colors duration-200"
+                        style={{
+                          color: active ? '#FFFFFF' : inactiveColor,
+                        }}
                       />
-                    )}
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={item.path}
-                        initial={{ opacity: 0, scale: 0.85 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.85 }}
-                        transition={{ duration: 0.15 }}
-                        className="relative z-10 flex flex-col items-center justify-center pointer-events-none"
-                      >
-                        <Icon size={20} strokeWidth={active && !isNavEditing ? 2.5 : 2.2} className="transition-transform duration-150" />
-                        <span className="text-[10.5px] sm:text-[11px] tracking-tight mt-0.5 leading-none">
-                          {item.label}
-                        </span>
-                      </motion.div>
-                    </AnimatePresence>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-          {/* Divided Companion Satellite: More / Menu Launcher (Three Dots) */}
-          <div className="flex items-center justify-center p-1.5 rounded-[26px] bg-[var(--card-surface)] border border-[var(--card-border)] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.5)] transition-colors duration-300">
-            <button
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUpOrLeave}
-              onPointerLeave={handlePointerUpOrLeave}
-              onPointerCancel={handlePointerUpOrLeave}
-              onClick={() => {
-                if (isLongPressTriggeredRef.current) {
-                  isLongPressTriggeredRef.current = false;
-                  return;
-                }
-                if (isNavEditing) {
+              {/* 2. More button (right element, separate squircle): 64px x 64px, border-radius 28px */}
+              <motion.button
+                ref={squircleRef}
+                whileTap={{ scale: 0.94 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                onClick={() => {
                   triggerHaptic('light');
-                  return;
-                }
-                triggerHaptic('light');
-                setMenuOpen(!menuOpen);
-              }}
-              title="More Sections"
-              aria-expanded={menuOpen}
-              className={`relative flex flex-col items-center justify-center w-[58px] sm:w-[64px] py-1.5 px-2 rounded-[20px] transition-all duration-150 active:scale-95 select-none focus:outline-none ${
-                menuOpen || isSecondaryActive
-                  ? 'text-[var(--pill-active-text)] font-bold'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold'
-              }`}
-            >
-              {(menuOpen || isSecondaryActive) && (
-                <div
-                  className="absolute inset-0 rounded-[18px] bg-[var(--pill-active-bg)] border border-[var(--card-border)] shadow-xs transition-opacity duration-150"
-                />
-              )}
-              {menuOpen ? (
-                <X size={20} strokeWidth={2.4} className="relative z-10 transition-transform duration-150" />
-              ) : (
-                <Menu size={20} strokeWidth={2.2} className="relative z-10 transition-transform duration-150" />
-              )}
-              <span className="relative z-10 text-[10.5px] sm:text-[11px] tracking-tight mt-0.5 leading-none">
-                {menuOpen ? 'Close' : 'More'}
-              </span>
-            </button>
-          </div>
-        </div>
-      </nav>
+                  setMenuOpen(!menuOpen);
+                }}
+                className="w-[64px] h-[64px] shrink-0 rounded-[28px] flex items-center justify-center border border-white/20 shadow-[0_10px_28px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none focus:outline-none cursor-pointer relative overflow-hidden"
+                style={{
+                  backgroundColor: squircleBg,
+                  transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
+                }}
+                aria-label="More Menu"
+                aria-expanded={menuOpen}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {menuOpen ? (
+                    <motion.div
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 34, mass: 1 }}
+                    >
+                      <X size={26} strokeWidth={2.4} className="text-white" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="grid"
+                      initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 34, mass: 1 }}
+                    >
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+                        <circle cx="7" cy="7" r="2.4" />
+                        <circle cx="17" cy="7" r="2.4" />
+                        <circle cx="7" cy="17" r="2.4" />
+                        <circle cx="17" cy="17" r="2.4" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
+          </motion.nav>
+        );
+      })()}
 
       {/* ── Slot Picker BottomSheet Modal ── */}
       <NavSlotPickerModal

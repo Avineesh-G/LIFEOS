@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generated automatically from src/utils/pixelSkyPalettes.ts. Do NOT edit directly. -->
+<!-- Generated automatically from src/theme/phaseSeedColors.ts (Material 3). Do NOT edit directly. -->
 <resources>
-    <!-- DAWN PHASE -->
-    <color name="dawn_card_surface">#FCF9F8</color>
-    <color name="dawn_card_border">#EAD5CD</color>
-    <color name="dawn_text_primary">#171424</color>
-    <color name="dawn_text_secondary">#3A3654</color>
-    <color name="dawn_text_muted">#5F5A7C</color>
-    <color name="dawn_accent">#AA187E</color>
-    <color name="dawn_accent_contrast">#FFFFFF</color>
+    <!-- DAWN PHASE (M3 Seed: #F5A623) -->
+    <color name="dawn_card_surface">#fff5ec</color>
+    <color name="dawn_card_border">#d3c4b4</color>
+    <color name="dawn_text_primary">#1E2024</color>
+    <color name="dawn_text_secondary">#575B66</color>
+    <color name="dawn_text_muted">#808593</color>
+    <color name="dawn_accent">#835500</color>
+    <color name="dawn_accent_contrast">#ffffff</color>
 
-    <!-- MORNING PHASE -->
-    <color name="morning_card_surface">#FCFBF8</color>
-    <color name="morning_card_border">#EAE1CD</color>
-    <color name="morning_text_primary">#141A24</color>
-    <color name="morning_text_secondary">#364154</color>
-    <color name="morning_text_muted">#5A677C</color>
-    <color name="morning_accent">#1872AA</color>
-    <color name="morning_accent_contrast">#FFFFFF</color>
+    <!-- MORNING PHASE (M3 Seed: #0284C7) -->
+    <color name="morning_card_surface">#f6f6f9</color>
+    <color name="morning_card_border">#c2c7ce</color>
+    <color name="morning_text_primary">#1E2024</color>
+    <color name="morning_text_secondary">#575B66</color>
+    <color name="morning_text_muted">#808593</color>
+    <color name="morning_accent">#006398</color>
+    <color name="morning_accent_contrast">#ffffff</color>
 
-    <!-- AFTERNOON PHASE -->
-    <color name="afternoon_card_surface">#FCFBF8</color>
-    <color name="afternoon_card_border">#EAE4CD</color>
-    <color name="afternoon_text_primary">#141A24</color>
-    <color name="afternoon_text_secondary">#364254</color>
-    <color name="afternoon_text_muted">#5A687C</color>
-    <color name="afternoon_accent">#186BAA</color>
-    <color name="afternoon_accent_contrast">#FFFFFF</color>
+    <!-- AFTERNOON PHASE (M3 Seed: #2563EB) -->
+    <color name="afternoon_card_surface">#f8f5fa</color>
+    <color name="afternoon_card_border">#c5c6d0</color>
+    <color name="afternoon_text_primary">#1E2024</color>
+    <color name="afternoon_text_secondary">#575B66</color>
+    <color name="afternoon_text_muted">#808593</color>
+    <color name="afternoon_accent">#0053db</color>
+    <color name="afternoon_accent_contrast">#ffffff</color>
 
-    <!-- DUSK PHASE -->
-    <color name="dusk_card_surface">#FCF9F8</color>
-    <color name="dusk_card_border">#EAD7CD</color>
-    <color name="dusk_text_primary">#1A1424</color>
-    <color name="dusk_text_secondary">#413654</color>
-    <color name="dusk_text_muted">#675A7C</color>
-    <color name="dusk_accent">#AA1874</color>
-    <color name="dusk_accent_contrast">#FFFFFF</color>
+    <!-- DUSK PHASE (M3 Seed: #E11D48) -->
+    <color name="dusk_card_surface">#fff4f3</color>
+    <color name="dusk_card_border">#d7c1c2</color>
+    <color name="dusk_text_primary">#1E2024</color>
+    <color name="dusk_text_secondary">#575B66</color>
+    <color name="dusk_text_muted">#808593</color>
+    <color name="dusk_accent">#be0037</color>
+    <color name="dusk_accent_contrast">#ffffff</color>
 
-    <!-- EVENING PHASE -->
-    <color name="evening_card_surface">#0E1122</color>
-    <color name="evening_card_border">#1F2440</color>
-    <color name="evening_text_primary">#F2F3F8</color>
-    <color name="evening_text_secondary">#AEB2CB</color>
-    <color name="evening_text_muted">#6F759B</color>
-    <color name="evening_accent">#8290ED</color>
-    <color name="evening_accent_contrast">#060810</color>
+    <!-- EVENING PHASE (M3 Seed: #7C3AED) -->
+    <color name="evening_card_surface">#fbf5fa</color>
+    <color name="evening_card_border">#cbc4cf</color>
+    <color name="evening_text_primary">#1E2024</color>
+    <color name="evening_text_secondary">#575B66</color>
+    <color name="evening_text_muted">#808593</color>
+    <color name="evening_accent">#732ee4</color>
+    <color name="evening_accent_contrast">#ffffff</color>
 
-    <!-- NIGHT PHASE -->
-    <color name="night_card_surface">#0E1322</color>
-    <color name="night_card_border">#1F2640</color>
-    <color name="night_text_primary">#F2F3F8</color>
-    <color name="night_text_secondary">#AEB4CB</color>
-    <color name="night_text_muted">#6F789B</color>
-    <color name="night_accent">#829DED</color>
-    <color name="night_accent_contrast">#060810</color>
+    <!-- NIGHT PHASE (M3 Seed: #4F46E5) -->
+    <color name="night_card_surface">#242327</color>
+    <color name="night_card_border">#47464f</color>
+    <color name="night_text_primary">#F2F3F5</color>
+    <color name="night_text_secondary">#B8BBC3</color>
+    <color name="night_text_muted">#858994</color>
+    <color name="night_accent">#c3c0ff</color>
+    <color name="night_accent_contrast">#1d00a5</color>
 
 </resources>

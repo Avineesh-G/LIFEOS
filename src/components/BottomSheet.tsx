@@ -27,10 +27,14 @@ export function BottomSheet({
 }: BottomSheetProps) {
   useEffect(() => {
     if (isOpen) {
+      window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
+      document.body.setAttribute('data-subinterface-open', 'true');
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
+        document.body.removeAttribute('data-subinterface-open');
         document.body.style.overflow = prevOverflow;
+        window.dispatchEvent(new CustomEvent('lifeos-subinterface-close'));
       };
     }
   }, [isOpen]);
@@ -112,10 +116,14 @@ export function Modal({
 }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
+      window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
+      document.body.setAttribute('data-subinterface-open', 'true');
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
+        document.body.removeAttribute('data-subinterface-open');
         document.body.style.overflow = prevOverflow;
+        window.dispatchEvent(new CustomEvent('lifeos-subinterface-close'));
       };
     }
   }, [isOpen]);

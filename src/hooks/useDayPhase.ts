@@ -171,7 +171,7 @@ export function calculatePhaseAndProgress(now: Date = new Date()): DayPhaseState
  * Central single source of truth:
  * - If themeMode === 'night': returns fixed deep-night state { phase: 'night', nextPhase: 'dawn', progress: 0.5 }
  * - If themeMode === 'dynamic': returns real live device time state
- * Downstream consumers (DayThemeProvider, PixelSkyCanvas, typography weights) automatically stay in sync.
+ * Downstream consumers (DayThemeProvider, useMaterialTheme, typography weights) automatically stay in sync.
  */
 export function useDayPhase(): DayPhaseState {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getThemeMode);

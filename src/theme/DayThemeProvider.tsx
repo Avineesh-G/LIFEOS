@@ -1,17 +1,24 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useDayPhase, DayPhase } from '../hooks/useDayPhase';
+import { useMaterialTheme, UseMaterialThemeReturn } from '../hooks/useMaterialTheme';
 import {
-  PIXEL_SKY_PALETTES,
-  PhaseUiTokens,
-  hexToRgb
-} from '../utils/pixelSkyPalettes';
-import { getHeadingWeight, getBodyWeight } from './typography';
+  SectionM3Theme,
+  M3ColorScheme,
+  hexToRgb,
+  AppSection,
+  getM3ThemeForSection,
+  applyM3ThemeToDocument,
+} from './sectionSeedColors';
+import { initM3StateLayer } from '../utils/m3StateLayer';
+import { TEXT_TONAL_DARK, TEXT_TONAL_LIGHT, TYPOGRAPHY_TOKENS } from './typography';
 
 export interface DayThemeContextValue {
   phase: DayPhase;
   nextPhase: DayPhase;
   progress: number;
-  ui: PhaseUiTokens;
+  section: AppSection;
+  m3Theme: SectionM3Theme;
+  scheme: M3ColorScheme;
   isDark: boolean;
   headingWeight: number;
   bodyWeight: number;
@@ -21,13 +28,16 @@ const DayThemeContext = createContext<DayThemeContextValue | null>(null);
 
 export function DayThemeProvider({ children }: { children: React.ReactNode }) {
   const { phase, nextPhase, progress } = useDayPhase();
-  const phaseConfig = PIXEL_SKY_PALETTES[phase];
-  const ui = phaseConfig.ui;
-  const isDark = phase === 'night';
-  const headingWeight = getHeadingWeight(phase, progress);
-  const bodyWeight = getBodyWeight(phase, progress);
+  const { theme: m3Theme, scheme, isDark, section } = useMaterialTheme();
+
+  // Pixel typography weight hierarchy: 600 heading, 400 body (700 rare display emphasis)
+  const headingWeight = 600;
+  const bodyWeight = 400;
 
   useEffect(() => {
+    // Initialize native Material 3 state-layer touch ripple
+    initM3StateLayer();
+
     // Purge legacy manual theme keys from storage on mount
     try {
       localStorage.removeItem('theme');
@@ -39,87 +49,127 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
 
-    // Apply smooth 400ms transition on color/background properties across :root
-    root.style.setProperty('--day-theme-transition', 'all 400ms cubic-bezier(0.16, 1, 0.3, 1)');
+    // Apply smooth transition on background scenes
+    root.style.setProperty('--day-theme-transition', 'all 500ms cubic-bezier(0.2, 0, 0, 1)');
 
-    // Surface RGB & Alpha
-    const [sR, sG, sB] = hexToRgb(ui.cardSurface);
-    const cardSurfaceRgba = `rgba(${sR}, ${sG}, ${sB}, ${ui.cardSurfaceAlpha})`;
+    applyM3ThemeToDocument(scheme);
 
-    // Single source of truth CSS Custom Properties directly from pixelSkyPalettes
-    root.style.setProperty('--card-surface', cardSurfaceRgba);
-    root.style.setProperty('--card-surface-hex', ui.cardSurface);
-    root.style.setProperty('--card-border', ui.cardBorder);
-    root.style.setProperty('--text-primary', ui.textPrimary);
-    root.style.setProperty('--text-secondary', ui.textSecondary);
-    root.style.setProperty('--text-muted', ui.textMuted);
-    root.style.setProperty('--accent', ui.accent);
-    root.style.setProperty('--accent-primary', ui.accent);
-    root.style.setProperty('--accent-secondary', ui.accent);
-    root.style.setProperty('--accent-contrast', ui.accentContrast);
-    root.style.setProperty('--accent-soft', ui.accentSoft);
-    root.style.setProperty('--pill-active-bg', ui.accentSoft);
-    root.style.setProperty('--pill-active-text', ui.accent);
+    // ── UI Bridge for Full Dynamic Backward Compatibility ──
+    const cardBg = isDark ? scheme.surfaceContainerLow : scheme.surfaceContainerLowest;
+    const cardElevated = isDark ? scheme.surfaceContainer : scheme.surfaceContainerLow;
 
-    // Compatibility aliases for Tailwind and design system
-    root.style.setProperty('--bg-card', cardSurfaceRgba);
-    root.style.setProperty('--bg-card-elevated', cardSurfaceRgba);
-    root.style.setProperty('--border-card', ui.cardBorder);
-    root.style.setProperty('--glow', 'transparent');
-    root.style.setProperty('--shadow-glow', 'transparent');
-    root.style.setProperty('--shadow-card', isDark ? '0 4px 16px rgba(0, 0, 0, 0.30)' : '0 4px 16px rgba(0, 0, 0, 0.04)');
-    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${ui.textPrimary}, ${ui.accent})`);
+    // ── Pixel 4-Level Tonal Text Hierarchy ──
+    const tonal = isDark ? TEXT_TONAL_DARK : TEXT_TONAL_LIGHT;
+    root.style.setProperty('--text-primary', tonal.primary);
+    root.style.setProperty('--text-secondary', tonal.secondary);
+    root.style.setProperty('--text-tertiary', tonal.tertiary);
+    root.style.setProperty('--text-disabled', tonal.disabled);
+    root.style.setProperty('--text-muted', tonal.tertiary);
 
-    // Pixel unit scale aligned to background grid (12px default, snaps padding/texture)
-    root.style.setProperty('--pixel-size', '12px');
-    root.style.setProperty('--pixel-unit', '12px');
-
-    // Apply day-phase aware typography weight custom properties
+    // ── Pixel Core Typography Tokens ──
+    root.style.setProperty('--font-family-primary', TYPOGRAPHY_TOKENS.fontFamilyPrimary);
+    root.style.setProperty('--font-primary', 'var(--font-family-primary)');
+    root.style.setProperty('--font-weight-regular', TYPOGRAPHY_TOKENS.fontWeightRegular.toString());
+    root.style.setProperty('--font-weight-medium', TYPOGRAPHY_TOKENS.fontWeightMedium.toString());
+    root.style.setProperty('--font-weight-semibold', TYPOGRAPHY_TOKENS.fontWeightSemiBold.toString());
+    root.style.setProperty('--font-weight-bold', TYPOGRAPHY_TOKENS.fontWeightBold.toString());
     root.style.setProperty('--font-weight-heading', headingWeight.toString());
     root.style.setProperty('--font-weight-body', bodyWeight.toString());
 
-    // Compute --accent-rgb for Tailwind opacity utilities (e.g., bg-accent/15)
-    const [aR, aG, aB] = hexToRgb(ui.accent);
-    root.style.setProperty('--accent-rgb', `${aR}, ${aG}, ${aB}`);
+    root.style.setProperty('--card-surface', cardBg);
+    root.style.setProperty('--card-surface-hex', cardBg);
+    root.style.setProperty('--card-border', scheme.outlineVariant);
+    root.style.setProperty('--accent', scheme.primary);
+    root.style.setProperty('--accent-primary', scheme.primary);
+    root.style.setProperty('--accent-secondary', scheme.secondary);
+    root.style.setProperty('--accent-contrast', scheme.onPrimary);
+    root.style.setProperty('--accent-soft', scheme.primaryContainer);
+    root.style.setProperty('--pill-active-bg', scheme.primaryContainer);
+    root.style.setProperty('--pill-active-text', scheme.onPrimaryContainer);
 
-    // Set data attribute for phase-aware CSS styling
+    root.style.setProperty('--bg-card', cardBg);
+    root.style.setProperty('--bg-card-elevated', cardElevated);
+    root.style.setProperty('--border-card', scheme.outlineVariant);
+    root.style.setProperty('--glow', 'transparent');
+    root.style.setProperty('--shadow-glow', 'transparent');
+    // M3 tonal elevation replaces harsh drop shadows
+    root.style.setProperty('--shadow-card', 'none');
+    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${tonal.primary}, ${scheme.primary})`);
+
+    // RGB channels for opacity utilities
+    const [aR, aG, aB] = hexToRgb(scheme.primary);
+    root.style.setProperty('--accent-rgb', `${aR}, ${aG}, ${aB}`);
+    root.style.setProperty('--primary-rgb', `${aR}, ${aG}, ${aB}`);
+    root.style.setProperty('--md-primary-rgb', `${aR}, ${aG}, ${aB}`);
+
+    const [sR, sG, sB] = hexToRgb(scheme.surface);
+    root.style.setProperty('--surface-rgb', `${sR}, ${sG}, ${sB}`);
+
+    const [scR, scG, scB] = hexToRgb(scheme.sceneBg);
+    root.style.setProperty('--scene-bg-rgb', `${scR}, ${scG}, ${scB}`);
+
+    // Section dataset for CSS targeting
+    root.dataset.section = section;
     root.dataset.dayPhase = phase;
 
-    // Toggle .dark class exclusively at night for Tailwind dark:* utilities
+    // Full bleed background
+    root.style.backgroundColor = scheme.sceneBg;
+    root.style.color = tonal.primary;
+    if (document.body) {
+      document.body.style.backgroundColor = scheme.sceneBg;
+      document.body.style.color = tonal.primary;
+    }
+
+    // Dark class for Tailwind dark:* utilities
     if (isDark) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
 
-    // Sync mobile browser status bar / navigation bar meta tags
+    // Mobile theme-color meta tag matches saturated scene
     const metaThemeTags = document.querySelectorAll('meta[name="theme-color"]');
     metaThemeTags.forEach(tag => {
-      tag.setAttribute('content', ui.cardSurface);
+      tag.setAttribute('content', scheme.sceneBg);
     });
-  }, [phase, ui, isDark, headingWeight, bodyWeight]);
+  }, [section, m3Theme, scheme, isDark, phase]);
 
   return (
-    <DayThemeContext.Provider value={{ phase, nextPhase, progress, ui, isDark, headingWeight, bodyWeight }}>
+    <DayThemeContext.Provider
+      value={{
+        phase,
+        nextPhase,
+        progress,
+        section,
+        m3Theme,
+        scheme,
+        isDark,
+        headingWeight,
+        bodyWeight,
+      }}
+    >
       {children}
     </DayThemeContext.Provider>
   );
 }
 
 /**
- * Convenient hook to consume the current day theme state and pixel-native UI tokens.
+ * Convenient hook to consume the current section theme state and M3 tokens.
  */
 export function useDayTheme(): DayThemeContextValue {
   const context = useContext(DayThemeContext);
   if (!context) {
     const phaseInfo = useDayPhase();
-    const ui = PIXEL_SKY_PALETTES[phaseInfo.phase].ui;
+    const isDark = false;
+    const m3Theme = getM3ThemeForSection('home', isDark);
     return {
       ...phaseInfo,
-      ui,
-      isDark: phaseInfo.phase === 'night',
-      headingWeight: getHeadingWeight(phaseInfo.phase, phaseInfo.progress),
-      bodyWeight: getBodyWeight(phaseInfo.phase, phaseInfo.progress),
+      section: 'home',
+      m3Theme,
+      scheme: m3Theme.scheme,
+      isDark,
+      headingWeight: 600,
+      bodyWeight: 400,
     };
   }
   return context;
