@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, startTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -630,7 +630,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       onClick={() => {
                         triggerHaptic('nav');
                         if (menuOpen) setMenuOpen(false);
-                        navigate(tab.path);
+                        startTransition(() => { navigate(tab.path); });
                       }}
                       className="relative w-[40px] h-[40px] rounded-full flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95"
                       aria-label={tab.label}
@@ -644,7 +644,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                             backgroundColor: solidAccent,
                             transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1)',
                           }}
-                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                          transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
                         />
                       )}
                       {/* Icon size: 24px, active in white, inactive in 55% opacity */}
@@ -664,8 +664,9 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               {/* 2. More button (right element, separate squircle): 64px x 64px, border-radius 28px */}
               <motion.button
                 ref={squircleRef}
-                whileTap={{ scale: 0.94 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                whileTap={{ scale: 0.92 }}
+                animate={{ scale: menuOpen ? 0.96 : 1 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.8 }}
                 onClick={() => {
                   // Guard: if icon-swap animation is in progress, still toggle
                   // but skip haptic to avoid double-feedback. Never ignore the tap.
@@ -688,20 +689,20 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   {menuOpen ? (
                     <motion.div
                       key="close"
-                      initial={{ rotate: -90, opacity: 0, scale: 0.8 }}
+                      initial={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                      exit={{ rotate: 90, opacity: 0, scale: 0.8 }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 34, mass: 1 }}
+                      exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.8 }}
                     >
                       <X size={26} strokeWidth={2.4} className="text-white" />
                     </motion.div>
                   ) : (
                     <motion.div
                       key="grid"
-                      initial={{ rotate: 90, opacity: 0, scale: 0.8 }}
+                      initial={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                      exit={{ rotate: -90, opacity: 0, scale: 0.8 }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 34, mass: 1 }}
+                      exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.8 }}
                     >
                       <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-white">
                         <circle cx="7" cy="7" r="2.4" />

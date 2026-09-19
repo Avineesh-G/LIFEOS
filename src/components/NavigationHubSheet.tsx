@@ -103,7 +103,7 @@ const DestinationTile = React.memo(function DestinationTile({
       initial={
         prefersReducedMotion
           ? { opacity: 0 }
-          : { opacity: 0, y: 10, scale: 0.96 }
+          : { opacity: 0, y: 6, scale: 0.97 }
       }
       animate={
         prefersReducedMotion
@@ -112,10 +112,10 @@ const DestinationTile = React.memo(function DestinationTile({
       }
       transition={
         prefersReducedMotion
-          ? { duration: 0.12 }
+          ? { duration: 0.1 }
           : {
-              duration: 0.22,
-              delay: index * 0.02,
+              duration: 0.2,
+              delay: index * 0.015,
               ease: [0.16, 1, 0.3, 1],
             }
       }
@@ -274,7 +274,7 @@ export function NavigationHubSheet({
             initial={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { y: '100%', opacity: 1 }
+                : { y: 'calc(100% + 16px)', opacity: 0.8 }
             }
             animate={
               prefersReducedMotion
@@ -284,12 +284,21 @@ export function NavigationHubSheet({
             exit={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { y: '100%', opacity: 1 }
+                : { y: 'calc(100% + 16px)', opacity: 0 }
             }
             transition={
               prefersReducedMotion
                 ? { duration: 0.12 }
-                : { type: 'spring', stiffness: 380, damping: 34, mass: 1 }
+                : {
+                    // Enter: soft spring — floats up, decelerates naturally (no snap/stuck feel)
+                    type: 'spring',
+                    stiffness: 320,
+                    damping: 28,
+                    mass: 0.9,
+                    // Exit: fast tween on y (overrides spring for exit only)
+                    // Result: open feels elastic, close feels decisive
+                    exit: { duration: 0.2, ease: [0.36, 0, 0.66, -0.04] },
+                  }
             }
             drag="y"
             dragConstraints={{ top: 0 }}
