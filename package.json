@@ -1,7 +1,7 @@
 {
   "name": "lifeos",
   "private": true,
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,8 @@
     "cap:build": "npm run cap:sync && cd android && gradlew assembleRelease",
     "cap:open": "npx cap open android",
     "release:prep": "node scripts/prepare-release.js",
+    "release:guard": "node --experimental-strip-types scripts/verify-release-guard.ts",
+    "test:updater": "node --experimental-strip-types scripts/test-updater.ts",
     "test:matrix": "node --experimental-strip-types scripts/test-layout-matrix.ts"
   },
   "dependencies": {
@@ -20,6 +22,7 @@
     "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.5.1",
     "@capacitor/core": "^8.5.1",
+    "@capacitor/filesystem": "^8.1.3",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/local-notifications": "^8.3.1",
     "@capacitor/preferences": "^8.0.1",

@@ -1,0 +1,6 @@
+{
+  "versionCode": 10,
+  "versionName": "1.2.3",
+  "releaseDate": "2026-09-21",
+  "releaseNotes": "LifeOS v1.2.3 (Build 10): Complete native UI/UX baseline, Outings interface, enhanced updater with SHA-256 validation, and universal screen layout engine."
+}

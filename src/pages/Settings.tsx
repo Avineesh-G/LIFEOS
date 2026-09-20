@@ -1048,7 +1048,7 @@ export default function Settings({
 
       <div className="text-center py-2">
         <p className="text-xs font-tag font-bold text-muted-light dark:text-muted-dark tracking-wider uppercase">
-          v<span className="font-stat">1.6</span> · Offline-First
+          v<span className="font-stat">{CURRENT_VERSION_NAME}</span> (Build <span className="font-stat">{CURRENT_VERSION_CODE}</span>) · Native Baseline
         </p>
       </div>
     </div>

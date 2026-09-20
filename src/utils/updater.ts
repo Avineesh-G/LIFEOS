@@ -1,11 +1,11 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { CURRENT_VERSION_CODE, CURRENT_VERSION_NAME, APP_VERSION } from '../version.ts';
 
-export const CURRENT_VERSION_CODE = 4;
-export const CURRENT_VERSION_NAME = '1.2.2';
+export { CURRENT_VERSION_CODE, CURRENT_VERSION_NAME, APP_VERSION };
 
 export const VERCEL_APK_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
 export const GITHUB_RAW_APK_URL = VERCEL_APK_URL;
-export const GITHUB_RELEASES_API_URL = 'https://api.github.com/repos/Avineesh-G/LIFEOS/releases/latest';
 
 export const REMOTE_VERSION_URLS = [
   'https://lifeos-gujjeti-avineeshs-projects.vercel.app/version.json',
@@ -19,6 +19,12 @@ export interface AppVersionInfo {
   releaseNotes: string;
   apkUrl: string;
   sha256?: string;
+}
+
+export interface InstalledVersionInfo {
+  versionCode: number;
+  versionName: string;
+  isNative: boolean;
 }
 
 export interface DownloadProgressEvent {
@@ -64,38 +70,50 @@ export const isNativeAndroid = (): boolean => {
 };
 
 /**
- * Resolves binary download URL from latest GitHub Releases asset if Vercel is unreachable
+ * Dynamically queries the native Android app for installed version and build number.
+ * Falls back to bundled web configuration if running on Web/PWA or native info is unavailable.
  */
-export async function fetchGitHubReleaseApkUrl(): Promise<string | null> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-    const res = await fetch(GITHUB_RELEASES_API_URL, {
-      signal: controller.signal,
-      headers: { Accept: 'application/vnd.github.v3+json' },
-      cache: 'no-store'
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.assets)) {
-        const apkAsset = data.assets.find((a: any) => a.name && a.name.endsWith('.apk'));
-        if (apkAsset && apkAsset.browser_download_url) {
-          return apkAsset.browser_download_url;
-        }
-      }
+export async function getInstalledVersion(): Promise<InstalledVersionInfo> {
+  if (isNativeAndroid()) {
+    try {
+      const info = await CapApp.getInfo();
+      const parsedBuild = parseInt(info.build, 10);
+      return {
+        versionCode: isNaN(parsedBuild) ? CURRENT_VERSION_CODE : parsedBuild,
+        versionName: info.version || CURRENT_VERSION_NAME,
+        isNative: true,
+      };
+    } catch (e) {
+      console.warn('[LifeOS Updater] Failed to read native App.getInfo, falling back to bundled constants:', e);
     }
-  } catch (e) {
-    console.warn('[LifeOS Updater] Failed to resolve GitHub Release asset URL:', e);
   }
-  return null;
+  return {
+    versionCode: CURRENT_VERSION_CODE,
+    versionName: CURRENT_VERSION_NAME,
+    isNative: false,
+  };
+}
+
+/**
+ * Pure helper function to evaluate version comparison outcomes
+ */
+export function evaluateUpdateAvailable(installedCode: number, remoteCode: number): {
+  hasUpdate: boolean;
+  isDowngrade: boolean;
+  isEqual: boolean;
+} {
+  if (isNaN(installedCode) || isNaN(remoteCode)) {
+    return { hasUpdate: false, isDowngrade: false, isEqual: false };
+  }
+  return {
+    hasUpdate: remoteCode > installedCode,
+    isDowngrade: remoteCode < installedCode,
+    isEqual: remoteCode === installedCode,
+  };
 }
 
 /**
  * Fetches version metadata from remote endpoints with fast fallback & timeout.
- * Strips the local bundle check to prevent false-positive reports of current version.
  */
 export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
   const timestamp = Date.now();
@@ -125,24 +143,33 @@ export async function fetchRemoteVersion(): Promise<AppVersionInfo | null> {
 }
 
 /**
- * Compares remote version with current local bundle
+ * Compares remote version with current native/bundled installation
  */
 export async function checkForAppUpdate(): Promise<{
   hasUpdate: boolean;
   currentVersion: string;
+  currentVersionCode: number;
+  isDowngradeRejected?: boolean;
   remoteVersion: AppVersionInfo | null;
 }> {
+  const installed = await getInstalledVersion();
   const remote = await fetchRemoteVersion();
   if (!remote) {
-    return { hasUpdate: false, currentVersion: CURRENT_VERSION_NAME, remoteVersion: null };
+    return {
+      hasUpdate: false,
+      currentVersion: installed.versionName,
+      currentVersionCode: installed.versionCode,
+      remoteVersion: null,
+    };
   }
 
-  // Update exists if remote versionCode is higher than current build
-  const hasUpdate = remote.versionCode > CURRENT_VERSION_CODE;
+  const comparison = evaluateUpdateAvailable(installed.versionCode, remote.versionCode);
 
   return {
-    hasUpdate,
-    currentVersion: CURRENT_VERSION_NAME,
+    hasUpdate: comparison.hasUpdate,
+    currentVersion: installed.versionName,
+    currentVersionCode: installed.versionCode,
+    isDowngradeRejected: comparison.isDowngrade,
     remoteVersion: remote,
   };
 }
