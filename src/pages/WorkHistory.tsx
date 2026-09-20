@@ -21,9 +21,9 @@ type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending';
 
 const TABS: { id: HistoryTab; icon: any; title: string; color: string }[] = [
   { id: 'nutrition', icon: UtensilsCrossed, title: 'Nutrition History', color: 'text-amber-500' },
-  { id: 'gym',       icon: Dumbbell,        title: 'Gym History',       color: 'text-sky-500' },
+  { id: 'gym',       icon: Dumbbell,        title: 'Gym History',       color: 'text-rose-500' },
   { id: 'todo',      icon: CheckSquare,     title: 'Tasks History',     color: 'text-emerald-500' },
-  { id: 'spending',  icon: Wallet,          title: 'Spending History',  color: 'text-violet-500' },
+  { id: 'spending',  icon: Wallet,          title: 'Spending History',  color: 'text-[#15803D] dark:text-[#82CB92]' },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -338,8 +338,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${
             activeTab === 'nutrition' ? 'bg-amber-500' :
-            activeTab === 'gym' ? 'bg-sky-500' :
-            activeTab === 'todo' ? 'bg-emerald-500' : 'bg-violet-500'
+            activeTab === 'gym' ? 'bg-rose-500' :
+            activeTab === 'todo' ? 'bg-emerald-500' : 'bg-[#15803D]'
           }`} />
           <h2 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             {currentTabMeta.title}
@@ -375,20 +375,20 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
           {/* AI Nutrition Analysis Card */}
           <div className="card p-4 space-y-3 border border-emerald-500/30 bg-emerald-500/5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <Sparkles size={16} />
+            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Sparkles size={18} />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">AI Nutrition Analysis</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono">Dietary trends & smart advice</p>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Nutrition Analysis</h3>
+                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Dietary trends & smart advice</p>
                 </div>
               </div>
               <button
                 onClick={handleRunNutritionAi}
                 disabled={nutritionAiLoading || monthlyNutritionLogs.length === 0}
-                className="btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5 rounded-xl disabled:opacity-50"
+                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
               >
                 {nutritionAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
                 {nutritionAiResult ? 'Refresh' : 'Analyze'}
@@ -444,7 +444,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                           </span>
                         )}
                       </div>
-                      <span className={`text-xs font-mono font-bold ${isOver ? 'text-red-500' : isUnder ? 'text-sky-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      <span className={`text-xs font-mono font-bold ${isOver ? 'text-red-500' : isUnder ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {Math.round(log.dailyTotal)} / {targetCals} kcal
                       </span>
                     </div>
@@ -452,7 +452,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     {/* Progress Bar */}
                     <div className="w-full h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${isOver ? 'bg-red-500' : isUnder ? 'bg-sky-500' : 'bg-emerald-500'}`}
+                        className={`h-full rounded-full transition-all ${isOver ? 'bg-red-500' : isUnder ? 'bg-amber-500' : 'bg-emerald-500'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -501,7 +501,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             </div>
             <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Sets Done</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-sky-600 dark:text-sky-400 truncate">{gymStats.totalSets} <span className="text-xs font-mono font-normal">sets</span></p>
+              <p className="text-lg sm:text-xl font-black font-sans text-rose-600 dark:text-rose-400 truncate">{gymStats.totalSets} <span className="text-xs font-mono font-normal">sets</span></p>
             </div>
             <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Top Split</span>
@@ -516,21 +516,21 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           </div>
 
           {/* AI Gym Insights */}
-          <div className="card p-4 space-y-3 border border-sky-500/30 bg-sky-500/5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                  <Sparkles size={16} />
+          <div className="card p-4 space-y-3 border border-rose-500/30 bg-rose-500/5">
+            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <Sparkles size={18} />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">AI Gym Progression</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono">Training consistency analysis</p>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Gym Progression</h3>
+                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Training consistency analysis</p>
                 </div>
               </div>
               <button
                 onClick={handleRunGymAi}
                 disabled={gymAiLoading || monthlyGymLogs.length === 0}
-                className="btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5 rounded-xl disabled:opacity-50"
+                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
               >
                 {gymAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
                 {gymAiResult ? 'Refresh' : 'Analyze'}
@@ -538,7 +538,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             </div>
 
             {gymAiResult && (
-              <div className="space-y-2 pt-2 border-t border-sky-500/20">
+              <div className="space-y-2 pt-2 border-t border-rose-500/20">
                 <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
                   "{gymAiResult.summary}"
                 </p>
@@ -546,7 +546,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                   <ul className="space-y-1 pt-1">
                     {gymAiResult.tips.map((tip: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-sky-500 flex-shrink-0 mt-0.5" />
+                        <Check size={13} className="text-rose-500 flex-shrink-0 mt-0.5" />
                         <span>{tip}</span>
                       </li>
                     ))}
@@ -691,7 +691,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="grid grid-cols-2 gap-2.5 w-full">
             <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Total Spent</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-violet-600 dark:text-violet-400 truncate">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
+              <p className="text-lg sm:text-xl font-black font-sans text-[#15803D] dark:text-[#82CB92] truncate">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
             </div>
             <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Daily Avg</span>
@@ -708,21 +708,21 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           </div>
 
           {/* AI Spending Analysis Card */}
-          <div className="card p-4 space-y-3 border border-violet-500/30 bg-violet-500/5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center">
-                  <Sparkles size={16} />
+          <div className="card p-4 space-y-3 border border-[#15803D]/30 bg-[#15803D]/5">
+            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-[#15803D]/20 text-[#15803D] dark:text-[#82CB92] flex items-center justify-center shrink-0">
+                  <Sparkles size={18} />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">AI Spending Audit</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono">Waste reduction & budget tips</p>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Spending Audit</h3>
+                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Waste reduction & budget tips</p>
                 </div>
               </div>
               <button
                 onClick={handleRunSpendingAi}
                 disabled={spendingAiLoading || monthlyExpenses.length === 0}
-                className="btn-primary py-1.5 px-3 text-xs flex items-center gap-1.5 rounded-xl disabled:opacity-50"
+                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
               >
                 {spendingAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
                 {spendingAiResult ? 'Refresh' : 'Analyze'}
@@ -730,7 +730,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             </div>
 
             {spendingAiResult && (
-              <div className="space-y-2 pt-2 border-t border-violet-500/20">
+              <div className="space-y-2 pt-2 border-t border-[#15803D]/20">
                 <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
                   "{spendingAiResult.summary}"
                 </p>
@@ -738,7 +738,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                   <ul className="space-y-1 pt-1">
                     {spendingAiResult.tips.map((tip: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-violet-500 flex-shrink-0 mt-0.5" />
+                        <Check size={13} className="text-[#15803D] dark:text-[#82CB92] flex-shrink-0 mt-0.5" />
                         <span>{tip}</span>
                       </li>
                     ))}

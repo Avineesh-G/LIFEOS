@@ -63,6 +63,22 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const squircleRef = useRef<HTMLButtonElement | null>(null);
   // Guards against double-toggle during the squircle icon swap animation (~120ms)
   const squircleAnimatingRef = useRef(false);
+  const navRef = useRef<HTMLElement | null>(null);
+
+  // Measure bottom nav pill actual rendered height into CSS variable --nav-h
+  useEffect(() => {
+    if (!navRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height = Math.round(entry.contentRect.height);
+        if (height > 0) {
+          document.documentElement.style.setProperty('--nav-h', `${height}px`);
+        }
+      }
+    });
+    observer.observe(navRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSlotPointerDown = (slotIndex: number, e: React.PointerEvent) => {
     isLongPressTriggeredRef.current = false;
@@ -421,23 +437,25 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   ];
 
   return (
-    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
+    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* ── Material 3 Expressive Background System: Neutral Canvas + Single Off-Canvas Organic Blob ── */}
       <SectionAccentBlob />
 
       {/* ── Top In-Page Minimalist Controls (Floating Minimalist Pill Directly on Wallpaper) ── */}
       <header 
-        className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited"
+        className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited w-full overflow-hidden"
         style={{
-          paddingTop: 'max(0.75rem, env(safe-area-inset-top, 0px))',
+          paddingTop: 'max(var(--sat, env(safe-area-inset-top, 0px)), 12px)',
+          paddingLeft: 'max(var(--sal, 0px), 12px)',
+          paddingRight: 'max(var(--sar, 0px), 12px)',
         }}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 h-9 max-w-xl mx-auto">
+        <div className="flex items-center justify-between h-9 w-full max-w-[720px] mx-auto min-w-0">
           {/* Left: LifeOS Floating Micro-Badge directly on wallpaper */}
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm cursor-pointer"
+            className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm cursor-pointer shrink-0"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
@@ -448,7 +466,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           </button>
 
           {/* Right Controls: Notification Enable Alert + Reload Squircle Button */}
-          <div className="pointer-events-auto flex items-center gap-2">
+          <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
             {!hasNotificationPermission && (
               <button
                 onPointerDown={() => triggerHaptic('light')}
@@ -457,11 +475,11 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   const granted = await requestAndSyncNotifications(data, updateData);
                   setHasNotificationPermission(granted);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm cursor-pointer shrink-0"
                 title="Allow phone notifications for Timetable & Tasks"
               >
-                <Bell size={13} className="text-white animate-bounce" />
-                <span>Allow Alerts</span>
+                <Bell size={13} className="text-white animate-bounce shrink-0" />
+                <span className="hidden compact:inline">Allow Alerts</span>
               </button>
             )}
 
@@ -469,7 +487,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               onPointerDown={() => triggerHaptic('light')}
               onClick={handleReload}
               disabled={isReloading}
-              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm cursor-pointer ${
+              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm cursor-pointer shrink-0 ${
                 isReloading ? 'border-white/60 bg-white/20' : ''
               }`}
               style={{ contain: 'paint' }}
@@ -486,11 +504,13 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       <main 
         className="relative z-10 min-h-screen"
         style={{
-          paddingTop: 'calc(3.75rem + env(safe-area-inset-top, 0px))',
-          paddingBottom: 'calc(5.25rem + env(safe-area-inset-bottom, 0px))',
+          paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
+          paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 28px)',
+          paddingLeft: 'var(--sal, 0px)',
+          paddingRight: 'var(--sar, 0px)',
         }}
       >
-        <div className="max-w-xl mx-auto px-4 sm:px-6 pt-2 sm:pt-4">
+        <div className="w-full max-w-[720px] mx-auto px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
           {children}
         </div>
       </main>
@@ -518,6 +538,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         const isNavHidden = isKeyboardOpen || subInterfaceOpen || isSubRoute || (!navVisible && !menuOpen);
         return (
           <motion.nav
+            ref={navRef}
             initial={false}
             animate={{
               y: isNavHidden ? 100 : 0,
@@ -530,7 +551,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               scale: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
             }}
             style={{
-              bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+              bottom: 'calc(var(--sab, env(safe-area-inset-bottom, 0px)) + 12px)',
               pointerEvents: isNavHidden ? 'none' : 'auto',
               touchAction: 'manipulation',
             }}
@@ -544,6 +565,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 className="h-[64px] px-[20px] rounded-full flex items-center gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none"
                 style={{
                   backgroundColor: pillBg,
+                  opacity: 1,
                   transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
                 }}
               >
@@ -622,7 +644,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 {/* Active accent dot when current route is in the hub */}
                 {isHubActive && !menuOpen && (
                   <span
-                    className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white ring-2 ring-black/20"
+                    className="absolute top-3.5 right-3.5 w-2 h-2 rounded-full bg-white ring-2 ring-black/20"
                     aria-hidden="true"
                   />
                 )}

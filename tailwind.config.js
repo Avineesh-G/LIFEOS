@@ -4,6 +4,12 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        'micro': '280px',
+        'compact': '340px',
+        'medium': '600px',
+        'expanded': '840px',
+      },
       fontFamily: {
         heading: ['"Google Sans Flex"', 'sans-serif'],
         body: ['"Google Sans Flex"', 'sans-serif'],
@@ -26,6 +32,53 @@ export default {
           700: '#4338CA',
           800: '#3730A3',
           900: '#312E81',
+        },
+        history: {
+          seed: '#8C1D40',
+          strong: '#AA3B58',
+          tint: '#D66FA0',
+        },
+        outing: {
+          seed: '#8C500A',
+          lightText: '#78350F',
+          strong: '#A05F0A',
+          tint: '#C88A58',
+        },
+        shopping: {
+          seed: '#172554',
+          lightText: '#1E3A8A',
+          strong: '#254BB5',
+          tint: '#93C5FD',
+        },
+        vault: {
+          seed: '#2034A0',
+          lightText: '#1E40AF',
+          strong: '#3B82F6',
+          tint: '#818CF8',
+        },
+        finance: {
+          seed: '#15803D',
+          strong: '#15803D',
+          tint: '#82CB92',
+        },
+        study: {
+          seed: '#0891B2',
+          onAccent: '#1A1A1F',
+          lightText: '#0E7D9A',
+          strong: '#0891B2',
+          tint: '#80D2ED',
+        },
+        settings: {
+          seed: '#475569',
+          strong: '#556378',
+          tint: '#A7AEBB',
+        },
+        streak: {
+          seed: '#FF6B35',
+          onAccent: '#1A1A1F',
+          lightText: '#CB470D',
+          strong: '#FF6B35',
+          tint: '#FCA487',
         },
         bg: {
           light: '#F8F9FA',

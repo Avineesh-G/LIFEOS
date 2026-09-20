@@ -24,7 +24,7 @@ async function ensureNotificationChannels() {
       visibility: 1, // Public visibility on lockscreen and shade
       vibration: true,
       lights: true,
-      lightColor: '#4F46E5',
+      lightColor: '#0891B2',
     });
 
     await LocalNotifications.createChannel({

@@ -308,7 +308,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
           className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-[var(--card-border)] shadow-sm space-y-5"
         >
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-[14px] bg-indigo-500/15 border border-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shadow-xs">
+            <span className="w-10 h-10 rounded-[14px] bg-accent/15 border border-accent/25 text-[var(--accent-text)] flex items-center justify-center shadow-xs">
               <Clock size={19} strokeWidth={2.2} />
             </span>
             <div>
@@ -382,7 +382,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
             whileTap={{ scale: 0.95 }}
             onClick={handleStart}
             disabled={!subject.trim()}
-            className="w-full py-4 rounded-full bg-accent text-white font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-accent/25 flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-full bg-accent text-[var(--on-accent)] font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-accent/25 flex items-center justify-center gap-2"
           >
             <Play size={16} fill="currentColor" /> Start Focus Session
           </motion.button>
@@ -391,10 +391,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-[36px] p-8 text-center liquid-glass glow-lavender border border-indigo-200/50 dark:border-indigo-800/40 text-m3-lavender-text dark:text-m3-lavender-darkText shadow-sm space-y-6 relative overflow-hidden"
+          className="rounded-[36px] p-8 text-center liquid-glass border border-[var(--card-border)] text-[var(--text-primary)] shadow-sm space-y-6 relative overflow-hidden"
         >
           <div className="space-y-1 relative z-10">
-            <span className="rounded-full bg-indigo-500/15 border border-indigo-500/25 px-4 py-1.5 text-xs font-bold inline-block shadow-xs text-indigo-900 dark:text-indigo-200">
+            <span className="rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold inline-block shadow-xs text-[var(--accent-text)]">
               {subject} {topic ? `· ${topic}` : ''}
             </span>
             <p className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono pt-2">
@@ -412,7 +412,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 onClick={handlePause}
-                className="w-16 h-16 rounded-[24px] bg-white dark:bg-white/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center transition-colors shadow-sm"
+                className="w-16 h-16 rounded-[24px] bg-white dark:bg-white/10 border border-[var(--card-border)] text-[var(--accent-text)] flex items-center justify-center transition-colors shadow-sm"
                 title="Pause"
               >
                 <Pause size={24} fill="currentColor" />
@@ -422,7 +422,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 onClick={handleResume}
-                className="w-16 h-16 rounded-[24px] bg-indigo-600 dark:bg-indigo-400 text-white dark:text-indigo-950 flex items-center justify-center transition-colors shadow-md shadow-indigo-500/25"
+                className="w-16 h-16 rounded-[24px] bg-accent text-[var(--on-accent)] flex items-center justify-center transition-colors shadow-md shadow-accent/25"
                 title="Resume"
               >
                 <Play size={24} fill="currentColor" />

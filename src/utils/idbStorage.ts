@@ -10,7 +10,7 @@
  */
 
 const DB_NAME = 'lifeos_local_cache';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE_NAME = 'app_state';
 
 let dbInstance: IDBDatabase | null = null;
@@ -37,6 +37,18 @@ export function getIndexedDB(): Promise<IDBDatabase | null> {
         const db = request.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'key' });
+        }
+        const outingStores = [
+          'outing_outings',
+          'outing_people',
+          'outing_expenses',
+          'outing_settlements',
+          'outing_receipts',
+        ];
+        for (const store of outingStores) {
+          if (!db.objectStoreNames.contains(store)) {
+            db.createObjectStore(store, { keyPath: 'id' });
+          }
         }
       };
 

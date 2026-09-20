@@ -25,8 +25,13 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
   const [copied, setCopied] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const activeQuote = quoteState.quote;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [quoteState]);
 
   // Auto-advance active quote every 12 seconds unless hovered/paused
   useEffect(() => {
@@ -117,16 +122,16 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
       )}
 
       {/* ── Top Header Row ── */}
-      <div className="relative z-10 flex items-center justify-between gap-2">
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           {/* Main Badge */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30 text-[11px] font-tag font-bold tracking-wider uppercase shadow-xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30 text-[11px] font-tag font-bold tracking-wider uppercase shadow-xs shrink-0">
             <Sparkles size={12} className="text-[var(--accent)] animate-pulse shrink-0" />
             <span>DAILY WISDOM</span>
           </div>
 
           {/* Dynamic Category Pill */}
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-tag font-bold uppercase tracking-wider border shadow-xs ${currentMeta.badgeClass}`}>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-tag font-bold uppercase tracking-wider border shadow-xs shrink-0 ${currentMeta.badgeClass}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${currentMeta.dotClass}`} />
             {currentMeta.label}
           </span>
@@ -206,15 +211,26 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="space-y-3.5 gpu-composited"
           >
-            <p className="text-[16px] sm:text-[18px] md:text-[20px] font-heading font-bold text-[var(--md-on-surface)] tracking-tight leading-relaxed line-clamp-3">
-              <span className="text-[var(--md-primary)] font-serif mr-1">“</span>
-              {activeQuote?.quote}
-              <span className="text-[var(--md-primary)] font-serif ml-1">”</span>
-            </p>
+            <div>
+              <p className={`text-[16px] sm:text-[18px] md:text-[20px] font-heading font-bold text-[var(--md-on-surface)] tracking-tight leading-relaxed break-words ${isExpanded ? '' : 'line-clamp-3'}`}>
+                <span className="text-[var(--md-primary)] font-serif mr-1">“</span>
+                {activeQuote?.quote}
+                <span className="text-[var(--md-primary)] font-serif ml-1">”</span>
+              </p>
+              {activeQuote?.quote && activeQuote.quote.length > 100 && (
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-xs font-bold text-[var(--md-primary)] hover:underline mt-1 inline-flex items-center"
+                >
+                  {isExpanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
+            </div>
 
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <div className="flex items-center gap-1.5 text-xs font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
-                <span className="text-[var(--md-primary)] font-heading text-sm font-bold">—</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-1.5 text-xs font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] min-w-0">
+                <span className="text-[var(--md-primary)] font-heading text-sm font-bold shrink-0">—</span>
                 <span className="truncate max-w-[220px]">{activeQuote?.author}</span>
               </div>
 
@@ -226,7 +242,10 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
                 title="Next quote"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
-                <span>#<span className="font-stat">{quoteState.seenIndex + 1}</span></span>
+                <span className="inline-flex items-baseline font-stat font-bold text-[var(--md-primary)] leading-none">
+                  <span className="font-stat select-none">#</span>
+                  <span className="font-stat">{quoteState.seenIndex + 1}</span>
+                </span>
                 <span className="opacity-40">•</span>
                 <span className="opacity-75 text-[10px] uppercase font-tag">Today</span>
                 <ChevronRight size={12} className="opacity-50 group-hover/pill:opacity-100 group-hover/pill:translate-x-0.5 transition-all" />

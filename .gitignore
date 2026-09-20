@@ -16,3 +16,4 @@ pnpm-debug.log*
 *.jks
 *.keystore
 google-services.json
+test-results/

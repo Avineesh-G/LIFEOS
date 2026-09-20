@@ -529,8 +529,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     <Wallet size={16} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
-                      ₹<span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
+                    <p className="font-stat text-primary-light dark:text-primary-dark truncate flex items-baseline">
+                      <span className="font-stat select-none">₹</span>
+                      <span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
                     </p>
                     <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
                       {selectedDateData.expenses.length > 0 ? (

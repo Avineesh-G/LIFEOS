@@ -57,7 +57,7 @@ export function SectionAccentBlob() {
             color-mix(in srgb, var(--md-accent-blob, #2563EB) 40%, transparent) 40%,
             transparent 70%
           )`,
-          opacity: isDark ? 0.32 : 0.22,
+          opacity: (section === 'history' || section === 'outing') ? (isDark ? 0.18 : 0.10) : (isDark ? 0.32 : 0.22),
           // CSS opacity transition only — no layout, no filter, no paint
           transition: 'opacity 500ms cubic-bezier(0.2, 0, 0, 1)',
           transform: 'translateZ(0)',

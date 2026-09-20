@@ -9,6 +9,7 @@ import {
   getM3ThemeForSection,
   applyM3ThemeToDocument,
 } from './sectionSeedColors';
+import { getInterfaceTokens } from './palette';
 import { initM3StateLayer } from '../utils/m3StateLayer';
 import { TEXT_TONAL_DARK, TEXT_TONAL_LIGHT, TYPOGRAPHY_TOKENS } from './typography';
 
@@ -79,10 +80,18 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--card-surface', cardBg);
     root.style.setProperty('--card-surface-hex', cardBg);
     root.style.setProperty('--card-border', scheme.outlineVariant);
-    root.style.setProperty('--accent', scheme.primary);
-    root.style.setProperty('--accent-primary', scheme.primary);
-    root.style.setProperty('--accent-secondary', scheme.secondary);
-    root.style.setProperty('--accent-contrast', scheme.onPrimary);
+
+    // ── Interface Palette Tokens (Scope Lock) ──
+    const ifaceTokens = getInterfaceTokens(section, isDark);
+    root.style.setProperty('--accent', isDark ? ifaceTokens.darkStrong : ifaceTokens.seed);
+    root.style.setProperty('--accent-seed', ifaceTokens.seed);
+    root.style.setProperty('--on-accent', ifaceTokens.onAccent);
+    root.style.setProperty('--accent-text', ifaceTokens.textAccent);
+    root.style.setProperty('--accent-strong', ifaceTokens.darkStrong);
+    root.style.setProperty('--accent-tint', ifaceTokens.darkTint);
+    root.style.setProperty('--accent-primary', isDark ? ifaceTokens.darkStrong : ifaceTokens.seed);
+    root.style.setProperty('--accent-secondary', isDark ? ifaceTokens.darkTint : ifaceTokens.textAccent);
+    root.style.setProperty('--accent-contrast', ifaceTokens.onAccent);
     root.style.setProperty('--accent-soft', scheme.primaryContainer);
     root.style.setProperty('--pill-active-bg', scheme.primaryContainer);
     root.style.setProperty('--pill-active-text', scheme.onPrimaryContainer);
@@ -94,10 +103,11 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--shadow-glow', 'transparent');
     // M3 tonal elevation replaces harsh drop shadows
     root.style.setProperty('--shadow-card', 'none');
-    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${tonal.primary}, ${scheme.primary})`);
+    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${tonal.primary}, ${isDark ? ifaceTokens.darkStrong : ifaceTokens.seed})`);
 
     // RGB channels for opacity utilities
-    const [aR, aG, aB] = hexToRgb(scheme.primary);
+    const activeAccentHex = isDark ? ifaceTokens.darkStrong : ifaceTokens.seed;
+    const [aR, aG, aB] = hexToRgb(activeAccentHex);
     root.style.setProperty('--accent-rgb', `${aR}, ${aG}, ${aB}`);
     root.style.setProperty('--primary-rgb', `${aR}, ${aG}, ${aB}`);
     root.style.setProperty('--md-primary-rgb', `${aR}, ${aG}, ${aB}`);

@@ -22,7 +22,7 @@ const BLOCK_COLORS = [
   'bg-m3-mint-container dark:bg-m3-mint-darkContainer border-m3-mint-badge/60 dark:border-m3-mint-darkBadge/60 text-m3-mint-text dark:text-m3-mint-darkText',
   'bg-m3-peach-container dark:bg-m3-peach-darkContainer border-m3-peach-badge/60 dark:border-m3-peach-darkBadge/60 text-m3-peach-text dark:text-m3-peach-darkText',
   'bg-m3-rose-container dark:bg-m3-rose-darkContainer border-m3-rose-badge/60 dark:border-m3-rose-darkBadge/60 text-m3-rose-text dark:text-m3-rose-darkText',
-  'bg-sky-50 dark:bg-[#1B252E] border-sky-200 dark:border-[#2C3B49] text-sky-800 dark:text-sky-200',
+  'bg-cyan-50 dark:bg-[#15282F] border-cyan-200 dark:border-[#1E3B45] text-cyan-800 dark:text-cyan-200',
   'bg-amber-50 dark:bg-[#2A2315] border-amber-200 dark:border-[#3F3520] text-amber-800 dark:text-amber-200',
 ];
 
@@ -184,7 +184,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
         </div>
         <button
           onClick={openAdd}
-          className="rounded-full bg-[var(--accent-primary)] text-white font-bold px-4 sm:px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-[var(--accent-primary)]/25 active:scale-[0.96] transition-all shrink-0"
+          className="rounded-full bg-[var(--accent-primary)] text-[var(--on-accent)] font-bold px-4 sm:px-5 py-2.5 text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-[var(--accent-primary)]/25 active:scale-[0.96] transition-all shrink-0"
         >
           <Plus size={15} strokeWidth={2.5} /> Add Block
         </button>

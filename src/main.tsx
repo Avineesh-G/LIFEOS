@@ -66,6 +66,54 @@ if (import.meta.env.DEV) {
   });
 }
 
+// ── 4. Responsive Viewport Metrics & Width Classes ──
+const updateViewportMetrics = () => {
+  const w = window.innerWidth || document.documentElement.clientWidth;
+  const widthClass = w < 340 ? 'micro' : w < 600 ? 'compact' : w < 840 ? 'medium' : 'expanded';
+  document.documentElement.setAttribute('data-width', widthClass);
+  const vh = ((window.visualViewport?.height || window.innerHeight) * 0.01).toFixed(3);
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+};
+updateViewportMetrics();
+window.addEventListener('resize', updateViewportMetrics, { passive: true });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateViewportMetrics, { passive: true });
+}
+
+// ── 5. Native Shell Guards: Prevent browser context menus & text toolbars on non-inputs ──
+const isEditableElement = (el: EventTarget | null): boolean => {
+  if (!el || !(el instanceof HTMLElement)) return false;
+  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable) return true;
+  if (el.closest('input, textarea, [contenteditable="true"], .allow-select')) return true;
+  return false;
+};
+
+window.addEventListener('contextmenu', (e) => {
+  if (!isEditableElement(e.target)) {
+    e.preventDefault();
+  }
+}, { capture: true });
+
+window.addEventListener('selectstart', (e) => {
+  if (!isEditableElement(e.target)) {
+    e.preventDefault();
+  }
+}, { capture: true });
+
+// Prevent WebView hijacking from external links
+window.addEventListener('click', (e) => {
+  const target = (e.target as HTMLElement)?.closest('a');
+  if (target && target.href && /^https?:\/\//i.test(target.href)) {
+    try {
+      const url = new URL(target.href);
+      if (url.origin !== window.location.origin) {
+        target.setAttribute('target', '_blank');
+        target.setAttribute('rel', 'noopener noreferrer');
+      }
+    } catch {}
+  }
+}, { capture: true });
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary level="root" fallbackTitle="LifeOS Application Recovery">

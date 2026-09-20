@@ -1,5 +1,5 @@
 import { doc, getDoc, getDocFromServer, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from './firebase.ts';
 import type { AppData } from './types';
 
 const DEFAULT_DATA: AppData = {
@@ -144,6 +144,13 @@ export async function getData(uid: string, forceServer: boolean = false): Promis
 
 export async function saveData(uid: string, data: Partial<AppData>): Promise<void> {
   const cleaned = cleanForFirestore(data);
+  try {
+    const jsonStr = JSON.stringify(cleaned);
+    const sizeBytes = typeof Blob !== 'undefined' ? new Blob([jsonStr]).size : jsonStr.length;
+    if (sizeBytes > 800 * 1024) {
+      console.warn(`[LifeOS Firestore Size Guard] Warning: AppData payload size is ${(sizeBytes / 1024).toFixed(1)} KB (approaching 1 MiB limit). Consider archiving older history logs.`);
+    }
+  } catch {}
   const docRef = doc(db, 'users', uid);
   await setDoc(docRef, cleaned, { merge: true });
 }

@@ -8,15 +8,15 @@ import {
   ShoppingBag,
   CheckSquare,
   Shirt,
-  BarChart3,
   History as HistoryIcon,
   ShieldCheck,
   Settings as SettingsIcon,
+  MapPin,
   LucideIcon,
 } from 'lucide-react';
 import { AppSection } from '../theme/sectionSeedColors';
 
-export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system';
+export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault';
 
 export type DestinationId =
   | 'gym'
@@ -25,9 +25,9 @@ export type DestinationId =
   | 'timetable'
   | 'spending'
   | 'shopping'
+  | 'outings'
   | 'tasks'
   | 'laundry'
-  | 'progress'
   | 'history'
   | 'vault'
   | 'settings';
@@ -56,7 +56,7 @@ export const HOME_DESTINATION: HomeDestination = {
   route: '/',
   icon: Home,
   family: 'home',
-  matchRoutes: ['/', '/tasks', '/progress', '/history', '/laundry'],
+  matchRoutes: ['/', '/tasks', '/laundry'],
 };
 
 /**
@@ -114,8 +114,16 @@ export const DESTINATIONS: HubDestination[] = [
     label: 'Shopping Lists',
     route: '/shopping',
     icon: ShoppingBag,
-    family: 'finance',
+    family: 'shopping',
     matchRoutes: ['/shopping'],
+  },
+  {
+    id: 'outings',
+    label: 'Outing Expenses',
+    route: '/outings',
+    icon: MapPin,
+    family: 'outing',
+    matchRoutes: ['/outings'],
   },
 
   // Home tools family
@@ -136,19 +144,11 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/laundry'],
   },
   {
-    id: 'progress',
-    label: 'Progress & Analytics',
-    route: '/progress',
-    icon: BarChart3,
-    family: 'home',
-    matchRoutes: ['/progress'],
-  },
-  {
     id: 'history',
     label: 'History',
     route: '/history',
     icon: HistoryIcon,
-    family: 'home',
+    family: 'history',
     matchRoutes: ['/history'],
   },
 
@@ -158,7 +158,7 @@ export const DESTINATIONS: HubDestination[] = [
     label: 'Vault',
     route: '/vault',
     icon: ShieldCheck,
-    family: 'system',
+    family: 'vault',
     matchRoutes: ['/vault'],
   },
   {
@@ -176,6 +176,8 @@ export const DESTINATIONS: HubDestination[] = [
  */
 export const HUB_DESTINATIONS = DESTINATIONS;
 
+import { PALETTE } from '../theme/palette';
+
 /**
  * Per-family color configurations (independent of active interface)
  */
@@ -185,37 +187,90 @@ export const HUB_FAMILY_CONFIG: Record<
     seed: string;
     rgb: [number, number, number];
     darkGlyph: string;
+    textAccent: string;
+    onAccent: string;
+    darkStrong: string;
   }
 > = {
   gym: {
-    seed: '#E11D48', // Rose / Gym
+    seed: PALETTE.gym.seed, // Coral Crimson #E11D48
     rgb: [225, 29, 72],
-    darkGlyph: '#FB7185',
+    darkGlyph: PALETTE.gym.darkTint, // #FB7185
+    textAccent: PALETTE.gym.textAccent,
+    onAccent: PALETTE.gym.onAccent,
+    darkStrong: PALETTE.gym.darkStrong,
   },
   nutrition: {
-    seed: '#F5A623', // Amber / Nutrition
+    seed: PALETTE.nutrition.seed, // Solar Amber #F5A623
     rgb: [245, 166, 35],
-    darkGlyph: '#FBBF24',
+    darkGlyph: PALETTE.nutrition.darkTint, // #FBC15E
+    textAccent: PALETTE.nutrition.textAccent,
+    onAccent: PALETTE.nutrition.onAccent,
+    darkStrong: PALETTE.nutrition.darkStrong,
   },
   study: {
-    seed: '#0284C7', // Sky Blue
-    rgb: [2, 132, 199],
-    darkGlyph: '#5CC8F5',
+    seed: PALETTE.study.seed, // Lagoon Cyan #0891B2
+    rgb: [8, 145, 178],
+    darkGlyph: PALETTE.study.darkTint, // #80D2ED
+    textAccent: PALETTE.study.textAccent,
+    onAccent: PALETTE.study.onAccent,
+    darkStrong: PALETTE.study.darkStrong,
   },
   finance: {
-    seed: '#7C3AED', // Twilight Violet
-    rgb: [124, 58, 237],
-    darkGlyph: '#B79CFF',
+    seed: PALETTE.finance.seed, // Forest Green #15803D
+    rgb: [21, 128, 61],
+    darkGlyph: PALETTE.finance.darkTint, // #82CB92
+    textAccent: PALETTE.finance.textAccent,
+    onAccent: PALETTE.finance.onAccent,
+    darkStrong: PALETTE.finance.darkStrong,
   },
   home: {
-    seed: '#2563EB', // Royal Blue
+    seed: PALETTE.home.seed, // Royal Blue #2563EB
     rgb: [37, 99, 235],
-    darkGlyph: '#8DB0FF',
+    darkGlyph: PALETTE.home.darkTint, // #8DB0FF
+    textAccent: PALETTE.home.textAccent,
+    onAccent: PALETTE.home.onAccent,
+    darkStrong: PALETTE.home.darkStrong,
   },
   system: {
-    seed: '#4F46E5', // Midnight Indigo
-    rgb: [79, 70, 229],
-    darkGlyph: '#A5A0FF',
+    seed: PALETTE.settings.seed, // Slate #475569
+    rgb: [71, 85, 105],
+    darkGlyph: PALETTE.settings.darkTint, // #A7AEBB
+    textAccent: PALETTE.settings.textAccent,
+    onAccent: PALETTE.settings.onAccent,
+    darkStrong: PALETTE.settings.darkStrong,
+  },
+  history: {
+    seed: PALETTE.history.seed, // Burgundy #8C1D40
+    rgb: [140, 29, 64],
+    darkGlyph: PALETTE.history.darkTint, // #D66FA0
+    textAccent: PALETTE.history.textAccent,
+    onAccent: PALETTE.history.onAccent,
+    darkStrong: PALETTE.history.darkStrong,
+  },
+  outing: {
+    seed: PALETTE.outing.seed, // Saddle Brown #8C500A
+    rgb: [140, 80, 10],
+    darkGlyph: PALETTE.outing.darkTint, // #C88A58
+    textAccent: PALETTE.outing.textAccent,
+    onAccent: PALETTE.outing.onAccent,
+    darkStrong: PALETTE.outing.darkStrong,
+  },
+  shopping: {
+    seed: '#172554', // Deep Midnight Navy
+    rgb: [23, 37, 84],
+    darkGlyph: '#93C5FD',
+    textAccent: '#1E3A8A',
+    onAccent: '#FFFFFF',
+    darkStrong: '#254BB5',
+  },
+  vault: {
+    seed: '#2034A0', // Cyber Cobalt Navy
+    rgb: [32, 52, 160],
+    darkGlyph: '#818CF8',
+    textAccent: '#1E40AF',
+    onAccent: '#FFFFFF',
+    darkStrong: '#3B82F6',
   },
 };
 
@@ -226,6 +281,10 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   finance: 'Finance',
   study: 'Study',
   settings: 'Settings',
+  history: 'History',
+  outing: 'Outing Expenses',
+  shopping: 'Shopping Lists',
+  vault: 'Vault',
 };
 
 export function getDestinationById(id: string): HubDestination | undefined {
