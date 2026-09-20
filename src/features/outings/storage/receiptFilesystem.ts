@@ -12,7 +12,7 @@ import { Capacitor } from '@capacitor/core';
 const RECEIPT_DIR = 'lifeos_receipts';
 
 export async function isNativeFilesystemAvailable(): Promise<boolean> {
-  return Capacitor.isNativePlatform();
+  return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Filesystem');
 }
 
 /**
@@ -34,7 +34,7 @@ async function ensureReceiptsDir(): Promise<void> {
  * Saves binary base64 receipt data directly to native app-private filesystem
  */
 export async function writeNativeReceipt(id: string, base64Data: string): Promise<string> {
-  if (!Capacitor.isNativePlatform()) {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Filesystem')) {
     return `idb://${id}`;
   }
 
@@ -61,7 +61,7 @@ export async function writeNativeReceipt(id: string, base64Data: string): Promis
  * Reads binary base64 receipt data from native app-private filesystem
  */
 export async function readNativeReceipt(id: string): Promise<string | null> {
-  if (!Capacitor.isNativePlatform()) {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Filesystem')) {
     return null;
   }
 
@@ -83,7 +83,7 @@ export async function readNativeReceipt(id: string): Promise<string | null> {
  * Deletes receipt file from native app-private filesystem
  */
 export async function deleteNativeReceipt(id: string): Promise<void> {
-  if (!Capacitor.isNativePlatform()) {
+  if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('Filesystem')) {
     return;
   }
 

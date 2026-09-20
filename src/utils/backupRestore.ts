@@ -193,7 +193,7 @@ export async function exportBackupFile(currentAppData: AppData, includeAiKeys: b
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const filename = `LifeOS_Backup_${timestamp}.json`;
 
-  if (Capacitor.isNativePlatform()) {
+  if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Filesystem')) {
     try {
       // Save directly to Documents / Downloads via Capacitor Filesystem
       await Filesystem.writeFile({

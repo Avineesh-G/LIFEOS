@@ -74,7 +74,7 @@ export const isNativeAndroid = (): boolean => {
  * Falls back to bundled web configuration if running on Web/PWA or native info is unavailable.
  */
 export async function getInstalledVersion(): Promise<InstalledVersionInfo> {
-  if (isNativeAndroid()) {
+  if (isNativeAndroid() && Capacitor.isPluginAvailable('App')) {
     try {
       const info = await CapApp.getInfo();
       const parsedBuild = parseInt(info.build, 10);
@@ -178,7 +178,7 @@ export async function checkForAppUpdate(): Promise<{
  * Check if Android has permission to install unknown apps / self-update
  */
 export async function checkCanInstallApk(): Promise<boolean> {
-  if (!isNativeAndroid()) return true;
+  if (!isNativeAndroid() || !Capacitor.isPluginAvailable('ApkInstaller')) return true;
   try {
     const res = await ApkInstaller.canRequestPackageInstalls();
     return res.canInstall;
@@ -191,7 +191,7 @@ export async function checkCanInstallApk(): Promise<boolean> {
  * Opens system settings page to grant install permission for this app package
  */
 export async function openInstallSettings(): Promise<void> {
-  if (!isNativeAndroid()) return;
+  if (!isNativeAndroid() || !Capacitor.isPluginAvailable('ApkInstaller')) return;
   try {
     await ApkInstaller.openInstallPermissionSettings();
   } catch (e) {
@@ -203,7 +203,7 @@ export async function openInstallSettings(): Promise<void> {
  * Installs already downloaded and checksum-verified APK (e.g. after permission was granted)
  */
 export async function installVerifiedApk(): Promise<{ success: boolean; needPermission?: boolean }> {
-  if (!isNativeAndroid()) return { success: true };
+  if (!isNativeAndroid() || !Capacitor.isPluginAvailable('ApkInstaller')) return { success: true };
   try {
     const res = await ApkInstaller.installDownloadedApk();
     if (res.status === 'permission_needed') {
@@ -236,7 +236,7 @@ export async function startApkUpdate(
     targetUrl = VERCEL_APK_URL;
   }
 
-  if (isNativeAndroid()) {
+  if (isNativeAndroid() && Capacitor.isPluginAvailable('ApkInstaller')) {
     let progressSub: any;
     let errorSub: any;
     let permSub: any;

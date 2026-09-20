@@ -16,6 +16,7 @@
     "release:guard": "node --experimental-strip-types scripts/verify-release-guard.ts",
     "test:updater": "node --experimental-strip-types scripts/test-updater.ts",
     "test:backup": "node --experimental-strip-types scripts/test-backup-roundtrip.ts",
+    "test:plugins": "node --experimental-strip-types scripts/test-plugin-compatibility.ts",
     "test:matrix": "node --experimental-strip-types scripts/test-layout-matrix.ts"
   },
   "dependencies": {
