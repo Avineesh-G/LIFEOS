@@ -18,7 +18,7 @@ const DEFAULT_DATA: AppData = {
   timetable: [],
   tasks: [],
   reviews: [],
-  settings: { theme: 'system', accentColor: '#6366F1' },
+  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'] },
   profile: null,
   menuMonths: [],
   nutritionLogs: [],
@@ -111,6 +111,15 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
         }))
       : [],
   }));
+
+  merged.settings = {
+    ...DEFAULT_DATA.settings,
+    ...(merged.settings || {}),
+    navPinned:
+      Array.isArray(merged.settings?.navPinned) && merged.settings.navPinned.length === 2
+        ? [String(merged.settings.navPinned[0]), String(merged.settings.navPinned[1])]
+        : ['gym', 'nutrition'],
+  };
 
   return merged;
 }

@@ -21,6 +21,7 @@ import {
   installVerifiedApk,
   isNativeAndroid,
   CURRENT_VERSION_NAME,
+  CURRENT_VERSION_CODE,
   AppVersionInfo,
   DownloadProgressEvent,
   VERCEL_APK_URL
@@ -205,8 +206,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
     );
   };
 
+  const hasUpdate = remoteVersion ? remoteVersion.versionCode > CURRENT_VERSION_CODE : false;
+
   const handleStartUpdate = async () => {
-    if (!remoteVersion) return;
+    if (!remoteVersion || !hasUpdate) return;
 
     setErrorMessage('');
     setStatusNotice('');
@@ -221,6 +224,20 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
     }
 
     await executeDownload();
+  };
+
+  const handleCheckAgain = async () => {
+    setStatus('checking');
+    try {
+      const res = await checkForAppUpdate();
+      if (res.remoteVersion) {
+        setRemoteVersion(res.remoteVersion);
+      }
+    } catch (e) {
+      console.warn('Refresh update check failed', e);
+    } finally {
+      setStatus('idle');
+    }
   };
 
   const handleGrantPermission = async () => {
@@ -263,24 +280,38 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
         >
           {/* Glowing Header Banner */}
           <div className="relative p-6 pb-5 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border-b border-black/5 dark:border-white/5">
-            <div className="absolute top-0 right-0 w-36 h-36 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none ${
+              hasUpdate ? 'bg-indigo-500/15' : 'bg-emerald-500/15'
+            }`} />
 
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
-                  <Sparkles size={22} className="animate-pulse" />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${
+                  hasUpdate
+                    ? 'bg-gradient-to-tr from-indigo-600 to-violet-500 shadow-indigo-500/25'
+                    : 'bg-gradient-to-tr from-emerald-600 to-teal-500 shadow-emerald-500/25'
+                }`}>
+                  {hasUpdate ? (
+                    <Sparkles size={22} className="animate-pulse" />
+                  ) : (
+                    <CheckCircle2 size={22} />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-black tracking-tight text-gray-900 dark:text-white">
-                      LifeOS Update
+                      {hasUpdate ? 'LifeOS Update' : 'LifeOS Up to Date'}
                     </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                      v{remoteVersion?.versionName || 'New'}
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                      hasUpdate
+                        ? 'bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
+                        : 'bg-emerald-500/10 dark:bg-emerald-400/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                    }`}>
+                      v{hasUpdate ? (remoteVersion?.versionName || 'New') : CURRENT_VERSION_NAME}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-                    Direct In-App Auto-Updater
+                    {hasUpdate ? 'Direct In-App Auto-Updater' : 'Latest Release Installed'}
                   </p>
                 </div>
               </div>
@@ -299,19 +330,31 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           {/* Body Content */}
           <div className="p-6 space-y-5">
             {/* Version Transition Capsule */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5 text-xs font-semibold">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">Current:</span>
-                <span className="text-gray-700 dark:text-gray-300 font-mono">v{CURRENT_VERSION_NAME}</span>
+            {hasUpdate ? (
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5 text-xs font-semibold">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 dark:text-gray-500">Current:</span>
+                  <span className="text-gray-700 dark:text-gray-300 font-mono">v{CURRENT_VERSION_NAME}</span>
+                </div>
+                <ArrowRight size={14} className="text-indigo-500" />
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 dark:text-gray-500">Latest:</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold">
+                    v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
+                  </span>
+                </div>
               </div>
-              <ArrowRight size={14} className="text-indigo-500" />
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">Latest:</span>
-                <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold">
-                  v{remoteVersion?.versionName || '1.6'}
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs font-semibold">
+                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+                  <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+                  <span>Version {CURRENT_VERSION_NAME} (Build {CURRENT_VERSION_CODE})</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
+                  Latest
                 </span>
               </div>
-            </div>
+            )}
 
             {/* Status Views */}
             {status === 'checking' ? (
@@ -433,8 +476,8 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   )}
                 </div>
               </div>
-            ) : (
-              /* IDLE STATE: Show Release Notes & Highlights */
+            ) : hasUpdate ? (
+              /* IDLE STATE (UPDATE AVAILABLE): Show Release Notes */
               <div className="space-y-3">
                 <div className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed max-h-36 overflow-y-auto pr-1 space-y-1.5">
                   <div className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
@@ -450,27 +493,68 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   <span>SHA-256 verified build • Installs cleanly inside LifeOS</span>
                 </div>
               </div>
+            ) : (
+              /* IDLE STATE (ALREADY UP TO DATE) */
+              <div className="space-y-3 text-center py-2">
+                <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                  You are currently running the latest build of LifeOS with all navigation features and 120 FPS performance optimizations enabled.
+                </p>
+                <div className="p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/5 dark:border-white/5 text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                  <span>Channel: Stable Production</span>
+                  <button
+                    type="button"
+                    onClick={handleManualDownload}
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
+                  >
+                    <Download size={12} /> Direct APK
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Action Buttons */}
             {status === 'idle' && (
               <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleDismiss}
-                  className="flex-1 py-3 px-4 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.08] dark:hover:bg-white/[0.09] text-gray-700 dark:text-gray-300 text-xs font-bold transition-all text-center"
-                >
-                  Later
-                </button>
+                {hasUpdate ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleDismiss}
+                      className="flex-1 py-3 px-4 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.08] dark:hover:bg-white/[0.09] text-gray-700 dark:text-gray-300 text-xs font-bold transition-all text-center"
+                    >
+                      Later
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={handleStartUpdate}
-                  className="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-98 transition-all flex items-center justify-center gap-2"
-                >
-                  <Download size={15} />
-                  <span>Update Now</span>
-                </button>
+                    <button
+                      type="button"
+                      onClick={handleStartUpdate}
+                      className="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-98 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Download size={15} />
+                      <span>Update Now</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleCheckAgain}
+                      className="flex-1 py-3 px-4 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] hover:bg-black/[0.08] dark:hover:bg-white/[0.09] text-gray-700 dark:text-gray-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <RefreshCw size={13} />
+                      <span>Check Again</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleDismiss}
+                      className="flex-[2] py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-98 transition-all flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle2 size={15} />
+                      <span>Got It</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
             {status === 'checking' && (

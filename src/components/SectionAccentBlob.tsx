@@ -44,7 +44,6 @@ export function SectionAccentBlob() {
       style={{ contain: 'strict' }}
     >
       <div
-        key={key}
         style={{
           position: 'absolute',
           width: 'clamp(420px, 62vw, 700px)',

@@ -1,10 +1,9 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useThemeMode } from './useDayPhase';
 import {
   getM3ThemeForSection,
   getSectionFromPathname,
-  applyM3ThemeToDocument,
   SectionM3Theme,
   M3ColorScheme,
   AppSection,
@@ -46,9 +45,6 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
     return getM3ThemeForSection(section, isDark);
   }, [section, isDark]);
 
-  useEffect(() => {
-    applyM3ThemeToDocument(theme.scheme);
-  }, [theme.scheme]);
 
   return {
     theme,

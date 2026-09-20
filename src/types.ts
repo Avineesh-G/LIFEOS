@@ -98,6 +98,7 @@ export interface AppSettings {
   notificationLeadMinutes?: number; // 5 | 10 | 15 | 20 (default 10)
   taskNotificationsEnabled?: boolean;
   timetableNotificationsEnabled?: boolean;
+  navPinned?: [string, string];
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────

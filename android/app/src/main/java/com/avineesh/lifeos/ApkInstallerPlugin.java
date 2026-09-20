@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -23,8 +25,11 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -107,6 +112,7 @@ public class ApkInstallerPlugin extends Plugin {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(apkUrl));
             request.setTitle("LifeOS Update");
             request.setDescription("Downloading latest LifeOS APK...");
+            request.setMimeType("application/vnd.android.package-archive");
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS, APK_FILE_NAME);
             request.setAllowedOverMetered(true);
@@ -131,10 +137,19 @@ public class ApkInstallerPlugin extends Plugin {
 
     @PluginMethod
     public void installDownloadedApk(PluginCall call) {
-        File downloadsDir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        File targetApk = new File(downloadsDir, APK_FILE_NAME);
+        File targetApk = null;
+        File cacheApk = new File(getContext().getCacheDir(), APK_FILE_NAME);
+        if (cacheApk.exists() && cacheApk.length() > 0) {
+            targetApk = cacheApk;
+        } else {
+            File downloadsDir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            File downloadApk = new File(downloadsDir, APK_FILE_NAME);
+            if (downloadApk.exists() && downloadApk.length() > 0) {
+                targetApk = downloadApk;
+            }
+        }
 
-        if (!targetApk.exists()) {
+        if (targetApk == null) {
             call.reject("No downloaded APK file found. Please download the update first.");
             return;
         }
@@ -256,6 +271,24 @@ public class ApkInstallerPlugin extends Plugin {
             }
         }
 
+        // Prepare file for installation - copy to app internal cache to bypass Scoped Storage access restrictions on Android 11+
+        File apkToInstall = targetApk;
+        try {
+            targetApk.setReadable(true, false);
+            File cacheDir = getContext().getCacheDir();
+            File cachedApk = new File(cacheDir, APK_FILE_NAME);
+            if (cachedApk.exists()) {
+                cachedApk.delete();
+            }
+            copyFile(targetApk, cachedApk);
+            cachedApk.setReadable(true, false);
+            apkToInstall = cachedApk;
+            Log.d(TAG, "Copied verified APK to internal cache for install: " + cachedApk.getAbsolutePath());
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to copy APK to internal cache, proceeding with original file", e);
+            apkToInstall = targetApk;
+        }
+
         // Check install permissions before firing intent
         boolean canInstall = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -276,7 +309,7 @@ public class ApkInstallerPlugin extends Plugin {
         }
 
         try {
-            triggerInstallIntent(targetApk);
+            triggerInstallIntent(apkToInstall);
             JSObject res = new JSObject();
             res.put("status", "installing");
             res.put("message", "Package installer launched");
@@ -304,6 +337,8 @@ public class ApkInstallerPlugin extends Plugin {
 
     private void triggerInstallIntent(File apkFile) {
         Context ctx = getContext();
+        apkFile.setReadable(true, false);
+
         Uri apkUri = FileProvider.getUriForFile(
             ctx,
             ctx.getPackageName() + ".fileprovider",
@@ -313,8 +348,35 @@ public class ApkInstallerPlugin extends Plugin {
         Intent installIntent = new Intent(Intent.ACTION_VIEW);
         installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
         installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        installIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        installIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        installIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true);
+
+        // Grant explicit read URI permissions to candidate package installer activities
+        try {
+            List<ResolveInfo> resolveInfoList = ctx.getPackageManager().queryIntentActivities(
+                installIntent,
+                PackageManager.MATCH_DEFAULT_ONLY
+            );
+            for (ResolveInfo resolveInfo : resolveInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                ctx.grantUriPermission(packageName, apkUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Could not grant explicit URI permission to candidate installer activities", e);
+        }
+
         ctx.startActivity(installIntent);
+    }
+
+    private void copyFile(File source, File destination) throws Exception {
+        try (FileInputStream inStream = new FileInputStream(source);
+             FileOutputStream outStream = new FileOutputStream(destination);
+             FileChannel inChannel = inStream.getChannel();
+             FileChannel outChannel = outStream.getChannel()) {
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        }
     }
 
     private void startProgressPolling(long downloadId) {

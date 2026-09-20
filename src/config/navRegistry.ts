@@ -1,32 +1,77 @@
+import { LucideIcon } from 'lucide-react';
 import {
-  Dumbbell,
-  Utensils,
-  Shirt,
-  BarChart3,
-  History,
-  CalendarDays,
-  BookOpen,
-  Wallet,
-  CheckSquare,
-  ShieldCheck,
-  Settings,
-  ShoppingBag,
-  LucideIcon
-} from 'lucide-react';
+  DESTINATIONS,
+  DestinationId,
+  HubDestination,
+  getDestinationById,
+} from './hubDestinations';
 
-export type NavModuleId =
-  | 'gym'
-  | 'nutrition'
-  | 'laundry'
-  | 'progress'
-  | 'history'
-  | 'timetable'
-  | 'study'
-  | 'spending'
-  | 'shopping'
-  | 'tasks'
-  | 'vault'
-  | 'settings';
+export type { DestinationId };
+export type NavModuleId = DestinationId;
+
+export interface NavConfig {
+  version: 1;
+  pinned: [DestinationId, DestinationId]; // Slot 1, Slot 2
+}
+
+export const DEFAULT_NAV: NavConfig = {
+  version: 1,
+  pinned: ['gym', 'nutrition'],
+};
+
+export const DEFAULT_NAV_CONFIG = DEFAULT_NAV;
+
+const VALID_DESTINATION_SET = new Set<string>(DESTINATIONS.map(d => d.id));
+
+/**
+ * Validates and self-heals raw navigation config from localStorage or Firestore.
+ * Handles migration from legacy `{ slot1, slot2 }` to `{ version: 1, pinned: [slot1, slot2] }`.
+ * Ensures exactly 2 distinct valid destinations (never 'home', never duplicate).
+ */
+export function validateNavConfig(raw: any): NavConfig {
+  if (!raw || typeof raw !== 'object') {
+    return DEFAULT_NAV;
+  }
+
+  // 1. Check for legacy format: { slot1, slot2 }
+  if (
+    typeof raw.slot1 === 'string' &&
+    typeof raw.slot2 === 'string' &&
+    VALID_DESTINATION_SET.has(raw.slot1) &&
+    VALID_DESTINATION_SET.has(raw.slot2) &&
+    raw.slot1 !== raw.slot2 &&
+    raw.slot1 !== 'home' &&
+    raw.slot2 !== 'home'
+  ) {
+    return {
+      version: 1,
+      pinned: [raw.slot1 as DestinationId, raw.slot2 as DestinationId],
+    };
+  }
+
+  // 2. Check for current format: { version: 1, pinned: [id1, id2] } or { pinned: [id1, id2] }
+  if (Array.isArray(raw.pinned) && raw.pinned.length === 2) {
+    const [p1, p2] = raw.pinned;
+    if (
+      typeof p1 === 'string' &&
+      typeof p2 === 'string' &&
+      VALID_DESTINATION_SET.has(p1) &&
+      VALID_DESTINATION_SET.has(p2) &&
+      p1 !== p2 &&
+      p1 !== 'home' &&
+      p2 !== 'home'
+    ) {
+      return {
+        version: 1,
+        pinned: [p1 as DestinationId, p2 as DestinationId],
+      };
+    }
+  }
+
+  return DEFAULT_NAV;
+}
+
+// ── Backward Compatibility Helpers ──────────────────────────────────────────
 
 export interface NavModuleDefinition {
   id: NavModuleId;
@@ -37,117 +82,31 @@ export interface NavModuleDefinition {
   description?: string;
 }
 
-export const NAV_MODULE_REGISTRY: NavModuleDefinition[] = [
-  {
-    id: 'gym',
-    label: 'Gym',
-    path: '/gym',
-    icon: Dumbbell,
-    color: 'text-emerald-500 dark:text-emerald-400',
-    description: 'Workouts, splits, and exercise logs'
-  },
-  {
-    id: 'nutrition',
-    label: 'Nutrition',
-    path: '/nutrition',
-    icon: Utensils,
-    color: 'text-orange-500 dark:text-orange-400',
-    description: 'Diet, macro targets, and hydration'
-  },
-  {
-    id: 'tasks',
-    label: 'To-Do Tasks',
-    path: '/tasks',
-    icon: CheckSquare,
-    color: 'text-emerald-500 dark:text-emerald-400',
-    description: 'Deadlines, daily priorities, and tasks'
-  },
-  {
-    id: 'timetable',
-    label: 'Timetable',
-    path: '/timetable',
-    icon: CalendarDays,
-    color: 'text-sky-500 dark:text-sky-400',
-    description: 'Class schedule, rooms, and timetable'
-  },
-  {
-    id: 'study',
-    label: 'Study',
-    path: '/study',
-    icon: BookOpen,
-    color: 'text-indigo-500 dark:text-indigo-400',
-    description: 'Pomodoro timer, doubts, and study analytics'
-  },
-  {
-    id: 'spending',
-    label: 'Spending',
-    path: '/spending',
-    icon: Wallet,
-    color: 'text-amber-500 dark:text-amber-400',
-    description: 'Expense tracking and monthly budget'
-  },
-  {
-    id: 'shopping',
-    label: 'Shopping Lists',
-    path: '/shopping',
-    icon: ShoppingBag,
-    color: 'text-orange-500 dark:text-orange-400',
-    description: 'Checklists, grocery trips, and outing templates'
-  },
-  {
-    id: 'laundry',
-    label: 'Laundry',
-    path: '/laundry',
-    icon: Shirt,
-    color: 'text-teal-500 dark:text-teal-400',
-    description: 'Clothes count and return date tracker'
-  },
-  {
-    id: 'progress',
-    label: 'Progress & Analytics',
-    path: '/progress',
-    icon: BarChart3,
-    color: 'text-purple-500 dark:text-purple-400',
-    description: 'Habit streaks and macro trends'
-  },
-  {
-    id: 'history',
-    label: 'History',
-    path: '/history',
-    icon: History,
-    color: 'text-violet-500 dark:text-violet-400',
-    description: 'Historical archive of past days'
-  },
-  {
-    id: 'vault',
-    label: 'Vault',
-    path: '/vault',
-    icon: ShieldCheck,
-    color: 'text-emerald-500 dark:text-emerald-400',
-    description: 'Biometric encrypted credential vault'
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    path: '/settings',
-    icon: Settings,
-    color: 'text-slate-500 dark:text-slate-400',
-    description: 'Preferences, notifications, and security'
-  },
-];
-
-export interface NavConfig {
-  slot1: NavModuleId;
-  slot2: NavModuleId;
-}
-
-export const DEFAULT_NAV_CONFIG: NavConfig = {
-  slot1: 'gym',
-  slot2: 'nutrition',
-};
+export const NAV_MODULE_REGISTRY: NavModuleDefinition[] = DESTINATIONS.map(d => ({
+  id: d.id,
+  label: d.label,
+  path: d.route,
+  icon: d.icon,
+  description: d.label,
+}));
 
 export function getModuleById(id: NavModuleId): NavModuleDefinition {
-  const found = NAV_MODULE_REGISTRY.find(m => m.id === id);
-  if (found) return found;
-  return NAV_MODULE_REGISTRY[0];
+  const dest = getDestinationById(id);
+  if (dest) {
+    return {
+      id: dest.id,
+      label: dest.label,
+      path: dest.route,
+      icon: dest.icon,
+      description: dest.label,
+    };
+  }
+  const fallback = DESTINATIONS[0];
+  return {
+    id: fallback.id,
+    label: fallback.label,
+    path: fallback.route,
+    icon: fallback.icon,
+    description: fallback.label,
+  };
 }

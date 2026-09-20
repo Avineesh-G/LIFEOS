@@ -874,11 +874,11 @@ export default function Settings({
                   Software Updates
                 </h3>
                 <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 tracking-wider uppercase">
-                  v<span className="font-stat">1.6</span>
+                  v<span className="font-stat">{CURRENT_VERSION_NAME}</span>
                 </span>
               </div>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                Direct In-App APK Auto-Updater • Build <span className="font-stat">21</span>
+                Direct In-App APK Auto-Updater • Build <span className="font-stat">{CURRENT_VERSION_CODE}</span>
               </p>
             </div>
           </div>
@@ -951,9 +951,16 @@ export default function Settings({
         <div className="pt-1 flex flex-wrap items-center gap-2 text-xs">
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               triggerHaptic('light');
-              window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
+              try {
+                const res = await checkForAppUpdate();
+                window.dispatchEvent(new CustomEvent('lifeos-open-updater', {
+                  detail: { remoteVersion: res.remoteVersion, hasUpdate: res.hasUpdate }
+                }));
+              } catch {
+                window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
+              }
             }}
             className="px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-primary-light dark:text-primary-dark font-bold flex items-center gap-1.5 transition-all"
           >

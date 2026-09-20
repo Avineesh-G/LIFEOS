@@ -4,6 +4,10 @@
  * Implements the standard Material 3 state-layer specification:
  * An expanding circular highlight layer using --md-primary at low opacity (12%)
  * emanating directly from the touch/click origin point on interactive surfaces.
+ *
+ * Performance optimizations:
+ * - Immediate fast-path bailout for nav bars, sheets, and [data-no-ripple] elements.
+ * - Avoids calling window.getComputedStyle on tap to prevent synchronous style recalculation.
  */
 
 let initialized = false;
@@ -15,12 +19,24 @@ export function initM3StateLayer(): void {
   window.addEventListener(
     'pointerdown',
     (e: PointerEvent) => {
-      // Find closest interactive element across all interactive roles
-      const target = (e.target as HTMLElement)?.closest(
-        'button, [role="button"], a, input[type="submit"], input[type="checkbox"], .card-interactive, [data-m3-interactive], .bouncy-tap, .interactive-item, label.cursor-pointer, .nav-item, [onclick]'
+      const rawTarget = e.target as HTMLElement | null;
+      if (!rawTarget) return;
+
+      // Fast bailout: never run ripple calculations on navigation bars, sheets, dialogs, or opted-out elements
+      if (
+        rawTarget.closest(
+          '[data-no-ripple="true"], nav, [role="navigation"], [role="dialog"], [aria-label="Main Navigation"]'
+        )
+      ) {
+        return;
+      }
+
+      // Find closest interactive element
+      const target = rawTarget.closest(
+        'button, [role="button"], a, input[type="submit"], input[type="checkbox"], .card-interactive, [data-m3-interactive], .bouncy-tap, .interactive-item, label.cursor-pointer, [onclick]'
       ) as HTMLElement | null;
 
-      if (!target || target.getAttribute('data-no-ripple') === 'true' || target.hasAttribute('disabled')) {
+      if (!target || target.hasAttribute('disabled')) {
         return;
       }
 
@@ -37,12 +53,11 @@ export function createM3Ripple(e: PointerEvent | React.PointerEvent, container: 
   const ripple = document.createElement('span');
   ripple.className = 'm3-state-layer-ripple';
 
-  // Ensure container clips child ripples and establishes stacking context
-  const computedStyle = window.getComputedStyle(container);
-  if (computedStyle.position === 'static') {
+  // Fast inline positioning without getComputedStyle layout query
+  if (!container.style.position || container.style.position === 'static') {
     container.style.position = 'relative';
   }
-  if (computedStyle.overflow !== 'hidden') {
+  if (!container.style.overflow || container.style.overflow !== 'hidden') {
     container.style.overflow = 'hidden';
   }
 
@@ -56,7 +71,6 @@ export function createM3Ripple(e: PointerEvent | React.PointerEvent, container: 
 
   container.appendChild(ripple);
 
-  // Clean up after animation finishes
   setTimeout(() => {
     ripple.remove();
   }, 420);

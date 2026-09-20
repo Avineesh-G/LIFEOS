@@ -1,8 +1,8 @@
 {
-  "versionCode": 3,
-  "versionName": "1.2.1",
-  "releaseDate": "2026-09-19",
-  "releaseNotes": "LifeOS v1.2.1 (Build 3): Performance optimization release. Eliminates GPU blur on blob (radial-gradient), removes layout-reflow height animations (scaleY+opacity), fixes 300ms tap delay (touch-action:manipulation), removes MutationObserver from main thread, wraps hub navigation in startTransition, fixes More button double-toggle with AnimatePresence popLayout mode and animation guard, and skips service worker in native APK.",
+  "versionCode": 4,
+  "versionName": "1.2.2",
+  "releaseDate": "2026-09-20",
+  "releaseNotes": "LifeOS v1.2.2 (Build 4): Navigation customization with dynamic 3-pill slots and 12-destination hub pool, 120 FPS ultra-fluid animations, and optimized in-app updater with Scoped Storage FileProvider permissions.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "3ace9090b865092ea96e0745406da357657c2f1ac21b839ec1bed19493f64504"
+  "sha256": "300cc0cea3e8cb6ed7be2f2ce25ebf98737b6000b0c2d816b8e9eea274b9972d"
 }

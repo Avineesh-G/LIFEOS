@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useMemo, startTransition } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, startTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home, Dumbbell, Utensils, Menu, X, RotateCw, Bell, LucideIcon, Check, ArrowLeftRight
+  X, RotateCw, Bell
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -12,14 +12,6 @@ import {
   syncTaskNotifications,
   syncNutritionNotifications,
 } from '../utils/notifications';
-import {
-  NAV_MODULE_REGISTRY,
-  NavConfig,
-  getModuleById,
-  NavModuleId
-} from '../config/navRegistry';
-import { loadNavConfig, saveNavConfig } from '../utils/navStorage';
-import { NavSlotPickerModal } from './NavSlotPickerModal';
 import { SectionAccentBlob } from './SectionAccentBlob';
 import { NavigationHubSheet } from './NavigationHubSheet';
 import { MotionScheme } from '../utils/motionConfig';
@@ -29,6 +21,8 @@ import {
   getNavSquircleBg,
 } from '../theme/sectionSeedColors';
 import { useDayTheme } from '../theme/DayThemeProvider';
+import { useNavConfig } from '../hooks/useNavConfig';
+import { DESTINATIONS } from '../config/hubDestinations';
 import type { AppData, AppSettings } from '../types';
 
 interface LayoutProps {
@@ -50,11 +44,18 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const permissionCheckedRef = useRef(false);
 
-  // Customizable Nav Bar States
-  const [navConfig, setNavConfig] = useState<NavConfig>(loadNavConfig);
-  const [isNavEditing, setIsNavEditing] = useState(false);
-  const [pickerSlot, setPickerSlot] = useState<1 | 2 | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Dynamic Navigation Configuration Hook
+  const {
+    pinned,
+    pillDestinations,
+    hubDestinations,
+    setSlot,
+    reset: resetNav,
+  } = useNavConfig({ data, updateData });
+
+  // Hub Edit Mode State (can be triggered by 450ms long press on pill slots)
+  const [hubEditMode, setHubEditMode] = useState(false);
+  const [hubSelectedSlot, setHubSelectedSlot] = useState<1 | 2>(1);
 
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressTriggeredRef = useRef(false);
@@ -63,62 +64,31 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   // Guards against double-toggle during the squircle icon swap animation (~120ms)
   const squircleAnimatingRef = useRef(false);
 
-  const slot1Module = getModuleById(navConfig.slot1);
-  const slot2Module = getModuleById(navConfig.slot2);
-
-  const primaryDockItems = [
-    { icon: Home, label: 'Home', path: '/', isFixed: true, slot: 0 },
-    { icon: slot1Module.icon, label: slot1Module.label, path: slot1Module.path, isFixed: false, slot: 1 },
-    { icon: slot2Module.icon, label: slot2Module.label, path: slot2Module.path, isFixed: false, slot: 2 },
-  ];
-
-  const handleSelectModule = (targetSlot: 1 | 2, moduleId: NavModuleId) => {
-    const nextConfig: NavConfig = {
-      ...navConfig,
-      [targetSlot === 1 ? 'slot1' : 'slot2']: moduleId,
-    };
-    setNavConfig(nextConfig);
-    saveNavConfig(nextConfig);
-    triggerHaptic('light');
-  };
-
-  const handleSwapSlots = (targetSlot: 1 | 2) => {
-    const nextConfig: NavConfig = {
-      slot1: navConfig.slot2,
-      slot2: navConfig.slot1,
-    };
-    setNavConfig(nextConfig);
-    saveNavConfig(nextConfig);
-    const otherSlotNumber = targetSlot === 1 ? 2 : 1;
-    triggerHaptic('medium');
-    setToastMessage(`Swapped with Slot ${otherSlotNumber}`);
-  };
-
-  useEffect(() => {
-    if (!toastMessage) return;
-    const t = setTimeout(() => {
-      setToastMessage(null);
-    }, 2400);
-    return () => clearTimeout(t);
-  }, [toastMessage]);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handleSlotPointerDown = (slotIndex: number, e: React.PointerEvent) => {
     isLongPressTriggeredRef.current = false;
     pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
 
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
     }
 
+    if (slotIndex === 0) {
+      // Home is fixed and cannot be customized
+      return;
+    }
+
+    const targetSlot = slotIndex as 1 | 2;
     longPressTimerRef.current = setTimeout(() => {
       isLongPressTriggeredRef.current = true;
       triggerHaptic('medium');
-      setIsNavEditing(true);
-      setMenuOpen(false);
-    }, 600);
+      setHubEditMode(true);
+      setHubSelectedSlot(targetSlot);
+      setMenuOpen(true);
+    }, 450);
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
+  const handleSlotPointerMove = (e: React.PointerEvent) => {
     const dx = Math.abs(e.clientX - pointerStartPosRef.current.x);
     const dy = Math.abs(e.clientY - pointerStartPosRef.current.y);
     if (dx > 10 || dy > 10) {
@@ -129,7 +99,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     }
   };
 
-  const handlePointerUpOrLeave = () => {
+  const handleSlotPointerUpOrLeave = () => {
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
@@ -223,15 +193,23 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     }
   };
 
-  // Close speed dial menu when navigating or pressing escape
+  // Close speed dial menu when navigating
   useEffect(() => {
     setMenuOpen(false);
+    setHubEditMode(false);
   }, [location.pathname]);
 
   // Sync menu open state for Android hardware back button handling
   useEffect(() => {
     (window as any).__lifeos_menu_open = menuOpen;
-    const handleCloseMenu = () => setMenuOpen(false);
+    const handleCloseMenu = () => {
+      // If hub is in edit mode, let NavigationHubSheet handle exiting edit mode first
+      if ((window as any).__lifeos_hub_edit_mode) {
+        return;
+      }
+      setMenuOpen(false);
+      setHubEditMode(false);
+    };
     window.addEventListener('lifeos-close-menu', handleCloseMenu);
     return () => {
       window.removeEventListener('lifeos-close-menu', handleCloseMenu);
@@ -243,109 +221,77 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     if (!el || !(el instanceof HTMLElement)) return false;
     if (el.tagName === 'TEXTAREA' || el.isContentEditable) return true;
     if (el.tagName === 'INPUT') {
-      const input = el as HTMLInputElement;
-      const type = (input.type || 'text').toLowerCase();
-      const nonKeyboardTypes = [
-        'date',
-        'time',
-        'datetime-local',
-        'month',
-        'week',
-        'checkbox',
-        'radio',
-        'range',
-        'color',
-        'file',
-        'button',
-        'submit',
-        'reset',
-        'hidden',
-        'image',
-      ];
-      return !nonKeyboardTypes.includes(type) && !input.readOnly && !input.disabled;
+      const type = (el.getAttribute('type') || 'text').toLowerCase();
+      // Input types that definitely summon a soft keyboard
+      return ['text', 'search', 'email', 'number', 'password', 'tel', 'url'].includes(type);
     }
     return false;
   };
 
-  // Hide floating navigation dock when mobile virtual keyboard is open
+  // Virtual keyboard detection: hide nav bar when keyboard is up to prevent occlusion
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.visualViewport) {
-        const isShrunk = window.visualViewport.height < window.innerHeight - 120;
-        if (!isShrunk) {
-          setIsKeyboardOpen(false);
-        } else if (isVirtualKeyboardInput(document.activeElement)) {
-          setIsKeyboardOpen(true);
-        }
-      }
-    };
-
     const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (isVirtualKeyboardInput(target)) {
+      if (isVirtualKeyboardInput(e.target as Element)) {
         setIsKeyboardOpen(true);
       }
     };
 
     const handleFocusOut = () => {
+      // Give a tiny tick so if focus moves between inputs, we don't flash the nav
       setTimeout(() => {
-        const active = document.activeElement;
-        if (!isVirtualKeyboardInput(active)) {
+        if (!isVirtualKeyboardInput(document.activeElement)) {
           setIsKeyboardOpen(false);
         }
       }, 100);
     };
 
-    window.visualViewport?.addEventListener('resize', handleResize);
+    // VisualViewport fallback: tracks real-time screen shrinkage when keyboard slides in on Android/iOS
+    const handleViewportResize = () => {
+      if (window.visualViewport) {
+        // If viewport height drops significantly below window innerHeight, keyboard is open
+        const heightDiff = window.innerHeight - window.visualViewport.height;
+        if (heightDiff > 140) {
+          setIsKeyboardOpen(true);
+        } else if (!isVirtualKeyboardInput(document.activeElement)) {
+          setIsKeyboardOpen(false);
+        }
+      }
+    };
+
     window.addEventListener('focusin', handleFocusIn);
     window.addEventListener('focusout', handleFocusOut);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportResize);
+      window.visualViewport.addEventListener('scroll', handleViewportResize);
+    }
 
     return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
       window.removeEventListener('focusin', handleFocusIn);
       window.removeEventListener('focusout', handleFocusOut);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportResize);
+        window.visualViewport.removeEventListener('scroll', handleViewportResize);
+      }
     };
   }, []);
 
+  // Directional scroll listener: hides nav on scroll down, shows on scroll up
   const [navVisible, setNavVisible] = useState(true);
 
-  // Global event listener to force reveal nav dock and clear keyboard lock
   useEffect(() => {
-    const handleShowNav = () => {
-      setNavVisible(true);
-      setIsKeyboardOpen(false);
-    };
-    window.addEventListener('lifeos-show-nav', handleShowNav);
-    return () => {
-      window.removeEventListener('lifeos-show-nav', handleShowNav);
-    };
-  }, []);
-
-  // Automatically reset nav visibility, keyboard state, and close speed dial on route change
-  useEffect(() => {
-    setNavVisible(true);
-    setMenuOpen(false);
-    setIsKeyboardOpen(false);
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-  }, [location.pathname]);
-
-  // OneStop auto-hiding navigation: hides when scrolling down, reappears when scrolling back up
-  useEffect(() => {
-    let lastScrollY = window.scrollY || document.documentElement.scrollTop;
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
     let ticking = false;
 
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0;
           const delta = currentScrollY - lastScrollY;
 
-          // When near the top of the page, navigation is always visible
-          if (currentScrollY <= 20) {
+          // If at the very top of page, always reveal nav
+          if (currentScrollY <= 15) {
             setNavVisible(true);
           } else if (Math.abs(delta) > 5) {
             if (delta > 0) {
@@ -391,18 +337,13 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     window.addEventListener('lifeos-subinterface-open', handleSubOpen);
     window.addEventListener('lifeos-subinterface-close', handleSubClose);
 
-    // NOTE: MutationObserver removed — it fired on every DOM mutation,
-    // running synchronously on the main thread at tap time and causing
-    // input delay (janky first frame after tapping the More button).
-    // Custom events are sufficient for all LifeOS sub-interface cases.
-
     return () => {
       window.removeEventListener('lifeos-subinterface-open', handleSubOpen);
       window.removeEventListener('lifeos-subinterface-close', handleSubClose);
     };
   }, []);
 
-  // Sub-routes where focused task execution happens (workout session, shopping list items, study timer, etc.)
+  // Sub-routes where focused task execution happens
   const isSubRoute = useMemo(() => {
     const path = (location.pathname || '').toLowerCase();
     if (
@@ -420,62 +361,64 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     return false;
   }, [location.pathname]);
 
-
   const { isDark } = useDayTheme();
   const activeSection = getSectionFromPathname(location.pathname);
   const pillBg = getNavPillBg(activeSection, isDark);
   const squircleBg = getNavSquircleBg(activeSection, isDark);
   const solidAccent = squircleBg;
-  // Inactive icons: rendered in a muted tone (roughly 55% opacity of the pill's "on-container" color)
   const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(15, 23, 42, 0.55)';
+
+  const currentPath = (location.pathname || '').toLowerCase();
+
+  const isRouteMatching = useCallback(
+    (dest: { route: string; matchRoutes?: string[] }) => {
+      const targetRoute = dest.route.toLowerCase();
+      if (targetRoute !== '/' && (currentPath === targetRoute || currentPath.startsWith(targetRoute + '/'))) {
+        return true;
+      }
+      if (dest.matchRoutes && dest.matchRoutes.length > 0) {
+        return dest.matchRoutes.some((r) => {
+          const lowerR = r.toLowerCase();
+          if (lowerR === '/') return currentPath === '/' || currentPath === '';
+          return currentPath === lowerR || currentPath.startsWith(lowerR + '/');
+        });
+      }
+      return false;
+    },
+    [currentPath]
+  );
+
+  const isSlot1Active = isRouteMatching(pillDestinations[1]);
+  const isSlot2Active = !isSlot1Active && isRouteMatching(pillDestinations[2]);
+  const isHubActive = !isSlot1Active && !isSlot2Active && hubDestinations.some((d) => isRouteMatching(d));
+  const isHomeActive = !isSlot1Active && !isSlot2Active && !isHubActive;
 
   const navTabs = [
     {
       id: 'home',
-      path: '/',
-      icon: Home,
-      isActive: location.pathname === '/' || ['/tasks', '/progress', '/history', '/laundry'].includes(location.pathname),
-      label: 'Home',
+      path: pillDestinations[0].route,
+      icon: pillDestinations[0].icon,
+      isActive: isHomeActive,
+      label: pillDestinations[0].label,
+      slotIndex: 0,
     },
     {
-      id: 'gym',
-      path: '/gym',
-      icon: Dumbbell,
-      isActive: location.pathname.startsWith('/gym'),
-      label: 'Gym',
+      id: pillDestinations[1].id,
+      path: pillDestinations[1].route,
+      icon: pillDestinations[1].icon,
+      isActive: isSlot1Active,
+      label: pillDestinations[1].label,
+      slotIndex: 1,
     },
     {
-      id: 'nutrition',
-      path: '/nutrition',
-      icon: Utensils,
-      isActive: location.pathname === '/nutrition',
-      label: 'Nutrition',
+      id: pillDestinations[2].id,
+      path: pillDestinations[2].route,
+      icon: pillDestinations[2].icon,
+      isActive: isSlot2Active,
+      label: pillDestinations[2].label,
+      slotIndex: 2,
     },
   ];
-
-  const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/' || ['/tasks', '/progress', '/history', '/laundry'].includes(location.pathname);
-    return location.pathname.startsWith(path);
-  };
-
-  const isPrimaryPath = (path: string) => {
-    if (path === '/') return true;
-    if (path === '/gym') return true;
-    if (path === '/nutrition') return true;
-    return false;
-  };
-
-  const isSecondaryActive = NAV_MODULE_REGISTRY.some(
-    item => !isPrimaryPath(item.path) && isActive(item.path)
-  );
-
-
-  // Current page label for header
-  const currentNav =
-    location.pathname === '/'
-      ? { label: 'Home' }
-      : NAV_MODULE_REGISTRY.find(n => isActive(n.path));
-  const pageLabel = currentNav?.label ?? 'LifeOS';
 
   return (
     <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200">
@@ -494,7 +437,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm"
+            className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm cursor-pointer"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
@@ -514,7 +457,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   const granted = await requestAndSyncNotifications(data, updateData);
                   setHasNotificationPermission(granted);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm cursor-pointer"
                 title="Allow phone notifications for Timetable & Tasks"
               >
                 <Bell size={13} className="text-white animate-bounce" />
@@ -526,7 +469,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               onPointerDown={() => triggerHaptic('light')}
               onClick={handleReload}
               disabled={isReloading}
-              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm ${
+              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm cursor-pointer ${
                 isReloading ? 'border-white/60 bg-white/20' : ''
               }`}
               style={{ contain: 'paint' }}
@@ -555,37 +498,20 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       {/* ── Compact Material 3 Expressive Navigation Hub Modal Sheet ── */}
       <NavigationHubSheet
         isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => {
+          setMenuOpen(false);
+          setHubEditMode(false);
+        }}
         activeSection={activeSection}
         isDark={isDark}
         returnFocusRef={squircleRef}
+        pinned={pinned}
+        onSetSlot={setSlot}
+        onResetNav={resetNav}
+        initialEditMode={hubEditMode}
+        initialSelectedSlot={hubSelectedSlot}
+        onExitEditMode={() => setHubEditMode(false)}
       />
-
-      {/* ── Edit Mode Outside Click Dismiss Backdrop ── */}
-      {isNavEditing && !pickerSlot && (
-        <div
-          className="fixed inset-0 z-[95] pointer-events-auto bg-black/20 dark:bg-black/40"
-          onClick={() => {
-            triggerHaptic('light');
-            setIsNavEditing(false);
-          }}
-        />
-      )}
-
-      {/* ── Toast Notification for Slot Swapping ── */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 14, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-full bg-black/90 dark:bg-white/95 text-white dark:text-black text-xs font-bold shadow-xl flex items-center gap-2 border border-white/20 dark:border-black/10 pointer-events-none select-none whitespace-nowrap"
-          >
-            <ArrowLeftRight size={13} strokeWidth={2.4} className="text-[var(--accent-primary)]" />
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Fixed Bottom Divided Navigation Bar (Pill + Squircle, Per-Interface Color) ── */}
       {(() => {
@@ -627,26 +553,33 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   return (
                     <button
                       key={tab.id}
+                      data-no-ripple="true"
+                      onPointerDown={(e) => handleSlotPointerDown(tab.slotIndex, e)}
+                      onPointerMove={handleSlotPointerMove}
+                      onPointerUp={handleSlotPointerUpOrLeave}
+                      onPointerCancel={handleSlotPointerUpOrLeave}
+                      onPointerLeave={handleSlotPointerUpOrLeave}
                       onClick={() => {
+                        if (isLongPressTriggeredRef.current) {
+                          isLongPressTriggeredRef.current = false;
+                          return;
+                        }
                         triggerHaptic('nav');
                         if (menuOpen) setMenuOpen(false);
                         startTransition(() => { navigate(tab.path); });
                       }}
-                      className="relative w-[40px] h-[40px] rounded-full flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95"
+                      className="relative w-[40px] h-[40px] rounded-full flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
                       aria-label={tab.label}
                     >
-                      {/* Active icon chip: 40px diameter filled circle chip in interface solid accent color */}
-                      {active && (
-                        <motion.div
-                          layoutId="navActiveChip"
-                          className="absolute inset-0 rounded-full shadow-xs"
-                          style={{
-                            backgroundColor: solidAccent,
-                            transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1)',
-                          }}
-                          transition={{ type: 'spring', stiffness: 380, damping: 30, mass: 0.8 }}
-                        />
-                      )}
+                      {/* Active icon chip: 40px diameter filled circle chip in interface solid accent color (pure GPU compositor transition) */}
+                      <div
+                        className={`absolute inset-0 rounded-full shadow-xs pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                          active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                        }`}
+                        style={{
+                          backgroundColor: solidAccent,
+                        }}
+                      />
                       {/* Icon size: 24px, active in white, inactive in 55% opacity */}
                       <Icon
                         size={24}
@@ -664,15 +597,16 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               {/* 2. More button (right element, separate squircle): 64px x 64px, border-radius 28px */}
               <motion.button
                 ref={squircleRef}
-                whileTap={{ scale: 0.92 }}
+                data-no-ripple="true"
+                whileTap={{ scale: 0.94 }}
                 animate={{ scale: menuOpen ? 0.96 : 1 }}
-                transition={{ type: 'spring', stiffness: 380, damping: 26, mass: 0.8 }}
+                transition={{ type: 'tween', duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => {
                   // Guard: if icon-swap animation is in progress, still toggle
                   // but skip haptic to avoid double-feedback. Never ignore the tap.
                   if (!squircleAnimatingRef.current) {
                     squircleAnimatingRef.current = true;
-                    setTimeout(() => { squircleAnimatingRef.current = false; }, 150);
+                    setTimeout(() => { squircleAnimatingRef.current = false; }, 120);
                     triggerHaptic('light');
                   }
                   setMenuOpen(prev => !prev);
@@ -685,6 +619,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 aria-label="More Menu"
                 aria-expanded={menuOpen}
               >
+                {/* Active accent dot when current route is in the hub */}
+                {isHubActive && !menuOpen && (
+                  <span
+                    className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-white ring-2 ring-black/20"
+                    aria-hidden="true"
+                  />
+                )}
+
                 <AnimatePresence mode="popLayout" initial={false}>
                   {menuOpen ? (
                     <motion.div
@@ -692,7 +634,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       initial={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.8 }}
+                      transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <X size={26} strokeWidth={2.4} className="text-white" />
                     </motion.div>
@@ -702,7 +644,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       initial={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 22, mass: 0.8 }}
+                      transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-white">
                         <circle cx="7" cy="7" r="2.4" />
@@ -718,17 +660,6 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           </motion.nav>
         );
       })()}
-
-      {/* ── Slot Picker BottomSheet Modal ── */}
-      <NavSlotPickerModal
-        isOpen={pickerSlot !== null}
-        onClose={() => setPickerSlot(null)}
-        targetSlot={pickerSlot || 1}
-        currentSlotModuleId={pickerSlot === 1 ? navConfig.slot1 : navConfig.slot2}
-        otherSlotModuleId={pickerSlot === 1 ? navConfig.slot2 : navConfig.slot1}
-        onSelectModule={handleSelectModule}
-        onSwapSlots={handleSwapSlots}
-      />
 
     </div>
   );

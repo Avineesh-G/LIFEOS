@@ -1,4 +1,7 @@
 import {
+  Home,
+  Dumbbell,
+  Utensils,
   BookOpen,
   CalendarDays,
   Wallet,
@@ -13,39 +16,165 @@ import {
 } from 'lucide-react';
 import { AppSection } from '../theme/sectionSeedColors';
 
-export type HubFamily = 'study' | 'finance' | 'home' | 'system';
+export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system';
+
+export type DestinationId =
+  | 'gym'
+  | 'nutrition'
+  | 'study'
+  | 'timetable'
+  | 'spending'
+  | 'shopping'
+  | 'tasks'
+  | 'laundry'
+  | 'progress'
+  | 'history'
+  | 'vault'
+  | 'settings';
 
 export interface HubDestination {
-  id: string;
+  id: DestinationId;
   label: string;
   route: string;
   icon: LucideIcon;
   family: HubFamily;
+  matchRoutes: string[];
 }
 
+export interface HomeDestination {
+  id: 'home';
+  label: string;
+  route: string;
+  icon: LucideIcon;
+  family: 'home';
+  matchRoutes: string[];
+}
+
+export const HOME_DESTINATION: HomeDestination = {
+  id: 'home',
+  label: 'Home',
+  route: '/',
+  icon: Home,
+  family: 'home',
+  matchRoutes: ['/', '/tasks', '/progress', '/history', '/laundry'],
+};
+
 /**
- * Static typed array of Hub Destinations (10 destinations, strictly ordered by family bands)
- * Row 1: Study, Timetable (Study) + Spending, Shopping Lists (Finance)
- * Row 2: To-Do Tasks, Laundry, Progress & Analytics, History (Home tools)
- * Row 3: Vault, Settings (System)
+ * Static typed array of all 12 editable-pool destinations.
+ * In the hub, exactly 10 of these are rendered (the 2 pinned destinations are excluded).
  */
-export const HUB_DESTINATIONS: HubDestination[] = [
-  // Row 1: Study family + Finance family
-  { id: 'study', label: 'Study', route: '/study', icon: BookOpen, family: 'study' },
-  { id: 'timetable', label: 'Timetable', route: '/timetable', icon: CalendarDays, family: 'study' },
-  { id: 'spending', label: 'Spending', route: '/spending', icon: Wallet, family: 'finance' },
-  { id: 'shopping', label: 'Shopping Lists', route: '/shopping', icon: ShoppingBag, family: 'finance' },
+export const DESTINATIONS: HubDestination[] = [
+  // Gym & Nutrition
+  {
+    id: 'gym',
+    label: 'Gym',
+    route: '/gym',
+    icon: Dumbbell,
+    family: 'gym',
+    matchRoutes: ['/gym'],
+  },
+  {
+    id: 'nutrition',
+    label: 'Nutrition',
+    route: '/nutrition',
+    icon: Utensils,
+    family: 'nutrition',
+    matchRoutes: ['/nutrition'],
+  },
 
-  // Row 2: Home tools family
-  { id: 'tasks', label: 'To-Do Tasks', route: '/tasks', icon: CheckSquare, family: 'home' },
-  { id: 'laundry', label: 'Laundry', route: '/laundry', icon: Shirt, family: 'home' },
-  { id: 'progress', label: 'Progress & Analytics', route: '/progress', icon: BarChart3, family: 'home' },
-  { id: 'history', label: 'History', route: '/history', icon: HistoryIcon, family: 'home' },
+  // Study family
+  {
+    id: 'study',
+    label: 'Study',
+    route: '/study',
+    icon: BookOpen,
+    family: 'study',
+    matchRoutes: ['/study'],
+  },
+  {
+    id: 'timetable',
+    label: 'Timetable',
+    route: '/timetable',
+    icon: CalendarDays,
+    family: 'study',
+    matchRoutes: ['/timetable'],
+  },
 
-  // Row 3: System family
-  { id: 'vault', label: 'Vault', route: '/vault', icon: ShieldCheck, family: 'system' },
-  { id: 'settings', label: 'Settings', route: '/settings', icon: SettingsIcon, family: 'system' },
+  // Finance family
+  {
+    id: 'spending',
+    label: 'Spending',
+    route: '/spending',
+    icon: Wallet,
+    family: 'finance',
+    matchRoutes: ['/spending'],
+  },
+  {
+    id: 'shopping',
+    label: 'Shopping Lists',
+    route: '/shopping',
+    icon: ShoppingBag,
+    family: 'finance',
+    matchRoutes: ['/shopping'],
+  },
+
+  // Home tools family
+  {
+    id: 'tasks',
+    label: 'To-Do Tasks',
+    route: '/tasks',
+    icon: CheckSquare,
+    family: 'home',
+    matchRoutes: ['/tasks'],
+  },
+  {
+    id: 'laundry',
+    label: 'Laundry',
+    route: '/laundry',
+    icon: Shirt,
+    family: 'home',
+    matchRoutes: ['/laundry'],
+  },
+  {
+    id: 'progress',
+    label: 'Progress & Analytics',
+    route: '/progress',
+    icon: BarChart3,
+    family: 'home',
+    matchRoutes: ['/progress'],
+  },
+  {
+    id: 'history',
+    label: 'History',
+    route: '/history',
+    icon: HistoryIcon,
+    family: 'home',
+    matchRoutes: ['/history'],
+  },
+
+  // System family
+  {
+    id: 'vault',
+    label: 'Vault',
+    route: '/vault',
+    icon: ShieldCheck,
+    family: 'system',
+    matchRoutes: ['/vault'],
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    route: '/settings',
+    icon: SettingsIcon,
+    family: 'system',
+    matchRoutes: ['/settings'],
+  },
 ];
+
+/**
+ * Backward compatibility alias for DESTINATIONS
+ */
+export const HUB_DESTINATIONS = DESTINATIONS;
 
 /**
  * Per-family color configurations (independent of active interface)
@@ -58,6 +187,16 @@ export const HUB_FAMILY_CONFIG: Record<
     darkGlyph: string;
   }
 > = {
+  gym: {
+    seed: '#E11D48', // Rose / Gym
+    rgb: [225, 29, 72],
+    darkGlyph: '#FB7185',
+  },
+  nutrition: {
+    seed: '#F5A623', // Amber / Nutrition
+    rgb: [245, 166, 35],
+    darkGlyph: '#FBBF24',
+  },
   study: {
     seed: '#0284C7', // Sky Blue
     rgb: [2, 132, 199],
@@ -88,3 +227,7 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   study: 'Study',
   settings: 'Settings',
 };
+
+export function getDestinationById(id: string): HubDestination | undefined {
+  return DESTINATIONS.find(d => d.id === id);
+}

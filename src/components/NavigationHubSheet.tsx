@@ -1,18 +1,10 @@
-import React, { useEffect, useRef, useMemo, useCallback, startTransition } from 'react';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import React, { useEffect, useRef, useState, useMemo, useCallback, startTransition } from 'react';
+import { motion, AnimatePresence, useMotionValue, useDragControls } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  BookOpen,
-  CalendarDays,
-  Wallet,
-  ShoppingBag,
-  CheckSquare,
-  Shirt,
-  BarChart3,
-  History as HistoryIcon,
-  ShieldCheck,
-  Settings as SettingsIcon,
-  LucideIcon,
+  Plus,
+  Pencil,
+  Lock,
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -21,13 +13,17 @@ import {
   SECTION_BLOB_POSITIONS,
   hexToRgb,
   blendHex,
+  getNavPillBg,
 } from '../theme/sectionSeedColors';
 
 import {
-  HUB_DESTINATIONS,
+  DESTINATIONS,
+  HOME_DESTINATION,
+  DestinationId,
+  HubDestination,
   HUB_FAMILY_CONFIG,
   HUB_SECTION_NAMES,
-  HubDestination,
+  getDestinationById,
 } from '../config/hubDestinations';
 
 interface NavigationHubSheetProps {
@@ -36,6 +32,12 @@ interface NavigationHubSheetProps {
   activeSection: AppSection;
   isDark: boolean;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
+  pinned: [DestinationId, DestinationId];
+  onSetSlot: (slot: 1 | 2, id: DestinationId) => void;
+  onResetNav: () => void;
+  initialEditMode?: boolean;
+  initialSelectedSlot?: 1 | 2;
+  onExitEditMode?: () => void;
 }
 
 // Corner coordinates for sheet accent blob
@@ -48,38 +50,36 @@ const BLOB_CORNER_STYLES: Record<string, React.CSSProperties> = {
 };
 
 /**
- * Memoized single destination tile
+ * High-performance memoized single destination tile
+ * - Pure GPU styling (no layout="position", no staggered entrance animations)
+ * - data-no-ripple="true" to prevent synchronous layout queries on touch
  */
 const DestinationTile = React.memo(function DestinationTile({
   destination,
   isCurrent,
+  isEditMode,
   isDark,
-  prefersReducedMotion,
-  index,
   onSelect,
 }: {
   destination: HubDestination;
   isCurrent: boolean;
+  isEditMode: boolean;
   isDark: boolean;
-  prefersReducedMotion: boolean;
-  index: number;
   onSelect: (dest: HubDestination) => void;
 }) {
   const Icon = destination.icon;
   const config = HUB_FAMILY_CONFIG[destination.family];
   const [r, g, b] = config.rgb;
 
-  // Tile styles per spec:
-  // Dark mode: fill = seed at 14-18%, border 0.5px seed at 35-40%, icon squircle fill = seed at 28-32%
-  // Light mode: fill = seed at 8-10%, border 0.5px seed at 25%, icon squircle fill = seed at 14%
-  // Active/current: stronger fill ~28% and 1px full-seed border
   const tileBg = isCurrent
     ? `rgba(${r}, ${g}, ${b}, ${isDark ? 0.32 : 0.22})`
     : isDark
     ? `rgba(${r}, ${g}, ${b}, 0.16)`
     : `rgba(${r}, ${g}, ${b}, 0.08)`;
 
-  const tileBorder = isCurrent
+  const tileBorder = isEditMode
+    ? `1px solid rgba(${r}, ${g}, ${b}, ${isDark ? 0.6 : 0.45})`
+    : isCurrent
     ? `1px solid ${config.seed}`
     : isDark
     ? `0.5px solid rgba(${r}, ${g}, ${b}, 0.38)`
@@ -98,51 +98,47 @@ const DestinationTile = React.memo(function DestinationTile({
     : config.seed;
 
   return (
-    <motion.button
+    <button
       type="button"
-      initial={
-        prefersReducedMotion
-          ? { opacity: 0 }
-          : { opacity: 0, y: 6, scale: 0.97 }
-      }
-      animate={
-        prefersReducedMotion
-          ? { opacity: 1 }
-          : { opacity: 1, y: 0, scale: 1 }
-      }
-      transition={
-        prefersReducedMotion
-          ? { duration: 0.1 }
-          : {
-              duration: 0.2,
-              delay: index * 0.015,
-              ease: [0.16, 1, 0.3, 1],
-            }
-      }
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+      data-no-ripple="true"
       onClick={() => onSelect(destination)}
       style={{
         backgroundColor: tileBg,
         border: tileBorder,
         outlineColor: config.seed,
       }}
-      className="group relative min-h-[80px] rounded-[20px] py-[10px] px-1 flex flex-col items-center justify-center gap-[6px] select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none transition-colors duration-150"
-      aria-label={destination.label}
+      className="group relative min-h-[80px] rounded-[20px] py-[10px] px-1 flex flex-col items-center justify-center gap-[6px] select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none transition-transform duration-100 active:scale-95"
+      aria-label={
+        isEditMode
+          ? `Assign ${destination.label} to selected slot`
+          : destination.label
+      }
       aria-current={isCurrent ? 'page' : undefined}
     >
-      {/* 36x36 squircle (radius 12px) holding 20px icon */}
+      {/* Subtle + indicator badge when in edit mode */}
+      {isEditMode && (
+        <span
+          className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-xs"
+          style={{ backgroundColor: config.seed }}
+          aria-hidden="true"
+        >
+          <Plus size={10} strokeWidth={3} />
+        </span>
+      )}
+
+      {/* 36x36 squircle holding 20px icon */}
       <div
-        className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-150 group-active:scale-95"
+        className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-100 group-active:scale-95"
         style={{ backgroundColor: squircleBg }}
       >
         <Icon size={20} strokeWidth={2.3} style={{ color: glyphColor }} />
       </div>
 
-      {/* Label: 12px / 500, centered, line-height 1.25, max 2 lines with line-clamp, text-primary token */}
+      {/* Label */}
       <span className="text-[12px] font-medium leading-[1.25] text-center line-clamp-2 px-1 text-[var(--text-primary)] select-none">
         {destination.label}
       </span>
-    </motion.button>
+    </button>
   );
 });
 
@@ -152,20 +148,55 @@ export function NavigationHubSheet({
   activeSection,
   isDark,
   returnFocusRef,
+  pinned,
+  onSetSlot,
+  onResetNav,
+  initialEditMode = false,
+  initialSelectedSlot = 1,
+  onExitEditMode,
 }: NavigationHubSheetProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  const dragControls = useDragControls();
+
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
+  const [selectedSlot, setSelectedSlot] = useState<1 | 2>(initialSelectedSlot);
+  const [homeShaking, setHomeShaking] = useState(false);
+  const [fixedNotice, setFixedNotice] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
+
+  // Sync edit mode with initial prop when opened
+  useEffect(() => {
+    if (isOpen) {
+      setIsEditMode(initialEditMode);
+      setSelectedSlot(initialSelectedSlot);
+      setFixedNotice(false);
+    }
+  }, [isOpen, initialEditMode, initialSelectedSlot]);
+
+  // Expose edit mode flag on window so hardware back button can exit edit mode first
+  useEffect(() => {
+    (window as any).__lifeos_hub_edit_mode = isOpen && isEditMode;
+    return () => {
+      (window as any).__lifeos_hub_edit_mode = false;
+    };
+  }, [isOpen, isEditMode]);
 
   const activeSeed = SECTION_SEED_COLORS[activeSection] || SECTION_SEED_COLORS.home;
   const [aR, aG, aB] = hexToRgb(activeSeed);
   const activePosition = SECTION_BLOB_POSITIONS[activeSection] || 'top-right';
 
-  // Base canvas (#FDFDFD light / #121316 dark) faintly tinted (~5%) toward active seed
+  // Base canvas faintly tinted (~5%) toward active seed
   const sheetBg = useMemo(() => {
     const base = isDark ? '#121316' : '#FDFDFD';
     return blendHex(base, activeSeed, 0.05);
   }, [activeSeed, isDark]);
+
+  // Pill container background for slot selector
+  const pillBg = useMemo(() => {
+    return getNavPillBg(activeSection, isDark);
+  }, [activeSection, isDark]);
 
   // Reduced motion preference
   const prefersReducedMotion = useMemo(() => {
@@ -173,7 +204,6 @@ export function NavigationHubSheet({
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
 
-  // Motion value for drag offset to avoid React re-renders while dragging
   const dragY = useMotionValue(0);
 
   // Esc key and hardware back button listener
@@ -184,11 +214,21 @@ export function NavigationHubSheet({
       if (e.key === 'Escape') {
         e.preventDefault();
         triggerHaptic('light');
-        onClose();
+        if (isEditMode) {
+          setIsEditMode(false);
+          onExitEditMode?.();
+        } else {
+          onClose();
+        }
       }
     };
 
     const handleCloseMenuEvent = () => {
+      if (isEditMode) {
+        setIsEditMode(false);
+        onExitEditMode?.();
+        return;
+      }
       onClose();
     };
 
@@ -199,7 +239,7 @@ export function NavigationHubSheet({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('lifeos-close-menu', handleCloseMenuEvent);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, isEditMode, onClose, onExitEditMode]);
 
   // Focus management: trap focus inside and restore to squircle on close
   useEffect(() => {
@@ -216,21 +256,45 @@ export function NavigationHubSheet({
     }
   }, [isOpen, returnFocusRef]);
 
-  // Destination selection: highlight, trigger haptic, close sheet after 120ms, then navigate
+  // Hub destinations: always exactly 10 destinations (excluding pinned)
+  const hubDestinations = useMemo(() => {
+    const pinnedSet = new Set<string>(pinned);
+    return DESTINATIONS.filter((d) => !pinnedSet.has(d.id));
+  }, [pinned]);
+
+  // Pinned destinations details for slot selector
+  const slot1Dest = useMemo(
+    () => getDestinationById(pinned[0]) || DESTINATIONS[0],
+    [pinned]
+  );
+  const slot2Dest = useMemo(
+    () => getDestinationById(pinned[1]) || DESTINATIONS[1],
+    [pinned]
+  );
+
+  // Normal mode destination selection
   const handleSelectDestination = useCallback(
     (dest: HubDestination) => {
+      if (isEditMode) {
+        // Edit mode assignment
+        triggerHaptic('light');
+        onSetSlot(selectedSlot, dest.id);
+        setAnnouncement(`Assigned ${dest.label} to Slot ${selectedSlot}`);
+        // Advance selection to other editable slot
+        setSelectedSlot((prev) => (prev === 1 ? 2 : 1));
+        return;
+      }
+
+      // Normal navigation: immediate close and deferred route render
       triggerHaptic('nav');
       setTimeout(() => {
         onClose();
-        // startTransition marks the new route render as low-priority so the
-        // sheet close animation completes without being blocked by the incoming
-        // page render. This is the primary fix for hub close jank.
         startTransition(() => {
           navigate(dest.route);
         });
-      }, 120);
+      }, 100);
     },
-    [navigate, onClose]
+    [isEditMode, selectedSlot, onSetSlot, navigate, onClose]
   );
 
   // Check if a destination route is currently active
@@ -245,42 +309,50 @@ export function NavigationHubSheet({
     [location.pathname]
   );
 
+  // Handle Home tap in edit mode (shake + message)
+  const handleHomeTap = useCallback(() => {
+    triggerHaptic('light');
+    setHomeShaking(true);
+    setFixedNotice(true);
+    setAnnouncement('Home is fixed and cannot be changed');
+    setTimeout(() => setHomeShaking(false), 350);
+    setTimeout(() => setFixedNotice(false), 2000);
+  }, []);
+
   const cornerStyle = BLOB_CORNER_STYLES[activePosition] || BLOB_CORNER_STYLES['top-right'];
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* ── Solid Scrim (black at 40% dark / 28% light, no backdrop-filter) ── */}
+          {/* ── Solid Scrim (black at 40% dark / 28% light) ── */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: isDark ? 0.4 : 0.28 }}
             exit={{ opacity: 0, pointerEvents: 'none' } as any}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
             onClick={() => {
               triggerHaptic('light');
               onClose();
             }}
+            data-no-ripple="true"
             className="fixed inset-0 z-[80] bg-black pointer-events-auto"
             aria-hidden="true"
           />
 
-          {/* ── Compact Navigation Hub Modal Bottom Sheet ── */}
+          {/* ── Compact Navigation Hub Modal Bottom Sheet (GPU Tween Animation) ── */}
           <motion.div
             ref={sheetRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Navigate"
+            aria-label={isEditMode ? 'Edit Navigation' : 'Navigate'}
+            data-no-ripple="true"
             initial={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { y: 'calc(100% + 16px)', opacity: 0.8 }
+                : { y: 'calc(100% + 16px)', opacity: 0.85 }
             }
-            animate={
-              prefersReducedMotion
-                ? { opacity: 1 }
-                : { y: 0, opacity: 1 }
-            }
+            animate={{ y: 0, opacity: 1 }}
             exit={
               prefersReducedMotion
                 ? { opacity: 0 }
@@ -288,28 +360,24 @@ export function NavigationHubSheet({
             }
             transition={
               prefersReducedMotion
-                ? { duration: 0.12 }
+                ? { duration: 0.1 }
                 : {
-                    // Enter: soft spring — floats up, decelerates naturally (no snap/stuck feel)
-                    type: 'spring',
-                    stiffness: 320,
-                    damping: 28,
-                    mass: 0.9,
-                    // Exit: fast tween on y (overrides spring for exit only)
-                    // Result: open feels elastic, close feels decisive
-                    exit: { duration: 0.2, ease: [0.36, 0, 0.66, -0.04] },
+                    type: 'tween',
+                    duration: 0.22,
+                    ease: [0.16, 1, 0.3, 1],
                   }
             }
             drag="y"
+            dragControls={dragControls}
+            dragListener={!isEditMode}
             dragConstraints={{ top: 0 }}
             dragElastic={{ top: 0.05, bottom: 0.6 }}
             style={{
               y: dragY,
               backgroundColor: sheetBg,
               border: `0.5px solid rgba(${aR}, ${aG}, ${aB}, 0.35)`,
-              // Bottom edge sits exactly 8px above the 64px nav bar
               bottom: 'calc(64px + max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem)) + 8px)',
-              contain: 'layout paint',
+              contain: 'layout paint style',
               maxHeight: 'min(60dvh, 420px)',
             }}
             onDragEnd={(_e, info) => {
@@ -318,9 +386,9 @@ export function NavigationHubSheet({
                 onClose();
               }
             }}
-            className="fixed left-2 right-2 max-w-[420px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.65)] select-none pointer-events-auto flex flex-col"
+            className="fixed left-2 right-2 max-w-[420px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.65)] select-none pointer-events-auto flex flex-col gpu-composited"
           >
-            {/* ── Active Interface Corner Accent Blob (No blur filter; pre-softened radial mask) ── */}
+            {/* ── Active Interface Corner Accent Blob ── */}
             <div
               className="absolute pointer-events-none w-48 h-48 rounded-full"
               style={{
@@ -330,8 +398,16 @@ export function NavigationHubSheet({
               aria-hidden="true"
             />
 
-            {/* ── Drag Handle Zone (16px high, handle 32x4px, radius 2px, 8px from top) ── */}
-            <div className="relative z-10 w-full h-4 flex items-center justify-center pt-2 pb-1 shrink-0 cursor-grab active:cursor-grabbing">
+            {/* ── Drag Handle Zone (16px high) ── */}
+            <div
+              className="relative z-10 w-full h-4 flex items-center justify-center pt-2 pb-1 shrink-0 cursor-grab active:cursor-grabbing"
+              data-no-ripple="true"
+              onPointerDown={(e) => {
+                if (isEditMode) {
+                  dragControls.start(e);
+                }
+              }}
+            >
               <div
                 className="w-8 h-1 rounded-[2px] transition-colors"
                 style={{
@@ -342,48 +418,238 @@ export function NavigationHubSheet({
               />
             </div>
 
-            {/* ── Header (Single Row, 36px) ── */}
-            <div className="relative z-10 h-9 flex items-center justify-between px-1 mb-2.5 shrink-0">
-              {/* Left: "Navigate" Google Sans Flex 600, 18px */}
-              <h2 className="text-[18px] font-semibold tracking-tight font-sans text-[var(--text-primary)]">
-                Navigate
-              </h2>
+            {/* ── Header (Fixed 44px height across both normal and edit modes) ── */}
+            <div className="relative z-10 h-[44px] flex items-center justify-between px-1 mb-2 shrink-0">
+              {!isEditMode ? (
+                <>
+                  <h2 className="text-[18px] font-semibold tracking-tight font-sans text-[var(--text-primary)]">
+                    Navigate
+                  </h2>
 
-              {/* Right: Chip with 6px dot + active interface name, 12px/500, pill radius, seed 20% opacity */}
-              <div
-                className="px-2.5 py-1 rounded-full flex items-center gap-1.5 border"
-                style={{
-                  backgroundColor: `rgba(${aR}, ${aG}, ${aB}, 0.20)`,
-                  borderColor: `rgba(${aR}, ${aG}, ${aB}, 0.35)`,
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: activeSeed }}
-                />
-                <span
-                  className="text-[12px] font-medium leading-none"
-                  style={{
-                    color: isDark
-                      ? HUB_FAMILY_CONFIG[
-                          activeSection === 'study'
-                            ? 'study'
-                            : activeSection === 'finance'
-                            ? 'finance'
-                            : activeSection === 'gym'
-                            ? 'home'
-                            : 'system'
-                        ]?.darkGlyph || activeSeed
-                      : activeSeed,
-                  }}
-                >
-                  {HUB_SECTION_NAMES[activeSection] || 'LifeOS'}
-                </span>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setIsEditMode(true);
+                        setSelectedSlot(1);
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center border border-black/[0.08] dark:border-white/20 bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer"
+                      aria-label="Edit navigation"
+                      title="Edit navigation"
+                    >
+                      <Pencil size={15} strokeWidth={2.2} />
+                    </button>
+
+                    <div
+                      className="px-2.5 py-1 rounded-full flex items-center gap-1.5 border"
+                      style={{
+                        backgroundColor: `rgba(${aR}, ${aG}, ${aB}, 0.20)`,
+                        borderColor: `rgba(${aR}, ${aG}, ${aB}, 0.35)`,
+                      }}
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: activeSeed }}
+                      />
+                      <span
+                        className="text-[12px] font-medium leading-none"
+                        style={{
+                          color: isDark
+                            ? HUB_FAMILY_CONFIG[
+                                activeSection === 'study'
+                                  ? 'study'
+                                  : activeSection === 'finance'
+                                  ? 'finance'
+                                  : activeSection === 'gym'
+                                  ? 'gym'
+                                  : activeSection === 'nutrition'
+                                  ? 'nutrition'
+                                  : 'system'
+                              ]?.darkGlyph || activeSeed
+                            : activeSeed,
+                        }}
+                      >
+                        {HUB_SECTION_NAMES[activeSection] || 'LifeOS'}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col justify-center min-w-0 pr-2">
+                    <h2 className="text-[16px] font-semibold tracking-tight font-sans text-[var(--text-primary)] leading-tight">
+                      Edit navigation
+                    </h2>
+                    <span className="text-[11px] text-[var(--text-secondary)] leading-none truncate mt-0.5">
+                      {fixedNotice ? (
+                        <span className="text-amber-400 font-semibold">Home is fixed</span>
+                      ) : (
+                        `Tap a slot above, then a destination below`
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={() => {
+                        triggerHaptic('medium');
+                        onResetNav();
+                        setAnnouncement('Navigation reset to defaults');
+                      }}
+                      className="px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer"
+                      aria-label="Reset to default slots"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setIsEditMode(false);
+                        onExitEditMode?.();
+                      }}
+                      className="px-3.5 py-1 rounded-full text-xs font-semibold text-white shadow-xs active:scale-95 transition-all cursor-pointer"
+                      style={{ backgroundColor: activeSeed }}
+                      aria-label="Done editing"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* ── Destinations Grid (3 rows x 80px + 2 gaps x 8px = 256px) ── */}
-            {/* 4 columns default, 3 columns below 340px */}
+            {/* ── Slot Selector Row (Edit Mode Only, GPU-accelerated scaleY + opacity, NO height animation) ── */}
+            <AnimatePresence>
+              {isEditMode && (
+                <motion.div
+                  initial={
+                    prefersReducedMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, scaleY: 0.8 }
+                  }
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  exit={{ opacity: 0, scaleY: 0.8 }}
+                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ transformOrigin: 'top' }}
+                  className="overflow-hidden mb-2.5 shrink-0"
+                >
+                  <div
+                    role="radiogroup"
+                    aria-label="Select slot to replace"
+                    className="h-[52px] px-3 rounded-full flex items-center justify-around border border-black/[0.08] dark:border-white/[0.12] shadow-sm select-none"
+                    style={{ backgroundColor: pillBg }}
+                  >
+                    {/* Slot 0: Home (Fixed) */}
+                    <motion.button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={handleHomeTap}
+                      animate={
+                        homeShaking
+                          ? { x: [-4, 4, -4, 4, 0] }
+                          : { x: 0 }
+                      }
+                      transition={{ duration: 0.25 }}
+                      className="relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer active:scale-95"
+                      aria-label="Home slot (locked)"
+                      title="Home slot is fixed"
+                    >
+                      <HOME_DESTINATION.icon
+                        size={22}
+                        strokeWidth={2.2}
+                        className="text-[var(--text-secondary)] opacity-80"
+                      />
+                      <span
+                        className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-black/60 dark:bg-black/80 border border-white/20 flex items-center justify-center text-white"
+                        title="Fixed slot"
+                      >
+                        <Lock size={9} strokeWidth={2.4} />
+                      </span>
+                    </motion.button>
+
+                    {/* Slot 1: User choice */}
+                    <button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setSelectedSlot(1);
+                      }}
+                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-all ${
+                        selectedSlot === 1
+                          ? 'ring-2 ring-offset-2 scale-105 shadow-md'
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor:
+                          selectedSlot === 1
+                            ? HUB_FAMILY_CONFIG[slot1Dest.family].seed
+                            : 'transparent',
+                        borderColor: HUB_FAMILY_CONFIG[slot1Dest.family].seed,
+                        outlineColor: HUB_FAMILY_CONFIG[slot1Dest.family].seed,
+                      }}
+                      role="radio"
+                      aria-checked={selectedSlot === 1}
+                      aria-label={`Slot 1: ${slot1Dest.label}`}
+                    >
+                      <slot1Dest.icon
+                        size={22}
+                        strokeWidth={2.3}
+                        style={{
+                          color: selectedSlot === 1 ? '#FFFFFF' : undefined,
+                        }}
+                        className={selectedSlot === 1 ? '' : 'text-[var(--text-primary)]'}
+                      />
+                      <span className="sr-only">Slot 1: {slot1Dest.label}</span>
+                    </button>
+
+                    {/* Slot 2: User choice */}
+                    <button
+                      type="button"
+                      data-no-ripple="true"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setSelectedSlot(2);
+                      }}
+                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-all ${
+                        selectedSlot === 2
+                          ? 'ring-2 ring-offset-2 scale-105 shadow-md'
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor:
+                          selectedSlot === 2
+                            ? HUB_FAMILY_CONFIG[slot2Dest.family].seed
+                            : 'transparent',
+                        borderColor: HUB_FAMILY_CONFIG[slot2Dest.family].seed,
+                        outlineColor: HUB_FAMILY_CONFIG[slot2Dest.family].seed,
+                      }}
+                      role="radio"
+                      aria-checked={selectedSlot === 2}
+                      aria-label={`Slot 2: ${slot2Dest.label}`}
+                    >
+                      <slot2Dest.icon
+                        size={22}
+                        strokeWidth={2.3}
+                        style={{
+                          color: selectedSlot === 2 ? '#FFFFFF' : undefined,
+                        }}
+                        className={selectedSlot === 2 ? '' : 'text-[var(--text-primary)]'}
+                      />
+                      <span className="sr-only">Slot 2: {slot2Dest.label}</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ── Destinations Grid (Always exactly 10 tiles, 3x4 layout) ── */}
             <div
               className="relative z-10 grid grid-cols-3 min-[340px]:grid-cols-4 gap-2 overflow-y-auto no-scrollbar overscroll-contain"
               style={{
@@ -392,17 +658,21 @@ export function NavigationHubSheet({
                 WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 16px), transparent 100%)',
               }}
             >
-              {HUB_DESTINATIONS.map((dest, idx) => (
+              {hubDestinations.map((dest) => (
                 <DestinationTile
                   key={dest.id}
                   destination={dest}
-                  isCurrent={isRouteCurrent(dest.route)}
+                  isCurrent={!isEditMode && isRouteCurrent(dest.route)}
+                  isEditMode={isEditMode}
                   isDark={isDark}
-                  prefersReducedMotion={prefersReducedMotion}
-                  index={idx}
                   onSelect={handleSelectDestination}
                 />
               ))}
+            </div>
+
+            {/* ── Screen Reader Announcements ── */}
+            <div className="sr-only" aria-live="polite" aria-atomic="true">
+              {announcement}
             </div>
           </motion.div>
         </>
