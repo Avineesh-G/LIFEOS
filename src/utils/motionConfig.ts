@@ -22,6 +22,8 @@ export function useReducedMotion(): boolean {
   return reduced;
 }
 
+import { getEffectivePerformanceMode } from './performanceMode';
+
 // ─── Official Material 3 Expressive Motion Schemes ───────────────────────────
 
 /**
@@ -30,19 +32,26 @@ export function useReducedMotion(): boolean {
  *   Apply to: page transitions, list scrolling, modal open/close
  * - MotionScheme.expressive: bouncier, visible overshoot, more energy (stiffness ~420, damping ~16)
  *   Apply to: nav tab switching, toggle/switch morphing, FAB press, streak badge, chip selection
+ * - In Lite performance mode, spring overshoot is eliminated with critical damping (damping 40)
  */
 export const MotionScheme = {
-  standard: {
-    type: 'spring' as const,
-    stiffness: 300,
-    damping: 30,
-    mass: 1,
+  get standard() {
+    const isLite = typeof window !== 'undefined' && getEffectivePerformanceMode() === 'lite';
+    return {
+      type: 'spring' as const,
+      stiffness: isLite ? 260 : 300,
+      damping: isLite ? 40 : 30,
+      mass: 1,
+    };
   },
-  expressive: {
-    type: 'spring' as const,
-    stiffness: 420,
-    damping: 16,
-    mass: 1,
+  get expressive() {
+    const isLite = typeof window !== 'undefined' && getEffectivePerformanceMode() === 'lite';
+    return {
+      type: 'spring' as const,
+      stiffness: isLite ? 260 : 420,
+      damping: isLite ? 40 : 16,
+      mass: 1,
+    };
   },
 } as const;
 
@@ -124,7 +133,15 @@ export function getPageMotionProps(reducedMotion: boolean) {
 /** Container variants for staggered list entry */
 export const STAGGER_CONTAINER = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.03, delayChildren: 0.05 } },
+  get show() {
+    const isLite = typeof window !== 'undefined' && getEffectivePerformanceMode() === 'lite';
+    return {
+      transition: {
+        staggerChildren: isLite ? 0 : 0.03,
+        delayChildren: isLite ? 0 : 0.05,
+      },
+    };
+  },
 };
 
 /** Individual item variants (used inside a stagger container) */

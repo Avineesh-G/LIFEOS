@@ -39,7 +39,10 @@ export default function VictoryModal({
   // Fallback Victory Element (Zero Emojis, pure vector glass trophy)
   const fallbackVictory = (
     <div className="relative flex flex-col items-center justify-center p-6">
-      <div className="absolute inset-0 bg-amber-500/15 rounded-full blur-2xl animate-pulse pointer-events-none" />
+      <div 
+        className="absolute inset-0 rounded-full animate-pulse pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%)' }}
+      />
       <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white flex items-center justify-center shadow-xl shadow-amber-500/30">
         <Trophy size={38} strokeWidth={2.2} />
       </div>

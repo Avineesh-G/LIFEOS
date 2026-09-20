@@ -834,6 +834,23 @@
     outline-offset: -1px;
     box-shadow: 0 0 14px var(--glow);
   }
+
+  /* ── Performance Mode: Lite Mode Overrides ── */
+  [data-perf-mode="lite"] .section-accent-blob,
+  [data-perf-mode="lite"] [data-accent-blob],
+  .perf-lite .section-accent-blob,
+  .perf-lite [data-accent-blob] {
+    display: none !important;
+  }
+
+  [data-perf-mode="lite"] .animate-pulse,
+  [data-perf-mode="lite"] .animate-ping,
+  [data-perf-mode="lite"] .animate-bounce,
+  .perf-lite .animate-pulse,
+  .perf-lite .animate-ping,
+  .perf-lite .animate-bounce {
+    animation: none !important;
+  }
 }
 
 

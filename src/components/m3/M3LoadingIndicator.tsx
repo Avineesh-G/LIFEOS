@@ -36,7 +36,8 @@ export function M3LoadingIndicator({
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="absolute inset-0 rounded-full bg-[var(--md-primary)]/20 blur-md"
+          className="absolute inset-0 rounded-full"
+          style={{ background: 'radial-gradient(circle, var(--md-primary) 0%, transparent 70%)', opacity: 0.25 }}
         />
 
         {/* Primary Morphing Shape */}

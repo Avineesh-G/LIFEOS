@@ -45,7 +45,10 @@ export default function AiCoachAvatar({
       className="relative flex items-center justify-center rounded-2xl bg-gradient-to-tr from-accent/20 via-purple-500/15 to-transparent border border-accent/30 shadow-lg shadow-accent/15"
     >
       {/* Outer Glow Halo */}
-      <div className={`absolute inset-0 rounded-2xl bg-accent/10 blur-md ${state === 'thinking' ? 'animate-ping opacity-30' : ''}`} />
+      <div 
+        className={`absolute inset-0 rounded-2xl ${state === 'thinking' ? 'animate-ping opacity-30' : ''}`}
+        style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.15 }}
+      />
 
       {/* Internal Core */}
       <div className="relative z-10 flex items-center justify-center text-accent">

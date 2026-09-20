@@ -439,9 +439,15 @@ export default function Vault({ data, updateData }: VaultProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           className="relative w-full max-w-sm rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
         >
-          {/* Subtle Ambient Glow Orbs */}
-          <div className="absolute -top-16 -left-16 w-44 h-44 bg-[var(--md-primary)]/15 dark:bg-[var(--md-primary)]/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 w-44 h-44 bg-[var(--md-secondary)]/15 dark:bg-[var(--md-secondary)]/20 rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle Ambient Glow Orbs (zero-cost radial gradients) */}
+          <div
+            className="absolute -top-16 -left-16 w-44 h-44 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, var(--md-primary) 0%, transparent 70%)', opacity: 0.18 }}
+          />
+          <div
+            className="absolute -bottom-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, var(--md-secondary) 0%, transparent 70%)', opacity: 0.18 }}
+          />
 
           {/* Biometric Holographic Scanner Icon */}
           <div className="relative mb-5 mt-2">

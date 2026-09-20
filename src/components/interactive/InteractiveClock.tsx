@@ -70,7 +70,8 @@ export default function InteractiveClock({
         <motion.div
           animate={{ scale: [1, 1.25, 1], opacity: [0.35, 0.7, 0.35] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute inset-0 rounded-full bg-indigo-500/25 blur-md pointer-events-none"
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%)' }}
         />
       )}
 

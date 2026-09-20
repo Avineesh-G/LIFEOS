@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDayTheme } from '../theme/DayThemeProvider';
 import { BlobPosition } from '../theme/sectionSeedColors';
+import { usePerformanceMode } from '../utils/performanceMode';
 
 interface BlobCoord {
   top?: string;
@@ -29,9 +30,16 @@ const POSITION_COORDS: Record<BlobPosition, BlobCoord> = {
  * - No willChange (permanent willChange degrades performance).
  * - Opacity transitions via CSS transition only (not Framer Motion).
  * - Static positioning — no animated layout properties.
+ * - Disabled in Lite performance mode.
  */
 export function SectionAccentBlob() {
+  const [, , effectiveMode] = usePerformanceMode();
   const { section, scheme, isDark } = useDayTheme();
+
+  if (effectiveMode === 'lite') {
+    return null;
+  }
+
   const position = scheme?.blobPosition || 'top-right';
   const coords = POSITION_COORDS[position] || POSITION_COORDS['top-right'];
   // Key changes on section OR dark-mode switch so the new gradient appears

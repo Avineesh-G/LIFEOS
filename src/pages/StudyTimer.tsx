@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Play, Pause, Square, RotateCcw, ChevronLeft, Check, Sparkles, Clock } from 'lucide-react';
 import { format } from 'date-fns';
@@ -28,6 +28,68 @@ interface PersistedTimer {
   startTimeStr: string;
 }
 
+// Sub-component that isolates high-frequency (1 Hz / 500ms) timer ticks
+// so the parent StudyTimer and surrounding UI do not re-render.
+interface RunningTimerDisplayProps {
+  isRunning: boolean;
+  lastStartTimestamp: number | null;
+  accumulatedSeconds: number;
+}
+
+const RunningTimerDisplay = React.memo(function RunningTimerDisplay({
+  isRunning,
+  lastStartTimestamp,
+  accumulatedSeconds,
+}: RunningTimerDisplayProps) {
+  const [seconds, setSeconds] = useState(() => {
+    if (isRunning && lastStartTimestamp) {
+      const elapsed = Math.floor((Date.now() - lastStartTimestamp) / 1000);
+      return accumulatedSeconds + Math.max(0, elapsed);
+    }
+    return accumulatedSeconds;
+  });
+
+  useEffect(() => {
+    if (!isRunning) {
+      setSeconds(accumulatedSeconds);
+      return;
+    }
+
+    const sync = () => {
+      if (lastStartTimestamp) {
+        const elapsed = Math.floor((Date.now() - lastStartTimestamp) / 1000);
+        setSeconds(accumulatedSeconds + Math.max(0, elapsed));
+      }
+    };
+
+    sync();
+    const interval = setInterval(sync, 500);
+
+    const handleWake = () => sync();
+    document.addEventListener('visibilitychange', handleWake);
+    window.addEventListener('focus', handleWake);
+    window.addEventListener('pageshow', handleWake);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleWake);
+      window.removeEventListener('focus', handleWake);
+      window.removeEventListener('pageshow', handleWake);
+    };
+  }, [isRunning, lastStartTimestamp, accumulatedSeconds]);
+
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const formatted = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+  return (
+    <div className="text-6xl sm:text-7xl font-black tracking-tight font-mono py-4 text-primary-light dark:text-primary-dark relative z-10">
+      {formatted}
+    </div>
+  );
+});
+
 export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -48,18 +110,19 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const [topic, setTopic] = useState(() => persisted?.topic || '');
   const [timerState, setTimerState] = useState<TimerState>(() => persisted?.timerState || 'idle');
 
-  // Calculate initial seconds based on wall-clock elapsed time
-  const [seconds, setSeconds] = useState<number>(() => {
-    if (!persisted) return 0;
-    if (persisted.timerState === 'running' && persisted.lastStartTimestamp) {
+  // Parent only tracks accumulated seconds and last start timestamp;
+  // It does NOT tick every second.
+  const [accumulatedSeconds, setAccumulatedSeconds] = useState<number>(persisted?.accumulatedSeconds || 0);
+  const [lastStartTimestamp, setLastStartTimestamp] = useState<number | null>(persisted?.lastStartTimestamp || null);
+  const [summarySeconds, setSummarySeconds] = useState<number>(() => {
+    if (persisted?.timerState === 'running' && persisted?.lastStartTimestamp) {
       const elapsed = Math.floor((Date.now() - persisted.lastStartTimestamp) / 1000);
-      return Math.max(0, persisted.accumulatedSeconds + elapsed);
+      return Math.max(0, (persisted.accumulatedSeconds || 0) + elapsed);
     }
-    return persisted.accumulatedSeconds || 0;
+    return persisted?.accumulatedSeconds || 0;
   });
 
   const [showSummary, setShowSummary] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const startTimeRef = useRef<string>(persisted?.startTimeStr || '');
   const accumulatedRef = useRef<number>(persisted?.accumulatedSeconds || 0);
   const lastStartRef = useRef<number | null>(persisted?.lastStartTimestamp || null);
@@ -88,50 +151,6 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     } catch {}
   }, []);
 
-  // Recalculate true elapsed seconds from wall clock
-  const syncElapsedSeconds = useCallback(() => {
-    if (timerState === 'running' && lastStartRef.current) {
-      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
-      const currentTotal = accumulatedRef.current + Math.max(0, elapsed);
-      setSeconds(currentTotal);
-    }
-  }, [timerState]);
-
-  // Main timer loop based on Wall-Clock time so it never stops when phone screen turns off
-  useEffect(() => {
-    if (timerState === 'running') {
-      if (!lastStartRef.current) {
-        lastStartRef.current = Date.now();
-      }
-      syncElapsedSeconds();
-
-      intervalRef.current = setInterval(() => {
-        syncElapsedSeconds();
-      }, 500); // 500ms intervals for smooth, drift-free display
-    } else {
-      clearInterval(intervalRef.current);
-    }
-
-    return () => clearInterval(intervalRef.current);
-  }, [timerState, syncElapsedSeconds]);
-
-  // Handle phone screen off / on (visibilitychange & window focus)
-  useEffect(() => {
-    const handleWake = () => {
-      syncElapsedSeconds();
-    };
-
-    document.addEventListener('visibilitychange', handleWake);
-    window.addEventListener('focus', handleWake);
-    window.addEventListener('pageshow', handleWake);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleWake);
-      window.removeEventListener('focus', handleWake);
-      window.removeEventListener('pageshow', handleWake);
-    };
-  }, [syncElapsedSeconds]);
-
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
@@ -147,7 +166,8 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     startTimeRef.current = startStr;
     accumulatedRef.current = 0;
     lastStartRef.current = now;
-    setSeconds(0);
+    setAccumulatedSeconds(0);
+    setLastStartTimestamp(now);
     setTimerState('running');
     saveTimerState('running', 0, now, subject.trim(), topic.trim(), startStr);
     
@@ -164,7 +184,8 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       accumulatedRef.current += Math.max(0, elapsed);
       lastStartRef.current = null;
     }
-    setSeconds(accumulatedRef.current);
+    setAccumulatedSeconds(accumulatedRef.current);
+    setLastStartTimestamp(null);
     setTimerState('paused');
     saveTimerState('paused', accumulatedRef.current, null, subject, topic, startTimeRef.current);
     
@@ -178,6 +199,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     triggerHaptic('light');
     const now = Date.now();
     lastStartRef.current = now;
+    setLastStartTimestamp(now);
     setTimerState('running');
     saveTimerState('running', accumulatedRef.current, now, subject, topic, startTimeRef.current);
     
@@ -185,17 +207,19 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       const sessionLabel = topic.trim() ? `${subject.trim()}: ${topic.trim()}` : subject.trim();
       TimerNotification.resume({ label: sessionLabel || 'Deep Work', elapsedBaseMs: accumulatedRef.current * 1000 });
     }
-    syncElapsedSeconds();
   };
 
   const handleStop = async () => {
     triggerHaptic('medium');
-    clearInterval(intervalRef.current);
     if (lastStartRef.current) {
       const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
       accumulatedRef.current += Math.max(0, elapsed);
+      lastStartRef.current = null;
     }
-    setSeconds(accumulatedRef.current);
+    const finalSec = accumulatedRef.current;
+    setAccumulatedSeconds(finalSec);
+    setLastStartTimestamp(null);
+    setSummarySeconds(finalSec);
     setTimerState('idle');
     saveTimerState('idle', 0, null, '', '', '');
     if (isNative) TimerNotification.stop();
@@ -204,7 +228,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
 
   const handleSave = () => {
     triggerHaptic('save');
-    const finalMinutes = Math.max(1, Math.round(seconds / 60));
+    const finalMinutes = Math.max(1, Math.round(summarySeconds / 60));
     const session: StudySession = {
       id: crypto.randomUUID(),
       subject: subject.trim(),
@@ -215,7 +239,9 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     };
     triggerHaptic('success');
     setShowSummary(false);
-    setSeconds(0);
+    setAccumulatedSeconds(0);
+    setLastStartTimestamp(null);
+    setSummarySeconds(0);
     accumulatedRef.current = 0;
     lastStartRef.current = null;
     setSubject('');
@@ -230,10 +256,11 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
 
   const handleCancel = () => {
     triggerHaptic('light');
-    clearInterval(intervalRef.current);
     if (isNative) TimerNotification.stop();
     setTimerState('idle');
-    setSeconds(0);
+    setAccumulatedSeconds(0);
+    setLastStartTimestamp(null);
+    setSummarySeconds(0);
     accumulatedRef.current = 0;
     lastStartRef.current = null;
     setShowSummary(false);
@@ -267,10 +294,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
           </p>
 
           <div className="text-5xl sm:text-6xl font-black tracking-tight mb-2 font-mono">
-            {formatTime(seconds)}
+            {formatTime(summarySeconds)}
           </div>
           <p className="text-xs font-bold tracking-wider uppercase opacity-75 mb-8 font-mono">
-            {Math.max(1, Math.round(seconds / 60))} total minutes logged
+            {Math.max(1, Math.round(summarySeconds / 60))} total minutes logged
           </p>
 
           <div className="flex gap-3">
@@ -402,9 +429,11 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
             </p>
           </div>
 
-          <div className="text-6xl sm:text-7xl font-black tracking-tight font-mono py-4 text-primary-light dark:text-primary-dark relative z-10">
-            {formatTime(seconds)}
-          </div>
+          <RunningTimerDisplay
+            isRunning={timerState === 'running'}
+            lastStartTimestamp={lastStartTimestamp}
+            accumulatedSeconds={accumulatedSeconds}
+          />
 
           <div className="flex items-center justify-center gap-4 pt-2 relative z-10">
             {timerState === 'running' ? (

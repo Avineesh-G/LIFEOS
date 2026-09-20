@@ -266,7 +266,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/75"
           onClick={status === 'downloading' || status === 'installing' ? undefined : handleDismiss}
         />
 
@@ -280,9 +280,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
         >
           {/* Glowing Header Banner */}
           <div className="relative p-6 pb-5 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border-b border-black/5 dark:border-white/5">
-            <div className={`absolute top-0 right-0 w-36 h-36 rounded-full blur-3xl pointer-events-none ${
-              hasUpdate ? 'bg-indigo-500/15' : 'bg-emerald-500/15'
-            }`} />
+            <div
+              className="absolute top-0 right-0 w-36 h-36 rounded-full pointer-events-none"
+              style={{
+                background: hasUpdate
+                  ? 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)'
+                  : 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)',
+              }}
+            />
 
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">

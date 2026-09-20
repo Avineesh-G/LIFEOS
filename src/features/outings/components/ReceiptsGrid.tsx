@@ -154,7 +154,7 @@ export function ReceiptViewerModal({
   const sizeKB = receipt.size ? Math.round(receipt.size / 1024) : 0;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col select-none">
+    <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col select-none">
       {/* Top Header */}
       <div className="flex items-center justify-between p-4 text-white z-10">
         <div className="min-w-0">

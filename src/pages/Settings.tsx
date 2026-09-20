@@ -20,6 +20,7 @@ import { deleteDoc, doc } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { useThemeMode, ThemeMode } from '../hooks/useDayPhase';
+import { usePerformanceMode, PerformanceMode } from '../utils/performanceMode';
 import SegmentedTogglePill from '../components/SegmentedTogglePill';
 import M3ToggleChip from '../components/M3ToggleChip';
 
@@ -38,6 +39,7 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const [themeMode, setThemeMode] = useThemeMode();
+  const [perfMode, setPerfMode, effectivePerfMode] = usePerformanceMode();
 
   const [backupLoading, setBackupLoading] = useState(false);
   const [backupFeedback, setBackupFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -414,6 +416,54 @@ export default function Settings({
               onChange={() => handleToggleThemeMode()}
             />
           </div>
+        </div>
+      </div>
+
+      {/* ── 2b. Performance Mode: Auto / Full / Lite ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden p-5 sm:p-6 space-y-3">
+        <div className="flex items-center justify-between gap-3 text-left">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
+              <Gauge size={22} strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
+                  Performance Mode
+                </h3>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark">
+                  Active: {effectivePerfMode}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
+                {perfMode === 'auto' 
+                  ? 'Auto-adapts to device hardware (Lite on low-end chipsets, Full on flagship)' 
+                  : perfMode === 'lite' 
+                    ? 'Lite: disables ambient blobs, stagger animations, and spring overshoot' 
+                    : 'Full: full 120 FPS spring physics and expressive background shaders'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1">
+          {(['auto', 'full', 'lite'] as PerformanceMode[]).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                setPerfMode(mode);
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold capitalize transition-all border ${
+                perfMode === mode
+                  ? 'bg-accent text-white border-accent shadow-sm'
+                  : 'bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
         </div>
       </div>
 

@@ -69,9 +69,15 @@ export default function AppLockOverlay() {
 
   return (
     <div className="fixed inset-0 z-[99999] bg-[#F8F9FA]/98 dark:bg-[#090A0D]/98 flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden">
-      {/* Ambient Theme Radial Glows */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-12 right-12 w-64 h-64 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
+      {/* Ambient Theme Radial Glows (Zero-cost radial gradients) */}
+      <div
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.15 }}
+      />
+      <div
+        className="absolute bottom-12 right-12 w-64 h-64 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #A855F7 0%, transparent 70%)', opacity: 0.12 }}
+      />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 10 }}

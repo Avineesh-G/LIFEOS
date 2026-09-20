@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
@@ -6,6 +7,8 @@ import type { AppData } from '../types';
 interface GymExerciseHistoryProps {
   data: AppData;
 }
+
+const PAGE_SIZE = 15;
 
 export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const navigate = useNavigate();
@@ -23,6 +26,25 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
     const totalVolume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
     return { date: w.date, sets, bestSet, totalVolume };
   });
+
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [decodedName]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisibleCount(prev => prev + PAGE_SIZE);
+      }
+    }, { rootMargin: '160px' });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [sessions.length]);
 
   const bestWeight = Math.max(...sessions.map(s => s.bestSet?.weight || 0), 0);
   const bestReps = Math.max(...sessions.map(s => s.bestSet?.reps || 0), 0);
@@ -56,7 +78,7 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
 
       {/* Sessions */}
       <div className="space-y-3.5">
-        {sessions.map((s, i) => (
+        {sessions.slice(0, visibleCount).map((s, i) => (
           <div key={i} className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-5 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-medium">
@@ -86,6 +108,12 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
             )}
           </div>
         ))}
+
+        {visibleCount < sessions.length && (
+          <div ref={sentinelRef} className="h-6 flex items-center justify-center py-2 text-xs text-secondary-light dark:text-secondary-dark opacity-60">
+            Loading more sessions...
+          </div>
+        )}
       </div>
 
       {sessions.length === 0 && (

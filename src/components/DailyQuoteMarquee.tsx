@@ -20,7 +20,7 @@ interface DailyQuoteMarqueeProps {
   embedded?: boolean;
 }
 
-export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarqueeProps) {
+function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarqueeProps) {
   const [quoteState, setQuoteState] = useState(() => getCurrentDailyQuote());
   const [copied, setCopied] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -115,9 +115,15 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
     >
       {!embedded && (
         <>
-          {/* Subtle Ambient Radial Glows */}
-          <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-gradient-to-br from-[var(--accent)]/12 via-[var(--accent)]/6 to-transparent blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-gradient-to-tr from-[var(--accent)]/8 to-transparent blur-3xl pointer-events-none" />
+          {/* Subtle Ambient Radial Glows (Zero-blur radial gradients) */}
+          <div 
+            className="absolute -top-12 -right-12 w-44 h-44 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.12 }}
+          />
+          <div 
+            className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.08 }}
+          />
         </>
       )}
 
@@ -257,3 +263,5 @@ export default function DailyQuoteMarquee({ embedded = false }: DailyQuoteMarque
     </div>
   );
 }
+
+export default React.memo(DailyQuoteMarquee);

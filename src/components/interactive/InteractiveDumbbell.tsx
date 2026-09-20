@@ -55,7 +55,8 @@ export default function InteractiveDumbbell({
         <motion.div
           animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute inset-0 rounded-full bg-emerald-500/25 blur-md pointer-events-none"
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%)' }}
         />
       )}
 
