@@ -21,10 +21,24 @@ import {
   HOME_DESTINATION,
   DestinationId,
   HubDestination,
+  HubFamily,
   HUB_FAMILY_CONFIG,
   HUB_SECTION_NAMES,
   getDestinationById,
 } from '../config/hubDestinations';
+
+const SECTION_TO_HUB_FAMILY: Record<AppSection, HubFamily> = {
+  home: 'home',
+  gym: 'gym',
+  nutrition: 'nutrition',
+  study: 'study',
+  finance: 'finance',
+  settings: 'system',
+  history: 'history',
+  outing: 'outing',
+  shopping: 'shopping',
+  vault: 'vault',
+};
 
 interface NavigationHubSheetProps {
   isOpen: boolean;
@@ -71,8 +85,9 @@ const DestinationTile = React.memo(function DestinationTile({
   const config = HUB_FAMILY_CONFIG[destination.family];
   const [r, g, b] = config.rgb;
 
+  const currentOpacity = (destination.family === 'history' || destination.family === 'outing') ? 0.28 : (isDark ? 0.32 : 0.22);
   const tileBg = isCurrent
-    ? `rgba(${r}, ${g}, ${b}, ${isDark ? 0.32 : 0.22})`
+    ? `rgba(${r}, ${g}, ${b}, ${currentOpacity})`
     : isDark
     ? `rgba(${r}, ${g}, ${b}, 0.16)`
     : `rgba(${r}, ${g}, ${b}, 0.08)`;
@@ -86,16 +101,16 @@ const DestinationTile = React.memo(function DestinationTile({
     : `0.5px solid rgba(${r}, ${g}, ${b}, 0.25)`;
 
   const squircleBg = isCurrent
-    ? config.seed
+    ? (isDark ? (config.darkStrong || config.seed) : config.seed)
     : isDark
     ? `rgba(${r}, ${g}, ${b}, 0.30)`
     : `rgba(${r}, ${g}, ${b}, 0.14)`;
 
   const glyphColor = isCurrent
-    ? '#FFFFFF'
+    ? (config.onAccent || '#FFFFFF')
     : isDark
     ? config.darkGlyph
-    : config.seed;
+    : (config.textAccent || config.seed);
 
   return (
     <button
@@ -205,6 +220,28 @@ export function NavigationHubSheet({
   }, []);
 
   const dragY = useMotionValue(0);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [canScrollMore, setCanScrollMore] = useState(false);
+
+  // Hub destinations: always exactly 10 destinations (excluding pinned)
+  const hubDestinations = useMemo(() => {
+    const pinnedSet = new Set<string>(pinned);
+    return DESTINATIONS.filter((d) => !pinnedSet.has(d.id));
+  }, [pinned]);
+
+  const checkScroll = useCallback(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const hasMore = el.scrollHeight - el.scrollTop - el.clientHeight > 8;
+    setCanScrollMore(hasMore);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(checkScroll, 120);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen, isEditMode, hubDestinations, checkScroll]);
 
   // Esc key and hardware back button listener
   useEffect(() => {
@@ -255,12 +292,6 @@ export function NavigationHubSheet({
       returnFocusRef?.current?.focus();
     }
   }, [isOpen, returnFocusRef]);
-
-  // Hub destinations: always exactly 10 destinations (excluding pinned)
-  const hubDestinations = useMemo(() => {
-    const pinnedSet = new Set<string>(pinned);
-    return DESTINATIONS.filter((d) => !pinnedSet.has(d.id));
-  }, [pinned]);
 
   // Pinned destinations details for slot selector
   const slot1Dest = useMemo(
@@ -376,9 +407,9 @@ export function NavigationHubSheet({
               y: dragY,
               backgroundColor: sheetBg,
               border: `0.5px solid rgba(${aR}, ${aG}, ${aB}, 0.35)`,
-              bottom: 'calc(64px + max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem)) + 8px)',
+              bottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 16px)',
               contain: 'layout paint style',
-              maxHeight: 'min(60dvh, 420px)',
+              maxHeight: 'min(76dvh, 480px)',
             }}
             onDragEnd={(_e, info) => {
               if (info.offset.y > 80 || info.velocity.y > 500) {
@@ -386,7 +417,7 @@ export function NavigationHubSheet({
                 onClose();
               }
             }}
-            className="fixed left-2 right-2 max-w-[420px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.65)] select-none pointer-events-auto flex flex-col gpu-composited"
+            className="fixed left-2 right-2 max-w-[560px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.65)] select-none pointer-events-auto flex flex-col gpu-composited"
           >
             {/* ── Active Interface Corner Accent Blob ── */}
             <div
@@ -457,17 +488,7 @@ export function NavigationHubSheet({
                         className="text-[12px] font-medium leading-none"
                         style={{
                           color: isDark
-                            ? HUB_FAMILY_CONFIG[
-                                activeSection === 'study'
-                                  ? 'study'
-                                  : activeSection === 'finance'
-                                  ? 'finance'
-                                  : activeSection === 'gym'
-                                  ? 'gym'
-                                  : activeSection === 'nutrition'
-                                  ? 'nutrition'
-                                  : 'system'
-                              ]?.darkGlyph || activeSeed
+                            ? (HUB_FAMILY_CONFIG[SECTION_TO_HUB_FAMILY[activeSection]]?.darkGlyph || activeSeed)
                             : activeSeed,
                         }}
                       >
@@ -649,13 +670,19 @@ export function NavigationHubSheet({
               )}
             </AnimatePresence>
 
-            {/* ── Destinations Grid (Always exactly 10 tiles, 3x4 layout) ── */}
+            {/* ── Destinations Grid (Always exactly 10 tiles, adaptive columns) ── */}
             <div
-              className="relative z-10 grid grid-cols-3 min-[340px]:grid-cols-4 gap-2 overflow-y-auto no-scrollbar overscroll-contain"
+              ref={gridRef}
+              onScroll={checkScroll}
+              className="relative z-10 grid grid-cols-[repeat(auto-fit,minmax(76px,1fr))] gap-2 overflow-y-auto no-scrollbar overscroll-contain pb-6"
               style={{
                 WebkitOverflowScrolling: 'touch',
-                maskImage: 'linear-gradient(to bottom, black calc(100% - 16px), transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 16px), transparent 100%)',
+                ...(canScrollMore
+                  ? {
+                      maskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
+                      WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 24px), transparent 100%)',
+                    }
+                  : {}),
               }}
             >
               {hubDestinations.map((dest) => (

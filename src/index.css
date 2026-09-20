@@ -7,14 +7,69 @@
 
 @layer base {
   :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --nav-h: 64px;
+    --vh: 1vh;
     --font-weight-heading: 600;
     --font-weight-body: 400;
+    --history-seed: #8C1D40;
+    --history-dark-strong: #AA3B58;
+    --history-dark-tint: #D66FA0;
+    --outing-seed: #8C500A;
+    --outing-light-text: #78350F;
+    --outing-dark-strong: #A05F0A;
+    --outing-dark-tint: #C88A58;
+    --shopping-seed: #172554;
+    --shopping-light-text: #1E3A8A;
+    --shopping-dark-strong: #254BB5;
+    --shopping-dark-tint: #93C5FD;
+    --vault-seed: #2034A0;
+    --vault-light-text: #1E40AF;
+    --vault-dark-strong: #3B82F6;
+    --vault-dark-tint: #818CF8;
+    --finance-seed: #15803D;
+    --finance-dark-strong: #15803D;
+    --finance-dark-tint: #82CB92;
+    --study-seed: #0891B2;
+    --study-on-accent: #1A1A1F;
+    --study-light-text: #0E7D9A;
+    --study-dark-strong: #0891B2;
+    --study-dark-tint: #80D2ED;
+    --settings-seed: #475569;
+    --settings-dark-strong: #556378;
+    --settings-dark-tint: #A7AEBB;
+    --streak-seed: #FF6B35;
+    --streak-on-accent: #1A1A1F;
+    --streak-light-text: #CB470D;
+    --streak-dark-strong: #FF6B35;
+    --streak-dark-tint: #FCA487;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html.dark[data-section="history"] .btn-primary,
+  html.dark [data-section="history"] .btn-primary {
+    border: 1px solid rgba(214, 111, 160, 0.5);
   }
 
   html {
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    overscroll-behavior: none;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    height: 100%;
+    min-height: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
   }
 
   body {
@@ -26,7 +81,69 @@
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+    min-height: 100%;
+    min-height: 100dvh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  #root {
+    min-height: 100%;
+    min-height: 100dvh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Text selection only inside editable form elements and explicit allow-select */
+  input,
+  textarea,
+  [contenteditable="true"],
+  .allow-select {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Prevent drag ghost images on mobile */
+  img, svg, a {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
+  /* Theme-aware native form controls */
+  .input-field {
+    background-color: var(--md-surface-container, rgba(0, 0, 0, 0.04));
+    color: var(--md-on-surface, inherit);
+    border: 1px solid var(--md-outline-variant, rgba(0, 0, 0, 0.12));
+    border-radius: var(--md-shape-md, 12px);
+    color-scheme: light dark;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    min-width: 0;
+  }
+
+  .dark .input-field {
+    background-color: var(--md-surface-container, rgba(255, 255, 255, 0.06));
+    color: var(--md-on-surface, #F2F3F5);
+    border-color: var(--md-outline-variant, rgba(255, 255, 255, 0.15));
+  }
+
+  .input-field:focus-visible {
+    outline: none;
+    border-color: var(--md-primary, #6366F1);
+    box-shadow: 0 0 0 2px rgba(var(--md-primary-rgb, 99, 102, 241), 0.25);
+  }
+
+  .input-field::placeholder {
+    color: var(--md-on-surface-variant, currentColor);
+    opacity: 0.6;
   }
 
   h1 {

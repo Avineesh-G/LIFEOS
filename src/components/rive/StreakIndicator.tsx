@@ -44,7 +44,7 @@ export default function StreakIndicator({
     <div className="relative flex items-center justify-center">
       <Flame
         size={isSmall ? 13 : isLarge ? 20 : 16}
-        className="relative z-10 text-white fill-white transition-transform duration-300 group-hover:scale-110"
+        className="relative z-10 text-[#1A1A1F] fill-[#1A1A1F] transition-transform duration-300 group-hover:scale-110"
       />
     </div>
   );
@@ -55,9 +55,9 @@ export default function StreakIndicator({
       onClick={handleTap}
       className={`group cursor-pointer inline-flex items-center gap-2 select-none ${className}`}
     >
-      {/* 8-Point Scallop / Burst Badge in Flame Orange #FF7A45 (Prompt B7 system-level accent) */}
+      {/* 8-Point Scallop / Burst Badge in Flame Orange #FF6B35 with Dark On-Accent Text */}
       <div 
-        className={`flex items-center justify-center shrink-0 bg-[#FF7A45] text-white shadow-sm p-1.5 transition-transform duration-200 group-hover:scale-105 ${
+        className={`flex items-center justify-center shrink-0 bg-[#FF6B35] text-[#1A1A1F] shadow-sm p-1.5 transition-transform duration-200 group-hover:scale-105 ${
           isSmall ? 'w-6 h-6' : isLarge ? 'w-10 h-10' : 'w-8 h-8'
         }`}
         style={{ clipPath: BURST_CLIP_PATH }}
@@ -74,7 +74,7 @@ export default function StreakIndicator({
       </div>
 
       <div className="flex items-center gap-1.5 font-bold tracking-tight">
-        <span className={`font-stat text-[#FF7A45] font-extrabold ${isSmall ? 'text-xs' : isLarge ? 'text-base' : 'text-sm'}`}>
+        <span className={`font-stat text-[#CB470D] dark:text-[#FCA487] font-extrabold ${isSmall ? 'text-xs' : isLarge ? 'text-base' : 'text-sm'}`}>
           {streak}
         </span>
         <span className="text-[10px] font-tag font-semibold text-[var(--text-secondary)] uppercase tracking-wider">

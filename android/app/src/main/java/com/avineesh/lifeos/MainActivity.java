@@ -1,9 +1,15 @@
 package com.avineesh.lifeos;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import ee.forgr.biometric.NativeBiometric;
@@ -42,6 +48,46 @@ public class MainActivity extends BridgeActivity {
                 }
             } catch (Exception ignored) {
             }
+        }
+
+        // Apply edge-to-edge window insets listener and forward CSS variables into WebView
+        View decorView = getWindow().getDecorView();
+        ViewCompat.setOnApplyWindowInsetsListener(decorView, (v, windowInsets) -> {
+            Insets statusInsets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout()
+            );
+            Insets navInsets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.navigationBars()
+            );
+
+            float density = getResources().getDisplayMetrics().density;
+            int topDp = Math.round(statusInsets.top / density);
+            int bottomDp = Math.round(navInsets.bottom / density);
+            int leftDp = Math.round(statusInsets.left / density);
+            int rightDp = Math.round(statusInsets.right / density);
+
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                WebView webView = getBridge().getWebView();
+                String js = String.format(
+                    "document.documentElement.style.setProperty('--sat', '%dpx');" +
+                    "document.documentElement.style.setProperty('--sab', '%dpx');" +
+                    "document.documentElement.style.setProperty('--sal', '%dpx');" +
+                    "document.documentElement.style.setProperty('--sar', '%dpx');",
+                    topDp, bottomDp, leftDp, rightDp
+                );
+                webView.post(() -> webView.evaluateJavascript(js, null));
+            }
+            return windowInsets;
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            WebView webView = getBridge().getWebView();
+            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            webView.setBackgroundColor(Color.TRANSPARENT);
         }
     }
 }

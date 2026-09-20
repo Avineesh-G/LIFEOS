@@ -440,8 +440,8 @@ export default function Vault({ data, updateData }: VaultProps) {
           className="relative w-full max-w-sm rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col items-center text-center overflow-hidden"
         >
           {/* Subtle Ambient Glow Orbs */}
-          <div className="absolute -top-16 -left-16 w-44 h-44 bg-emerald-500/15 dark:bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 w-44 h-44 bg-cyan-500/15 dark:bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-16 -left-16 w-44 h-44 bg-[var(--md-primary)]/15 dark:bg-[var(--md-primary)]/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 w-44 h-44 bg-[var(--md-secondary)]/15 dark:bg-[var(--md-secondary)]/20 rounded-full blur-3xl pointer-events-none" />
 
           {/* Biometric Holographic Scanner Icon */}
           <div className="relative mb-5 mt-2">
@@ -449,23 +449,23 @@ export default function Vault({ data, updateData }: VaultProps) {
               animate={{
                 scale: [1, 1.08, 1],
                 boxShadow: [
-                  '0 0 0 0 rgba(16, 185, 129, 0.2)',
-                  '0 0 0 18px rgba(16, 185, 129, 0)',
-                  '0 0 0 0 rgba(16, 185, 129, 0.2)',
+                  '0 0 0 0 rgba(32, 52, 160, 0.25)',
+                  '0 0 0 18px rgba(32, 52, 160, 0)',
+                  '0 0 0 0 rgba(32, 52, 160, 0.25)',
                 ],
               }}
               transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border border-emerald-500/40 dark:border-emerald-400/40 flex items-center justify-center relative overflow-hidden"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-[var(--md-primary)]/20 via-[var(--md-secondary)]/20 to-[var(--md-primary)]/10 border border-[var(--md-primary)]/40 dark:border-[var(--md-secondary)]/40 flex items-center justify-center relative overflow-hidden"
             >
               {/* Vertical Laser Scan Line */}
               <motion.div
                 animate={{ y: [-54, 54, -54] }}
                 transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-                className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399]"
+                className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-[var(--md-secondary)] to-transparent shadow-[0_0_14px_var(--md-secondary)]"
               />
-              <Fingerprint size={50} strokeWidth={1.7} className="text-emerald-500 dark:text-emerald-400 relative z-10" />
+              <Fingerprint size={50} strokeWidth={1.7} className="text-[var(--md-primary)] dark:text-[var(--md-secondary)] relative z-10" />
             </motion.div>
-            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-1.5 shadow-md">
+            <div className="absolute -bottom-1 -right-1 bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-full p-1.5 shadow-md">
               <Lock size={14} strokeWidth={2.6} />
             </div>
           </div>
@@ -492,7 +492,7 @@ export default function Vault({ data, updateData }: VaultProps) {
           <button
             onClick={() => handleDeviceUnlock(false)}
             disabled={isAuthenticating}
-            className="w-full relative group overflow-hidden flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs sm:text-sm tracking-wide transition-all duration-200 active:scale-98 shadow-lg shadow-emerald-500/25 mb-4"
+            className="w-full relative group overflow-hidden flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-2xl bg-[var(--md-primary)] hover:opacity-95 text-[var(--md-on-primary)] font-bold text-xs sm:text-sm tracking-wide transition-all duration-200 active:scale-98 shadow-lg shadow-[var(--md-primary)]/25 mb-4"
           >
             {isAuthenticating ? (
               <RefreshCw size={18} className="animate-spin" />
@@ -506,11 +506,11 @@ export default function Vault({ data, updateData }: VaultProps) {
 
           <div className="w-full pt-4 border-t border-white/[0.05] flex flex-col gap-2">
             <div className="flex items-center justify-center gap-2 text-[11px] text-secondary-light dark:text-secondary-dark/80">
-              <Smartphone size={13} className="text-emerald-500" />
+              <Smartphone size={13} className="text-[var(--md-primary)] dark:text-[var(--md-secondary)]" />
               <span>Bound to your device's hardware screen lock</span>
             </div>
             <div className="flex items-center justify-center gap-2 text-[11px] text-secondary-light dark:text-secondary-dark/80">
-              <ShieldCheck size={13} className="text-emerald-500" />
+              <ShieldCheck size={13} className="text-[var(--md-primary)] dark:text-[var(--md-secondary)]" />
               <span>AES-256-GCM Zero Knowledge Encryption</span>
             </div>
           </div>
@@ -527,7 +527,7 @@ export default function Vault({ data, updateData }: VaultProps) {
       {/* ── Compact Mobile Header Bar ── */}
       <div className="flex items-center justify-between gap-2 p-3.5 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[var(--md-primary)]/15 border border-[var(--md-primary)]/30 flex items-center justify-center text-[var(--md-primary)] dark:text-[var(--md-secondary)] shrink-0">
             <ShieldCheck size={19} strokeWidth={2.2} />
           </div>
           <div>
@@ -535,13 +535,13 @@ export default function Vault({ data, updateData }: VaultProps) {
               <h1 className="text-sm sm:text-base font-heading font-bold tracking-tight text-primary-light dark:text-primary-dark">
                 Vault
               </h1>
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-tag font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-tag font-bold tracking-wider uppercase bg-[var(--md-primary)]/15 text-[var(--md-primary)] dark:text-[var(--md-secondary)] border border-[var(--md-primary)]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] dark:bg-[var(--md-secondary)] animate-pulse" />
                 {vaultItems.length}
               </span>
             </div>
             <p className="text-[10px] text-secondary-light dark:text-secondary-dark">
-              Auto-locks in <span className="font-semibold text-emerald-500">{lockCountdown}s</span>
+              Auto-locks in <span className="font-semibold text-[var(--md-primary)] dark:text-[var(--md-secondary)]">{lockCountdown}s</span>
             </p>
           </div>
         </div>
@@ -550,7 +550,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         <div className="flex items-center gap-1.5">
           <button
             onClick={openAddModal}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-sm shadow-emerald-500/20 active:scale-95 transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[var(--md-primary)] hover:opacity-95 text-[var(--md-on-primary)] font-bold text-xs shadow-sm shadow-[var(--md-primary)]/20 active:scale-95 transition-all"
           >
             <Plus size={15} strokeWidth={2.5} />
             <span>Add</span>
@@ -575,7 +575,7 @@ export default function Vault({ data, updateData }: VaultProps) {
             placeholder="Search accounts, usernames..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-xs sm:text-sm text-primary-light dark:text-primary-dark placeholder-secondary-light dark:placeholder-secondary-dark focus:outline-none focus:border-emerald-500 transition-colors shadow-xs"
+            className="w-full pl-9 pr-8 py-2.5 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-xs sm:text-sm text-primary-light dark:text-primary-dark placeholder-secondary-light dark:placeholder-secondary-dark focus:outline-none focus:border-[var(--md-primary)] transition-colors shadow-xs"
           />
           {searchQuery && (
             <button
@@ -590,7 +590,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         {/* Generator Quick Tool Button */}
         <button
           onClick={handleOpenGenerator}
-          className="h-10 px-3 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5 text-xs font-bold hover:bg-cyan-500/10 active:scale-95 transition-all shadow-xs shrink-0"
+          className="h-10 px-3 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-[var(--md-primary)] dark:text-[var(--md-secondary)] flex items-center gap-1.5 text-xs font-bold hover:bg-[var(--md-primary)]/10 active:scale-95 transition-all shadow-xs shrink-0"
           title="Password Generator Tool"
         >
           <Sparkles size={14} />
@@ -612,11 +612,11 @@ export default function Vault({ data, updateData }: VaultProps) {
           {selectedCategory === 'all' && (
             <motion.div
               layoutId="activeVaultCategoryCapsule"
-              className="absolute inset-0 rounded-xl bg-emerald-500 shadow-md shadow-emerald-500/20"
+              className="absolute inset-0 rounded-xl bg-[var(--md-primary)] shadow-md shadow-[var(--md-primary)]/20"
               transition={{ type: 'spring', stiffness: 450, damping: 35 }}
             />
           )}
-          <span className={`relative z-10 ${selectedCategory === 'all' ? 'text-white' : ''}`}>
+          <span className={`relative z-10 ${selectedCategory === 'all' ? 'text-[var(--md-on-primary)]' : ''}`}>
             All ({vaultItems.length})
           </span>
         </button>
@@ -639,13 +639,13 @@ export default function Vault({ data, updateData }: VaultProps) {
               {active && (
                 <motion.div
                   layoutId="activeVaultCategoryCapsule"
-                  className="absolute inset-0 rounded-xl bg-emerald-500 shadow-md shadow-emerald-500/20"
+                  className="absolute inset-0 rounded-xl bg-[var(--md-primary)] shadow-md shadow-[var(--md-primary)]/20"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}
-              <Icon size={12} className={`relative z-10 transition-colors ${active ? 'text-white' : config.color}`} />
-              <span className={`relative z-10 transition-colors ${active ? 'text-white' : ''}`}>{config.shortLabel}</span>
-              {count > 0 && <span className={`relative z-10 text-[10px] opacity-80 ${active ? 'text-white' : ''}`}>({count})</span>}
+              <Icon size={12} className={`relative z-10 transition-colors ${active ? 'text-[var(--md-on-primary)]' : config.color}`} />
+              <span className={`relative z-10 transition-colors ${active ? 'text-[var(--md-on-primary)]' : ''}`}>{config.shortLabel}</span>
+              {count > 0 && <span className={`relative z-10 text-[10px] opacity-80 ${active ? 'text-[var(--md-on-primary)]' : ''}`}>({count})</span>}
             </button>
           );
         })}
@@ -660,7 +660,7 @@ export default function Vault({ data, updateData }: VaultProps) {
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-black/90 dark:bg-white/95 text-white dark:text-black text-xs font-bold shadow-xl flex items-center gap-2 border border-white/20 dark:border-black/20"
           >
-            <Sparkles size={13} className="text-emerald-400 dark:text-emerald-600" />
+            <Sparkles size={13} className="text-[var(--md-secondary)]" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
@@ -669,7 +669,7 @@ export default function Vault({ data, updateData }: VaultProps) {
       {/* ── Credentials List (Mobile-Optimized Cards) ── */}
       {filteredItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-white/40 dark:bg-[#161820]/40 border border-dashed border-black/10 dark:border-white/10 text-center my-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-2.5">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--md-primary)]/10 flex items-center justify-center text-[var(--md-primary)] dark:text-[var(--md-secondary)] mb-2.5">
             <KeyRound size={22} strokeWidth={1.8} />
           </div>
           <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark mb-1">
@@ -683,7 +683,7 @@ export default function Vault({ data, updateData }: VaultProps) {
           {!searchQuery && (
             <button
               onClick={openAddModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 text-white text-xs font-bold shadow-sm active:scale-95 transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold shadow-sm active:scale-95 transition-all"
             >
               <Plus size={16} />
               <span>Add Your First Password</span>
@@ -710,7 +710,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.96 }}
-                className="group relative rounded-[22px] p-3 sm:p-3.5 liquid-glass border border-[var(--card-border)] hover:border-emerald-500/40 transition-all shadow-xs flex flex-col gap-2.5"
+                className="group relative rounded-[22px] p-3 sm:p-3.5 liquid-glass border border-[var(--card-border)] hover:border-[var(--md-primary)]/40 transition-all shadow-xs flex flex-col gap-2.5"
               >
                 {/* 1. Header: Squircle Icon + Title + Category + Edit/Delete */}
                 <div className="flex items-center justify-between gap-2">
@@ -771,7 +771,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     <button
                       onClick={() => handleCopyUsername(item.id, item.usernameOrEmail)}
                       className={`text-[10px] font-bold flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all active:scale-95 ${
-                        isUserCopied ? 'text-emerald-500 bg-emerald-500/10' : 'text-secondary-light hover:text-primary-light dark:hover:text-primary-dark'
+                        isUserCopied ? 'text-[var(--md-primary)] dark:text-[var(--md-secondary)] bg-[var(--md-primary)]/10' : 'text-secondary-light hover:text-primary-light dark:hover:text-primary-dark'
                       }`}
                       title="Copy Username"
                     >
@@ -784,9 +784,9 @@ export default function Vault({ data, updateData }: VaultProps) {
                 {/* 3. Password Action Row (Mobile-Optimized Compact Dock) */}
                 <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-black/[0.03] dark:bg-black/30 border border-black/5 dark:border-white/5">
                   <div className="flex items-center gap-2 px-1 min-w-0 truncate font-mono">
-                    <KeyRound size={13} className="text-emerald-500 shrink-0" />
+                    <KeyRound size={13} className="text-[var(--md-primary)] dark:text-[var(--md-secondary)] shrink-0" />
                     {isRevealed ? (
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 tracking-wider truncate select-all">
+                      <span className="text-xs font-bold text-[var(--md-primary)] dark:text-[var(--md-secondary)] tracking-wider truncate select-all">
                         {revealedPlain}
                       </span>
                     ) : (
@@ -799,7 +799,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   <div className="flex items-center gap-1.5 shrink-0">
                     {/* Peek Timer Countdown */}
                     {isRevealed && (
-                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 animate-pulse">
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-[var(--md-primary)]/20 text-[var(--md-primary)] dark:text-[var(--md-secondary)] border border-[var(--md-primary)]/30 animate-pulse">
                         {peekSecondsLeft}s
                       </span>
                     )}
@@ -809,7 +809,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       onClick={() => handleToggleReveal(item)}
                       className={`w-8 h-8 rounded-lg border transition-all flex items-center justify-center active:scale-95 ${
                         isRevealed
-                          ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                          ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
                           : 'bg-surface-light dark:bg-[#20232E] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
                       }`}
                       title={isRevealed ? 'Hide' : 'Peek for 10s'}
@@ -822,7 +822,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       onClick={() => handleCopyPassword(item)}
                       className={`w-8 h-8 rounded-lg border transition-all flex items-center justify-center active:scale-95 ${
                         isPasswordCopied
-                          ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                          ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
                           : 'bg-surface-light dark:bg-[#20232E] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
                       }`}
                       title="Copy Password"
@@ -854,7 +854,7 @@ export default function Vault({ data, updateData }: VaultProps) {
       >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--md-primary)]/15 border border-[var(--md-primary)]/30 flex items-center justify-center text-[var(--md-primary)] dark:text-[var(--md-secondary)]">
                     <KeyRound size={17} />
                   </div>
                   <div>
@@ -886,7 +886,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="e.g. VIT Student Portal, GitHub, Netflix"
                     value={modalForm.title}
                     onChange={(e) => setModalForm({ ...modalForm, title: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                   />
                 </div>
 
@@ -909,11 +909,11 @@ export default function Vault({ data, updateData }: VaultProps) {
                           }}
                           className={`flex items-center justify-center gap-1 p-2 rounded-xl border text-[11px] font-bold transition-all ${
                             active
-                              ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
                               : 'bg-surface-light dark:bg-[#1F212A] text-secondary-light dark:text-secondary-dark border-border-light dark:border-border-dark'
                           }`}
                         >
-                          <c.icon size={12} className={active ? 'text-white' : c.color} />
+                          <c.icon size={12} className={active ? 'text-[var(--md-on-primary)]' : c.color} />
                           <span className="truncate">{c.shortLabel}</span>
                         </button>
                       );
@@ -931,7 +931,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="e.g. 21BCE1024 / user@email.com"
                     value={modalForm.usernameOrEmail}
                     onChange={(e) => setModalForm({ ...modalForm, usernameOrEmail: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                   />
                 </div>
 
@@ -944,7 +944,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     <button
                       type="button"
                       onClick={handleOpenGenerator}
-                      className="flex items-center gap-1 text-[11px] font-bold text-cyan-500 hover:text-cyan-400"
+                      className="flex items-center gap-1 text-[11px] font-bold text-[var(--md-primary)] dark:text-[var(--md-secondary)] hover:opacity-80"
                     >
                       <Sparkles size={11} />
                       <span>Generate Strong</span>
@@ -957,7 +957,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       placeholder="••••••••••••"
                       value={modalForm.password}
                       onChange={(e) => setModalForm({ ...modalForm, password: e.target.value })}
-                      className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm font-mono text-primary-light dark:text-primary-dark focus:outline-none focus:border-emerald-500"
+                      className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm font-mono text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                     />
                     <button
                       type="button"
@@ -996,7 +996,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       placeholder="e.g. vtop.vit.ac.in"
                       value={modalForm.websiteUrl}
                       onChange={(e) => setModalForm({ ...modalForm, websiteUrl: e.target.value })}
-                      className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-emerald-500"
+                      className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                     />
                   </div>
                 </div>
@@ -1011,7 +1011,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="Security questions, recovery codes, or hints..."
                     value={modalForm.notes}
                     onChange={(e) => setModalForm({ ...modalForm, notes: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-emerald-500 resize-none"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)] resize-none"
                   />
                 </div>
 
@@ -1025,7 +1025,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md shadow-emerald-500/25 active:scale-95 transition-all"
+                    className="px-5 py-2 rounded-xl bg-[var(--md-primary)] hover:opacity-95 text-[var(--md-on-primary)] text-xs font-bold shadow-md shadow-[var(--md-primary)]/25 active:scale-95 transition-all"
                   >
                     {editingItem ? 'Update' : 'Save Encrypted'}
                   </button>
@@ -1043,7 +1043,7 @@ export default function Vault({ data, updateData }: VaultProps) {
       >
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-500 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-[var(--md-primary)]/15 text-[var(--md-primary)] dark:text-[var(--md-secondary)] flex items-center justify-center">
                     <Sparkles size={16} />
                   </div>
                   <div>
@@ -1071,7 +1071,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   </span>
                   <button
                     onClick={handleRegeneratePassword}
-                    className="p-1.5 rounded-lg text-secondary-light hover:text-cyan-500 active:scale-95"
+                    className="p-1.5 rounded-lg text-secondary-light hover:text-[var(--md-primary)] dark:hover:text-[var(--md-secondary)] active:scale-95"
                     title="Regenerate"
                   >
                     <RefreshCw size={14} />
@@ -1107,7 +1107,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     setGenOptions(updated);
                     setGeneratedPassword(generateSecurePassword(updated));
                   }}
-                  className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-black/10 dark:bg-white/10 rounded-lg"
+                  className="w-full accent-[var(--md-primary)] cursor-pointer h-1.5 bg-black/10 dark:bg-white/10 rounded-lg"
                 />
               </div>
 
@@ -1132,12 +1132,12 @@ export default function Vault({ data, updateData }: VaultProps) {
                       }}
                       className={`p-1.5 px-2 rounded-lg border text-[10px] font-bold transition-all flex items-center justify-between ${
                         active
-                          ? 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30'
+                          ? 'bg-[var(--md-primary)]/15 text-[var(--md-primary)] dark:text-[var(--md-secondary)] border border-[var(--md-primary)]/30'
                           : 'bg-surface-light dark:bg-[#1E2029] text-secondary-light border-border-light dark:border-border-dark'
                       }`}
                     >
                       <span>{label}</span>
-                      <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${active ? 'bg-cyan-500 border-cyan-500 text-white' : 'border-neutral-400'}`}>
+                      <div className={`w-3 h-3 rounded-full border flex items-center justify-center ${active ? 'bg-[var(--md-primary)] border-[var(--md-primary)] text-[var(--md-on-primary)]' : 'border-neutral-400'}`}>
                         {active && <Check size={8} strokeWidth={3} />}
                       </div>
                     </button>
@@ -1161,7 +1161,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                 <button
                   type="button"
                   onClick={handleUseGeneratedPassword}
-                  className="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold shadow-md shadow-cyan-500/25 active:scale-95 transition-all"
+                  className="flex-1 py-2 rounded-xl bg-[var(--md-primary)] hover:opacity-95 text-[var(--md-on-primary)] text-xs font-bold shadow-md shadow-[var(--md-primary)]/25 active:scale-95 transition-all"
                 >
                   Use Password
                 </button>

@@ -1,5 +1,6 @@
-import { Moon, Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Zap, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download } from 'lucide-react';
+import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers } from 'lucide-react';
 import { checkForAppUpdate, VERCEL_APK_URL, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
+import { getReceiptsStorageSize, clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { triggerHaptic, getHapticLevel, setHapticLevel, getHapticIntensity, setHapticIntensity, HapticLevel } from '../utils/haptics';
 import { getSecurityConfig, saveSecurityConfig, setAppLocked, authenticateDeviceLock, SecurityConfig } from '../utils/security';
 import { requestNotificationPermission, checkNotificationPermission, sendInstantTestNotification, syncTimetableNotifications, syncTaskNotifications } from '../utils/notifications';
-import type { AppData, AppSettings, TransitionMode } from '../types';
+import type { AppData, AppSettings } from '../types';
 import BodyProfileForm from '../components/BodyProfileForm';
 import InteractiveBiometricScan from '../components/interactive/InteractiveBiometricScan';
 import { FITNESS_GOALS } from '../utils/calculations';
@@ -24,16 +25,12 @@ import M3ToggleChip from '../components/M3ToggleChip';
 interface SettingsProps {
   accentColor?: string;
   setAccentColor?: (c: string) => void;
-  transitionMode?: TransitionMode;
-  setTransitionMode?: (m: TransitionMode) => void;
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
   refresh: () => Promise<AppData>;
 }
 
 export default function Settings({
-  transitionMode = 'efficient',
-  setTransitionMode,
   data,
   updateData
 }: SettingsProps) {
@@ -60,13 +57,21 @@ export default function Settings({
   // Accordion open/close state for all sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     notifications: true,
-    transitions: false,
     haptics: false,
     security: false,
     profile: false,
     ai: false,
+    outingsStorage: false,
     account: false,
   });
+
+  const [receiptsStorageBytes, setReceiptsStorageBytes] = useState<number>(0);
+  const [isClearingReceipts, setIsClearingReceipts] = useState(false);
+  const [receiptsClearedNotice, setReceiptsClearedNotice] = useState(false);
+
+  useEffect(() => {
+    getReceiptsStorageSize().then(setReceiptsStorageBytes).catch(() => {});
+  }, [openSections.outingsStorage]);
 
   const toggleSection = (section: string) => {
     triggerHaptic('selection');
@@ -137,9 +142,15 @@ export default function Settings({
   const [hapticSaved, setHapticSaved] = useState(false);
 
   const handleHapticSliderChange = (newVal: number) => {
-    setHapticIntensityState(newVal);
-    const newLevel: HapticLevel = newVal === 0 ? 'off' : 'medium';
+    const clamped = Math.max(0, Math.min(100, newVal));
+    setHapticIntensityState(clamped);
+    setHapticIntensity(clamped);
+    const newLevel: HapticLevel = clamped === 0 ? 'off' : 'medium';
     setHapticLevelState(newLevel);
+    setHapticLevel(newLevel);
+    if (clamped > 0) {
+      triggerHaptic('medium');
+    }
   };
 
   const handleSaveHaptic = () => {
@@ -149,6 +160,9 @@ export default function Settings({
     setHapticLevelState(newLevel);
     setHapticLevel(newLevel);
     setHapticSaved(true);
+    if (hapticIntensity > 0) {
+      triggerHaptic('save');
+    }
     setTimeout(() => setHapticSaved(false), 2500);
   };
 
@@ -209,13 +223,6 @@ export default function Settings({
     }
   };
 
-  const handleTransitionChange = (mode: TransitionMode) => {
-    if (setTransitionMode) {
-      setTransitionMode(mode);
-      triggerHaptic('light');
-    }
-  };
-
   return (
     <div className="space-y-4">
 
@@ -245,15 +252,15 @@ export default function Settings({
           onClick={() => toggleSection('notifications')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 shadow-sm shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-[var(--accent-text)] shadow-sm shrink-0">
               <Bell size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
                 Notifications & Reminders
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
                 Android Notification Center · Timetable & Tasks
               </p>
             </div>
@@ -340,7 +347,7 @@ export default function Settings({
                   </p>
                   <div className="space-y-1 text-xs text-secondary-light dark:text-secondary-dark font-medium">
                     <p className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0891B2]" />
                       Timetable: Upcoming lectures with room & teacher
                     </p>
                     <p className="flex items-center gap-2">
@@ -378,15 +385,15 @@ export default function Settings({
       {/* ── 2. Appearance & Theme ── */}
       <div className="rounded-[30px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-none overflow-hidden">
         <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shrink-0">
               <Sun size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
                 Appearance & Theme
               </h3>
-              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 truncate">
+              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
                 Material 3 Expressive surface modes
               </p>
             </div>
@@ -402,99 +409,22 @@ export default function Settings({
         </div>
       </div>
 
-      {/* ── 3. Interface Transitions (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
-        <button
-          type="button"
-          onClick={() => toggleSection('transitions')}
-          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
-        >
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm shrink-0">
-              <Gauge size={22} strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
-                Interface Transitions
-              </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
-                120 / 144 FPS adaptive fluid motion engine
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full font-tag uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
-              {transitionMode}
-            </span>
-            {openSections.transitions ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
-          </div>
-        </button>
-
-        <AnimatePresence>
-          {openSections.transitions && (
-            <motion.div
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={{ scaleY: 1, opacity: 1 }}
-              exit={{ scaleY: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-              style={{ transformOrigin: 'top' }}
-              className="overflow-hidden"
-            >
-              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-2.5">
-                {[
-                  { id: 'fast' as const, title: 'Fast', icon: Zap, badge: '< 150ms', desc: 'Snappy Response • High-speed micro-scale crossfade' },
-                  { id: 'efficient' as const, title: 'Efficient (Default)', icon: Gauge, badge: '180ms', desc: 'Balanced Performance • GPU composited fluid slide' },
-                  { id: 'soft' as const, title: 'Soft', icon: Moon, badge: '260ms', desc: 'Liquid Smooth • Kinetic spring easing curve' },
-                ].map(mode => {
-                  const active = transitionMode === mode.id;
-                  return (
-                    <div
-                      key={mode.id}
-                      onClick={() => handleTransitionChange(mode.id)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
-                        active
-                          ? 'border-accent/50 bg-accent/10 shadow-sm'
-                          : 'border-black/5 dark:border-white/5 hover:border-accent/30 bg-black/[0.02] dark:bg-white/[0.02]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${active ? 'bg-accent text-white' : 'bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark'}`}>
-                          <mode.icon size={16} />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark">{mode.title}</p>
-                          <p className="text-[11px] text-secondary-light dark:text-secondary-dark">{mode.desc}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark shrink-0">
-                        {mode.badge}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── 4. Navigation Bar Haptics (Accordion) ── */}
+      {/* ── 3. Navigation Bar Haptics (Accordion) ── */}
       <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => toggleSection('haptics')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm shrink-0">
               <Smartphone size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
                 Navigation Bar Haptics
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
                 Tactile feedback on dock & interactions
               </p>
             </div>
@@ -540,9 +470,10 @@ export default function Settings({
 
                   <div className="flex justify-between text-[10px] font-tag font-bold text-muted-light dark:text-muted-dark uppercase tracking-wider">
                     <button type="button" onClick={() => handleHapticSliderChange(0)}>Off (0%)</button>
-                    <button type="button" onClick={() => handleHapticSliderChange(35)}>Light (35%)</button>
-                    <button type="button" onClick={() => handleHapticSliderChange(65)}>Balanced (65%)</button>
-                    <button type="button" onClick={() => handleHapticSliderChange(100)}>Medium (100%)</button>
+                    <button type="button" onClick={() => handleHapticSliderChange(25)}>Subtle (25%)</button>
+                    <button type="button" onClick={() => handleHapticSliderChange(50)}>Default (50%)</button>
+                    <button type="button" onClick={() => handleHapticSliderChange(75)}>High (75%)</button>
+                    <button type="button" onClick={() => handleHapticSliderChange(100)}>Max (+0.9X)</button>
                   </div>
 
                   <div className="flex items-center justify-end pt-2 border-t border-black/5 dark:border-white/10">
@@ -568,19 +499,19 @@ export default function Settings({
           onClick={() => toggleSection('security')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center shadow-sm shrink-0 ${
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+            <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center border shadow-sm shrink-0 ${
               securityConfig.enabled
                 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                 : 'bg-accent/15 text-accent'
             }`}>
               <InteractiveBiometricScan isLocked={securityConfig.enabled} size={24} onScan={handleEnableSecurity} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
                 App Security & Lock
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
                 {securityConfig.enabled ? 'Phone biometric & lock active' : 'Protect with phone screen lock'}
               </p>
             </div>
@@ -661,15 +592,15 @@ export default function Settings({
           onClick={() => toggleSection('profile')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 shadow-sm shrink-0">
               <Dumbbell size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
                 Body Profile & Targets
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
                 Metabolic baseline & calorie target
               </p>
             </div>
@@ -711,15 +642,15 @@ export default function Settings({
           onClick={() => toggleSection('ai')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0 flex-1">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-purple-500/15 text-purple-600 dark:text-purple-400 shadow-sm shrink-0">
               <Key size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
                 AI Coach Integration
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
                 Private Groq API Key for smart suggestions
               </p>
             </div>
@@ -787,7 +718,126 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 8. Account & Danger Zone (Accordion) ── */}
+      {/* ── 8. Outings & Offline Storage (Accordion) ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('outingsStorage')}
+          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-[16px] bg-[#8C500A]/15 text-[#8C500A] dark:text-[#C88A58] border border-[#8C500A]/25 flex items-center justify-center shadow-sm shrink-0">
+              <Receipt size={22} strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark break-words leading-snug">
+                  Outings & Storage
+                </h3>
+                <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-[#8C500A]/15 text-[#78350F] dark:text-[#C88A58] border border-[#8C500A]/25 shrink-0 whitespace-nowrap">
+                  Offline-First
+                </span>
+              </div>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 break-words line-clamp-2">
+                On-device IndexedDB receipt cache & sync status
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {openSections.outingsStorage ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
+          </div>
+        </button>
+
+        <AnimatePresence>
+          {openSections.outingsStorage && (
+            <motion.div
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+              style={{ transformOrigin: 'top' }}
+              className="overflow-hidden"
+            >
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
+                <div className="p-4 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-border-light dark:border-border-dark flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                      <HardDrive size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                        Local Receipts Cache
+                      </p>
+                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                        High-resolution photo attachments saved on-device
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-stat font-bold px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 text-primary-light dark:text-primary-dark">
+                    {receiptsStorageBytes === 0
+                      ? '0 KB'
+                      : receiptsStorageBytes < 1024 * 1024
+                      ? `${(receiptsStorageBytes / 1024).toFixed(1)} KB`
+                      : `${(receiptsStorageBytes / (1024 * 1024)).toFixed(2)} MB`}
+                  </span>
+                </div>
+
+                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
+                  Receipt photos captured in Outing Expenses are compressed and stored locally in on-device IndexedDB (<code className="font-mono text-[11px]">outing_receipts</code>). Calculations and metadata sync to the cloud with zero file bandwidth costs.
+                </p>
+
+                {receiptsClearedNotice && (
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 size={16} />
+                    <span>Receipt image cache cleared successfully.</span>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    disabled={isClearingReceipts || receiptsStorageBytes === 0}
+                    onClick={async () => {
+                      if (window.confirm('Clear all local receipt photo files? Outings, expenses, and split calculations will be preserved.')) {
+                        setIsClearingReceipts(true);
+                        triggerHaptic('medium');
+                        try {
+                          await clearAllReceiptBlobs();
+                          const freshSize = await getReceiptsStorageSize();
+                          setReceiptsStorageBytes(freshSize);
+                          setReceiptsClearedNotice(true);
+                          setTimeout(() => setReceiptsClearedNotice(false), 4000);
+                        } finally {
+                          setIsClearingReceipts(false);
+                        }
+                      }
+                    }}
+                    className="px-4 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-40"
+                  >
+                    <Trash2 size={13} />
+                    <span>{isClearingReceipts ? 'Clearing...' : 'Clear Receipt Cache'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      navigate('/outings');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] active:scale-95 text-primary-light dark:text-primary-dark text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Receipt size={13} className="text-[#8C500A] dark:text-[#C88A58]" />
+                    <span>Open Outing Expenses</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── 9. Account & Danger Zone (Accordion) ── */}
       <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
@@ -799,10 +849,10 @@ export default function Settings({
               {(auth.currentUser?.email || 'U')[0].toUpperCase()}
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans truncate">
+              <h3 className="text-base font-black text-primary-light dark:text-primary-dark font-sans break-words leading-snug">
                 Account & Reset
               </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 break-words line-clamp-2">
                 {auth.currentUser?.email || 'Signed in user'}
               </p>
             </div>
@@ -824,7 +874,7 @@ export default function Settings({
               className="overflow-hidden"
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
-                <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -834,7 +884,7 @@ export default function Settings({
                       navigate('/');
                       signOut(auth);
                     }}
-                    className="w-full py-2.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 min-h-[44px] rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5"
                   >
                     <LogOut size={14} /> Sign Out
                   </button>
@@ -850,7 +900,7 @@ export default function Settings({
                         }
                       }
                     }}
-                    className="w-full py-2.5 rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark text-xs font-bold flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 min-h-[44px] rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark text-xs font-bold flex items-center justify-center gap-1.5"
                   >
                     <AlertTriangle size={14} className="text-amber-500" /> Reset Data
                   </button>
@@ -863,21 +913,21 @@ export default function Settings({
 
       {/* ── 9. Software Updates & Release (Card) ── */}
       <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm p-5 sm:p-6 overflow-hidden space-y-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-accent/15 text-accent shadow-sm shrink-0">
               <Sparkles size={22} strokeWidth={2.2} />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark break-words leading-snug">
                   Software Updates
                 </h3>
-                <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 tracking-wider uppercase">
+                <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 shrink-0 whitespace-nowrap tracking-wider uppercase">
                   v<span className="font-stat">{CURRENT_VERSION_NAME}</span>
                 </span>
               </div>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 truncate">
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 break-words line-clamp-2">
                 Direct In-App APK Auto-Updater • Build <span className="font-stat">{CURRENT_VERSION_CODE}</span>
               </p>
             </div>
@@ -915,7 +965,7 @@ export default function Settings({
               }
             }}
             disabled={checkingUpdate}
-            className="shrink-0 px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-60"
+            className="w-full sm:w-auto mt-1 sm:mt-0 px-4 py-2.5 min-h-[44px] rounded-2xl text-xs font-bold bg-accent text-white shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 shrink-0"
           >
             <RefreshCw size={13} className={checkingUpdate ? 'animate-spin' : ''} />
             <span>{checkingUpdate ? 'Checking...' : 'Check Update'}</span>
@@ -948,7 +998,7 @@ export default function Settings({
         </AnimatePresence>
 
         {/* Quick action buttons row */}
-        <div className="pt-1 flex flex-wrap items-center gap-2 text-xs">
+        <div className="pt-1 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 text-xs">
           <button
             type="button"
             onClick={async () => {
@@ -962,9 +1012,9 @@ export default function Settings({
                 window.dispatchEvent(new CustomEvent('lifeos-open-updater'));
               }
             }}
-            className="px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-primary-light dark:text-primary-dark font-bold flex items-center gap-1.5 transition-all"
+            className="w-full sm:w-auto px-3.5 py-2.5 min-h-[44px] rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-primary-light dark:text-primary-dark font-bold flex items-center justify-center gap-1.5 transition-all"
           >
-            <Sparkles size={13} className="text-accent" />
+            <Sparkles size={13} className="text-accent shrink-0" />
             <span>Open Updater Dialog</span>
           </button>
 
@@ -974,11 +1024,25 @@ export default function Settings({
             rel="noopener noreferrer"
             download="LifeOS.apk"
             onClick={() => triggerHaptic('selection')}
-            className="px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium flex items-center gap-1.5 transition-all"
+            className="w-full sm:w-auto px-3.5 py-2.5 min-h-[44px] rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium flex items-center justify-center gap-1.5 transition-all"
           >
-            <Download size={13} />
+            <Download size={13} className="shrink-0" />
             <span>Download APK (Direct)</span>
           </a>
+
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('selection');
+                navigate('/dev/palette');
+              }}
+              className="w-full sm:w-auto px-3.5 py-2.5 min-h-[44px] rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center gap-1.5 transition-all"
+            >
+              <Layers size={13} className="shrink-0" />
+              <span>Open Palette Board (Dev)</span>
+            </button>
+          )}
         </div>
       </div>
 

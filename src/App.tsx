@@ -22,20 +22,23 @@ import ShoppingListDetail from './pages/ShoppingListDetail';
 import Timetable from './pages/Timetable';
 import Tasks from './pages/Tasks';
 import Laundry from './pages/Laundry';
-import Progress from './pages/Progress';
 import WorkHistory from './pages/WorkHistory';
 import SettingsPage from './pages/Settings';
 import Vault from './pages/Vault';
 import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
+import { OutingsProvider } from './features/outings/context/OutingsContext';
+
+const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
+const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
-import type { TransitionMode } from './types';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
+const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
@@ -45,14 +48,10 @@ function MainContent({
   data,
   refresh,
   updateData,
-  transitionMode,
-  setTransitionMode,
 }: {
   data: any;
   refresh: () => Promise<any>;
   updateData: (partial: any) => Promise<any>;
-  transitionMode: TransitionMode;
-  setTransitionMode: (m: TransitionMode) => void;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
@@ -85,13 +84,27 @@ function MainContent({
     { path: '/spending', element: <RouteErrorBoundary routeName="Spending"><Spending data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/shopping', element: <RouteErrorBoundary routeName="Shopping Lists"><ShoppingLists data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/shopping/:listId', element: <RouteErrorBoundary routeName="Shopping List Detail"><ShoppingListDetail data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/outings', element: <RouteErrorBoundary routeName="Outing Expenses"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outings...</div>}><OutingsListPage /></Suspense></RouteErrorBoundary> },
+    { path: '/outings/:id', element: <RouteErrorBoundary routeName="Outing Detail"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
+    { path: '/outings/:id/add', element: <RouteErrorBoundary routeName="Add Outing Expense"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
+    { path: '/outings/:id/expense/:expenseId', element: <RouteErrorBoundary routeName="Edit Outing Expense"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
+    { path: '/outings/:id/settle', element: <RouteErrorBoundary routeName="Settle Outing"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
     { path: '/timetable', element: <RouteErrorBoundary routeName="Timetable"><Timetable data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/tasks', element: <RouteErrorBoundary routeName="Tasks"><Tasks data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/progress', element: <RouteErrorBoundary routeName="Progress"><Progress data={data} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage transitionMode={transitionMode} setTransitionMode={setTransitionMode} data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
+    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
+    ...(import.meta.env.DEV && DevPaletteBoard ? [{
+      path: '/dev/palette',
+      element: (
+        <RouteErrorBoundary routeName="Palette Board">
+          <Suspense fallback={<div className="p-8 text-center text-secondary">Loading Palette Board...</div>}>
+            <DevPaletteBoard />
+          </Suspense>
+        </RouteErrorBoundary>
+      )
+    }] : []),
     { path: '*', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
   ]);
 
@@ -213,8 +226,6 @@ function App() {
               navigate('/tasks');
             } else if (clean === 'study') {
               navigate('/study');
-            } else if (clean === 'progress') {
-              navigate('/progress');
             } else if (clean === 'home' || clean === '') {
               navigate('/');
             }
@@ -335,13 +346,13 @@ function App() {
       >
         <Layout refresh={refresh} data={safeData} updateData={updateData}>
           <ErrorBoundary>
-            <MainContent
-              data={safeData}
-              refresh={refresh}
-              updateData={updateData}
-              transitionMode={transitionMode}
-              setTransitionMode={setTransitionMode}
-            />
+            <OutingsProvider>
+              <MainContent
+                data={safeData}
+                refresh={refresh}
+                updateData={updateData}
+              />
+            </OutingsProvider>
           </ErrorBoundary>
         </Layout>
       </div>

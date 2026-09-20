@@ -118,20 +118,20 @@ export default function Study({ data }: StudyProps) {
           </div>
 
           {/* Pill-Row + Standalone Squircle Action Pattern (Image 1 pattern) */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Wide Pill Housing Secondary Actions */}
             <div className="inline-flex items-center p-1 rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
               <button
                 type="button"
                 onClick={() => { triggerHaptic('light'); navigate('/study/history'); }}
-                className="px-3 py-1.5 rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95"
+                className="px-3.5 py-2 min-h-[44px] rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95 flex items-center justify-center"
               >
                 History
               </button>
               <button
                 type="button"
                 onClick={() => { triggerHaptic('light'); navigate('/study/heatmap'); }}
-                className="px-3 py-1.5 rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95"
+                className="px-3.5 py-2 min-h-[44px] rounded-full text-xs font-bold text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all active:scale-95 flex items-center justify-center"
               >
                 Heatmap
               </button>
@@ -146,7 +146,7 @@ export default function Study({ data }: StudyProps) {
                 triggerHaptic('medium');
                 navigate('/study/timer');
               }}
-              className="h-10 px-4 rounded-[14px] bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-none transition-transform"
+              className="h-11 px-4 min-h-[44px] rounded-[14px] bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-none transition-transform"
               title="Start Timer"
             >
               <Play size={15} fill="currentColor" />

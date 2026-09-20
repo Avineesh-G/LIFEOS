@@ -47,7 +47,7 @@ export default function M3StatWidget({
     >
       {/* Top row: Label + icon or badge */}
       <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="text-[11px] font-bold font-tag uppercase tracking-wider text-[var(--md-on-surface-variant)] truncate">
+        <span className="text-[11px] font-bold font-tag uppercase tracking-wider text-[var(--md-on-surface-variant)] line-clamp-2 break-words leading-tight min-w-0">
           {label}
         </span>
         {icon && (
@@ -59,18 +59,18 @@ export default function M3StatWidget({
 
       {/* Center: Large bold numeral with clamp sizing and M3 Numeral role */}
       <div className="my-1">
-        <div className="flex items-baseline gap-1 text-[var(--md-on-surface)]">
-          <span className="m3-numeral text-3xl sm:text-4xl font-extrabold tracking-tight">
+        <div className="flex items-baseline gap-1 flex-wrap text-[var(--md-on-surface)]">
+          <span className="m3-numeral text-2xl compact:text-3xl sm:text-4xl font-extrabold tracking-tight">
             {value}
           </span>
           {unit && (
-            <span className="text-xs sm:text-sm font-semibold text-[var(--md-on-surface-variant)]">
+            <span className="text-xs sm:text-sm font-semibold text-[var(--md-on-surface-variant)] shrink-0">
               {unit}
             </span>
           )}
         </div>
         {sublabel && (
-          <p className="text-[11px] text-[var(--md-on-surface-variant)] font-medium mt-0.5 truncate">
+          <p className="text-[11px] text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2 break-words">
             {sublabel}
           </p>
         )}
@@ -79,7 +79,7 @@ export default function M3StatWidget({
       {/* Bottom: Single highlighted data point in accent color */}
       {highlight && (
         <div className="mt-3 pt-2.5 border-t border-[var(--md-outline-variant)]/60 flex items-center justify-between">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-tag font-bold tracking-wider uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-tag font-bold tracking-wider uppercase bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] break-words line-clamp-1">
             {highlight.text}
           </span>
         </div>

@@ -12,32 +12,42 @@ import {
   themeFromSourceColor,
 } from '@material/material-color-utilities';
 
-export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings';
+import { PALETTE } from './palette.ts';
+
+export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault';
 
 /**
- * Fixed identity seed color per section
+ * Fixed identity seed color per section from PALETTE
  */
 export const SECTION_SEED_COLORS: Record<AppSection, string> = {
-  home: '#2563EB',      // Royal Blue
-  finance: '#7C3AED',   // Twilight Violet
-  gym: '#E11D48',       // Coral Crimson
-  nutrition: '#F5A623', // Solar Amber
-  study: '#0284C7',     // Sky Blue
-  settings: '#4F46E5',  // Midnight Indigo
+  home: PALETTE.home.seed,          // Royal Blue #2563EB
+  finance: PALETTE.finance.seed,    // Forest Green #15803D
+  gym: PALETTE.gym.seed,            // Coral Crimson #E11D48
+  nutrition: PALETTE.nutrition.seed,// Solar Amber #F5A623
+  study: PALETTE.study.seed,        // Lagoon Cyan #0891B2
+  settings: PALETTE.settings.seed,  // Slate #475569
+  history: PALETTE.history.seed,    // History Burgundy #8C1D40
+  outing: PALETTE.outing.seed,      // Saddle Brown #8C500A
+  shopping: '#172554',              // Deep Midnight Navy #172554
+  vault: '#2034A0',                 // Cyber Cobalt #2034A0
 };
 
 /**
  * Pale tonal container colors for Navigation Bar Pill
- * - Light mode: 90–94% tone of that hue (soft, desaturated, closer to white than accent)
- * - Dark mode: 20–25% tone of that hue (soft, desaturated, closer to near-black #121316 than accent)
+ * - Light mode: soft, desaturated tone closer to canvas #FDFDFD
+ * - Dark mode: soft, desaturated tone closer to dark canvas #121316
  */
 export const NAV_PILL_BG_COLORS: Record<AppSection, { light: string; dark: string }> = {
   home: { light: '#E0E9FC', dark: '#162545' },       // pale tonal container from #2563EB
   gym: { light: '#FBDFE5', dark: '#381620' },        // pale tonal container from #E11D48
   nutrition: { light: '#FEF3E0', dark: '#3A2A14' },  // pale tonal container from #F5A623
-  finance: { light: '#EDE3FC', dark: '#25183D' },    // pale tonal container from #7C3AED
-  study: { light: '#DCEEF7', dark: '#0F2636' },      // pale tonal container from #0284C7
-  settings: { light: '#E6E5FB', dark: '#1E1D3D' },   // pale tonal container from #4F46E5
+  finance: { light: '#E8F5E9', dark: '#122E1A' },    // pale tonal container from #15803D
+  study: { light: '#E0F7FA', dark: '#0C2A33' },      // pale tonal container from #0891B2
+  settings: { light: '#EEF2F6', dark: '#1E2530' },   // pale tonal container from #475569
+  history: { light: '#FCE8EE', dark: '#2E131B' },    // pale tonal container from #8C1D40
+  outing: { light: '#FDF7F2', dark: '#2A1806' },     // pale tonal container from #8C500A
+  shopping: { light: '#EFF6FF', dark: '#0F172A' },   // pale tonal container from #172554
+  vault: { light: '#EEF2FF', dark: '#0C122B' },      // pale tonal container from #2034A0
 };
 
 export function getNavPillBg(section: AppSection, isDark: boolean): string {
@@ -46,14 +56,10 @@ export function getNavPillBg(section: AppSection, isDark: boolean): string {
 }
 
 export function getNavSquircleBg(section: AppSection, isDark: boolean): string {
-  const seed = SECTION_SEED_COLORS[section] || SECTION_SEED_COLORS.home;
-  if (!isDark) return seed;
-  if (section === 'home') return '#3B82F6';      // slightly lightened for AA contrast against #121316
-  if (section === 'gym') return '#F43F5E';       // slightly lightened for AA contrast against #121316
-  if (section === 'settings') return '#6366F1';  // slightly lightened indigo for AA contrast against #121316
-  if (section === 'finance') return '#8B5CF6';   // slightly lightened violet for AA contrast against #121316
-  if (section === 'study') return '#0EA5E9';     // slightly lightened sky for AA contrast against #121316
-  return seed;
+  if (section === 'shopping') return isDark ? '#254BB5' : '#172554';
+  if (section === 'vault') return isDark ? '#3B82F6' : '#2034A0';
+  const paletteEntry = PALETTE[section] || PALETTE.home;
+  return isDark ? paletteEntry.darkStrong : paletteEntry.seed;
 }
 
 
@@ -62,7 +68,13 @@ export function getNavSquircleBg(section: AppSection, isDark: boolean): string {
  */
 export function getSectionFromPathname(pathname: string): AppSection {
   const p = (pathname || '/').toLowerCase();
-  if (p.startsWith('/spending') || p.startsWith('/shopping')) {
+  if (p.startsWith('/gym/history')) {
+    return 'gym';
+  }
+  if (p.startsWith('/shopping')) {
+    return 'shopping';
+  }
+  if (p.startsWith('/spending')) {
     return 'finance';
   }
   if (p.startsWith('/gym')) {
@@ -74,10 +86,19 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/study') || p.startsWith('/timetable')) {
     return 'study';
   }
-  if (p.startsWith('/settings') || p.startsWith('/vault')) {
+  if (p.startsWith('/vault')) {
+    return 'vault';
+  }
+  if (p.startsWith('/settings')) {
     return 'settings';
   }
-  return 'home'; // '/', '/tasks', '/progress', '/history', '/laundry'
+  if (p.startsWith('/history')) {
+    return 'history';
+  }
+  if (p.startsWith('/outings')) {
+    return 'outing';
+  }
+  return 'home'; // '/', '/tasks', '/laundry'
 }
 
 export interface M3ColorScheme {
@@ -130,6 +151,10 @@ export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   nutrition: 'bottom-right',
   study: 'top-right',
   settings: 'bottom-left',
+  history: 'bottom-right',
+  outing: 'top-right',
+  shopping: 'top-left',
+  vault: 'top-center',
 };
 
 export interface SectionM3Theme {
@@ -268,6 +293,62 @@ export function getM3ThemeForSection(section: AppSection, isDark: boolean): Sect
     blobPosition,
   };
 
+  if (section === 'history') {
+    scheme.primary = isDark ? '#AA3B58' : '#8C1D40';
+    scheme.onPrimary = '#FFFFFF';
+    scheme.primaryContainer = isDark ? '#5C1028' : '#FFD9DF';
+    scheme.onPrimaryContainer = isDark ? '#FFD9DF' : '#3B0014';
+    scheme.secondary = isDark ? '#D66FA0' : '#8C1D40';
+  }
+
+  if (section === 'study') {
+    scheme.primary = '#0891B2';
+    scheme.onPrimary = '#1A1A1F';
+    scheme.secondary = isDark ? '#80D2ED' : '#0E7D9A';
+  }
+
+  if (section === 'nutrition') {
+    scheme.onPrimary = '#1A1A1F';
+    scheme.secondary = isDark ? '#FBC15E' : '#9F6803';
+  }
+
+  if (section === 'finance') {
+    scheme.primary = '#15803D';
+    scheme.secondary = isDark ? '#82CB92' : '#15803D';
+  }
+
+  if (section === 'settings') {
+    scheme.primary = isDark ? '#556378' : '#475569';
+    scheme.secondary = isDark ? '#A7AEBB' : '#475569';
+  }
+
+  if (section === 'outing') {
+    scheme.primary = '#8C500A';
+    scheme.onPrimary = '#FFFFFF';
+    scheme.primaryContainer = isDark ? '#432203' : '#FDF7F2';
+    scheme.onPrimaryContainer = isDark ? '#FED7AA' : '#78350F';
+    scheme.secondary = isDark ? '#C88A58' : '#A05F0A';
+    scheme.onSecondary = '#FFFFFF';
+  }
+
+  if (section === 'shopping') {
+    scheme.primary = isDark ? '#254BB5' : '#172554';
+    scheme.onPrimary = '#FFFFFF';
+    scheme.primaryContainer = isDark ? '#0F172A' : '#EFF6FF';
+    scheme.onPrimaryContainer = isDark ? '#BFDBFE' : '#172554';
+    scheme.secondary = isDark ? '#93C5FD' : '#1E3A8A';
+    scheme.onSecondary = '#FFFFFF';
+  }
+
+  if (section === 'vault') {
+    scheme.primary = isDark ? '#3B82F6' : '#2034A0';
+    scheme.onPrimary = '#FFFFFF';
+    scheme.primaryContainer = isDark ? '#0C122B' : '#EEF2FF';
+    scheme.onPrimaryContainer = isDark ? '#C7D2FE' : '#1E40AF';
+    scheme.secondary = isDark ? '#818CF8' : '#1E40AF';
+    scheme.onSecondary = '#FFFFFF';
+  }
+
   const result: SectionM3Theme = {
     section,
     seedHex,
@@ -370,11 +451,11 @@ export function applyM3ThemeToDocument(scheme: M3ColorScheme): void {
  * Category colors for module accents
  */
 export const CATEGORY_COLORS = {
-  streak: '#FF7A45',
+  streak: PALETTE.streak.seed,   // Flame Orange #FF6B35
   gym: '#22C55E',
-  finance: '#7C3AED',
-  nutrition: '#F5A623',
-  study: '#0284C7',
+  finance: PALETTE.finance.seed, // Forest Green #15803D
+  nutrition: PALETTE.nutrition.seed, // Solar Amber #F5A623
+  study: PALETTE.study.seed,     // Lagoon Cyan #0891B2
 } as const;
 
 export type CategoryKey = keyof typeof CATEGORY_COLORS;

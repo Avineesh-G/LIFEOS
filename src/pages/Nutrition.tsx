@@ -567,7 +567,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       {/* Material 3 Expressive Amber Calorie Hero Card */}
       <motion.div
         variants={item}
-        className="rounded-[32px] sm:rounded-[36px] p-6 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none flex items-center gap-6 relative overflow-hidden"
+        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none flex flex-col compact:flex-row items-center gap-5 sm:gap-6 relative overflow-hidden"
       >
         <div className="relative flex-shrink-0">
           <svg width="104" height="104" viewBox="0 0 104 104">
@@ -589,24 +589,24 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
           </div>
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 w-full space-y-2">
           {activeGoalConfig && (
-            <div className="flex items-center justify-between gap-1 pb-1 border-b border-[var(--md-outline-variant)]/60">
-              <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate">
+            <div className="flex items-center justify-between gap-2 pb-1 border-b border-[var(--md-outline-variant)]/60">
+              <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate min-w-0">
                 {activeGoalConfig.label}
               </span>
-              <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0">
+              <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0 whitespace-nowrap">
                 {targetProtein}g Protein
               </span>
             </div>
           )}
-          <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">Target</span>
-            <span className="font-stat font-bold text-sm text-[var(--md-on-surface)]">{targetCals} kcal</span>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Target</span>
+            <span className="font-stat font-bold text-sm text-[var(--md-on-surface)] whitespace-nowrap">{targetCals} kcal</span>
           </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">Remaining</span>
-            <span className={`font-stat font-bold text-sm ${totalConsumed > targetCals ? 'text-red-500' : 'text-emerald-500'}`}>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Remaining</span>
+            <span className={`font-stat font-bold text-sm whitespace-nowrap ${totalConsumed > targetCals ? 'text-red-500' : 'text-emerald-500'}`}>
               {Math.round(Math.max(0, targetCals - totalConsumed))} kcal
             </span>
           </div>
@@ -687,7 +687,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             onChange={(e) => setFoodDoubtQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !foodDoubtLoading && handleAskFoodDoubt()}
             placeholder="e.g. 2 slices of pepperoni pizza, iced mocha, samosa..."
-            className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
+            className="flex-1 min-w-0 input-field rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
           />
           <motion.button
             whileHover={{ scale: 1.03 }}
@@ -695,7 +695,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
             onPointerDown={() => triggerHaptic('ai')}
             onClick={handleAskFoodDoubt}
             disabled={foodDoubtLoading || !foodDoubtQuery.trim()}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-40 flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-sm shrink-0"
           >
             {foodDoubtLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
             <span>Ask</span>
@@ -724,15 +724,16 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       {/* Menu Cards */}
       {todayMenu && (
         <motion.div variants={item} className="space-y-3">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="label-mono text-secondary-light dark:text-secondary-dark">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
+          <div className="flex items-center justify-between mb-1 gap-2">
+            <h2 className="label-mono text-secondary-light dark:text-secondary-dark break-words min-w-0">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
             <button
               onPointerDown={() => triggerHaptic('ai')}
               onClick={handleGetAdvice}
-              className="btn-ghost-pill px-3 py-1 flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors"
+              className="btn-ghost-pill px-3 py-1.5 min-h-[44px] flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors shrink-0"
             >
-              <Sparkles size={12} />
-              AI Diet Coach
+              <Sparkles size={13} className="shrink-0" />
+              <span className="hidden compact:inline">AI Diet Coach</span>
+              <span className="inline compact:hidden">Coach</span>
             </button>
           </div>
 
@@ -1029,13 +1030,13 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                                   value={extraTexts[mealObj.slot] || ''}
                                   onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
                                   onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
-                                  className="input-field flex-1 text-sm py-2 px-3"
+                                  className="input-field flex-1 min-w-0 text-sm py-2 px-3"
                                   disabled={estimatingSlot === mealObj.slot}
                                 />
                                 <button
                                   onClick={() => handleAddExtraItem(mealObj.slot)}
                                   disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
-                                  className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-xl disabled:opacity-50"
+                                  className="w-11 h-11 min-h-[44px] min-w-[44px] flex-shrink-0 flex items-center justify-center bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-xl disabled:opacity-50"
                                 >
                                   {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
                                 </button>
