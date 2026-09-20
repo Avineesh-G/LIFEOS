@@ -231,7 +231,11 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       triggerHaptic('success');
     } catch (err: any) {
       console.error(err);
-      setFoodDoubtError('Failed to get answer. Please try again.');
+      if (err?.message === 'NO_API_KEY') {
+        setFoodDoubtError('API Key not configured. Please enter your Groq or Gemini API key in Settings > API Keys to use Food Doubt.');
+      } else {
+        setFoodDoubtError('Failed to get answer. Please check connection and try again.');
+      }
     } finally {
       setFoodDoubtLoading(false);
     }

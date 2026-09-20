@@ -1,6 +1,7 @@
 import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers } from 'lucide-react';
 import { checkForAppUpdate, VERCEL_APK_URL, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
 import { getReceiptsStorageSize, clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
+import { exportBackupFile, previewBackupPackage, restoreBackupPackage, BackupPreviewSummary } from '../utils/backupRestore.ts';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +33,17 @@ interface SettingsProps {
 
 export default function Settings({
   data,
-  updateData
+  updateData,
+  refresh
 }: SettingsProps) {
   const navigate = useNavigate();
   const [themeMode, setThemeMode] = useThemeMode();
+
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [backupFeedback, setBackupFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [restorePreview, setRestorePreview] = useState<BackupPreviewSummary | null>(null);
+  const [pendingRestoreJson, setPendingRestoreJson] = useState<string | null>(null);
+  const [includeAiKeysInExport, setIncludeAiKeysInExport] = useState(false);
 
   const handleToggleThemeMode = () => {
     triggerHaptic('selection');
@@ -909,6 +917,181 @@ export default function Settings({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* ── Data Backup & Recovery (Card) ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm p-5 sm:p-6 overflow-hidden space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-blue-500/15 text-blue-600 dark:text-blue-400 shadow-sm shrink-0">
+              <HardDrive size={22} strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark break-words leading-snug">
+                  Data Backup &amp; Recovery
+                </h3>
+                <span className="text-[10px] font-tag font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shrink-0 whitespace-nowrap tracking-wider uppercase">
+                  Versioned JSON
+                </span>
+              </div>
+              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 break-words line-clamp-2">
+                Export complete encrypted backup or restore workouts, nutrition, outings, receipts, and tasks.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {backupFeedback && (
+          <div className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center gap-2.5 ${
+            backupFeedback.type === 'success' 
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+              : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'
+          }`}>
+            {backupFeedback.type === 'success' ? <CheckCircle2 size={16} className="shrink-0" /> : <AlertTriangle size={16} className="shrink-0" />}
+            <span className="break-words leading-relaxed">{backupFeedback.message}</span>
+          </div>
+        )}
+
+        {/* Restore Confirmation Modal / Card */}
+        {restorePreview && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
+                <AlertTriangle size={15} /> Confirm Data Restoration
+              </span>
+              <button
+                type="button"
+                onClick={() => { setRestorePreview(null); setPendingRestoreJson(null); }}
+                className="text-secondary-light dark:text-secondary-dark hover:text-primary-light font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+            <p className="text-secondary-light dark:text-secondary-dark">
+              Backup created on: <strong>{new Date(restorePreview.exportedAt).toLocaleString()}</strong>
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+              <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-white/5">
+                <span className="block font-bold text-primary-light dark:text-primary-dark">{restorePreview.counts.workouts}</span>
+                <span className="text-[10px] text-secondary-light dark:text-secondary-dark">Workouts</span>
+              </div>
+              <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-white/5">
+                <span className="block font-bold text-primary-light dark:text-primary-dark">{restorePreview.counts.nutritionLogs}</span>
+                <span className="text-[10px] text-secondary-light dark:text-secondary-dark">Food Logs</span>
+              </div>
+              <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-white/5">
+                <span className="block font-bold text-primary-light dark:text-primary-dark">{restorePreview.counts.tasks}</span>
+                <span className="text-[10px] text-secondary-light dark:text-secondary-dark">Tasks</span>
+              </div>
+              <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-white/5">
+                <span className="block font-bold text-primary-light dark:text-primary-dark">{restorePreview.counts.outings}</span>
+                <span className="text-[10px] text-secondary-light dark:text-secondary-dark">Outings</span>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                disabled={backupLoading}
+                onClick={async () => {
+                  if (!pendingRestoreJson) return;
+                  setBackupLoading(true);
+                  try {
+                    const res = await restoreBackupPackage(pendingRestoreJson, data, async (newData) => {
+                      await updateData(newData);
+                      if (refresh) await refresh();
+                    });
+                    setBackupFeedback({ type: 'success', message: res.message });
+                    setRestorePreview(null);
+                    setPendingRestoreJson(null);
+                  } catch (e: any) {
+                    setBackupFeedback({ type: 'error', message: e.message || 'Restoration failed.' });
+                  } finally {
+                    setBackupLoading(false);
+                  }
+                }}
+                className="flex-1 py-2.5 min-h-[44px] rounded-full bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              >
+                {backupLoading ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                Confirm &amp; Restore All
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+          <button
+            type="button"
+            disabled={backupLoading}
+            onClick={async () => {
+              setBackupLoading(true);
+              setBackupFeedback(null);
+              triggerHaptic('selection');
+              try {
+                const res = await exportBackupFile(data, includeAiKeysInExport);
+                setBackupFeedback({
+                  type: 'success',
+                  message: `Backup saved successfully as ${res.filename}`
+                });
+              } catch (e: any) {
+                setBackupFeedback({
+                  type: 'error',
+                  message: `Export failed: ${e.message || 'Unknown error'}`
+                });
+              } finally {
+                setBackupLoading(false);
+              }
+            }}
+            className="flex-1 py-3 px-4 min-h-[44px] rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
+          >
+            {backupLoading ? <RefreshCw size={15} className="animate-spin" /> : <Download size={15} />}
+            <span>Export Backup (JSON)</span>
+          </button>
+
+          <label className="flex-1 py-3 px-4 min-h-[44px] rounded-full bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] text-primary-light dark:text-primary-dark border border-border-light dark:border-border-dark font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95">
+            <HardDrive size={15} />
+            <span>Restore from Backup</span>
+            <input
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  const text = event.target?.result as string;
+                  if (text) {
+                    const preview = previewBackupPackage(text);
+                    if (preview.valid) {
+                      setPendingRestoreJson(text);
+                      setRestorePreview(preview);
+                      setBackupFeedback(null);
+                    } else {
+                      setBackupFeedback({ type: 'error', message: preview.error || 'Invalid backup file.' });
+                    }
+                  }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+              }}
+            />
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1 text-[11px] text-secondary-light dark:text-secondary-dark">
+          <input
+            type="checkbox"
+            id="includeAiKeys"
+            checked={includeAiKeysInExport}
+            onChange={(e) => setIncludeAiKeysInExport(e.target.checked)}
+            className="rounded border-gray-400 text-primary focus:ring-0"
+          />
+          <label htmlFor="includeAiKeys" className="cursor-pointer select-none">
+            Include Gemini &amp; AI API keys in export (uncheck if sharing backup file)
+          </label>
+        </div>
       </div>
 
       {/* ── 9. Software Updates & Release (Card) ── */}

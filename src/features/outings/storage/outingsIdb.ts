@@ -11,6 +11,7 @@
 
 import { getIndexedDB } from '../../../utils/idbStorage';
 import { DEFAULT_ME_PERSON } from '../constants';
+import { deleteNativeReceipt } from './receiptFilesystem';
 import type {
   Outing,
   OutingPerson,
@@ -198,6 +199,13 @@ export async function saveExpense(expense: OutingExpense): Promise<void> {
 
 export async function deleteExpense(id: string, permanent: boolean = false): Promise<void> {
   if (permanent) {
+    const all = await getAllFromStore<OutingExpense>(STORE_EXPENSES);
+    const exp = all.find((e) => e.id === id);
+    if (exp && exp.receiptIds && exp.receiptIds.length > 0) {
+      for (const rId of exp.receiptIds) {
+        await deleteReceiptRecord(rId);
+      }
+    }
     await deleteFromStore(STORE_EXPENSES, id);
   } else {
     const all = await getAllFromStore<OutingExpense>(STORE_EXPENSES);
@@ -260,6 +268,7 @@ export async function getReceiptRecordsByOuting(outingId: string): Promise<Outin
 }
 
 export async function deleteReceiptRecord(id: string): Promise<void> {
+  await deleteNativeReceipt(id);
   await deleteFromStore(STORE_RECEIPTS, id);
 }
 

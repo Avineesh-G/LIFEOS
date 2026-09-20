@@ -9,6 +9,7 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
@@ -25,6 +26,13 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(TimerNotificationPlugin.class);
         registerPlugin(WidgetUpdaterPlugin.class);
         super.onCreate(savedInstanceState);
+
+        // Enable edge-to-edge layout across all supported Android versions (API 24+)
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
+        // Match decor window background to theme canvas to avoid white/dark flashes
+        boolean isNight = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(isNight ? Color.parseColor("#121316") : Color.parseColor("#FDFDFD")));
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
