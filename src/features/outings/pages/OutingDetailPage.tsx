@@ -73,28 +73,6 @@ export default function OutingDetailPage() {
   const [isSettleOpen, setIsSettleOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<OutingExpense | null>(null);
 
-  // Read Sarvam AI API key from localStorage (same keys used by useData.ts)
-  const sarvamApiKey = useMemo(() => {
-    try {
-      const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
-      if (cachedUser) {
-        const uid = JSON.parse(cachedUser)?.uid;
-        if (uid) {
-          const raw = localStorage.getItem('lifeos_cache_' + uid);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            if (parsed?.sarvamApiKey) return parsed.sarvamApiKey as string;
-          }
-        }
-      }
-      const globalRaw = localStorage.getItem('lifeos_cached_app_data');
-      if (globalRaw) {
-        const parsed = JSON.parse(globalRaw);
-        return (parsed?.sarvamApiKey as string) || '';
-      }
-    } catch {}
-    return '';
-  }, []);
 
   // Local notes autosave state
   const [notesContent, setNotesContent] = useState('');
@@ -584,7 +562,6 @@ export default function OutingDetailPage() {
         }}
         outing={activeOuting}
         expenseToEdit={editingExpense}
-        sarvamApiKey={sarvamApiKey}
       />
 
       {/* Manual Entry Sheet (Shopping Receipt / Lend / Received) */}

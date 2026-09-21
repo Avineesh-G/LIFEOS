@@ -70,7 +70,6 @@ export default function Settings({
     security: false,
     profile: false,
     ai: false,
-    sarvam: false,
     outingsStorage: false,
     account: false,
   });
@@ -160,11 +159,6 @@ export default function Settings({
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
 
-  // Sarvam.ai OCR API Key State (Indian Receipts - Outing Expenses)
-  const [sarvamKeyInput, setSarvamKeyInput] = useState(data.sarvamApiKey || '');
-  const [showSarvamKey, setShowSarvamKey] = useState(false);
-  const [sarvamKeySaved, setSarvamKeySaved] = useState(false);
-
   // Haptic feedback preference state
   const [hapticLevel, setHapticLevelState] = useState<HapticLevel>(() => getHapticLevel());
   const [hapticIntensity, setHapticIntensityState] = useState<number>(() => getHapticIntensity());
@@ -200,13 +194,6 @@ export default function Settings({
     await updateData({ geminiApiKey: apiKeyInput.trim() });
     setApiKeySaved(true);
     setTimeout(() => setApiKeySaved(false), 2500);
-  };
-
-  const handleSaveSarvamKey = async () => {
-    triggerHaptic('save');
-    await updateData({ sarvamApiKey: sarvamKeyInput.trim() });
-    setSarvamKeySaved(true);
-    setTimeout(() => setSarvamKeySaved(false), 2500);
   };
 
   // App Security & Lock state
@@ -859,95 +846,6 @@ export default function Settings({
                     className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
                   >
                     {apiKeySaved ? 'Saved ✓' : 'Save Key'}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── 7b. Sarvam.ai OCR API Key (Accordion) ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
-        <button
-          type="button"
-          onClick={() => toggleSection('sarvam')}
-          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
-        >
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shadow-sm shrink-0">
-              <Sparkles size={22} strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words flex items-center gap-2">
-                <span>Sarvam.ai OCR (Indian Receipts)</span>
-                <span className="text-[10px] font-tag px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400 uppercase font-bold">
-                  🇮🇳 Made in India
-                </span>
-              </h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
-                Sarvam AI subscription key for Indian bills, UPI receipts & retail invoices (Max 20MB)
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-[10px] font-tag font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-              data.sarvamApiKey ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-neutral-500/15 text-muted-light'
-            }`}>
-              {data.sarvamApiKey ? 'Active ✓' : 'Not Set'}
-            </span>
-            {openSections.sarvam ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
-          </div>
-        </button>
-
-        <AnimatePresence>
-          {openSections.sarvam && (
-            <motion.div
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={{ scaleY: 1, opacity: 1 }}
-              exit={{ scaleY: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-              style={{ transformOrigin: 'top' }}
-              className="overflow-hidden"
-            >
-              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
-                <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                  Optimized for Indian receipts, UPI payment screenshots (Google Pay, PhonePe, Paytm), and retail store bills. Enter your <code>api-subscription-key</code> from Sarvam AI.
-                </p>
-                <div className="relative flex items-center">
-                  <input
-                    type={showSarvamKey ? 'text' : 'password'}
-                    value={sarvamKeyInput}
-                    onChange={e => setSarvamKeyInput(e.target.value)}
-                    placeholder="Enter Sarvam api-subscription-key..."
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSarvamKey(!showSarvamKey)}
-                    className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
-                  >
-                    {showSarvamKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <a
-                    href="https://dashboard.sarvam.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-bold text-accent hover:underline font-mono"
-                  >
-                    Get Free Sarvam Key →
-                  </a>
-                  <button
-                    type="button"
-                    onClick={handleSaveSarvamKey}
-                    disabled={!sarvamKeyInput.trim()}
-                    className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
-                  >
-                    {sarvamKeySaved ? 'Saved ✓' : 'Save Sarvam Key'}
                   </button>
                 </div>
               </div>
