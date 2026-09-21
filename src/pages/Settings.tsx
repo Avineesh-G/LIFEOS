@@ -64,9 +64,9 @@ export default function Settings({
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [updateFeedback, setUpdateFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  // Accordion open/close state for all sections
+  // Accordion open/close state for all sections (enclosed by default until user taps for help)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    notifications: true,
+    notifications: false,
     haptics: false,
     security: false,
     profile: false,
@@ -74,6 +74,21 @@ export default function Settings({
     outingsStorage: false,
     account: false,
   });
+
+  const anyOpen = Object.values(openSections).some(Boolean);
+  const handleToggleAllSections = () => {
+    triggerHaptic('selection');
+    const targetState = !anyOpen;
+    setOpenSections({
+      notifications: targetState,
+      haptics: targetState,
+      security: targetState,
+      profile: targetState,
+      ai: targetState,
+      outingsStorage: targetState,
+      account: targetState,
+    });
+  };
 
   const [receiptsStorageBytes, setReceiptsStorageBytes] = useState<number>(0);
   const [isClearingReceipts, setIsClearingReceipts] = useState(false);
@@ -250,8 +265,28 @@ export default function Settings({
             System tuning, biometrics & offline synchronization
           </p>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center justify-center text-[var(--accent-primary)] shadow-xs shrink-0">
-          <Gauge size={22} strokeWidth={2.2} />
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] flex items-center justify-center text-[var(--accent-primary)] shadow-xs">
+            <Gauge size={22} strokeWidth={2.2} />
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleAllSections}
+            className="px-2.5 py-1 rounded-full text-[10px] font-tag font-bold tracking-wider uppercase bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-secondary-light dark:text-secondary-dark border border-[var(--card-border)] flex items-center gap-1 transition-all active:scale-95 shadow-2xs"
+            title={anyOpen ? 'Enclose all sections' : 'Enlarge all sections'}
+          >
+            {anyOpen ? (
+              <>
+                <ChevronUp size={12} className="text-[var(--accent-primary)]" />
+                <span>Enclose All</span>
+              </>
+            ) : (
+              <>
+                <ChevronDown size={12} className="text-[var(--accent-primary)]" />
+                <span>Enlarge All</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 

@@ -9,7 +9,7 @@ export const APP_VERSION: AppVersionConfig = {
   versionCode: 13,
   versionName: '1.2.3',
   releaseDate: '2026-09-21',
-  releaseNotes: 'LifeOS v1.2.3 (Build 13): Resolved modal sheet sticky footer clashing, refined bottom clearance with natural document flow, and verified zero-overlap smooth scrolling.',
+  releaseNotes: 'LifeOS v1.2.3 (Build 13): Settings sections enclosed by default with quick enlarge/enclose controls, modal layout refinements, and zero-overlap smooth scrolling.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

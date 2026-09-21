@@ -2,7 +2,7 @@
   "versionCode": 13,
   "versionName": "1.2.3",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.3 (Build 13): Resolved modal sheet sticky footer clashing, refined bottom clearance with natural document flow, and verified zero-overlap smooth scrolling.",
+  "releaseNotes": "LifeOS v1.2.3 (Build 13): Settings sections enclosed by default with quick enlarge/enclose controls, modal layout refinements, and zero-overlap smooth scrolling.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "a6888d8d78ef2f996d6657d51718e5869e54fa2c71b7ed3a77b8ac66b1f6caad"
+  "sha256": "f26e95fc2058543f04e2bdacfc4e737b1c139ee444dfa52d0071acebc5a02e89"
 }
