@@ -683,15 +683,15 @@ export function AddExpenseSheet({
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="pt-2">
+        {/* Action Button (Sticky Footer so it's always accessible and never cut off) */}
+        <div className="sticky bottom-0 -mx-6 -mb-6 px-6 pt-3 pb-[max(1.25rem,calc(env(safe-area-inset-bottom,0px)+1rem))] bg-[var(--md-surface-container-low)]/95 backdrop-blur-md border-t border-[var(--card-border)] mt-4 z-20">
           <button
             type="button"
             onClick={handleSave}
             disabled={amountPaise <= 0 || isCompressing}
-            className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            {expenseToEdit ? 'Save Expense' : 'Record Expense'}
+            <span>{expenseToEdit ? 'Save Expense' : 'Record Expense'}</span>
           </button>
         </div>
       </div>

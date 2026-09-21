@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -25,6 +25,8 @@ export function BottomSheet({
   maxWidth = 'sm:max-w-lg',
   className = '',
 }: BottomSheetProps) {
+  const dragControls = useDragControls();
+
   useEffect(() => {
     if (isOpen) {
       window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
@@ -68,23 +70,31 @@ export function BottomSheet({
               mass: 0.8,
             }}
             drag="y"
+            dragControls={dragControls}
+            dragListener={false}
             dragConstraints={{ top: 0 }}
-            dragElastic={0.15}
+            dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 90 || info.velocity.y > 400) {
                 onClose();
               }
             }}
-            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1.25rem))] sm:pb-6 border-t sm:border border-[var(--card-border)] shadow-2xl overflow-y-auto no-scrollbar gpu-composited touch-pan-y ${className}`}
+            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.75rem))] sm:pb-6 border-t sm:border border-[var(--card-border)] shadow-2xl overflow-y-auto overscroll-contain no-scrollbar gpu-composited touch-pan-y ${className}`}
             style={{
               maxHeight,
               willChange: 'transform',
               transform: 'translate3d(0, 0, 0)',
+              WebkitOverflowScrolling: 'touch',
             }}
             onClick={e => e.stopPropagation()}
           >
             {showDragHandle && (
-              <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600/80 mx-auto mb-4 shrink-0 active:scale-95 transition-transform" />
+              <div
+                className="w-full pt-1 pb-3 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none -mt-2 mb-2 shrink-0"
+                onPointerDown={(e) => dragControls.start(e)}
+              >
+                <div className="w-12 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600/80 shrink-0 active:scale-95 transition-transform" />
+              </div>
             )}
             {children}
           </motion.div>

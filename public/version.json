@@ -1,8 +1,8 @@
 {
-  "versionCode": 11,
+  "versionCode": 12,
   "versionName": "1.2.3",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.3 (Build 11): Fixed vertical scrolling regression across all devices, single viewport scroller architecture, responsive ultra-compact layout scaling, and automated touch regression suite.",
+  "releaseNotes": "LifeOS v1.2.3 (Build 12): Fixed Outing Expenses bottom sheet touch-scroll capture, added sticky accessible action buttons, and verified seamless group expense calculations.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "81d1438f95740d0c8e0b1b39e050a1e969afa4e937dec8cd8bea7ef1c735d6f7"
+  "sha256": "a5202a90114e191c62fe3b60b9ac543ef9b51821548269315dbd0ddb3cc444b8"
 }
