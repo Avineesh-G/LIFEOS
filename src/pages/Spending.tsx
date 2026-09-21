@@ -171,18 +171,18 @@ export default function Spending({ data, updateData }: SpendingProps) {
         className="relative overflow-hidden rounded-[28px] p-4 sm:p-7 m3-elevation-2 border border-[var(--md-outline-variant)] text-[var(--md-on-surface)]"
       >
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:mb-5">
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-[18px] sm:rounded-[20px] bg-[var(--md-surface-container-high)] text-[var(--md-primary)] flex items-center justify-center border border-[var(--md-outline-variant)] shrink-0">
               <Wallet size={20} className="sm:w-[22px] sm:h-[22px]" />
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-75 font-tag text-[var(--md-on-surface-variant)] truncate">
+              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-75 font-tag text-[var(--md-on-surface-variant)] break-words">
                 {format(now, 'MMMM yyyy')}
               </p>
-              <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] truncate">Total Spending</h2>
+              <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] break-words">Total Spending</h2>
             </div>
           </div>
-          <span className="rounded-full bg-[var(--md-surface-container)] px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold font-tag border border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)] shrink-0">
+          <span className="rounded-full bg-[var(--md-surface-container)] px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold font-tag border border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)] shrink-0">
             <span className="font-stat">{monthExpenses.length}</span> txns
           </span>
         </div>
@@ -193,57 +193,50 @@ export default function Spending({ data, updateData }: SpendingProps) {
               ₹{monthTotal.toLocaleString('en-IN')}
             </span>
           </div>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ type: 'spring', stiffness: 450, damping: 22 }}
-            onClick={() => setShowAdd(true)}
-            className="rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-none transition-transform shrink-0"
-          >
-            <Plus size={16} strokeWidth={2.5} /> Add Spend
-          </motion.button>
+          <span className="text-xs font-bold text-[var(--md-on-surface-variant)] font-mono">
+            Avg ₹{Math.round(monthTotal / Math.max(1, new Date().getDate())).toLocaleString('en-IN')}/day
+          </span>
         </div>
       </motion.div>
 
-      {/* Stats grid (Level 1 Elevation) */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-2.5 sm:gap-5">
+      {/* ── 2 Metric Cards: Today & Month Stats ── */}
+      <motion.div variants={item} className="grid grid-cols-2 gap-2.5 sm:gap-4 mb-4 sm:mb-6">
         <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-          className="rounded-[24px] p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden"
+          className="rounded-[24px] p-3 compact:p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden min-w-0"
         >
           <div className="flex items-center justify-between mb-2 gap-1">
-            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag truncate">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag break-words">
               Today
             </p>
             <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-[14px] sm:rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
               <TrendingDown size={13} className="sm:w-[14px] sm:h-[14px]" />
             </span>
           </div>
-          <p className="m3-numeral text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] truncate">
+          <p className="m3-numeral text-lg compact:text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] break-words leading-tight">
             ₹{todayTotal.toLocaleString('en-IN')}
           </p>
-          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium truncate">Recorded today</p>
+          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium break-words">Recorded today</p>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-          className="rounded-[24px] p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden"
+          className="rounded-[24px] p-3 compact:p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden min-w-0"
         >
           <div className="flex items-center justify-between mb-2 gap-1">
-            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag truncate">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag break-words">
               Transactions
             </p>
             <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-[14px] sm:rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
               <ArrowUpRight size={13} className="sm:w-[14px] sm:h-[14px]" />
             </span>
           </div>
-          <p className="m3-numeral text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] truncate">
+          <p className="m3-numeral text-lg compact:text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] break-words leading-tight">
             {monthExpenses.length}
           </p>
-          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium truncate">This month</p>
+          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium break-words">This month</p>
         </motion.div>
       </motion.div>
 
@@ -339,7 +332,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     <Wallet size={18} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-[var(--md-on-surface)] truncate font-sans">
+                    <p className="font-bold text-sm text-[var(--md-on-surface)] line-clamp-2 break-words leading-tight font-sans">
                       {e.category}
                       {e.note ? <span className="font-normal text-[var(--md-on-surface-variant)]"> · {e.note}</span> : ''}
                     </p>

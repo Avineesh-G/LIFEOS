@@ -41,26 +41,26 @@ export default function M3StatWidget({
       whileTap={isClickable ? { scale: 0.97 } : undefined}
       transition={{ type: 'spring', stiffness: 450, damping: 26 }}
       onClick={onClick}
-      className={`relative overflow-hidden rounded-[24px] p-5 sm:p-6 m3-elevation-2 border border-[var(--md-outline-variant)] flex flex-col justify-between select-none ${
+      className={`relative overflow-hidden rounded-[20px] sm:rounded-[24px] p-3.5 compact:p-4 sm:p-6 m3-elevation-2 border border-[var(--md-outline-variant)] flex flex-col justify-between select-none ${
         isClickable ? 'cursor-pointer' : ''
       } ${className}`}
     >
       {/* Top row: Label + icon or badge */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="text-[11px] font-bold font-tag uppercase tracking-wider text-[var(--md-on-surface-variant)] line-clamp-2 break-words leading-tight min-w-0">
+      <div className="flex items-center justify-between gap-2 mb-2 sm:mb-3">
+        <span className="text-[10px] compact:text-[11px] font-bold font-tag uppercase tracking-wider text-[var(--md-on-surface-variant)] line-clamp-2 break-words leading-tight min-w-0">
           {label}
         </span>
         {icon && (
-          <span className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container-high)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
+          <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-[14px] sm:rounded-[16px] bg-[var(--md-surface-container-high)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
             {icon}
           </span>
         )}
       </div>
 
       {/* Center: Large bold numeral with clamp sizing and M3 Numeral role */}
-      <div className="my-1">
+      <div className="my-0.5 sm:my-1">
         <div className="flex items-baseline gap-1 flex-wrap text-[var(--md-on-surface)]">
-          <span className="m3-numeral text-2xl compact:text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <span className="m3-numeral text-xl compact:text-2xl sm:text-3xl font-extrabold tracking-tight break-words">
             {value}
           </span>
           {unit && (

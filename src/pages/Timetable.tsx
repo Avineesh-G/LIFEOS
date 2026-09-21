@@ -320,17 +320,17 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-bold text-sm truncate text-primary-light dark:text-primary-dark">
+                        <p className="font-bold text-sm line-clamp-2 break-words leading-tight text-primary-light dark:text-primary-dark">
                           {block.subject}
                         </p>
                       </div>
                       {block.teacher && (
-                        <p className="text-xs truncate mt-0.5 text-secondary-light dark:text-secondary-dark">
+                        <p className="text-xs line-clamp-1 break-words mt-0.5 text-secondary-light dark:text-secondary-dark">
                           {block.teacher}
                         </p>
                       )}
                       {(block.courseCode || block.room || block.slot) && (
-                        <p className="text-[11px] truncate mt-0.5 text-muted-light dark:text-muted-dark">
+                        <p className="text-[11px] line-clamp-1 break-words mt-0.5 text-muted-light dark:text-muted-dark">
                           {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
                         </p>
                       )}
@@ -509,16 +509,16 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                     <p className="text-[10px] opacity-70">{block.endTime}</p>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-sm truncate font-sans ${isOngoing ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
+                    <p className={`font-bold text-sm line-clamp-2 break-words leading-tight font-sans ${isOngoing ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
                       {block.subject}
                     </p>
                     {block.teacher && (
-                      <p className={`text-xs truncate mt-0.5 ${isOngoing ? 'text-secondary-light dark:text-secondary-dark' : 'text-secondary-light dark:text-secondary-dark'}`}>
+                      <p className={`text-xs line-clamp-1 break-words mt-0.5 ${isOngoing ? 'text-secondary-light dark:text-secondary-dark' : 'text-secondary-light dark:text-secondary-dark'}`}>
                         {block.teacher}
                       </p>
                     )}
                     {(block.courseCode || block.room || block.slot) && (
-                      <p className={`text-[11px] truncate mt-0.5 ${isOngoing ? 'text-muted-light dark:text-muted-dark' : 'text-muted-light dark:text-muted-dark'}`}>
+                      <p className={`text-[11px] line-clamp-1 break-words mt-0.5 ${isOngoing ? 'text-muted-light dark:text-muted-dark' : 'text-muted-light dark:text-muted-dark'}`}>
                         {[block.courseCode, block.room, block.slot].filter(Boolean).join(' • ')}
                       </p>
                     )}

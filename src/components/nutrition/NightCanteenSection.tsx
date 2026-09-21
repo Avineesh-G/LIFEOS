@@ -340,7 +340,7 @@ export default function NightCanteenSection({
 
                     {/* Item Details */}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm font-semibold text-primary-light dark:text-primary-dark truncate">
+                      <p className="text-xs sm:text-sm font-semibold text-primary-light dark:text-primary-dark line-clamp-2 break-words leading-tight">
                         {item.name}
                       </p>
                       <div className="flex items-center gap-1.5 text-[10px] text-muted-light dark:text-muted-dark font-mono flex-wrap">

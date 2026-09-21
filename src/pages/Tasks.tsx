@@ -406,7 +406,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                     {previousPendingTasks.length}
                   </span>
                 </div>
-                <p className="text-[11px] text-amber-800/80 dark:text-amber-400/80 font-medium truncate">
+                <p className="text-[11px] text-amber-800/80 dark:text-amber-400/80 font-medium line-clamp-2 break-words">
                   Unfinished tasks carried forward so you don't forget
                 </p>
               </div>

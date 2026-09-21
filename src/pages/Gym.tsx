@@ -184,10 +184,10 @@ export default function Gym({ data, updateData }: GymProps) {
               <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag">
                 {today} · Target Routine
               </p>
-              <h2 className="text-xs sm:text-sm font-bold text-[var(--md-on-surface)] truncate">Daily Protocol</h2>
+              <h2 className="text-xs sm:text-sm font-bold text-[var(--md-on-surface)] break-words leading-tight">Daily Protocol</h2>
             </div>
           </div>
-          <span className={`rounded-full shrink-0 px-3 py-1 text-[11px] font-bold border font-tag ${
+          <span className={`rounded-full shrink-0 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-bold border font-tag ${
             isCompletedToday 
               ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)]'
               : 'bg-[var(--md-surface-container)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
@@ -292,7 +292,7 @@ export default function Gym({ data, updateData }: GymProps) {
                 </div>
 
                 <div className="my-1">
-                  <p className="text-sm font-bold font-heading truncate">
+                  <p className="text-sm font-bold font-heading line-clamp-2 break-words leading-tight">
                     {plan.type || 'Rest'}
                   </p>
                   <p className="text-[11px] opacity-75 font-mono mt-0.5">
@@ -313,15 +313,15 @@ export default function Gym({ data, updateData }: GymProps) {
       {/* Goal Routine Alignment & Customization Freedom Card */}
       <div className="rounded-[24px] p-4 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-3">
         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               {renderGoalIcon(goalConfig.iconName, 14)}
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark truncate">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark break-words">
                 Goal Recommendation
               </p>
-              <h3 className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+              <h3 className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark break-words leading-tight">
                 {goalConfig.label}
               </h3>
             </div>

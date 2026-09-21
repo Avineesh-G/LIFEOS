@@ -360,22 +360,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       {activeTab === 'nutrition' && (
         <motion.div key="nutrition" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
           {/* Nutrition Cards Arrangement: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2.5 w-full">
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Avg / Day</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{nutritionStats.avgCals} <span className="text-xs font-mono font-normal">kcal</span></p>
+          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Avg / Day</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{nutritionStats.avgCals} <span className="text-xs font-mono font-normal">kcal</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Days Logged</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{nutritionStats.daysLogged} <span className="text-xs font-mono font-normal">days</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Days Logged</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{nutritionStats.daysLogged} <span className="text-xs font-mono font-normal">days</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Target Hit Rate</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 truncate">{nutritionStats.targetHitPct}%</p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Target Hit Rate</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 break-words leading-tight">{nutritionStats.targetHitPct}%</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Total Consumed</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{Math.round(nutritionStats.totalCals).toLocaleString('en-IN')} <span className="text-xs font-mono font-normal">kcal</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Consumed</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{Math.round(nutritionStats.totalCals).toLocaleString('en-IN')} <span className="text-xs font-mono font-normal">kcal</span></p>
             </div>
           </div>
 
@@ -501,22 +501,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       {activeTab === 'gym' && (
         <motion.div key="gym" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
           {/* Gym Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2.5 w-full">
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Workouts</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{gymStats.totalWorkouts} <span className="text-xs font-mono font-normal">sessions</span></p>
+          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Workouts</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{gymStats.totalWorkouts} <span className="text-xs font-mono font-normal">sessions</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Sets Done</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-rose-600 dark:text-rose-400 truncate">{gymStats.totalSets} <span className="text-xs font-mono font-normal">sets</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Sets Done</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-rose-600 dark:text-rose-400 break-words leading-tight">{gymStats.totalSets} <span className="text-xs font-mono font-normal">sets</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Top Split</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{gymStats.topSplit}</p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Top Split</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{gymStats.topSplit}</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Avg Sets / Day</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Avg Sets / Day</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">
                 {gymStats.totalWorkouts > 0 ? Math.round(gymStats.totalSets / gymStats.totalWorkouts) : 0} <span className="text-xs font-mono font-normal">sets</span>
               </p>
             </div>
@@ -630,22 +630,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       {activeTab === 'todo' && (
         <motion.div key="todo" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
           {/* Tasks Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2.5 w-full">
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Completed</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 truncate">{todoStats.completed} <span className="text-xs font-mono font-normal">done</span></p>
+          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Completed</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 break-words leading-tight">{todoStats.completed} <span className="text-xs font-mono font-normal">done</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Total Tasks</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{todoStats.total} <span className="text-xs font-mono font-normal">tasks</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Tasks</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{todoStats.total} <span className="text-xs font-mono font-normal">tasks</span></p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Completion Rate</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{todoStats.rate}%</p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Completion Rate</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{todoStats.rate}%</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Pending Tasks</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-amber-600 dark:text-amber-400 truncate">{Math.max(0, todoStats.total - todoStats.completed)} <span className="text-xs font-mono font-normal">left</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Pending Tasks</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-amber-600 dark:text-amber-400 break-words leading-tight">{Math.max(0, todoStats.total - todoStats.completed)} <span className="text-xs font-mono font-normal">left</span></p>
             </div>
           </div>
 
@@ -695,22 +695,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       {activeTab === 'spending' && (
         <motion.div key="spending" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
           {/* Spending Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2.5 w-full">
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Total Spent</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-[#15803D] dark:text-[#82CB92] truncate">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
+          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Spent</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-[#15803D] dark:text-[#82CB92] break-words leading-tight">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Daily Avg</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">₹{Math.round(spendingStats.dailyAvg).toLocaleString('en-IN')}</p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Daily Avg</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">₹{Math.round(spendingStats.dailyAvg).toLocaleString('en-IN')}</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Top Category</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{spendingStats.topCategory}</p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Top Category</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{spendingStats.topCategory}</p>
             </div>
-            <div className="card p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block truncate">Expenses Logged</span>
-              <p className="text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark truncate">{monthlyExpenses.length} <span className="text-xs font-mono font-normal">records</span></p>
+            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
+              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Expenses Logged</span>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{monthlyExpenses.length} <span className="text-xs font-mono font-normal">records</span></p>
             </div>
           </div>
 

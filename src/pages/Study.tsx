@@ -214,11 +214,11 @@ export default function Study({ data }: StudyProps) {
               const remMins = mins % 60;
               return (
                 <div key={subject} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-primary-light dark:text-primary-dark truncate max-w-[200px]">
+                  <div className="flex items-center justify-between text-xs font-semibold gap-2">
+                    <span className="text-primary-light dark:text-primary-dark line-clamp-2 break-words leading-tight flex-1 min-w-0">
                       {subject}
                     </span>
-                    <span className="font-mono font-bold text-primary-light dark:text-primary-dark">
+                    <span className="font-mono font-bold text-primary-light dark:text-primary-dark shrink-0">
                       {hours > 0 ? `${hours}h ` : ''}{remMins}m
                     </span>
                   </div>

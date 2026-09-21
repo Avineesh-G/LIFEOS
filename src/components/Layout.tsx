@@ -462,7 +462,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           paddingRight: 'max(var(--sar, 0px), 12px)',
         }}
       >
-        <div className="flex items-center justify-between h-9 w-full max-w-[720px] mx-auto min-w-0">
+        <div className="flex items-center justify-between h-9 w-full max-w-[720px] md:max-w-[800px] mx-auto min-w-0">
           {/* Left: LifeOS Floating Micro-Badge directly on wallpaper */}
           <button
             onPointerDown={() => triggerHaptic('light')}
@@ -517,12 +517,12 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         className="relative z-10 min-h-screen"
         style={{
           paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
-          paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 28px)',
+          paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 24px)',
           paddingLeft: 'var(--sal, 0px)',
           paddingRight: 'var(--sar, 0px)',
         }}
       >
-        <div className="w-full max-w-[720px] mx-auto px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
+        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
           {children}
         </div>
       </main>
@@ -567,14 +567,14 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               pointerEvents: isNavHidden ? 'none' : 'auto',
               touchAction: 'manipulation',
             }}
-            className="fixed left-0 right-0 z-[100] flex items-center justify-center px-4 gpu-composited select-none"
+            className="fixed left-0 right-0 z-[100] flex items-center justify-center px-2 compact:px-3 sm:px-4 gpu-composited select-none"
             role="navigation"
             aria-label="Main Navigation"
           >
-            <div className="relative pointer-events-auto flex items-center gap-[14px]">
-              {/* 1. Nav pill (left element): full stadium/pill, fixed height 64px, width sized to content with 20px h-padding */}
+            <div className="relative pointer-events-auto flex items-center gap-2 compact:gap-3 sm:gap-[14px]">
+              {/* 1. Nav pill (left element): full stadium/pill, fluid height, width sized to content */}
               <div
-                className="h-[64px] px-[20px] rounded-full flex items-center gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none"
+                className="h-[52px] compact:h-[58px] sm:h-[64px] px-2.5 compact:px-3.5 sm:px-[20px] rounded-full flex items-center gap-2 compact:gap-4 sm:gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none"
                 style={{
                   backgroundColor: pillBg,
                   opacity: 1,
@@ -602,7 +602,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                         if (menuOpen) setMenuOpen(false);
                         startTransition(() => { navigate(tab.path); });
                       }}
-                      className="relative w-[40px] h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
+                      className="relative w-[34px] h-[34px] compact:w-[38px] compact:h-[38px] sm:w-[40px] sm:h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
                       aria-label={tab.label}
                     >
                       {/* Active icon chip: 12-lobed scallop shape — rotates 30° on each interface switch */}
@@ -614,15 +614,15 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                         <motion.div
                           animate={{ rotate: scallopRotation }}
                           transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
+                          className="w-full h-full flex items-center justify-center"
                         >
-                          <ScallopShape size={40} fill={solidAccent} className="drop-shadow-sm" />
+                          <ScallopShape fill={solidAccent} className="w-full h-full drop-shadow-sm" />
                         </motion.div>
                       </div>
-                      {/* Icon size: 24px, active in white, inactive in 55% opacity */}
+                      {/* Icon: active in white, inactive in 55% opacity */}
                       <Icon
-                        size={24}
+                        className="relative z-10 transition-colors duration-200 w-[19px] h-[19px] compact:w-[21px] compact:h-[21px] sm:w-[24px] sm:h-[24px]"
                         strokeWidth={active ? 2.5 : 2.2}
-                        className="relative z-10 transition-colors duration-200"
                         style={{
                           color: active ? '#FFFFFF' : inactiveColor,
                         }}
@@ -632,7 +632,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 })}
               </div>
 
-              {/* 2. More button (right element, separate scallop shape): 64px × 64px */}
+              {/* 2. More button (right element, separate scallop shape): responsive dimensions */}
               <motion.button
                 ref={squircleRef}
                 data-no-ripple="true"
@@ -649,7 +649,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   }
                   setMenuOpen(prev => !prev);
                 }}
-                className="w-[64px] h-[64px] shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative"
+                className="w-[52px] h-[52px] compact:w-[58px] compact:h-[58px] sm:w-[64px] sm:h-[64px] shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative"
                 style={{
                   transition: 'filter 220ms cubic-bezier(0.2, 0, 0, 1)',
                   filter: 'drop-shadow(0 10px 18px rgba(0,0,0,0.22))',
@@ -657,21 +657,21 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 aria-label="More Menu"
                 aria-expanded={menuOpen}
               >
-                {/* Scallop shape background — 72px (bleeds 4px beyond 64px tap target for visual emphasis) */}
-                <ScallopShape
-                  size={72}
-                  fill={squircleBg}
-                  className="absolute pointer-events-none"
-                  style={{ top: '-4px', left: '-4px' }}
-                  pathStyle={{
-                    transition: 'fill 220ms cubic-bezier(0.2, 0, 0, 1)',
-                  }}
-                />
+                {/* Scallop shape background — bleeds 4px beyond tap target for visual emphasis */}
+                <div className="absolute inset-[-4px] pointer-events-none flex items-center justify-center">
+                  <ScallopShape
+                    fill={squircleBg}
+                    className="w-full h-full"
+                    pathStyle={{
+                      transition: 'fill 220ms cubic-bezier(0.2, 0, 0, 1)',
+                    }}
+                  />
+                </div>
 
                 {/* Active accent dot when current route is in the hub */}
                 {isHubActive && !menuOpen && (
                   <span
-                    className="absolute top-[14px] right-[14px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
+                    className="absolute top-[10px] right-[10px] sm:top-[14px] sm:right-[14px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
                     aria-hidden="true"
                   />
                 )}
@@ -680,24 +680,24 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   {menuOpen ? (
                     <motion.div
                       key="close"
-                      className="relative z-10"
+                      className="relative z-10 flex items-center justify-center"
                       initial={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <CollapseContentIcon size={26} className="text-white" />
+                      <CollapseContentIcon className="w-[20px] h-[20px] compact:w-[23px] compact:h-[23px] sm:w-[26px] sm:h-[26px] text-white" />
                     </motion.div>
                   ) : (
                     <motion.div
                       key="grid"
-                      className="relative z-10"
+                      className="relative z-10 flex items-center justify-center"
                       initial={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <ExpandAllIcon size={26} className="text-white" />
+                      <ExpandAllIcon className="w-[20px] h-[20px] compact:w-[23px] compact:h-[23px] sm:w-[26px] sm:h-[26px] text-white" />
                     </motion.div>
                   )}
                 </AnimatePresence>

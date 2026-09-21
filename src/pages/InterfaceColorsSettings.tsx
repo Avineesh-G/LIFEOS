@@ -237,51 +237,51 @@ export default function InterfaceColorsSettings({
                 onClick={() => handleOpenPicker(iface)}
                 whileHover={{ scale: 1.006 }}
                 whileTap={{ scale: 0.985 }}
-                className="w-full p-4 rounded-[26px] liquid-glass border border-[var(--card-border)] shadow-xs hover:shadow-sm text-left flex items-center justify-between gap-3.5 transition-all group"
+                className="w-full p-3 sm:p-4 rounded-[22px] sm:rounded-[26px] liquid-glass border border-[var(--card-border)] shadow-xs hover:shadow-sm text-left flex items-center justify-between gap-2.5 sm:gap-3.5 transition-all group"
               >
                 {/* Left: Icon & Name */}
-                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
                   <div
-                    className="w-12 h-12 rounded-[18px] flex items-center justify-center border shadow-2xs shrink-0 transition-transform group-hover:scale-105"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] sm:rounded-[18px] flex items-center justify-center border shadow-2xs shrink-0 transition-transform group-hover:scale-105"
                     style={{
                       backgroundColor: family.iconSurface,
                       color: family.icon,
                       borderColor: family.border,
                     }}
                   >
-                    <IconComponent size={22} strokeWidth={2.2} />
+                    <IconComponent size={20} strokeWidth={2.2} className="sm:w-[22px] sm:h-[22px]" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-heading font-bold text-primary-light dark:text-primary-dark truncate">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <h3 className="text-xs sm:text-sm font-heading font-bold text-primary-light dark:text-primary-dark break-words leading-tight">
                         {iface.label}
                       </h3>
-                      <span className="text-[10px] text-muted-light dark:text-muted-dark font-mono font-medium">
+                      <span className="hidden compact:inline text-[10px] text-muted-light dark:text-muted-dark font-mono font-medium">
                         {iface.route}
                       </span>
                     </div>
-                    <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium line-clamp-1 mt-0.5">
+                    <p className="text-[11px] sm:text-xs text-secondary-light dark:text-secondary-dark font-medium line-clamp-1 break-words mt-0.5">
                       {iface.description}
                     </p>
                   </div>
                 </div>
 
                 {/* Right: Color Indicator Badge & Arrow */}
-                <div className="flex items-center gap-2.5 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   <div
-                    className="px-3 py-1.5 rounded-full border flex items-center gap-2 shadow-2xs"
+                    className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border flex items-center gap-1.5 sm:gap-2 shadow-2xs"
                     style={{
                       backgroundColor: family.surfaceSoft,
                       borderColor: family.border,
                     }}
                   >
                     <span
-                      className="w-3 h-3 rounded-full shadow-xs"
+                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full shadow-xs"
                       style={{ backgroundColor: family.dotColor || family.primary }}
                     />
                     <span
-                      className="text-xs font-heading font-bold tracking-tight"
+                      className="text-[11px] sm:text-xs font-heading font-bold tracking-tight"
                       style={{ color: family.primary }}
                     >
                       {family.name}

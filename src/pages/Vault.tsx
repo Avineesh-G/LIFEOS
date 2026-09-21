@@ -725,7 +725,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       <CategoryIcon size={16} className={categoryConfig.color} />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-xs sm:text-sm font-black text-primary-light dark:text-primary-dark tracking-tight truncate leading-tight">
+                      <h4 className="text-xs sm:text-sm font-black text-primary-light dark:text-primary-dark tracking-tight line-clamp-2 break-words leading-tight">
                         {item.title}
                       </h4>
                       <div className="flex items-center gap-1.5 text-[10px] text-secondary-light dark:text-secondary-dark mt-0.5">

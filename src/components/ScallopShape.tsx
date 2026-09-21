@@ -34,7 +34,7 @@ export interface ScallopShapeProps {
 
 export const ScallopShape: React.FC<ScallopShapeProps> = React.memo(
   function ScallopShape({
-    size = 48,
+    size,
     fill = 'currentColor',
     stroke = 'none',
     strokeWidth = 0,
@@ -45,18 +45,18 @@ export const ScallopShape: React.FC<ScallopShapeProps> = React.memo(
     title,
     children,
   }) {
+    const hasExplicitSize = typeof size === 'number';
     return (
       <svg
-        width={size}
-        height={size}
+        width={hasExplicitSize ? size : '100%'}
+        height={hasExplicitSize ? size : '100%'}
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className={`shrink-0 select-none ${className}`}
         style={{
           ...style,
-          width: size,
-          height: size,
+          ...(hasExplicitSize ? { width: size, height: size } : {}),
         }}
         aria-hidden={!title}
         role={title ? 'img' : 'presentation'}

@@ -364,13 +364,13 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         className="rounded-[28px] p-5 sm:p-6 m3-elevation-2 border border-[var(--md-outline-variant)] relative overflow-hidden transition-all duration-300"
       >
         {/* Header Row */}
-        <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container-high)] flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
               <CalendarDays size={16} strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-heading font-bold tracking-tight text-[var(--md-on-surface)] truncate">
+              <h2 className="text-sm font-heading font-bold tracking-tight text-[var(--md-on-surface)] break-words leading-tight">
                 {isToday(selectedDate)
                   ? 'Today'
                   : isSameDay(selectedDate, subDays(new Date(), 1))
@@ -379,23 +379,23 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                   ? 'Tomorrow'
                   : format(selectedDate, 'EEEE')}
               </h2>
-              <p className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+              <p className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark break-words leading-tight">
                 {format(selectedDate, 'MMMM d, yyyy')}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {!isToday(selectedDate) && (
               <button
                 onClick={() => setSelectedDate(startOfDay(new Date()))}
-                className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] hover:opacity-85 active:scale-95 transition-all select-none"
+                className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] hover:opacity-85 active:scale-95 transition-all select-none"
               >
                 Today
               </button>
             )}
             <span
-              className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide border ${
+              className={`px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wide border ${
                 selectedDateData.isSelToday
                   ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-[var(--md-outline-variant)]'
                   : selectedDateData.isSelPast
@@ -447,13 +447,13 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Study Pillar */}
                 <div
                   onClick={() => { triggerHaptic('nav'); navigate('/study'); }}
-                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-8 h-8 rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
-                    <InteractiveClock size={18} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
+                    <InteractiveClock size={16} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
                       {selectedDateData.studyMinutes > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.studyHours}</span>h{' '}
@@ -461,7 +461,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                         </>
                       ) : selectedDateData.isSelFuture ? 'Scheduled' : '0m logged'}
                     </p>
-                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
                       {selectedDateData.sessions.length > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.sessions.length}</span> session{selectedDateData.sessions.length !== 1 ? 's' : ''}
@@ -474,18 +474,18 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Gym Pillar */}
                 <div
                   onClick={() => { triggerHaptic('nav'); navigate('/gym'); }}
-                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-8 h-8 rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
-                    <InteractiveDumbbell size={18} isCompleted={!!selectedDateData.workoutLog} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
+                    <InteractiveDumbbell size={16} isCompleted={!!selectedDateData.workoutLog} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
                       {selectedDateData.workoutLog 
                         ? (selectedDateData.workoutLog.type || 'Completed') 
                         : (selectedDateData.plannedWorkout?.type || 'Rest Day')}
                     </p>
-                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
                       {selectedDateData.workoutLog 
                         ? 'Workout Done' 
                         : selectedDateData.plannedWorkout?.type ? 'Split Planned' : 'Recovery'}
@@ -496,13 +496,13 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Tasks Pillar */}
                 <div
                   onClick={() => { triggerHaptic('nav'); navigate('/tasks'); }}
-                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-8 h-8 rounded-[16px] bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
-                    <CheckCircle2 size={16} strokeWidth={2.2} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
+                    <CheckCircle2 size={15} strokeWidth={2.2} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate font-stat">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
                       {selectedDateData.tasks.length > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.completedTasks.length}</span>/
@@ -510,7 +510,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                         </>
                       ) : '0 Tasks'}
                     </p>
-                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
                       {selectedDateData.pendingTasks.length > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.pendingTasks.length}</span> pending
@@ -523,17 +523,17 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 {/* Spending Pillar */}
                 <div
                   onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
-                  className="p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2.5 transition-all cursor-pointer bouncy-tap select-none"
+                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-8 h-8 rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
-                    <Wallet size={16} strokeWidth={2.2} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
+                    <Wallet size={15} strokeWidth={2.2} />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-stat text-primary-light dark:text-primary-dark truncate flex items-baseline">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-stat text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark flex items-baseline leading-tight break-words">
                       <span className="font-stat select-none">₹</span>
                       <span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
                     </p>
-                    <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
                       {selectedDateData.expenses.length > 0 ? (
                         <>
                           <span className="font-stat">{selectedDateData.expenses.length}</span> record{selectedDateData.expenses.length !== 1 ? 's' : ''}
@@ -566,11 +566,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Clock size={16} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark line-clamp-2 break-words leading-tight">
                             Next Class: {selectedDateData.nextBlockToday.subject}
                           </p>
-                          <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark truncate">
+                          <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark line-clamp-1 break-words mt-0.5">
                             <span className="font-stat">{selectedDateData.nextBlockToday.startTime}</span> – <span className="font-stat">{selectedDateData.nextBlockToday.endTime}</span>
                             {selectedDateData.nextBlockToday.room ? ` • Room ${selectedDateData.nextBlockToday.room}` : ''}
                           </p>
@@ -588,11 +588,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                           className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
                         >
                           <InteractiveCheckbox checked={false} onChange={() => handleToggleTask(task.id)} size={18} />
-                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1 min-w-0">
+                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark line-clamp-2 break-words flex-1 min-w-0 leading-tight">
                             {task.text}
                           </span>
                           {task.subtask && (
-                            <span className="text-[10px] text-muted-light dark:text-muted-dark truncate flex-shrink-0">
+                            <span className="text-[10px] text-muted-light dark:text-muted-dark line-clamp-1 break-words flex-shrink-0">
                               {task.subtask}
                             </span>
                           )}
@@ -637,7 +637,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                           <div className="w-4 h-4 rounded-[6px] bg-accent text-white flex items-center justify-center flex-shrink-0">
                             <Check size={10} strokeWidth={2.5} />
                           </div>
-                          <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark line-through truncate flex-1 min-w-0">
+                          <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark line-through line-clamp-2 break-words flex-1 min-w-0 leading-tight">
                             {task.text}
                           </span>
                         </div>
@@ -819,7 +819,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               >
                 <InteractiveCheckbox checked={task.completed} onChange={() => handleToggleTask(task.id)} size={18} />
                 <div className="flex-1 min-w-0">
-                  <span className={`text-sm font-semibold block truncate ${
+                  <span className={`text-sm font-semibold block line-clamp-2 break-words leading-snug ${
                     task.completed
                       ? 'line-through text-[var(--md-on-surface-variant)] opacity-60'
                       : 'text-[var(--md-on-surface)]'
@@ -827,7 +827,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                     {task.text}
                   </span>
                   {task.subtask && (
-                    <span className={`text-[11px] block truncate ${
+                    <span className={`text-[11px] block line-clamp-1 break-words mt-0.5 ${
                       task.completed
                         ? 'line-through text-[var(--md-on-surface-variant)]/50'
                         : 'text-[var(--md-on-surface-variant)]'
