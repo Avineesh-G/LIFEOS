@@ -1,8 +1,8 @@
 {
-  "versionCode": 4,
-  "versionName": "1.2.2",
-  "releaseDate": "2026-09-20",
-  "releaseNotes": "LifeOS v1.2.2 (Build 4): Navigation customization with dynamic 3-pill slots and 12-destination hub pool, 120 FPS ultra-fluid animations, and optimized in-app updater with Scoped Storage FileProvider permissions.",
+  "versionCode": 11,
+  "versionName": "1.2.3",
+  "releaseDate": "2026-09-21",
+  "releaseNotes": "LifeOS v1.2.3 (Build 11): Fixed vertical scrolling regression across all devices, single viewport scroller architecture, responsive ultra-compact layout scaling, and automated touch regression suite.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "300cc0cea3e8cb6ed7be2f2ce25ebf98737b6000b0c2d816b8e9eea274b9972d"
+  "sha256": "81d1438f95740d0c8e0b1b39e050a1e969afa4e937dec8cd8bea7ef1c735d6f7"
 }
