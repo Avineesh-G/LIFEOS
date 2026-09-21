@@ -1,8 +1,8 @@
 /**
- * LifeOS — Gemini Vision Receipt OCR
+ * LifeOS — AI Receipt OCR (Dual Engine: Gemini Vision + Groq Vision Fallback)
  *
- * Sends a receipt image (as base64) to Gemini 2.0 Flash via the REST API
- * and parses out amount, title, category, and date from the receipt.
+ * Scans receipt photos and extracts total amount, merchant title, category, and date.
+ * Automatically handles API key routing and fallback between Gemini and Groq Vision.
  */
 
 export interface ReceiptOcrResult {
@@ -45,19 +45,84 @@ Respond ONLY with a valid JSON object in this exact format, no extra text:
 
 If a field is not visible or unclear, omit it from the JSON.`;
 
-export async function analyzeReceiptWithGemini(
+/**
+ * Executes Receipt OCR using Groq's LLaMA 3.2 Vision Model
+ */
+async function analyzeWithGroqVision(
   imageBlob: Blob,
-  apiKey: string
+  groqKey: string
 ): Promise<ReceiptOcrResult> {
-  const trimmedKey = apiKey?.trim() || '';
-  if (!trimmedKey) {
-    throw new Error('Gemini Vision API key not configured. Get your free key at aistudio.google.com and enter it in Settings → Gemini Vision.');
+  const base64Data = await blobToBase64(imageBlob);
+  const mimeType = imageBlob.type || 'image/jpeg';
+  const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+  const GROQ_MODELS = ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'];
+  let lastErr: Error | null = null;
+
+  for (const model of GROQ_MODELS) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqKey.trim()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: PROMPT },
+                {
+                  type: 'image_url',
+                  image_url: { url: dataUrl },
+                },
+              ],
+            },
+          ],
+          temperature: 0.1,
+          max_tokens: 256,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text: string = data?.choices?.[0]?.message?.content || '';
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            amount: typeof parsed.amount === 'number' ? parsed.amount : undefined,
+            title: typeof parsed.title === 'string' ? parsed.title : undefined,
+            category: typeof parsed.category === 'string' ? parsed.category : undefined,
+            date: typeof parsed.date === 'string' ? parsed.date : undefined,
+            rawText: text,
+          };
+        }
+        return { rawText: text };
+      }
+
+      const errText = await response.text().catch(() => '');
+      lastErr = new Error(`Groq Vision (${model}) ${response.status}: ${errText.slice(0, 100)}`);
+    } catch (err: any) {
+      lastErr = err;
+    }
   }
 
-  // Validate Google Gemini API key format (Google API keys start with AIzaSy)
-  if (!trimmedKey.startsWith('AIzaSy')) {
-    throw new Error('Invalid Gemini API Key format. Google Gemini keys start with "AIzaSy...". Please get a free key from aistudio.google.com/app/apikey');
-  }
+  throw lastErr || new Error('Groq Vision model failed');
+}
+
+/**
+ * Main Receipt OCR engine with Dual Gemini + Groq Vision support & fallback
+ */
+export async function analyzeReceiptWithGemini(
+  imageBlob: Blob,
+  apiKey?: string,
+  fallbackGroqKey?: string
+): Promise<ReceiptOcrResult> {
+  const trimmedGeminiKey = apiKey?.trim() || '';
+  const trimmedGroqKey = fallbackGroqKey?.trim() || '';
 
   // 20MB limit check
   const MAX_SIZE_BYTES = 20 * 1024 * 1024;
@@ -65,50 +130,50 @@ export async function analyzeReceiptWithGemini(
     throw new Error('Image exceeds 20MB limit. Please upload a smaller receipt photo.');
   }
 
-  const base64Data = await blobToBase64(imageBlob);
-  const mimeType = imageBlob.type || 'image/jpeg';
+  // If key provided is a Groq key (starts with gsk_), route to Groq Vision
+  if (trimmedGeminiKey.startsWith('gsk_')) {
+    return analyzeWithGroqVision(imageBlob, trimmedGeminiKey);
+  }
 
-  const requestBody = {
-    contents: [
-      {
-        parts: [
-          {
-            inline_data: {
-              mime_type: mimeType,
-              data: base64Data,
-            },
-          },
-          {
-            text: PROMPT,
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 256,
-    },
-  };
-
-  const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
   let lastError: Error | null = null;
 
-  for (const model of MODELS) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${trimmedKey}`,
+  // Attempt Gemini Vision models if primary key provided
+  if (trimmedGeminiKey) {
+    const base64Data = await blobToBase64(imageBlob);
+    const mimeType = imageBlob.type || 'image/jpeg';
+
+    const requestBody = {
+      contents: [
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-        }
-      );
+          parts: [
+            { inline_data: { mime_type: mimeType, data: base64Data } },
+            { text: PROMPT },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 256,
+      },
+    };
 
-      if (response.ok) {
-        const data = await response.json();
-        const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
 
-        try {
+    for (const model of MODELS) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${trimmedGeminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
@@ -120,25 +185,29 @@ export async function analyzeReceiptWithGemini(
               rawText: text,
             };
           }
-        } catch {
           return { rawText: text };
         }
-        return { rawText: text };
-      }
 
-      const errText = await response.text().catch(() => '');
-      if (response.status === 400 || response.status === 401 || response.status === 403) {
-        throw new Error(`Invalid Gemini API Key (${response.status}). Please check your key in Settings.`);
+        const errText = await response.text().catch(() => '');
+        lastError = new Error(`Gemini (${model}) ${response.status}: ${errText.slice(0, 100)}`);
+      } catch (err: any) {
+        lastError = err;
       }
-
-      lastError = new Error(`Gemini (${model}) error ${response.status}: ${errText.slice(0, 100)}`);
-    } catch (err: any) {
-      if (err.message?.includes('Invalid Gemini API Key')) {
-        throw err;
-      }
-      lastError = err;
     }
   }
 
-  throw lastError || new Error('Gemini AI models are busy right now. Please try scanning again.');
+  // Automatic Fallback: Try Groq Vision if a Groq key exists in Settings
+  if (trimmedGroqKey && trimmedGroqKey.startsWith('gsk_')) {
+    try {
+      return await analyzeWithGroqVision(imageBlob, trimmedGroqKey);
+    } catch (groqErr: any) {
+      if (!lastError) lastError = groqErr;
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  throw new Error('API Key missing or invalid. Please check your Gemini or Groq API key in Settings.');
 }

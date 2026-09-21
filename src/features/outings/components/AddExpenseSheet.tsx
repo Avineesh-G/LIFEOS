@@ -52,6 +52,7 @@ interface AddExpenseSheetProps {
   outing: Outing;
   expenseToEdit?: OutingExpense | null;
   geminiVisionApiKey?: string;
+  groqApiKey?: string;
 }
 
 export function AddExpenseSheet({
@@ -60,6 +61,7 @@ export function AddExpenseSheet({
   outing,
   expenseToEdit,
   geminiVisionApiKey,
+  groqApiKey,
 }: AddExpenseSheetProps) {
   const { people, addExpense, updateExpense } = useOutings();
 
@@ -239,14 +241,14 @@ export function AddExpenseSheet({
       setPendingReceipts((prev) => [...prev, ...newItems]);
       triggerHaptic('save');
 
-      // ── Gemini Vision OCR: analyze the first new receipt ──
-      if (geminiVisionApiKey?.trim() && newItems.length > 0) {
+      // ── AI Vision OCR: analyze the first new receipt (Gemini + Groq Dual Engine) ──
+      if ((geminiVisionApiKey?.trim() || groqApiKey?.trim()) && newItems.length > 0) {
         setIsAnalyzing(true);
         setOcrStatus('idle');
         setOcrMessage('');
         try {
           // Use the full-quality blob for better OCR accuracy
-          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiVisionApiKey);
+          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiVisionApiKey, groqApiKey);
           let filled = false;
 
           if (result.amount && result.amount > 0 && !amountInput) {

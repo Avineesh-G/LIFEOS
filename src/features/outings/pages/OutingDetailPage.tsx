@@ -73,10 +73,11 @@ export default function OutingDetailPage() {
   const [isSettleOpen, setIsSettleOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<OutingExpense | null>(null);
 
-  // Read Gemini Vision API key from localStorage (same keys used by useData.ts)
-  const geminiVisionApiKey = useMemo(() => {
+  // Read Gemini Vision API key & Groq API key from localStorage (same keys used by useData.ts)
+  const apiKeys = useMemo(() => {
+    let visionKey = '';
+    let groqKey = '';
     try {
-      // Try per-user cache first (lifeos_cache_<uid>)
       const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
       if (cachedUser) {
         const uid = JSON.parse(cachedUser)?.uid;
@@ -84,18 +85,21 @@ export default function OutingDetailPage() {
           const raw = localStorage.getItem('lifeos_cache_' + uid);
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (parsed?.geminiVisionApiKey) return parsed.geminiVisionApiKey as string;
+            visionKey = parsed?.geminiVisionApiKey || '';
+            groqKey = parsed?.geminiApiKey || '';
           }
         }
       }
-      // Fallback: global cache
-      const globalRaw = localStorage.getItem('lifeos_cached_app_data');
-      if (globalRaw) {
-        const parsed = JSON.parse(globalRaw);
-        return (parsed?.geminiVisionApiKey as string) || '';
+      if (!visionKey || !groqKey) {
+        const globalRaw = localStorage.getItem('lifeos_cached_app_data');
+        if (globalRaw) {
+          const parsed = JSON.parse(globalRaw);
+          if (!visionKey) visionKey = parsed?.geminiVisionApiKey || '';
+          if (!groqKey) groqKey = parsed?.geminiApiKey || '';
+        }
       }
     } catch {}
-    return '';
+    return { visionKey, groqKey };
   }, []);
 
   // Local notes autosave state
@@ -586,7 +590,8 @@ export default function OutingDetailPage() {
         }}
         outing={activeOuting}
         expenseToEdit={editingExpense}
-        geminiVisionApiKey={geminiVisionApiKey}
+        geminiVisionApiKey={apiKeys.visionKey}
+        groqApiKey={apiKeys.groqKey}
       />
 
       {/* Manual Entry Sheet (Shopping Receipt / Lend / Received) */}
