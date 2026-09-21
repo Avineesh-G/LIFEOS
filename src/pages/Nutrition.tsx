@@ -6,6 +6,7 @@ import { format, parseISO, addDays, subDays } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
+import NightCanteenSection from '../components/nutrition/NightCanteenSection';
 import { FITNESS_GOALS } from '../utils/calculations';
 import InteractiveWaterGlass from '../components/interactive/InteractiveWaterGlass';
 import M3StatWidget from '../components/M3StatWidget';
@@ -856,6 +857,24 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                           <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
                             <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped {mealObj.label.toLowerCase()}</p>
                           </div>
+                        ) : mealObj.slot === 'nightCanteen' ? (
+                          <NightCanteenSection
+                            mealLog={mealLog}
+                            onToggleItem={(name, cals) => toggleMenuItem('nightCanteen', name, cals)}
+                            onUpdatePortion={(id, change) => updateItemPortion('nightCanteen', id, change)}
+                            extraTexts={extraTexts}
+                            setExtraTexts={setExtraTexts}
+                            editingExtraId={editingExtraId}
+                            setEditingExtraId={setEditingExtraId}
+                            editExtraName={editExtraName}
+                            setEditExtraName={setEditExtraName}
+                            editExtraCals={editExtraCals}
+                            setEditExtraCals={setEditExtraCals}
+                            onSaveExtraEdit={saveEditedExtraItem}
+                            onDeleteExtraItem={handleDeleteExtraItem}
+                            onAddExtraItem={handleAddExtraItem}
+                            estimatingSlot={estimatingSlot}
+                          />
                         ) : (
                           <>
                             {/* Standard Menu Items if present */}
@@ -928,33 +947,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                               </div>
                             )}
 
-                            {/* Night Canteen Quick Suggestions */}
-                            {mealObj.slot === 'nightCanteen' && (
-                              <div className="mb-3">
-                                <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mb-1.5">Quick Canteen Picks:</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {['Maggi', 'Egg Roll', 'Chicken Roll', 'Cold Coffee', 'Sandwich', 'Tea', 'French Fries'].map(chip => (
-                                    <button
-                                      key={chip}
-                                      type="button"
-                                      onClick={() => {
-                                        triggerHaptic(5);
-                                        setExtraTexts(prev => ({ ...prev, [mealObj.slot]: chip }));
-                                      }}
-                                      className="text-xs px-2.5 py-1 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:border-accent/40 text-secondary-light dark:text-secondary-dark transition-colors"
-                                    >
-                                      + {chip}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
                             {/* Extra / Logged Items List for this slot */}
                             {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
                               <div className="mt-4 mb-4 space-y-2">
                                 <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">
-                                  {mealObj.slot === 'nightCanteen' ? 'Logged Canteen Items' : 'Extra Items'}
+                                  Extra Items
                                 </h4>
                                 {mealLog.items.filter(i => i.isExtra).map((extra) => (
                                   <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
@@ -1019,18 +1016,18 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                               </div>
                             )}
 
-                            {/* Add Extra / Canteen Item Input with AI calorie estimation */}
+                            {/* Add Extra Item Input with AI calorie estimation */}
                             <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
                               <div className="flex items-center gap-2 mb-2">
                                 <Sparkles size={14} className="text-purple-500" />
                                 <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
-                                  {mealObj.slot === 'nightCanteen' ? 'Ate at Night Canteen? (AI estimates cals)' : 'Ate something else? (AI estimates cals)'}
+                                  Ate something else? (AI estimates cals)
                                 </span>
                               </div>
                               <div className="flex gap-2">
                                 <input
                                   type="text"
-                                  placeholder={mealObj.slot === 'nightCanteen' ? 'e.g. 1 plate Maggi, 1 cold coffee' : 'e.g. 2 slices of pizza, 1 apple'}
+                                  placeholder="e.g. 2 slices of pizza, 1 apple"
                                   value={extraTexts[mealObj.slot] || ''}
                                   onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
                                   onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
