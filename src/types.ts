@@ -222,6 +222,7 @@ export interface AppData {
   nutritionLogs: NutritionLog[];
   messPreference: MessType;
   geminiApiKey: string;
+  geminiVisionApiKey?: string;
 
   // Vault / Password Keeper Module
   vaultItems?: VaultItem[];

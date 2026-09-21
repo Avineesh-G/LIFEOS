@@ -50,7 +50,13 @@ export async function analyzeReceiptWithGemini(
   apiKey: string
 ): Promise<ReceiptOcrResult> {
   if (!apiKey?.trim()) {
-    throw new Error('Gemini API key not configured. Please add it in Settings → Gemini AI.');
+    throw new Error('Gemini Vision API key not configured. Please add it in Settings → Gemini Vision API Key.');
+  }
+
+  // 20MB limit check
+  const MAX_SIZE_BYTES = 20 * 1024 * 1024;
+  if (imageBlob.size > MAX_SIZE_BYTES) {
+    throw new Error('Image exceeds 20MB limit. Please upload a smaller receipt photo.');
   }
 
   const base64Data = await blobToBase64(imageBlob);
@@ -78,41 +84,55 @@ export async function analyzeReceiptWithGemini(
     },
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    }
-  );
+  const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro'];
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    const errText = await response.text().catch(() => '');
-    throw new Error(`Gemini API error (${response.status}): ${errText.slice(0, 200)}`);
+  for (const model of MODELS) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+        try {
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            return {
+              amount: typeof parsed.amount === 'number' ? parsed.amount : undefined,
+              title: typeof parsed.title === 'string' ? parsed.title : undefined,
+              category: typeof parsed.category === 'string' ? parsed.category : undefined,
+              date: typeof parsed.date === 'string' ? parsed.date : undefined,
+              rawText: text,
+            };
+          }
+        } catch {
+          return { rawText: text };
+        }
+        return { rawText: text };
+      }
+
+      const errText = await response.text().catch(() => '');
+      if (response.status === 400 || response.status === 403) {
+        throw new Error(`Gemini API Key Error (${response.status}): ${errText.slice(0, 150)}`);
+      }
+
+      lastError = new Error(`Gemini (${model}) ${response.status}: ${errText.slice(0, 150)}`);
+    } catch (err: any) {
+      if (err.message?.includes('Gemini API Key Error')) {
+        throw err;
+      }
+      lastError = err;
+    }
   }
 
-  const data = await response.json();
-  const text: string =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-  // Try to parse the JSON response
-  try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      return {
-        amount: typeof parsed.amount === 'number' ? parsed.amount : undefined,
-        title: typeof parsed.title === 'string' ? parsed.title : undefined,
-        category: typeof parsed.category === 'string' ? parsed.category : undefined,
-        date: typeof parsed.date === 'string' ? parsed.date : undefined,
-        rawText: text,
-      };
-    }
-  } catch {
-    // Fallback: return raw text for debugging
-    return { rawText: text };
-  }
-
-  return { rawText: text };
+  throw lastError || new Error('All Gemini models are currently busy. Please try again shortly.');
 }

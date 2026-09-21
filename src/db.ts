@@ -25,6 +25,7 @@ const DEFAULT_DATA: AppData = {
   nutritionLogs: [],
   messPreference: 'nonveg',
   geminiApiKey: '',
+  geminiVisionApiKey: '',
   vaultItems: [],
   vaultConfig: null,
   laundryBatches: [],

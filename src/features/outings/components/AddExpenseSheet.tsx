@@ -51,7 +51,7 @@ interface AddExpenseSheetProps {
   onClose: () => void;
   outing: Outing;
   expenseToEdit?: OutingExpense | null;
-  geminiApiKey?: string;
+  geminiVisionApiKey?: string;
 }
 
 export function AddExpenseSheet({
@@ -59,7 +59,7 @@ export function AddExpenseSheet({
   onClose,
   outing,
   expenseToEdit,
-  geminiApiKey,
+  geminiVisionApiKey,
 }: AddExpenseSheetProps) {
   const { people, addExpense, updateExpense } = useOutings();
 
@@ -182,10 +182,39 @@ export function AddExpenseSheet({
     }
   }, [spentAt, outing]);
 
+  // Long press timer for deleting receipt photo thumbnails
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleThumbnailTouchStart = (idx: number) => {
+    longPressTimerRef.current = setTimeout(() => {
+      triggerHaptic('medium');
+      removePendingReceipt(idx);
+    }, 500);
+  };
+
+  const handleThumbnailTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
   // Handle photo selection & off-main-thread compression + Gemini OCR
   const handlePhotosSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // 20MB file size limit pre-check
+    const MAX_PHOTO_BYTES = 20 * 1024 * 1024;
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > MAX_PHOTO_BYTES) {
+        setError('Photo exceeds 20MB limit. Please choose a smaller image.');
+        triggerHaptic('error');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (cameraInputRef.current) cameraInputRef.current.value = '';
+        return;
+      }
+    }
 
     if (pendingReceipts.length + files.length > MAX_RECEIPTS_PER_EXPENSE) {
       setError(`Maximum ${MAX_RECEIPTS_PER_EXPENSE} receipts allowed per expense`);
@@ -211,13 +240,13 @@ export function AddExpenseSheet({
       triggerHaptic('save');
 
       // ── Gemini Vision OCR: analyze the first new receipt ──
-      if (geminiApiKey?.trim() && newItems.length > 0) {
+      if (geminiVisionApiKey?.trim() && newItems.length > 0) {
         setIsAnalyzing(true);
         setOcrStatus('idle');
         setOcrMessage('');
         try {
           // Use the full-quality blob for better OCR accuracy
-          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiApiKey);
+          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiVisionApiKey);
           let filled = false;
 
           if (result.amount && result.amount > 0 && !amountInput) {
@@ -738,11 +767,20 @@ export function AddExpenseSheet({
               <span className="text-[9px] font-bold">Gallery</span>
             </button>
 
-            {/* Thumbnail previews */}
+            {/* Thumbnail previews (Supports tap X or long-press to delete) */}
             {pendingReceipts.map((rcpt, idx) => (
               <div
                 key={idx}
-                className="relative h-16 w-16 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 shrink-0 group"
+                onTouchStart={() => handleThumbnailTouchStart(idx)}
+                onTouchEnd={handleThumbnailTouchEnd}
+                onTouchCancel={handleThumbnailTouchEnd}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  triggerHaptic('medium');
+                  removePendingReceipt(idx);
+                }}
+                className="relative h-16 w-16 rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 shrink-0 group select-none cursor-pointer"
+                title="Long press or tap X to delete"
               >
                 <img
                   src={rcpt.previewUrl}
@@ -751,7 +789,10 @@ export function AddExpenseSheet({
                 />
                 <button
                   type="button"
-                  onClick={() => removePendingReceipt(idx)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removePendingReceipt(idx);
+                  }}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center cursor-pointer shadow-xs active:scale-90"
                 >
                   <X size={10} />

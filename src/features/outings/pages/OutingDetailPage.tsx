@@ -73,8 +73,8 @@ export default function OutingDetailPage() {
   const [isSettleOpen, setIsSettleOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<OutingExpense | null>(null);
 
-  // Read Gemini API key from localStorage (same keys used by useData.ts)
-  const geminiApiKey = useMemo(() => {
+  // Read Gemini Vision API key from localStorage (same keys used by useData.ts)
+  const geminiVisionApiKey = useMemo(() => {
     try {
       // Try per-user cache first (lifeos_cache_<uid>)
       const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
@@ -84,7 +84,7 @@ export default function OutingDetailPage() {
           const raw = localStorage.getItem('lifeos_cache_' + uid);
           if (raw) {
             const parsed = JSON.parse(raw);
-            if (parsed?.geminiApiKey) return parsed.geminiApiKey as string;
+            if (parsed?.geminiVisionApiKey) return parsed.geminiVisionApiKey as string;
           }
         }
       }
@@ -92,7 +92,7 @@ export default function OutingDetailPage() {
       const globalRaw = localStorage.getItem('lifeos_cached_app_data');
       if (globalRaw) {
         const parsed = JSON.parse(globalRaw);
-        return (parsed?.geminiApiKey as string) || '';
+        return (parsed?.geminiVisionApiKey as string) || '';
       }
     } catch {}
     return '';
@@ -586,7 +586,7 @@ export default function OutingDetailPage() {
         }}
         outing={activeOuting}
         expenseToEdit={editingExpense}
-        geminiApiKey={geminiApiKey}
+        geminiVisionApiKey={geminiVisionApiKey}
       />
 
       {/* Manual Entry Sheet (Shopping Receipt / Lend / Received) */}
