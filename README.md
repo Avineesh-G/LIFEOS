@@ -1,11 +1,13 @@
 <div align="center">
 
-# 🌌 LifeOS
+<img src="public/icon.svg" width="100" height="100" alt="LifeOS Logo" />
+
+# LifeOS
 
 **The Unified Personal Operating System for High-Performance Living**  
 *Academics · Hypertrophy Fitness · Nutrition · Campus Life · Biometric Vault · Home Screen Widget*
 
-[![Version](https://img.shields.io/badge/Version-v1.2.1_(Build_2)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v1.2.3_(Build_13)-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript_5-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -14,7 +16,7 @@
 
 <br />
 
-### [📱 Download Direct APK (v1.2.1)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [🌐 Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [✨ Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [🐛 Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
+### [Download Direct APK (v1.2.3)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) · [Launch Live Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) · [Interactive Showcase](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) · [Report Bug](https://github.com/Avineesh-G/LIFEOS/issues)
 
 <br />
 
@@ -22,163 +24,156 @@
 
 ---
 
-## 📖 Executive Summary
+## Executive Summary
 
-Modern students and professionals juggle between 5 to 7 fragmented, ad-ridden apps every single day:
-- A gym workout & progressive overload logger ($10/mo)
-- A Pomodoro focus & study timer ($6/mo)
-- An expense & personal budget tracker ($8/mo)
-- A college timetable schedule & classroom planner
-- A hostel mess menu & macro nutrition tracker
-- A daily task manager & habit tracker
-- A password keeper or notes vault
+Modern students and professionals often juggle between five to seven fragmented, subscription-gated applications:
+- A progressive overload and gym workout logger
+- A Pomodoro focus timer and study manager
+- A daily spending and budget ledger
+- A group outings and shared trip expense splitter
+- A college timetable and classroom schedule organizer
+- A campus mess menu and macronutrient tracker
+- A password keeper and encrypted notes vault
 
-**LifeOS eliminates this digital clutter completely.** Designed and engineered by **Gujjeti Avineesh**, LifeOS unifies daily execution into a single, cohesive, offline-first operating system. Built with **React 18, TypeScript, Tailwind CSS, and Capacitor 8**, it compiles into a signed, hardware-accelerated native Android app supporting native biometrics, 120Hz display refresh rates, home screen glanceable widgets, and zero subscription paywalls.
-
----
-
-## ⚡ What's New in v1.2.1 (Build 2)
-
-- 🔤 **Pixel-Style Typography System**: Unified `Google Sans Flex` variable typeface across the entire app — zero font mixing. Implements the 4-weight Pixel hierarchy (400 Regular, 500 Medium, 600 SemiBold, 700 Bold-rare) and a 4-level tonal text hierarchy (`#F2F3F5` primary, `#B8BBC3` secondary, `#858994` tertiary, `#5F626B` disabled in dark mode).
-- 🧭 **Navigation Bar Redesign**: Floating pill (icon-only tabs) + separate squircle More button. Both pill and squircle recolor per active interface. Hides on scroll-down, reappears on scroll-up with smooth fade transition. Auto-hides inside sub-interface routes.
-- 📋 **Navigation Hub Sheet**: Compact bottom-sheet More menu opened by the squircle button — 10 destinations in a content-hugging layout (max 60dvh/420px), safe-area aware, drag-to-dismiss with Framer Motion spring physics.
-- 🏠 **Per-Interface Background System**: Each main interface carries its own faintly seed-tinted canvas (`#FDFDFD` light / `#121316` dark at ~5% seed blend) with a single organic blob accent and interface-keyed ambient gradient.
-- 🐛 **Blank Screen Hardening**: Structural fixes to prevent recurring blank-screen-after-HMR issues — lazy import chains, React error boundaries, service worker cache-busting, and HMR stability guards.
-
-- 📱 **Per-Widget Metric Customization (`WidgetConfigActivity`)**: Configure each placed widget instance independently! Select 2 to 3 metrics to display on your home screen:
-  1. 🔥 **Current Streak**: Consecutive study and active habit consistency count.
-  2. ✓ **Tasks Done Today**: Completed vs total scheduled tasks tally (`x/y`).
-  3. ⏱ **Study Time Today**: Formatted focus time tracked today (`1h 30m`).
-  4. 📅 **Next Scheduled Block**: Real-time next class or lecture time and subject from your timetable.
-  5. 💳 **Safe-to-Spend / Today's Spent**: Daily expense tracking and safe-to-spend allowance.
-- 📐 **Adaptive Slot-Based Widget Architecture**: The home screen widget dynamically adapts its layout — rendering a prominent hero left tile alongside either a full-height single right tile (for 2 selected metrics) or two stacked tiles (for 3 selected metrics).
-- 🛠️ **Fixed Stuck Blank Widget (RemoteViews Inflation)**: Resolved launcher host fallback issue caused by unannotated view tags by ensuring 100% `@RemoteView`-compatible view inflation and per-widget isolated error handling.
-- 🧹 **Automatic Orphaned Widget Cleanup (`onDeleted`)**: Unplaced or removed widget instances automatically clean up their corresponding configuration entries from SharedPreferences.
-- 🥗 **Nutrition Navigation Persistence**: Resolved bottom navigation dock visibility when switching between past dates in the Nutrition module.
-- 🎨 **Settings Toggle: Dynamic Theme vs. Full Night Theme**: Centralized toggle locking either dynamic circadian transitions (6 day phases) or tranquil permanent midnight aesthetics.
+LifeOS unifies daily execution into a single, cohesive, offline-first personal operating system. Designed and engineered by Gujjeti Avineesh, LifeOS is built with React 18, TypeScript, Tailwind CSS, and Capacitor 8. It compiles into a hardware-accelerated Android application supporting native biometrics, 120Hz display refresh rates, glanceable home screen widgets, and an autonomous in-app update mechanism with zero subscription paywalls.
 
 ---
 
-## 🎯 Core Features & Modules
+## What is New in v1.2.3 (Build 13)
 
-### 📱 1. Native Android Home Screen Widget
-- **Glanceable Tri-Metric Display**: Real-time study streak count, today's task completion tally (`Done / Total`), and total study minutes logged today (`Xh Ym`).
-- **Circadian Theming Engine**: Synchronized with the app's 6 day-phase color system natively inside Android `RemoteViews`.
-- **Stat Deep-Links**: Direct routing into relevant app modules from widget tiles.
-- **Asynchronous Data Bridge**: Zero UI thread contention through background executor dispatch and Capacitor Preferences persistence.
+- **Outing Expenses Architecture & Sheet Refinement**: Completely resolved modal bottom sheet touch-scrolling blockers by scoping gesture detection to drag handles via Framer Motion drag controls. Restored clean natural document flow across Outing creation, expense logging, and balance settlements with verified zero input overlap.
+- **Single Viewport Scroller Architecture**: Enforced a single top-level viewport scroller across all routes and sub-interfaces, completely eliminating trapped nested scroll areas and preserving 100% swipe responsiveness on physical Android devices.
+- **Autonomous In-App APK Updater**: Native updater client backed by SHA-256 cryptographic verification and seamless Android PackageInstaller integration, enabling zero-friction sideload updates directly from the edge CDN.
+- **Pixel-Style Typography System**: Unified Google Sans Flex variable typeface across the entire platform. Implements strict tonal text hierarchy (primary, secondary, tertiary, and disabled states) across light and dark themes.
+- **Per-Interface Ambient Canvas**: Dedicated seed-tinted backgrounds for each primary workspace (Home, Gym, Study, Nutrition, Outings, Spending, Timetable, Vault) with organic corner accents and ambient circadian palettes.
+- **Automated Quality & Regression Gates**: 1,260-point layout matrix validation across six viewports, continuous scroll regression suite, and automated palette perceptual distance verification (Delta E >= 13.0).
 
-### 🎨 2. Circadian Ambient Sky & Dynamic Theming
-- **6 Natural Day Phases**: Mathematically maps device time to *Dawn* (05:00–08:00), *Morning* (08:00–12:00), *Afternoon* (12:00–17:00), *Dusk* (17:00–19:00), *Evening* (19:00–22:00), and *Night* (22:00–05:00).
-- **Procedural Pixel-Sky Canvas**: Multi-tiered pixel background with atmospheric gradients, dithering, and low-overhead requestAnimationFrame star shimmer.
-- **Dynamic Fluid UI Tokens**: CSS variable transitions (400ms cubic-bezier) altering card surfaces, borders, text contrast, and accents automatically.
-- **Adaptive Typography Density**: Variable font weights dynamically adjusting heading and body typography between high-energy daytime and calm evening reading.
+---
 
-### 🏋️ 3. Gym & Hypertrophy Tracker
-- **Intelligent Split Management**: Push/Pull/Legs, Upper/Lower, or custom routines with interactive weekly schedules.
-- **Live Session Logger**: Log weights, reps, and RPE with automated rest interval timers and set checkboxes.
-- **Progressive Overload Analytics**: Real-time 1RM estimations (Brzycki formula), personal records (PRs), and volume tracking per exercise.
-- **Customizable Routine Library**: Add, reorder, and modify workouts with custom exercise sets and target reps.
+## Core Modules & Capabilities
 
-### 📚 4. Deep Focus Study & Academics
-- **Hardware-Synced Study Timer**: Persistent wall-clock time tracking that never drifts or freezes when the device screen sleeps or the app minimizes.
-- **Continuous Foreground Service**: Active Android notification with live elapsed time display and pause/stop triggers.
-- **365-Day Consistency Heatmap**: GitHub-style activity grid visualizing daily study intensity and focus streaks.
-- **Subject-Wise Analytics**: Track study distribution across subjects with session notes and exam doubts log.
+### 1. Native Android Home Screen Widget
+- **Configurable Glanceable Display**: Displays real-time focus streaks, daily task completion tallies, and logged study minutes directly on the launcher.
+- **Circadian Theming Engine**: Synchronizes with the application's six day-phase color system natively inside Android RemoteViews.
+- **Direct Module Deep-Linking**: Direct intent routing into relevant operational areas straight from widget tiles.
+- **Non-Blocking Data Bridge**: Zero UI thread contention via background executor dispatch and Capacitor Preferences persistence.
 
-### 📅 5. Smart Class Timetable
-- **Active Period Highlighter**: Dynamically pinpoints current and upcoming lectures based on real-time clock hours.
-- **Room & Instructor Details**: Displays lecture hall numbers, lab locations, and professor names.
-- **Proactive Notification Leads**: Scheduled local notifications (5 to 20 minutes before class) to ensure you never miss a lecture.
-- **Tap-to-Study Shortcut**: Launch a focused study session directly from any syllabus block.
+### 2. Circadian Ambient Theming & Color Science
+- **Six Natural Day Phases**: Mathematically maps device time to Dawn (05:00-08:00), Morning (08:00-12:00), Afternoon (12:00-17:00), Dusk (17:00-19:00), Evening (19:00-22:00), and Night (22:00-05:00).
+- **Procedural Canvas**: Multi-tiered background canvas with atmospheric gradients and low-overhead star shimmer.
+- **Dynamic Fluid Design Tokens**: CSS custom property transitions altering card surfaces, borders, text contrast, and accents automatically.
+- **Strict Color Accessibility**: Enforces WCAG AAA compliance and Delta E >= 13.0 perceptual distance between interface seed colors.
 
-### 🥗 6. Campus Nutrition & Mess Menus
-- **Daily Macro Target Engine**: Tracks protein, carbohydrate, fat, and total caloric intake against personal fitness goals.
+### 3. Gym & Hypertrophy Tracker
+- **Workout Routine Management**: Supports Push/Pull/Legs, Upper/Lower, and custom training splits with interactive weekly schedules.
+- **Live Session Logger**: Log weights, reps, and RPE with automated rest interval timers and set completion checks.
+- **Progressive Overload Analytics**: Real-time one-rep maximum estimations (Brzycki equation), personal record badges, and volume tracking per muscle group.
+
+### 4. Deep Focus Study & Academics
+- **Hardware-Synced Focus Stopwatch**: Persistent wall-clock time tracking that never drifts or freezes when the device screen sleeps or the app is minimized.
+- **Foreground Service Integration**: Persistent Android notification with live elapsed time display and pause/resume triggers.
+- **365-Day Consistency Heatmap**: Visual activity grid charting daily study intensity and academic milestones.
+- **Subject-Wise Analytics**: Track study time distribution across subjects with session notes and exam doubts log.
+
+### 5. Smart Class Timetable
+- **Active Period Highlighter**: Dynamically highlights current and upcoming lectures based on real-time clock hours.
+- **Room & Faculty Details**: Displays lecture hall numbers, lab locations, and instructor details.
+- **Proactive Notification Leads**: Scheduled notifications prior to lectures to prevent missed sessions.
+
+### 6. Campus Nutrition & Mess Menus
+- **Daily Macro Target Engine**: Tracks protein, carbohydrate, fat, and caloric intake against fitness goals.
 - **Hostel Mess Integration**: Pre-configured campus meal menus across breakfast, lunch, high tea, and dinner.
-- **Meal Logging**: Check off consumed mess meals or add custom foods with instant macronutrient calculation.
+- **Rapid Meal Logging**: Check off consumed mess meals or record custom foods with instant macronutrient breakdown.
 
-### 🧺 7. Hostel Laundry Manager
-- **Batch Tracking**: Track submitted laundry batches with handover dates and expected delivery timelines.
-- **Itemized Counting**: Categorize shirts, pants, undergarments, and bedsheets with automated tallying.
-- **Status Indicators**: Instant visual indicators for pending, in-wash, and returned laundry bags.
+### 7. Outing Expenses & Group Settlements
+- **Group Trip & Outing Tracking**: Record outings with destinations, optional budgets, and participant rosters.
+- **Rapid Expense Logging**: Log shared expenses, assign payment sources, and select split modes (Equal, Custom, or Personal).
+- **On-Device Receipt Compression**: Client-side image compression storing compressed receipts locally in IndexedDB.
+- **Settle-Up Optimization**: Instant net balance calculations identifying who owes whom with single-tap clipboard recap sharing.
 
-### 💰 8. Frictionless Expense & Budget Tracker
-- **Lightning Fast Logging**: Log expenditures in under 3 seconds with minimal taps.
-- **Student-Centric Categories**: Mess & Food, Academics, Travel, Gym & Supplements, Personal, and Miscellaneous.
-- **Monthly Allowance Guardrails**: Visual progress meters warning when approaching budget thresholds.
+### 8. Frictionless Expense & Budget Tracker
+- **Rapid Entry**: Log personal expenditures in seconds with minimal interactions.
+- **Categorized Accounting**: Mess & Food, Academics, Travel, Gym, Personal, and Miscellaneous ledgers.
+- **Allowance Guardrails**: Visual progress meters warning when approaching defined monthly spending limits.
 
-### 🔐 9. Biometric App Lock & Password Vault
-- **Hardware Biometrics**: Secured via Android Jetpack Biometrics (`BIOMETRIC_STRONG | DEVICE_CREDENTIAL`) supporting fingerprint, face unlock, and device PIN fallback.
-- **AES-256-GCM Password Vault**: Client-side encrypted credential keeper for university portals, Wi-Fi logins, and academic accounts with PBKDF2 key derivation.
-- **Background Auto-Lock**: Configurable security timeouts (Instant, 30s, 1m, 5m) when the app is backgrounded.
+### 9. Hostel Laundry Manager
+- **Batch Tracking**: Monitor submitted laundry batches with handover dates and expected delivery timelines.
+- **Itemized Counting**: Categorize apparel, linen, and delicates with automated tallying.
+- **Status Workflows**: Visual state indicators for pending, processing, and collected laundry bags.
 
----
-
-## 🏗️ System Architecture
-
-```
-┌───────────────────────────────────────────────────────────────────────────┐
-│                      LifeOS Unified Client (React 18)                     │
-│  (Home · Gym · Study · Nutrition · Timetable · Spending · Settings · Vault)│
-└─────────────────────┬───────────────────────────────┬─────────────────────┘
-                      │                               │
-                      ▼                               ▼
-       ┌─────────────────────────────┐ ┌─────────────────────────────┐
-       │     useDayPhase() Hook      │ │    useData (Sync Engine)    │
-       │  - Real-time phase clock    │ │  - Optimistic local cache   │
-       │  - ThemeMode (Dynamic/Night)│ │  - Partial diff merge       │
-       │  - Preferences persistence  │ │  - Firestore background sync│
-       └──────────────┬──────────────┘ └──────────────┬──────────────┘
-                      │                               │
-        ┌─────────────┴─────────────┐                 │
-        ▼                           ▼                 ▼
-┌───────────────────┐     ┌───────────────────┐ ┌───────────────────────────┐
-│ DayThemeProvider  │     │   usePixelSky()   │ │ Firebase Cloud Firestore  │
-│ - CSS custom vars │     │ - PixelSkyCanvas  │ │ users/{uid} private doc   │
-│ - 400ms transition│     │ - Twinkle layer   │ └───────────────────────────┘
-└───────────────────┘     └───────────────────┘               │
-                                                              ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                          Capacitor Native Bridge                          │
-│ ┌──────────────────────┐ ┌──────────────────────┐ ┌─────────────────────┐ │
-│ │ WidgetUpdaterPlugin  │ │  ApkInstallerPlugin  │ │ TimerForegroundSvc  │ │
-│ │ - Off-thread executor│ │ - Sideload installer │ │ - Wall-clock timer  │ │
-│ │ - SharedPreferences  │ │ - SHA-256 validation │ │ - Persistent alerts │ │
-│ └──────────────────────┘ └──────────────────────┘ └─────────────────────┘ │
-│ ┌──────────────────────┐ ┌──────────────────────┐ ┌─────────────────────┐ │
-│ │   NativeBiometric    │ │   CapacitorHaptics   │ │ LocalNotifications  │ │
-│ └──────────────────────┘ └──────────────────────┘ └─────────────────────┘ │
-└───────────────────────────────────────────────────────────────────────────┘
-```
+### 10. Biometric Credentials Vault
+- **Hardware Biometrics**: Secured via Android Jetpack Biometrics supporting fingerprint, face unlock, and device PIN fallback.
+- **AES-256-GCM Encryption**: Client-side encrypted credential keeper for portals and academic accounts with PBKDF2 key derivation.
+- **Background Auto-Lock**: Configurable security timeouts when the application is backgrounded.
 
 ---
 
-## 🛠️ Technology Stack
+## System Architecture
+
+```
++---------------------------------------------------------------------------+
+|                     LifeOS Unified Client (React 18)                      |
+|  (Home · Gym · Study · Nutrition · Timetable · Outings · Vault · Settings) |
++---------------------+-------------------------------+---------------------+
+                      |                               |
+                      v                               v
+       +-----------------------------+ +-----------------------------+
+       |     useDayPhase() Hook      | |    useData (Sync Engine)    |
+       |  - Real-time phase clock    | |  - Optimistic local cache   |
+       |  - ThemeMode (Dynamic/Night)| |  - IndexedDB storage        |
+       |  - Preferences persistence  | |  - Firestore background sync|
+       +--------------+--------------+ +--------------+--------------+
+                      |                               |
+        +-------------+-------------+                 |
+        v                           v                 v
++-------------------+     +-------------------+ +---------------------------+
+| DayThemeProvider  |     |   usePixelSky()   | | Firebase Cloud Firestore  |
+| - CSS custom vars |     | - PixelSkyCanvas  | | users/{uid} private doc   |
+| - Tonal palettes  |     | - Twinkle layer   | +---------------------------+
++-------------------+     +-------------------+               |
+                                                              v
++---------------------------------------------------------------------------+
+|                          Capacitor Native Bridge                          |
+| +----------------------+ +----------------------+ +---------------------+ |
+| | WidgetUpdaterPlugin  | |  ApkInstallerPlugin  | | TimerForegroundSvc  | |
+| | - Off-thread executor| | - Sideload installer | | - Wall-clock timer  | |
+| | - SharedPreferences  | | - SHA-256 validation | | - Persistent alerts | |
+| +----------------------+ +----------------------+ +---------------------+ |
+| +----------------------+ +----------------------+ +---------------------+ |
+| |   NativeBiometric    | |   CapacitorHaptics   | | LocalNotifications  | |
+| +----------------------+ +----------------------+ +---------------------+ |
++---------------------------------------------------------------------------+
+```
+
+---
+
+## Technology Stack
 
 | Domain | Technology | Description |
 |---|---|---|
-| **Core Framework** | React 18.3 | Concurrent rendering, functional components, hooks |
+| **Core Framework** | React 18.3 | Concurrent rendering, functional components, custom hooks |
 | **Language** | TypeScript 5.5 | Strictly typed domain models and interfaces |
-| **Styling & Design** | Tailwind CSS 3.4 | Utility-first styling with custom glassmorphic tokens |
-| **Typography** | Clash Display & Satoshi | Adaptive variable fonts with dynamic weight scaling |
+| **Styling & Design** | Tailwind CSS 3.4 | Utility-first styling with custom Material 3 tokens |
+| **Typography** | Google Sans Flex | Adaptive variable font with unified weight hierarchy |
 | **Animations** | Framer Motion 11 | GPU-composited 120fps physics-based transitions |
-| **Build Tooling** | Vite 8 + Rolldown | Blazing fast HMR and optimized production bundles |
+| **Build Tooling** | Vite 8 + Rolldown | High-performance bundling and instant HMR |
 | **Native Runtime** | Capacitor 8 | Native Android container with modern plugin bridge |
 | **Android Layer** | Kotlin 2.0 & Java 17 | Android SDK 34+ target, AndroidX, Gradle 8.14 |
-| **Cloud Backend** | Google Firebase | Cloud Firestore for real-time document synchronization |
+| **Cloud Backend** | Google Firebase | Cloud Firestore for encrypted cloud synchronization |
 | **Authentication** | Firebase Auth | Google OAuth 2.0 and biometric-backed local sessions |
-| **Home Screen Widget** | Android AppWidget | Native `RemoteViews`, `AppWidgetProvider`, day-phase styling |
+| **Home Screen Widget** | Android AppWidget | Native RemoteViews, AppWidgetProvider, circadian theming |
 | **Security & Cryptography** | Web Crypto API | AES-256-GCM client-side encryption with PBKDF2 |
-| **Hosting & CDN** | Vercel Edge Network | Dual-hosting distribution for web client and raw APK |
+| **Hosting & CDN** | Vercel Edge Network | Global distribution for web application and release APK |
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 lifeos/
 ├── android/                             # Android Studio native project
 │   ├── app/
-│   │   ├── build.gradle                 # Version code (28), version name (1.6.3), keystores
+│   │   ├── build.gradle                 # Version code (13), version name (1.2.3), signing configs
 │   │   ├── lifeos-release-key.jks       # Signed production keystore
 │   │   └── src/main/
 │   │       ├── java/com/avineesh/lifeos/
@@ -189,61 +184,47 @@ lifeos/
 │   │       │   ├── TimerForegroundService.java  # Persistent notification countdown service
 │   │       │   └── TimerNotificationPlugin.java # Foreground timer bridge
 │   │       └── res/
-│   │           ├── layout/widget_layout.xml     # Native 4x2 AppWidget UI hierarchy
+│   │           ├── layout/widget_layout.xml     # Native AppWidget UI hierarchy
 │   │           ├── values/widget_phase_colors.xml # Circadian color definitions for native widgets
 │   │           └── xml/lifeos_widget_info.xml   # AppWidgetProvider metadata
 ├── public/
-│   ├── LifeOS.apk                       # Production-signed release APK (~8.3 MB)
+│   ├── LifeOS.apk                       # Production-signed release APK (~14 MB)
 │   ├── version.json                     # Live release manifest with SHA-256 checksum
-│   ├── icon.svg                         # Vector icon asset
+│   ├── icon.svg                         # Vector application icon
 │   └── icon-monochrome.svg              # Material You dynamic themed icon
 ├── scripts/
-│   ├── generate-widget-colors.js        # Extracts CSS palettes into Android XML colors
-│   └── prepare-release.js               # Computes SHA-256, updates manifest, stages APK
+│   ├── check-palette.ts                 # Validates Delta E distances and WCAG contrast
+│   ├── test-layout-matrix.ts            # 1,260-point multi-viewport layout validation
+│   ├── test-scroll-regression.ts        # Comprehensive vertical scroll test suite
+│   ├── test-sheet-scroll.mjs            # Modal bottom sheet touch and zero-overlap test
+│   ├── test-updater.ts                  # Updater logic and SHA-256 verification tests
+│   └── generate-widget-colors.js        # Extracts CSS palettes into Android XML colors
 ├── src/
-│   ├── components/                      # Reusable UI elements (Buttons, Skeletons, Modals)
-│   ├── config/                          # Navigation and route configuration
-│   ├── hooks/
-│   │   ├── useDayPhase.ts               # Single source of truth for circadian phases & theme mode
-│   │   ├── usePixelSky.ts               # Ambient pixel canvas flow controller
-│   │   └── useData.ts                   # Optimistic local-first Firestore synchronization hook
-│   ├── pages/
-│   │   ├── DownloadPage.tsx             # Interactive public landing & APK download page
-│   │   ├── Home.tsx                     # Daily dashboard and circadian hero
-│   │   ├── Gym.tsx / GymWorkout.tsx     # Workout routines and live set tracker
-│   │   ├── Study.tsx / StudyTimer.tsx   # Pomodoro timer and academic logs
-│   │   ├── Nutrition.tsx                # Mess menu and macronutrient tracking
-│   │   ├── Timetable.tsx                # Period schedule and classroom timetable
-│   │   ├── Spending.tsx                 # Student expense and budget ledger
-│   │   ├── Settings.tsx                 # System preferences, biometric setup, theme toggles
-│   │   └── Auth.tsx                     # Google and email authentication gateway
-│   ├── theme/
-│   │   ├── DayThemeProvider.tsx         # Injects CSS variables and 400ms phase transitions
-│   │   ├── typography.ts                # Phase-dependent font weight calculations
-│   │   └── pixelSkyPalettes.ts          # Color matrices for all 6 day phases
-│   ├── utils/
-│   │   ├── widgetBridge.ts              # Memoized, debounced native widget sync bridge
-│   │   ├── updater.ts                   # In-app APK update checker & installer client
-│   │   ├── security.ts                  # Biometric lock controller
-│   │   └── haptics.ts                   # Tactile vibration feedback system
+│   ├── components/                      # Reusable UI elements (BottomSheet, Nav, Buttons)
+│   ├── config/                          # Route and navigation configuration
+│   ├── features/                        # Domain feature modules (outings, workouts, etc.)
+│   │   └── outings/                     # Group expense tracking and split balancing
+│   ├── hooks/                           # Lifecycle, theme, and data hooks
+│   ├── pages/                           # Application views (Home, Gym, Study, Nutrition, etc.)
+│   ├── theme/                           # Color tokens, section seeds, and typography
+│   ├── utils/                           # Storage, updater, haptics, and security utilities
 │   ├── App.tsx                          # Root router and lifecycle coordinator
-│   ├── firebase.ts                      # Firebase SDK configuration
-│   └── types.ts                         # Domain data models and TypeScript types
-├── capacitor.config.ts                  # Capacitor native project configuration
-├── tailwind.config.js                   # Design tokens and custom theme extension
+│   └── firebase.ts                      # Firebase SDK initialization
+├── capacitor.config.ts                  # Capacitor native container configuration
+├── tailwind.config.js                   # Design tokens and theme extensions
 └── vite.config.ts                       # Vite build configuration
 ```
 
 ---
 
-## 🚀 Quickstart for Developers
+## Development Quickstart
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **Package Manager**: npm v9+
-- **Java Development Kit**: JDK 17
-- **Android Studio**: Ladybug / Meerkat (SDK 34+)
-- **Firebase Project**: Firestore Database and Authentication enabled
+- Node.js v18.0.0 or higher
+- npm v9 or higher
+- Java Development Kit (JDK) 17
+- Android Studio (Ladybug or newer, Android SDK 34+)
+- Google Firebase account with Firestore and Authentication enabled
 
 ### 1. Clone & Install
 ```bash
@@ -267,99 +248,61 @@ VITE_FIREBASE_APP_ID=your_app_id
 ```bash
 npm run dev
 ```
-Visit `http://localhost:5173/download` for the showcase page or `http://localhost:5173/` for the application.
+Navigate to `http://localhost:5173/` in your browser.
 
 ---
 
-## 📦 Build & Release Pipeline
+## Build & Release Verification
 
 | Command | Action Performed |
 |---|---|
-| `npm run dev` | Spins up local Vite development server with instant HMR |
-| `npm run build` | Compiles TypeScript and builds production distribution in `dist/` |
-| `npm run generate:widget-colors` | Generates native Android XML color resources from `pixelSkyPalettes.ts` |
-| `npm run cap:sync` | Compiles web assets, generates colors, and synchronizes to Android assets |
-| `npm run cap:build` | Syncs assets and compiles signed release APK via Gradle |
-| `npm run release:prep` | Computes SHA-256 checksum and updates `public/version.json` |
-| `npm run cap:open` | Opens Android Studio directly for native debugging |
+| `npm run dev` | Starts local Vite development server with instant HMR |
+| `npm run build` | Compiles TypeScript and builds production web bundle in `dist/` |
+| `npm run check:palette` | Verifies contrast ratios and Delta E perceptual color distances |
+| `npm run test:updater` | Tests version parsing, downgrade prevention, and SHA-256 validation |
+| `npm run test:matrix` | Runs 1,260-point multi-viewport layout validation across all routes |
+| `npm run test:scroll` | Verifies vertical touch and wheel scroll responsiveness |
+| `npm run cap:sync` | Compiles web bundle, updates colors, and syncs to Android platform |
 
-### Release Compilation (Command Line)
+### Release Compilation (Android APK)
 ```bash
-# 1. Sync web bundle to Android
+# 1. Compile web bundle and sync to Android
 npm run cap:sync
 
-# 2. Compile signed release APK
+# 2. Compile signed release APK via Gradle
 cd android
 ./gradlew assembleRelease
 cd ..
 
-# 3. Prepare release assets & compute checksum
-npm run release:prep
+# 3. Stage APK and update version manifest
+Copy-Item -Path android/app/build/outputs/apk/release/app-release.apk -Destination public/LifeOS.apk -Force
 ```
 
-The signed release APK will be generated at:  
-`android/app/build/outputs/apk/release/app-release.apk`  
-and automatically mirrored to `public/LifeOS.apk` for hosting.
-
 ---
 
-## 📱 Sideload Installation Guide (Android)
+## Sideload Installation Guide (Android)
 
-1. Open your mobile browser and navigate to:  
-   👉 **[https://lifeos-gujjeti-avineeshs-projects.vercel.app/download](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)**
+1. Open your device mobile browser and navigate to:  
+   **[https://lifeos-gujjeti-avineeshs-projects.vercel.app/download](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)**
 2. Tap **Download LifeOS for Android** to fetch `LifeOS.apk`.
-3. When prompted by Android Chrome regarding direct APK downloads (*"File might be harmful"*), select **Download anyway**.
-4. Open the downloaded APK and select **Install**. If prompted, toggle **Allow from this source** in your browser permissions.
-5. Launch LifeOS and add the **LifeOS Widget** to your home screen!
+3. When prompted by Android regarding direct APK downloads (*"File might be harmful"*), select **Download anyway**.
+4. Open the downloaded file and choose **Install**. Enable **Allow from this source** in browser permissions if required.
+5. Open LifeOS and pin the **LifeOS Widget** to your home screen.
 
 ---
 
-## 📜 Version History & Changelog
-
-### **v1.6.4 (Build 29)** — *Current Release*
-- **Nutrition Date Tracking Navigation Fix**: Resolved an issue where opening the date picker or browsing past dates in Nutrition caused the floating bottom navigation bar to remain hidden until a page reload.
-- **Intelligent Virtual Keyboard Detection**: Refined keyboard focus detection in `Layout.tsx` to distinguish actual text input fields from system picker dialogs (`date`, `time`, `checkbox`, `radio`), preventing false keyboard state locks.
-- **Route & Date Change Auto-Reveal**: Navigation dock automatically resets its visibility and clears virtual keyboard locks whenever switching routes or date tabs.
-
-### **v1.6.3 (Build 28)**
-- **Dynamic Day Theme vs. Full Night Theme**: Added a toggle in Settings enabling users to lock the entire application into a tranquil, deep midnight aesthetic (01:30 AM circadian progress) with persistent star twinkle animations.
-- **Preferences-Backed Theme Persistence**: Theme mode persists across cold starts and offline restarts via `@capacitor/preferences`.
-- **Architectural Centralization**: Centralized theme logic into `useDayPhase()`, allowing all downstream consumers (`PixelSkyCanvas`, `DayThemeProvider`, `typography.ts`) to adapt with zero consumer-side code duplication.
-
-### **v1.6.2 (Build 27)**
-- **Widget Refresh Frame Drop Elimination**: Resolved micro-stutters during task completion and study session end by offloading SharedPreferences writes and widget updates to a background worker thread in `WidgetUpdaterPlugin.kt`.
-- **Memoized Streak & Task Counting**: Optimized `widgetBridge.ts` with memoized streak calculations and single-pass task counting, reducing bridge IPC overhead.
-- **Debounced Widget Synchronization**: Implemented 150ms debounced synchronization so widget refresh runs strictly after UI animations and haptics finish painting.
-
-### **v1.6.1 (Build 23)**
-- **Native Android Home Screen Widget**: Released 4×2 glanceable AppWidget with real-time streak, tasks done, study minutes, and circadian day-phase styling.
-- **Deep-Link Intent Routing**: Connected widget tiles directly to internal app routes (`lifeos://progress`, `lifeos://tasks`, `lifeos://study`).
-- **Circadian Theme Export Script**: Created automated script converting TypeScript palette definitions to Android XML resource files.
-
-### **v1.6.0 (Build 20)**
-- **Circadian Ambient Day-Phase System**: Introduced 6 natural day phases with mathematical progress calculations.
-- **Pixel-Sky Ambient Canvas**: Implemented multi-tiered procedural sky with smooth transitions and performance tiering.
-- **Adaptive Font Weight Density**: Variable font scaling for headings and body copy synchronized with daily energy curves.
-
-### **v1.5.5 (Build 15)**
-- **Biometric Credentials Vault**: Encrypted AES-256-GCM vault protected by hardware biometrics.
-- **Persistent Wall-Clock Timer**: Non-drifting study stopwatch backed by Android Foreground Service.
-- **Instant Cold-Start Optimization**: Synchronous cache hydration eliminating startup spinners.
-
----
-
-## 👤 Author & Maintainer
+## Author & Maintainer
 
 **Gujjeti Avineesh**  
-*Architect, Designer & Full-Stack Developer*
+Architect, Designer & Full-Stack Developer  
 
-- **GitHub**: [@Avineesh-G](https://github.com/Avineesh-G)
-- **Project Repository**: [https://github.com/Avineesh-G/LIFEOS](https://github.com/Avineesh-G/LIFEOS)
-- **Live Deployment**: [https://lifeos-gujjeti-avineeshs-projects.vercel.app](https://lifeos-gujjeti-avineeshs-projects.vercel.app)
+- GitHub: [@Avineesh-G](https://github.com/Avineesh-G)
+- Project Repository: [https://github.com/Avineesh-G/LIFEOS](https://github.com/Avineesh-G/LIFEOS)
+- Live Deployment: [https://lifeos-gujjeti-avineeshs-projects.vercel.app](https://lifeos-gujjeti-avineeshs-projects.vercel.app)
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License**. You are free to use, modify, and distribute this software with attribution. See the [LICENSE](LICENSE) file for details.
 
@@ -368,6 +311,6 @@ This project is licensed under the **MIT License**. You are free to use, modify,
 <br />
 
 **Built with pride for discipline, high achievement, and daily clarity.**  
-*LifeOS © 2026. All rights reserved.*
+*LifeOS. All rights reserved.*
 
 </div>
