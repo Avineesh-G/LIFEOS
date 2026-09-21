@@ -9,7 +9,7 @@ import {
   getM3ThemeForSection,
   applyM3ThemeToDocument,
 } from './sectionSeedColors';
-import { getInterfaceTokens } from './palette';
+import { getInterfaceTokens, MORE_BUTTON_TOKENS } from './palette';
 import { initM3StateLayer } from '../utils/m3StateLayer';
 import { TEXT_TONAL_DARK, TEXT_TONAL_LIGHT, TYPOGRAPHY_TOKENS } from './typography';
 
@@ -95,6 +95,10 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--accent-soft', scheme.primaryContainer);
     root.style.setProperty('--pill-active-bg', scheme.primaryContainer);
     root.style.setProperty('--pill-active-text', scheme.onPrimaryContainer);
+
+    // Fixed neutral More button tokens
+    root.style.setProperty('--more-fill', isDark ? MORE_BUTTON_TOKENS.dark.fill : MORE_BUTTON_TOKENS.light.fill);
+    root.style.setProperty('--more-icon', isDark ? MORE_BUTTON_TOKENS.dark.icon : MORE_BUTTON_TOKENS.light.icon);
 
     root.style.setProperty('--bg-card', cardBg);
     root.style.setProperty('--bg-card-elevated', cardElevated);

@@ -5,7 +5,7 @@
  * Enforces the 8 strict perceptual and contrast rules from the LifeOS palette spec.
  */
 
-import { PALETTE, deltaE, getContrast, type PaletteEntry } from '../src/theme/palette.ts';
+import { PALETTE, deltaE, getContrast, MORE_BUTTON_TOKENS, type PaletteEntry } from '../src/theme/palette.ts';
 
 const CANVAS_LIGHT = '#FDFDFD';
 const CANVAS_DARK = '#121316';
@@ -139,6 +139,64 @@ function runPaletteCheck() {
     hasError = true;
   }
   console.log('   ✅ All role values are unique across all interfaces');
+
+  // ── 8. More Button Fixed Tokens Verification (Rule 8) ──
+  console.log('8️⃣ Checking More Button Fixed Tokens (Rule 8: icon ≥ 4.5:1, fill ≥ 3.0:1, seed ΔE ≥ 13.0)...');
+  
+  // Light mode check
+  const lightIconContrast = getContrast(MORE_BUTTON_TOKENS.light.icon, MORE_BUTTON_TOKENS.light.fill);
+  const lightFillCanvasContrast = getContrast(MORE_BUTTON_TOKENS.light.fill, CANVAS_LIGHT);
+  if (lightIconContrast < 4.5) {
+    console.error(`❌ VIOLATION: More button light icon contrast fails (< 4.5:1): ${lightIconContrast.toFixed(2)}:1`);
+    hasError = true;
+  }
+  if (lightFillCanvasContrast < 3.0) {
+    console.error(`❌ VIOLATION: More button light fill canvas contrast fails (< 3.0:1): ${lightFillCanvasContrast.toFixed(2)}:1`);
+    hasError = true;
+  }
+
+  let minLightDE = Infinity;
+  let minLightSeedName = '';
+  for (const entry of entries) {
+    const de = deltaE(MORE_BUTTON_TOKENS.light.fill, entry.seed);
+    if (de < minLightDE) {
+      minLightDE = de;
+      minLightSeedName = entry.name;
+    }
+    if (de < 13.0) {
+      console.error(`❌ VIOLATION: More button light fill too close to ${entry.name} (< 13.0): ΔE = ${de.toFixed(2)}`);
+      hasError = true;
+    }
+  }
+
+  // Dark mode check
+  const darkIconContrast = getContrast(MORE_BUTTON_TOKENS.dark.icon, MORE_BUTTON_TOKENS.dark.fill);
+  const darkFillCanvasContrast = getContrast(MORE_BUTTON_TOKENS.dark.fill, CANVAS_DARK);
+  if (darkIconContrast < 4.5) {
+    console.error(`❌ VIOLATION: More button dark icon contrast fails (< 4.5:1): ${darkIconContrast.toFixed(2)}:1`);
+    hasError = true;
+  }
+  if (darkFillCanvasContrast < 3.0) {
+    console.error(`❌ VIOLATION: More button dark fill canvas contrast fails (< 3.0:1): ${darkFillCanvasContrast.toFixed(2)}:1`);
+    hasError = true;
+  }
+
+  let minDarkDE = Infinity;
+  let minDarkSeedName = '';
+  for (const entry of entries) {
+    const de = deltaE(MORE_BUTTON_TOKENS.dark.fill, entry.seed);
+    if (de < minDarkDE) {
+      minDarkDE = de;
+      minDarkSeedName = entry.name;
+    }
+    if (de < 13.0) {
+      console.error(`❌ VIOLATION: More button dark fill too close to ${entry.name} (< 13.0): ΔE = ${de.toFixed(2)}`);
+      hasError = true;
+    }
+  }
+
+  console.log(`   ✅ Light More fill: icon contrast ${lightIconContrast.toFixed(1)}:1, canvas contrast ${lightFillCanvasContrast.toFixed(1)}:1, min seed ΔE ${minLightDE.toFixed(1)} (${minLightSeedName})`);
+  console.log(`   ✅ Dark More fill: icon contrast ${darkIconContrast.toFixed(1)}:1, canvas contrast ${darkFillCanvasContrast.toFixed(1)}:1, min seed ΔE ${minDarkDE.toFixed(1)} (${minDarkSeedName})`);
 
   console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   if (hasError) {

@@ -26,6 +26,21 @@ export interface PaletteEntry {
   blobCorner: 'top-right' | 'bottom-left' | 'bottom-right' | 'top-left' | 'none';
 }
 
+/**
+ * Fixed neutral tokens for More button across all interfaces.
+ * Never changes with active interface to serve as stable visual anchor.
+ */
+export const MORE_BUTTON_TOKENS = {
+  light: {
+    fill: '#1B1C22', // "ink"
+    icon: '#FFFFFF',
+  },
+  dark: {
+    fill: '#E6E4EE', // "cloud"
+    icon: '#1B1C22',
+  },
+} as const;
+
 export const PALETTE: Record<string, PaletteEntry> = {
   home: {
     id: 'home',

@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 13,
-  versionName: '1.2.3',
+  versionCode: 14,
+  versionName: '1.2.4',
   releaseDate: '2026-09-21',
-  releaseNotes: 'LifeOS v1.2.3 (Build 13): Settings sections enclosed by default with quick enlarge/enclose controls, modal layout refinements, and zero-overlap smooth scrolling.',
+  releaseNotes: 'LifeOS v1.2.4 (Build 14): Scalloped navigation shapes — active icon indicator and More button now use a 12-lobed organic scallop shape with per-interface color sync and spin animation on tab switch.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

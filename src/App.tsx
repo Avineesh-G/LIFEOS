@@ -39,6 +39,7 @@ import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
 const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
+const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
@@ -105,6 +106,28 @@ function MainContent({
         </RouteErrorBoundary>
       )
     }] : []),
+    ...(import.meta.env.DEV && DevShapeBoard ? [
+      {
+        path: '/dev/shapes',
+        element: (
+          <RouteErrorBoundary routeName="Shape Board">
+            <Suspense fallback={<div className="p-8 text-center text-secondary">Loading Shape Board...</div>}>
+              <DevShapeBoard />
+            </Suspense>
+          </RouteErrorBoundary>
+        )
+      },
+      {
+        path: '/dev-shapes',
+        element: (
+          <RouteErrorBoundary routeName="Shape Board">
+            <Suspense fallback={<div className="p-8 text-center text-secondary">Loading Shape Board...</div>}>
+              <DevShapeBoard />
+            </Suspense>
+          </RouteErrorBoundary>
+        )
+      }
+    ] : []),
     { path: '*', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
   ]);
 

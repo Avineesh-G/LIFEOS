@@ -13,6 +13,7 @@ import {
   syncNutritionNotifications,
 } from '../utils/notifications';
 import { SectionAccentBlob } from './SectionAccentBlob';
+import { ScallopShape } from './ScallopShape';
 import { NavigationHubSheet } from './NavigationHubSheet';
 import { MotionScheme } from '../utils/motionConfig';
 import {
@@ -384,6 +385,16 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const solidAccent = squircleBg;
   const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(15, 23, 42, 0.55)';
 
+  // Cumulative rotation for the active scallop indicator — spins 30° on each interface switch
+  const [scallopRotation, setScallopRotation] = useState(0);
+  const prevSectionRef = useRef(activeSection);
+  useEffect(() => {
+    if (activeSection !== prevSectionRef.current) {
+      prevSectionRef.current = activeSection;
+      setScallopRotation((r) => r + 30);
+    }
+  }, [activeSection]);
+
   const currentPath = (location.pathname || '').toLowerCase();
 
   const isRouteMatching = useCallback(
@@ -590,18 +601,22 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                         if (menuOpen) setMenuOpen(false);
                         startTransition(() => { navigate(tab.path); });
                       }}
-                      className="relative w-[40px] h-[40px] rounded-full flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
+                      className="relative w-[40px] h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
                       aria-label={tab.label}
                     >
-                      {/* Active icon chip: 40px diameter filled circle chip in interface solid accent color (pure GPU compositor transition) */}
+                      {/* Active icon chip: 12-lobed scallop shape — rotates 30° on each interface switch */}
                       <div
-                        className={`absolute inset-0 rounded-full shadow-xs pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                        className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                           active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
                         }`}
-                        style={{
-                          backgroundColor: solidAccent,
-                        }}
-                      />
+                      >
+                        <motion.div
+                          animate={{ rotate: scallopRotation }}
+                          transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
+                        >
+                          <ScallopShape size={40} fill={solidAccent} className="drop-shadow-sm" />
+                        </motion.div>
+                      </div>
                       {/* Icon size: 24px, active in white, inactive in 55% opacity */}
                       <Icon
                         size={24}
@@ -616,7 +631,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 })}
               </div>
 
-              {/* 2. More button (right element, separate squircle): 64px x 64px, border-radius 28px */}
+              {/* 2. More button (right element, separate scallop shape): 64px × 64px */}
               <motion.button
                 ref={squircleRef}
                 data-no-ripple="true"
@@ -633,18 +648,29 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   }
                   setMenuOpen(prev => !prev);
                 }}
-                className="w-[64px] h-[64px] shrink-0 rounded-[28px] flex items-center justify-center border border-white/20 shadow-[0_10px_28px_rgba(0,0,0,0.18)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none focus:outline-none cursor-pointer relative overflow-hidden"
+                className="w-[64px] h-[64px] shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative"
                 style={{
-                  backgroundColor: squircleBg,
-                  transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
+                  transition: 'filter 220ms cubic-bezier(0.2, 0, 0, 1)',
+                  filter: 'drop-shadow(0 10px 18px rgba(0,0,0,0.22))',
                 }}
                 aria-label="More Menu"
                 aria-expanded={menuOpen}
               >
+                {/* Scallop shape background — 72px (bleeds 4px beyond 64px tap target for visual emphasis) */}
+                <ScallopShape
+                  size={72}
+                  fill={squircleBg}
+                  className="absolute pointer-events-none"
+                  style={{ top: '-4px', left: '-4px' }}
+                  pathStyle={{
+                    transition: 'fill 220ms cubic-bezier(0.2, 0, 0, 1)',
+                  }}
+                />
+
                 {/* Active accent dot when current route is in the hub */}
                 {isHubActive && !menuOpen && (
                   <span
-                    className="absolute top-3.5 right-3.5 w-2 h-2 rounded-full bg-white ring-2 ring-black/20"
+                    className="absolute top-[14px] right-[14px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
                     aria-hidden="true"
                   />
                 )}
@@ -653,6 +679,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   {menuOpen ? (
                     <motion.div
                       key="close"
+                      className="relative z-10"
                       initial={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
@@ -663,6 +690,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   ) : (
                     <motion.div
                       key="grid"
+                      className="relative z-10"
                       initial={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}

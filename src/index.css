@@ -46,6 +46,13 @@
     --streak-light-text: #CB470D;
     --streak-dark-strong: #FF6B35;
     --streak-dark-tint: #FCA487;
+    --more-fill: #1B1C22;
+    --more-icon: #FFFFFF;
+  }
+
+  html.dark {
+    --more-fill: #E6E4EE;
+    --more-icon: #1B1C22;
   }
 
   *, *::before, *::after {
