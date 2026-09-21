@@ -29,6 +29,8 @@ import {
   CheckCircle2,
   FileText,
   DollarSign,
+  ShoppingBag,
+  PenLine,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useOutings } from '../context/OutingsContext';
@@ -38,6 +40,7 @@ import { ExpenseList } from '../components/ExpenseList';
 import { ReceiptsGrid } from '../components/ReceiptsGrid';
 import { CreateOutingSheet } from '../components/CreateOutingSheet';
 import { AddExpenseSheet } from '../components/AddExpenseSheet';
+import { ManualEntrySheet } from '../components/ManualEntrySheet';
 import { SettleUpModal } from '../components/SettleUpModal';
 import { triggerHaptic } from '../../../utils/haptics';
 import type { OutingExpense } from '../types';
@@ -66,8 +69,34 @@ export default function OutingDetailPage() {
   const [activeTab, setActiveTab] = useState<DetailTab>('expenses');
   const [isEditOutingOpen, setIsEditOutingOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const [isSettleOpen, setIsSettleOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<OutingExpense | null>(null);
+
+  // Read Gemini API key from localStorage (same keys used by useData.ts)
+  const geminiApiKey = useMemo(() => {
+    try {
+      // Try per-user cache first (lifeos_cache_<uid>)
+      const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
+      if (cachedUser) {
+        const uid = JSON.parse(cachedUser)?.uid;
+        if (uid) {
+          const raw = localStorage.getItem('lifeos_cache_' + uid);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.geminiApiKey) return parsed.geminiApiKey as string;
+          }
+        }
+      }
+      // Fallback: global cache
+      const globalRaw = localStorage.getItem('lifeos_cached_app_data');
+      if (globalRaw) {
+        const parsed = JSON.parse(globalRaw);
+        return (parsed?.geminiApiKey as string) || '';
+      }
+    } catch {}
+    return '';
+  }, []);
 
   // Local notes autosave state
   const [notesContent, setNotesContent] = useState('');
@@ -383,19 +412,33 @@ export default function OutingDetailPage() {
         </div>
       )}
 
-      {/* ── Primary Action: Add Expense ── */}
-      <button
-        type="button"
-        onClick={() => {
-          triggerHaptic('light');
-          setEditingExpense(null);
-          setIsAddExpenseOpen(true);
-        }}
-        className="w-full py-3.5 rounded-[22px] bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <Plus size={18} strokeWidth={2.4} />
-        <span>Add Expense</span>
-      </button>
+      {/* ── Primary Actions: Add Expense + Manual Entry ── */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('light');
+            setEditingExpense(null);
+            setIsAddExpenseOpen(true);
+          }}
+          className="py-3.5 rounded-[22px] bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Plus size={18} strokeWidth={2.4} />
+          <span>Add Expense</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('light');
+            setIsManualEntryOpen(true);
+          }}
+          className="py-3.5 rounded-[22px] bg-black/[0.05] dark:bg-white/[0.08] border border-[var(--card-border)] text-primary-light dark:text-primary-dark font-bold text-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <PenLine size={16} strokeWidth={2.3} />
+          <span>Manual Entry</span>
+        </button>
+      </div>
 
       {/* ── Category Breakdown Bars ── */}
       {activeSummary && (
@@ -543,6 +586,15 @@ export default function OutingDetailPage() {
         }}
         outing={activeOuting}
         expenseToEdit={editingExpense}
+        geminiApiKey={geminiApiKey}
+      />
+
+      {/* Manual Entry Sheet (Shopping Receipt / Lend / Received) */}
+      <ManualEntrySheet
+        isOpen={isManualEntryOpen}
+        onClose={() => setIsManualEntryOpen(false)}
+        outing={activeOuting}
+        defaultMode="shopping"
       />
 
       {/* Settle Up Modal */}

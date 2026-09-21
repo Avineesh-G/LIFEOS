@@ -22,6 +22,8 @@ import {
   Clock,
   Trash2,
   Receipt,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { format, parseISO, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns';
 import { BottomSheet } from '../../../components/BottomSheet';
@@ -34,6 +36,7 @@ import {
 import { compressReceiptImage } from '../utils/receiptCompressor';
 import { triggerHaptic } from '../../../utils/haptics';
 import { useOutings } from '../context/OutingsContext';
+import { analyzeReceiptWithGemini } from '../../../utils/geminiReceiptOcr';
 import type {
   Outing,
   OutingExpense,
@@ -48,6 +51,7 @@ interface AddExpenseSheetProps {
   onClose: () => void;
   outing: Outing;
   expenseToEdit?: OutingExpense | null;
+  geminiApiKey?: string;
 }
 
 export function AddExpenseSheet({
@@ -55,6 +59,7 @@ export function AddExpenseSheet({
   onClose,
   outing,
   expenseToEdit,
+  geminiApiKey,
 }: AddExpenseSheetProps) {
   const { people, addExpense, updateExpense } = useOutings();
 
@@ -77,6 +82,9 @@ export function AddExpenseSheet({
     { blob: Blob; thumbBlob: Blob; width: number; height: number; size: number; previewUrl: string }[]
   >([]);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [ocrMessage, setOcrMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,6 +134,8 @@ export function AddExpenseSheet({
     }
     setPendingReceipts([]);
     setError(null);
+    setOcrStatus('idle');
+    setOcrMessage('');
   }, [expenseToEdit, outing, isOpen]);
 
   // Clean up object URLs when unmounting or closing
@@ -172,7 +182,7 @@ export function AddExpenseSheet({
     }
   }, [spentAt, outing]);
 
-  // Handle photo selection & off-main-thread compression
+  // Handle photo selection & off-main-thread compression + Gemini OCR
   const handlePhotosSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -199,6 +209,50 @@ export function AddExpenseSheet({
       }
       setPendingReceipts((prev) => [...prev, ...newItems]);
       triggerHaptic('save');
+
+      // ── Gemini Vision OCR: analyze the first new receipt ──
+      if (geminiApiKey?.trim() && newItems.length > 0) {
+        setIsAnalyzing(true);
+        setOcrStatus('idle');
+        setOcrMessage('');
+        try {
+          // Use the full-quality blob for better OCR accuracy
+          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiApiKey);
+          let filled = false;
+
+          if (result.amount && result.amount > 0 && !amountInput) {
+            setAmountInput(result.amount.toFixed(2));
+            filled = true;
+          }
+          if (result.title && !title) {
+            setTitle(result.title);
+            filled = true;
+          }
+          if (result.category) {
+            // Match to one of our categories
+            const matched = OUTING_CATEGORIES.find(
+              (c) => c.label.toLowerCase() === result.category!.toLowerCase()
+            );
+            if (matched) {
+              setCategory(matched.label);
+              filled = true;
+            }
+          }
+
+          setOcrStatus('success');
+          setOcrMessage(
+            filled
+              ? `Receipt scanned ✓ — fields pre-filled from receipt`
+              : `Receipt scanned — no data detected, fill manually`
+          );
+          triggerHaptic('save');
+        } catch (ocrErr: any) {
+          setOcrStatus('error');
+          setOcrMessage(ocrErr?.message || 'Receipt scan failed');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      }
     } catch (err: any) {
       setError('Could not process receipt image');
     } finally {
@@ -637,6 +691,30 @@ export function AddExpenseSheet({
             className="hidden"
             onChange={handlePhotosSelected}
           />
+
+          {/* OCR Status Banner */}
+          {(isAnalyzing || ocrStatus !== 'idle') && (
+            <div
+              className={`flex items-center gap-2 p-2.5 rounded-2xl text-xs font-medium border ${
+                isAnalyzing
+                  ? 'bg-accent/10 border-accent/20 text-accent'
+                  : ocrStatus === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              {isAnalyzing ? (
+                <Loader2 size={13} className="animate-spin shrink-0" />
+              ) : ocrStatus === 'success' ? (
+                <Sparkles size={13} className="shrink-0" />
+              ) : (
+                <AlertTriangle size={13} className="shrink-0" />
+              )}
+              <span>
+                {isAnalyzing ? 'Scanning receipt with Gemini AI...' : ocrMessage}
+              </span>
+            </div>
+          )}
 
           {/* Actions & Thumbnails Row */}
           <div className="flex flex-wrap gap-2 pt-1">
