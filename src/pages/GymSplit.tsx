@@ -421,19 +421,19 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
       {/* Workout Type */}
       <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-6 sm:p-7 shadow-sm space-y-4">
         <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">Workout Type</label>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <input
             type="text"
             value={activePlan.type}
             onChange={(e) => updatePlan({ ...activePlan, type: e.target.value })}
             placeholder="e.g. PUSH, PULL, LEGS, CARDIO, REST"
-            className="flex-1 bg-transparent border border-border-light dark:border-border-dark rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className="flex-1 min-w-0 bg-transparent border border-border-light dark:border-border-dark rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           {activePlan.type !== 'REST' && activePlan.type.trim() && (
             <button
               onClick={handleAutoGenerate}
               disabled={generating}
-              className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
+              className="shrink-0 flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {generating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />} 
               <span className="hidden sm:inline">Auto-Generate</span>

@@ -129,7 +129,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [isLocked, setIsLocked] = useState(!!existingLogForDate?.isSaved);
   const [draftLog, setDraftLog] = useState<NutritionLog>(() => {
     if (existingLogForDate) {
-      const isOldFormat = existingLogForDate.mealsEaten.some((m: any) => 'itemsSelected' in m);
+      const isOldFormat = existingLogForDate.mealsEaten?.some((m: any) => 'itemsSelected' in m);
       if (isOldFormat) {
         return {
           id: `nut-${selectedDate}`,
@@ -154,7 +154,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   useEffect(() => {
     const log = (data.nutritionLogs || []).find(l => l.date === selectedDate);
     if (log) {
-      const isOldFormat = log.mealsEaten.some((m: any) => 'itemsSelected' in m);
+      const isOldFormat = log.mealsEaten?.some((m: any) => 'itemsSelected' in m);
       if (isOldFormat) {
         setDraftLog({
           id: `nut-${selectedDate}`,

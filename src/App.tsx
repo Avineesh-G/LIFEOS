@@ -114,7 +114,7 @@ function MainContent({
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
-        className="w-full overflow-x-hidden gpu-composited"
+        className="w-full gpu-composited"
         style={{ minHeight: '100%' }}
         {...motionProps}
       >
@@ -152,6 +152,10 @@ function App() {
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       clearTimeout(timer);
+      if (!currentUser && ((window as any).__LIFEOS_MOCK_AUTH__ || localStorage.getItem('lifeos_mock_auth') === 'true')) {
+        setAuthLoading(false);
+        return;
+      }
       setUser(currentUser);
       setAuthLoading(false);
       try {
@@ -287,6 +291,25 @@ function App() {
     return subscribeToLockState(setIsLocked);
   }, []);
 
+  const safeData = data || DEFAULT_DATA;
+
+  // Prompt phone OS native notification permission directly on app start if not yet allowed
+  useEffect(() => {
+    if (user) {
+      checkNotificationPermission().then(granted => {
+        if (!granted) {
+          const t = setTimeout(() => {
+            requestAndSyncNotifications(safeData, updateData);
+          }, 1000);
+          return () => clearTimeout(t);
+        } else {
+          if (safeData?.timetable) syncTimetableNotifications(safeData.timetable, safeData.settings?.notificationLeadMinutes || 10);
+          if (safeData?.tasks) syncTaskNotifications(safeData.tasks, safeData.settings?.notificationLeadMinutes || 10);
+        }
+      });
+    }
+  }, [user?.uid]);
+
   if (location.pathname.toLowerCase().startsWith('/download')) {
     return (
       <DayThemeProvider>
@@ -312,25 +335,6 @@ function App() {
       </DayThemeProvider>
     );
   }
-
-  const safeData = data || DEFAULT_DATA;
-
-  // Prompt phone OS native notification permission directly on app start if not yet allowed
-  useEffect(() => {
-    if (user) {
-      checkNotificationPermission().then(granted => {
-        if (!granted) {
-          const t = setTimeout(() => {
-            requestAndSyncNotifications(safeData, updateData);
-          }, 1000);
-          return () => clearTimeout(t);
-        } else {
-          if (safeData?.timetable) syncTimetableNotifications(safeData.timetable, safeData.settings?.notificationLeadMinutes || 10);
-          if (safeData?.tasks) syncTaskNotifications(safeData.tasks, safeData.settings?.notificationLeadMinutes || 10);
-        }
-      });
-    }
-  }, [user?.uid]);
 
   return (
     <DayThemeProvider>

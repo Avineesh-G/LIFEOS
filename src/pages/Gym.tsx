@@ -311,22 +311,22 @@ export default function Gym({ data, updateData }: GymProps) {
       </div>
 
       {/* Goal Routine Alignment & Customization Freedom Card */}
-      <div className="rounded-[24px] p-5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-3">
-        <div className="flex items-center justify-between gap-2">
+      <div className="rounded-[24px] p-4 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span className="w-7 h-7 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               {renderGoalIcon(goalConfig.iconName, 14)}
             </span>
-            <div>
-              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
+            <div className="min-w-0">
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark truncate">
                 Goal Recommendation
               </p>
-              <h3 className="text-xs font-bold text-primary-light dark:text-primary-dark">
+              <h3 className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
                 {goalConfig.label}
               </h3>
             </div>
           </div>
-          <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span className="text-[10px] font-mono font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
             Recommended
           </span>
         </div>

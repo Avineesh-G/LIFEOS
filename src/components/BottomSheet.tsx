@@ -49,10 +49,9 @@ export function BottomSheet({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, pointerEvents: 'none' } as any}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={onClose}
-            onTouchMove={e => e.preventDefault()}
             className="fixed inset-0 bg-black/60 dark:bg-black/75 gpu-composited"
             style={{ width: '100vw', height: '100vh' }}
           />

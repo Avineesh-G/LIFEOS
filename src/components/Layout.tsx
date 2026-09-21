@@ -437,7 +437,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   ];
 
   return (
-    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200 overflow-x-hidden w-full max-w-full">
+    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200 w-full max-w-full">
       {/* ── Material 3 Expressive Background System: Neutral Canvas + Single Off-Canvas Organic Blob ── */}
       <SectionAccentBlob />
 

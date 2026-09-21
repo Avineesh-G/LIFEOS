@@ -47,7 +47,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
   const [customCategories, setCustomCategories] = useState<string[]>([]);
 
   const batches = useMemo(() => {
-    return (data?.laundryBatches || []).slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return (data?.laundryBatches || []).slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   }, [data?.laundryBatches]);
 
   const totalClothesInNewBatch = useMemo(() => {
@@ -363,7 +363,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
               {/* Clothes Item Badges Summary */}
               <div className="flex flex-wrap gap-1.5 pt-3">
-                {batch.items.map((item, idx) => (
+                {(batch.items || []).map((item, idx) => (
                   <span
                     key={idx}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold bg-black/[0.03] dark:bg-white/[0.05] text-primary-light dark:text-primary-dark border border-black/5 dark:border-white/5"

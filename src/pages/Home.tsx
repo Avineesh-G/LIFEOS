@@ -740,27 +740,27 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       {/* ── Card 4: Forward-Looking Quick Actions & M3 Widgets ── */}
       <motion.div variants={item} className="space-y-3 sm:space-y-4">
         {/* Quick Action Pill Row */}
-        <div className="flex items-center gap-2 p-1.5 sm:p-2 rounded-[24px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+        <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-[24px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
           <button
             onClick={() => { triggerHaptic('light'); navigate('/study/timer'); }}
-            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-primary)] text-[var(--md-on-primary)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
           >
-            <Play size={13} className="fill-current" />
-            <span>Focus</span>
+            <Play size={12} className="fill-current shrink-0" />
+            <span className="truncate">Focus</span>
           </button>
           <button
             onClick={() => { triggerHaptic('light'); navigate('/gym'); }}
-            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
           >
-            <Dumbbell size={14} />
-            <span>Workout</span>
+            <Dumbbell size={13} className="shrink-0" />
+            <span className="truncate">Workout</span>
           </button>
           <button
             onClick={() => { triggerHaptic('light'); navigate('/spending'); }}
-            className="flex-1 py-2.5 px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-xs font-heading font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform select-none"
+            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
           >
-            <Wallet size={14} />
-            <span>Expense</span>
+            <Wallet size={13} className="shrink-0" />
+            <span className="truncate">Expense</span>
           </button>
         </div>
 

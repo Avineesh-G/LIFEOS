@@ -165,30 +165,31 @@ export default function Spending({ data, updateData }: SpendingProps) {
       {/* Material 3 Expressive Violet Hero Card (Level 2 Elevation) */}
       <motion.div
         variants={item}
-        whileHover={{ y: -2 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className="relative overflow-hidden rounded-[28px] p-6 sm:p-7 m3-elevation-2 border border-[var(--md-outline-variant)] text-[var(--md-on-surface)]"
+        style={{
+          background: 'linear-gradient(145deg, var(--md-surface-container), var(--md-surface-container-high))',
+        }}
+        className="relative overflow-hidden rounded-[28px] p-4 sm:p-7 m3-elevation-2 border border-[var(--md-outline-variant)] text-[var(--md-on-surface)]"
       >
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <span className="w-12 h-12 rounded-[20px] bg-[var(--md-surface-container-high)] text-[var(--md-primary)] flex items-center justify-center border border-[var(--md-outline-variant)]">
-              <Wallet size={22} />
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:mb-5">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-[18px] sm:rounded-[20px] bg-[var(--md-surface-container-high)] text-[var(--md-primary)] flex items-center justify-center border border-[var(--md-outline-variant)] shrink-0">
+              <Wallet size={20} className="sm:w-[22px] sm:h-[22px]" />
             </span>
-            <div>
-              <p className="text-xs font-bold tracking-wider uppercase opacity-75 font-tag text-[var(--md-on-surface-variant)]">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-75 font-tag text-[var(--md-on-surface-variant)] truncate">
                 {format(now, 'MMMM yyyy')}
               </p>
-              <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)]">Total Spending</h2>
+              <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] truncate">Total Spending</h2>
             </div>
           </div>
-          <span className="rounded-full bg-[var(--md-surface-container)] px-3.5 py-1.5 text-xs font-bold font-tag border border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]">
-            <span className="font-stat">{monthExpenses.length}</span> transactions
+          <span className="rounded-full bg-[var(--md-surface-container)] px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold font-tag border border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)] shrink-0">
+            <span className="font-stat">{monthExpenses.length}</span> txns
           </span>
         </div>
 
-        <div className="flex items-baseline justify-between gap-4 mt-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-3 mt-3">
           <div>
-            <span className="m3-numeral text-4xl sm:text-5xl font-extrabold tracking-tight leading-none text-[var(--md-on-surface)]">
+            <span className="m3-numeral text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-none text-[var(--md-on-surface)]">
               ₹{monthTotal.toLocaleString('en-IN')}
             </span>
           </div>
@@ -198,57 +199,57 @@ export default function Spending({ data, updateData }: SpendingProps) {
             whileTap={{ scale: 0.94 }}
             transition={{ type: 'spring', stiffness: 450, damping: 22 }}
             onClick={() => setShowAdd(true)}
-            className="rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold px-5 py-3 text-xs sm:text-sm flex items-center gap-2 shadow-none transition-transform"
+            className="rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-none transition-transform shrink-0"
           >
-            <Plus size={18} strokeWidth={2.5} /> Add Spend
+            <Plus size={16} strokeWidth={2.5} /> Add Spend
           </motion.button>
         </div>
       </motion.div>
 
       {/* Stats grid (Level 1 Elevation) */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:gap-5">
+      <motion.div variants={item} className="grid grid-cols-2 gap-2.5 sm:gap-5">
         <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-          className="rounded-[24px] p-5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between"
+          className="rounded-[24px] p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">
+          <div className="flex items-center justify-between mb-2 gap-1">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag truncate">
               Today
             </p>
-            <span className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)]">
-              <TrendingDown size={14} />
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-[14px] sm:rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
+              <TrendingDown size={13} className="sm:w-[14px] sm:h-[14px]" />
             </span>
           </div>
-          <p className="m3-numeral text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)]">
+          <p className="m3-numeral text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] truncate">
             ₹{todayTotal.toLocaleString('en-IN')}
           </p>
-          <p className="text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium">Recorded today</p>
+          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium truncate">Recorded today</p>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.02, y: -2 }}
           transition={{ type: 'spring', stiffness: 420, damping: 24 }}
-          className="rounded-[24px] p-5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between"
+          className="rounded-[24px] p-3.5 sm:p-6 m3-elevation-1 border border-[var(--md-outline-variant)] flex flex-col justify-between overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">
+          <div className="flex items-center justify-between mb-2 gap-1">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag truncate">
               Transactions
             </p>
-            <span className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)]">
-              <ArrowUpRight size={14} />
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-[14px] sm:rounded-[16px] bg-[var(--md-surface-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
+              <ArrowUpRight size={13} className="sm:w-[14px] sm:h-[14px]" />
             </span>
           </div>
-          <p className="m3-numeral text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)]">
+          <p className="m3-numeral text-xl sm:text-3xl font-extrabold tracking-tight text-[var(--md-on-surface)] truncate">
             {monthExpenses.length}
           </p>
-          <p className="text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium">This month</p>
+          <p className="text-[10px] sm:text-xs text-[var(--md-on-surface-variant)] mt-1 font-medium truncate">This month</p>
         </motion.div>
       </motion.div>
 
       {/* Category breakdown (Level 1 Elevation) */}
       {sortedCats.length > 0 && (
-        <motion.div variants={item} className="rounded-[24px] p-6 sm:p-7 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-4">
+        <motion.div variants={item} className="rounded-[24px] p-4 sm:p-7 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag">
               Category Breakdown

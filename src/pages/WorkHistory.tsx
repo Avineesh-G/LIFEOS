@@ -462,7 +462,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                       {log.mealsEaten.map(m => {
                         const isSkipped = m.items.some(i => i.id === 'skipped');
                         const mealCals = m.items.reduce((sum, i) => sum + (i.calories * i.portion), 0);
-                        const label = m.slot === 'nightCanteen' ? 'Night Canteen' : m.slot.charAt(0).toUpperCase() + m.slot.slice(1);
+                        const slotName = m.slot || 'meal';
+                        const label = slotName === 'nightCanteen' ? 'Night Canteen' : slotName.charAt(0).toUpperCase() + slotName.slice(1);
                         return (
                           <div
                             key={m.slot}

@@ -400,7 +400,7 @@ export function NavigationHubSheet({
             }
             drag="y"
             dragControls={dragControls}
-            dragListener={!isEditMode}
+            dragListener={false}
             dragConstraints={{ top: 0 }}
             dragElastic={{ top: 0.05, bottom: 0.6 }}
             style={{
@@ -434,9 +434,7 @@ export function NavigationHubSheet({
               className="relative z-10 w-full h-4 flex items-center justify-center pt-2 pb-1 shrink-0 cursor-grab active:cursor-grabbing"
               data-no-ripple="true"
               onPointerDown={(e) => {
-                if (isEditMode) {
-                  dragControls.start(e);
-                }
+                dragControls.start(e);
               }}
             >
               <div
@@ -450,7 +448,14 @@ export function NavigationHubSheet({
             </div>
 
             {/* ── Header (Fixed 44px height across both normal and edit modes) ── */}
-            <div className="relative z-10 h-[44px] flex items-center justify-between px-1 mb-2 shrink-0">
+            <div 
+              className="relative z-10 h-[44px] flex items-center justify-between px-1 mb-2 shrink-0 cursor-grab"
+              onPointerDown={(e) => {
+                if (!(e.target as HTMLElement)?.closest('button, [role="button"], a')) {
+                  dragControls.start(e);
+                }
+              }}
+            >
               {!isEditMode ? (
                 <>
                   <h2 className="text-[18px] font-semibold tracking-tight font-sans text-[var(--text-primary)]">
