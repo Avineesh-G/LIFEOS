@@ -49,8 +49,14 @@ export async function analyzeReceiptWithGemini(
   imageBlob: Blob,
   apiKey: string
 ): Promise<ReceiptOcrResult> {
-  if (!apiKey?.trim()) {
-    throw new Error('Gemini Vision API key not configured. Please add it in Settings → Gemini Vision API Key.');
+  const trimmedKey = apiKey?.trim() || '';
+  if (!trimmedKey) {
+    throw new Error('Gemini Vision API key not configured. Get your free key at aistudio.google.com and enter it in Settings → Gemini Vision.');
+  }
+
+  // Validate Google Gemini API key format (Google API keys start with AIzaSy)
+  if (!trimmedKey.startsWith('AIzaSy')) {
+    throw new Error('Invalid Gemini API Key format. Google Gemini keys start with "AIzaSy...". Please get a free key from aistudio.google.com/app/apikey');
   }
 
   // 20MB limit check
@@ -84,13 +90,13 @@ export async function analyzeReceiptWithGemini(
     },
   };
 
-  const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro'];
+  const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite'];
   let lastError: Error | null = null;
 
   for (const model of MODELS) {
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${trimmedKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -121,18 +127,18 @@ export async function analyzeReceiptWithGemini(
       }
 
       const errText = await response.text().catch(() => '');
-      if (response.status === 400 || response.status === 403) {
-        throw new Error(`Gemini API Key Error (${response.status}): ${errText.slice(0, 150)}`);
+      if (response.status === 400 || response.status === 401 || response.status === 403) {
+        throw new Error(`Invalid Gemini API Key (${response.status}). Please check your key in Settings.`);
       }
 
-      lastError = new Error(`Gemini (${model}) ${response.status}: ${errText.slice(0, 150)}`);
+      lastError = new Error(`Gemini (${model}) error ${response.status}: ${errText.slice(0, 100)}`);
     } catch (err: any) {
-      if (err.message?.includes('Gemini API Key Error')) {
+      if (err.message?.includes('Invalid Gemini API Key')) {
         throw err;
       }
       lastError = err;
     }
   }
 
-  throw lastError || new Error('All Gemini models are currently busy. Please try again shortly.');
+  throw lastError || new Error('Gemini AI models are busy right now. Please try scanning again.');
 }
