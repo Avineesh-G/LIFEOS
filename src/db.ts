@@ -26,6 +26,7 @@ const DEFAULT_DATA: AppData = {
   messPreference: 'nonveg',
   geminiApiKey: '',
   geminiVisionApiKey: '',
+  sarvamApiKey: '',
   vaultItems: [],
   vaultConfig: null,
   laundryBatches: [],

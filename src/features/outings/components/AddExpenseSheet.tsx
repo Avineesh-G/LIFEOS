@@ -36,7 +36,7 @@ import {
 import { compressReceiptImage } from '../utils/receiptCompressor';
 import { triggerHaptic } from '../../../utils/haptics';
 import { useOutings } from '../context/OutingsContext';
-import { analyzeReceiptWithGemini } from '../../../utils/geminiReceiptOcr';
+import { analyzeReceiptWithSarvam } from '../../../utils/sarvamReceiptOcr';
 import type {
   Outing,
   OutingExpense,
@@ -51,8 +51,7 @@ interface AddExpenseSheetProps {
   onClose: () => void;
   outing: Outing;
   expenseToEdit?: OutingExpense | null;
-  geminiVisionApiKey?: string;
-  groqApiKey?: string;
+  sarvamApiKey?: string;
 }
 
 export function AddExpenseSheet({
@@ -60,8 +59,7 @@ export function AddExpenseSheet({
   onClose,
   outing,
   expenseToEdit,
-  geminiVisionApiKey,
-  groqApiKey,
+  sarvamApiKey,
 }: AddExpenseSheetProps) {
   const { people, addExpense, updateExpense } = useOutings();
 
@@ -241,14 +239,14 @@ export function AddExpenseSheet({
       setPendingReceipts((prev) => [...prev, ...newItems]);
       triggerHaptic('save');
 
-      // ── AI Vision OCR: analyze the first new receipt (Gemini + Groq Dual Engine) ──
-      if ((geminiVisionApiKey?.trim() || groqApiKey?.trim()) && newItems.length > 0) {
+      // ── Sarvam.ai OCR: analyze the first new receipt ──
+      if (sarvamApiKey?.trim() && newItems.length > 0) {
         setIsAnalyzing(true);
         setOcrStatus('idle');
         setOcrMessage('');
         try {
-          // Use the full-quality blob for better OCR accuracy
-          const result = await analyzeReceiptWithGemini(newItems[0].blob, geminiVisionApiKey, groqApiKey);
+          // Use full-quality blob for Sarvam AI OCR accuracy
+          const result = await analyzeReceiptWithSarvam(newItems[0].blob, sarvamApiKey);
           let filled = false;
 
           if (result.amount && result.amount > 0 && !amountInput) {
@@ -742,7 +740,7 @@ export function AddExpenseSheet({
                 <AlertTriangle size={13} className="shrink-0" />
               )}
               <span>
-                {isAnalyzing ? 'Scanning receipt with Gemini AI...' : ocrMessage}
+                {isAnalyzing ? 'Scanning receipt with Sarvam AI...' : ocrMessage}
               </span>
             </div>
           )}

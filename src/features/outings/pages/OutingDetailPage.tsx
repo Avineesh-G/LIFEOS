@@ -73,10 +73,8 @@ export default function OutingDetailPage() {
   const [isSettleOpen, setIsSettleOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<OutingExpense | null>(null);
 
-  // Read Gemini Vision API key & Groq API key from localStorage (same keys used by useData.ts)
-  const apiKeys = useMemo(() => {
-    let visionKey = '';
-    let groqKey = '';
+  // Read Sarvam AI API key from localStorage (same keys used by useData.ts)
+  const sarvamApiKey = useMemo(() => {
     try {
       const cachedUser = localStorage.getItem('lifeos_cached_auth_user');
       if (cachedUser) {
@@ -85,21 +83,17 @@ export default function OutingDetailPage() {
           const raw = localStorage.getItem('lifeos_cache_' + uid);
           if (raw) {
             const parsed = JSON.parse(raw);
-            visionKey = parsed?.geminiVisionApiKey || '';
-            groqKey = parsed?.geminiApiKey || '';
+            if (parsed?.sarvamApiKey) return parsed.sarvamApiKey as string;
           }
         }
       }
-      if (!visionKey || !groqKey) {
-        const globalRaw = localStorage.getItem('lifeos_cached_app_data');
-        if (globalRaw) {
-          const parsed = JSON.parse(globalRaw);
-          if (!visionKey) visionKey = parsed?.geminiVisionApiKey || '';
-          if (!groqKey) groqKey = parsed?.geminiApiKey || '';
-        }
+      const globalRaw = localStorage.getItem('lifeos_cached_app_data');
+      if (globalRaw) {
+        const parsed = JSON.parse(globalRaw);
+        return (parsed?.sarvamApiKey as string) || '';
       }
     } catch {}
-    return { visionKey, groqKey };
+    return '';
   }, []);
 
   // Local notes autosave state
@@ -590,8 +584,7 @@ export default function OutingDetailPage() {
         }}
         outing={activeOuting}
         expenseToEdit={editingExpense}
-        geminiVisionApiKey={apiKeys.visionKey}
-        groqApiKey={apiKeys.groqKey}
+        sarvamApiKey={sarvamApiKey}
       />
 
       {/* Manual Entry Sheet (Shopping Receipt / Lend / Received) */}

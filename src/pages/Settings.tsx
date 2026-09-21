@@ -70,7 +70,7 @@ export default function Settings({
     security: false,
     profile: false,
     ai: false,
-    geminiVision: false,
+    sarvam: false,
     outingsStorage: false,
     account: false,
   });
@@ -160,10 +160,10 @@ export default function Settings({
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
 
-  // Gemini Vision API Key State (Receipt Scanning - Outing Expenses)
-  const [geminiVisionKeyInput, setGeminiVisionKeyInput] = useState(data.geminiVisionApiKey || '');
-  const [showGeminiVisionKey, setShowGeminiVisionKey] = useState(false);
-  const [geminiVisionKeySaved, setGeminiVisionKeySaved] = useState(false);
+  // Sarvam.ai OCR API Key State (Indian Receipts - Outing Expenses)
+  const [sarvamKeyInput, setSarvamKeyInput] = useState(data.sarvamApiKey || '');
+  const [showSarvamKey, setShowSarvamKey] = useState(false);
+  const [sarvamKeySaved, setSarvamKeySaved] = useState(false);
 
   // Haptic feedback preference state
   const [hapticLevel, setHapticLevelState] = useState<HapticLevel>(() => getHapticLevel());
@@ -202,11 +202,11 @@ export default function Settings({
     setTimeout(() => setApiKeySaved(false), 2500);
   };
 
-  const handleSaveGeminiVisionKey = async () => {
+  const handleSaveSarvamKey = async () => {
     triggerHaptic('save');
-    await updateData({ geminiVisionApiKey: geminiVisionKeyInput.trim() });
-    setGeminiVisionKeySaved(true);
-    setTimeout(() => setGeminiVisionKeySaved(false), 2500);
+    await updateData({ sarvamApiKey: sarvamKeyInput.trim() });
+    setSarvamKeySaved(true);
+    setTimeout(() => setSarvamKeySaved(false), 2500);
   };
 
   // App Security & Lock state
@@ -867,39 +867,42 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 7b. Gemini Vision API Key (Accordion) ── */}
+      {/* ── 7b. Sarvam.ai OCR API Key (Accordion) ── */}
       <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
-          onClick={() => toggleSection('geminiVision')}
+          onClick={() => toggleSection('sarvam')}
           className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left focus:outline-none"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-blue-500/15 text-blue-600 dark:text-blue-400 shadow-sm shrink-0">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shadow-sm shrink-0">
               <Sparkles size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
-                Gemini Vision (Receipt OCR)
+              <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words flex items-center gap-2">
+                <span>Sarvam.ai OCR (Indian Receipts)</span>
+                <span className="text-[10px] font-tag px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-600 dark:text-orange-400 uppercase font-bold">
+                  🇮🇳 Made in India
+                </span>
               </h3>
               <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
-                Google Gemini API Key for Outing Expenses photo scanning (Max 20MB)
+                Sarvam AI subscription key for Indian bills, UPI receipts & retail invoices (Max 20MB)
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <span className={`text-[10px] font-tag font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-              data.geminiVisionApiKey ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-neutral-500/15 text-muted-light'
+              data.sarvamApiKey ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-neutral-500/15 text-muted-light'
             }`}>
-              {data.geminiVisionApiKey ? 'Active ✓' : 'Not Set'}
+              {data.sarvamApiKey ? 'Active ✓' : 'Not Set'}
             </span>
-            {openSections.geminiVision ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
+            {openSections.sarvam ? <ChevronUp size={18} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={18} className="text-muted-light dark:text-muted-dark" />}
           </div>
         </button>
 
         <AnimatePresence>
-          {openSections.geminiVision && (
+          {openSections.sarvam && (
             <motion.div
               initial={{ scaleY: 0, opacity: 0 }}
               animate={{ scaleY: 1, opacity: 1 }}
@@ -910,41 +913,41 @@ export default function Settings({
             >
               <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
                 <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed">
-                  Used exclusively in <strong>Outing Expenses</strong> for scanning receipt photos. Images up to 20MB are supported. Auto model fallback prevents errors during peak server traffic.
+                  Optimized for Indian receipts, UPI payment screenshots (Google Pay, PhonePe, Paytm), and retail store bills. Enter your <code>api-subscription-key</code> from Sarvam AI.
                 </p>
                 <div className="relative flex items-center">
                   <input
-                    type={showGeminiVisionKey ? 'text' : 'password'}
-                    value={geminiVisionKeyInput}
-                    onChange={e => setGeminiVisionKeyInput(e.target.value)}
-                    placeholder="AIzaSy..."
+                    type={showSarvamKey ? 'text' : 'password'}
+                    value={sarvamKeyInput}
+                    onChange={e => setSarvamKeyInput(e.target.value)}
+                    placeholder="Enter Sarvam api-subscription-key..."
                     className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowGeminiVisionKey(!showGeminiVisionKey)}
+                    onClick={() => setShowSarvamKey(!showSarvamKey)}
                     className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
                   >
-                    {showGeminiVisionKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showSarvamKey ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <a
-                    href="https://aistudio.google.com/app/apikey"
+                    href="https://dashboard.sarvam.ai"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[11px] font-bold text-accent hover:underline font-mono"
                   >
-                    Get Free Gemini Key →
+                    Get Free Sarvam Key →
                   </a>
                   <button
                     type="button"
-                    onClick={handleSaveGeminiVisionKey}
-                    disabled={!geminiVisionKeyInput.trim()}
+                    onClick={handleSaveSarvamKey}
+                    disabled={!sarvamKeyInput.trim()}
                     className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
                   >
-                    {geminiVisionKeySaved ? 'Saved ✓' : 'Save Gemini Key'}
+                    {sarvamKeySaved ? 'Saved ✓' : 'Save Sarvam Key'}
                   </button>
                 </div>
               </div>

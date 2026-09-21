@@ -223,6 +223,7 @@ export interface AppData {
   messPreference: MessType;
   geminiApiKey: string;
   geminiVisionApiKey?: string;
+  sarvamApiKey?: string;
 
   // Vault / Password Keeper Module
   vaultItems?: VaultItem[];
