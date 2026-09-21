@@ -10,31 +10,36 @@ console.log('🧪 Running LifeOS Backup & Restore Round-Trip Invariant Tests...'
 
 const sampleData: AppData = {
   workoutPlans: [
-    { day: 'Mon', type: 'PUSH', exercises: [{ name: 'Bench Press', sets: 3, reps: 10, weight: 80 }] },
+    { day: 'Mon', type: 'PUSH', exercises: [{ id: 'ex_1', name: 'Bench Press', sets: 3, reps: 10, weight: 80 }] },
   ],
   workoutLogs: [
     {
       id: 'w_1',
       date: '2026-09-20',
+      day: 'Mon',
       type: 'PUSH',
-      notes: 'Strong bench sets',
-      durationMinutes: 55,
       exercises: [{ name: 'Bench Press', sets: [{ reps: 10, weight: 80, completed: true }] }],
     },
   ],
-  expenses: [{ id: 'e_1', date: '2026-09-20', amount: 450, category: 'Food', description: 'Dinner' }],
-  studySessions: [{ id: 's_1', date: '2026-09-20', durationMinutes: 45, subject: 'CS', type: 'focus' }],
+  expenses: [{ id: 'e_1', date: '2026-09-20', amount: 450, category: 'Food', note: 'Dinner' }],
+  studySessions: [{ id: 's_1', date: '2026-09-20', startTime: '09:00', duration: 45, subject: 'CS' }],
   timetable: [{ id: 'tt_1', day: 'Mon', startTime: '09:00', endTime: '10:00', subject: 'Math', room: '101' }],
-  tasks: [{ id: 't_1', title: 'Complete testing', completed: true, date: '2026-09-20', priority: 'high' }],
+  tasks: [{ id: 't_1', text: 'Complete testing', completed: true, date: '2026-09-20' }],
   reviews: [],
   settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'] },
   profile: null,
   menuMonths: [],
   nutritionLogs: [
     {
+      id: 'n_1',
       date: '2026-09-20',
-      waterIntake: 2500,
-      meals: [{ id: 'm_1', name: 'Eggs & Toast', calories: 400, protein: 30, carbs: 40, fats: 10, time: '08:00' }],
+      dailyTotal: 400,
+      mealsEaten: [
+        {
+          slot: 'breakfast',
+          items: [{ id: 'm_1', name: 'Eggs & Toast', calories: 400, portion: 1, isExtra: false }],
+        },
+      ],
     },
   ],
   messPreference: 'nonveg',
@@ -53,13 +58,15 @@ const sampleData: AppData = {
       updatedAt: '2026-09-20T00:00:00.000Z',
     },
   ],
-  vaultConfig: { isSetup: true, salt: 'abcdef123456', biometricEnabled: true },
+  vaultConfig: { salt: 'abcdef123456', hasMasterPin: true, useBiometrics: true },
   laundryBatches: [],
   shoppingLists: [
     {
       id: 'list_1',
       name: 'Groceries',
       createdAt: '2026-09-20T00:00:00.000Z',
+      updatedAt: '2026-09-20T00:00:00.000Z',
+      isTemplate: false,
       items: [{ id: 'item_1', name: 'Milk', checked: false, quantity: '1L' }],
     },
   ],

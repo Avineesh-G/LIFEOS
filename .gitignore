@@ -17,3 +17,4 @@ pnpm-debug.log*
 *.keystore
 google-services.json
 test-results/
+*.tsbuildinfo

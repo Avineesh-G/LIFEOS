@@ -1,6 +1,6 @@
 {
-  "versionCode": 10,
-  "versionName": "1.2.3",
+  "versionCode": 14,
+  "versionName": "1.2.4",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.3 (Build 10): Complete native UI/UX baseline, Outings interface, enhanced updater with SHA-256 validation, and universal screen layout engine."
+  "releaseNotes": "LifeOS v1.2.4 (Build 14): Scalloped navigation shapes — active icon indicator and More button now use a 12-lobed organic scallop shape with per-interface color sync and spin animation on tab switch."
 }

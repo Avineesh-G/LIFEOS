@@ -292,7 +292,7 @@ export async function restoreBackupPackage(
 
   try {
     const parsed: LifeOSBackupPackage = JSON.parse(jsonString);
-    const rawAppData = parsed.appData || parsed;
+    const rawAppData = (parsed.appData || parsed) as Partial<AppData>;
     const sanitized = sanitizeAppData(rawAppData);
 
     // 3. Restore Outings if present

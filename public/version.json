@@ -1,8 +1,8 @@
 {
-  "versionCode": 13,
-  "versionName": "1.2.3",
+  "versionCode": 14,
+  "versionName": "1.2.4",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.3 (Build 13): Settings sections enclosed by default with quick enlarge/enclose controls, modal layout refinements, and zero-overlap smooth scrolling.",
+  "releaseNotes": "LifeOS v1.2.4 (Build 14): Scalloped navigation shapes — active icon indicator and More button now use a 12-lobed organic scallop shape with per-interface color sync and spin animation on tab switch.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "f26e95fc2058543f04e2bdacfc4e737b1c139ee444dfa52d0071acebc5a02e89"
+  "sha256": "c93c00bfd18f57c00ff2406e59af71a29bd1c60e5c5b2de573905e0bc62b6959"
 }

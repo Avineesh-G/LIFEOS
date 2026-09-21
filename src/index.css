@@ -123,7 +123,6 @@
   /* Prevent drag ghost images on mobile */
   img, svg, a {
     -webkit-user-drag: none;
-    user-drag: none;
   }
 
   /* Theme-aware native form controls */
