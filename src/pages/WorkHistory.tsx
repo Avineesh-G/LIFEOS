@@ -2,10 +2,16 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, UtensilsCrossed, Dumbbell, CheckSquare, Wallet,
+  ArrowLeft,
   Sparkles, Loader2, Calendar, Check, AlertTriangle, TrendingUp,
   Clock, Award, ChevronLeft, ChevronRight, PieChart, ShieldCheck
 } from 'lucide-react';
+import {
+  FlatwareIcon,
+  ExerciseIcon,
+  ListAltCheckIcon,
+  WalletIcon,
+} from '../components/icons/MaterialSymbols';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
@@ -20,10 +26,10 @@ interface WorkHistoryProps {
 type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending';
 
 const TABS: { id: HistoryTab; icon: any; title: string; color: string }[] = [
-  { id: 'nutrition', icon: UtensilsCrossed, title: 'Nutrition History', color: 'text-amber-500' },
-  { id: 'gym',       icon: Dumbbell,        title: 'Gym History',       color: 'text-rose-500' },
-  { id: 'todo',      icon: CheckSquare,     title: 'Tasks History',     color: 'text-emerald-500' },
-  { id: 'spending',  icon: Wallet,          title: 'Spending History',  color: 'text-[#15803D] dark:text-[#82CB92]' },
+  { id: 'nutrition', icon: FlatwareIcon,    title: 'Nutrition History', color: 'text-amber-500' },
+  { id: 'gym',       icon: ExerciseIcon,    title: 'Gym History',       color: 'text-rose-500' },
+  { id: 'todo',      icon: ListAltCheckIcon, title: 'Tasks History',     color: 'text-emerald-500' },
+  { id: 'spending',  icon: WalletIcon,      title: 'Spending History',  color: 'text-[#15803D] dark:text-[#82CB92]' },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };

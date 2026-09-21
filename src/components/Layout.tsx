@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback, startTransition } fr
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X, RotateCw, Bell
+  RotateCw, Bell
 } from 'lucide-react';
+import { ExpandAllIcon, CollapseContentIcon } from './icons/MaterialSymbols';
 import { triggerHaptic } from '../utils/haptics';
 import {
   checkNotificationPermission,
@@ -685,7 +686,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <X size={26} strokeWidth={2.4} className="text-white" />
+                      <CollapseContentIcon size={26} className="text-white" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -696,12 +697,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" className="text-white">
-                        <circle cx="7" cy="7" r="2.4" />
-                        <circle cx="17" cy="7" r="2.4" />
-                        <circle cx="7" cy="17" r="2.4" />
-                        <circle cx="17" cy="17" r="2.4" />
-                      </svg>
+                      <ExpandAllIcon size={26} className="text-white" />
                     </motion.div>
                   )}
                 </AnimatePresence>
