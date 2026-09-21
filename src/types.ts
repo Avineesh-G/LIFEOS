@@ -99,6 +99,7 @@ export interface AppSettings {
   taskNotificationsEnabled?: boolean;
   timetableNotificationsEnabled?: boolean;
   navPinned?: [string, string];
+  interfaceColors?: Record<string, string>;
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────

@@ -29,7 +29,7 @@ const DayThemeContext = createContext<DayThemeContextValue | null>(null);
 
 export function DayThemeProvider({ children }: { children: React.ReactNode }) {
   const { phase, nextPhase, progress } = useDayPhase();
-  const { theme: m3Theme, scheme, isDark, section } = useMaterialTheme();
+  const { theme: m3Theme, scheme, isDark, section, colorFamily } = useMaterialTheme();
 
   // Pixel typography weight hierarchy: 600 heading, 400 body (700 rare display emphasis)
   const headingWeight = 600;
@@ -81,20 +81,41 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--card-surface-hex', cardBg);
     root.style.setProperty('--card-border', scheme.outlineVariant);
 
-    // ── Interface Palette Tokens (Scope Lock) ──
+    // ── Interface Palette Tokens (Scope Lock & Personalized Tonal Family) ──
     const ifaceTokens = getInterfaceTokens(section, isDark);
-    root.style.setProperty('--accent', isDark ? ifaceTokens.darkStrong : ifaceTokens.seed);
-    root.style.setProperty('--accent-seed', ifaceTokens.seed);
-    root.style.setProperty('--on-accent', ifaceTokens.onAccent);
-    root.style.setProperty('--accent-text', ifaceTokens.textAccent);
-    root.style.setProperty('--accent-strong', ifaceTokens.darkStrong);
-    root.style.setProperty('--accent-tint', ifaceTokens.darkTint);
-    root.style.setProperty('--accent-primary', isDark ? ifaceTokens.darkStrong : ifaceTokens.seed);
-    root.style.setProperty('--accent-secondary', isDark ? ifaceTokens.darkTint : ifaceTokens.textAccent);
-    root.style.setProperty('--accent-contrast', ifaceTokens.onAccent);
-    root.style.setProperty('--accent-soft', scheme.primaryContainer);
-    root.style.setProperty('--pill-active-bg', scheme.primaryContainer);
-    root.style.setProperty('--pill-active-text', scheme.onPrimaryContainer);
+    const activeAccent = colorFamily
+      ? (isDark ? colorFamily.dark.primary : colorFamily.primary)
+      : (isDark ? ifaceTokens.darkStrong : ifaceTokens.seed);
+    const activeSeed = colorFamily ? colorFamily.primary : ifaceTokens.seed;
+    const onAccent = colorFamily ? (isDark ? '#FFFFFF' : '#FFFFFF') : ifaceTokens.onAccent;
+    const textAccent = colorFamily
+      ? (isDark ? colorFamily.dark.accent : colorFamily.accent)
+      : (isDark ? ifaceTokens.darkTint : ifaceTokens.textAccent);
+    const softSurface = colorFamily
+      ? (isDark ? colorFamily.dark.surfaceSoft : colorFamily.surfaceSoft)
+      : scheme.primaryContainer;
+    const softText = colorFamily
+      ? (isDark ? colorFamily.dark.text : colorFamily.text)
+      : scheme.onPrimaryContainer;
+
+    root.style.setProperty('--accent', activeAccent);
+    root.style.setProperty('--accent-seed', activeSeed);
+    root.style.setProperty('--on-accent', onAccent);
+    root.style.setProperty('--accent-text', textAccent);
+    root.style.setProperty('--accent-strong', activeAccent);
+    root.style.setProperty('--accent-tint', textAccent);
+    root.style.setProperty('--accent-primary', activeAccent);
+    root.style.setProperty('--accent-secondary', textAccent);
+    root.style.setProperty('--accent-contrast', onAccent);
+    root.style.setProperty('--accent-soft', softSurface);
+    root.style.setProperty('--pill-active-bg', softSurface);
+    root.style.setProperty('--pill-active-text', softText);
+    if (colorFamily) {
+      root.style.setProperty('--accent-border', isDark ? colorFamily.dark.border : colorFamily.border);
+      root.style.setProperty('--accent-icon', isDark ? colorFamily.dark.icon : colorFamily.icon);
+      root.style.setProperty('--accent-icon-surface', isDark ? colorFamily.dark.iconSurface : colorFamily.iconSurface);
+      root.style.setProperty('--accent-shadow', isDark ? colorFamily.dark.shadow : colorFamily.shadow);
+    }
 
     // Fixed neutral More button tokens
     root.style.setProperty('--more-fill', isDark ? MORE_BUTTON_TOKENS.dark.fill : MORE_BUTTON_TOKENS.light.fill);
@@ -107,11 +128,10 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--shadow-glow', 'transparent');
     // M3 tonal elevation replaces harsh drop shadows
     root.style.setProperty('--shadow-card', 'none');
-    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${tonal.primary}, ${isDark ? ifaceTokens.darkStrong : ifaceTokens.seed})`);
+    root.style.setProperty('--headline-gradient', `linear-gradient(to right, ${tonal.primary}, ${activeAccent})`);
 
     // RGB channels for opacity utilities
-    const activeAccentHex = isDark ? ifaceTokens.darkStrong : ifaceTokens.seed;
-    const [aR, aG, aB] = hexToRgb(activeAccentHex);
+    const [aR, aG, aB] = hexToRgb(activeAccent);
     root.style.setProperty('--accent-rgb', `${aR}, ${aG}, ${aB}`);
     root.style.setProperty('--primary-rgb', `${aR}, ${aG}, ${aB}`);
     root.style.setProperty('--md-primary-rgb', `${aR}, ${aG}, ${aB}`);

@@ -13,6 +13,13 @@ import {
 } from '@material/material-color-utilities';
 
 import { PALETTE } from './palette.ts';
+import {
+  getPersistedInterfaceColors,
+  getCustomizableInterfaceFromPathname,
+  getInterfaceColorFamily,
+  CustomizableInterfaceId,
+} from './interfaceColorManager.ts';
+import { ColorFamily, getReadableForeground } from './colorFamilies.ts';
 
 export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault';
 
@@ -33,6 +40,21 @@ export const SECTION_SEED_COLORS: Record<AppSection, string> = {
 };
 
 /**
+ * Resolves the active personalized color family for a given route or interface
+ */
+export function getRoutePersonalizedColorFamily(
+  pathnameOrInterface: string,
+  customAssignments?: Record<string, string>
+): ColorFamily {
+  const assignments = getPersistedInterfaceColors(customAssignments);
+  const interfaceId = pathnameOrInterface.startsWith('/')
+    ? getCustomizableInterfaceFromPathname(pathnameOrInterface)
+    : (pathnameOrInterface as CustomizableInterfaceId);
+
+  return getInterfaceColorFamily(interfaceId, assignments);
+}
+
+/**
  * Pale tonal container colors for Navigation Bar Pill
  * - Light mode: soft, desaturated tone closer to canvas #FDFDFD
  * - Dark mode: soft, desaturated tone closer to dark canvas #121316
@@ -50,12 +72,38 @@ export const NAV_PILL_BG_COLORS: Record<AppSection, { light: string; dark: strin
   vault: { light: '#EEF2FF', dark: '#0C122B' },      // pale tonal container from #2034A0
 };
 
-export function getNavPillBg(section: AppSection, isDark: boolean): string {
+export function getNavPillBg(
+  section: AppSection,
+  isDark: boolean,
+  pathnameOrColorFamily?: string | ColorFamily
+): string {
+  if (pathnameOrColorFamily) {
+    const family =
+      typeof pathnameOrColorFamily === 'string'
+        ? getRoutePersonalizedColorFamily(pathnameOrColorFamily)
+        : pathnameOrColorFamily;
+    if (family) {
+      return isDark ? family.dark.surfaceSoft : family.surfaceSoft;
+    }
+  }
   const tones = NAV_PILL_BG_COLORS[section] || NAV_PILL_BG_COLORS.home;
   return isDark ? tones.dark : tones.light;
 }
 
-export function getNavSquircleBg(section: AppSection, isDark: boolean): string {
+export function getNavSquircleBg(
+  section: AppSection,
+  isDark: boolean,
+  pathnameOrColorFamily?: string | ColorFamily
+): string {
+  if (pathnameOrColorFamily) {
+    const family =
+      typeof pathnameOrColorFamily === 'string'
+        ? getRoutePersonalizedColorFamily(pathnameOrColorFamily)
+        : pathnameOrColorFamily;
+    if (family) {
+      return isDark ? family.dark.primary : family.primary;
+    }
+  }
   if (section === 'shopping') return isDark ? '#254BB5' : '#172554';
   if (section === 'vault') return isDark ? '#3B82F6' : '#2034A0';
   const paletteEntry = PALETTE[section] || PALETTE.home;
@@ -197,12 +245,18 @@ const themeCache = new Map<string, SectionM3Theme>();
  * - Card surfaces: light-mode cards ~96-98% tone, dark-mode cards ~14-18% tone derived from seed
  * - Blob: filled with seedHex at ~14% (light) / ~20% (dark)
  */
-export function getM3ThemeForSection(section: AppSection, isDark: boolean): SectionM3Theme {
-  const cacheKey = `${section}:${isDark ? 'dark' : 'light'}`;
+export function getM3ThemeForSection(
+  section: AppSection,
+  isDark: boolean,
+  colorFamilyOverride?: ColorFamily
+): SectionM3Theme {
+  const cacheKey = `${section}:${isDark ? 'dark' : 'light'}:${colorFamilyOverride ? colorFamilyOverride.id : 'default'}`;
   const cached = themeCache.get(cacheKey);
   if (cached) return cached;
 
-  const seedHex = SECTION_SEED_COLORS[section] || SECTION_SEED_COLORS.home;
+  const seedHex = colorFamilyOverride
+    ? (isDark ? colorFamilyOverride.dark.primary : colorFamilyOverride.primary)
+    : (SECTION_SEED_COLORS[section] || SECTION_SEED_COLORS.home);
   const sourceArgb = argbFromHex(seedHex);
   const theme = themeFromSourceColor(sourceArgb);
 
@@ -347,6 +401,17 @@ export function getM3ThemeForSection(section: AppSection, isDark: boolean): Sect
     scheme.onPrimaryContainer = isDark ? '#C7D2FE' : '#1E40AF';
     scheme.secondary = isDark ? '#818CF8' : '#1E40AF';
     scheme.onSecondary = '#FFFFFF';
+  }
+
+  if (colorFamilyOverride) {
+    const tone = isDark ? colorFamilyOverride.dark : colorFamilyOverride;
+    scheme.primary = tone.primary;
+    scheme.onPrimary = getReadableForeground(tone.primary);
+    scheme.primaryContainer = tone.surfaceSoft;
+    scheme.onPrimaryContainer = tone.text;
+    scheme.secondary = tone.accent;
+    scheme.outline = tone.border;
+    scheme.outlineVariant = tone.border;
   }
 
   const result: SectionM3Theme = {

@@ -32,6 +32,7 @@ import { OutingsProvider } from './features/outings/context/OutingsContext';
 
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
+const InterfaceColorsSettings = lazy(() => import('./pages/InterfaceColorsSettings'));
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
@@ -95,6 +96,7 @@ function MainContent({
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
+    { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
