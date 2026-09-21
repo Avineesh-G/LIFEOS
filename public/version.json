@@ -1,8 +1,8 @@
 {
-  "versionCode": 12,
+  "versionCode": 13,
   "versionName": "1.2.3",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.3 (Build 12): Fixed Outing Expenses bottom sheet touch-scroll capture, added sticky accessible action buttons, and verified seamless group expense calculations.",
+  "releaseNotes": "LifeOS v1.2.3 (Build 13): Resolved modal sheet sticky footer clashing, refined bottom clearance with natural document flow, and verified zero-overlap smooth scrolling.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "a5202a90114e191c62fe3b60b9ac543ef9b51821548269315dbd0ddb3cc444b8"
+  "sha256": "a6888d8d78ef2f996d6657d51718e5869e54fa2c71b7ed3a77b8ac66b1f6caad"
 }

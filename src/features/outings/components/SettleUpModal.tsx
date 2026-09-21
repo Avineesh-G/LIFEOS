@@ -347,8 +347,8 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
           </div>
         )}
 
-        {/* 4. Share & Copy Recap Actions (Sticky Footer) */}
-        <div className="sticky bottom-0 -mx-6 -mb-6 px-6 pt-3 pb-[max(1.25rem,calc(env(safe-area-inset-bottom,0px)+1rem))] bg-[var(--md-surface-container-low)]/95 backdrop-blur-md border-t border-[var(--card-border)] mt-4 z-20 flex items-center gap-2">
+        {/* 4. Share & Copy Recap Actions */}
+        <div className="pt-4 pb-2 flex items-center gap-2">
           <button
             type="button"
             onClick={handleCopyRecap}

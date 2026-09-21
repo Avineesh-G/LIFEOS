@@ -21,7 +21,7 @@ export function BottomSheet({
   onClose,
   children,
   showDragHandle = true,
-  maxHeight = '90vh',
+  maxHeight = 'min(92vh, calc(100dvh - 1.5rem))',
   maxWidth = 'sm:max-w-lg',
   className = '',
 }: BottomSheetProps) {
@@ -79,7 +79,7 @@ export function BottomSheet({
                 onClose();
               }
             }}
-            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1.75rem))] sm:pb-6 border-t sm:border border-[var(--card-border)] shadow-2xl overflow-y-auto overscroll-contain no-scrollbar gpu-composited touch-pan-y ${className}`}
+            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-t-[32px] sm:rounded-[32px] p-6 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+2.5rem))] sm:pb-6 border-t sm:border border-[var(--card-border)] shadow-2xl overflow-y-auto overscroll-contain no-scrollbar gpu-composited touch-pan-y ${className}`}
             style={{
               maxHeight,
               willChange: 'transform',

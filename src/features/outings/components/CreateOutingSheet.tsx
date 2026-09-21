@@ -383,8 +383,8 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
           />
         </div>
 
-        {/* Action Button (Sticky Footer so it's always accessible and never cut off) */}
-        <div className="sticky bottom-0 -mx-6 -mb-6 px-6 pt-3 pb-[max(1.25rem,calc(env(safe-area-inset-bottom,0px)+1rem))] bg-[var(--md-surface-container-low)]/95 backdrop-blur-md border-t border-[var(--card-border)] mt-4 z-20">
+        {/* Action Button */}
+        <div className="pt-4 pb-2">
           <button
             type="button"
             onClick={handleSave}
