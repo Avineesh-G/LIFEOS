@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 15,
-  versionName: '1.2.5',
+  versionCode: 16,
+  versionName: '1.2.6',
   releaseDate: '2026-09-21',
-  releaseNotes: 'LifeOS v1.2.5 (Build 15): Complete Night Canteen menu with all 91 finalized items, dietary/category filters, real-time search, calorie tracking, and automatic canteen billing.',
+  releaseNotes: 'LifeOS v1.2.6 (Build 16): Updated navigation icons to Google Material Symbols (Rounded) for Home, Gym, Nutrition, Study, Spending, Shopping, Tasks, Laundry, and hub controls.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;
