@@ -153,110 +153,110 @@ export const COLOR_FAMILIES: Record<ColorFamilyId, ColorFamily> = {
     },
   },
 
-  // 03 — Emerald: Fresh / Healthy / Balanced
+  // 03 — Emerald: Fresh / Healthy / Balanced (Finance & Spending Authentic)
   emerald: {
     id: 'emerald',
     name: 'Emerald',
     mood: 'Fresh / Healthy / Balanced',
-    dotColor: '#059669',
-    primary: '#059669',
-    accent: '#10B981',
+    dotColor: '#15803D',
+    primary: '#15803D',
+    accent: '#16A34A',
     surface: '#FFFFFF',
-    surfaceSoft: '#D1FAE5',
-    border: '#6EE7B7',
-    icon: '#047857',
-    iconSurface: '#A7F3D0',
-    text: '#153027',
-    textSecondary: '#52665D',
+    surfaceSoft: '#E8F5E9',
+    border: '#A7F3D0',
+    icon: '#15803D',
+    iconSurface: '#DCFCE7',
+    text: '#122E1A',
+    textSecondary: '#15803D',
     hover: '#ECFDF5',
-    pressed: '#047857',
-    selected: '#D1FAE5',
-    focusRing: 'rgba(5, 150, 105, 0.45)',
-    shadow: 'rgba(5, 150, 105, 0.16)',
+    pressed: '#14532D',
+    selected: '#E8F5E9',
+    focusRing: 'rgba(21, 128, 61, 0.45)',
+    shadow: 'rgba(21, 128, 61, 0.16)',
     dark: {
-      primary: '#10B981',
-      accent: '#34D399',
-      surface: '#13231E',
-      surfaceSoft: '#18382E',
-      border: 'rgba(110, 231, 183, 0.25)',
-      icon: '#6EE7B7',
-      iconSurface: 'rgba(16, 185, 129, 0.2)',
+      primary: '#15803D',
+      accent: '#82CB92',
+      surface: '#122E1A',
+      surfaceSoft: '#16351F',
+      border: 'rgba(130, 203, 146, 0.25)',
+      icon: '#82CB92',
+      iconSurface: 'rgba(21, 128, 61, 0.25)',
       text: '#ECFDF5',
-      textSecondary: '#6EE7B7',
-      hover: 'rgba(16, 185, 129, 0.12)',
-      pressed: '#059669',
+      textSecondary: '#82CB92',
+      hover: 'rgba(21, 128, 61, 0.12)',
+      pressed: '#15803D',
       shadow: 'rgba(0, 0, 0, 0.4)',
     },
   },
 
-  // 04 — Coral: Energetic / Friendly / Expressive
+  // 04 — Coral: Energetic / Friendly / Expressive (Gym & Workouts Authentic)
   coral: {
     id: 'coral',
     name: 'Coral',
     mood: 'Energetic / Friendly / Expressive',
-    dotColor: '#F43F5E',
-    primary: '#F43F5E',
+    dotColor: '#E11D48',
+    primary: '#E11D48',
     accent: '#FB7185',
     surface: '#FFFFFF',
-    surfaceSoft: '#FFE4E6',
+    surfaceSoft: '#FBDFE5',
     border: '#FDA4AF',
     icon: '#E11D48',
     iconSurface: '#FECDD3',
-    text: '#35171E',
-    textSecondary: '#70535A',
+    text: '#381620',
+    textSecondary: '#E11D48',
     hover: '#FFF1F2',
-    pressed: '#E11D48',
-    selected: '#FFE4E6',
-    focusRing: 'rgba(244, 63, 94, 0.45)',
-    shadow: 'rgba(244, 63, 94, 0.16)',
+    pressed: '#BE123C',
+    selected: '#FBDFE5',
+    focusRing: 'rgba(225, 29, 72, 0.45)',
+    shadow: 'rgba(225, 29, 72, 0.16)',
     dark: {
-      primary: '#FB7185',
-      accent: '#FDA4AF',
-      surface: '#29181C',
-      surfaceSoft: '#3D1E25',
+      primary: '#E11D48',
+      accent: '#FB7185',
+      surface: '#381620',
+      surfaceSoft: '#29181C',
       border: 'rgba(253, 164, 175, 0.25)',
-      icon: '#FDA4AF',
-      iconSurface: 'rgba(251, 113, 133, 0.2)',
+      icon: '#FB7185',
+      iconSurface: 'rgba(225, 29, 72, 0.2)',
       text: '#FFF1F2',
-      textSecondary: '#FDA4AF',
-      hover: 'rgba(251, 113, 133, 0.12)',
-      pressed: '#F43F5E',
+      textSecondary: '#FB7185',
+      hover: 'rgba(225, 29, 72, 0.12)',
+      pressed: '#BE123C',
       shadow: 'rgba(0, 0, 0, 0.4)',
     },
   },
 
-  // 05 — Amber: Warm / Positive / Active
+  // 05 — Amber: Warm / Positive / Active (Nutrition & Mess Authentic)
   amber: {
     id: 'amber',
     name: 'Amber',
     mood: 'Warm / Positive / Active',
-    dotColor: '#F59E0B',
-    primary: '#F59E0B',
-    accent: '#FBBF24',
+    dotColor: '#F5A623',
+    primary: '#F5A623',
+    accent: '#FBC15E',
     surface: '#FFFFFF',
-    surfaceSoft: '#FEF3C7',
-    border: '#FCD34D',
+    surfaceSoft: '#FEF3E0',
+    border: '#FDE68A',
     icon: '#D97706',
-    iconSurface: '#FDE68A',
-    text: '#34230A',
-    textSecondary: '#6B5A35',
+    iconSurface: '#FEF3C7',
+    text: '#3A2A14',
+    textSecondary: '#9F6803',
     hover: '#FFFBEB',
     pressed: '#D97706',
-    selected: '#FEF3C7',
-    focusRing: 'rgba(245, 158, 11, 0.45)',
-    shadow: 'rgba(245, 158, 11, 0.16)',
+    selected: '#FEF3E0',
+    focusRing: 'rgba(245, 166, 35, 0.45)',
+    shadow: 'rgba(245, 166, 35, 0.16)',
     dark: {
-      primary: '#FBBF24',
-      accent: '#FCD34D',
-      surface: '#2B2213',
-      surfaceSoft: '#3E3017',
-      border: 'rgba(252, 211, 77, 0.25)',
-      icon: '#FCD34D',
-      iconSurface: 'rgba(251, 191, 36, 0.2)',
-      text: '#FFFBEB',
-      textSecondary: '#FCD34D',
-      hover: 'rgba(251, 191, 36, 0.12)',
-      pressed: '#F59E0B',
+      primary: '#F5A623',
+      accent: '#FBC15E',
+      surface: '#3A2A14',
+      surfaceSoft: '#2B1E0D',
+      border: 'rgba(251, 193, 94, 0.25)',
+      icon: '#FBC15E',
+      iconSurface: 'rgba(245, 166, 35, 0.2)',
+      text: '#FEF3E0',
+      textSecondary: '#FBC15E',
+      hover: 'rgba(245, 166, 35, 0.12)',
+      pressed: '#D97706',
       shadow: 'rgba(0, 0, 0, 0.4)',
     },
   },
@@ -1007,15 +1007,17 @@ export function getReadableForeground(bgHex: string): '#FFFFFF' | '#172033' {
  * 1-to-1 mapping across interfaces with zero color duplication.
  */
 export const DEFAULT_INTERFACE_COLORS: Record<string, ColorFamilyId> = {
-  home: 'azure',       // Royal Blue identity
-  study: 'cyan',       // Lagoon Cyan identity
-  timetable: 'indigo', // Academic / Focused Indigo identity
-  spending: 'emerald', // Fresh Green Wealth identity
-  shopping: 'teal',    // Clean Sophisticated Teal identity
-  outings: 'tangerine', // Bold Outing Warmth identity
-  tasks: 'violet',     // Expressive Modern Violet identity
-  laundry: 'amber',    // Warm Positive Active identity
-  history: 'rose',     // Burgundy / Rose identity
-  vault: 'coral',      // Security Accent Coral identity
-  settings: 'slate',   // Sleek Titanium Slate identity
+  home: 'azure',       // Royal Blue #2563EB
+  gym: 'coral',        // Coral Crimson #E11D48
+  nutrition: 'amber',  // Solar Amber #F5A623
+  study: 'cyan',       // Lagoon Cyan #0891B2
+  timetable: 'cyan',   // Lagoon Cyan #0891B2
+  spending: 'emerald', // Forest Green #15803D
+  shopping: 'charcoal',// Midnight Navy #172554
+  outings: 'copper',   // Saddle Brown #8C500A
+  tasks: 'violet',     // Modern Violet #7C3AED
+  laundry: 'teal',     // Clean Teal #0D9488
+  history: 'rose',     // Burgundy / Rose #8C1D40
+  vault: 'cobalt',     // Cyber Cobalt #2034A0
+  settings: 'slate',   // Sleek Titanium Slate #475569
 };

@@ -118,7 +118,10 @@ export default function InterfaceColorsSettings({
     triggerHaptic('medium');
     const defaults = { ...DEFAULT_INTERFACE_COLORS };
     setAssignments(defaults);
-    saveInterfaceColorsToStorage(defaults);
+    try {
+      localStorage.removeItem('lifeos_interface_colors');
+      window.dispatchEvent(new CustomEvent('lifeos:interface-colors-changed', { detail: {} }));
+    } catch {}
     setShowResetModal(false);
 
     if (updateData) {
@@ -126,7 +129,7 @@ export default function InterfaceColorsSettings({
         await updateData({
           settings: {
             ...data?.settings,
-            interfaceColors: defaults,
+            interfaceColors: {},
           },
         });
       } catch (err) {

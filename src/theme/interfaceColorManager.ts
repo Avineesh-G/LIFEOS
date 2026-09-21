@@ -1,28 +1,32 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  Home,
+  Dumbbell,
+  UtensilsCrossed,
+  BookOpen,
   CalendarDays,
+  Wallet,
+  ShoppingCart,
+  MapPin,
+  CheckSquare,
+  Shirt,
   History as HistoryIcon,
   ShieldCheck,
   Settings as SettingsIcon,
-  MapPin,
 } from 'lucide-react';
-import {
-  HomeAppLogoIcon,
-  Book2Icon,
-  WalletIcon,
-  ShoppingCartIcon,
-  ListAltCheckIcon,
-  LaundryIcon,
-} from '../components/icons/MaterialSymbols';
-import {
-  COLOR_FAMILIES,
+import type {
   ColorFamily,
   ColorFamilyId,
+} from './colorFamilies.ts';
+import {
+  COLOR_FAMILIES,
   DEFAULT_INTERFACE_COLORS,
-} from './colorFamilies';
+} from './colorFamilies.ts';
 
 export type CustomizableInterfaceId =
   | 'home'
+  | 'gym'
+  | 'nutrition'
   | 'study'
   | 'timetable'
   | 'spending'
@@ -49,15 +53,31 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     label: 'Home',
     description: 'Dashboard, day phase overview, and quick status',
     route: '/',
-    icon: HomeAppLogoIcon,
+    icon: Home,
     defaultFamily: 'azure',
+  },
+  {
+    id: 'gym',
+    label: 'Gym',
+    description: 'Workout routines, exercise logs, and split schedules',
+    route: '/gym',
+    icon: Dumbbell,
+    defaultFamily: 'coral',
+  },
+  {
+    id: 'nutrition',
+    label: 'Nutrition',
+    description: 'Daily meals, mess schedule, night canteen, and calories',
+    route: '/nutrition',
+    icon: UtensilsCrossed,
+    defaultFamily: 'amber',
   },
   {
     id: 'study',
     label: 'Study',
     description: 'Focus timer, study subjects, notes, and streak tracking',
     route: '/study',
-    icon: Book2Icon,
+    icon: BookOpen,
     defaultFamily: 'cyan',
   },
   {
@@ -66,14 +86,14 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     description: 'Weekly class schedule, lecture rooms, and slot reminders',
     route: '/timetable',
     icon: CalendarDays,
-    defaultFamily: 'indigo',
+    defaultFamily: 'cyan',
   },
   {
     id: 'spending',
     label: 'Spending',
     description: 'Daily cashflow, budget categorization, and expense analysis',
     route: '/spending',
-    icon: WalletIcon,
+    icon: Wallet,
     defaultFamily: 'emerald',
   },
   {
@@ -81,8 +101,8 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     label: 'Shopping Lists',
     description: 'Multi-category grocery, pantry inventory, and supplies checklists',
     route: '/shopping',
-    icon: ShoppingCartIcon,
-    defaultFamily: 'teal',
+    icon: ShoppingCart,
+    defaultFamily: 'charcoal',
   },
   {
     id: 'outings',
@@ -90,14 +110,14 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     description: 'Shared trip budgets, group bills, receipts, and split balances',
     route: '/outings',
     icon: MapPin,
-    defaultFamily: 'tangerine',
+    defaultFamily: 'copper',
   },
   {
     id: 'tasks',
     label: 'To-Do Tasks',
     description: 'Prioritized task cards, subtasks, deadlines, and time blocks',
     route: '/tasks',
-    icon: ListAltCheckIcon,
+    icon: CheckSquare,
     defaultFamily: 'violet',
   },
   {
@@ -105,8 +125,8 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     label: 'Laundry',
     description: 'Washing batch cycles, garment counts, and vendor pickups',
     route: '/laundry',
-    icon: LaundryIcon,
-    defaultFamily: 'amber',
+    icon: Shirt,
+    defaultFamily: 'teal',
   },
   {
     id: 'history',
@@ -122,7 +142,7 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     description: 'Encrypted credentials, confidential notes, and biometric lock',
     route: '/vault',
     icon: ShieldCheck,
-    defaultFamily: 'coral',
+    defaultFamily: 'cobalt',
   },
   {
     id: 'settings',
@@ -144,38 +164,53 @@ export const INTERFACE_MAP = new Map<CustomizableInterfaceId, InterfaceConfig>(
 export const INTERFACE_COLORS_STORAGE_KEY = 'lifeos_interface_colors';
 
 /**
- * Reads persisted interface color assignments from localStorage or settings.
+ * Reads raw user customizations (returns null if user has NOT customized colors)
  */
-export function getPersistedInterfaceColors(
+export function getRawUserCustomColors(
   settingsInterfaceColors?: Record<string, string>
-): Record<string, ColorFamilyId> {
-  const assignments: Record<string, ColorFamilyId> = { ...DEFAULT_INTERFACE_COLORS };
-
-  // 1. Try settings from AppData (cloud / synced state)
-  if (settingsInterfaceColors && typeof settingsInterfaceColors === 'object') {
-    for (const [key, colorId] of Object.entries(settingsInterfaceColors)) {
-      if (colorId && colorId in COLOR_FAMILIES) {
-        assignments[key] = colorId as ColorFamilyId;
+): Record<string, ColorFamilyId> | null {
+  if (settingsInterfaceColors && typeof settingsInterfaceColors === 'object' && Object.keys(settingsInterfaceColors).length > 0) {
+    const valid: Record<string, ColorFamilyId> = {};
+    for (const [k, v] of Object.entries(settingsInterfaceColors)) {
+      if (v && v in COLOR_FAMILIES) {
+        valid[k] = v as ColorFamilyId;
       }
     }
+    if (Object.keys(valid).length > 0) return valid;
   }
 
-  // 2. Try localStorage backup (ensures instant offline sync before network loads)
   try {
     const raw = localStorage.getItem(INTERFACE_COLORS_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        for (const [key, colorId] of Object.entries(parsed)) {
-          if (colorId && typeof colorId === 'string' && colorId in COLOR_FAMILIES) {
-            assignments[key] = colorId as ColorFamilyId;
+      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+        const valid: Record<string, ColorFamilyId> = {};
+        for (const [k, v] of Object.entries(parsed)) {
+          if (v && typeof v === 'string' && v in COLOR_FAMILIES) {
+            valid[k] = v as ColorFamilyId;
           }
         }
+        if (Object.keys(valid).length > 0) return valid;
       }
     }
   } catch {}
 
-  return assignments;
+  return null;
+}
+
+/**
+ * Reads interface color assignments for Settings UI display.
+ * Merges factory defaults with any explicit user custom overrides.
+ */
+export function getPersistedInterfaceColors(
+  settingsInterfaceColors?: Record<string, string>
+): Record<string, ColorFamilyId> {
+  const defaults: Record<string, ColorFamilyId> = { ...DEFAULT_INTERFACE_COLORS };
+  const custom = getRawUserCustomColors(settingsInterfaceColors);
+  if (custom) {
+    return { ...defaults, ...custom };
+  }
+  return defaults;
 }
 
 /**
@@ -186,7 +221,6 @@ export function saveInterfaceColorsToStorage(
 ): void {
   try {
     localStorage.setItem(INTERFACE_COLORS_STORAGE_KEY, JSON.stringify(assignments));
-    // Trigger custom event so any active hook/provider updates immediately
     window.dispatchEvent(new CustomEvent('lifeos:interface-colors-changed', { detail: assignments }));
   } catch {}
 }
@@ -239,9 +273,11 @@ export function getInterfaceColorFamily(
 /**
  * Maps a URL route pathname to its canonical CustomizableInterfaceId.
  */
-export function getCustomizableInterfaceFromPathname(pathname: string): CustomizableInterfaceId {
+export function getCustomizableInterfaceFromPathname(pathname: string): CustomizableInterfaceId | null {
   const p = (pathname || '/').toLowerCase();
   if (p === '/' || p === '') return 'home';
+  if (p.startsWith('/gym')) return 'gym';
+  if (p.startsWith('/nutrition')) return 'nutrition';
   if (p.startsWith('/timetable')) return 'timetable';
   if (p.startsWith('/study')) return 'study';
   if (p.startsWith('/spending')) return 'spending';
@@ -253,5 +289,5 @@ export function getCustomizableInterfaceFromPathname(pathname: string): Customiz
   if (p.startsWith('/vault')) return 'vault';
   if (p.startsWith('/settings')) return 'settings';
 
-  return 'home';
+  return null;
 }

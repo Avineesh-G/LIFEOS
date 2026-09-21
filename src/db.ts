@@ -19,7 +19,7 @@ const DEFAULT_DATA: AppData = {
   timetable: [],
   tasks: [],
   reviews: [],
-  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: DEFAULT_INTERFACE_COLORS },
+  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {} },
   profile: null,
   menuMonths: [],
   nutritionLogs: [],

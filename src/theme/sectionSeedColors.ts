@@ -17,9 +17,11 @@ import {
   getPersistedInterfaceColors,
   getCustomizableInterfaceFromPathname,
   getInterfaceColorFamily,
-  CustomizableInterfaceId,
+  getRawUserCustomColors,
 } from './interfaceColorManager.ts';
-import { ColorFamily, getReadableForeground } from './colorFamilies.ts';
+import type { CustomizableInterfaceId } from './interfaceColorManager.ts';
+import type { ColorFamily } from './colorFamilies.ts';
+import { getReadableForeground, COLOR_FAMILIES, DEFAULT_INTERFACE_COLORS } from './colorFamilies.ts';
 
 export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault';
 
@@ -45,13 +47,25 @@ export const SECTION_SEED_COLORS: Record<AppSection, string> = {
 export function getRoutePersonalizedColorFamily(
   pathnameOrInterface: string,
   customAssignments?: Record<string, string>
-): ColorFamily {
-  const assignments = getPersistedInterfaceColors(customAssignments);
+): ColorFamily | null {
   const interfaceId = pathnameOrInterface.startsWith('/')
     ? getCustomizableInterfaceFromPathname(pathnameOrInterface)
     : (pathnameOrInterface as CustomizableInterfaceId);
 
-  return getInterfaceColorFamily(interfaceId, assignments);
+  if (!interfaceId) return null;
+
+  const custom = getRawUserCustomColors(customAssignments);
+  if (!custom) return null;
+
+  const colorId = custom[interfaceId];
+  if (!colorId || !COLOR_FAMILIES[colorId]) return null;
+
+  // If assigned color matches the default family for this interface, return null to preserve authentic PALETTE!
+  if (colorId === DEFAULT_INTERFACE_COLORS[interfaceId]) {
+    return null;
+  }
+
+  return COLOR_FAMILIES[colorId];
 }
 
 /**
@@ -75,7 +89,7 @@ export const NAV_PILL_BG_COLORS: Record<AppSection, { light: string; dark: strin
 export function getNavPillBg(
   section: AppSection,
   isDark: boolean,
-  pathnameOrColorFamily?: string | ColorFamily
+  pathnameOrColorFamily?: string | ColorFamily | null
 ): string {
   if (pathnameOrColorFamily) {
     const family =
@@ -93,7 +107,7 @@ export function getNavPillBg(
 export function getNavSquircleBg(
   section: AppSection,
   isDark: boolean,
-  pathnameOrColorFamily?: string | ColorFamily
+  pathnameOrColorFamily?: string | ColorFamily | null
 ): string {
   if (pathnameOrColorFamily) {
     const family =

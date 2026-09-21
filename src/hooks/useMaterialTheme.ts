@@ -17,7 +17,7 @@ export interface UseMaterialThemeReturn {
   isDark: boolean;
   section: AppSection;
   seedHex: string;
-  colorFamily: ColorFamily;
+  colorFamily: ColorFamily | null;
   // Backwards compatibility alias
   phase: string;
 }
@@ -59,7 +59,7 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
   }, [pathname, colorVersion]);
 
   const theme = useMemo(() => {
-    return getM3ThemeForSection(section, isDark, colorFamily);
+    return getM3ThemeForSection(section, isDark, colorFamily || undefined);
   }, [section, isDark, colorFamily]);
 
   return {

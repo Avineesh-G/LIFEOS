@@ -1,6 +1,6 @@
 {
-  "versionCode": 16,
-  "versionName": "1.2.6",
+  "versionCode": 17,
+  "versionName": "1.2.7",
   "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.6 (Build 16): Updated navigation icons to Google Material Symbols (Rounded) for Home, Gym, Nutrition, Study, Spending, Shopping, Tasks, Laundry, and hub controls."
+  "releaseNotes": "LifeOS v1.2.7 (Build 17): Added 15 new curated tonal color families (25 total) to the per-interface personalization system with 1-to-1 lock enforcement and live preview."
 }
