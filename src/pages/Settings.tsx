@@ -1028,11 +1028,36 @@ export default function Settings({
                   <button
                     type="button"
                     onClick={async () => {
-                      if (window.confirm('Are you sure you want to reset all your data? This cannot be undone.')) {
-                        if (auth.currentUser) {
-                          await deleteDoc(doc(db, 'users', auth.currentUser.uid));
-                          alert('Data reset successfully! The app will now reload.');
-                          window.location.reload();
+                      if (window.confirm('Are you sure you want to reset ALL your data? Every entry, setting, and key will be permanently erased. This cannot be undone.')) {
+                        try {
+                          // 1. Delete Firestore document
+                          if (auth.currentUser) {
+                            await deleteDoc(doc(db, 'users', auth.currentUser.uid));
+                          }
+
+                          // 2. Clear ALL LifeOS localStorage caches so data doesn't come back on reload
+                          const keysToRemove: string[] = [];
+                          for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (key && (key.startsWith('lifeos_') || key.startsWith('lifeos-'))) {
+                              keysToRemove.push(key);
+                            }
+                          }
+                          keysToRemove.forEach(k => localStorage.removeItem(k));
+
+                          // 3. Clear IndexedDB receipt blobs
+                          try { await clearAllReceiptBlobs(); } catch {}
+
+                          // 4. Sign out
+                          if (Capacitor.isNativePlatform()) {
+                            GoogleAuth.signOut().catch(() => {});
+                          }
+                          await signOut(auth);
+
+                          // 5. Reload cleanly
+                          window.location.href = '/';
+                        } catch (err) {
+                          alert('Reset failed. Please try again.');
                         }
                       }
                     }}
