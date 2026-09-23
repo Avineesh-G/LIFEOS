@@ -1,8 +1,8 @@
 {
-  "versionCode": 24,
-  "versionName": "2.0.0",
+  "versionCode": 25,
+  "versionName": "2.0.1",
   "releaseDate": "2026-09-23",
-  "releaseNotes": "LifeOS v2.0.0 (Build 24): 100% offline launch, in-app offline notification modal, draft auto-preservation across interfaces, and auto-healing cloud sync with opted signs preservation.",
+  "releaseNotes": "LifeOS v2.0.1 (Build 25): 100% offline launch, one-time cloud data migration prompt, and complete data reset engine.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "7b5b5b7376563ca355fbf0decb0d755a061e78139e86eb0c61ffb33db0ed1e46"
+  "sha256": "2d51e391b08c29f4f741f717af9e2170a6d1d9e08987aa9d286a43cfe79a1cfd"
 }

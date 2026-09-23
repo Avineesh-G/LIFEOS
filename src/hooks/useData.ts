@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getData, saveData, sanitizeAppData, migrateAppData, DEFAULT_DATA } from '../db';
+import { getData, saveData, sanitizeAppData, migrateAppData, clearAllData, DEFAULT_DATA } from '../db';
 import type { AppData } from '../types';
 import { User } from 'firebase/auth';
 import { scheduleWidgetSync } from '../utils/widgetBridge';
+import { Preferences } from '@capacitor/preferences';
+import { clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
 
 const CACHE_KEY_PREFIX = 'lifeos_cache_';
 const GLOBAL_CACHE_KEY = 'lifeos_cached_app_data';
@@ -262,13 +264,12 @@ export function useData(user: User | null) {
           setLoading(false);
           setError(null);
         } else {
-          // Document does not exist yet on server (brand new user)
-          const initial = dataRef.current || DEFAULT_DATA;
-          setData(initial);
-          dataRef.current = initial;
+          // Document does not exist yet on server (brand new user or reset user)
+          setData(DEFAULT_DATA);
+          dataRef.current = DEFAULT_DATA;
           setLoading(false);
-          // Auto-seed initial user document in Firestore cloud so subsequent saves merge seamlessly
-          saveData(user.uid, initial).catch(err => {
+          // Auto-seed clean user document in Firestore cloud so subsequent saves merge seamlessly
+          saveData(user.uid, DEFAULT_DATA).catch(err => {
             console.warn('Initial cloud seed notice:', err);
           });
         }
@@ -358,5 +359,39 @@ export function useData(user: User | null) {
     }
   }, [user]);
 
-  return { data, loading, updateData, refresh, error };
+  // Permanent and total data reset: wipes Firestore document, clears localStorage, sessionStorage, and IndexedDB
+  const resetAllData = useCallback(async (): Promise<void> => {
+    if (!user) return;
+    setData(DEFAULT_DATA);
+    dataRef.current = DEFAULT_DATA;
+    try {
+      await clearAllData(user.uid);
+    } catch (err) {
+      console.error('[LifeOS] Error wiping Firestore user document:', err);
+    }
+    try {
+      localStorage.clear();
+    } catch {}
+    try {
+      sessionStorage.clear();
+    } catch {}
+    try {
+      await clearAllReceiptBlobs();
+    } catch {}
+    try {
+      const dbs = await indexedDB.databases?.();
+      if (dbs) {
+        for (const d of dbs) {
+          if (d.name && d.name !== 'firebaseLocalStorageDb') {
+            indexedDB.deleteDatabase(d.name);
+          }
+        }
+      }
+    } catch {}
+    try {
+      await Preferences.clear();
+    } catch {}
+  }, [user]);
+
+  return { data, loading, updateData, refresh, resetAllData, error };
 }

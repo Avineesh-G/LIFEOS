@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 24,
-  versionName: '2.0.0',
+  versionCode: 25,
+  versionName: '2.0.1',
   releaseDate: '2026-09-23',
-  releaseNotes: 'LifeOS v2.0.0 (Build 24): 100% offline launch, in-app offline notification modal, draft auto-preservation across interfaces, and auto-healing cloud sync with opted signs preservation.',
+  releaseNotes: 'LifeOS v2.0.1 (Build 25): 100% offline launch, one-time cloud data migration prompt, and complete data reset engine.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

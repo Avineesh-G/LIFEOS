@@ -30,12 +30,14 @@ interface SettingsProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
   refresh: () => Promise<AppData>;
+  resetAllData?: () => Promise<void>;
 }
 
 export default function Settings({
   data,
   updateData,
-  refresh
+  refresh,
+  resetAllData,
 }: SettingsProps) {
   const navigate = useNavigate();
   const [themeMode, setThemeMode] = useThemeMode();
@@ -1029,31 +1031,33 @@ export default function Settings({
                     onClick={async () => {
                       if (window.confirm('Are you sure you want to reset ALL your data? Every entry, setting, and key will be permanently erased. This cannot be undone.')) {
                         try {
-                          // 1. Delete Firestore document
-                          if (auth.currentUser) {
-                            await deleteDoc(doc(db, 'users', auth.currentUser.uid));
-                          }
+                          triggerHaptic('heavy');
 
-                          // 2. Clear ALL LifeOS localStorage caches so data doesn't come back on reload
-                          const keysToRemove: string[] = [];
-                          for (let i = 0; i < localStorage.length; i++) {
-                            const key = localStorage.key(i);
-                            if (key && (key.startsWith('lifeos_') || key.startsWith('lifeos-'))) {
-                              keysToRemove.push(key);
+                          // 1. Wipe Firestore, memory state, localStorage, sessionStorage, and IndexedDB
+                          if (resetAllData) {
+                            await resetAllData();
+                          } else {
+                            if (auth.currentUser) {
+                              await deleteDoc(doc(db, 'users', auth.currentUser.uid));
                             }
+                            try { localStorage.clear(); } catch {}
+                            try { sessionStorage.clear(); } catch {}
+                            try { await clearAllReceiptBlobs(); } catch {}
                           }
-                          keysToRemove.forEach(k => localStorage.removeItem(k));
 
-                          // 3. Clear IndexedDB receipt blobs
-                          try { await clearAllReceiptBlobs(); } catch {}
+                          // 2. Clear native preferences & caches
+                          try {
+                            localStorage.clear();
+                            sessionStorage.clear();
+                          } catch {}
 
-                          // 4. Sign out
+                          // 3. Sign out cleanly
                           if (Capacitor.isNativePlatform()) {
                             GoogleAuth.signOut().catch(() => {});
                           }
                           await signOut(auth);
 
-                          // 5. Reload cleanly
+                          // 4. Reload cleanly to root
                           window.location.href = '/';
                         } catch (err) {
                           alert('Reset failed. Please try again.');

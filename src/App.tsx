@@ -40,6 +40,7 @@ import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
 import NetworkStatusModal from './components/NetworkStatusModal';
+import CloudMigrationModal from './components/CloudMigrationModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
 const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
 const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
@@ -52,10 +53,12 @@ function MainContent({
   data,
   refresh,
   updateData,
+  resetAllData,
 }: {
   data: any;
   refresh: () => Promise<any>;
   updateData: (partial: any) => Promise<any>;
+  resetAllData?: () => Promise<void>;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
@@ -97,7 +100,7 @@ function MainContent({
     { path: '/tasks', element: <RouteErrorBoundary routeName="Tasks"><Tasks data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
+    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} /></RouteErrorBoundary> },
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
@@ -207,7 +210,7 @@ function App() {
     };
   }, []);
 
-  const { data, loading: dataLoading, updateData, refresh } = useData(user);
+  const { data, loading: dataLoading, updateData, refresh, resetAllData } = useData(user);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -368,6 +371,7 @@ function App() {
   return (
     <DayThemeProvider>
       <NetworkStatusModal />
+      <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
       <AppLockOverlay />
       <InAppUpdateModal />
       <div
@@ -385,6 +389,7 @@ function App() {
                 data={safeData}
                 refresh={refresh}
                 updateData={updateData}
+                resetAllData={resetAllData}
               />
             </OutingsProvider>
           </ErrorBoundary>

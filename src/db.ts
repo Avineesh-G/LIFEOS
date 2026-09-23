@@ -212,7 +212,7 @@ export async function importData(uid: string, json: string): Promise<void> {
 
 export async function clearAllData(uid: string): Promise<void> {
   const docRef = doc(db, 'users', uid);
-  await deleteDoc(docRef);
+  await setDoc(docRef, cleanForFirestore(DEFAULT_DATA));
 }
 
-export { DEFAULT_DATA };
+export { DEFAULT_DATA, cleanForFirestore };
