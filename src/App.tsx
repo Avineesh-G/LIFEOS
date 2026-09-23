@@ -33,11 +33,13 @@ import { OutingsProvider } from './features/outings/context/OutingsContext';
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
 const InterfaceColorsSettings = lazy(() => import('./pages/InterfaceColorsSettings'));
+const Notes = lazy(() => import('./pages/Notes'));
 import { auth } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
+import NetworkStatusModal from './components/NetworkStatusModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
 const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
 const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
@@ -98,6 +100,7 @@ function MainContent({
     { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} /></RouteErrorBoundary> },
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
       element: (
@@ -356,6 +359,7 @@ function App() {
   if (!user) {
     return (
       <DayThemeProvider>
+        <NetworkStatusModal />
         <Auth />
       </DayThemeProvider>
     );
@@ -363,6 +367,7 @@ function App() {
 
   return (
     <DayThemeProvider>
+      <NetworkStatusModal />
       <AppLockOverlay />
       <InAppUpdateModal />
       <div

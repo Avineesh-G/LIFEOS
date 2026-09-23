@@ -232,6 +232,21 @@ export interface AppData {
 
   // Shopping Lists Module
   shoppingLists?: ShoppingList[];
+
+  // Notes & Ideas Module
+  notes?: NoteItem[];
+}
+
+export interface NoteItem {
+  id: string;
+  title: string;
+  content: string;
+  pageView: 'white' | 'lined' | 'grid';
+  monthKey: string; // 'YYYY-MM'
+  isArchived: boolean;
+  colorTone?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ── Laundry Module ─────────────────────────────────────────────────────────

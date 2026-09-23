@@ -87,7 +87,7 @@ export function useData(user: User | null) {
           const serverData = snapshot.data() as Partial<AppData>;
           const fresh = migrateAppData(serverData);
 
-          // Auto-healing protection: preserve local progress if server arrays are empty
+          // Auto-healing protection: preserve local progress and opted signs if server is missing them or older
           try {
             const cachedRaw = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
             if (cachedRaw) {
@@ -95,31 +95,149 @@ export function useData(user: User | null) {
               let needsCloudRestore = false;
               const recoveryPatch: Partial<AppData> = {};
 
-              if ((localData.workoutLogs?.length || 0) > (fresh.workoutLogs?.length || 0)) {
-                fresh.workoutLogs = localData.workoutLogs;
-                recoveryPatch.workoutLogs = localData.workoutLogs;
+              // 1. Tasks: preserve any newly added tasks AND any locally completed / opted signs!
+              if (Array.isArray(localData.tasks)) {
+                const serverTasks = Array.isArray(fresh.tasks) ? fresh.tasks : [];
+                let tasksChanged = false;
+
+                const serverIds = new Set(serverTasks.map((t: any) => t.id));
+                const localOnlyTasks = localData.tasks.filter((t: any) => !serverIds.has(t.id));
+
+                const mergedTasks = serverTasks.map((st: any) => {
+                  const lt = localData.tasks.find((t: any) => t.id === st.id);
+                  if (lt && lt.completed && !st.completed) {
+                    tasksChanged = true;
+                    return { ...st, completed: true, date: lt.date, dueDate: lt.dueDate };
+                  }
+                  return st;
+                });
+
+                if (localOnlyTasks.length > 0 || tasksChanged) {
+                  fresh.tasks = [...mergedTasks, ...localOnlyTasks];
+                  recoveryPatch.tasks = fresh.tasks;
+                  needsCloudRestore = true;
+                }
+              }
+
+              // 2. Shopping Lists: preserve new lists AND opted signs (checked items)
+              if (Array.isArray(localData.shoppingLists)) {
+                const serverLists = Array.isArray(fresh.shoppingLists) ? fresh.shoppingLists : [];
+                let shoppingChanged = false;
+                const serverListIds = new Set(serverLists.map((l: any) => l.id));
+                const localOnlyLists = localData.shoppingLists.filter((l: any) => !serverListIds.has(l.id));
+
+                const mergedLists = serverLists.map((sList: any) => {
+                  const lList = localData.shoppingLists.find((l: any) => l.id === sList.id);
+                  if (!lList || !Array.isArray(lList.items)) return sList;
+
+                  const serverItemIds = new Set((sList.items || []).map((it: any) => it.id));
+                  const localOnlyItems = (lList.items || []).filter((it: any) => !serverItemIds.has(it.id));
+
+                  const mergedItems = (sList.items || []).map((sItem: any) => {
+                    const lItem = lList.items.find((it: any) => it.id === sItem.id);
+                    if (lItem && lItem.checked && !sItem.checked) {
+                      shoppingChanged = true;
+                      return { ...sItem, checked: true };
+                    }
+                    return sItem;
+                  });
+
+                  if (localOnlyItems.length > 0) shoppingChanged = true;
+                  return {
+                    ...sList,
+                    items: [...mergedItems, ...localOnlyItems],
+                  };
+                });
+
+                if (localOnlyLists.length > 0 || shoppingChanged) {
+                  fresh.shoppingLists = [...mergedLists, ...localOnlyLists];
+                  recoveryPatch.shoppingLists = fresh.shoppingLists;
+                  needsCloudRestore = true;
+                }
+              }
+
+              // 3. Workout Logs: preserve completed sets (opted signs) and any offline logs
+              if (Array.isArray(localData.workoutLogs)) {
+                const serverLogs = Array.isArray(fresh.workoutLogs) ? fresh.workoutLogs : [];
+                let workoutChanged = false;
+                const serverLogDates = new Set(serverLogs.map((w: any) => w.date));
+                const localOnlyLogs = localData.workoutLogs.filter((w: any) => !serverLogDates.has(w.date));
+
+                const mergedWorkoutLogs = serverLogs.map((sLog: any) => {
+                  const lLog = localData.workoutLogs.find((w: any) => w.date === sLog.date);
+                  if (!lLog || !Array.isArray(lLog.exercises)) return sLog;
+
+                  const localCompletedSets = (lLog.exercises || []).reduce(
+                    (sum: number, ex: any) => sum + (ex.sets || []).filter((s: any) => s.completed).length,
+                    0
+                  );
+                  const serverCompletedSets = (sLog.exercises || []).reduce(
+                    (sum: number, ex: any) => sum + (ex.sets || []).filter((s: any) => s.completed).length,
+                    0
+                  );
+                  if (localCompletedSets > serverCompletedSets) {
+                    workoutChanged = true;
+                    return lLog;
+                  }
+                  return sLog;
+                });
+
+                if (localOnlyLogs.length > 0 || workoutChanged) {
+                  fresh.workoutLogs = [...mergedWorkoutLogs, ...localOnlyLogs];
+                  recoveryPatch.workoutLogs = fresh.workoutLogs;
+                  needsCloudRestore = true;
+                }
+              }
+
+              // 4. Notes: preserve any notes created offline or edited locally
+              if (Array.isArray(localData.notes)) {
+                const serverNotes = Array.isArray(fresh.notes) ? fresh.notes : [];
+                const serverNoteIds = new Set(serverNotes.map((n: any) => n.id));
+                const localOnlyNotes = localData.notes.filter((n: any) => !serverNoteIds.has(n.id));
+
+                if (localOnlyNotes.length > 0) {
+                  fresh.notes = [...serverNotes, ...localOnlyNotes];
+                  recoveryPatch.notes = fresh.notes;
+                  needsCloudRestore = true;
+                }
+              }
+
+              // 5. Laundry batches
+              if ((localData.laundryBatches?.length || 0) > (fresh.laundryBatches?.length || 0)) {
+                fresh.laundryBatches = localData.laundryBatches;
+                recoveryPatch.laundryBatches = localData.laundryBatches;
                 needsCloudRestore = true;
               }
-              if ((localData.studySessions?.length || 0) > (fresh.studySessions?.length || 0)) {
-                fresh.studySessions = localData.studySessions;
-                recoveryPatch.studySessions = localData.studySessions;
+
+              // 6. Vault items
+              if ((localData.vaultItems?.length || 0) > (fresh.vaultItems?.length || 0)) {
+                fresh.vaultItems = localData.vaultItems;
+                recoveryPatch.vaultItems = localData.vaultItems;
                 needsCloudRestore = true;
               }
+
+              // 7. Expenses
               if ((localData.expenses?.length || 0) > (fresh.expenses?.length || 0)) {
                 fresh.expenses = localData.expenses;
                 recoveryPatch.expenses = localData.expenses;
                 needsCloudRestore = true;
               }
-              if ((localData.tasks?.length || 0) > (fresh.tasks?.length || 0)) {
-                fresh.tasks = localData.tasks;
-                recoveryPatch.tasks = localData.tasks;
-                needsCloudRestore = true;
-              }
+
+              // 8. Timetable
               if ((localData.timetable?.length || 0) > (fresh.timetable?.length || 0)) {
                 fresh.timetable = localData.timetable;
                 recoveryPatch.timetable = localData.timetable;
                 needsCloudRestore = true;
               }
+
+              // 9. Study sessions
+              if ((localData.studySessions?.length || 0) > (fresh.studySessions?.length || 0)) {
+                fresh.studySessions = localData.studySessions;
+                recoveryPatch.studySessions = localData.studySessions;
+                needsCloudRestore = true;
+              }
+
+              // 10. Profile
               if (localData.profile && !fresh.profile) {
                 fresh.profile = localData.profile;
                 recoveryPatch.profile = localData.profile;
@@ -127,7 +245,7 @@ export function useData(user: User | null) {
               }
 
               if (needsCloudRestore) {
-                console.log('Auto-healing: Synchronizing local progress back to Firestore cloud', recoveryPatch);
+                console.log('Auto-healing: Synchronizing local progress & opted signs back to Firestore cloud', recoveryPatch);
                 saveData(user.uid, recoveryPatch).catch(err => console.error('Cloud restore error:', err));
               }
             }
@@ -175,6 +293,21 @@ export function useData(user: User | null) {
     );
 
     return () => unsubscribe();
+  }, [user]);
+
+  // When internet connection is restored, immediately synchronize current phone storage state to Cloud Firestore
+  useEffect(() => {
+    if (!user) return;
+    const handleOnline = () => {
+      console.log('[LifeOS] Online connection restored: syncing local phone data to cloud');
+      if (dataRef.current) {
+        saveData(user.uid, dataRef.current).catch(err => {
+          console.error('[LifeOS] Cloud re-sync error on online event:', err);
+        });
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
   }, [user]);
 
   // Synchronous optimistic update: UI updates at 0ms latency!

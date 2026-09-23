@@ -47,6 +47,29 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
   const [itemQuantity, setItemQuantity] = useState('');
   const itemInputRef = useRef<HTMLInputElement | null>(null);
 
+  const ITEM_DRAFT_KEY = `lifeos_shopping_item_draft_${listId}`;
+
+  // Restore drafted item if user switched interfaces
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(ITEM_DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.itemName) setItemName(parsed.itemName);
+        if (parsed.itemQuantity) setItemQuantity(parsed.itemQuantity);
+      }
+    } catch {}
+  }, [ITEM_DRAFT_KEY]);
+
+  // Persist draft on typing
+  useEffect(() => {
+    if (itemName.trim() || itemQuantity.trim()) {
+      try {
+        localStorage.setItem(ITEM_DRAFT_KEY, JSON.stringify({ itemName, itemQuantity }));
+      } catch {}
+    }
+  }, [itemName, itemQuantity, ITEM_DRAFT_KEY]);
+
   // Template Save Modal
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
@@ -113,6 +136,9 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
     await updateCurrentList({ items: nextItems });
 
     // Clear inputs and keep focus on item name for rapid entry
+    try {
+      localStorage.removeItem(ITEM_DRAFT_KEY);
+    } catch {}
     setItemName('');
     setItemQuantity('');
     itemInputRef.current?.focus();

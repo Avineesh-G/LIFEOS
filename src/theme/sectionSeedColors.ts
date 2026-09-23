@@ -23,7 +23,7 @@ import type { CustomizableInterfaceId } from './interfaceColorManager.ts';
 import type { ColorFamily } from './colorFamilies.ts';
 import { getReadableForeground, COLOR_FAMILIES, DEFAULT_INTERFACE_COLORS } from './colorFamilies.ts';
 
-export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault';
+export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
 
 /**
  * Fixed identity seed color per section from PALETTE
@@ -39,6 +39,7 @@ export const SECTION_SEED_COLORS: Record<AppSection, string> = {
   outing: PALETTE.outing.seed,      // Saddle Brown #8C500A
   shopping: '#172554',              // Deep Midnight Navy #172554
   vault: '#2034A0',                 // Cyber Cobalt #2034A0
+  notes: '#C026D3',                 // Radiant Electric Orchid Fuchsia #C026D3
 };
 
 /**
@@ -84,6 +85,7 @@ export const NAV_PILL_BG_COLORS: Record<AppSection, { light: string; dark: strin
   outing: { light: '#FDF7F2', dark: '#2A1806' },     // pale tonal container from #8C500A
   shopping: { light: '#EFF6FF', dark: '#0F172A' },   // pale tonal container from #172554
   vault: { light: '#EEF2FF', dark: '#0C122B' },      // pale tonal container from #2034A0
+  notes: { light: '#FDF4FF', dark: '#280E2B' },      // pale tonal container from #C026D3
 };
 
 export function getNavPillBg(
@@ -160,6 +162,9 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/outings')) {
     return 'outing';
   }
+  if (p.startsWith('/notes')) {
+    return 'notes';
+  }
   return 'home'; // '/', '/tasks', '/laundry'
 }
 
@@ -217,6 +222,7 @@ export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   outing: 'top-right',
   shopping: 'top-left',
   vault: 'top-center',
+  notes: 'top-right',
 };
 
 export interface SectionM3Theme {

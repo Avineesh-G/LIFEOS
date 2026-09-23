@@ -29,13 +29,54 @@ export default function Tasks({ data, updateData }: TasksProps) {
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
   const yesterday = useMemo(() => format(subDays(new Date(), 1), 'yyyy-MM-dd'), []);
 
+  const TASK_DRAFT_KEY = 'lifeos_task_draft';
+
+  // Restore task draft when switching back to Tasks interface
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem(TASK_DRAFT_KEY);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed && (parsed.newTask || parsed.newSubtask)) {
+          setNewTask(parsed.newTask || '');
+          setNewSubtask(parsed.newSubtask || '');
+          if (parsed.newDate) setNewDate(parsed.newDate);
+          if (parsed.newStartTime) setNewStartTime(parsed.newStartTime);
+          if (parsed.newEndTime) setNewEndTime(parsed.newEndTime);
+          setShowAdd(true);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Auto-save draft on input change so switching interfaces or dropping internet preserves input
+  useEffect(() => {
+    if (showAdd && (newTask.trim() || newSubtask.trim())) {
+      try {
+        localStorage.setItem(
+          TASK_DRAFT_KEY,
+          JSON.stringify({
+            newTask,
+            newSubtask,
+            newDate,
+            newStartTime,
+            newEndTime,
+          })
+        );
+      } catch {}
+    }
+  }, [showAdd, newTask, newSubtask, newDate, newStartTime, newEndTime]);
+
   // Sync native OS notification center reminders on mount or task update, prompting phone permission if not yet allowed
   useEffect(() => {
     checkNotificationPermission().then(granted => {
       if (!granted) {
-        requestAndSyncNotifications(data, updateData);
+        const handled = localStorage.getItem('lifeos_permission_prompt_handled');
+        if (!handled) {
+          localStorage.setItem('lifeos_permission_prompt_handled', 'true');
+          requestAndSyncNotifications(data, updateData);
+        }
       } else if (data?.tasks) {
-        // Non-blocking background sync to prevent UI frame hitch
         setTimeout(() => {
           syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
         }, 80);
@@ -111,6 +152,9 @@ export default function Tasks({ data, updateData }: TasksProps) {
       };
       await updateData({ tasks: [...(data?.tasks || []), task] });
     }
+    try {
+      localStorage.removeItem(TASK_DRAFT_KEY);
+    } catch {}
     setNewTask('');
     setNewSubtask('');
     setNewStartTime('');

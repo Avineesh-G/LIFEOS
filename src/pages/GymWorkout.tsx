@@ -18,6 +18,19 @@ import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import type { AppData, WorkoutLog } from '../types';
 
 
+interface ExerciseSet {
+  reps: number;
+  weight: number;
+  completed: boolean;
+}
+
+interface WorkoutExerciseItem {
+  name: string;
+  howTo?: string;
+  rest?: string;
+  sets: ExerciseSet[];
+}
+
 interface GymWorkoutProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
@@ -121,7 +134,31 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const currentApiKey = data.geminiApiKey || GEMINI_API_KEY;
   const hasAi = !!currentApiKey && currentApiKey !== 'PASTE_YOUR_KEY_HERE';
 
-  const [exercises, setExercises] = useState(() => {
+  const WORKOUT_DRAFT_KEY = `lifeos_workout_draft_${today}`;
+
+  const [exercises, setExercises] = useState<WorkoutExerciseItem[]>(() => {
+    // 1. Recover active in-progress workout draft if user switched interfaces or lost connection
+    try {
+      const savedDraft = localStorage.getItem(`lifeos_workout_draft_${today}`);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((ex: any) => ({
+            name: String(ex.name || 'Exercise'),
+            howTo: String(ex.howTo || ''),
+            rest: String(ex.rest || ''),
+            sets: Array.isArray(ex.sets)
+              ? ex.sets.map((s: any) => ({
+                  reps: Number(s?.reps) || 10,
+                  weight: Number(s?.weight) || 0,
+                  completed: Boolean(s?.completed),
+                }))
+              : [],
+          }));
+        }
+      }
+    } catch {}
+
     if (existingLog && Array.isArray(existingLog.exercises)) {
       return existingLog.exercises.map(ex => ({
         name: ex.name || 'Exercise',
@@ -140,8 +177,18 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
         sets: Array.from({ length: Number(ex.sets) || 3 }, () => ({ reps: Number(ex.reps) || 10, weight: Number(ex.weight) || 0, completed: false }))
       }));
     }
-    return [] as { name: string; howTo?: string; rest?: string; sets: { reps: number; weight: number; completed: boolean }[] }[];
+    return [] as WorkoutExerciseItem[];
   });
+
+  // Automatically save in-progress session draft to phone storage whenever any set checkbox or rep changes
+  useEffect(() => {
+    if (exercises && exercises.length > 0) {
+      try {
+        localStorage.setItem(`lifeos_workout_draft_${today}`, JSON.stringify(exercises));
+      } catch {}
+    }
+  }, [exercises, today]);
+
   const [newExName, setNewExName] = useState('');
   const [saved, setSaved] = useState(false);
   const [isLocked, setIsLocked] = useState(!!existingLog?.isSaved);
@@ -312,6 +359,9 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
       ? (data.workoutLogs || []).map(w => w.id === existingLog.id ? log : w)
       : [...(data.workoutLogs || []), log];
     await updateData({ workoutLogs: updatedLogs });
+    try {
+      localStorage.removeItem(WORKOUT_DRAFT_KEY);
+    } catch {}
     triggerHaptic(isComplete ? 'milestone' : 'success');
     setSaved(true);
     setIsSavedDay(true);

@@ -29,6 +29,7 @@ const DEFAULT_DATA: AppData = {
   vaultConfig: null,
   laundryBatches: [],
   shoppingLists: [],
+  notes: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -113,6 +114,18 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
       : [],
   }));
 
+  merged.notes = (merged.notes || []).map(note => ({
+    id: note?.id || `note_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    title: note?.title || '',
+    content: note?.content || '',
+    pageView: (note?.pageView === 'lined' || note?.pageView === 'grid') ? note.pageView : 'white',
+    monthKey: note?.monthKey || new Date().toISOString().slice(0, 7),
+    isArchived: Boolean(note?.isArchived),
+    colorTone: note?.colorTone || '#7C3AED',
+    createdAt: note?.createdAt || new Date().toISOString(),
+    updatedAt: note?.updatedAt || new Date().toISOString(),
+  }));
+
   merged.settings = {
     ...DEFAULT_DATA.settings,
     ...(merged.settings || {}),
@@ -180,6 +193,7 @@ export function migrateAppData(data: any): AppData {
     if (!Array.isArray(migrated.shoppingLists)) migrated.shoppingLists = [];
     if (!Array.isArray(migrated.vaultItems)) migrated.vaultItems = [];
     if (!Array.isArray(migrated.laundryBatches)) migrated.laundryBatches = [];
+    if (!Array.isArray(migrated.notes)) migrated.notes = [];
   }
 
   return sanitizeAppData(migrated);

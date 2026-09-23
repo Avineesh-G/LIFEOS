@@ -5,6 +5,7 @@ import {
   Settings as SettingsIcon,
   MapPin,
   LucideIcon,
+  NotebookPen,
 } from 'lucide-react';
 import {
   HomeAppLogoIcon,
@@ -18,7 +19,7 @@ import {
 } from '../components/icons/MaterialSymbols';
 import { AppSection } from '../theme/sectionSeedColors';
 
-export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault';
+export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
 
 export type DestinationId =
   | 'gym'
@@ -32,7 +33,8 @@ export type DestinationId =
   | 'laundry'
   | 'history'
   | 'vault'
-  | 'settings';
+  | 'settings'
+  | 'notes';
 
 export interface HubDestination {
   id: DestinationId;
@@ -171,6 +173,14 @@ export const DESTINATIONS: HubDestination[] = [
     family: 'system',
     matchRoutes: ['/settings'],
   },
+  {
+    id: 'notes',
+    label: 'Notes & Ideas',
+    route: '/notes',
+    icon: NotebookPen,
+    family: 'notes',
+    matchRoutes: ['/notes'],
+  },
 ];
 
 /**
@@ -274,6 +284,14 @@ export const HUB_FAMILY_CONFIG: Record<
     onAccent: '#FFFFFF',
     darkStrong: '#3B82F6',
   },
+  notes: {
+    seed: '#C026D3', // Radiant Electric Orchid Fuchsia
+    rgb: [192, 38, 211],
+    darkGlyph: '#F0ABFC',
+    textAccent: '#C026D3',
+    onAccent: '#FFFFFF',
+    darkStrong: '#FDF4FF',
+  },
 };
 
 export const HUB_SECTION_NAMES: Record<AppSection, string> = {
@@ -287,6 +305,7 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   outing: 'Outing Expenses',
   shopping: 'Shopping Lists',
   vault: 'Vault',
+  notes: 'Notes & Ideas',
 };
 
 export function getDestinationById(id: string): HubDestination | undefined {

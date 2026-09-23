@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 17,
-  versionName: '1.2.7',
-  releaseDate: '2026-09-21',
-  releaseNotes: 'LifeOS v1.2.7 (Build 17): Added 15 new curated tonal color families (25 total) to the per-interface personalization system with 1-to-1 lock enforcement and live preview.',
+  versionCode: 24,
+  versionName: '2.0.0',
+  releaseDate: '2026-09-23',
+  releaseNotes: 'LifeOS v2.0.0 (Build 24): 100% offline launch, in-app offline notification modal, draft auto-preservation across interfaces, and auto-healing cloud sync with opted signs preservation.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

@@ -107,6 +107,8 @@ export default function Settings({
   const leadMinutes = data?.settings?.notificationLeadMinutes || 10;
   const [testSent, setTestSent] = useState(false);
   const [permissionNotice, setPermissionNotice] = useState<string | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isExportingBeforeLogout, setIsExportingBeforeLogout] = useState(false);
 
   const handleToggleNotifications = async () => {
     triggerHaptic('medium');
@@ -1014,11 +1016,8 @@ export default function Settings({
                   <button
                     type="button"
                     onClick={() => {
-                      if (Capacitor.isNativePlatform()) {
-                        GoogleAuth.signOut().catch(() => {});
-                      }
-                      navigate('/');
-                      signOut(auth);
+                      triggerHaptic('medium');
+                      setShowLogoutModal(true);
                     }}
                     className="w-full py-2.5 min-h-[44px] rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5"
                   >
@@ -1387,6 +1386,82 @@ export default function Settings({
           v<span className="font-stat">{CURRENT_VERSION_NAME}</span> (Build <span className="font-stat">{CURRENT_VERSION_CODE}</span>) · Native Baseline
         </p>
       </div>
+
+      {/* ── Pre-Logout Data Recovery Modal ── */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="w-full max-w-sm rounded-3xl bg-[var(--card-surface)] border border-[var(--card-border)] p-6 shadow-2xl space-y-4 text-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
+                <ShieldCheck size={24} />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold text-primary-light dark:text-primary-dark">
+                  Data Safety Before Sign Out
+                </h3>
+                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
+                  Would you like to download a complete backup copy of your LifeOS data (JSON file) to ensure no records or notes are ever lost?
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsExportingBeforeLogout(true);
+                    try {
+                      await exportBackupFile(data);
+                    } catch (e) {
+                      alert('Backup download failed.');
+                    } finally {
+                      setIsExportingBeforeLogout(false);
+                    }
+                  }}
+                  disabled={isExportingBeforeLogout}
+                  className="w-full py-2.5 px-4 rounded-xl bg-accent text-on-accent text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                >
+                  <Download size={14} />
+                  <span>{isExportingBeforeLogout ? 'Preparing Backup...' : 'Download Backup File (JSON)'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (Capacitor.isNativePlatform()) {
+                      GoogleAuth.signOut().catch(() => {});
+                    }
+                    setShowLogoutModal(false);
+                    navigate('/');
+                    signOut(auth);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <LogOut size={14} /> Sign Out Anyway
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutModal(false)}
+                  className="w-full py-2 px-4 rounded-xl text-secondary-light dark:text-secondary-dark text-xs font-semibold hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

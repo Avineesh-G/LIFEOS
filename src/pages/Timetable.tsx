@@ -58,7 +58,11 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   useEffect(() => {
     checkNotificationPermission().then(granted => {
       if (!granted) {
-        requestAndSyncNotifications(data, updateData);
+        const handled = localStorage.getItem('lifeos_permission_prompt_handled');
+        if (!handled) {
+          localStorage.setItem('lifeos_permission_prompt_handled', 'true');
+          requestAndSyncNotifications(data, updateData);
+        }
       } else if (data?.timetable) {
         syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
       }

@@ -13,6 +13,7 @@ import {
   History as HistoryIcon,
   ShieldCheck,
   Settings as SettingsIcon,
+  NotebookPen,
 } from 'lucide-react';
 import type {
   ColorFamily,
@@ -36,7 +37,8 @@ export type CustomizableInterfaceId =
   | 'laundry'
   | 'history'
   | 'vault'
-  | 'settings';
+  | 'settings'
+  | 'notes';
 
 export interface InterfaceConfig {
   id: CustomizableInterfaceId;
@@ -151,6 +153,14 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     route: '/settings',
     icon: SettingsIcon,
     defaultFamily: 'slate',
+  },
+  {
+    id: 'notes',
+    label: 'Notes & Ideas',
+    description: 'Capture quick thoughts, brainstorms, and boundless notes',
+    route: '/notes',
+    icon: NotebookPen,
+    defaultFamily: 'fuchsia',
   },
 ];
 
@@ -288,6 +298,7 @@ export function getCustomizableInterfaceFromPathname(pathname: string): Customiz
   if (p.startsWith('/history')) return 'history';
   if (p.startsWith('/vault')) return 'vault';
   if (p.startsWith('/settings')) return 'settings';
+  if (p.startsWith('/notes')) return 'notes';
 
   return null;
 }

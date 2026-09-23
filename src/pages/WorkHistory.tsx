@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Sparkles, Loader2, Calendar, Check, AlertTriangle, TrendingUp,
-  Clock, Award, ChevronLeft, ChevronRight, PieChart, ShieldCheck
+  Clock, Award, ChevronLeft, ChevronRight, PieChart, ShieldCheck,
+  NotebookPen
 } from 'lucide-react';
 import {
   FlatwareIcon,
@@ -23,13 +24,14 @@ interface WorkHistoryProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending';
+type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending' | 'notes';
 
 const TABS: { id: HistoryTab; icon: any; title: string; color: string }[] = [
   { id: 'nutrition', icon: FlatwareIcon,    title: 'Nutrition History', color: 'text-amber-500' },
   { id: 'gym',       icon: ExerciseIcon,    title: 'Gym History',       color: 'text-rose-500' },
   { id: 'todo',      icon: ListAltCheckIcon, title: 'Tasks History',     color: 'text-emerald-500' },
   { id: 'spending',  icon: WalletIcon,      title: 'Spending History',  color: 'text-[#15803D] dark:text-[#82CB92]' },
+  { id: 'notes',     icon: NotebookPen,     title: 'Notes & Ideas History', color: 'text-[#C026D3]' },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -199,6 +201,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     return { total, dailyAvg, topCategory, catTotals };
   }, [monthlyExpenses]);
 
+  // ── 5. NOTES FILTER & STATS ──
+  const monthlyNotes = useMemo(() => {
+    return (data.notes || [])
+      .filter(n => n.monthKey === selectedMonth || (n.createdAt && n.createdAt.startsWith(selectedMonth)))
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+  }, [data.notes, selectedMonth]);
+
   const handleRunSpendingAi = async () => {
     if (monthlyExpenses.length === 0) return;
     triggerHaptic('ai');
@@ -308,9 +317,9 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         </button>
       </motion.div>
 
-      {/* ── 4 Symbols Only Switcher (Requirement: Just add their symbols instead of names) ── */}
+      {/* ── 5 Symbols Only Switcher ── */}
       <motion.div variants={item} className="w-full">
-        <div className="grid grid-cols-4 gap-2.5 w-full p-2 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-xs">
+        <div className="grid grid-cols-5 gap-2 w-full p-2 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-xs">
           {TABS.map(tab => {
             const isActive = activeTab === tab.id;
             const Icon = tab.icon;
@@ -345,7 +354,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <span className={`w-2 h-2 rounded-full ${
             activeTab === 'nutrition' ? 'bg-amber-500' :
             activeTab === 'gym' ? 'bg-rose-500' :
-            activeTab === 'todo' ? 'bg-emerald-500' : 'bg-[#15803D]'
+            activeTab === 'todo' ? 'bg-emerald-500' :
+            activeTab === 'spending' ? 'bg-[#15803D]' : 'bg-[#C026D3]'
           }`} />
           <h2 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             {currentTabMeta.title}
@@ -792,6 +802,77 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 </div>
               )}
               </>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* ── TAB 5: NOTES & IDEAS HISTORY ── */}
+      {activeTab === 'notes' && (
+        <motion.div key="notes" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
+          <div className="grid grid-cols-3 gap-2 w-full">
+            <div className="card p-3 rounded-[20px] space-y-1 text-center">
+              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Total Notes</span>
+              <p className="text-lg font-black text-[#C026D3] dark:text-[#F0ABFC]">{monthlyNotes.length}</p>
+            </div>
+            <div className="card p-3 rounded-[20px] space-y-1 text-center">
+              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Lined Pages</span>
+              <p className="text-lg font-black text-primary-light dark:text-primary-dark">
+                {monthlyNotes.filter(n => n.pageView === 'lined').length}
+              </p>
+            </div>
+            <div className="card p-3 rounded-[20px] space-y-1 text-center">
+              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">White / Grid</span>
+              <p className="text-lg font-black text-primary-light dark:text-primary-dark">
+                {monthlyNotes.filter(n => n.pageView !== 'lined').length}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
+                Saved Notes & Brainstorms ({monthlyNotes.length})
+              </h3>
+              <button
+                type="button"
+                onClick={() => navigate('/notes')}
+                className="text-xs font-bold text-[#C026D3] dark:text-[#F0ABFC] hover:underline"
+              >
+                Open Notes Interface →
+              </button>
+            </div>
+
+            {monthlyNotes.length === 0 ? (
+              <div className="card p-8 text-center text-muted-light dark:text-muted-dark text-xs space-y-2">
+                <NotebookPen size={28} className="mx-auto text-[#C026D3]/40" />
+                <p>No notes or ideas found for this month.</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {monthlyNotes.map(note => (
+                  <div
+                    key={note.id}
+                    onClick={() => navigate('/notes')}
+                    className="card p-4 rounded-2xl cursor-pointer hover:border-[#C026D3]/40 transition-all space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-bold text-[#4A044E] dark:text-[#FDF4FF] line-clamp-1">
+                        {note.title || 'Untitled Thought'}
+                      </h4>
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#C026D3]/10 text-[#C026D3] dark:text-[#F0ABFC]">
+                        {note.pageView || 'white'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-secondary-light dark:text-secondary-dark line-clamp-2">
+                      {note.content || '(Empty page)'}
+                    </p>
+                    <span className="text-[10px] text-muted-light dark:text-muted-dark block">
+                      {format(new Date(note.updatedAt || note.createdAt), 'MMM d, yyyy • h:mm a')}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </motion.div>

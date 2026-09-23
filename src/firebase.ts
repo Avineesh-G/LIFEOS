@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || (typeof process !== 'undefined' && process.env) || {};
@@ -15,4 +15,15 @@ const firebaseConfig = {
 
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Explicit 100MB Firestore cache cap to keep mobile storage ultra-lean & fast
+let firestoreDb;
+try {
+  firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({ cacheSizeBytes: 100 * 1024 * 1024 }),
+  });
+} catch {
+  firestoreDb = getFirestore(app);
+}
+
+export const db = firestoreDb;
