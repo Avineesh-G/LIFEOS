@@ -1,8 +1,8 @@
 {
-  "versionCode": 28,
-  "versionName": "2.0.4",
+  "versionCode": 29,
+  "versionName": "2.0.5",
   "releaseDate": "2026-09-24",
-  "releaseNotes": "LifeOS v2.0.4 (Build 28): Categorized navigation hub with settings at end, navbar color matching across all sections, notes prompt templates, and header cloud/offline status indicator.",
+  "releaseNotes": "LifeOS v2.0.5 (Build 29): Redesigned M3 Expressive update card & progress bar, rounded Material Symbols replacing emojis in Notes, and corrected header layout.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "5f935b39c54d513eeced56d840d02960c2c7ddc908950f027b05375d9cc71682"
+  "sha256": "5f878e043a5e7d2a6c752cf898354217d5d49257ed5f971f8fcecde8ea8224c1"
 }

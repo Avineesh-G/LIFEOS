@@ -30,6 +30,35 @@ function createSymbol(pathData: string, displayName: string): MaterialSymbolIcon
   return IconComponent as MaterialSymbolIcon;
 }
 
+export function createSvgIcon(
+  viewBox: string,
+  renderContent: (props: LucideProps) => React.ReactNode,
+  displayName: string
+): MaterialSymbolIcon {
+  const IconComponent = React.forwardRef<SVGSVGElement, LucideProps>(
+    ({ size = 24, color, className = '', style = {}, ...props }, ref) => {
+      return (
+        <svg
+          ref={ref}
+          xmlns="http://www.w3.org/2000/svg"
+          width={size}
+          height={size}
+          viewBox={viewBox}
+          fill={color || 'currentColor'}
+          className={className}
+          style={style}
+          aria-hidden="true"
+          {...props}
+        >
+          {renderContent({ size, color, className, style, ...props })}
+        </svg>
+      );
+    }
+  );
+  IconComponent.displayName = displayName;
+  return IconComponent as MaterialSymbolIcon;
+}
+
 // 1. Home App Logo
 export const HomeAppLogoIcon = createSymbol(
   'M480-427ZM240-120q-50 0-85-35t-35-85v-240q0-24 9-46t26-39l240-240q17-18 39.5-26.5T480-840q23 0 45 8.5t40 26.5l240 240q17 17 26 39t9 46v240q0 50-35 85t-85 35H240Zm0-80h480q17 0 28.5-11.5T760-240v-240q0-8-3-15t-9-13L595-662l-59 58 144 144v180H280v-180l258-258-30-30q-8-8-15.5-10t-12.5-2q-5 0-12.5 2T452-748L212-508q-6 6-9 13t-3 15v240q0 17 11.5 28.5T240-200Zm120-160h240v-67L480-547 360-427v67Z',
@@ -88,4 +117,130 @@ export const ExpandAllIcon = createSymbol(
 export const CollapseContentIcon = createSymbol(
   'M360-360H240q-17 0-28.5-11.5T200-400q0-17 11.5-28.5T240-440h160q17 0 28.5 11.5T440-400v160q0 17-11.5 28.5T400-200q-17 0-28.5-11.5T360-240v-120Zm240-240h120q17 0 28.5 11.5T760-560q0 17-11.5 28.5T720-520H560q-17 0-28.5-11.5T520-560v-160q0-17 11.5-28.5T560-760q17 0 28.5 11.5T600-720v120Z',
   'CollapseContentIcon'
+);
+
+// 11. Cloud Done (Rounded cloud with checkmark)
+export const CloudDoneIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+      <polyline points="9 13.5 11.5 16 15.5 11" strokeWidth="2.4" />
+    </g>
+  ),
+  'CloudDoneIcon'
+);
+
+// 12. Cloud Off (Rounded cloud with diagonal slash)
+export const CloudOffIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m2 2 20 20" strokeWidth="2.4" />
+      <path d="M5.782 5.782A7 7 0 0 0 5.35 8.04C2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h12.17" />
+      <path d="M21.53 15.82A5 5 0 0 0 19 11c-.44 0-.87.05-1.28.14" />
+      <path d="M18.8 8.11A7 7 0 0 0 12 4c-1.8 0-3.46.68-4.72 1.8" />
+    </g>
+  ),
+  'CloudOffIcon'
+);
+
+// 13. Lightbulb (Rounded lightbulb for Brain Dump)
+export const LightbulbIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8.5" r="5.5" />
+      <path d="M9 16h6" strokeWidth="2.5" />
+      <path d="M10.2 19a1.8 1.8 0 0 0 3.6 0" strokeWidth="2.2" fill="currentColor" />
+    </g>
+  ),
+  'LightbulbIcon'
+);
+
+// 14. Target Check (Concentric circle target with checkmark)
+export const TargetCheckIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7a5 5 0 0 0-5 5 5 5 0 0 0 5 5" />
+      <path d="m9.5 12 2.5 2.5 5.5-5.5" strokeWidth="2.5" />
+    </g>
+  ),
+  'TargetCheckIcon'
+);
+
+// 15. Rocket (Rocket with circular window and fins)
+export const RocketIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2.5c-3 3-4.5 6.5-4.5 11 0 2.5.5 4.5 1.5 6h6c1-1.5 1.5-3.5 1.5-6 0-4.5-1.5-8-4.5-11z" />
+      <circle cx="12" cy="11" r="2" fill="currentColor" />
+      <path d="M7.5 13H5c-.6 0-1 .4-1 1v4c0 .6.4 1 1 1h2.5" />
+      <path d="M16.5 13H19c.6 0 1 .4 1 1v4c0 .6-.4 1-1 1h-2.5" />
+    </g>
+  ),
+  'RocketIcon'
+);
+
+// 16. Neurology (Curved brain lobes)
+export const NeurologyIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 4v16" />
+      <path d="M12 5a3.5 3.5 0 0 0-3.5 3.5c0 .6.16 1.15.45 1.62A3.2 3.2 0 0 0 7 13a3.2 3.2 0 0 0 2 2.95V16a3 3 0 0 0 3 3" />
+      <path d="M8.5 9.5a2 2 0 1 0 3.5 0" />
+      <path d="M9 14a2 2 0 1 0 3 1.5" />
+      <path d="M12 5a3.5 3.5 0 0 1 3.5 3.5c0 .6-.16 1.15-.45 1.62A3.2 3.2 0 0 1 17 13a3.2 3.2 0 0 1-2 2.95V16a3 3 0 0 1-3 3" />
+      <path d="M15.5 9.5a2 2 0 1 1-3.5 0" />
+      <path d="M15 14a2 2 0 1 1-3 1.5" />
+    </g>
+  ),
+  'NeurologyIcon'
+);
+
+// 17. Local Library (Person reading an open book)
+export const LocalLibraryIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="6.5" r="3" />
+      <path d="M4 19.5c3.5-1.8 6-1.2 8 0 2-1.2 4.5-1.8 8 0V11c-3.5-1.8-6-1.2-8 0-2-1.2-4.5-1.8-8 0v8.5z" />
+    </g>
+  ),
+  'LocalLibraryIcon'
+);
+
+// 18. Content Paste (Clipboard with top clip)
+export const ContentPasteIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="4" width="14" height="17" rx="3" />
+      <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" />
+      <circle cx="12" cy="4.2" r="0.9" fill="currentColor" />
+    </g>
+  ),
+  'ContentPasteIcon'
+);
+
+// 19. Things To Do (Monument building with flag on top)
+export const ThingsToDoIcon = createSvgIcon(
+  '0 0 24 24',
+  () => (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20h16" />
+      <path d="M6 16h12" />
+      <path d="M8 16v-4" />
+      <path d="M12 16v-4" />
+      <path d="M16 16v-4" />
+      <path d="M7 12a5 5 0 0 1 10 0" />
+      <path d="M12 7V3" />
+      <path d="M12 3h4l-1 2 1 2h-4" />
+    </g>
+  ),
+  'ThingsToDoIcon'
 );

@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback, startTransition } fr
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  RotateCw, Bell, Cloud, WifiOff
+  RotateCw, Bell
 } from 'lucide-react';
-import { ExpandAllIcon, CollapseContentIcon } from './icons/MaterialSymbols';
+import { ExpandAllIcon, CollapseContentIcon, CloudDoneIcon, CloudOffIcon } from './icons/MaterialSymbols';
 import { triggerHaptic } from '../utils/haptics';
 import {
   checkNotificationPermission,
@@ -519,9 +519,9 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               aria-label={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
             >
               {isOnline ? (
-                <Cloud size={15} strokeWidth={2.2} />
+                <CloudDoneIcon size={16} />
               ) : (
-                <WifiOff size={14} strokeWidth={2.2} />
+                <CloudOffIcon size={16} />
               )}
             </div>
 
