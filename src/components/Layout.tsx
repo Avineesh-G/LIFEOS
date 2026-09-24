@@ -16,6 +16,7 @@ import {
 import { SectionAccentBlob } from './SectionAccentBlob';
 import { ScallopShape } from './ScallopShape';
 import { NavigationHubSheet } from './NavigationHubSheet';
+import { M3ProgressIndicator } from './m3/M3Shapes';
 import { MotionScheme } from '../utils/motionConfig';
 import {
   getSectionFromPathname,
@@ -506,7 +507,11 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               aria-label="Reload and sync data"
               title="Reload and sync data"
             >
-              <RotateCw size={14} strokeWidth={2.4} className={`transition-transform duration-300 ${isReloading ? 'animate-spin text-white' : ''}`} />
+              {isReloading ? (
+                <M3ProgressIndicator size={16} color="#FFFFFF" />
+              ) : (
+                <RotateCw size={14} strokeWidth={2.4} className="text-white transition-transform duration-300" />
+              )}
             </button>
           </div>
         </div>

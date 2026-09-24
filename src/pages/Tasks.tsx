@@ -7,6 +7,7 @@ import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotif
 import { BottomSheet, Modal } from '../components/BottomSheet';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import M3Button from '../components/m3/M3Button';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, Task } from '../types';
 
 
@@ -16,6 +17,7 @@ interface TasksProps {
 }
 
 export default function Tasks({ data, updateData }: TasksProps) {
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const [newTask, setNewTask] = useState('');
   const [newSubtask, setNewSubtask] = useState('');
   const [newDate, setNewDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
@@ -152,6 +154,11 @@ export default function Tasks({ data, updateData }: TasksProps) {
       };
       await updateData({ tasks: [...(data?.tasks || []), task] });
     }
+    showSavedFeedback({
+      title: editingTaskId ? 'Task Updated!' : 'Task Saved!',
+      message: newTask.trim(),
+      section: 'tasks',
+    });
     try {
       localStorage.removeItem(TASK_DRAFT_KEY);
     } catch {}
@@ -202,13 +209,21 @@ export default function Tasks({ data, updateData }: TasksProps) {
     });
   };
 
-  const confirmDeleteTask = async () => {
-    if (!taskToDelete) return;
-    triggerHaptic('heavy');
-    await updateData({
-      tasks: (data?.tasks || []).filter(t => t.id !== taskToDelete.id)
+  const promptDeleteTask = (task: Task) => {
+    confirmDelete({
+      title: 'Delete Task?',
+      itemName: task.text,
+      message: 'Are you sure you want to delete this task? It will be permanently removed.',
+      section: 'tasks',
+      onConfirm: async () => {
+        const remaining = (data?.tasks || []).filter(t => t.id !== task.id);
+        await updateData({ tasks: remaining });
+        if (editingTaskId === task.id) {
+          setShowAdd(false);
+          setEditingTaskId(null);
+        }
+      },
     });
-    setTaskToDelete(null);
   };
 
   // Long-press handler ref
@@ -219,8 +234,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
     isLongPressActive.current = false;
     pressTimer.current = setTimeout(() => {
       isLongPressActive.current = true;
-      triggerHaptic('heavy');
-      setTaskToDelete(task);
+      promptDeleteTask(task);
     }, 550);
   };
 
@@ -621,38 +635,6 @@ export default function Tasks({ data, updateData }: TasksProps) {
         )}
       </div>
 
-      {/* ── Long Press Delete Confirmation Dialog (Rendered via Portal) ── */}
-      <Modal isOpen={!!taskToDelete} onClose={() => setTaskToDelete(null)} maxWidth="max-w-sm">
-        {taskToDelete && (
-          <div className="space-y-4">
-            <div className="w-12 h-12 rounded-full bg-red-500/15 text-red-500 flex items-center justify-center mx-auto">
-              <X size={24} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="text-lg font-black text-primary-light dark:text-primary-dark">Delete Task?</h3>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1 font-medium line-clamp-2">
-                "{taskToDelete.text}"
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setTaskToDelete(null)}
-                className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-              >
-                Keep Task
-              </button>
-              <button
-                type="button"
-                onClick={confirmDeleteTask}
-                className="py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       {/* ── Add / Update Task Elevated Modal with Date Picker & Start/End Time (Rendered via Portal) ── */}
       <BottomSheet

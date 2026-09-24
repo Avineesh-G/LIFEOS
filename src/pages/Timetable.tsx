@@ -7,6 +7,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { AnimatedCalendar } from '../components/AnimatedIcons';
 import { BottomSheet } from '../components/BottomSheet';
 import { syncTimetableNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, TimetableBlock } from '../types';
 
 interface TimetableProps {
@@ -38,6 +39,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } 
 const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } } };
 
 export default function Timetable({ data, updateData }: TimetableProps) {
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const navigate = useNavigate();
   const today = format(new Date(), 'EEEE');
   const todayIndex = DAYS.indexOf(today);
@@ -119,8 +121,17 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   };
 
   const handleDelete = async (id: string) => {
-    triggerHaptic(15);
-    await updateData({ timetable: data.timetable.filter(b => b.id !== id) });
+    const target = data.timetable.find(b => b.id === id);
+    await confirmDelete({
+      title: 'Delete Class / Slot?',
+      itemName: target?.subject || 'Timetable Slot',
+      message: 'Are you sure you want to remove this timetable entry?',
+      section: 'timetable',
+      onConfirm: async () => {
+        await updateData({ timetable: data.timetable.filter(b => b.id !== id) });
+        setShowModal(false);
+      },
+    });
   };
 
   const handleSave = async () => {
@@ -145,6 +156,11 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
     setShowModal(false);
     await updateData({ timetable: updated });
+    showSavedFeedback({
+      title: editingBlock ? 'Class Updated!' : 'Class Added!',
+      message: block.subject,
+      section: 'timetable',
+    });
   };
 
   const getBlocksForDay = (d: string) =>

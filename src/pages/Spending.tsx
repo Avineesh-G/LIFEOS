@@ -7,6 +7,7 @@ import { BottomSheet } from '../components/BottomSheet';
 import { triggerHaptic } from '../utils/haptics';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow } from '../components/Skeleton';
 import SegmentedTogglePill, { SegmentedOption } from '../components/SegmentedTogglePill';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, Expense } from '../types';
 
 interface SpendingProps {
@@ -53,6 +54,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } 
 const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } } };
 
 export default function Spending({ data, updateData }: SpendingProps) {
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Food');
@@ -102,22 +104,38 @@ export default function Spending({ data, updateData }: SpendingProps) {
       triggerHaptic('error');
       return;
     }
+    const val = parseFloat(amount);
     const expense: Expense = {
       id: crypto.randomUUID(),
-      amount: parseFloat(amount),
+      amount: val,
       category,
       note: note.trim() || undefined,
       date: format(now, 'yyyy-MM-dd'),
     };
     await updateData({ expenses: [...data.expenses, expense] });
-    triggerHaptic('success');
     setAmount('');
     setNote('');
     setShowAdd(false);
+    showSavedFeedback({
+      title: 'Expense Added',
+      message: `₹${val.toLocaleString('en-IN')} logged under ${category}`,
+      section: 'spending',
+    });
   };
 
-  const handleDelete = async (id: string) => {
-    await updateData({ expenses: data.expenses.filter(e => e.id !== id) });
+  const handleDelete = (id: string) => {
+    const target = data.expenses.find(e => e.id === id);
+    const label = target ? `₹${target.amount} (${target.category})` : 'Expense';
+
+    confirmDelete({
+      title: 'Delete Expense?',
+      itemName: label,
+      message: 'This expense entry will be removed from your spending records.',
+      section: 'spending',
+      onConfirm: async () => {
+        await updateData({ expenses: data.expenses.filter(e => e.id !== id) });
+      },
+    });
   };
 
   // ── Windowed list virtualization for recent expenses ──

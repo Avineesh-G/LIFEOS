@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import { Modal } from '../components/BottomSheet';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import {
   generateShoppingId,
   duplicateAsTemplate,
@@ -34,6 +35,7 @@ interface ShoppingListDetailProps {
 export default function ShoppingListDetail({ data, updateData }: ShoppingListDetailProps) {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
 
   const allLists = useMemo(() => data?.shoppingLists || [], [data?.shoppingLists]);
   const currentList = useMemo(() => allLists.find(l => l.id === listId), [allLists, listId]);
@@ -157,30 +159,53 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
     await updateCurrentList({ items: nextItems });
   };
 
-  // Delete item
-  const handleDeleteItem = async (itemId: string) => {
-    triggerHaptic('light');
-    const nextItems = currentList.items.filter(it => it.id !== itemId);
-    await updateCurrentList({ items: nextItems });
-    setItemToDelete(null);
+  // Delete item with M3 confirmation & delete symbol animation
+  const handleDeleteItem = (itemId: string, name?: string) => {
+    const itemTarget = currentList.items.find(it => it.id === itemId);
+    const displayName = name || itemTarget?.name || 'Item';
+
+    confirmDelete({
+      title: 'Remove Item?',
+      itemName: displayName,
+      message: 'This item will be removed from your shopping list.',
+      section: 'shopping',
+      onConfirm: async () => {
+        const nextItems = currentList.items.filter(it => it.id !== itemId);
+        await updateCurrentList({ items: nextItems });
+        setItemToDelete(null);
+      },
+    });
   };
 
-  // Clear all checked items
-  const handleClearChecked = async () => {
+  // Clear all checked items with M3 confirmation
+  const handleClearChecked = () => {
     if (completedItems.length === 0) return;
-    triggerHaptic('medium');
-    const nextItems = currentList.items.filter(it => !it.checked);
-    await updateCurrentList({ items: nextItems });
+
+    confirmDelete({
+      title: 'Clear Completed?',
+      itemName: `${completedItems.length} completed item${completedItems.length === 1 ? '' : 's'}`,
+      message: 'All checked items will be permanently removed from this list.',
+      section: 'shopping',
+      onConfirm: async () => {
+        const nextItems = currentList.items.filter(it => !it.checked);
+        await updateCurrentList({ items: nextItems });
+      },
+    });
   };
 
   // Save as Template
   const handleSaveAsTemplate = async () => {
-    triggerHaptic('success');
     const name = templateName.trim() || `${currentList.name} (Template)`;
     const newTemplate = duplicateAsTemplate(currentList, name);
     const nextLists = [...allLists, newTemplate];
     await updateData({ shoppingLists: nextLists });
     setShowSaveTemplateModal(false);
+
+    showSavedFeedback({
+      title: 'Template Created',
+      message: `"${name}" saved to your shopping templates.`,
+      section: 'shopping',
+    });
   };
 
   // Rename list title

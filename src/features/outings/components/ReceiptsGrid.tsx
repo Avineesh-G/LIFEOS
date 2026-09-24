@@ -10,6 +10,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Image as ImageIcon, Trash2, X, ZoomIn, ZoomOut, ExternalLink } from 'lucide-react';
 import { triggerHaptic } from '../../../utils/haptics';
+import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
 import type { OutingReceiptRecord, OutingExpense } from '../types';
 
 interface ReceiptsGridProps {
@@ -124,6 +125,7 @@ export function ReceiptViewerModal({
   onDelete,
   onNavigateToExpense,
 }: ReceiptViewerModalProps) {
+  const { confirmDelete } = useM3Feedback();
   const [fullUrl, setFullUrl] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
@@ -190,10 +192,15 @@ export function ReceiptViewerModal({
           <button
             type="button"
             onClick={() => {
-              if (window.confirm('Delete this receipt permanently?')) {
-                triggerHaptic('save');
-                onDelete();
-              }
+              confirmDelete({
+                title: 'Delete Receipt?',
+                itemName: parentExpense ? parentExpense.title : 'Receipt Image',
+                message: 'This receipt image will be removed permanently.',
+                section: 'outings',
+                onConfirm: async () => {
+                  onDelete();
+                },
+              });
             }}
             className="p-2 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 active:scale-95 transition-all cursor-pointer"
             title="Delete receipt"

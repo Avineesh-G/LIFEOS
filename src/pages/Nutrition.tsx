@@ -10,6 +10,7 @@ import NightCanteenSection from '../components/nutrition/NightCanteenSection';
 import { FITNESS_GOALS } from '../utils/calculations';
 import InteractiveWaterGlass from '../components/interactive/InteractiveWaterGlass';
 import M3StatWidget from '../components/M3StatWidget';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 
 
@@ -106,6 +107,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     return activeSlot;
   });
   const [showSavedFeedback, setShowSavedFeedback] = useState(false);
+  const { confirmDelete, showSavedFeedback: showM3Saved } = useM3Feedback();
 
   // Food Doubt State (AI Can I eat this?)
   const [foodDoubtQuery, setFoodDoubtQuery] = useState('');
@@ -372,19 +374,31 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   };
 
   const handleDeleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
-    setDraftLog(prev => {
-      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-      if (mealIdx >= 0) {
-        const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-        newLog.mealsEaten[mealIdx] = mealLog;
-        mealLog.items = mealLog.items.filter(i => i.id !== itemId);
-      }
-      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-      newLog.isSaved = false;
-      return newLog;
+    const meal = draftLog.mealsEaten.find(m => m.slot === mealSlot);
+    const item = meal?.items.find(i => i.id === itemId);
+    const itemName = item?.name || 'Food item';
+
+    confirmDelete({
+      title: 'Remove Food Item?',
+      itemName,
+      message: 'This extra item will be removed from your meal log.',
+      section: 'nutrition',
+      onConfirm: async () => {
+        setDraftLog(prev => {
+          const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
+          const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
+          if (mealIdx >= 0) {
+            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
+            newLog.mealsEaten[mealIdx] = mealLog;
+            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
+          }
+          newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
+          newLog.isSaved = false;
+          return newLog;
+        });
+      },
     });
-  }
+  };
 
   const handleSkipMeal = (mealSlot: MealSlot) => {
     triggerHaptic(5);
@@ -455,6 +469,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
     setExpanded(null); // Close enlarged state so it doesn't stay open after saving
 
     setShowSavedFeedback(true);
+    showM3Saved({
+      title: 'Nutrition Saved',
+      message: `Logged ${finalLog.dailyTotal} kcal for ${format(new Date(finalLog.date), 'MMM d')}`,
+      section: 'nutrition',
+    });
     setTimeout(() => setShowSavedFeedback(false), 2000);
 
     const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== selectedDate);

@@ -43,6 +43,7 @@ import { AddExpenseSheet } from '../components/AddExpenseSheet';
 import { ManualEntrySheet } from '../components/ManualEntrySheet';
 import { SettleUpModal } from '../components/SettleUpModal';
 import { triggerHaptic } from '../../../utils/haptics';
+import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
 import type { OutingExpense } from '../types';
 
 type DetailTab = 'expenses' | 'people' | 'receipts' | 'notes';
@@ -51,6 +52,7 @@ export default function OutingDetailPage() {
   const { id: outingId, expenseId } = useParams<{ id: string; expenseId?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirmDelete } = useM3Feedback();
 
   const {
     outings,
@@ -226,11 +228,16 @@ export default function OutingDetailPage() {
           <button
             type="button"
             onClick={() => {
-              if (window.confirm(`Delete outing "${activeOuting.name}"? You can undo this for 5 seconds.`)) {
-                triggerHaptic('save');
-                deleteOuting(activeOuting.id);
-                navigate('/outings');
-              }
+              confirmDelete({
+                title: 'Delete Outing?',
+                itemName: activeOuting.name,
+                message: 'All associated expenses, receipts, and split balances will be deleted.',
+                section: 'outings',
+                onConfirm: async () => {
+                  deleteOuting(activeOuting.id);
+                  navigate('/outings');
+                },
+              });
             }}
             className="w-9 h-9 rounded-full flex items-center justify-center bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 active:scale-95 transition-all cursor-pointer"
             title="Delete outing"

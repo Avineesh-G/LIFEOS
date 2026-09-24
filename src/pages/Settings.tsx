@@ -23,6 +23,7 @@ import { useThemeMode, ThemeMode } from '../hooks/useDayPhase';
 import { usePerformanceMode, PerformanceMode } from '../utils/performanceMode';
 import SegmentedTogglePill from '../components/SegmentedTogglePill';
 import M3ToggleChip from '../components/M3ToggleChip';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 
 interface SettingsProps {
   accentColor?: string;
@@ -40,6 +41,7 @@ export default function Settings({
   resetAllData,
 }: SettingsProps) {
   const navigate = useNavigate();
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const [themeMode, setThemeMode] = useThemeMode();
   const [perfMode, setPerfMode, effectivePerfMode] = usePerformanceMode();
 
@@ -938,20 +940,25 @@ export default function Settings({
                   <button
                     type="button"
                     disabled={isClearingReceipts || receiptsStorageBytes === 0}
-                    onClick={async () => {
-                      if (window.confirm('Clear all local receipt photo files? Outings, expenses, and split calculations will be preserved.')) {
-                        setIsClearingReceipts(true);
-                        triggerHaptic('medium');
-                        try {
-                          await clearAllReceiptBlobs();
-                          const freshSize = await getReceiptsStorageSize();
-                          setReceiptsStorageBytes(freshSize);
-                          setReceiptsClearedNotice(true);
-                          setTimeout(() => setReceiptsClearedNotice(false), 4000);
-                        } finally {
-                          setIsClearingReceipts(false);
-                        }
-                      }
+                    onClick={() => {
+                      confirmDelete({
+                        title: 'Clear Receipt Cache?',
+                        itemName: `${(receiptsStorageBytes / (1024 * 1024)).toFixed(1)} MB photos`,
+                        message: 'Local receipt images will be removed. Outings, expenses, and split calculations remain completely safe.',
+                        section: 'settings',
+                        onConfirm: async () => {
+                          setIsClearingReceipts(true);
+                          try {
+                            await clearAllReceiptBlobs();
+                            const freshSize = await getReceiptsStorageSize();
+                            setReceiptsStorageBytes(freshSize);
+                            setReceiptsClearedNotice(true);
+                            setTimeout(() => setReceiptsClearedNotice(false), 4000);
+                          } finally {
+                            setIsClearingReceipts(false);
+                          }
+                        },
+                      });
                     }}
                     className="px-4 py-2 rounded-xl border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-40"
                   >
@@ -1028,41 +1035,45 @@ export default function Settings({
 
                   <button
                     type="button"
-                    onClick={async () => {
-                      if (window.confirm('Are you sure you want to reset ALL your data? Every entry, setting, and key will be permanently erased. This cannot be undone.')) {
-                        try {
-                          triggerHaptic('heavy');
-
-                          // 1. Wipe Firestore, memory state, localStorage, sessionStorage, and IndexedDB
-                          if (resetAllData) {
-                            await resetAllData();
-                          } else {
-                            if (auth.currentUser) {
-                              await deleteDoc(doc(db, 'users', auth.currentUser.uid));
-                            }
-                            try { localStorage.clear(); } catch {}
-                            try { sessionStorage.clear(); } catch {}
-                            try { await clearAllReceiptBlobs(); } catch {}
-                          }
-
-                          // 2. Clear native preferences & caches
+                    onClick={() => {
+                      confirmDelete({
+                        title: 'Reset ALL Data?',
+                        itemName: 'Entire LifeOS Database',
+                        message: 'Every note, workout, meal, expense, setting, and key will be permanently erased. This cannot be undone.',
+                        section: 'settings',
+                        onConfirm: async () => {
                           try {
-                            localStorage.clear();
-                            sessionStorage.clear();
-                          } catch {}
+                            // 1. Wipe Firestore, memory state, localStorage, sessionStorage, and IndexedDB
+                            if (resetAllData) {
+                              await resetAllData();
+                            } else {
+                              if (auth.currentUser) {
+                                await deleteDoc(doc(db, 'users', auth.currentUser.uid));
+                              }
+                              try { localStorage.clear(); } catch {}
+                              try { sessionStorage.clear(); } catch {}
+                              try { await clearAllReceiptBlobs(); } catch {}
+                            }
 
-                          // 3. Sign out cleanly
-                          if (Capacitor.isNativePlatform()) {
-                            GoogleAuth.signOut().catch(() => {});
+                            // 2. Clear native preferences & caches
+                            try {
+                              localStorage.clear();
+                              sessionStorage.clear();
+                            } catch {}
+
+                            // 3. Sign out cleanly
+                            if (Capacitor.isNativePlatform()) {
+                              GoogleAuth.signOut().catch(() => {});
+                            }
+                            await signOut(auth);
+
+                            // 4. Reload cleanly to root
+                            window.location.href = '/';
+                          } catch (err) {
+                            alert('Reset failed. Please try again.');
                           }
-                          await signOut(auth);
-
-                          // 4. Reload cleanly to root
-                          window.location.href = '/';
-                        } catch (err) {
-                          alert('Reset failed. Please try again.');
-                        }
-                      }
+                        },
+                      });
                     }}
                     className="w-full py-2.5 min-h-[44px] rounded-full bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border border-border-light dark:border-border-dark text-xs font-bold flex items-center justify-center gap-1.5"
                   >

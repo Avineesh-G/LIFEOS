@@ -42,6 +42,7 @@ import InAppUpdateModal from './components/InAppUpdateModal';
 import NetworkStatusModal from './components/NetworkStatusModal';
 import CloudMigrationModal from './components/CloudMigrationModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
+import { M3FeedbackProvider } from './components/m3/M3FeedbackContext';
 const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
 const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
@@ -407,31 +408,33 @@ function App() {
 
   return (
     <DayThemeProvider>
-      <NetworkStatusModal />
-      <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
-      <AppLockOverlay />
-      <InAppUpdateModal />
-      <div
-        className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
-        style={{
-          filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
-          opacity: isLocked ? 0.2 : 1,
-          pointerEvents: isLocked ? 'none' : 'auto',
-        }}
-      >
-        <Layout refresh={refresh} data={safeData} updateData={updateData}>
-          <ErrorBoundary>
-            <OutingsProvider>
-              <MainContent
-                data={safeData}
-                refresh={refresh}
-                updateData={updateData}
-                resetAllData={resetAllData}
-              />
-            </OutingsProvider>
-          </ErrorBoundary>
-        </Layout>
-      </div>
+      <M3FeedbackProvider>
+        <NetworkStatusModal />
+        <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
+        <AppLockOverlay />
+        <InAppUpdateModal />
+        <div
+          className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
+          style={{
+            filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
+            opacity: isLocked ? 0.2 : 1,
+            pointerEvents: isLocked ? 'none' : 'auto',
+          }}
+        >
+          <Layout refresh={refresh} data={safeData} updateData={updateData}>
+            <ErrorBoundary>
+              <OutingsProvider>
+                <MainContent
+                  data={safeData}
+                  refresh={refresh}
+                  updateData={updateData}
+                  resetAllData={resetAllData}
+                />
+              </OutingsProvider>
+            </ErrorBoundary>
+          </Layout>
+        </div>
+      </M3FeedbackProvider>
     </DayThemeProvider>
   );
 }

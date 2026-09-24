@@ -24,6 +24,7 @@ import {
   calculateListProgress,
   STARTER_TEMPLATES,
 } from '../utils/shoppingStorage';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, ShoppingList } from '../types';
 
 interface ShoppingListsProps {
@@ -32,6 +33,7 @@ interface ShoppingListsProps {
 }
 
 export default function ShoppingLists({ data, updateData }: ShoppingListsProps) {
+  const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const navigate = useNavigate();
   const allLists = useMemo(() => data?.shoppingLists || [], [data?.shoppingLists]);
 
@@ -80,6 +82,11 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
     await updateData({ shoppingLists: updated });
     setShowNewModal(false);
     setNewListName('');
+    showSavedFeedback({
+      title: 'List Created!',
+      message: newList.name,
+      section: 'shopping',
+    });
     navigate(`/shopping/${newList.id}`);
   };
 
@@ -88,15 +95,27 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
     const newList = createShoppingList(starter.name, false, starter.items);
     const updated = [...allLists, newList];
     await updateData({ shoppingLists: updated });
+    showSavedFeedback({
+      title: 'Template Added!',
+      message: newList.name,
+      section: 'shopping',
+    });
     navigate(`/shopping/${newList.id}`);
   };
 
   const handleDeleteList = async () => {
     if (!listToDelete) return;
-    triggerHaptic('medium');
-    const updated = allLists.filter(l => l.id !== listToDelete.id);
-    await updateData({ shoppingLists: updated });
-    setListToDelete(null);
+    await confirmDelete({
+      title: 'Delete Shopping List?',
+      itemName: listToDelete.name,
+      message: 'Are you sure you want to delete this shopping list and all its checklist items?',
+      section: 'shopping',
+      onConfirm: async () => {
+        const updated = allLists.filter(l => l.id !== listToDelete.id);
+        await updateData({ shoppingLists: updated });
+        setListToDelete(null);
+      },
+    });
   };
 
   return (

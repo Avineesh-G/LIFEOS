@@ -15,6 +15,7 @@ import {
 } from '../utils/geminiCoach';
 import VictoryModal from '../components/rive/VictoryModal';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, WorkoutLog } from '../types';
 
 
@@ -125,6 +126,7 @@ function InsightCard({ icon, title, subtitle, content, loading, error, accentCla
 
 export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const navigate = useNavigate();
+  const { showSavedFeedback } = useM3Feedback();
   const today = format(new Date(), 'yyyy-MM-dd');
   const shortDay = { 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat', 'Sunday': 'Sun' }[format(new Date(), 'EEEE')] || '';
   const todayPlan = data.workoutPlans.find(p => p.day === shortDay);
@@ -366,6 +368,11 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
     setSaved(true);
     setIsSavedDay(true);
     setIsLocked(true);
+    showSavedFeedback({
+      title: isComplete ? 'Workout Completed!' : 'Workout Saved',
+      message: isComplete ? `${workoutType} session logged to gym history.` : 'Workout progress saved.',
+      section: 'gym',
+    });
     setTimeout(() => setSaved(false), 3000);
     if (isComplete) {
       fetchPostSummary(); // auto-trigger post-workout analysis

@@ -11,6 +11,7 @@ import { triggerHaptic } from '../utils/haptics';
 import { authenticateDeviceLock, isDeviceLockAvailable } from '../utils/security';
 import { auth } from '../firebase';
 import { BottomSheet, Modal } from '../components/BottomSheet';
+import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import {
   deriveVaultKey,
   generateRandomSalt,
@@ -39,6 +40,8 @@ const CATEGORY_CONFIG: Record<VaultCategory, { label: string; shortLabel: string
 const AUTO_LOCK_SECONDS = 90;
 
 export default function Vault({ data, updateData }: VaultProps) {
+  const { confirmDelete, showSavedFeedback, showEditedFeedback } = useM3Feedback();
+
   // ── Vault State ───────────────────────────────────────────────────────────
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [vaultKey, setVaultKey] = useState<CryptoKey | null>(null);
@@ -351,6 +354,11 @@ export default function Vault({ data, updateData }: VaultProps) {
             : item
         );
         setToastMessage('Account credentials updated');
+        showEditedFeedback({
+          title: 'Account Updated',
+          message: `Credentials for "${modalForm.title.trim()}" updated`,
+          section: 'vault',
+        });
       } else {
         const newItem: VaultItem = {
           id: `vault_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -366,6 +374,11 @@ export default function Vault({ data, updateData }: VaultProps) {
         };
         updatedList = [newItem, ...vaultItems];
         setToastMessage('Password encrypted & saved');
+        showSavedFeedback({
+          title: 'Vault Item Secured',
+          message: `"${modalForm.title.trim()}" encrypted & stored`,
+          section: 'vault',
+        });
       }
 
       await updateData({ vaultItems: updatedList });
@@ -375,12 +388,18 @@ export default function Vault({ data, updateData }: VaultProps) {
     }
   };
 
-  const handleDeleteItem = async (item: VaultItem) => {
-    if (!confirm(`Delete "${item.title}" from your vault?`)) return;
-    triggerHaptic('heavy');
-    const updated = vaultItems.filter((i) => i.id !== item.id);
-    await updateData({ vaultItems: updated });
-    setToastMessage(`Deleted ${item.title}`);
+  const handleDeleteItem = (item: VaultItem) => {
+    confirmDelete({
+      title: 'Delete from Vault?',
+      itemName: item.title,
+      message: 'This encrypted credential will be permanently removed from your vault.',
+      section: 'vault',
+      onConfirm: async () => {
+        const updated = vaultItems.filter((i) => i.id !== item.id);
+        await updateData({ vaultItems: updated });
+        setToastMessage(`Deleted ${item.title}`);
+      },
+    });
   };
 
   // ── Password Generator ───────────────────────────────────────────────────
