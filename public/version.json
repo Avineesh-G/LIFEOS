@@ -2,7 +2,7 @@
   "versionCode": 26,
   "versionName": "2.0.2",
   "releaseDate": "2026-09-24",
-  "releaseNotes": "LifeOS v2.0.2 (Build 26): 100% offline launch with zero net::ERR_NAME_NOT_RESOLVED errors, native WebView auto-healing, Android Hardware Back Navigation, Edge-to-Edge Immersive Theming, Launcher Shortcuts, and WorkManager Background Sync.",
+  "releaseNotes": "LifeOS v2.0.2 (Build 26): Boundless Notes & Ideas first-class design system integration, Twilight Violet theme, zero-overflow responsive editor, offline auto-healing, and native Android navigation.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "f0156407eeb18559e580696f686a271d6ceffa1970e37a3da8083d20f4de44fc"
+  "sha256": "f6fe0a12d220d8f77f2337a0092bbb78ee2cc66a8d6269fba171d951edbf6d0e"
 }
