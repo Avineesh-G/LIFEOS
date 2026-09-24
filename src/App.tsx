@@ -362,7 +362,29 @@ function App() {
   }, []);
 
   const safeData = data || DEFAULT_DATA;
-  const [hasGreeted, setHasGreeted] = useState(false);
+
+  // Startup Greeting Cooldown: 5-minute cooldown to prevent repeating when reopening/refreshing frequently
+  const [hasGreeted, setHasGreeted] = useState(() => {
+    try {
+      const last = localStorage.getItem('lifeos_last_startup_greeting_timestamp');
+      if (last) {
+        const elapsed = Date.now() - parseInt(last, 10);
+        if (elapsed < 5 * 60 * 1000) {
+          return true; // Greeted within the last 5 minutes, skip greeting
+        }
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
+
+  const handleGreetingComplete = () => {
+    try {
+      localStorage.setItem('lifeos_last_startup_greeting_timestamp', String(Date.now()));
+    } catch {}
+    setHasGreeted(true);
+  };
 
   const greetingUsername = useMemo(() => {
     if (user?.displayName && user.displayName.trim()) {
@@ -427,7 +449,7 @@ function App() {
             username={greetingUsername}
             photoURL={user.photoURL}
             isAppReady={!dataLoading && Boolean(data)}
-            onComplete={() => setHasGreeted(true)}
+            onComplete={handleGreetingComplete}
           />
         )}
         <NetworkStatusModal />
