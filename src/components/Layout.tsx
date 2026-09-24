@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback, startTransition } fr
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  RotateCw, Bell
+  RotateCw, Bell, Cloud, WifiOff
 } from 'lucide-react';
 import { ExpandAllIcon, CollapseContentIcon } from './icons/MaterialSymbols';
 import { triggerHaptic } from '../utils/haptics';
@@ -46,6 +46,18 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [isReloading, setIsReloading] = useState(false);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const permissionCheckedRef = useRef(false);
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Dynamic Navigation Configuration Hook
   const {
@@ -382,8 +394,8 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
   const { isDark } = useDayTheme();
   const activeSection = getSectionFromPathname(location.pathname);
-  const pillBg = getNavPillBg(activeSection, isDark);
-  const squircleBg = getNavSquircleBg(activeSection, isDark);
+  const pillBg = getNavPillBg(activeSection, isDark, location.pathname);
+  const squircleBg = getNavSquircleBg(activeSection, isDark, location.pathname);
   const solidAccent = squircleBg;
   const inactiveColor = isDark ? 'rgba(255, 255, 255, 0.55)' : 'rgba(15, 23, 42, 0.55)';
 
@@ -495,6 +507,23 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 <span className="hidden compact:inline">Allow Alerts</span>
               </button>
             )}
+
+            {/* Network Status Symbol: Cloud symbol when online, offline symbol when offline */}
+            <div
+              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden border transition-all shadow-sm shrink-0 select-none ${
+                isOnline
+                  ? 'bg-black/30 dark:bg-black/55 border-white/20 text-emerald-400'
+                  : 'bg-amber-500/25 border-amber-500/40 text-amber-300 animate-pulse'
+              }`}
+              title={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
+              aria-label={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
+            >
+              {isOnline ? (
+                <Cloud size={15} strokeWidth={2.2} />
+              ) : (
+                <WifiOff size={14} strokeWidth={2.2} />
+              )}
+            </div>
 
             <button
               onPointerDown={() => triggerHaptic('light')}

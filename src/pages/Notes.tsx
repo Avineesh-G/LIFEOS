@@ -40,6 +40,73 @@ interface NotesProps {
 
 type PageViewMode = 'white' | 'lined' | 'grid';
 
+interface NotePromptOption {
+  id: string;
+  icon: string;
+  label: string;
+  description: string;
+  title: string;
+  template: string;
+  pageView: PageViewMode;
+}
+
+const NOTE_PROMPT_OPTIONS: NotePromptOption[] = [
+  {
+    id: 'brain-dump',
+    icon: '💡',
+    label: 'Brain Dump',
+    description: 'Capture unfiltered thoughts',
+    title: 'Brain Dump — Fast Thoughts',
+    template: '## 💡 Key Thoughts\n• \n• \n\n## ⚡ Immediate Actions\n• [ ] \n• [ ] \n\n## 💭 Later Reflection\n• ',
+    pageView: 'lined',
+  },
+  {
+    id: 'weekly-goals',
+    icon: '🎯',
+    label: 'Weekly Goals',
+    description: 'Top 3 priorities this week',
+    title: 'Weekly Priorities & Objectives',
+    template: '## 🎯 Top 3 Priorities\n1. \n2. \n3. \n\n## 📌 Essential Milestones\n• [ ] Mon-Tue: \n• [ ] Wed-Thu: \n• [ ] Fri-Sun: \n\n## 🏆 Win Condition\n• ',
+    pageView: 'grid',
+  },
+  {
+    id: 'project-idea',
+    icon: '🚀',
+    label: 'Project Concept',
+    description: 'Problem, audience & plan',
+    title: 'Project Concept: ',
+    template: '## 🚀 The Core Problem\nWhat specific friction are we solving?\n\n## 💡 Proposed Solution\nHow does this work in practice?\n\n## 👥 Target Audience\nWho benefits from this?\n\n## 🛠️ Step 1 Execution\n• [ ] Prototype core flow\n• [ ] Gather initial feedback',
+    pageView: 'white',
+  },
+  {
+    id: 'meeting-notes',
+    icon: '🧠',
+    label: 'Meeting / Lecture',
+    description: 'Takeaways & action items',
+    title: 'Meeting / Lecture Notes — ',
+    template: '## 👥 Attendees / Subject\n• \n\n## 📝 Core Discussion Points\n• \n• \n\n## ✅ Action Items & Owners\n• [ ] Task 1 (@owner)\n• [ ] Task 2 (@owner)\n\n## 📌 Key Decision / Next Steps\n• ',
+    pageView: 'lined',
+  },
+  {
+    id: 'daily-reflection',
+    icon: '📖',
+    label: 'Daily Reflection',
+    description: 'Wins, learnings & focus',
+    title: 'Daily Reflection — ',
+    template: '## 🌟 Today\'s Biggest Win\n• \n\n## 🧠 What I Learned Today\n• \n\n## 🔋 Energy & Mindset\n• How do I feel tonight?\n\n## 🚀 Focus for Tomorrow\n1. ',
+    pageView: 'lined',
+  },
+  {
+    id: 'quick-checklist',
+    icon: '📋',
+    label: 'Action Checklist',
+    description: 'Fast structured checklist',
+    title: 'Action Checklist: ',
+    template: '## 📋 Tasks & Checklist\n- [ ] Priority 1\n- [ ] Priority 2\n- [ ] Follow up on:\n- [ ] Double check:\n- [ ] Completed & verified',
+    pageView: 'grid',
+  },
+];
+
 export default function Notes({ data, updateData }: NotesProps) {
   const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const { id: routeNoteId } = useParams<{ id?: string }>();
@@ -222,6 +289,26 @@ export default function Notes({ data, updateData }: NotesProps) {
   }, [allNotes, activeTab, selectedMonth, currentMonthKey, searchQuery]);
 
   // Handlers
+  const handleSelectPrompt = (prompt: NotePromptOption) => {
+    triggerHaptic('medium');
+    const newNote: NoteItem = {
+      id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      title: prompt.title,
+      content: prompt.template,
+      pageView: prompt.pageView,
+      monthKey: currentMonthKey,
+      isArchived: false,
+      syncStatus: isOnline ? 'synced' : 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setActiveNote(newNote);
+    setEditorTitle(prompt.title);
+    setEditorContent(prompt.template);
+    setEditorPageView(prompt.pageView);
+    setIsEditing(true);
+  };
+
   const handleOpenNewNote = () => {
     triggerHaptic('light');
     navigate('/notes/new');
@@ -407,6 +494,39 @@ export default function Notes({ data, updateData }: NotesProps) {
             <Plus size={18} />
             <span>New Note / Idea</span>
           </button>
+        </div>
+      </div>
+
+      {/* ── Quick Starter Prompts Row ── */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono flex items-center gap-1.5">
+            <span>✨</span>
+            <span>Idea Prompts & Starter Templates</span>
+          </span>
+          <span className="text-[10.5px] text-secondary-light/70 dark:text-secondary-dark/70 font-medium">
+            Tap to start note
+          </span>
+        </div>
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-none -mx-1 px-1">
+          {NOTE_PROMPT_OPTIONS.map((prompt) => (
+            <button
+              key={prompt.id}
+              type="button"
+              onClick={() => handleSelectPrompt(prompt)}
+              className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-white/70 dark:bg-[#1E1929]/70 hover:bg-[#8436E9]/10 dark:hover:bg-[#8436E9]/20 border border-[#8436E9]/20 dark:border-[#8436E9]/30 text-primary-light dark:text-primary-dark transition-all active:scale-95 shrink-0 shadow-2xs group cursor-pointer"
+            >
+              <span className="text-lg group-hover:scale-110 transition-transform">{prompt.icon}</span>
+              <div className="text-left">
+                <div className="text-xs font-bold leading-tight group-hover:text-[#8436E9] dark:group-hover:text-[#BAA8FE] transition-colors whitespace-nowrap">
+                  {prompt.label}
+                </div>
+                <div className="text-[10px] text-secondary-light dark:text-secondary-dark leading-tight whitespace-nowrap">
+                  {prompt.description}
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -624,6 +744,32 @@ export default function Notes({ data, updateData }: NotesProps) {
         )}
 
         <div className="space-y-3.5">
+          {/* Quick Prompts Picker in Editor */}
+          <div>
+            <label className="text-[10.5px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
+              <span>✨</span>
+              <span>Starter Templates</span>
+            </label>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-0.5 px-0.5">
+              {NOTE_PROMPT_OPTIONS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setEditorTitle(p.title);
+                    setEditorContent(p.template);
+                    setEditorPageView(p.pageView);
+                  }}
+                  className="px-2.5 py-1 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-[#8436E9]/15 border border-[#8436E9]/25 text-[11px] font-semibold text-primary-light dark:text-primary-dark flex items-center gap-1 shrink-0 whitespace-nowrap transition-colors cursor-pointer active:scale-95"
+                >
+                  <span>{p.icon}</span>
+                  <span>{p.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Note Title */}
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">

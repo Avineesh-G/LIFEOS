@@ -45,6 +45,9 @@ const SECTION_TO_HUB_FAMILY: Record<AppSection, HubFamily> = {
   shopping: 'shopping',
   vault: 'vault',
   notes: 'notes',
+  timetable: 'study',
+  tasks: 'home',
+  laundry: 'home',
 };
 
 interface NavigationHubSheetProps {

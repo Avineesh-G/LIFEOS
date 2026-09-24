@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 27,
-  versionName: '2.0.3',
+  versionCode: 28,
+  versionName: '2.0.4',
   releaseDate: '2026-09-24',
-  releaseNotes: 'LifeOS v2.0.3 (Build 27): Fix network status and offline indicator safe-area overlay clashing with camera cutout and hardware status bar.',
+  releaseNotes: 'LifeOS v2.0.4 (Build 28): Categorized navigation hub with settings at end, navbar color matching across all sections, notes prompt templates, and header cloud/offline status indicator.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

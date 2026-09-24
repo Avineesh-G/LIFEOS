@@ -107,48 +107,33 @@ export default function NetworkStatusModal() {
         )}
       </AnimatePresence>
 
-      {/* ── Persistent Subtle Status Bar Indicator When Offline (If modal was dismissed) ── */}
-      <AnimatePresence>
-        {isOffline && !showModal && (
-          <motion.div
-            initial={{ opacity: 0, y: -15, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -15, scale: 0.95 }}
-            onClick={() => setShowModal(true)}
-            style={{
-              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 46px)',
-            }}
-            className="fixed left-1/2 -translate-x-1/2 z-[90] px-3.5 py-1.5 rounded-full bg-amber-500/95 text-white text-[11px] font-bold shadow-lg shadow-amber-500/25 backdrop-blur-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform border border-amber-400/30 select-none"
-          >
-            <WifiOff size={12} />
-            <span>Offline Mode</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Reconnected Toast When Internet Comes Back ── */}
       <AnimatePresence>
         {showReconnectedToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+          <div
             style={{
-              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 46px)',
+              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 48px)',
             }}
-            className="fixed left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xl shadow-emerald-600/30 flex items-center gap-2 border border-emerald-400/30 max-w-[92vw] select-none"
+            className="fixed inset-x-4 z-[100] flex justify-center pointer-events-none"
           >
-            <CheckCircle2 size={15} className="shrink-0" />
-            <span className="truncate">Back Online — Connected to Cloud</span>
-            <button
-              type="button"
-              onClick={() => setShowReconnectedToast(false)}
-              className="ml-1 p-0.5 hover:bg-white/20 rounded-full shrink-0"
-              aria-label="Dismiss notification"
+            <motion.div
+              initial={{ opacity: 0, y: -16, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -16, scale: 0.95 }}
+              className="pointer-events-auto px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xl shadow-emerald-600/30 flex items-center gap-2 border border-emerald-400/30 max-w-full select-none"
             >
-              <X size={12} />
-            </button>
-          </motion.div>
+              <CheckCircle2 size={15} className="shrink-0 text-white" />
+              <span className="truncate">Back Online — Connected to Cloud</span>
+              <button
+                type="button"
+                onClick={() => setShowReconnectedToast(false)}
+                className="ml-1 p-0.5 hover:bg-white/20 rounded-full shrink-0 cursor-pointer"
+                aria-label="Dismiss notification"
+              >
+                <X size={12} />
+              </button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>

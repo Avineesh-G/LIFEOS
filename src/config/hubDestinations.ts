@@ -68,7 +68,7 @@ export const HOME_DESTINATION: HomeDestination = {
  * In the hub, exactly 10 of these are rendered (the 2 pinned destinations are excluded).
  */
 export const DESTINATIONS: HubDestination[] = [
-  // Gym & Nutrition
+  // Health & Body
   {
     id: 'gym',
     label: 'Gym',
@@ -86,7 +86,7 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/nutrition'],
   },
 
-  // Study family
+  // Focus, Planning & Mind
   {
     id: 'study',
     label: 'Study',
@@ -103,8 +103,24 @@ export const DESTINATIONS: HubDestination[] = [
     family: 'study',
     matchRoutes: ['/timetable'],
   },
+  {
+    id: 'tasks',
+    label: 'To-Do Tasks',
+    route: '/tasks',
+    icon: ListAltCheckIcon,
+    family: 'home',
+    matchRoutes: ['/tasks'],
+  },
+  {
+    id: 'notes',
+    label: 'Notes & Ideas',
+    route: '/notes',
+    icon: NotebookPen,
+    family: 'notes',
+    matchRoutes: ['/notes'],
+  },
 
-  // Finance family
+  // Finance & Commerce
   {
     id: 'spending',
     label: 'Spending',
@@ -130,15 +146,7 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/outings'],
   },
 
-  // Home tools family
-  {
-    id: 'tasks',
-    label: 'To-Do Tasks',
-    route: '/tasks',
-    icon: ListAltCheckIcon,
-    family: 'home',
-    matchRoutes: ['/tasks'],
-  },
+  // Chores & Life History
   {
     id: 'laundry',
     label: 'Laundry',
@@ -156,7 +164,7 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/history'],
   },
 
-  // System family
+  // Security & Settings
   {
     id: 'vault',
     label: 'Vault',
@@ -172,14 +180,6 @@ export const DESTINATIONS: HubDestination[] = [
     icon: SettingsIcon,
     family: 'system',
     matchRoutes: ['/settings'],
-  },
-  {
-    id: 'notes',
-    label: 'Notes & Ideas',
-    route: '/notes',
-    icon: NotebookPen,
-    family: 'notes',
-    matchRoutes: ['/notes'],
   },
 ];
 
@@ -306,6 +306,9 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   shopping: 'Shopping Lists',
   vault: 'Vault',
   notes: 'Notes & Ideas',
+  timetable: 'Timetable',
+  tasks: 'To-Do Tasks',
+  laundry: 'Laundry',
 };
 
 export function getDestinationById(id: string): HubDestination | undefined {

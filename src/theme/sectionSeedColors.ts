@@ -23,7 +23,21 @@ import type { CustomizableInterfaceId } from './interfaceColorManager.ts';
 import type { ColorFamily } from './colorFamilies.ts';
 import { getReadableForeground, COLOR_FAMILIES, DEFAULT_INTERFACE_COLORS } from './colorFamilies.ts';
 
-export type AppSection = 'home' | 'finance' | 'gym' | 'nutrition' | 'study' | 'settings' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
+export type AppSection =
+  | 'home'
+  | 'finance'
+  | 'gym'
+  | 'nutrition'
+  | 'study'
+  | 'timetable'
+  | 'tasks'
+  | 'laundry'
+  | 'settings'
+  | 'history'
+  | 'outing'
+  | 'shopping'
+  | 'vault'
+  | 'notes';
 
 /**
  * Fixed identity seed color per section from PALETTE
@@ -34,6 +48,9 @@ export const SECTION_SEED_COLORS: Record<AppSection, string> = {
   gym: PALETTE.gym.seed,            // Coral Crimson #E11D48
   nutrition: PALETTE.nutrition.seed,// Solar Amber #F5A623
   study: PALETTE.study.seed,        // Lagoon Cyan #0891B2
+  timetable: '#0891B2',             // Lagoon Cyan #0891B2
+  tasks: '#7C3AED',                 // Amethyst Violet #7C3AED
+  laundry: '#0D9488',               // Ocean Teal #0D9488
   settings: PALETTE.settings.seed,  // Slate #475569
   history: PALETTE.history.seed,    // History Burgundy #8C1D40
   outing: PALETTE.outing.seed,      // Saddle Brown #8C500A
@@ -80,6 +97,9 @@ export const NAV_PILL_BG_COLORS: Record<AppSection, { light: string; dark: strin
   nutrition: { light: '#FEF3E0', dark: '#3A2A14' },  // pale tonal container from #F5A623
   finance: { light: '#E8F5E9', dark: '#122E1A' },    // pale tonal container from #15803D
   study: { light: '#E0F7FA', dark: '#0C2A33' },      // pale tonal container from #0891B2
+  timetable: { light: '#E0F7FA', dark: '#0C2A33' },  // pale tonal container from #0891B2
+  tasks: { light: '#F3E8FF', dark: '#241038' },      // pale tonal container from #7C3AED
+  laundry: { light: '#E6FFFA', dark: '#0C2A26' },    // pale tonal container from #0D9488
   settings: { light: '#EEF2F6', dark: '#1E2530' },   // pale tonal container from #475569
   history: { light: '#FCE8EE', dark: '#2E131B' },    // pale tonal container from #8C1D40
   outing: { light: '#FDF7F2', dark: '#2A1806' },     // pale tonal container from #8C500A
@@ -132,7 +152,7 @@ export function getNavSquircleBg(
  */
 export function getSectionFromPathname(pathname: string): AppSection {
   const p = (pathname || '/').toLowerCase();
-  if (p.startsWith('/gym/history')) {
+  if (p.startsWith('/gym/history') || p.startsWith('/gym')) {
     return 'gym';
   }
   if (p.startsWith('/shopping')) {
@@ -141,14 +161,20 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/spending')) {
     return 'finance';
   }
-  if (p.startsWith('/gym')) {
-    return 'gym';
-  }
   if (p.startsWith('/nutrition')) {
     return 'nutrition';
   }
-  if (p.startsWith('/study') || p.startsWith('/timetable')) {
+  if (p.startsWith('/timetable')) {
+    return 'timetable';
+  }
+  if (p.startsWith('/study')) {
     return 'study';
+  }
+  if (p.startsWith('/tasks')) {
+    return 'tasks';
+  }
+  if (p.startsWith('/laundry')) {
+    return 'laundry';
   }
   if (p.startsWith('/vault')) {
     return 'vault';
@@ -165,7 +191,7 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/notes')) {
     return 'notes';
   }
-  return 'home'; // '/', '/tasks', '/laundry'
+  return 'home';
 }
 
 export interface M3ColorScheme {
@@ -217,6 +243,9 @@ export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   finance: 'top-left',
   nutrition: 'bottom-right',
   study: 'top-right',
+  timetable: 'top-right',
+  tasks: 'top-left',
+  laundry: 'bottom-right',
   settings: 'bottom-left',
   history: 'bottom-right',
   outing: 'top-right',
