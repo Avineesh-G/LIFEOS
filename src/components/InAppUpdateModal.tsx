@@ -67,48 +67,50 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
   const autoRetryDoneRef = useRef(false);
   const isResumingRef = useRef(false);
 
-  // Check on initial load (with 3-second delay to ensure smooth, instantaneous app boot)
+  // Check on initial load (triggers right after startup greeting completes)
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
     const runAutoCheck = async () => {
-      // Check if user snoozed updates recently (within 24 hours)
-      const lastSnoozed = localStorage.getItem('lifeos_update_snoozed_time');
-      if (lastSnoozed && Date.now() - parseInt(lastSnoozed, 10) < 24 * 60 * 60 * 1000) {
-        return;
-      }
+      try {
+        const res = await checkForAppUpdate();
+        if (res.hasUpdate && res.remoteVersion) {
+          setRemoteVersion(res.remoteVersion);
+          setStatus('idle');
 
-      const res = await checkForAppUpdate();
-      if (res.hasUpdate && res.remoteVersion) {
-        setRemoteVersion(res.remoteVersion);
-        // Do not block user on boot with a full-screen modal; use the expandable banner instead
-        // Fire native phone notification so user is alerted even if app is in background
-        sendUpdateAvailableNotification(
-          res.currentVersion,
-          res.remoteVersion.versionName,
-          res.remoteVersion.releaseNotes
-        );
+          // Always pop up the update modal immediately after entering the app
+          setIsOpen(true);
 
-        // Also broadcast to the expandable In-App Material 3 Notification Bar
-        window.dispatchEvent(
-          new CustomEvent('lifeos-show-notification-banner', {
-            detail: {
-              id: `update_${res.remoteVersion.versionCode}`,
-              title: `Update Available: LifeOS v${res.remoteVersion.versionName}`,
-              message: 'A newer version of LifeOS is available with new features and performance enhancements.',
-              details: res.remoteVersion.releaseNotes,
-              type: 'update',
-              actionLabel: 'Update Now',
-              onAction: () => {
-                setIsOpen(true);
+          // Fire native phone notification into Android notification bar/shade
+          sendUpdateAvailableNotification(
+            res.currentVersion,
+            res.remoteVersion.versionName,
+            res.remoteVersion.releaseNotes
+          );
+
+          // Also broadcast to the expandable In-App Material 3 Notification Bar
+          window.dispatchEvent(
+            new CustomEvent('lifeos-show-notification-banner', {
+              detail: {
+                id: `update_${res.remoteVersion.versionCode}`,
+                title: `Update Available: LifeOS v${res.remoteVersion.versionName}`,
+                message: 'A newer version of LifeOS is available with new features and performance enhancements.',
+                details: res.remoteVersion.releaseNotes,
+                type: 'update',
+                actionLabel: 'Update Now',
+                onAction: () => {
+                  setIsOpen(true);
+                },
               },
-            },
-          })
-        );
+            })
+          );
+        }
+      } catch (err) {
+        console.warn('[InAppUpdateModal] Auto check failed:', err);
       }
     };
 
-    timer = setTimeout(runAutoCheck, 3000);
+    timer = setTimeout(runAutoCheck, 1100);
 
     // Also listen for manual trigger events (e.g. from Settings)
     const handleManualTrigger = async (event?: any) => {

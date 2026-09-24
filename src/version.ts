@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 31,
-  versionName: '2.0.7',
+  versionCode: 32,
+  versionName: '2.0.8',
   releaseDate: '2026-09-24',
-  releaseNotes: 'LifeOS v2.0.7 (Build 31):\n• Added (+ Add Expense) directly in recent expenses list\n• Added Money Lent tracker for personal loans (excluded from total spending)\n• Material 3 Expressive Greeting screen with live M3 animations & Gmail username\n• Official M3 Expressive wavy continuous sine-wave progress bar\n• WorkManager background update notifications without opening app\n• Expandable notification bar with Enlarge/Read More and Close options\n• Eliminated black screen on route transitions with concurrent popLayout crossfade\n• Fixed repeated system notification permission prompts on launch\n• 120 FPS high refresh-rate GPU compositing & touch acceleration',
+  releaseNotes: 'LifeOS v2.0.8 (Build 32):\n• High-performance 120 FPS M3 Expressive greeting with 10-minute cooldown\n• Instant in-app update popup & native phone notification alerts\n• Enhanced reload button with state preservation\n• Smooth cinematic home screen transition with zero frame drops',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

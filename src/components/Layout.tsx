@@ -215,10 +215,20 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         await refresh();
       }
 
-      // 4. Force reload
+      // 4. Preserve greeting cooldown timestamp so reload NEVER triggers greeting screen
+      try {
+        localStorage.setItem('lifeos_last_startup_greeting_timestamp', String(Date.now()));
+      } catch (e) {
+        console.warn('Could not write greeting timestamp:', e);
+      }
+
+      // 5. Force reload
       window.location.reload();
     } catch (err) {
       console.warn('Refresh error:', err);
+      try {
+        localStorage.setItem('lifeos_last_startup_greeting_timestamp', String(Date.now()));
+      } catch {}
       window.location.reload();
     } finally {
       setIsReloading(false);

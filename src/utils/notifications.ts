@@ -524,34 +524,50 @@ export async function sendUpdateAvailableNotification(
   newVersion: string,
   releaseNotes?: string
 ): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false;
-  try {
-    await ensureNotificationChannels();
-    const body = releaseNotes
-      ? releaseNotes.slice(0, 120) + (releaseNotes.length > 120 ? '...' : '')
-      : `Open LifeOS to download v${newVersion} now.`;
+  const body = releaseNotes
+    ? releaseNotes.slice(0, 140) + (releaseNotes.length > 140 ? '...' : '')
+    : `Open LifeOS to download v${newVersion} now.`;
 
-    await LocalNotifications.schedule({
-      notifications: [
-        {
-          id: 99999,
-          title: `LifeOS Update Available — v${newVersion}`,
-          body,
-          channelId: TASKS_CHANNEL_ID,
-          smallIcon: NOTIFICATION_ICON,
-          iconColor: NOTIFICATION_COLOR,
-          schedule: { at: new Date(Date.now() + 100), allowWhileIdle: true },
-          extra: {
-            type: 'update_available',
-            currentVersion,
-            newVersion,
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const hasPerm = await checkNotificationPermission();
+      if (!hasPerm) {
+        await requestNotificationPermission();
+      }
+      await ensureNotificationChannels();
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: 99999,
+            title: `LifeOS Update Available — v${newVersion}`,
+            body,
+            channelId: TASKS_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: NOTIFICATION_COLOR,
+            schedule: { at: new Date(Date.now() + 50), allowWhileIdle: true },
+            extra: {
+              type: 'update_available',
+              currentVersion,
+              newVersion,
+            },
           },
-        },
-      ],
-    });
-    return true;
-  } catch (err) {
-    console.warn('[Notifications] Update notification failed:', err);
-    return false;
+        ],
+      });
+      return true;
+    } catch (err) {
+      console.warn('[Notifications] Native update notification failed:', err);
+    }
+  } else if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(`LifeOS Update Available — v${newVersion}`, {
+        body,
+        icon: '/pwa-192x192.png',
+      });
+      return true;
+    } catch (e) {
+      console.warn('[Notifications] Web update notification failed:', e);
+    }
   }
+  return false;
 }

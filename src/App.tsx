@@ -363,14 +363,14 @@ function App() {
 
   const safeData = data || DEFAULT_DATA;
 
-  // Startup Greeting Cooldown: 5-minute cooldown to prevent repeating when reopening/refreshing frequently
+  // Startup Greeting Cooldown: Strict 10-minute cooldown to prevent repeating when reopening/refreshing frequently
   const [hasGreeted, setHasGreeted] = useState(() => {
     try {
       const last = localStorage.getItem('lifeos_last_startup_greeting_timestamp');
       if (last) {
         const elapsed = Date.now() - parseInt(last, 10);
-        if (elapsed < 5 * 60 * 1000) {
-          return true; // Greeted within the last 5 minutes, skip greeting
+        if (elapsed < 10 * 60 * 1000) {
+          return true; // Greeted within the last 10 minutes, strictly skip greeting
         }
       }
       return false;
