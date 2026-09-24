@@ -66,19 +66,43 @@ async function ensureNotificationChannels() {
   }
 }
 
+let permissionRequestInFlight: Promise<boolean> | null = null;
+
 /**
  * Requests permission directly from the phone operating system to show notifications in the phone notification center.
+ * Features strict singleton deduplication so the user is never prompted multiple times on launch.
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
-    if (Capacitor.isNativePlatform()) {
-      await ensureNotificationChannels();
-      const status = await LocalNotifications.requestPermissions();
-      return status.display === 'granted';
-    } else if (typeof window !== 'undefined' && 'Notification' in window) {
-      const res = await Notification.requestPermission();
-      return res === 'granted';
+    // 1. If already granted, return true immediately without triggering any native OS dialog
+    const alreadyGranted = await checkNotificationPermission();
+    if (alreadyGranted) return true;
+
+    // 2. If a prompt is already in-flight across components, return the existing promise
+    if (permissionRequestInFlight) {
+      return permissionRequestInFlight;
     }
+
+    permissionRequestInFlight = (async () => {
+      try {
+        if (Capacitor.isNativePlatform()) {
+          await ensureNotificationChannels();
+          // Explicitly request display permission only so Android never kicks user to "Alarms & Reminders"
+          const status = await (LocalNotifications as any).requestPermissions({ permissions: ['display'] });
+          return status.display === 'granted';
+        } else if (typeof window !== 'undefined' && 'Notification' in window) {
+          const res = await Notification.requestPermission();
+          return res === 'granted';
+        }
+      } catch (err) {
+        console.warn('[Notifications] requestPermission error:', err);
+      } finally {
+        permissionRequestInFlight = null;
+      }
+      return false;
+    })();
+
+    return await permissionRequestInFlight;
   } catch (err) {
     console.warn('[Notifications] requestPermission error:', err);
   }
@@ -122,11 +146,14 @@ export async function requestAndSyncNotifications(
       syncNutritionNotifications();
     }, 50);
 
-    // Fire instant alert with app logo into the actual phone notification center
-    await sendInstantTestNotification(
-      'LifeOS Notifications Active',
-      'Timetable, TO-DO, Nutrition alerts, and Study timer will appear here with the LifeOS logo.'
-    );
+    // Fire instant alert with app logo into the actual phone notification center ONCE on first grant
+    if (!localStorage.getItem('lifeos_initial_test_notif_sent')) {
+      localStorage.setItem('lifeos_initial_test_notif_sent', 'true');
+      await sendInstantTestNotification(
+        'LifeOS Notifications Active',
+        'Timetable, TO-DO, Nutrition alerts, and Study timer will appear here with the LifeOS logo.'
+      );
+    }
     return true;
   }
   return false;
@@ -239,6 +266,7 @@ export async function syncTimetableNotifications(
             channelId: TIMETABLE_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: NOTIFICATION_COLOR,
+            isExactNotification: false,
             schedule: { at: triggerTime, allowWhileIdle: true },
             extra: {
               type: 'timetable',
@@ -313,6 +341,7 @@ export async function syncTaskNotifications(
           channelId: TASKS_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
           iconColor: '#10B981',
+          isExactNotification: false,
           schedule: { at: triggerTime, allowWhileIdle: true },
           extra: {
             type: 'task',
@@ -378,6 +407,7 @@ export async function syncNutritionNotifications(): Promise<number> {
             channelId: NUTRITION_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: '#F59E0B',
+            isExactNotification: false,
             schedule: { at: triggerTime, allowWhileIdle: true },
             extra: {
               type: 'nutrition',

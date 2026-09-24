@@ -42,6 +42,9 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SyncManagerPlugin.class);
         super.onCreate(savedInstanceState);
 
+        // Schedule background update checks so users get update alerts without opening the app
+        UpdateCheckWorker.schedulePeriodicCheck(this);
+
         // 3. Native auto-healing: intercept any network or loading error and immediately fall back to local assets
         if (getBridge() != null) {
             getBridge().addWebViewListener(new WebViewListener() {

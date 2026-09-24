@@ -27,7 +27,7 @@ import SettingsPage from './pages/Settings';
 import Vault from './pages/Vault';
 import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
-import React, { useEffect, useState, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useMemo, Suspense, lazy } from 'react';
 import { OutingsProvider } from './features/outings/context/OutingsContext';
 
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
@@ -50,6 +50,7 @@ import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 import { scheduleWidgetSync } from './utils/widgetBridge';
 import { triggerTopDismissible, handleRootBackPress } from './utils/backNavigation';
+import M3StartupGreeting from './components/M3StartupGreeting';
 
 function MainContent({
   data,
@@ -145,7 +146,7 @@ function MainContent({
   const motionProps = getPageMotionProps(prefersReducedMotion);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div
         key={location.pathname}
         className="w-full gpu-composited"
@@ -361,6 +362,18 @@ function App() {
   }, []);
 
   const safeData = data || DEFAULT_DATA;
+  const [hasGreeted, setHasGreeted] = useState(false);
+
+  const greetingUsername = useMemo(() => {
+    if (user?.displayName && user.displayName.trim()) {
+      return user.displayName.trim();
+    }
+    if (user?.email) {
+      const handle = user.email.split('@')[0];
+      return handle.charAt(0).toUpperCase() + handle.slice(1);
+    }
+    return 'Friend';
+  }, [user?.displayName, user?.email]);
 
   // Prompt phone OS native notification permission directly on app start if not yet allowed
   useEffect(() => {
@@ -409,6 +422,14 @@ function App() {
   return (
     <DayThemeProvider>
       <M3FeedbackProvider>
+        {!hasGreeted && user && (
+          <M3StartupGreeting
+            username={greetingUsername}
+            photoURL={user.photoURL}
+            isAppReady={!dataLoading && Boolean(data)}
+            onComplete={() => setHasGreeted(true)}
+          />
+        )}
         <NetworkStatusModal />
         <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
         <AppLockOverlay />

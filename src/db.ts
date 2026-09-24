@@ -30,6 +30,7 @@ const DEFAULT_DATA: AppData = {
   laundryBatches: [],
   shoppingLists: [],
   notes: [],
+  moneyLent: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -124,6 +125,17 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     colorTone: note?.colorTone || '#7C3AED',
     createdAt: note?.createdAt || new Date().toISOString(),
     updatedAt: note?.updatedAt || new Date().toISOString(),
+  }));
+
+  merged.moneyLent = (merged.moneyLent || []).map(item => ({
+    id: item?.id || `lent_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    personName: item?.personName || 'Unnamed',
+    amount: Number(item?.amount) || 0,
+    date: item?.date || new Date().toISOString().slice(0, 10),
+    note: item?.note || '',
+    status: item?.status === 'returned' ? 'returned' : 'pending',
+    returnedDate: item?.returnedDate || undefined,
+    createdAt: item?.createdAt || new Date().toISOString(),
   }));
 
   merged.settings = {

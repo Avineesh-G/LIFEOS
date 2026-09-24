@@ -50,6 +50,17 @@ export interface Expense {
   date: string;
 }
 
+export interface MoneyLentItem {
+  id: string;
+  personName: string;
+  amount: number;
+  date: string; // 'YYYY-MM-DD'
+  note?: string;
+  status: 'pending' | 'returned';
+  returnedDate?: string; // 'YYYY-MM-DD'
+  createdAt: string;
+}
+
 export interface TimetableBlock {
   id: string;
   subject: string;
@@ -235,6 +246,9 @@ export interface AppData {
 
   // Notes & Ideas Module
   notes?: NoteItem[];
+
+  // Money Lent Module (Loans to friends/colleagues, excluded from expenses)
+  moneyLent?: MoneyLentItem[];
 }
 
 export interface NoteItem {

@@ -17,6 +17,7 @@ import { SectionAccentBlob } from './SectionAccentBlob';
 import { ScallopShape } from './ScallopShape';
 import { NavigationHubSheet } from './NavigationHubSheet';
 import { M3ProgressIndicator } from './m3/M3Shapes';
+import M3NotificationBanner from './M3NotificationBanner';
 import { MotionScheme } from '../utils/motionConfig';
 import {
   getSectionFromPathname,
@@ -557,6 +558,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         }}
       >
         <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
+          <M3NotificationBanner />
           {children}
         </div>
       </main>

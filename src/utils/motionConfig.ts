@@ -65,18 +65,18 @@ export const EASE_OUT_FAST = [0.4, 0, 1, 1] as const;
 
 // ─── Page-Level Transitions ───────────────────────────────────────────────────
 
-/** Duration in seconds for page enter animations */
-const PAGE_ENTER_DURATION = 0.24;
+/** Duration in seconds for page enter animations (instant 120 FPS response) */
+const PAGE_ENTER_DURATION = 0.16;
 /** Duration in seconds for page exit animations */
-const PAGE_EXIT_DURATION = 0.15;
+const PAGE_EXIT_DURATION = 0.08;
 /** Duration for reduced-motion fallback (opacity-only, near-instant) */
-const REDUCED_DURATION = 0.08;
+const REDUCED_DURATION = 0.05;
 
-/** Framer Motion variants for full page enter/exit */
+/** Framer Motion variants for full page enter/exit (no blackout gap) */
 export const PAGE_VARIANTS = {
-  initial: { opacity: 0, y: 10 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -6 },
+  exit:    { opacity: 0 },
 };
 
 /** Framer Motion variants for reduced-motion mode (opacity only) */

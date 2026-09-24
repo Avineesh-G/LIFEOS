@@ -228,6 +228,17 @@
     text-transform: uppercase;
   }
 
+  /* 120 FPS GPU Compositing & High Refresh Rate Acceleration */
+  .gpu-composited {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
   /* M3 Expressive Dual Elevation Scale (Tonal Shift + Shadow) */
   .m3-elevation-0 {
     background-color: var(--md-surface);

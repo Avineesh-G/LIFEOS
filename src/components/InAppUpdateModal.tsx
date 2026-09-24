@@ -14,6 +14,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { M3_SCALLOP_PATH, M3ProgressIndicator } from './m3/M3Shapes';
+import M3WavyProgressBar from './M3WavyProgressBar';
 import { 
   checkForAppUpdate, 
   startApkUpdate, 
@@ -80,12 +81,29 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
       const res = await checkForAppUpdate();
       if (res.hasUpdate && res.remoteVersion) {
         setRemoteVersion(res.remoteVersion);
-        setIsOpen(true);
+        // Do not block user on boot with a full-screen modal; use the expandable banner instead
         // Fire native phone notification so user is alerted even if app is in background
         sendUpdateAvailableNotification(
           res.currentVersion,
           res.remoteVersion.versionName,
           res.remoteVersion.releaseNotes
+        );
+
+        // Also broadcast to the expandable In-App Material 3 Notification Bar
+        window.dispatchEvent(
+          new CustomEvent('lifeos-show-notification-banner', {
+            detail: {
+              id: `update_${res.remoteVersion.versionCode}`,
+              title: `Update Available: LifeOS v${res.remoteVersion.versionName}`,
+              message: 'A newer version of LifeOS is available with new features and performance enhancements.',
+              details: res.remoteVersion.releaseNotes,
+              type: 'update',
+              actionLabel: 'Update Now',
+              onAction: () => {
+                setIsOpen(true);
+              },
+            },
+          })
         );
       }
     };
@@ -531,23 +549,9 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   </span>
                 </div>
 
-                {/* Official M3 Expressive Linear Progress Bar */}
-                <div className="relative w-full h-3 rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden p-0.5">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-500 rounded-full relative overflow-hidden"
-                    initial={{ width: '0%' }}
-                    animate={{ width: `${Math.max(progress, 4)}%` }}
-                    transition={{ ease: [0.2, 0, 0, 1], duration: 0.25 }}
-                  >
-                    {/* Animated continuous fluid light shimmer */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent"
-                      animate={{ x: ['-100%', '200%'] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    />
-                  </motion.div>
-                  {/* Subtle M3 Stop Indicator Dot at track end */}
-                  <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-black/15 dark:bg-white/20 pointer-events-none" />
+                {/* Official Material 3 Expressive Wavy Progress Bar */}
+                <div className="py-1">
+                  <M3WavyProgressBar progress={progress} activeColor="#C084FC" trackColor="#581C87" height={22} />
                 </div>
 
                 {/* Progress Details — Cleanly Spaced, Zero Text Wrapping */}
