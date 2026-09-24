@@ -12,15 +12,13 @@ import {
   CheckCircle2, 
   Check, 
   CalendarDays,
-  Plus,
-  Play
+  Plus
 } from 'lucide-react';
 import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startOfDay } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
-import DailyQuoteMarquee from '../components/DailyQuoteMarquee';
-import M3StatWidget from '../components/M3StatWidget';
+import DailyBriefCard from '../components/DailyBriefCard';
 import AiCoachAvatar from '../components/rive/AiCoachAvatar';
 import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
@@ -239,55 +237,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     updateData({ tasks: updated });
   };
 
-  // ── Today's Core Highlights for Quick Glance ──
-  const {
-    todaySessions,
-    todayStudyHours,
-    todayStudyMins,
-    todayWorkout,
-    todayPlan,
-    todayExpenses,
-    todaySpent,
-    todayTasks,
-    completedTasks,
-    nextBlock,
-  } = useMemo(() => {
+  // ── Today's Tasks for Quick Preview ──
+  const { todayTasks, completedTasks } = useMemo(() => {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const dayOfWeek = format(new Date(), 'EEEE');
-    const sessions = (data.studySessions || []).filter(s => s.date === todayStr);
-    const studyMinsTotal = sessions.reduce((sum, s) => sum + s.duration, 0);
-    const studyHours = Math.floor(studyMinsTotal / 60);
-    const studyMins = studyMinsTotal % 60;
-
-    const workout = (data.workoutLogs || []).find(w => w.date === todayStr);
-    const dayMap: Record<string, string> = {
-      Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
-      Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
-    };
-    const plan = (data.workoutPlans || []).find(p => dayMap[p.day] === dayOfWeek);
-
-    const expenses = (data.expenses || []).filter(e => e.date === todayStr);
-    const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
-
     const tasks = (data.tasks || []).filter(t => t.date === todayStr);
     const completed = tasks.filter(t => t.completed).length;
 
-    const nowTimeStr = format(new Date(), 'HH:mm');
-    const next = (data.timetable || [])
-      .filter(b => b.day === dayOfWeek && b.startTime > nowTimeStr)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
-
     return {
-      todaySessions: sessions,
-      todayStudyHours: studyHours,
-      todayStudyMins: studyMins,
-      todayWorkout: workout,
-      todayPlan: plan,
-      todayExpenses: expenses,
-      todaySpent: spent,
       todayTasks: tasks,
       completedTasks: completed,
-      nextBlock: next,
     };
   }, [data]);
 
@@ -299,11 +257,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <SkeletonHeroCard />
           <SkeletonCard height="h-28" />
           <SkeletonCard height="h-44" />
-          <SkeletonStatRow />
-          <div className="grid grid-cols-2 gap-4">
-            <SkeletonCard height="h-32" />
-            <SkeletonCard height="h-32" />
-          </div>
         </div>
       }
     >
@@ -353,9 +306,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </div>
       </motion.div>
 
-      {/* ── Daily Wisdom & Focus Card (Editorial Standalone Card) ── */}
+      {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
       <motion.div variants={item}>
-        <DailyQuoteMarquee />
+        <DailyBriefCard data={data} updateData={updateData} />
       </motion.div>
 
       {/* ── Option 1: Interactive 7-Day Dynamic Strip (M3 Elevation Level 2) ── */}
@@ -737,53 +690,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </AnimatePresence>
       </motion.div>
 
-      {/* ── Card 4: Forward-Looking Quick Actions & M3 Widgets ── */}
-      <motion.div variants={item} className="space-y-3 sm:space-y-4">
-        {/* Quick Action Pill Row */}
-        <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-[24px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
-          <button
-            onClick={() => { triggerHaptic('light'); navigate('/study/timer'); }}
-            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-primary)] text-[var(--md-on-primary)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
-          >
-            <Play size={12} className="fill-current shrink-0" />
-            <span className="truncate">Focus</span>
-          </button>
-          <button
-            onClick={() => { triggerHaptic('light'); navigate('/gym'); }}
-            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
-          >
-            <Dumbbell size={13} className="shrink-0" />
-            <span className="truncate">Workout</span>
-          </button>
-          <button
-            onClick={() => { triggerHaptic('light'); navigate('/spending'); }}
-            className="flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-[18px] bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] text-[11px] sm:text-xs font-heading font-bold flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 transition-transform select-none min-w-0"
-          >
-            <Wallet size={13} className="shrink-0" />
-            <span className="truncate">Expense</span>
-          </button>
-        </div>
-
-        {/* M3 Stat Widget Pair (Image 9 Reference) */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <M3StatWidget
-            label="Today's Focus"
-            value={todayStudyHours > 0 || todayStudyMins > 0 ? `${todayStudyHours}h ${todayStudyMins}m` : '0m'}
-            sublabel={`${todaySessions.length} session${todaySessions.length !== 1 ? 's' : ''} logged`}
-            highlight={{ text: 'Deep Work', variant: 'primary' }}
-            icon={<BookOpen size={16} />}
-            onClick={() => { triggerHaptic('nav'); navigate('/study'); }}
-          />
-          <M3StatWidget
-            label="Today's Spend"
-            value={`₹${todaySpent.toLocaleString('en-IN')}`}
-            sublabel={`${todayExpenses.length} transaction${todayExpenses.length !== 1 ? 's' : ''}`}
-            highlight={{ text: 'Finance', variant: 'secondary' }}
-            icon={<Wallet size={16} />}
-            onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
-          />
-        </div>
-      </motion.div>
 
       {/* ── Card 5: Expressive Fluid TO-DO Preview ── */}
       {todayTasks.length > 0 && (

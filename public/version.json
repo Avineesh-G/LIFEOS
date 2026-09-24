@@ -1,8 +1,8 @@
 {
-  "versionCode": 29,
-  "versionName": "2.0.5",
+  "versionCode": 30,
+  "versionName": "2.0.6",
   "releaseDate": "2026-09-24",
-  "releaseNotes": "LifeOS v2.0.5 (Build 29): Redesigned M3 Expressive update card & progress bar, rounded Material Symbols replacing emojis in Notes, and corrected header layout.",
+  "releaseNotes": "LifeOS v2.0.6 (Build 30): Material 3 Expressive Daily Brief with smart multi-module suggestions, removed redundant quick actions & stat widgets, and clean home layout.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "5f878e043a5e7d2a6c752cf898354217d5d49257ed5f971f8fcecde8ea8224c1"
+  "sha256": "52b54191eeacf2f094536aa3111506697c41dd69eb8a519ae8743951a70fa8bc"
 }

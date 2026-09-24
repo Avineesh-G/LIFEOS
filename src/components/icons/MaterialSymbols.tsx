@@ -244,3 +244,34 @@ export const ThingsToDoIcon = createSvgIcon(
   ),
   'ThingsToDoIcon'
 );
+
+// 20. Auto Awesome / Sparkles (M3 4-point star with secondary spark)
+export const AutoAwesomeIcon = createSymbol(
+  'm480-120-43-95-95-43q-19-8-19-22t19-22l95-43 43-95q8-19 22-19t22 19l43 95 95 43q19 8 19 22t-19 22l-95 43-43 95q-8 19-22 19t-22-19Zm-280-320-25-55-55-25q-15-7-15-20t15-20l55-25 25-55q7-15 20-15t20 15l25 55 55 25q15 7 15 20t-15 20l-55 25-25 55q-7 15-20 15t-20-15Zm560 0-25-55-55-25q-15-7-15-20t15-20l55-25 25-55q7-15 20-15t20 15l25 55 55 25q15 7 15 20t-15 20l-55 25-25 55q-7 15-20 15t-20-15Z',
+  'AutoAwesomeIcon'
+);
+
+// 21. Schedule (Rounded clock face)
+export const ScheduleIcon = createSymbol(
+  'm480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm-40-160h80v-180h-80v180Zm0-240h80v-80h-80v80Z',
+  'ScheduleIcon'
+);
+
+// 22. Warning Amber (Rounded warning triangle)
+export const WarningAmberIcon = createSymbol(
+  'm480-120q-33 0-58-18t-38-46L114-670q-13-28-1-57t39-33q13-2 26 2t24 10l278 486 278-486q11-19 24-23t26-2q27 4 39 33t-1 57L576-184q-13 28-38 46t-58 18Zm0-80 270-472-540 0 270 472Zm-40-100h80v-80h-80v80Zm0-120h80v-160h-80v160Z',
+  'WarningAmberIcon'
+);
+
+// 23. Check Circle Rounded
+export const CheckCircleRoundedIcon = createSymbol(
+  'm424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Z',
+  'CheckCircleRoundedIcon'
+);
+
+// 24. Play Arrow Rounded
+export const PlayArrowRoundedIcon = createSymbol(
+  'M320-203v-554q0-23 16-36t38-5q8 2 15 6l424 277q17 11 17 32t-17 32L389-174q-7 4-15 6-22 8-38-5t-16-36Z',
+  'PlayArrowRoundedIcon'
+);
+
