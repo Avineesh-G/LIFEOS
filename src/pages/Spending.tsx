@@ -284,6 +284,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
         {/* Top Material 3 Segmented Mode Pill Switcher */}
         <motion.div variants={item} className="flex justify-center">
           <SegmentedTogglePill
+            id="spending-main-tabs"
             options={[
               { value: 'expenses', label: 'Expenses' },
               { value: 'lent', label: `Money Lent (${lentStats.pendingCount})` },
@@ -455,6 +456,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
 
               {/* Finance Interaction Personality: Segmented Toggle-Pill Selector */}
               <SegmentedTogglePill
+                id="spending-category-filter"
                 options={[
                   { value: 'All', label: 'All' },
                   { value: 'Food', label: 'Food' },
@@ -613,6 +615,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
 
               {/* Status Filter Pill */}
               <SegmentedTogglePill
+                id="spending-lent-filter"
                 options={[
                   { value: 'all', label: `All (${data.moneyLent?.length || 0})` },
                   { value: 'pending', label: `Pending (${lentStats.pendingCount})` },

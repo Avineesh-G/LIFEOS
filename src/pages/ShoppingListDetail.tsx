@@ -219,7 +219,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-32 space-y-5 animate-fade-in">
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-6 space-y-5 animate-fade-in">
       {/* ── Top Navigation Bar ── */}
       <div className="flex items-center justify-between gap-3">
         <button

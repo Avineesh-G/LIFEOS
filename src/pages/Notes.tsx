@@ -118,7 +118,7 @@ const NOTE_PROMPT_OPTIONS: NotePromptOption[] = [
 ];
 
 export default function Notes({ data, updateData }: NotesProps) {
-  const { confirmDelete, showSavedFeedback } = useM3Feedback();
+  const { confirmDelete, showSavedFeedback, showEditedFeedback } = useM3Feedback();
   const { id: routeNoteId } = useParams<{ id?: string }>();
   const navigate = useNavigate();
 
@@ -380,11 +380,19 @@ export default function Notes({ data, updateData }: NotesProps) {
       } catch {}
       setDraftAlert(null);
       setSaveStatus('saved');
-      showSavedFeedback({
-        title: 'Idea Saved!',
-        message: updated.title || 'Saved to your notes collection',
-        section: 'notes',
-      });
+      if (existingIndex >= 0) {
+        showEditedFeedback({
+          title: 'Note Updated!',
+          message: updated.title || 'Changes saved',
+          section: 'notes',
+        });
+      } else {
+        showSavedFeedback({
+          title: 'Idea Saved!',
+          message: updated.title || 'Saved to your notes collection',
+          section: 'notes',
+        });
+      }
 
       setTimeout(() => {
         setSaveStatus('idle');
@@ -461,7 +469,7 @@ export default function Notes({ data, updateData }: NotesProps) {
   }, [editorPageView]);
 
   return (
-    <div className="min-h-screen pb-[calc(var(--nav-h,80px)+var(--sab,0px)+2rem)] pt-2 sm:pt-4 px-3 sm:px-6 max-w-5xl mx-auto space-y-5 sm:space-y-6 overflow-x-hidden min-w-0">
+    <div className="w-full max-w-5xl mx-auto space-y-5 sm:space-y-6 min-w-0">
       {/* Dynamic CSS Pattern definitions for Lined and Grid paper */}
       <style>{`
         .notebook-lined-bg {

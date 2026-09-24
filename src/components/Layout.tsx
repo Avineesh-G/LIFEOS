@@ -559,7 +559,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Main content (Streamlined with precise bottom dock clearance) ── */}
       <main 
-        className="relative z-10 min-h-screen"
+        className="relative z-10 min-h-screen box-border"
         style={{
           paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
           paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 24px)',

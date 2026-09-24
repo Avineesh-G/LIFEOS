@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, AlertTriangle, X } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
 import { registerDismissible } from '../../utils/backNavigation';
 import { PALETTE } from '../../theme/palette';
 import {
   M3SaveSymbolAnimation,
+  M3EditSymbolAnimation,
   M3DeleteSymbolAnimation,
-  M3ProgressIndicator,
-  M3ScallopShape,
+  M3DeleteForeverIcon,
 } from './M3Shapes';
 
 export interface ConfirmDeleteOptions {
@@ -59,7 +58,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
 
   const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
-  // Floating Expressive Feedback Toast State
+  // Centered Expressive Action Feedback Modal State (Saved / Edited / Deleted)
   const [feedback, setFeedback] = useState<{
     type: 'saved' | 'edited' | 'deleted';
     title?: string;
@@ -88,6 +87,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     if (section && section === 'timetable') return '#D97706';
     if (section && section === 'spending') return '#15803D';
     if (section && (section === 'outings' || section === 'outing')) return '#8C500A';
+    if (section && section === 'notes') return '#8436E9';
     return 'var(--md-primary, #8436E9)';
   }, []);
 
@@ -136,20 +136,20 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     }
   }, [deleteDialog.options]);
 
-  // 2. Action Feedback (Saved / Edited / Deleted)
+  // 2. Action Feedback (Saved / Edited / Deleted) — Centered Dialog Presentation
   const showSavedFeedback = useCallback(
     (opts: FeedbackOptions) => {
       triggerHaptic('save');
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       setFeedback({
         type: 'saved',
-        title: opts.title || 'Saved',
+        title: opts.title || 'Saved!',
         message: opts.message,
         section: opts.section,
       });
       feedbackTimerRef.current = setTimeout(() => {
         setFeedback(null);
-      }, opts.durationMs || 2200);
+      }, opts.durationMs || 1400);
     },
     []
   );
@@ -160,13 +160,13 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       setFeedback({
         type: 'edited',
-        title: opts.title || 'Updated',
+        title: opts.title || 'Updated!',
         message: opts.message,
         section: opts.section,
       });
       feedbackTimerRef.current = setTimeout(() => {
         setFeedback(null);
-      }, opts.durationMs || 2200);
+      }, opts.durationMs || 1400);
     },
     []
   );
@@ -183,12 +183,12 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
       });
       feedbackTimerRef.current = setTimeout(() => {
         setFeedback(null);
-      }, opts.durationMs || 2200);
+      }, opts.durationMs || 1400);
     },
     []
   );
 
-  const activeColor = resolveSectionColor(deleteDialog.options?.section);
+  const activeDeleteColor = resolveSectionColor(deleteDialog.options?.section);
 
   return (
     <M3FeedbackContext.Provider
@@ -220,19 +220,19 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
               onClick={(e) => e.stopPropagation()}
             >
               {deleteDialog.stage === 'confirm' ? (
-                /* Confirmation Stage: "Are you sure?" */
+                /* Confirmation Stage: "Are you sure?" with Google delete_forever symbol */
                 <div className="flex flex-col items-center text-center space-y-4">
                   {/* M3 Scallop / Squircle Icon Container in Section Theme */}
                   <div className="relative w-14 h-14 flex items-center justify-center">
                     <div
                       className="absolute inset-0 rounded-[20px] opacity-15"
-                      style={{ backgroundColor: activeColor }}
+                      style={{ backgroundColor: activeDeleteColor }}
                     />
                     <div
                       className="relative w-10 h-10 rounded-[14px] flex items-center justify-center text-white shadow-sm"
-                      style={{ backgroundColor: activeColor }}
+                      style={{ backgroundColor: activeDeleteColor }}
                     >
-                      <Trash2 size={20} strokeWidth={2.4} />
+                      <M3DeleteForeverIcon size={22} color="#FFFFFF" />
                     </div>
                   </div>
 
@@ -266,7 +266,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                       onClick={handleExecuteDelete}
                       className="py-3 px-4 rounded-full text-white font-bold text-xs shadow-md transition-all active:scale-95 hover:opacity-95"
                       style={{
-                        backgroundColor: '#DC2626', // Destructive Red with section border
+                        backgroundColor: '#DC2626',
                         boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
                       }}
                     >
@@ -275,7 +275,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                   </div>
                 </div>
               ) : (
-                /* Deleting Stage: Official M3 Deleted Symbol Animation */
+                /* Deleting Stage: Official Google M3 Deleted Symbol Animation with Trash + X */
                 <motion.div
                   key="deleting-animation"
                   initial={{ opacity: 0, scale: 0.85 }}
@@ -302,34 +302,71 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      {/* ── 2. Floating Material 3 Expressive Action Feedback Toast ── */}
+      {/* ── 2. Centered Material 3 Action Feedback Modal (Saved / Edited / Deleted) ── */}
       <AnimatePresence>
         {feedback && (
           <motion.div
-            initial={{ opacity: 0, y: 35, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.92 }}
-            transition={{ type: 'spring', stiffness: 450, damping: 26 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9998] flex items-center gap-3 px-4 py-2.5 rounded-full bg-white/95 dark:bg-[#1E1929]/95 border border-black/[0.08] dark:border-white/[0.12] shadow-xl backdrop-blur-md select-none max-w-[90vw]"
-            style={{ contain: 'paint' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 select-none"
+            onClick={() => setFeedback(null)}
           >
-            {feedback.type === 'saved' || feedback.type === 'edited' ? (
-              <M3SaveSymbolAnimation
-                accentColor={resolveSectionColor(feedback.section)}
-                size={34}
-              />
-            ) : (
-              <M3DeleteSymbolAnimation accentColor="#DC2626" size={34} />
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.88, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 8 }}
+              transition={{ type: 'spring', stiffness: 440, damping: 28 }}
+              className="w-full max-w-xs sm:max-w-sm rounded-[28px] bg-white dark:bg-[#1E1929] border border-black/[0.08] dark:border-white/[0.12] shadow-2xl p-6 sm:p-7 overflow-hidden relative flex flex-col items-center justify-center text-center space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Centered Animated Symbol */}
+              <div className="py-1">
+                {feedback.type === 'saved' ? (
+                  <M3SaveSymbolAnimation
+                    accentColor={resolveSectionColor(feedback.section)}
+                    size={72}
+                  />
+                ) : feedback.type === 'edited' ? (
+                  <M3EditSymbolAnimation
+                    accentColor={resolveSectionColor(feedback.section)}
+                    size={72}
+                  />
+                ) : (
+                  <M3DeleteSymbolAnimation accentColor="#DC2626" size={72} />
+                )}
+              </div>
 
-            <div className="flex flex-col min-w-0 pr-1">
-              <span className="text-xs font-black text-primary-light dark:text-primary-dark truncate">
-                {feedback.title}
-              </span>
-              <span className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark truncate">
-                {feedback.message}
-              </span>
-            </div>
+              {/* Title & Body Message */}
+              <div className="space-y-1 px-2">
+                <motion.h4
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-base sm:text-lg font-black text-primary-light dark:text-primary-dark tracking-tight"
+                >
+                  {feedback.title}
+                </motion.h4>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed max-w-[240px] mx-auto"
+                >
+                  {feedback.message}
+                </motion.p>
+              </div>
+
+              {/* Progress timer bar */}
+              <div className="w-24 h-1 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden mt-1">
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: resolveSectionColor(feedback.section) }}
+                  initial={{ width: '0%' }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 1.35, ease: 'linear' }}
+                />
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

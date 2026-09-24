@@ -119,7 +119,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 space-y-7 animate-fade-in">
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6 space-y-7 animate-fade-in">
       {/* ── Top Header ── */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>

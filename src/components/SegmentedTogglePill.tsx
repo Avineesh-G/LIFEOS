@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 
@@ -10,31 +10,38 @@ export interface SegmentedOption<T extends string = string> {
 }
 
 export interface SegmentedTogglePillProps<T extends string = string> {
+  id?: string;
   options: SegmentedOption<T>[];
   value: T;
   onChange: (val: T) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
+  activeColor?: string;
 }
 
 /**
- * Material 3 Expressive Segmented Toggle Pill Group (Reference Image 7 pattern)
+ * Material 3 Expressive Segmented Toggle Pill Group
  * One wide pill container housing 2-5 segments with an active segment highlighted solid
- * via spring-physics layout transition.
+ * via spring-physics layout transition. High-contrast colors guaranteed in both light and dark themes.
  */
 export default function SegmentedTogglePill<T extends string = string>({
+  id,
   options,
   value,
   onChange,
   className = '',
   size = 'md',
   fullWidth = false,
+  activeColor,
 }: SegmentedTogglePillProps<T>) {
+  const generatedId = useId();
+  const pillLayoutId = id || `segmentedActivePill_${generatedId.replace(/:/g, '')}`;
+
   const sizeClasses = {
     sm: 'py-1.5 px-3 text-xs',
-    md: 'py-2 px-3.5 text-xs sm:text-sm',
-    lg: 'py-2.5 px-4 text-sm',
+    md: 'py-2 px-4 text-xs sm:text-sm',
+    lg: 'py-2.5 px-5 text-sm',
   }[size];
 
   const isFullWidth = fullWidth || className.includes('w-full');
@@ -42,7 +49,7 @@ export default function SegmentedTogglePill<T extends string = string>({
   return (
     <div
       role="radiogroup"
-      className={`${isFullWidth ? 'w-full flex' : 'inline-flex'} items-center p-1 rounded-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-none select-none ${className}`}
+      className={`${isFullWidth ? 'w-full flex' : 'inline-flex'} items-center p-1 rounded-full bg-black/[0.06] dark:bg-white/[0.08] border border-black/[0.08] dark:border-white/[0.12] shadow-xs select-none ${className}`}
     >
       {options.map((opt) => {
         const isSelected = opt.value === value;
@@ -63,14 +70,17 @@ export default function SegmentedTogglePill<T extends string = string>({
               isFullWidth ? 'flex-1 min-w-0 text-center' : ''
             } ${
               isSelected
-                ? 'text-[var(--md-on-primary)] font-semibold'
-                : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
+                ? 'text-white font-bold'
+                : 'text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {isSelected && (
               <motion.div
-                layoutId="segmentedActivePill"
-                className="absolute inset-0 rounded-full bg-[var(--md-primary)]"
+                layoutId={pillLayoutId}
+                className="absolute inset-0 rounded-full shadow-sm"
+                style={{
+                  backgroundColor: activeColor || 'var(--md-primary, #15803D)',
+                }}
                 transition={{
                   type: 'spring',
                   stiffness: 450,
@@ -92,10 +102,10 @@ export default function SegmentedTogglePill<T extends string = string>({
 
             {opt.badge !== undefined && (
               <span
-                className={`relative z-10 text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold leading-none ${
+                className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold leading-none ${
                   isSelected
-                    ? 'bg-white/20 text-white'
-                    : 'bg-black/5 dark:bg-white/10 text-[var(--md-on-surface-variant)]'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-black/10 dark:bg-white/15 text-slate-800 dark:text-slate-200'
                 }`}
               >
                 {opt.badge}
