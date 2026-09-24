@@ -1020,5 +1020,5 @@ export const DEFAULT_INTERFACE_COLORS: Record<string, ColorFamilyId> = {
   history: 'rose',     // Burgundy / Rose #8C1D40
   vault: 'cobalt',     // Cyber Cobalt #2034A0
   settings: 'slate',   // Sleek Titanium Slate #475569
-  notes: 'fuchsia',    // Electric Orchid Fuchsia #C026D3
+  notes: 'violet',     // Twilight Violet #8436E9
 };

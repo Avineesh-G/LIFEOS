@@ -105,6 +105,7 @@ function MainContent({
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
       element: (

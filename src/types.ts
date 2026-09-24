@@ -245,6 +245,7 @@ export interface NoteItem {
   monthKey: string; // 'YYYY-MM'
   isArchived: boolean;
   colorTone?: string;
+  syncStatus?: 'synced' | 'syncing' | 'pending' | 'error';
   createdAt: string;
   updatedAt: string;
 }

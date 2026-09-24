@@ -160,7 +160,7 @@ export const CUSTOMIZABLE_INTERFACES: InterfaceConfig[] = [
     description: 'Capture quick thoughts, brainstorms, and boundless notes',
     route: '/notes',
     icon: NotebookPen,
-    defaultFamily: 'fuchsia',
+    defaultFamily: 'violet',
   },
 ];
 

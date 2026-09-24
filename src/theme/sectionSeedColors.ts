@@ -39,7 +39,7 @@ export const SECTION_SEED_COLORS: Record<AppSection, string> = {
   outing: PALETTE.outing.seed,      // Saddle Brown #8C500A
   shopping: '#172554',              // Deep Midnight Navy #172554
   vault: '#2034A0',                 // Cyber Cobalt #2034A0
-  notes: '#C026D3',                 // Radiant Electric Orchid Fuchsia #C026D3
+  notes: PALETTE.notes.seed,        // Twilight Violet #8436E9
 };
 
 /**

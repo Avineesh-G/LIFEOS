@@ -132,6 +132,16 @@ export const PALETTE: Record<string, PaletteEntry> = {
     darkTint: '#FCA487',
     blobCorner: 'none',
   },
+  notes: {
+    id: 'notes',
+    name: 'Notes & Ideas (Twilight Violet)',
+    seed: '#8436E9',
+    onAccent: '#FFFFFF',
+    textAccent: '#8436E9',
+    darkStrong: '#8436E9',
+    darkTint: '#C8A8FE',
+    blobCorner: 'bottom-left',
+  },
 };
 
 // ── OKLab & Contrast Mathematics ──

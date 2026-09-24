@@ -10,7 +10,7 @@
  */
 
 const DB_NAME = 'lifeos_local_cache';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STORE_NAME = 'app_state';
 
 let dbInstance: IDBDatabase | null = null;
@@ -49,6 +49,10 @@ export function getIndexedDB(): Promise<IDBDatabase | null> {
           if (!db.objectStoreNames.contains(store)) {
             db.createObjectStore(store, { keyPath: 'id' });
           }
+        }
+        // Dedicated Notes store
+        if (!db.objectStoreNames.contains('notes')) {
+          db.createObjectStore('notes', { keyPath: 'id' });
         }
       };
 
