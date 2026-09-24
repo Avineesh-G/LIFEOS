@@ -31,6 +31,9 @@ if (import.meta.env.DEV) {
 // Assets are bundled locally; the SW only adds stale-cache risk + startup overhead.
 // The web version still benefits from SW caching (handled by vite-plugin-pwa).
 if (typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.()) {
+  try {
+    localStorage.removeItem('lifeos_live_sync');
+  } catch {}
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       for (const reg of registrations) {

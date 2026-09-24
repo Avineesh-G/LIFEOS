@@ -7,6 +7,9 @@ import { User } from 'firebase/auth';
 import { scheduleWidgetSync } from '../utils/widgetBridge';
 import { Preferences } from '@capacitor/preferences';
 import { clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
+import { registerPlugin, Capacitor } from '@capacitor/core';
+
+const SyncManager = registerPlugin<any>('SyncManager');
 
 const CACHE_KEY_PREFIX = 'lifeos_cache_';
 const GLOBAL_CACHE_KEY = 'lifeos_cached_app_data';
@@ -302,7 +305,11 @@ export function useData(user: User | null) {
     const handleOnline = () => {
       console.log('[LifeOS] Online connection restored: syncing local phone data to cloud');
       if (dataRef.current) {
-        saveData(user.uid, dataRef.current).catch(err => {
+        saveData(user.uid, dataRef.current).then(() => {
+          if (Capacitor.isNativePlatform()) {
+            SyncManager.cancelBackgroundSync().catch(() => {});
+          }
+        }).catch(err => {
           console.error('[LifeOS] Cloud re-sync error on online event:', err);
         });
       }
@@ -330,9 +337,23 @@ export function useData(user: User | null) {
     }
 
     // 3. Save to Firestore in background without blocking caller
-    saveData(user.uid, partial).catch(err => {
-      console.error('Background Firestore sync error:', err);
-    });
+    saveData(user.uid, partial)
+      .then(() => {
+        if (Capacitor.isNativePlatform()) {
+          SyncManager.cancelBackgroundSync().catch(() => {});
+        }
+      })
+      .catch(err => {
+        console.warn('Background Firestore sync error, enqueueing OS WorkManager background sync:', err);
+        if (Capacitor.isNativePlatform()) {
+          SyncManager.enqueueBackgroundSync().catch(() => {});
+        }
+      });
+
+    // If offline when mutating data, preemptively enqueue background sync
+    if (typeof navigator !== 'undefined' && !navigator.onLine && Capacitor.isNativePlatform()) {
+      SyncManager.enqueueBackgroundSync().catch(() => {});
+    }
 
     // 4. If tasks or study sessions changed, schedule non-blocking Android Home Screen Widget sync
     if (partial.tasks || partial.studySessions) {

@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 25,
-  versionName: '2.0.1',
-  releaseDate: '2026-09-23',
-  releaseNotes: 'LifeOS v2.0.1 (Build 25): 100% offline launch, one-time cloud data migration prompt, and complete data reset engine.',
+  versionCode: 26,
+  versionName: '2.0.2',
+  releaseDate: '2026-09-24',
+  releaseNotes: 'LifeOS v2.0.2 (Build 26): 100% offline launch with zero net::ERR_NAME_NOT_RESOLVED errors, native WebView auto-healing, Android Hardware Back Navigation, Edge-to-Edge Immersive Theming, Launcher Shortcuts, and WorkManager Background Sync.',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

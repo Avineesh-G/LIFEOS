@@ -11,6 +11,7 @@
     "check:palette": "node --experimental-strip-types scripts/check-palette.ts",
     "cap:sync": "npm run generate:widget-colors && npm run build && npx cap sync android",
     "cap:build": "npm run cap:sync && cd android && gradlew assembleRelease",
+    "bundle:release": "npm run cap:sync && cd android && gradlew bundleRelease assembleRelease",
     "cap:open": "npx cap open android",
     "release:prep": "node scripts/prepare-release.js",
     "release:guard": "node --experimental-strip-types scripts/verify-release-guard.ts",

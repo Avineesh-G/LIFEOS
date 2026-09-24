@@ -13,6 +13,9 @@ pnpm-debug.log*
 !.vscode/extensions.json
 *.apk
 !public/LifeOS.apk
+*.aab
+.kotlin/
+android/.kotlin/
 *.jks
 *.keystore
 google-services.json

@@ -34,6 +34,11 @@
                 <data android:scheme="lifeos" />
             </intent-filter>
 
+            <!-- Android App Icon Launcher Shortcuts -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+
         </activity>
 
         <!-- LifeOS Home Screen Widget Configuration -->

@@ -48,6 +48,7 @@ import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppFore
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 import { scheduleWidgetSync } from './utils/widgetBridge';
+import { triggerTopDismissible, handleRootBackPress } from './utils/backNavigation';
 
 function MainContent({
   data,
@@ -218,21 +219,44 @@ function App() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Hardware Back Button: returns to Home ('/') from any screen, or exits if already on Home
+  // Hardware Back Button: LIFO overlay dismissal -> sub-route history traversal -> root double-tap exit guard
   useEffect(() => {
     let backListener: any;
     const registerBackButton = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          // If speed dial menu is currently open, close it first without navigating away
+          // 1. Topmost active overlay (modals, sheets, dialogs)
+          if (triggerTopDismissible()) {
+            return;
+          }
+
+          // 2. If speed dial menu is currently open, close it first without navigating away
           if ((window as any).__lifeos_menu_open) {
             window.dispatchEvent(new CustomEvent('lifeos-close-menu'));
             return;
           }
-          if (location.pathname !== '/' && location.pathname !== '') {
-            navigate('/');
+
+          // 3. Hierarchical navigation for sub-routes
+          const path = location.pathname.toLowerCase();
+          if (path !== '/' && path !== '') {
+            // Check if nested sub-route (e.g. /gym/workout, /study/timer, /shopping/:id, /outings/:id, etc.)
+            const isNestedRoute = (
+              (path.startsWith('/gym/') && path !== '/gym') ||
+              (path.startsWith('/study/') && path !== '/study') ||
+              (path.startsWith('/shopping/') && path !== '/shopping') ||
+              (path.startsWith('/outings/') && path !== '/outings') ||
+              (path.startsWith('/settings/') && path !== '/settings')
+            );
+
+            if (isNestedRoute) {
+              navigate(-1);
+            } else {
+              // Primary sections return to Home ('/')
+              navigate('/');
+            }
           } else {
-            CapApp.exitApp();
+            // 4. Root Home Page double-tap exit protection
+            handleRootBackPress();
           }
         });
       } catch {
@@ -255,14 +279,26 @@ function App() {
       try {
         urlListener = await CapApp.addListener('appUrlOpen', (event) => {
           if (event?.url) {
-            const raw = event.url.replace(/^lifeos:\/\//i, '').toLowerCase().trim();
-            const clean = raw.startsWith('/') ? raw.slice(1) : raw;
-            if (clean === 'tasks') {
-              navigate('/tasks');
-            } else if (clean === 'study') {
+            const raw = event.url.replace(/^lifeos:\/\//i, '').trim();
+            const clean = (raw.startsWith('/') ? raw.slice(1) : raw).split('?')[0].toLowerCase();
+            if (clean.startsWith('notes')) {
+              navigate('/notes');
+            } else if (clean.startsWith('gym/workout')) {
+              navigate('/gym/workout');
+            } else if (clean.startsWith('gym')) {
+              navigate('/gym');
+            } else if (clean.startsWith('study/timer')) {
+              navigate('/study/timer');
+            } else if (clean.startsWith('study')) {
               navigate('/study');
-            } else if (clean === 'home' || clean === '') {
+            } else if (clean.startsWith('tasks')) {
+              navigate('/tasks');
+            } else if (clean.startsWith('shopping')) {
+              navigate('/shopping');
+            } else if (clean === 'home' || clean === '' || clean === 'progress') {
               navigate('/');
+            } else {
+              navigate('/' + clean);
             }
           }
         });

@@ -28,6 +28,8 @@ import {
 } from '../utils/updater';
 import { sendUpdateAvailableNotification } from '../utils/notifications';
 
+import { registerDismissible } from '../utils/backNavigation';
+
 interface InAppUpdateModalProps {
   // Optional manual trigger override
   forceOpen?: boolean;
@@ -44,6 +46,21 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
   const [errorMessage, setErrorMessage] = useState('');
   const [statusNotice, setStatusNotice] = useState('');
   const [failureCount, setFailureCount] = useState(0);
+
+  // Back button dismissible overlay registration
+  useEffect(() => {
+    if (isOpen) {
+      return registerDismissible('in-app-update-modal', () => {
+        // Only allow dismissing if not actively downloading or installing
+        if (status !== 'downloading' && status !== 'installing') {
+          setIsOpen(false);
+          if (onClose) onClose();
+          return true;
+        }
+        return false;
+      });
+    }
+  }, [isOpen, status, onClose]);
 
   const autoRetryDoneRef = useRef(false);
   const isResumingRef = useRef(false);

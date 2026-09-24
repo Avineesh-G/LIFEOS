@@ -7,6 +7,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
+import { registerDismissible } from '../utils/backNavigation';
 import {
   AppSection,
   SECTION_SEED_COLORS,
@@ -265,6 +266,21 @@ export function NavigationHubSheet({
       (window as any).__lifeos_hub_edit_mode = false;
     };
   }, [isOpen, isEditMode]);
+
+  // Back button dismissible overlay registration: exits edit mode first, or closes sheet
+  useEffect(() => {
+    if (isOpen) {
+      return registerDismissible('navigation-hub-sheet', () => {
+        if (isEditMode) {
+          setIsEditMode(false);
+          if (onExitEditMode) onExitEditMode();
+          return true;
+        }
+        onClose();
+        return true;
+      });
+    }
+  }, [isOpen, isEditMode, onExitEditMode, onClose]);
 
   const activeSeed = SECTION_SEED_COLORS[activeSection] || SECTION_SEED_COLORS.home;
   const [aR, aG, aB] = hexToRgb(activeSeed);

@@ -11,7 +11,10 @@ import {
 } from './sectionSeedColors';
 import { getInterfaceTokens, MORE_BUTTON_TOKENS } from './palette';
 import { initM3StateLayer } from '../utils/m3StateLayer';
+import { registerPlugin, Capacitor } from '@capacitor/core';
 import { TEXT_TONAL_DARK, TEXT_TONAL_LIGHT, TYPOGRAPHY_TOKENS } from './typography';
+
+const ThemeBridge = registerPlugin<any>('ThemeBridge');
 
 export interface DayThemeContextValue {
   phase: DayPhase;
@@ -166,6 +169,11 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     metaThemeTags.forEach(tag => {
       tag.setAttribute('content', scheme.sceneBg);
     });
+
+    // Native Android Edge-to-Edge System Bar Synchronizer
+    if (Capacitor.isNativePlatform()) {
+      ThemeBridge.setSystemBarsTheme({ isDark, sceneBg: scheme.sceneBg }).catch(() => {});
+    }
   }, [section, m3Theme, scheme, isDark, phase]);
 
   return (

@@ -7,4 +7,12 @@
     <string name="server_client_id">527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com</string>
     <string name="widget_name">LifeOS Daily Overview</string>
     <string name="widget_description">Shows streak, tasks done today, and study time.</string>
+    <string name="shortcut_new_note">New Note</string>
+    <string name="shortcut_new_note_long">Create New Note</string>
+    <string name="shortcut_log_workout">Log Workout</string>
+    <string name="shortcut_log_workout_long">Start Gym Workout</string>
+    <string name="shortcut_add_task">Add Task</string>
+    <string name="shortcut_add_task_long">Create New Task</string>
+    <string name="shortcut_timer">Focus Timer</string>
+    <string name="shortcut_timer_long">Open Focus Timer</string>
 </resources>

@@ -2,11 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Wifi, CloudOff, CheckCircle2, X } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
+import { registerDismissible } from '../utils/backNavigation';
 
 export default function NetworkStatusModal() {
   const [isOffline, setIsOffline] = useState(() => typeof navigator !== 'undefined' && !navigator.onLine);
   const [showModal, setShowModal] = useState(false);
   const [showReconnectedToast, setShowReconnectedToast] = useState(false);
+
+  // Back button dismissible overlay registration
+  useEffect(() => {
+    if (showModal) {
+      return registerDismissible('network-status-modal', () => {
+        setShowModal(false);
+      });
+    }
+  }, [showModal]);
 
   useEffect(() => {
     // Check initial state on mount

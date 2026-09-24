@@ -1,5 +1,6 @@
 package com.avineesh.lifeos;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.WebViewListener;
 import com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth;
 import ee.forgr.biometric.NativeBiometric;
 import com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin;
@@ -19,13 +21,63 @@ import com.capacitorjs.plugins.localnotifications.LocalNotificationsPlugin;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // 1. Permanently wipe any legacy CapWebViewSettings so no remote base path or server URL persists
+        try {
+            SharedPreferences prefs = getSharedPreferences("CapWebViewSettings", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+        } catch (Exception ignored) {}
+
+        // 2. Strip saved WebView instance state so Android never re-opens a stale remote Vercel session
+        if (savedInstanceState != null) {
+            savedInstanceState.remove("WEBVIEW_STATE");
+        }
+
         registerPlugin(GoogleAuth.class);
         registerPlugin(NativeBiometric.class);
         registerPlugin(LocalNotificationsPlugin.class);
         registerPlugin(ApkInstallerPlugin.class);
         registerPlugin(TimerNotificationPlugin.class);
         registerPlugin(WidgetUpdaterPlugin.class);
+        registerPlugin(ThemeBridgePlugin.class);
+        registerPlugin(SyncManagerPlugin.class);
         super.onCreate(savedInstanceState);
+
+        // 3. Native auto-healing: intercept any network or loading error and immediately fall back to local assets
+        if (getBridge() != null) {
+            getBridge().addWebViewListener(new WebViewListener() {
+                @Override
+                public void onReceivedError(WebView view) {
+                    view.post(() -> {
+                        String currentUrl = view.getUrl();
+                        if (currentUrl == null || currentUrl.contains("vercel.app") || !currentUrl.contains("localhost")) {
+                            view.stopLoading();
+                            view.clearHistory();
+                            view.loadUrl("https://localhost/");
+                        }
+                    });
+                }
+
+                @Override
+                public void onPageStarted(WebView view) {
+                    String currentUrl = view.getUrl();
+                    if (currentUrl != null && currentUrl.contains("vercel.app")) {
+                        view.stopLoading();
+                        view.loadUrl("https://localhost/");
+                    }
+                }
+            });
+
+            // If webView was already initialized with a stale remote URL, redirect immediately
+            WebView webView = getBridge().getWebView();
+            if (webView != null) {
+                String currentUrl = webView.getUrl();
+                if (currentUrl != null && currentUrl.contains("vercel.app")) {
+                    webView.stopLoading();
+                    webView.clearHistory();
+                    webView.loadUrl("https://localhost/");
+                }
+            }
+        }
 
         // Enable edge-to-edge layout across all supported Android versions (API 24+)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -96,6 +148,13 @@ public class MainActivity extends BridgeActivity {
             WebView webView = getBridge().getWebView();
             webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
             webView.setBackgroundColor(Color.TRANSPARENT);
+
+            String url = webView.getUrl();
+            if (url != null && url.contains("vercel.app")) {
+                webView.stopLoading();
+                webView.clearHistory();
+                webView.loadUrl("https://localhost/");
+            }
         }
     }
 }

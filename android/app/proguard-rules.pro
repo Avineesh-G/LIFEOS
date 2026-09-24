@@ -12,10 +12,19 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve Capacitor and Cordova bridge interfaces
+-keep class com.getcapacitor.** { *; }
+-keep class com.avineesh.lifeos.** { *; }
+-keepclassmembers class * implements com.getcapacitor.Plugin {
+    public *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Preserve AndroidX WorkManager Worker classes
+-keep class * extends androidx.work.Worker { *; }
+-keep class * extends androidx.work.CoroutineWorker { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keepclassmembers class androidx.work.** { *; }
+
+# Line number preservation for production stack traces
+-keepattributes SourceFile,LineNumberTable
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="new_note"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_note"
+        android:shortcutShortLabel="@string/shortcut_new_note"
+        android:shortcutLongLabel="@string/shortcut_new_note_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.avineesh.lifeos"
+            android:targetClass="com.avineesh.lifeos.MainActivity"
+            android:data="lifeos://notes?action=new" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="log_workout"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_workout"
+        android:shortcutShortLabel="@string/shortcut_log_workout"
+        android:shortcutLongLabel="@string/shortcut_log_workout_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.avineesh.lifeos"
+            android:targetClass="com.avineesh.lifeos.MainActivity"
+            android:data="lifeos://gym/workout" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="add_task"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_task"
+        android:shortcutShortLabel="@string/shortcut_add_task"
+        android:shortcutLongLabel="@string/shortcut_add_task_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.avineesh.lifeos"
+            android:targetClass="com.avineesh.lifeos.MainActivity"
+            android:data="lifeos://tasks?action=new" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="focus_timer"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_timer"
+        android:shortcutShortLabel="@string/shortcut_timer"
+        android:shortcutLongLabel="@string/shortcut_timer_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.avineesh.lifeos"
+            android:targetClass="com.avineesh.lifeos.MainActivity"
+            android:data="lifeos://study/timer" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

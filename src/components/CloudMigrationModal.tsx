@@ -6,6 +6,8 @@ import { triggerHaptic } from '../utils/haptics';
 import { saveData, cleanForFirestore } from '../db';
 import type { AppData } from '../types';
 
+import { registerDismissible } from '../utils/backNavigation';
+
 interface CloudMigrationModalProps {
   user: User | null;
   data: AppData;
@@ -20,6 +22,16 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
   const promptKey = useMemo(() => {
     return user ? `lifeos_cloud_sync_prompt_handled_${user.uid}` : null;
   }, [user]);
+
+  // Back button dismissible overlay registration
+  useEffect(() => {
+    if (showModal) {
+      return registerDismissible('cloud-migration-modal', () => {
+        setShowModal(false);
+        if (promptKey) localStorage.setItem(promptKey, 'true');
+      });
+    }
+  }, [showModal, promptKey]);
 
   // Calculate local progress counts
   const stats = useMemo(() => {
