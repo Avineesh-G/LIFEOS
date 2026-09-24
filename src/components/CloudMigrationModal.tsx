@@ -236,7 +236,10 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
       {/* ── Success Toast Banner ── */}
       <AnimatePresence>
         {toastMessage && (
-          <div className="fixed top-4 left-4 right-4 z-[120] max-w-sm mx-auto pointer-events-none">
+          <div
+            className="fixed left-4 right-4 z-[120] max-w-sm mx-auto pointer-events-none"
+            style={{ top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 46px)' }}
+          >
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

@@ -1,8 +1,8 @@
 {
-  "versionCode": 26,
-  "versionName": "2.0.2",
+  "versionCode": 27,
+  "versionName": "2.0.3",
   "releaseDate": "2026-09-24",
-  "releaseNotes": "LifeOS v2.0.2 (Build 26): Boundless Notes & Ideas first-class design system integration, Twilight Violet theme, zero-overflow responsive editor, offline auto-healing, and native Android navigation.",
+  "releaseNotes": "LifeOS v2.0.3 (Build 27): Fix network status and offline indicator safe-area overlay clashing with camera cutout and hardware status bar.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "c3dca178c254d47fbb4696f0163bcf852cbe5234e659200f652271a6175db09f"
+  "sha256": "47f940fcd820713f27ea061accfe27086367b8c9e24b707c709d34cd3cacdb9a"
 }

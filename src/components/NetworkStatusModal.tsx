@@ -111,11 +111,14 @@ export default function NetworkStatusModal() {
       <AnimatePresence>
         {isOffline && !showModal && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -15, scale: 0.95 }}
             onClick={() => setShowModal(true)}
-            className="fixed top-2 left-1/2 -translate-x-1/2 z-[90] px-3.5 py-1.5 rounded-full bg-amber-500/90 text-white text-[11px] font-bold shadow-md backdrop-blur-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform"
+            style={{
+              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 46px)',
+            }}
+            className="fixed left-1/2 -translate-x-1/2 z-[90] px-3.5 py-1.5 rounded-full bg-amber-500/95 text-white text-[11px] font-bold shadow-lg shadow-amber-500/25 backdrop-blur-md flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform border border-amber-400/30 select-none"
           >
             <WifiOff size={12} />
             <span>Offline Mode</span>
@@ -127,17 +130,21 @@ export default function NetworkStatusModal() {
       <AnimatePresence>
         {showReconnectedToast && (
           <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.95 }}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -30, scale: 0.95 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2"
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            style={{
+              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 46px)',
+            }}
+            className="fixed left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xl shadow-emerald-600/30 flex items-center gap-2 border border-emerald-400/30 max-w-[92vw] select-none"
           >
-            <CheckCircle2 size={15} />
-            <span>Back Online — Connected to Cloud</span>
+            <CheckCircle2 size={15} className="shrink-0" />
+            <span className="truncate">Back Online — Connected to Cloud</span>
             <button
               type="button"
               onClick={() => setShowReconnectedToast(false)}
-              className="ml-1 p-0.5 hover:bg-white/20 rounded-full"
+              className="ml-1 p-0.5 hover:bg-white/20 rounded-full shrink-0"
+              aria-label="Dismiss notification"
             >
               <X size={12} />
             </button>
