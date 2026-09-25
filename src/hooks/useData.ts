@@ -75,11 +75,15 @@ export function useData(user: User | null) {
         setData(parsed);
         dataRef.current = parsed;
         setLoading(false);
-      } else if (!dataRef.current) {
+      } else {
+        setData(DEFAULT_DATA);
+        dataRef.current = DEFAULT_DATA;
         setLoading(true);
       }
     } catch {
-      if (!dataRef.current) setLoading(true);
+      setData(DEFAULT_DATA);
+      dataRef.current = DEFAULT_DATA;
+      setLoading(true);
     }
     setError(null);
 
@@ -268,11 +272,23 @@ export function useData(user: User | null) {
           setError(null);
         } else {
           // Document does not exist yet on server (brand new user or reset user)
-          setData(DEFAULT_DATA);
-          dataRef.current = DEFAULT_DATA;
+          // Safety: check if local cache exists for this user so we NEVER wipe offline work!
+          let initialData = DEFAULT_DATA;
+          try {
+            const cachedRaw = localStorage.getItem(CACHE_KEY_PREFIX + user.uid);
+            if (cachedRaw) {
+              const localData = JSON.parse(cachedRaw);
+              if (localData && typeof localData === 'object') {
+                initialData = migrateAppData(localData);
+              }
+            }
+          } catch {}
+
+          setData(initialData);
+          dataRef.current = initialData;
           setLoading(false);
           // Auto-seed clean user document in Firestore cloud so subsequent saves merge seamlessly
-          saveData(user.uid, DEFAULT_DATA).catch(err => {
+          saveData(user.uid, initialData).catch(err => {
             console.warn('Initial cloud seed notice:', err);
           });
         }

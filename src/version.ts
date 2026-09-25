@@ -6,10 +6,10 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 33,
-  versionName: '2.0.9',
+  versionCode: 34,
+  versionName: '2.1.0',
   releaseDate: '2026-09-25',
-  releaseNotes: 'LifeOS v2.0.9 (Build 33):\n• Fixed Spending tab colors (no more white-on-white text when toggling Money Lent)\n• Removed redundant space and unwanted second page across all interfaces\n• Centered M3 Saved & Edited feedback dialogs with official Google Material Symbols\n• Official Google Material Symbols: Delete Forever, Edit, and Save icons\n• High-performance 120 FPS greeting with 10-minute cooldown & instant in-app update popup',
+  releaseNotes: 'LifeOS v2.1.0 (Build 34):\n• Fixed logout behavior: signing out no longer prompts with data loss warnings or resets data\n• Clean and instant Sign Out flow keeping all user records and cloud sync safely intact\n• Dedicated Reset Data option remains the sole destructive action for complete data wiping',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

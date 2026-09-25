@@ -112,7 +112,20 @@ export default function Settings({
   const [testSent, setTestSent] = useState(false);
   const [permissionNotice, setPermissionNotice] = useState<string | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isExportingBeforeLogout, setIsExportingBeforeLogout] = useState(false);
+
+  const handleSignOut = async () => {
+    triggerHaptic('medium');
+    setShowLogoutModal(false);
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await GoogleAuth.signOut().catch(() => {});
+      }
+      await signOut(auth);
+      navigate('/');
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
 
   const handleToggleNotifications = async () => {
     triggerHaptic('medium');
@@ -1402,7 +1415,7 @@ export default function Settings({
         </p>
       </div>
 
-      {/* ── Pre-Logout Data Recovery Modal ── */}
+      {/* ── Sign Out Confirmation Modal ── */}
       <AnimatePresence>
         {showLogoutModal && (
           <motion.div
@@ -1417,52 +1430,26 @@ export default function Settings({
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               className="w-full max-w-sm rounded-3xl bg-[var(--card-surface)] border border-[var(--card-border)] p-6 shadow-2xl space-y-4 text-center"
             >
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center">
-                <ShieldCheck size={24} />
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 mx-auto flex items-center justify-center">
+                <LogOut size={24} />
               </div>
 
               <div className="space-y-1.5">
                 <h3 className="text-base font-bold text-primary-light dark:text-primary-dark">
-                  Data Safety Before Sign Out
+                  Sign Out
                 </h3>
                 <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Would you like to download a complete backup copy of your LifeOS data (JSON file) to ensure no records or notes are ever lost?
+                  Are you sure you want to sign out? Your notes, tasks, workouts, and settings will remain safe in your cloud account.
                 </p>
               </div>
 
               <div className="space-y-2 pt-2">
                 <button
                   type="button"
-                  onClick={async () => {
-                    setIsExportingBeforeLogout(true);
-                    try {
-                      await exportBackupFile(data);
-                    } catch (e) {
-                      alert('Backup download failed.');
-                    } finally {
-                      setIsExportingBeforeLogout(false);
-                    }
-                  }}
-                  disabled={isExportingBeforeLogout}
-                  className="w-full py-2.5 px-4 rounded-xl bg-accent text-on-accent text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                  onClick={handleSignOut}
+                  className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
                 >
-                  <Download size={14} />
-                  <span>{isExportingBeforeLogout ? 'Preparing Backup...' : 'Download Backup File (JSON)'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (Capacitor.isNativePlatform()) {
-                      GoogleAuth.signOut().catch(() => {});
-                    }
-                    setShowLogoutModal(false);
-                    navigate('/');
-                    signOut(auth);
-                  }}
-                  className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
-                >
-                  <LogOut size={14} /> Sign Out Anyway
+                  <LogOut size={14} /> Sign Out
                 </button>
 
                 <button
