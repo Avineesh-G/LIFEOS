@@ -3,13 +3,17 @@ export interface AppVersionConfig {
   versionName: string;
   releaseDate: string;
   releaseNotes: string;
+  apkSize?: string;
+  apkSizeBytes?: number;
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 34,
-  versionName: '2.1.0',
+  versionCode: 35,
+  versionName: '2.1.1',
   releaseDate: '2026-09-25',
-  releaseNotes: 'LifeOS v2.1.0 (Build 34):\n• Fixed logout behavior: signing out no longer prompts with data loss warnings or resets data\n• Clean and instant Sign Out flow keeping all user records and cloud sync safely intact\n• Dedicated Reset Data option remains the sole destructive action for complete data wiping',
+  apkSize: '14.4 MB',
+  apkSizeBytes: 14404380,
+  releaseNotes: 'LifeOS v2.1.1 (Build 35):\n• High-Speed Direct In-App Downloader (no more stuck downloads over 5G/cellular data)\n• Real-time MB progress counter showing total update package size (14.4 MB)\n• Buttery-smooth 120 FPS GPU-accelerated M3 Expressive wavy progress bar\n• Fixed logout behavior: sign out preserves all user data and cloud sync cleanly',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

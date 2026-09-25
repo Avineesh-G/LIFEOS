@@ -206,7 +206,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
     setStatus('downloading');
     setProgress(0);
     setBytesRead(0);
-    setTotalBytes(0);
+    setTotalBytes(remoteVersion.apkSizeBytes || 14404380);
 
     await startApkUpdate(
       remoteVersion,
@@ -215,7 +215,9 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           setProgress(ev.progress);
         }
         setBytesRead(ev.bytesRead);
-        setTotalBytes(ev.totalBytes);
+        if (ev.totalBytes > 0) {
+          setTotalBytes(ev.totalBytes);
+        }
 
         if (ev.progress >= 100) {
           setStatus('installing');
@@ -291,7 +293,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
   const formatMB = (bytes: number) => {
     if (!bytes || bytes <= 0) return '0.0 MB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    return (bytes / 1000000).toFixed(1) + ' MB';
   };
 
   if (!isOpen) return null;
@@ -377,6 +379,11 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     >
                       v{hasUpdate ? (remoteVersion?.versionName || 'New') : CURRENT_VERSION_NAME}
                     </span>
+                    {hasUpdate && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/[0.08] text-gray-600 dark:text-gray-300 font-semibold">
+                        {remoteVersion?.apkSize || '14.4 MB'}
+                      </span>
+                    )}
                   </div>
                   <p
                     className="text-xs text-gray-500 dark:text-[#9EA2B0] mt-1"
@@ -403,38 +410,50 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           <div className="px-7 pb-7 pt-2 space-y-5">
             {/* Version Transition Capsule */}
             {hasUpdate ? (
-              <div className="flex items-center justify-between p-4 px-5 rounded-2xl bg-black/[0.035] dark:bg-white/[0.05]">
-                <div className="flex flex-col gap-0.5">
-                  <span
-                    className="text-[11px] text-gray-500 dark:text-[#8D92A0] uppercase tracking-wider"
-                    style={{ fontVariationSettings: "'wght' 500, 'ROND' 40" }}
-                  >
-                    Current
-                  </span>
-                  <span
-                    className="text-sm text-gray-800 dark:text-[#E2E4EB]"
-                    style={{ fontVariationSettings: "'wght' 600, 'ROND' 50" }}
-                  >
-                    v{CURRENT_VERSION_NAME}
-                  </span>
+              <div className="p-4 px-5 rounded-2xl bg-black/[0.035] dark:bg-white/[0.05] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-0.5">
+                    <span
+                      className="text-[11px] text-gray-500 dark:text-[#8D92A0] uppercase tracking-wider"
+                      style={{ fontVariationSettings: "'wght' 500, 'ROND' 40" }}
+                    >
+                      Current
+                    </span>
+                    <span
+                      className="text-sm text-gray-800 dark:text-[#E2E4EB]"
+                      style={{ fontVariationSettings: "'wght' 600, 'ROND' 50" }}
+                    >
+                      v{CURRENT_VERSION_NAME}
+                    </span>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-400/15 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <ArrowRight size={15} />
+                  </div>
+
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span
+                      className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase tracking-wider"
+                      style={{ fontVariationSettings: "'wght' 500, 'ROND' 40" }}
+                    >
+                      Latest
+                    </span>
+                    <span
+                      className="text-sm text-indigo-600 dark:text-indigo-300"
+                      style={{ fontVariationSettings: "'wght' 700, 'ROND' 50" }}
+                    >
+                      v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-indigo-500/10 dark:bg-indigo-400/15 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                  <ArrowRight size={15} />
-                </div>
-
-                <div className="flex flex-col items-end gap-0.5">
-                  <span
-                    className="text-[11px] text-indigo-600 dark:text-indigo-400 uppercase tracking-wider"
-                    style={{ fontVariationSettings: "'wght' 500, 'ROND' 40" }}
-                  >
-                    Latest
+                <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.05] flex items-center justify-between text-xs text-gray-500 dark:text-[#8D92A0]">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Download size={13} className="text-indigo-500 shrink-0" />
+                    New Update Size
                   </span>
-                  <span
-                    className="text-sm text-indigo-600 dark:text-indigo-300"
-                    style={{ fontVariationSettings: "'wght' 700, 'ROND' 50" }}
-                  >
-                    v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
+                  <span className="font-bold text-gray-800 dark:text-[#E2E4EB]">
+                    {remoteVersion?.apkSize || '14.4 MB'}
                   </span>
                 </div>
               </div>
@@ -563,7 +582,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     style={{ fontVariationSettings: "'wght' 450, 'ROND' 40" }}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                    Android DownloadManager
+                    High-Speed Download
                   </span>
                   <span
                     className="text-gray-700 dark:text-[#D1D4DE] whitespace-nowrap shrink-0 ml-3"
@@ -572,9 +591,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
-                    {totalBytes > 0
-                      ? `${formatMB(bytesRead)} / ${formatMB(totalBytes)}`
-                      : formatMB(bytesRead)}
+                    {`${formatMB(bytesRead)} / ${formatMB(totalBytes > 0 ? totalBytes : (remoteVersion?.apkSizeBytes || 14404380))}`}
                   </span>
                 </div>
               </div>

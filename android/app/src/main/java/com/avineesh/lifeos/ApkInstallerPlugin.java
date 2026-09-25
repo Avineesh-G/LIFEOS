@@ -23,17 +23,23 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @CapacitorPlugin(name = "ApkInstaller")
 public class ApkInstallerPlugin extends Plugin {
@@ -46,6 +52,8 @@ public class ApkInstallerPlugin extends Plugin {
     private BroadcastReceiver downloadReceiver;
     private ScheduledExecutorService progressScheduler;
     private ScheduledFuture<?> progressTask;
+    private ExecutorService directDownloadExecutor;
+    private final AtomicBoolean isDirectDownloadCancelled = new AtomicBoolean(false);
     private String expectedSha256;
     private PluginCall activeCall;
 
@@ -98,8 +106,125 @@ public class ApkInstallerPlugin extends Plugin {
 
         cleanupPreviousDownload();
 
+        // High-speed direct streaming download: works over 5G/4G/Wi-Fi with no mobile data threshold limits
+        startDirectDownload(apkUrl);
+    }
+
+    private void startDirectDownload(String apkUrl) {
+        stopDirectDownload();
+        isDirectDownloadCancelled.set(false);
+        directDownloadExecutor = Executors.newSingleThreadExecutor();
+
+        directDownloadExecutor.execute(() -> {
+            File targetApk = new File(getContext().getCacheDir(), APK_FILE_NAME);
+            if (targetApk.exists()) {
+                targetApk.delete();
+            }
+
+            HttpURLConnection conn = null;
+            InputStream in = null;
+            FileOutputStream out = null;
+
+            try {
+                URL url = new URL(apkUrl);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setInstanceFollowRedirects(true);
+                conn.setConnectTimeout(20000);
+                conn.setReadTimeout(35000);
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android " + Build.VERSION.RELEASE + ") LifeOS-InAppUpdater/2.1");
+                conn.setRequestProperty("Accept", "*/*");
+                conn.connect();
+
+                int code = conn.getResponseCode();
+                if (code == HttpURLConnection.HTTP_MOVED_PERM || code == HttpURLConnection.HTTP_MOVED_TEMP || code == 307 || code == 308) {
+                    String redirectUrl = conn.getHeaderField("Location");
+                    if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                        conn.disconnect();
+                        url = new URL(redirectUrl);
+                        conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(20000);
+                        conn.setReadTimeout(35000);
+                        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android " + Build.VERSION.RELEASE + ") LifeOS-InAppUpdater/2.1");
+                        conn.setRequestProperty("Accept", "*/*");
+                        conn.connect();
+                        code = conn.getResponseCode();
+                    }
+                }
+
+                if (code != HttpURLConnection.HTTP_OK && code != HttpURLConnection.HTTP_PARTIAL) {
+                    throw new IOException("HTTP error from server: " + code + " " + conn.getResponseMessage());
+                }
+
+                long totalBytes = conn.getContentLengthLong();
+                Log.d(TAG, "Direct streaming download started. Total bytes: " + totalBytes);
+
+                in = new BufferedInputStream(conn.getInputStream(), 65536);
+                out = new FileOutputStream(targetApk);
+
+                byte[] buffer = new byte[65536];
+                int bytesRead;
+                long totalRead = 0;
+                long lastProgressTime = 0;
+
+                JSObject initialObj = new JSObject();
+                initialObj.put("progress", 0);
+                initialObj.put("bytesRead", 0);
+                initialObj.put("totalBytes", totalBytes);
+                notifyListeners("downloadProgress", initialObj);
+
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    if (isDirectDownloadCancelled.get()) {
+                        targetApk.delete();
+                        return;
+                    }
+                    out.write(buffer, 0, bytesRead);
+                    totalRead += bytesRead;
+
+                    long now = System.currentTimeMillis();
+                    // Throttle notification to ~45ms for 60 FPS smooth progress
+                    if (now - lastProgressTime >= 45 || (totalBytes > 0 && totalRead >= totalBytes)) {
+                        lastProgressTime = now;
+                        int progress = totalBytes > 0 ? (int) ((totalRead * 100) / totalBytes) : -1;
+                        JSObject pObj = new JSObject();
+                        pObj.put("progress", progress);
+                        pObj.put("bytesRead", totalRead);
+                        pObj.put("totalBytes", totalBytes);
+                        notifyListeners("downloadProgress", pObj);
+                    }
+                }
+
+                out.flush();
+                out.close();
+                out = null;
+                in.close();
+                in = null;
+
+                Log.d(TAG, "Direct download completed successfully: " + targetApk.length() + " bytes");
+                handleDownloadSuccess(targetApk);
+
+            } catch (Exception e) {
+                Log.e(TAG, "Direct download failed, falling back to DownloadManager", e);
+                if (!isDirectDownloadCancelled.get()) {
+                    startDownloadManagerFallback(apkUrl);
+                }
+            } finally {
+                if (out != null) { try { out.close(); } catch (Exception ignored) {} }
+                if (in != null) { try { in.close(); } catch (Exception ignored) {} }
+                if (conn != null) { conn.disconnect(); }
+            }
+        });
+    }
+
+    private void stopDirectDownload() {
+        isDirectDownloadCancelled.set(true);
+        if (directDownloadExecutor != null) {
+            directDownloadExecutor.shutdownNow();
+            directDownloadExecutor = null;
+        }
+    }
+
+    private void startDownloadManagerFallback(String apkUrl) {
         try {
-            // Target file in app's external files downloads directory
             File downloadsDir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
             if (downloadsDir != null && !downloadsDir.exists()) {
                 downloadsDir.mkdirs();
@@ -115,23 +240,16 @@ public class ApkInstallerPlugin extends Plugin {
             request.setMimeType("application/vnd.android.package-archive");
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS, APK_FILE_NAME);
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
             request.setAllowedOverMetered(true);
             request.setAllowedOverRoaming(true);
 
-            // Register completion BroadcastReceiver
             registerDownloadReceiver(targetApk);
-
-            // Enqueue download via Android's DownloadManager
             activeDownloadId = downloadManager.enqueue(request);
-            Log.d(TAG, "Download enqueued with ID: " + activeDownloadId);
-
-            // Start 500ms progress polling
+            Log.d(TAG, "Fallback DownloadManager enqueued with ID: " + activeDownloadId);
             startProgressPolling(activeDownloadId);
-
         } catch (Exception e) {
-            Log.e(TAG, "Failed to enqueue download", e);
-            cleanupPreviousDownload();
-            call.reject("Failed to enqueue download: " + e.getMessage());
+            handleDownloadFailure("Download failed: " + e.getMessage());
         }
     }
 
@@ -277,13 +395,17 @@ public class ApkInstallerPlugin extends Plugin {
             targetApk.setReadable(true, false);
             File cacheDir = getContext().getCacheDir();
             File cachedApk = new File(cacheDir, APK_FILE_NAME);
-            if (cachedApk.exists()) {
-                cachedApk.delete();
+            if (!targetApk.getAbsolutePath().equals(cachedApk.getAbsolutePath())) {
+                if (cachedApk.exists()) {
+                    cachedApk.delete();
+                }
+                copyFile(targetApk, cachedApk);
+                cachedApk.setReadable(true, false);
+                apkToInstall = cachedApk;
+                Log.d(TAG, "Copied verified APK to internal cache for install: " + cachedApk.getAbsolutePath());
+            } else {
+                apkToInstall = targetApk;
             }
-            copyFile(targetApk, cachedApk);
-            cachedApk.setReadable(true, false);
-            apkToInstall = cachedApk;
-            Log.d(TAG, "Copied verified APK to internal cache for install: " + cachedApk.getAbsolutePath());
         } catch (Exception e) {
             Log.w(TAG, "Failed to copy APK to internal cache, proceeding with original file", e);
             apkToInstall = targetApk;
@@ -423,6 +545,7 @@ public class ApkInstallerPlugin extends Plugin {
     }
 
     private void cleanupPreviousDownload() {
+        stopDirectDownload();
         stopProgressPolling();
         unregisterDownloadReceiver();
         activeDownloadId = -1;

@@ -19,6 +19,8 @@ export interface AppVersionInfo {
   releaseNotes: string;
   apkUrl: string;
   sha256?: string;
+  apkSize?: string;
+  apkSizeBytes?: number;
 }
 
 export interface InstalledVersionInfo {

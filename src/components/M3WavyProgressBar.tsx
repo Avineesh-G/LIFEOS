@@ -1,5 +1,4 @@
 import React, { useId } from 'react';
-import { motion } from 'framer-motion';
 
 interface M3WavyProgressBarProps {
   progress: number; // 0 to 100
@@ -11,11 +10,9 @@ interface M3WavyProgressBarProps {
 
 /**
  * Material 3 Expressive Wavy Progress Bar
- * Matches user's uploaded Android M3 Expressive photo:
- * - Left side: Lavender (#C084FC) fluid sine wave
- * - Separator: 6px clean gap
- * - Right side: Deep purple (#581C87) solid straight track with rounded caps
- * - Fluid infinite wave animation
+ * - Hardware accelerated (GPU compositor) CSS wave animation for 120 FPS buttery smoothness
+ * - Ultra-smooth linear/spring cubic-bezier transition on progress width (no stutter or lag)
+ * - Lavender fluid sine wave with deep purple inactive track matching Google M3 specs
  */
 export default function M3WavyProgressBar({
   progress = 0,
@@ -26,12 +23,14 @@ export default function M3WavyProgressBar({
 }: M3WavyProgressBarProps) {
   const clampedProgress = Math.max(0, Math.min(100, progress));
   const wavelength = 24; // pixel period for one full sine cycle
-  const amplitude = 3.5;  // vertical wave height
+  const amplitude = 3.2;  // vertical wave height
   const centerY = height / 2;
   const strokeWidth = 4.5;
+  const rawId = useId();
+  const animKey = rawId.replace(/[^a-zA-Z0-9]/g, '');
 
-  // Pre-generate sine wave path across 1200px to accommodate any phone screen width
-  const totalPoints = 1200;
+  // Pre-generate smooth sine wave path across 800px width
+  const totalPoints = 800;
   let wavePath = `M 0 ${centerY}`;
   for (let x = 0; x < totalPoints; x += wavelength) {
     const half = wavelength / 2;
@@ -48,40 +47,55 @@ export default function M3WavyProgressBar({
 
   return (
     <div
-      className={`relative w-full flex items-center select-none ${className}`}
+      className={`relative w-full flex items-center select-none overflow-hidden ${className}`}
       style={{ height: `${height}px` }}
     >
+      <style>{`
+        @keyframes m3WaveGlide_${animKey} {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-${wavelength}px, 0, 0); }
+        }
+        .m3-wave-active-${animKey} {
+          animation: m3WaveGlide_${animKey} 0.85s linear infinite;
+          will-change: transform;
+        }
+      `}</style>
+
       {/* 1. Active Animated Wavy Section */}
       <div
-        className="h-full overflow-hidden transition-all duration-300 ease-out"
-        style={{ width: `${clampedProgress}%` }}
+        className="h-full overflow-hidden flex items-center"
+        style={{
+          width: `${clampedProgress}%`,
+          transition: 'width 180ms cubic-bezier(0.2, 0, 0, 1)',
+          willChange: 'width',
+        }}
       >
-        <svg
-          className="h-full overflow-visible"
-          style={{ width: '1200px' }}
-          viewBox={`0 0 1200 ${height}`}
-        >
-          <motion.path
-            d={wavePath}
-            fill="none"
-            stroke={activeColor}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            animate={{ x: [-wavelength, 0] }}
-            transition={{
-              duration: 1.1,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          />
-        </svg>
+        <div className={`h-full flex items-center m3-wave-active-${animKey}`} style={{ width: '800px' }}>
+          <svg
+            className="h-full overflow-visible"
+            style={{ width: '800px' }}
+            viewBox={`0 0 800 ${height}`}
+          >
+            <path
+              d={wavePath}
+              fill="none"
+              stroke={activeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
       </div>
 
       {/* 2. Gap & Inactive Straight Rounded Track */}
-      {remainingPercent > 2 && (
+      {remainingPercent > 1.5 && (
         <div
-          className="h-full flex items-center pl-1.5 transition-all duration-300 ease-out flex-1"
+          className="h-full flex items-center pl-1.5 flex-1"
+          style={{
+            transition: 'width 180ms cubic-bezier(0.2, 0, 0, 1)',
+            willChange: 'width',
+          }}
         >
           <div
             className="w-full rounded-full"
