@@ -1,111 +1,145 @@
-import React, { useId } from 'react';
+import React, { useId, useMemo } from 'react';
 
 interface M3WavyProgressBarProps {
   progress: number; // 0 to 100
   className?: string;
-  height?: number;
-  activeColor?: string;
-  trackColor?: string;
+  width?: number; // total width in px (default: 240)
+  height?: number; // total height in px (default: 28)
+  activeColor?: string; // primary wave color (default: Royal Blue #2563EB)
+  secondaryColor?: string; // gradient end color (default: Sky Blue #60A5FA)
+  trackColor?: string; // optional background track color (ignored on greeting)
+  showTrack?: boolean; // default: false (no background track per greeting spec)
 }
 
 /**
- * Material 3 Expressive Wavy Progress Bar
- * - Hardware accelerated (GPU compositor) CSS wave animation for 120 FPS buttery smoothness
- * - Ultra-smooth linear/spring cubic-bezier transition on progress width (no stutter or lag)
- * - Lavender fluid sine wave with deep purple inactive track matching Google M3 specs
+ * Material 3 Expressive Refined Wavy Progress Indicator
+ *
+ * Designed for 100% vector sharpness and zero pixelation:
+ * - Pure SVG <clipPath> (hardware vector stencil, avoiding Skia bitmap mask rasterization).
+ * - Smooth 4-quarter cubic bezier sine path with continuous second derivatives (no kinks/lumps).
+ * - Direct vector stroke gradient with opacity taper at the leading tip (no hard dot, smooth point).
+ * - Lazy 3.2s ripple cycle matching M3 Expressive specifications.
+ * - Settles gracefully from 88% to 100% into a calm, flat line.
  */
 export default function M3WavyProgressBar({
   progress = 0,
   className = '',
-  height = 20,
-  activeColor = '#C084FC',
-  trackColor = '#581C87',
+  width = 240,
+  height = 28,
+  activeColor = '#2563EB',
+  secondaryColor = '#60A5FA',
 }: M3WavyProgressBarProps) {
   const clampedProgress = Math.max(0, Math.min(100, progress));
-  const wavelength = 24; // pixel period for one full sine cycle
-  const amplitude = 3.2;  // vertical wave height
-  const centerY = height / 2;
-  const strokeWidth = 4.5;
   const rawId = useId();
-  const animKey = rawId.replace(/[^a-zA-Z0-9]/g, '');
+  const safeId = rawId.replace(/[^a-zA-Z0-9]/g, '');
 
-  // Pre-generate smooth sine wave path across 800px width
-  const totalPoints = 800;
-  let wavePath = `M 0 ${centerY}`;
-  for (let x = 0; x < totalPoints; x += wavelength) {
-    const half = wavelength / 2;
-    const cpX1 = x + wavelength * 0.18;
-    const cpX2 = x + wavelength * 0.32;
-    const cpX3 = x + half + wavelength * 0.18;
-    const cpX4 = x + half + wavelength * 0.32;
+  const wavelength = 56; // wide, elegant wavelength for fluid ripple
+  const centerY = height / 2;
+  const strokeWidth = 3.5;
 
-    wavePath += ` C ${cpX1} ${centerY - amplitude * 1.3}, ${cpX2} ${centerY - amplitude * 1.3}, ${x + half} ${centerY}`;
-    wavePath += ` C ${cpX3} ${centerY + amplitude * 1.3}, ${cpX4} ${centerY + amplitude * 1.3}, ${x + wavelength} ${centerY}`;
-  }
+  // Amplitude stays gently visible (3.8px) through 88%, then gracefully settles to 0 in the last 12%
+  const baseAmplitude = 3.8;
+  const amplitude = clampedProgress <= 88
+    ? baseAmplitude
+    : baseAmplitude * Math.max(0, (100 - clampedProgress) / 12);
 
-  const remainingPercent = Math.max(0, 100 - clampedProgress);
+  // Generate mathematically exact 4-quarter-bezier sine wave path
+  const wavePath = useMemo(() => {
+    const totalSpan = width + wavelength * 2;
+    const L = wavelength / 4; // quarter period
+    let d = `M 0 ${centerY}`;
+
+    for (let x = 0; x < totalSpan; x += wavelength) {
+      if (amplitude <= 0.05) {
+        // When settled, draw a calm straight line
+        d += ` L ${x + wavelength} ${centerY}`;
+      } else {
+        // Quarter 1: (0 -> peak -A)
+        d += ` C ${x + L * 0.3642} ${centerY - amplitude * 0.5708}, ${x + L * 0.6358} ${centerY - amplitude}, ${x + L} ${centerY - amplitude}`;
+        // Quarter 2: (peak -A -> 0)
+        d += ` C ${x + L + L * 0.3642} ${centerY - amplitude}, ${x + L + L * 0.6358} ${centerY - amplitude * 0.5708}, ${x + 2 * L} ${centerY}`;
+        // Quarter 3: (0 -> trough +A)
+        d += ` C ${x + 2 * L + L * 0.3642} ${centerY + amplitude * 0.5708}, ${x + 2 * L + L * 0.6358} ${centerY + amplitude}, ${x + 3 * L} ${centerY + amplitude}`;
+        // Quarter 4: (trough +A -> 0)
+        d += ` C ${x + 3 * L + L * 0.3642} ${centerY + amplitude}, ${x + 3 * L + L * 0.6358} ${centerY + amplitude * 0.5708}, ${x + 4 * L} ${centerY}`;
+      }
+    }
+    return d;
+  }, [width, wavelength, centerY, amplitude]);
+
+  // Current active pixel width of the wave
+  const activeWidth = (clampedProgress / 100) * width;
+  const taperLength = Math.min(20, Math.max(6, activeWidth * 0.3));
+  const taperStartRatio = activeWidth > 0
+    ? Math.max(0, (activeWidth - taperLength) / activeWidth)
+    : 0;
 
   return (
     <div
-      className={`relative w-full flex items-center select-none overflow-hidden ${className}`}
-      style={{ height: `${height}px` }}
+      className={`relative flex items-center justify-center select-none ${className}`}
+      style={{ width: `${width}px`, height: `${height}px` }}
     >
       <style>{`
-        @keyframes m3WaveGlide_${animKey} {
+        @keyframes m3Ripple_${safeId} {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(-${wavelength}px, 0, 0); }
         }
-        .m3-wave-active-${animKey} {
-          animation: m3WaveGlide_${animKey} 0.85s linear infinite;
+        .m3-wave-track-${safeId} {
+          animation: m3Ripple_${safeId} 3.2s linear infinite;
           will-change: transform;
         }
       `}</style>
 
-      {/* 1. Active Animated Wavy Section */}
-      <div
-        className="h-full overflow-hidden flex items-center"
-        style={{
-          width: `${clampedProgress}%`,
-          transition: 'width 180ms cubic-bezier(0.2, 0, 0, 1)',
-          willChange: 'width',
-        }}
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        shapeRendering="geometricPrecision"
+        className="overflow-hidden"
       >
-        <div className={`h-full flex items-center m3-wave-active-${animKey}`} style={{ width: '800px' }}>
-          <svg
-            className="h-full overflow-visible"
-            style={{ width: '800px' }}
-            viewBox={`0 0 800 ${height}`}
-          >
-            <path
-              d={wavePath}
-              fill="none"
-              stroke={activeColor}
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <defs>
+          {/* Pure Vector Clip: Masks the wave to activeWidth without bitmap rasterization */}
+          <clipPath id={`m3VectorClip_${safeId}`}>
+            <rect
+              x="0"
+              y="0"
+              width={activeWidth}
+              height={height}
             />
-          </svg>
-        </div>
-      </div>
+          </clipPath>
 
-      {/* 2. Gap & Inactive Straight Rounded Track */}
-      {remainingPercent > 1.5 && (
-        <div
-          className="h-full flex items-center pl-1.5 flex-1"
-          style={{
-            transition: 'width 180ms cubic-bezier(0.2, 0, 0, 1)',
-            willChange: 'width',
-          }}
-        >
-          <div
-            className="w-full rounded-full"
-            style={{
-              height: `${strokeWidth}px`,
-              backgroundColor: trackColor,
-            }}
-          />
-        </div>
-      )}
+          {/* Stroke gradient: Smooth transition with transparent fade at the leading edge */}
+          <linearGradient
+            id={`m3StrokeGrad_${safeId}`}
+            gradientUnits="userSpaceOnUse"
+            x1="0"
+            y1="0"
+            x2={Math.max(1, activeWidth)}
+            y2="0"
+          >
+            <stop offset="0%" stopColor={activeColor} stopOpacity="1" />
+            <stop offset={`${taperStartRatio * 100}%`} stopColor={secondaryColor} stopOpacity="1" />
+            <stop offset="100%" stopColor={secondaryColor} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* Active Animated Wave (No Background Track) */}
+        {clampedProgress > 0 && (
+          <g clipPath={`url(#m3VectorClip_${safeId})`}>
+            <g className={`m3-wave-track-${safeId}`}>
+              <path
+                d={wavePath}
+                fill="none"
+                stroke={`url(#m3StrokeGrad_${safeId})`}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
+          </g>
+        )}
+      </svg>
     </div>
   );
 }
+

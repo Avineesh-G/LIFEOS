@@ -52,7 +52,6 @@ import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 import { scheduleWidgetSync } from './utils/widgetBridge';
 import { triggerTopDismissible, handleRootBackPress } from './utils/backNavigation';
-import M3StartupGreeting from './components/M3StartupGreeting';
 
 function MainContent({
   data,
@@ -412,40 +411,6 @@ function App() {
 
   const safeData = data || DEFAULT_DATA;
 
-  // Startup Greeting Cooldown: Strict 10-minute cooldown to prevent repeating when reopening/refreshing frequently
-  const [hasGreeted, setHasGreeted] = useState(() => {
-    try {
-      const last = localStorage.getItem('lifeos_last_startup_greeting_timestamp');
-      if (last) {
-        const elapsed = Date.now() - parseInt(last, 10);
-        if (elapsed < 10 * 60 * 1000) {
-          return true; // Greeted within the last 10 minutes, strictly skip greeting
-        }
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  });
-
-  const handleGreetingComplete = () => {
-    try {
-      localStorage.setItem('lifeos_last_startup_greeting_timestamp', String(Date.now()));
-    } catch {}
-    setHasGreeted(true);
-  };
-
-  const greetingUsername = useMemo(() => {
-    if (user?.displayName && user.displayName.trim()) {
-      return user.displayName.trim();
-    }
-    if (user?.email) {
-      const handle = user.email.split('@')[0];
-      return handle.charAt(0).toUpperCase() + handle.slice(1);
-    }
-    return 'Friend';
-  }, [user?.displayName, user?.email]);
-
   // Prompt phone OS native notification permission directly on app start if not yet allowed
   useEffect(() => {
     if (user) {
@@ -493,14 +458,6 @@ function App() {
   return (
     <DayThemeProvider>
       <M3FeedbackProvider>
-        {!hasGreeted && user && (
-          <M3StartupGreeting
-            username={greetingUsername}
-            photoURL={user.photoURL}
-            isAppReady={!dataLoading && Boolean(data)}
-            onComplete={handleGreetingComplete}
-          />
-        )}
         <NetworkStatusModal />
         <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
         <AppLockOverlay />
