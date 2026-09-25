@@ -27,7 +27,7 @@ import SettingsPage from './pages/Settings';
 import Vault from './pages/Vault';
 import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
-import React, { useEffect, useState, useMemo, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { OutingsProvider } from './features/outings/context/OutingsContext';
 
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
@@ -35,7 +35,9 @@ const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetai
 const InterfaceColorsSettings = lazy(() => import('./pages/InterfaceColorsSettings'));
 const Notes = lazy(() => import('./pages/Notes'));
 import { auth } from './firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import AppLockOverlay from './components/security/AppLockOverlay';
 import InAppUpdateModal from './components/InAppUpdateModal';
@@ -57,11 +59,13 @@ function MainContent({
   refresh,
   updateData,
   resetAllData,
+  onSignOut,
 }: {
   data: any;
   refresh: () => Promise<any>;
   updateData: (partial: any) => Promise<any>;
   resetAllData?: () => Promise<void>;
+  onSignOut?: () => Promise<void> | void;
 }) {
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
@@ -103,7 +107,7 @@ function MainContent({
     { path: '/tasks', element: <RouteErrorBoundary routeName="Tasks"><Tasks data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} /></RouteErrorBoundary> },
+    { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} onSignOut={onSignOut} /></RouteErrorBoundary> },
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
@@ -179,6 +183,44 @@ function App() {
     }
   });
 
+  const handleSignOut = useCallback(async () => {
+    try {
+      localStorage.removeItem('lifeos_cached_auth_user');
+      localStorage.removeItem('lifeos_mock_auth');
+      (window as any).__LIFEOS_MOCK_AUTH__ = false;
+      setUser(null);
+
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await GoogleAuth.initialize({
+            clientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
+            scopes: ['profile', 'email'],
+            grantOfflineAccess: false,
+          });
+          await Promise.race([
+            GoogleAuth.signOut(),
+            new Promise((res) => setTimeout(res, 1000)),
+          ]);
+        } catch (e) {
+          console.warn('Native GoogleAuth signout:', e);
+        }
+      }
+      await signOut(auth).catch(() => {});
+    } catch (err) {
+      console.error('Sign out error:', err);
+    } finally {
+      setUser(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onGlobalSignOut = () => {
+      handleSignOut();
+    };
+    window.addEventListener('lifeos-sign-out', onGlobalSignOut);
+    return () => window.removeEventListener('lifeos-sign-out', onGlobalSignOut);
+  }, [handleSignOut]);
+
   useEffect(() => {
     // 5-second timeout safety: never gate render on hanging network auth
     const timer = setTimeout(() => {
@@ -187,25 +229,32 @@ function App() {
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       clearTimeout(timer);
-      if (!currentUser && ((window as any).__LIFEOS_MOCK_AUTH__ || localStorage.getItem('lifeos_mock_auth') === 'true')) {
+      if (currentUser) {
+        setUser(currentUser);
         setAuthLoading(false);
-        return;
-      }
-      setUser(currentUser);
-      setAuthLoading(false);
-      try {
-        if (currentUser) {
+        try {
           localStorage.setItem('lifeos_cached_auth_user', JSON.stringify({
             uid: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName,
             photoURL: currentUser.photoURL,
           }));
-        } else {
-          localStorage.removeItem('lifeos_cached_auth_user');
+        } catch {
+          // quota exceeded
         }
-      } catch {
-        // quota exceeded
+      } else {
+        if (((window as any).__LIFEOS_MOCK_AUTH__ || localStorage.getItem('lifeos_mock_auth') === 'true') && localStorage.getItem('lifeos_cached_auth_user')) {
+          setAuthLoading(false);
+          return;
+        }
+        setUser(null);
+        setAuthLoading(false);
+        try {
+          localStorage.removeItem('lifeos_cached_auth_user');
+          localStorage.removeItem('lifeos_mock_auth');
+        } catch {
+          // quota exceeded
+        }
       }
     });
     return () => {
@@ -472,6 +521,7 @@ function App() {
                   refresh={refresh}
                   updateData={updateData}
                   resetAllData={resetAllData}
+                  onSignOut={handleSignOut}
                 />
               </OutingsProvider>
             </ErrorBoundary>

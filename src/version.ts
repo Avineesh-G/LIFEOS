@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 35,
-  versionName: '2.1.1',
+  versionCode: 36,
+  versionName: '2.1.2',
   releaseDate: '2026-09-25',
   apkSize: '14.4 MB',
-  apkSizeBytes: 14404380,
-  releaseNotes: 'LifeOS v2.1.1 (Build 35):\n• High-Speed Direct In-App Downloader (no more stuck downloads over 5G/cellular data)\n• Real-time MB progress counter showing total update package size (14.4 MB)\n• Buttery-smooth 120 FPS GPU-accelerated M3 Expressive wavy progress bar\n• Fixed logout behavior: sign out preserves all user data and cloud sync cleanly',
+  apkSizeBytes: 14405000,
+  releaseNotes: 'LifeOS v2.1.2 (Build 36):\n• Redesigned Sign Out confirmation modal to match the M3 To-Do list card dialog design\n• Fixed sign-out flow: logging out immediately displays the Google sign-in interface without looping back to the app\n• Preserved user data safely in cloud account on sign-out',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

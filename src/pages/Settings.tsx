@@ -32,6 +32,7 @@ interface SettingsProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
   refresh: () => Promise<AppData>;
   resetAllData?: () => Promise<void>;
+  onSignOut?: () => Promise<void> | void;
 }
 
 export default function Settings({
@@ -39,6 +40,7 @@ export default function Settings({
   updateData,
   refresh,
   resetAllData,
+  onSignOut,
 }: SettingsProps) {
   const navigate = useNavigate();
   const { confirmDelete, showSavedFeedback } = useM3Feedback();
@@ -116,14 +118,33 @@ export default function Settings({
   const handleSignOut = async () => {
     triggerHaptic('medium');
     setShowLogoutModal(false);
+    if (onSignOut) {
+      await onSignOut();
+      return;
+    }
     try {
+      localStorage.removeItem('lifeos_cached_auth_user');
+      localStorage.removeItem('lifeos_mock_auth');
+      (window as any).__LIFEOS_MOCK_AUTH__ = false;
+      window.dispatchEvent(new CustomEvent('lifeos-sign-out'));
       if (Capacitor.isNativePlatform()) {
-        await GoogleAuth.signOut().catch(() => {});
+        try {
+          await GoogleAuth.initialize({
+            clientId: '527411007566-7gburgck4bkde6pevhn6in759lmr0cg2.apps.googleusercontent.com',
+            scopes: ['profile', 'email'],
+            grantOfflineAccess: false,
+          });
+          await Promise.race([
+            GoogleAuth.signOut(),
+            new Promise((res) => setTimeout(res, 1000)),
+          ]);
+        } catch {}
       }
-      await signOut(auth);
-      navigate('/');
+      await signOut(auth).catch(() => {});
+      window.location.replace('/');
     } catch (err) {
       console.error('Sign out error:', err);
+      window.location.replace('/');
     }
   };
 
@@ -1415,50 +1436,74 @@ export default function Settings({
         </p>
       </div>
 
-      {/* ── Sign Out Confirmation Modal ── */}
+      {/* ── Sign Out Confirmation Modal (M3 Card Dialog) ── */}
       <AnimatePresence>
         {showLogoutModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+            onClick={() => setShowLogoutModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="w-full max-w-sm rounded-3xl bg-[var(--card-surface)] border border-[var(--card-border)] p-6 shadow-2xl space-y-4 text-center"
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 10 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+              className="w-full max-w-sm rounded-[28px] bg-white dark:bg-[#1E1929] border border-black/[0.08] dark:border-white/[0.12] shadow-2xl p-6 sm:p-7 overflow-hidden relative select-none"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 mx-auto flex items-center justify-center">
-                <LogOut size={24} />
-              </div>
+              <div className="flex flex-col items-center text-center space-y-4">
+                {/* M3 Scallop / Squircle Icon Container in Red Theme */}
+                <div className="relative w-14 h-14 flex items-center justify-center">
+                  <div
+                    className="absolute inset-0 rounded-[20px] opacity-15"
+                    style={{ backgroundColor: '#DC2626' }}
+                  />
+                  <div
+                    className="relative w-10 h-10 rounded-[14px] flex items-center justify-center text-white shadow-sm"
+                    style={{ backgroundColor: '#DC2626' }}
+                  >
+                    <LogOut size={20} color="#FFFFFF" strokeWidth={2.2} />
+                  </div>
+                </div>
 
-              <div className="space-y-1.5">
-                <h3 className="text-base font-bold text-primary-light dark:text-primary-dark">
-                  Sign Out
-                </h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  Are you sure you want to sign out? Your notes, tasks, workouts, and settings will remain safe in your cloud account.
-                </p>
-              </div>
+                {/* Title & Body Text */}
+                <div className="space-y-1.5 px-2">
+                  <h3 className="text-lg font-black text-primary-light dark:text-primary-dark tracking-tight">
+                    Sign Out
+                  </h3>
+                  <p className="text-xs text-secondary-light/80 dark:text-secondary-dark/80 leading-relaxed pt-1">
+                    Are you sure you want to sign out? Your notes, tasks, workouts, and settings will remain safe in your cloud account.
+                  </p>
+                </div>
 
-              <div className="space-y-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="w-full py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                >
-                  <LogOut size={14} /> Sign Out
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowLogoutModal(false)}
-                  className="w-full py-2 px-4 rounded-xl text-secondary-light dark:text-secondary-dark text-xs font-semibold hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all"
-                >
-                  Cancel
-                </button>
+                {/* Action Buttons: Cancel (Outlined Pill) & Sign Out (Filled Pill) */}
+                <div className="grid grid-cols-2 gap-3 w-full pt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setShowLogoutModal(false);
+                    }}
+                    className="py-3 px-4 rounded-full border border-black/[0.12] dark:border-white/[0.15] text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all active:scale-95"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="py-3 px-4 rounded-full text-white font-bold text-xs shadow-md transition-all active:scale-95 hover:opacity-95 flex items-center justify-center gap-1.5"
+                    style={{
+                      backgroundColor: '#DC2626',
+                      boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
+                    }}
+                  >
+                    <LogOut size={14} className="shrink-0" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
