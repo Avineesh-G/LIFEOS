@@ -249,18 +249,6 @@ Open **`http://localhost:5173/`** for the web application or **`http://localhost
 4. Open the APK file and select **Install** (enable *Allow from this source* in browser permissions if requested).
 5. Open LifeOS and pin the **LifeOS Glanceable Widget** to your home screen!
 
----
-
-## 🔒 Security & Cryptographic Integrity
-
-Every release package is compiled and cryptographically verified:
-* **Package Name**: `com.avineesh.lifeos`
-* **Current Version**: `v2.1.3 (Build 37)`
-* **File Size**: `14.4 MB` (14,404,246 bytes)
-* **SHA-256 Checksum**:
-```text
-342d3989f63029cccff5b99f5c5ea68b9e48e9a00513cd6d665c5fbfabe81f69
-```
 
 ---
 
