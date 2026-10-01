@@ -589,59 +589,73 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       </motion.div>
 
       {/* Material 3 Expressive Amber Calorie Hero Card */}
-      <motion.div
-        variants={item}
-        className="rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 card bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] shadow-none flex flex-col compact:flex-row items-center gap-5 sm:gap-6 relative overflow-hidden"
-      >
-        <div className="relative flex-shrink-0">
-          <svg width="104" height="104" viewBox="0 0 104 104">
-            <circle cx="52" cy="52" r="44" fill="none" stroke="currentColor" strokeWidth="9" className="text-black/10 dark:text-white/10" />
-            <circle
-              cx="52" cy="52" r="44"
-              fill="none"
-              stroke="var(--md-primary)"
-              strokeWidth="9"
-              strokeLinecap="round"
-              strokeDasharray={`${strokeDash} ${circumference}`}
-              transform="rotate(-90 52 52)"
-              style={{ transition: 'stroke-dasharray 0.5s ease' }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="stat-clamp-tile font-bold font-stat leading-none text-[var(--md-on-surface)]">{Math.round(totalConsumed)}</span>
-            <span className="text-[10px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag mt-0.5">kcal</span>
-          </div>
-        </div>
+      {(() => {
+        const isOverBudget = totalConsumed > targetCals;
+        const overAmount = Math.round(totalConsumed - targetCals);
+        const remainingAmount = Math.round(Math.max(0, targetCals - totalConsumed));
+        const strokeColor = isOverBudget ? '#EF4444' : 'var(--md-primary)';
+        const barBgColor = isOverBudget ? 'bg-red-500' : 'bg-[var(--md-primary)]';
 
-        <div className="flex-1 w-full space-y-2">
-          {activeGoalConfig && (
-            <div className="flex items-center justify-between gap-2 pb-1 border-b border-[var(--md-outline-variant)]/60">
-              <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate min-w-0">
-                {activeGoalConfig.label}
-              </span>
-              <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0 whitespace-nowrap">
-                {targetProtein}g Protein
-              </span>
+        return (
+          <motion.div
+            variants={item}
+            className={`rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 card bg-[var(--md-surface-container-low)] border ${
+              isOverBudget ? 'border-red-500/40 ring-1 ring-red-500/30' : 'border-[var(--md-outline-variant)]'
+            } text-[var(--md-on-surface)] shadow-none flex flex-col compact:flex-row items-center gap-5 sm:gap-6 relative overflow-hidden`}
+          >
+            <div className="relative flex-shrink-0">
+              <svg width="104" height="104" viewBox="0 0 104 104">
+                <circle cx="52" cy="52" r="44" fill="none" stroke="currentColor" strokeWidth="9" className="text-black/10 dark:text-white/10" />
+                <circle
+                  cx="52" cy="52" r="44"
+                  fill="none"
+                  stroke={strokeColor}
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeDasharray={`${strokeDash} ${circumference}`}
+                  transform="rotate(-90 52 52)"
+                  style={{ transition: 'stroke-dasharray 0.5s ease, stroke 0.3s ease' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="stat-clamp-tile font-bold font-stat leading-none text-[var(--md-on-surface)]">{Math.round(totalConsumed)}</span>
+                <span className="text-[10px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag mt-0.5">kcal</span>
+              </div>
             </div>
-          )}
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Target</span>
-            <span className="font-stat font-bold text-sm text-[var(--md-on-surface)] whitespace-nowrap">{targetCals} kcal</span>
-          </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Remaining</span>
-            <span className={`font-stat font-bold text-sm whitespace-nowrap ${totalConsumed > targetCals ? 'text-red-500' : 'text-emerald-500'}`}>
-              {Math.round(Math.max(0, targetCals - totalConsumed))} kcal
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full bg-[var(--md-surface-container)] overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500 bg-[var(--md-primary)]"
-              style={{ width: `${Math.min(100, ringPct)}%` }}
-            />
-          </div>
-        </div>
-      </motion.div>
+
+            <div className="flex-1 w-full space-y-2">
+              {activeGoalConfig && (
+                <div className="flex items-center justify-between gap-2 pb-1 border-b border-[var(--md-outline-variant)]/60">
+                  <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate min-w-0">
+                    {activeGoalConfig.label}
+                  </span>
+                  <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0 whitespace-nowrap">
+                    {targetProtein}g Protein
+                  </span>
+                </div>
+              )}
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Target</span>
+                <span className="font-stat font-bold text-sm text-[var(--md-on-surface)] whitespace-nowrap">{targetCals} kcal</span>
+              </div>
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">
+                  {isOverBudget ? 'Budget Status' : 'Remaining'}
+                </span>
+                <span className={`font-stat font-bold text-sm whitespace-nowrap ${isOverBudget ? 'text-red-500 dark:text-red-400' : 'text-emerald-500'}`}>
+                  {isOverBudget ? `Over by ${overAmount} kcal` : `${remainingAmount} kcal`}
+                </span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-[var(--md-surface-container)] overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${barBgColor}`}
+                  style={{ width: `${Math.min(100, ringPct)}%` }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        );
+      })()}
 
       {/* ── Nutrition Interaction Personality: Widget-Style Single-Highlight Stat Cards (Image 9 pattern) ── */}
       <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-4">

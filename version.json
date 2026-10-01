@@ -1,6 +1,8 @@
 {
-  "versionCode": 17,
-  "versionName": "1.2.7",
-  "releaseDate": "2026-09-21",
-  "releaseNotes": "LifeOS v1.2.7 (Build 17): Added 15 new curated tonal color families (25 total) to the per-interface personalization system with 1-to-1 lock enforcement and live preview."
+  "versionCode": 38,
+  "versionName": "2.1.4",
+  "releaseDate": "2026-10-01",
+  "apkSize": "14.4 MB",
+  "apkSizeBytes": 14410000,
+  "releaseNotes": "LifeOS v2.1.4 (Build 38):\n• Android 17 / Gemini Intelligence design language restyle with glass, light & blur tokens\n• Performance mode system with Auto/Full/Lite tiers and Reduce blur effects setting"
 }

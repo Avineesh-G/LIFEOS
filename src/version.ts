@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 38,
-  versionName: '2.1.4',
-  releaseDate: '2026-10-01',
-  apkSize: '14.4 MB',
-  apkSizeBytes: 14410000,
-  releaseNotes: 'LifeOS v2.1.4 (Build 38):\n• Updated VIT-AP Mess Menu for October 2026 with full date-by-date calendar integration\n• Enhanced nutrition protocol tracking and item diet indicators',
+  versionCode: 40,
+  versionName: '2.1.6',
+  releaseDate: '2026-10-02',
+  apkSize: '14.5 MB',
+  apkSizeBytes: 14500000,
+  releaseNotes: 'LifeOS v2.1.6 (Build 40):\n• Fix Ask LifeOS AI input interaction and focus stability\n• Authentic organic glow pill dialer with instant single-tap responsiveness\n• Saved intelligence and persistent chat history',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

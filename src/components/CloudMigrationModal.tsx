@@ -134,7 +134,7 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
       {/* ── One-Time Migration Dialog ── */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-transparent pointer-events-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 24 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

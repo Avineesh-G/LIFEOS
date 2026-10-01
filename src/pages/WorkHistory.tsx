@@ -27,11 +27,11 @@ interface WorkHistoryProps {
 type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending' | 'notes';
 
 const TABS: { id: HistoryTab; icon: any; title: string; color: string }[] = [
-  { id: 'nutrition', icon: FlatwareIcon,    title: 'Nutrition History', color: 'text-amber-500' },
-  { id: 'gym',       icon: ExerciseIcon,    title: 'Gym History',       color: 'text-rose-500' },
-  { id: 'todo',      icon: ListAltCheckIcon, title: 'Tasks History',     color: 'text-emerald-500' },
-  { id: 'spending',  icon: WalletIcon,      title: 'Spending History',  color: 'text-[#15803D] dark:text-[#82CB92]' },
-  { id: 'notes',     icon: NotebookPen,     title: 'Notes & Ideas History', color: 'text-[#C026D3]' },
+  { id: 'nutrition', icon: FlatwareIcon,    title: 'Nutrition History', color: 'text-accent' },
+  { id: 'gym',       icon: ExerciseIcon,    title: 'Gym History',       color: 'text-accent' },
+  { id: 'todo',      icon: ListAltCheckIcon, title: 'Tasks History',     color: 'text-accent' },
+  { id: 'spending',  icon: WalletIcon,      title: 'Spending History',  color: 'text-accent' },
+  { id: 'notes',     icon: NotebookPen,     title: 'Notes & Ideas History', color: 'text-accent' },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -351,12 +351,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       {/* ── Section Title Header ── */}
       <div className="flex items-center justify-between px-1 pt-1 pb-0.5">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${
-            activeTab === 'nutrition' ? 'bg-amber-500' :
-            activeTab === 'gym' ? 'bg-rose-500' :
-            activeTab === 'todo' ? 'bg-emerald-500' :
-            activeTab === 'spending' ? 'bg-[#15803D]' : 'bg-[#C026D3]'
-          }`} />
+          <span className="w-2 h-2 rounded-full bg-accent" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
             {currentTabMeta.title}
           </h2>
@@ -708,7 +703,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
             <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Spent</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-[#15803D] dark:text-[#82CB92] break-words leading-tight">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
+              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-accent break-words leading-tight">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
             </div>
             <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
               <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Daily Avg</span>
@@ -725,10 +720,10 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           </div>
 
           {/* AI Spending Analysis Card */}
-          <div className="card p-4 space-y-3 border border-[#15803D]/30 bg-[#15803D]/5">
+          <div className="card p-4 space-y-3 border border-accent/30 bg-accent/5">
             <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#15803D]/20 text-[#15803D] dark:text-[#82CB92] flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-accent/20 text-accent flex items-center justify-center shrink-0">
                   <Sparkles size={18} />
                 </div>
                 <div className="min-w-0">
@@ -747,7 +742,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             </div>
 
             {spendingAiResult && (
-              <div className="space-y-2 pt-2 border-t border-[#15803D]/20">
+              <div className="space-y-2 pt-2 border-t border-accent/20">
                 <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
                   "{spendingAiResult.summary}"
                 </p>
@@ -755,7 +750,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                   <ul className="space-y-1 pt-1">
                     {spendingAiResult.tips.map((tip: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-[#15803D] dark:text-[#82CB92] flex-shrink-0 mt-0.5" />
+                        <Check size={13} className="text-accent flex-shrink-0 mt-0.5" />
                         <span>{tip}</span>
                       </li>
                     ))}
@@ -813,7 +808,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="grid grid-cols-3 gap-2 w-full">
             <div className="card p-3 rounded-[20px] space-y-1 text-center">
               <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Total Notes</span>
-              <p className="text-lg font-black text-[#C026D3] dark:text-[#F0ABFC]">{monthlyNotes.length}</p>
+              <p className="text-lg font-black text-accent">{monthlyNotes.length}</p>
             </div>
             <div className="card p-3 rounded-[20px] space-y-1 text-center">
               <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Lined Pages</span>
@@ -837,7 +832,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <button
                 type="button"
                 onClick={() => navigate('/notes')}
-                className="text-xs font-bold text-[#C026D3] dark:text-[#F0ABFC] hover:underline"
+                className="text-xs font-bold text-accent hover:underline"
               >
                 Open Notes Interface →
               </button>
@@ -845,7 +840,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
             {monthlyNotes.length === 0 ? (
               <div className="card p-8 text-center text-muted-light dark:text-muted-dark text-xs space-y-2">
-                <NotebookPen size={28} className="mx-auto text-[#C026D3]/40" />
+                <NotebookPen size={28} className="mx-auto text-accent/40" />
                 <p>No notes or ideas found for this month.</p>
               </div>
             ) : (
@@ -854,13 +849,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                   <div
                     key={note.id}
                     onClick={() => navigate('/notes')}
-                    className="card p-4 rounded-2xl cursor-pointer hover:border-[#C026D3]/40 transition-all space-y-1.5"
+                    className="card p-4 rounded-2xl cursor-pointer hover:border-accent/40 transition-all space-y-1.5"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-bold text-[#4A044E] dark:text-[#FDF4FF] line-clamp-1">
+                      <h4 className="text-sm font-bold text-primary-light dark:text-primary-dark line-clamp-1">
                         {note.title || 'Untitled Thought'}
                       </h4>
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#C026D3]/10 text-[#C026D3] dark:text-[#F0ABFC]">
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-accent/10 text-accent">
                         {note.pageView || 'white'}
                       </span>
                     </div>

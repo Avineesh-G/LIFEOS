@@ -2,5 +2,5 @@
   <rect width="512" height="512" rx="128" fill="#09090B"/>
   <rect x="2" y="2" width="508" height="508" rx="126" stroke="#27272A" stroke-width="4"/>
   <path d="M140 110h56v236h176v56H140V110z" fill="#FFFFFF"/>
-  <circle cx="372" cy="168" r="44" fill="#6366F1"/>
+  <circle cx="372" cy="168" r="44" fill="#2DD4BF"/>
 </svg>

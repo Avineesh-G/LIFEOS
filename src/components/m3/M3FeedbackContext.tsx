@@ -208,7 +208,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+            className="fixed inset-0 z-[9999] bg-transparent flex items-center justify-center p-4 sm:p-6"
             onClick={deleteDialog.stage === 'confirm' ? handleCancelDelete : undefined}
           >
             <motion.div
@@ -310,7 +310,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 select-none"
+            className="fixed inset-0 z-[9999] bg-transparent flex items-center justify-center p-4 sm:p-6 select-none"
             onClick={() => setFeedback(null)}
           >
             <motion.div

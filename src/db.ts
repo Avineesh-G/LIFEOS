@@ -1,7 +1,6 @@
 import { doc, getDoc, getDocFromServer, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase.ts';
 import type { AppData } from './types';
-import { DEFAULT_INTERFACE_COLORS } from './theme/colorFamilies.ts';
 
 const DEFAULT_DATA: AppData = {
   studySessions: [],
@@ -19,7 +18,7 @@ const DEFAULT_DATA: AppData = {
   timetable: [],
   tasks: [],
   reviews: [],
-  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {} },
+  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {}, performanceMode: 'auto', reduceBlurEffects: false },
   profile: null,
   menuMonths: [],
   nutritionLogs: [],
@@ -31,6 +30,7 @@ const DEFAULT_DATA: AppData = {
   shoppingLists: [],
   notes: [],
   moneyLent: [],
+  aiChatHistory: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -138,19 +138,32 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     createdAt: item?.createdAt || new Date().toISOString(),
   }));
 
+  merged.aiChatHistory = (merged.aiChatHistory || []).map(sess => ({
+    id: sess?.id || `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    title: sess?.title || 'Chat Session',
+    createdAt: sess?.createdAt || new Date().toISOString(),
+    updatedAt: sess?.updatedAt || new Date().toISOString(),
+    pathname: sess?.pathname || '/',
+    messages: Array.isArray(sess?.messages)
+      ? sess.messages.map(m => ({
+          id: m?.id || `msg_${Date.now()}`,
+          role: m?.role || 'user',
+          content: m?.content || '',
+          timestamp: m?.timestamp || new Date().toISOString(),
+          dataSentContext: m?.dataSentContext || undefined,
+        }))
+      : [],
+  }));
+
   merged.settings = {
     ...DEFAULT_DATA.settings,
     ...(merged.settings || {}),
+    performanceMode: merged.settings?.performanceMode || 'auto',
+    reduceBlurEffects: Boolean(merged.settings?.reduceBlurEffects),
     navPinned:
       Array.isArray(merged.settings?.navPinned) && merged.settings.navPinned.length === 2
         ? [String(merged.settings.navPinned[0]), String(merged.settings.navPinned[1])]
         : ['gym', 'nutrition'],
-    interfaceColors: {
-      ...DEFAULT_INTERFACE_COLORS,
-      ...(merged.settings?.interfaceColors && typeof merged.settings.interfaceColors === 'object'
-        ? merged.settings.interfaceColors
-        : {}),
-    },
   };
 
   return merged;

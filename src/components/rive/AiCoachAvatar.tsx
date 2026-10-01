@@ -42,7 +42,7 @@ export default function AiCoachAvatar({
   const fallbackOrb = (
     <div
       style={{ width: size, height: size }}
-      className="relative flex items-center justify-center rounded-2xl bg-gradient-to-tr from-accent/20 via-purple-500/15 to-transparent border border-accent/30 shadow-lg shadow-accent/15"
+      className="relative flex items-center justify-center rounded-2xl bg-gradient-to-tr from-accent/20 via-purple-500/15 to-transparent shadow-lg shadow-accent/15"
     >
       {/* Outer Glow Halo */}
       <div 

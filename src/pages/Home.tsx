@@ -24,9 +24,9 @@ import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
 import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { CATEGORY_COLORS } from '../theme/cardThemeTokens';
 import { M3_SHAPES } from '../theme/shapes';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
+import { LiquidFrame, GlassSurface, SuggestionChip, AskLifeOSPill } from '../components/glass';
 
 // ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
 const LiveClock = memo(function LiveClock() {
@@ -36,7 +36,7 @@ const LiveClock = memo(function LiveClock() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] shadow-none">
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] shadow-none">
       <Clock size={13} className="text-[var(--md-primary)] shrink-0" />
       <span className="text-xs font-semibold tracking-wide text-[var(--md-on-surface)]">
         {format(now, 'EEEE, MMMM d')}
@@ -64,18 +64,18 @@ const DayCell = memo(function DayCell({
         triggerHaptic('light');
         setSelectedDate(d);
       }}
-      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[var(--md-shape-xl)] transition-all select-none focus:outline-none bouncy-tap ${
+      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all select-none focus:outline-none bouncy-tap ${
         !isSel && isCur
-          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
+          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
           : !isSel
-          ? 'hover:bg-[var(--pill-active-bg)]'
+          ? 'hover:bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
           : ''
       }`}
     >
       {isSel && (
         <motion.div
           layoutId="activeHomeDatePill"
-          className="absolute inset-0 rounded-[20px] bg-[var(--md-primary)] shadow-none"
+          className="absolute inset-0 rounded-[18px] sm:rounded-[20px] bg-[var(--md-primary)] shadow-none"
           transition={{ type: 'spring', stiffness: 450, damping: 35 }}
         />
       )}
@@ -134,6 +134,24 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
   // ── Selected Date State (Defaults to Today) ──
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+
+  const greetingTime = useMemo(() => {
+    const hr = new Date().getHours();
+    if (hr < 12) return 'Good morning';
+    if (hr < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
+  const userName = useMemo(() => {
+    try {
+      const cached = localStorage.getItem('lifeos_cached_auth_user');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.displayName) return parsed.displayName.split(' ')[0];
+      }
+    } catch {}
+    return 'Avineesh';
+  }, []);
 
   // 7-day rolling window centered on today: 3 past, today, 3 future
   const weekDays = useMemo(() => {
@@ -262,48 +280,42 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
-      {/* ── Ambient Executive Greeting Hero Card (M3 Signature Asymmetric Shape) ── */}
-      <motion.div
-        variants={item}
-        className={`${M3_SHAPES.asymmetricHero} p-6 sm:p-7 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-4 select-none`}
-      >
-        {/* Top Header Row: Date Pill, Mode Badge & Streak */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <LiveClock />
+      {/* ── Ambient Executive Greeting Hero Card (Borderless LiquidFrame) ── */}
+      <motion.div variants={item}>
+        <LiquidFrame noBorder className="space-y-4 select-none border-none outline-none ring-0 focus:outline-none focus:ring-0">
+          {/* Top Header Row: Date Pill & Mode Badge */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <LiveClock />
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border-[var(--md-outline-variant)] shadow-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
-            Active Session
-          </span>
-
-          <StreakIndicator
-            streak={data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length || 1}
-            size="sm"
-          />
-        </div>
-
-        {/* Hero Title Row with AI Coach Avatar on Right */}
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-[var(--md-on-surface)] leading-tight">
-              Welcome to{' '}
-              <span
-                style={{ backgroundImage: 'var(--headline-gradient)' }}
-                className="bg-clip-text text-transparent"
-              >
-                LifeOS
-              </span>
-            </h1>
-
-            {/* Motivational Subline */}
-            <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
-              <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-90" />
-              <span>Your personal operating system · Focus and execute</span>
-            </p>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--glass-2)] text-primary shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              Active Session
+            </span>
           </div>
 
-          <AiCoachAvatar state="idle" size={54} />
-        </div>
+          {/* Hero Title Row with AI Coach Avatar on Right */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-primary leading-tight font-medium">
+                {greetingTime},{' '}
+                <span
+                  style={{ backgroundImage: 'var(--headline-gradient)' }}
+                  className="bg-clip-text text-transparent font-semibold"
+                >
+                  {userName}
+                </span>
+              </h1>
+
+              {/* Motivational Subline */}
+              <p className="text-xs sm:text-[13px] font-medium text-secondary mt-1.5 tracking-tight flex items-center gap-1.5">
+                <Sparkles size={13} className="text-accent shrink-0 opacity-90" />
+                <span>Your personal operating system · Focus and execute</span>
+              </p>
+            </div>
+
+            <AiCoachAvatar state="idle" size={54} />
+          </div>
+        </LiquidFrame>
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
@@ -478,7 +490,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                   onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
                   className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-accent/12 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0">
                     <Wallet size={15} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0 flex-1">

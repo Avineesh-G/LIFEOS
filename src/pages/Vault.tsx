@@ -694,7 +694,7 @@ export default function Vault({ data, updateData }: VaultProps) {
 
       {/* ── Credentials List (Mobile-Optimized Cards) ── */}
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-white/40 dark:bg-[#161820]/40 border border-dashed border-black/10 dark:border-white/10 text-center my-4">
+        <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-white/40 dark:bg-surface-dark border border-dashed border-black/10 dark:border-white/10 text-center my-4">
           <div className="w-12 h-12 rounded-2xl bg-[var(--md-primary)]/10 flex items-center justify-center text-[var(--md-primary)] dark:text-[var(--md-secondary)] mb-2.5">
             <KeyRound size={22} strokeWidth={1.8} />
           </div>
@@ -836,7 +836,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       className={`w-8 h-8 rounded-lg border transition-all flex items-center justify-center active:scale-95 ${
                         isRevealed
                           ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
-                          : 'bg-surface-light dark:bg-[#20232E] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
+                          : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
                       }`}
                       title={isRevealed ? 'Hide' : 'Peek for 10s'}
                     >
@@ -849,7 +849,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       className={`w-8 h-8 rounded-lg border transition-all flex items-center justify-center active:scale-95 ${
                         isPasswordCopied
                           ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
-                          : 'bg-surface-light dark:bg-[#20232E] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
+                          : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
                       }`}
                       title="Copy Password"
                     >
@@ -912,7 +912,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="e.g. VIT Student Portal, GitHub, Netflix"
                     value={modalForm.title}
                     onChange={(e) => setModalForm({ ...modalForm, title: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                   />
                 </div>
 
@@ -936,7 +936,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                           className={`flex items-center justify-center gap-1 p-2 rounded-xl border text-[11px] font-bold transition-all ${
                             active
                               ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
-                              : 'bg-surface-light dark:bg-[#1F212A] text-secondary-light dark:text-secondary-dark border-border-light dark:border-border-dark'
+                              : 'bg-surface-light dark:bg-surface-dark text-secondary-light dark:text-secondary-dark border-border-light dark:border-border-dark'
                           }`}
                         >
                           <c.icon size={12} className={active ? 'text-[var(--md-on-primary)]' : c.color} />
@@ -957,7 +957,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="e.g. 21BCE1024 / user@email.com"
                     value={modalForm.usernameOrEmail}
                     onChange={(e) => setModalForm({ ...modalForm, usernameOrEmail: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                   />
                 </div>
 
@@ -983,7 +983,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       placeholder="••••••••••••"
                       value={modalForm.password}
                       onChange={(e) => setModalForm({ ...modalForm, password: e.target.value })}
-                      className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm font-mono text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
+                      className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-xs sm:text-sm font-mono text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                     />
                     <button
                       type="button"
@@ -1022,7 +1022,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       placeholder="e.g. vtop.vit.ac.in"
                       value={modalForm.websiteUrl}
                       onChange={(e) => setModalForm({ ...modalForm, websiteUrl: e.target.value })}
-                      className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
+                      className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-xs sm:text-sm text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)]"
                     />
                   </div>
                 </div>
@@ -1037,7 +1037,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     placeholder="Security questions, recovery codes, or hints..."
                     value={modalForm.notes}
                     onChange={(e) => setModalForm({ ...modalForm, notes: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-light dark:bg-[#1F212A] border border-border-light dark:border-border-dark text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)] resize-none"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-[var(--md-primary)] resize-none"
                   />
                 </div>
 
@@ -1159,7 +1159,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       className={`p-1.5 px-2 rounded-lg border text-[10px] font-bold transition-all flex items-center justify-between ${
                         active
                           ? 'bg-[var(--md-primary)]/15 text-[var(--md-primary)] dark:text-[var(--md-secondary)] border border-[var(--md-primary)]/30'
-                          : 'bg-surface-light dark:bg-[#1E2029] text-secondary-light border-border-light dark:border-border-dark'
+                          : 'bg-surface-light dark:bg-surface-dark text-secondary-light border-border-light dark:border-border-dark'
                       }`}
                     >
                       <span>{label}</span>
