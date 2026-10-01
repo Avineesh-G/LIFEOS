@@ -1715,7 +1715,7 @@ export default function Settings({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6"
+            className="fixed inset-0 z-[9999] bg-transparent flex items-center justify-center p-4 sm:p-6"
             onClick={() => setShowLogoutModal(false)}
           >
             <motion.div

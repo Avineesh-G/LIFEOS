@@ -252,6 +252,24 @@ export interface AppData {
 
   // Money Lent Module (Loans to friends/colleagues, excluded from expenses)
   moneyLent?: MoneyLentItem[];
+
+  // AI Chat History Module (Saved search and assistant sessions)
+  aiChatHistory?: AiChatSession[];
+}
+
+export interface AiChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  pathname?: string;
+  messages: {
+    id: string;
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    timestamp: string;
+    dataSentContext?: string;
+  }[];
 }
 
 export interface NoteItem {

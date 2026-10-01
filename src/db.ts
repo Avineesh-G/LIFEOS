@@ -30,6 +30,7 @@ const DEFAULT_DATA: AppData = {
   shoppingLists: [],
   notes: [],
   moneyLent: [],
+  aiChatHistory: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -135,6 +136,23 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     status: item?.status === 'returned' ? 'returned' : 'pending',
     returnedDate: item?.returnedDate || undefined,
     createdAt: item?.createdAt || new Date().toISOString(),
+  }));
+
+  merged.aiChatHistory = (merged.aiChatHistory || []).map(sess => ({
+    id: sess?.id || `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    title: sess?.title || 'Chat Session',
+    createdAt: sess?.createdAt || new Date().toISOString(),
+    updatedAt: sess?.updatedAt || new Date().toISOString(),
+    pathname: sess?.pathname || '/',
+    messages: Array.isArray(sess?.messages)
+      ? sess.messages.map(m => ({
+          id: m?.id || `msg_${Date.now()}`,
+          role: m?.role || 'user',
+          content: m?.content || '',
+          timestamp: m?.timestamp || new Date().toISOString(),
+          dataSentContext: m?.dataSentContext || undefined,
+        }))
+      : [],
   }));
 
   merged.settings = {

@@ -51,6 +51,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
 
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const handleCloseAi = useCallback(() => setAiSheetOpen(false), []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -278,54 +279,6 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     return false;
   };
 
-  // Virtual keyboard detection: hide nav bar when keyboard is up to prevent occlusion
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-
-  useEffect(() => {
-    const handleFocusIn = (e: FocusEvent) => {
-      if (isVirtualKeyboardInput(e.target as Element)) {
-        setIsKeyboardOpen(true);
-      }
-    };
-
-    const handleFocusOut = () => {
-      // Give a tiny tick so if focus moves between inputs, we don't flash the nav
-      setTimeout(() => {
-        if (!isVirtualKeyboardInput(document.activeElement)) {
-          setIsKeyboardOpen(false);
-        }
-      }, 100);
-    };
-
-    // VisualViewport fallback: tracks real-time screen shrinkage when keyboard slides in on Android/iOS
-    const handleViewportResize = () => {
-      if (window.visualViewport) {
-        // If viewport height drops significantly below window innerHeight, keyboard is open
-        const heightDiff = window.innerHeight - window.visualViewport.height;
-        if (heightDiff > 140) {
-          setIsKeyboardOpen(true);
-        } else if (!isVirtualKeyboardInput(document.activeElement)) {
-          setIsKeyboardOpen(false);
-        }
-      }
-    };
-
-    window.addEventListener('focusin', handleFocusIn);
-    window.addEventListener('focusout', handleFocusOut);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleViewportResize);
-      window.visualViewport.addEventListener('scroll', handleViewportResize);
-    }
-
-    return () => {
-      window.removeEventListener('focusin', handleFocusIn);
-      window.removeEventListener('focusout', handleFocusOut);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleViewportResize);
-        window.visualViewport.removeEventListener('scroll', handleViewportResize);
-      }
-    };
-  }, []);
 
   // Directional scroll listener: hides nav on scroll down, shows on scroll up
   const [navVisible, setNavVisible] = useState(true);
@@ -608,96 +561,122 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         onExitEditMode={() => setHubEditMode(false)}
       />
 
-      {/* ── Fixed Bottom Divided Navigation Bar (Pill + Squircle, Per-Interface Color) ── */}
-      {(() => {
-        const isNavHidden = isKeyboardOpen || isSubRoute || (!navVisible && !menuOpen);
-        return (
-          <motion.nav
-            ref={navRef}
-            initial={false}
-            animate={{
-              y: isNavHidden ? 100 : 0,
-              opacity: isNavHidden ? 0 : 1,
-              scale: isNavHidden ? 0.93 : 1,
-            }}
-            transition={{
-              y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
-              opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-              scale: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
-            }}
-            style={{
-              bottom: 'calc(var(--sab, env(safe-area-inset-bottom, 0px)) + 12px)',
-              pointerEvents: isNavHidden ? 'none' : 'auto',
-              touchAction: 'manipulation',
-            }}
-            className="fixed left-0 right-0 z-[100] flex items-center justify-center px-2 compact:px-3 sm:px-4 gpu-composited select-none"
-            role="navigation"
-            aria-label="Main Navigation"
-          >
-            <div className="relative pointer-events-auto flex items-center gap-2 compact:gap-3 sm:gap-[14px]">
-              {/* 1. Nav pill (left element): full stadium/pill, fluid height, width sized to content */}
-              <div
-                className="h-[52px] compact:h-[58px] sm:h-[64px] px-2.5 compact:px-3.5 sm:px-[20px] rounded-full flex items-center gap-2 compact:gap-4 sm:gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none"
-                style={{
-                  backgroundColor: pillBg,
-                  opacity: 1,
-                  transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
-                }}
-              >
-                {navTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const active = tab.isActive;
-                  return (
-                    <button
-                      key={tab.id}
-                      data-no-ripple="true"
-                      onPointerDown={(e) => handleSlotPointerDown(tab.slotIndex, e)}
-                      onPointerMove={handleSlotPointerMove}
-                      onPointerUp={handleSlotPointerUpOrLeave}
-                      onPointerCancel={handleSlotPointerUpOrLeave}
-                      onPointerLeave={handleSlotPointerUpOrLeave}
-                      onClick={() => {
-                        if (isLongPressTriggeredRef.current) {
-                          isLongPressTriggeredRef.current = false;
-                          return;
-                        }
-                        triggerHaptic('nav');
-                        if (menuOpen) setMenuOpen(false);
-                        if ((tab as any).isAiButton) {
-                          setAiSheetOpen(true);
-                        } else {
-                          startTransition(() => { navigate(tab.path); });
-                        }
-                      }}
-                      className="relative w-[34px] h-[34px] compact:w-[38px] compact:h-[38px] sm:w-[40px] sm:h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
-                      aria-label={tab.label}
-                    >
-                      {/* Active icon chip: 12-lobed scallop shape — rotates 30° on each interface switch */}
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                          active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-                        }`}
-                      >
-                        <motion.div
-                          animate={{ rotate: scallopRotation }}
-                          transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
-                          className="w-full h-full flex items-center justify-center"
+      {/* ── Compact Bottom Navigation Wrapper (.bottom-nav-wrapper) ── */}
+      <div className="bottom-nav-wrapper">
+        {/* Atmospheric Blur Layer (.bottom-nav-atmosphere) */}
+        <motion.div
+          className="bottom-nav-atmosphere"
+          initial={false}
+          animate={{
+            y: aiSheetOpen ? 120 : 0,
+            opacity: aiSheetOpen ? 0 : 1,
+          }}
+          transition={{
+            y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
+            opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+          }}
+        />
+
+        {/* Compact Floating Navigation Bar */}
+        {(() => {
+          const isNavHidden = aiSheetOpen;
+          return (
+            <motion.nav
+              ref={navRef}
+              initial={false}
+              animate={{
+                y: isNavHidden ? 120 : 0,
+                opacity: isNavHidden ? 0 : 1,
+                scale: isNavHidden ? 0.93 : 1,
+              }}
+              transition={{
+                y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
+                opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+                scale: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+              }}
+              style={{
+                marginBottom: '10px',
+                pointerEvents: isNavHidden ? 'none' : 'auto',
+                touchAction: 'manipulation',
+              }}
+              className="relative z-10 flex items-center justify-center px-2 compact:px-3 sm:px-4 gpu-composited select-none"
+              role="navigation"
+              aria-label="Main Navigation"
+            >
+                <div className="relative pointer-events-auto flex items-center gap-2 compact:gap-3 sm:gap-[14px]">
+                  {/* 1. Nav pill (left element): compact stadium container with glass backdrop */}
+                  <div
+                    className="h-[52px] compact:h-[58px] sm:h-[64px] px-2.5 compact:px-3.5 sm:px-[20px] rounded-full flex items-center gap-2 compact:gap-4 sm:gap-[28px] border border-black/[0.06] dark:border-white/[0.12] shadow-[0_10px_28px_rgba(0,0,0,0.10)] dark:shadow-[0_14px_36px_rgba(0,0,0,0.45)] select-none relative"
+                    style={{
+                      backgroundColor: pillBg,
+                      backdropFilter: 'blur(22px) saturate(135%)',
+                      WebkitBackdropFilter: 'blur(22px) saturate(135%)',
+                      opacity: 1,
+                      transition: 'background-color 220ms cubic-bezier(0.2, 0, 0, 1), border-color 220ms cubic-bezier(0.2, 0, 0, 1)',
+                    }}
+                  >
+                    {navTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      const active = tab.isActive;
+                      const isAi = Boolean((tab as any).isAiButton);
+                      return (
+                        <button
+                          key={tab.id}
+                          data-no-ripple="true"
+                          onPointerDown={(e) => {
+                            if (!isAi) {
+                              handleSlotPointerDown(tab.slotIndex, e);
+                            }
+                          }}
+                          onPointerMove={!isAi ? handleSlotPointerMove : undefined}
+                          onPointerUp={!isAi ? handleSlotPointerUpOrLeave : undefined}
+                          onPointerCancel={!isAi ? handleSlotPointerUpOrLeave : undefined}
+                          onPointerLeave={!isAi ? handleSlotPointerUpOrLeave : undefined}
+                          onClick={() => {
+                            if (!isAi && isLongPressTriggeredRef.current) {
+                              isLongPressTriggeredRef.current = false;
+                              return;
+                            }
+                            triggerHaptic('nav');
+                            if (menuOpen) setMenuOpen(false);
+                            if (isAi) {
+                              setAiSheetOpen(true);
+                            } else {
+                              startTransition(() => { navigate(tab.path); });
+                            }
+                          }}
+                          className="relative w-[34px] h-[34px] compact:w-[38px] compact:h-[38px] sm:w-[40px] sm:h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
+                          aria-label={tab.label}
                         >
-                          <ScallopShape fill={solidAccent} className="w-full h-full drop-shadow-sm" />
-                        </motion.div>
-                      </div>
-                      {/* Icon: active in white, inactive in 55% opacity */}
-                      <Icon
-                        className="relative z-10 transition-colors duration-200 w-[19px] h-[19px] compact:w-[21px] compact:h-[21px] sm:w-[24px] sm:h-[24px]"
-                        strokeWidth={active ? 2.5 : 2.2}
-                        style={{
-                          color: active ? '#FFFFFF' : inactiveColor,
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
+                          {/* Localized active turquoise glow centered on active element */}
+                          {active && <div className="nav-active-glow" />}
+
+                          {/* Active icon chip: 12-lobed scallop shape */}
+                          <div
+                            className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                              active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                            }`}
+                          >
+                            <motion.div
+                              animate={{ rotate: scallopRotation }}
+                              transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
+                              className="w-full h-full flex items-center justify-center"
+                            >
+                              <ScallopShape fill={solidAccent} className="w-full h-full drop-shadow-sm" />
+                            </motion.div>
+                          </div>
+                          {/* Icon */}
+                          <Icon
+                            className="relative z-10 transition-colors duration-200 w-[19px] h-[19px] compact:w-[21px] compact:h-[21px] sm:w-[24px] sm:h-[24px]"
+                            strokeWidth={active ? 2.5 : 2.2}
+                            style={{
+                              color: active ? '#FFFFFF' : inactiveColor,
+                            }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
 
               {/* 2. More button (right element, separate scallop shape): responsive dimensions */}
               <motion.button
@@ -773,11 +752,12 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           </motion.nav>
         );
       })()}
+      </div>
 
       {/* ── Global Ask LifeOS AI Assistant Sheet (Pop-Up over active interface) ── */}
       <AskLifeOSModal
         isOpen={aiSheetOpen}
-        onClose={() => setAiSheetOpen(false)}
+        onClose={handleCloseAi}
         data={data || ({} as any)}
         updateData={updateData || (async () => ({} as any))}
       />

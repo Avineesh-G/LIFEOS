@@ -9,6 +9,15 @@
   --r-xl: 36px;
   --r-full: 999px;
 
+  /* Material 3 & Design Token Shape Aliases */
+  --md-shape-xs: 6px;
+  --md-shape-sm: 10px;
+  --md-shape-md: 14px;
+  --md-shape-lg: 18px;
+  --md-shape-xl: 22px;
+  --md-shape-xxl: 28px;
+  --md-shape-full: 9999px;
+
   /* Default container parent tokens */
   --r-parent: var(--r-md);
   --pad-parent: 12px;
@@ -52,17 +61,27 @@
   }
 }
 
-/* Smooth Scrollbar Styling with Rounded Thumbs */
+/* ── Mobile Native Scrollbar Reset: Hide all scrollbars globally ── */
+* {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.3);
-  border-radius: var(--r-full);
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-button {
+  display: none !important;
+  background: transparent !important;
+  border: none !important;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.5);

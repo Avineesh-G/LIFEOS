@@ -48,10 +48,20 @@ export default function FloatingPopup({
   const popupRef = useRef<HTMLDivElement>(null);
   const triggerElementRef = useRef<HTMLElement | null>(null);
 
+  const wasOpenRef = useRef(false);
+
   // Store trigger element for focus restoration upon close
   useEffect(() => {
     if (isOpen) {
-      triggerElementRef.current = (returnFocusRef?.current || document.activeElement) as HTMLElement;
+      wasOpenRef.current = true;
+      if (!popupRef.current?.contains(document.activeElement)) {
+        triggerElementRef.current = (returnFocusRef?.current || document.activeElement) as HTMLElement;
+      }
+    } else if (wasOpenRef.current) {
+      wasOpenRef.current = false;
+      if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
+        triggerElementRef.current.focus();
+      }
     }
   }, [isOpen, returnFocusRef]);
 
@@ -66,6 +76,11 @@ export default function FloatingPopup({
     }
   }, [isDirty, onClose]);
 
+  const handleAttemptCloseRef = useRef(handleAttemptClose);
+  useEffect(() => {
+    handleAttemptCloseRef.current = handleAttemptClose;
+  }, [handleAttemptClose]);
+
   // Confirm discard changes
   const handleConfirmDiscard = () => {
     triggerHaptic('medium');
@@ -75,25 +90,31 @@ export default function FloatingPopup({
 
   // Hardware Back Button Integration: Dismiss popup before page back navigation
   useEffect(() => {
-    if (isOpen) {
-      document.body.setAttribute('data-subinterface-open', 'true');
-      window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
+    if (!isOpen) return;
 
-      const unregister = registerDismissible('floating-popup', () => {
-        handleAttemptClose();
-        return true;
-      });
+    document.body.setAttribute('data-subinterface-open', 'true');
+    window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
 
-      return () => {
-        unregister();
-        document.body.removeAttribute('data-subinterface-open');
-        window.dispatchEvent(new CustomEvent('lifeos-subinterface-close'));
-        if (triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
-          triggerElementRef.current.focus();
-        }
-      };
-    }
-  }, [isOpen, handleAttemptClose]);
+    const unregister = registerDismissible('floating-popup', () => {
+      handleAttemptCloseRef.current();
+      return true;
+    });
+
+    return () => {
+      unregister();
+      document.body.removeAttribute('data-subinterface-open');
+      window.dispatchEvent(new CustomEvent('lifeos-subinterface-close'));
+    };
+  }, [isOpen]);
+
+  // Restore focus if component unmounts while still open
+  useEffect(() => {
+    return () => {
+      if (wasOpenRef.current && triggerElementRef.current && typeof triggerElementRef.current.focus === 'function') {
+        triggerElementRef.current.focus();
+      }
+    };
+  }, []);
 
   // Virtual Keyboard resize observer via visualViewport
   useEffect(() => {
@@ -132,22 +153,22 @@ export default function FloatingPopup({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[90] pointer-events-auto flex flex-col justify-end">
-          {/* 1. Flat Translucent Dim Scrim (z-90): Dims page background below nav bar (no heavy backdrop-blur) */}
+        <div className="fixed inset-0 z-[140] pointer-events-none flex flex-col justify-end">
+          {/* 1. Flat Transparent Scrim (z-140): Allows dashboard visibility below floating panel */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleAttemptClose}
-            className="fixed inset-0 bg-black/50 dark:bg-black/65 z-[90] cursor-pointer"
+            className="fixed inset-0 bg-transparent ask-lifeos-backdrop z-[140] cursor-pointer pointer-events-auto"
             style={{
               bottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)))',
             }}
             aria-hidden="true"
           />
 
-          {/* 2. Floating Pop-Up Card (z-95): Placed 12px inset from sides, bottom 12px above nav bar */}
+          {/* 2. Floating Pop-Up Card (z-150): Placed 12px inset from sides, bottom 24px above nav bar */}
           <motion.div
             ref={popupRef}
             role="dialog"
@@ -173,35 +194,43 @@ export default function FloatingPopup({
               mass: 0.8,
             }}
             drag={variant === 'form' ? 'y' : false}
-            dragControls={dragControls}
-            dragConstraints={{ top: -200, bottom: 0 }}
-            dragElastic={{ top: 0.1, bottom: 0.5 }}
-            onDragEnd={(_, info) => {
+            dragControls={variant === 'form' ? dragControls : undefined}
+            dragConstraints={variant === 'form' ? { top: -200, bottom: 0 } : undefined}
+            dragElastic={variant === 'form' ? { top: 0.1, bottom: 0.5 } : undefined}
+            onDragEnd={variant === 'form' ? (_, info) => {
               if (info.offset.y > 90 || info.velocity.y > 400) {
                 handleAttemptClose();
               } else if (info.offset.y < -80 && fullHeightExpandable) {
                 setIsExpanded(true);
               }
-            }}
-            className={`fixed z-[95] left-3 right-3 mx-auto w-[calc(100vw-24px)] ${maxWidth} liquid-glass border border-[var(--card-border)] rounded-[28px] shadow-[0_16px_48px_rgba(0,0,0,0.35)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)] overflow-hidden flex flex-col transition-all duration-200`}
+            } : undefined}
+            className={`fixed z-[150] left-3.5 right-3.5 mx-auto w-[calc(100vw-28px)] ${maxWidth} pointer-events-auto ask-lifeos-card ${
+              variant === 'chat'
+                ? 'bg-[#050B0D]/95 dark:bg-[#050B0D]/95 text-white border border-teal-500/30 backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.65)]'
+                : 'liquid-glass border border-[var(--card-border)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)]'
+            } rounded-[28px] overflow-hidden flex flex-col transition-all duration-200`}
             style={{
               bottom: keyboardOffset > 0
-                ? `calc(${keyboardOffset}px + 12px)`
-                : 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 12px)',
+                ? `calc(${keyboardOffset}px + 16px)`
+                : 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 36px)',
               maxHeight: isExpanded
                 ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - 24px)'
                 : variant === 'chat'
                 ? 'calc(75vh - var(--nav-h, 64px))'
-                : 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 64px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 36px)',
+                : 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 64px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 48px)',
               height: variant === 'chat' ? 'calc(72vh - var(--nav-h, 64px))' : undefined,
             }}
           >
             {/* Top Grab Handle Bar */}
             <div
-              onPointerDown={(e) => dragControls.start(e)}
+              onPointerDown={(e) => {
+                if (variant === 'form') {
+                  dragControls.start(e);
+                }
+              }}
               className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
-              <div className="w-9 h-1 rounded-full bg-black/20 dark:bg-white/20 hover:bg-accent/40 transition-colors" />
+              <div className="w-9 h-1 rounded-full bg-white/25 hover:bg-accent/40 transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
@@ -242,7 +271,7 @@ export default function FloatingPopup({
             )}
 
             {/* Scrollable Body Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4">
+            <div className={`flex-1 ${variant === 'chat' ? 'flex flex-col min-h-0 overflow-hidden p-3.5 sm:p-4' : 'overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4'}`}>
               {children}
             </div>
 

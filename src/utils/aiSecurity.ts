@@ -84,7 +84,18 @@ export async function initAiSecurity(): Promise<void> {
 }
 
 export function getGroqApiKey(): string {
-  return cachedApiKey;
+  if (cachedApiKey) return cachedApiKey;
+  if (typeof localStorage !== 'undefined') {
+    const val = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY);
+    if (val) {
+      cachedApiKey = val;
+      return val;
+    }
+  }
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GROQ_API_KEY) {
+    return (import.meta as any).env.VITE_GROQ_API_KEY;
+  }
+  return '';
 }
 
 export async function setGroqApiKey(key: string): Promise<void> {
@@ -96,7 +107,15 @@ export async function setGroqApiKey(key: string): Promise<void> {
 }
 
 export function getAiProxyUrl(): string {
-  return cachedProxyUrl;
+  if (cachedProxyUrl) return cachedProxyUrl;
+  if (typeof localStorage !== 'undefined') {
+    const val = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.PROXY_URL);
+    if (val) {
+      cachedProxyUrl = val;
+      return val;
+    }
+  }
+  return '';
 }
 
 export async function setAiProxyUrl(url: string): Promise<void> {
@@ -143,7 +162,15 @@ export function setLetAiMakeChanges(val: boolean): void {
 }
 
 export function getHasAgreedConsent(): boolean {
-  return cachedConsentAgreed;
+  if (cachedConsentAgreed) return true;
+  if (typeof localStorage !== 'undefined') {
+    const val = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.CONSENT_AGREED);
+    if (val === 'true') {
+      cachedConsentAgreed = true;
+      return true;
+    }
+  }
+  return false;
 }
 
 export function setHasAgreedConsent(val: boolean): void {

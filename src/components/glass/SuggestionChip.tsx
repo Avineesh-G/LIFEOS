@@ -37,8 +37,8 @@ export const SuggestionChip = React.forwardRef<HTMLButtonElement, SuggestionChip
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       className={`
         group relative flex items-center gap-3 overflow-hidden rounded-[22px] px-4 py-3 text-left
-        border border-[var(--rim,rgba(255,255,255,0.10))]
-        bg-[var(--glass-2)] hover:bg-[var(--glass-3)]
+        border border-white/20 dark:border-white/20
+        bg-white/10 dark:bg-white/10 hover:bg-accent/20 text-white
         transition-all duration-200 touch-manipulation outline-none select-none
         ${active ? 'border-[var(--accent)] bg-[rgba(var(--accent-rgb),0.12)]' : ''}
         ${className}
@@ -61,17 +61,17 @@ export const SuggestionChip = React.forwardRef<HTMLButtonElement, SuggestionChip
       )}
 
       {/* Sparkle or Custom Icon Badge */}
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(var(--accent-rgb),0.15)] text-[var(--accent-text)] border border-[rgba(var(--accent-rgb),0.25)]">
-        {icon || <SparkleIcon className="w-4 h-4 text-[var(--accent-text)] animate-pulse" />}
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent border border-accent/30">
+        {icon || <SparkleIcon className="w-4 h-4 text-accent animate-pulse" />}
       </div>
 
       {/* Title & Subtitle */}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-primary">
+        <div className="truncate text-sm font-semibold text-white">
           {title}
         </div>
         {subtitle && (
-          <div className="truncate text-xs text-secondary mt-0.5">
+          <div className="truncate text-xs text-teal-200/80 mt-0.5">
             {subtitle}
           </div>
         )}

@@ -48,8 +48,8 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
       ref={ref}
       className={`
         relative overflow-hidden rounded-[28px]
-        border border-[var(--rim,rgba(255,255,255,0.10))]
-        shadow-sm transition-all duration-200
+        border border-[var(--rim,rgba(255,255,255,0.08))]
+        shadow-md dark:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.45)] transition-all duration-200
         ${bgClasses}
         ${interactive ? 'active:scale-[0.98] hover:border-white/20 cursor-pointer touch-manipulation' : ''}
         ${className}
@@ -61,6 +61,9 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
       }}
       {...props}
     >
+      {/* Subtle top edge bevel highlight for 3D tactile glass depth */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+
       {/* Fine dotted grain overlay for extra tactile depth (Full performance mode only) */}
       {grain && !isLite && (
         <div

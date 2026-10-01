@@ -4,7 +4,7 @@ import {
   themeFromSourceColor,
 } from '@material/material-color-utilities';
 
-import { getActiveAccent, ThemeAccent } from './themeColorManager';
+import { getActiveAccent, type ThemeAccent } from './themeColorManager.ts';
 
 export type AppSection =
   | 'home'
@@ -249,7 +249,9 @@ export function applyM3ThemeToDocument(scheme: M3ColorScheme): void {
 export function getNavPillBg(_section: AppSection, isDark: boolean, _pathname?: string): string {
   const accent = getActiveAccent();
   const [r, g, b] = hexToRgb(accent.primary);
-  return isDark ? `rgba(${r}, ${g}, ${b}, 0.12)` : `rgba(${r}, ${g}, ${b}, 0.08)`;
+  return isDark
+    ? `rgba(${Math.round(r * 0.12 + 8)}, ${Math.round(g * 0.12 + 12)}, ${Math.round(b * 0.12 + 16)}, 0.88)`
+    : `rgba(255, 255, 255, 0.88)`;
 }
 
 export function getNavSquircleBg(_section: AppSection, isDark: boolean, _pathname?: string): string {

@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 39,
-  versionName: '2.1.5',
-  releaseDate: '2026-10-01',
+  versionCode: 40,
+  versionName: '2.1.6',
+  releaseDate: '2026-10-02',
   apkSize: '14.5 MB',
   apkSizeBytes: 14500000,
-  releaseNotes: 'LifeOS v2.1.5 (Build 39):\n• Ask LifeOS AI Privacy Controls & Data Access Layer\n• Automatic sensitive data redaction, prompt injection defense, 90-day local usage history',
+  releaseNotes: 'LifeOS v2.1.6 (Build 40):\n• Fix Ask LifeOS AI input interaction and focus stability\n• Authentic organic glow pill dialer with instant single-tap responsiveness\n• Saved intelligence and persistent chat history',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

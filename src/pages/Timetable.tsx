@@ -223,18 +223,18 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                 triggerHaptic(8);
                 setActiveDay(i);
               }}
-              className={`relative flex-1 min-w-[44px] py-2.5 rounded-[20px] flex flex-col items-center justify-center transition-colors text-xs select-none ${
+              className={`relative flex-1 min-w-[44px] py-2.5 rounded-[18px] sm:rounded-[20px] overflow-hidden flex flex-col items-center justify-center transition-colors text-xs select-none ${
                 isSelected
                   ? 'text-white font-bold'
                   : isToday
-                  ? 'text-accent font-semibold hover:bg-black/5 dark:hover:bg-white/5'
+                  ? 'text-accent font-semibold bg-accent/10 dark:bg-accent/15 rounded-[18px] sm:rounded-[20px]'
                   : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark font-medium'
               }`}
             >
               {isSelected && (
                 <motion.div
                   layoutId="activeTimetableDayCapsule"
-                  className="absolute inset-0 rounded-[20px] bg-accent shadow-md shadow-accent/25"
+                  className="absolute inset-0 rounded-[18px] sm:rounded-[20px] bg-accent shadow-md shadow-accent/25"
                   transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                 />
               )}

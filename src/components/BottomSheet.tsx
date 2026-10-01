@@ -86,7 +86,7 @@ export function Modal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 dark:bg-black/75 gpu-composited"
+            className="fixed inset-0 bg-transparent gpu-composited"
           />
 
           {/* Centered Modal Content Card */}

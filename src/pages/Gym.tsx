@@ -446,11 +446,11 @@ export default function Gym({ data, updateData }: GymProps) {
                   triggerHaptic('light');
                   setSelectedDay(day);
                 }}
-                className={`relative flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-xl transition-all min-h-[74px] sm:min-h-[80px] select-none focus:outline-none ${
+                className={`relative flex flex-col items-center justify-between py-2.5 px-0.5 sm:px-1 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all min-h-[74px] sm:min-h-[80px] select-none focus:outline-none ${
                   !isSelected && isToday
-                    ? 'border border-accent/40 bg-accent/10 dark:bg-accent/15'
+                    ? 'border border-accent/40 bg-accent/10 dark:bg-accent/15 rounded-[18px] sm:rounded-[20px]'
                     : !isSelected
-                    ? 'hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                    ? 'hover:bg-black/[0.03] dark:hover:bg-white/[0.04] rounded-[18px] sm:rounded-[20px]'
                     : ''
                 }`}
                 title={`${day}: ${plan?.type || 'Rest'} (${exCount} activities)`}
@@ -458,7 +458,7 @@ export default function Gym({ data, updateData }: GymProps) {
                 {isSelected && (
                   <motion.div
                     layoutId="activeGymDayCapsule"
-                    className="absolute inset-0 rounded-xl bg-accent shadow-md shadow-accent/25"
+                    className="absolute inset-0 rounded-[18px] sm:rounded-[20px] bg-accent shadow-md shadow-accent/25"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
                 )}

@@ -409,7 +409,7 @@ export function NavigationHubSheet({
               onClose();
             }}
             data-no-ripple="true"
-            className="fixed inset-0 z-[80] bg-black pointer-events-auto"
+            className="fixed inset-0 z-[80] bg-transparent pointer-events-auto"
             aria-hidden="true"
           />
 

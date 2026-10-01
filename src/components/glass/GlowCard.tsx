@@ -5,12 +5,14 @@ export interface GlowCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
   glowOpacity?: number;
+  contentClassName?: string;
 }
 
 export const GlowCard = React.forwardRef<HTMLDivElement, GlowCardProps>(({
   children,
   className = '',
   glowOpacity = 0.35,
+  contentClassName = '',
   style,
   ...props
 }, ref) => {
@@ -58,7 +60,7 @@ export const GlowCard = React.forwardRef<HTMLDivElement, GlowCardProps>(({
       <div className="pointer-events-none absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
       {/* Content wrapper */}
-      <div className="relative z-10">
+      <div className={`relative z-10 ${contentClassName}`}>
         {children}
       </div>
     </div>

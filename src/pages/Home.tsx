@@ -36,7 +36,7 @@ const LiveClock = memo(function LiveClock() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] shadow-none">
+    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] shadow-none">
       <Clock size={13} className="text-[var(--md-primary)] shrink-0" />
       <span className="text-xs font-semibold tracking-wide text-[var(--md-on-surface)]">
         {format(now, 'EEEE, MMMM d')}
@@ -64,18 +64,18 @@ const DayCell = memo(function DayCell({
         triggerHaptic('light');
         setSelectedDate(d);
       }}
-      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[var(--md-shape-xl)] transition-all select-none focus:outline-none bouncy-tap ${
+      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all select-none focus:outline-none bouncy-tap ${
         !isSel && isCur
-          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)]'
+          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
           : !isSel
-          ? 'hover:bg-[var(--pill-active-bg)]'
+          ? 'hover:bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
           : ''
       }`}
     >
       {isSel && (
         <motion.div
           layoutId="activeHomeDatePill"
-          className="absolute inset-0 rounded-[20px] bg-[var(--md-primary)] shadow-none"
+          className="absolute inset-0 rounded-[18px] sm:rounded-[20px] bg-[var(--md-primary)] shadow-none"
           transition={{ type: 'spring', stiffness: 450, damping: 35 }}
         />
       )}
@@ -280,22 +280,17 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
-      {/* ── Ambient Executive Greeting Hero Card (LiquidFrame Concave Refractive Border) ── */}
+      {/* ── Ambient Executive Greeting Hero Card (Borderless LiquidFrame) ── */}
       <motion.div variants={item}>
-        <LiquidFrame className="space-y-4 select-none">
-          {/* Top Header Row: Date Pill, Mode Badge & Streak */}
+        <LiquidFrame noBorder className="space-y-4 select-none border-none outline-none ring-0 focus:outline-none focus:ring-0">
+          {/* Top Header Row: Date Pill & Mode Badge */}
           <div className="flex items-center gap-2 flex-wrap">
             <LiveClock />
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border bg-[var(--glass-2)] text-primary border-[var(--rim)] shadow-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--glass-2)] text-primary shadow-none">
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
               Active Session
             </span>
-
-            <StreakIndicator
-              streak={data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length || 1}
-              size="sm"
-            />
           </div>
 
           {/* Hero Title Row with AI Coach Avatar on Right */}
@@ -321,11 +316,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             <AiCoachAvatar state="idle" size={54} />
           </div>
         </LiquidFrame>
-      </motion.div>
-
-      {/* ── Ask LifeOS Pill Floating Capsule ── */}
-      <motion.div variants={item}>
-        <AskLifeOSPill onClick={() => window.dispatchEvent(new CustomEvent('lifeos-open-ai'))} />
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
