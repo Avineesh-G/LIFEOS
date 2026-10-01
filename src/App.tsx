@@ -29,6 +29,8 @@ import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
 import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { OutingsProvider } from './features/outings/context/OutingsContext';
+import DevShapes from './pages/DevShapes';
+import { detectSquircleSupport } from './utils/squircleDetect';
 
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
@@ -111,6 +113,7 @@ function MainContent({
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/dev/shapes', element: <RouteErrorBoundary routeName="Squircle Shapes Board"><DevShapes /></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
       element: (

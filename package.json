@@ -21,7 +21,8 @@
     "test:matrix": "node --experimental-strip-types scripts/test-layout-matrix.ts",
     "test:scroll": "node --experimental-strip-types scripts/test-scroll-regression.ts",
     "test:app-guide": "node --experimental-strip-types scripts/verify-app-guide.ts",
-    "test:ai-privacy": "node --experimental-strip-types scripts/verify-ai-privacy.ts"
+    "test:ai-privacy": "node --experimental-strip-types scripts/verify-ai-privacy.ts",
+    "check:squircles": "node --experimental-strip-types scripts/check-squircle-tokens.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

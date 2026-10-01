@@ -1,0 +1,75 @@
+/* ── Smooth Squircle Design Tokens & Nested Radius System ── */
+
+:root {
+  /* Radius Scale Tokens */
+  --r-xs: 10px;
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+  --r-full: 999px;
+
+  /* Default container parent tokens */
+  --r-parent: var(--r-md);
+  --pad-parent: 12px;
+  --r-nested: max(var(--r-xs), calc(var(--r-parent) - var(--pad-parent)));
+}
+
+/* Base Radius Fallback Classes */
+.r-xs { border-radius: var(--r-xs); }
+.r-sm { border-radius: var(--r-sm); }
+.r-md { border-radius: var(--r-md); }
+.r-lg { border-radius: var(--r-lg); }
+.r-xl { border-radius: var(--r-xl); }
+.r-full { border-radius: var(--r-full); }
+.r-nested { border-radius: var(--r-nested); }
+
+/* Progressive Enhancement: True Squircle Superellipse via CSS @supports */
+@supports (corner-shape: squircle) {
+  .r-xs, .squircle-xs {
+    border-radius: var(--r-xs);
+    corner-shape: squircle;
+  }
+  .r-sm, .squircle-sm {
+    border-radius: var(--r-sm);
+    corner-shape: squircle;
+  }
+  .r-md, .squircle-md {
+    border-radius: var(--r-md);
+    corner-shape: squircle;
+  }
+  .r-lg, .squircle-lg {
+    border-radius: var(--r-lg);
+    corner-shape: squircle;
+  }
+  .r-xl, .squircle-xl {
+    border-radius: var(--r-xl);
+    corner-shape: squircle;
+  }
+  .r-nested {
+    border-radius: var(--r-nested);
+    corner-shape: squircle;
+  }
+}
+
+/* Smooth Scrollbar Styling with Rounded Thumbs */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: var(--r-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+
+/* Rounded Icon Caps & Joins across SVG Elements */
+svg path, svg circle, svg rect, svg line, svg polyline, svg polygon {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

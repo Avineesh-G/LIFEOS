@@ -41,6 +41,7 @@ import {
 } from '../utils/aiSecurity';
 import { clearUsageHistory } from '../services/aiUsageTracker';
 import { GROQ_CONFIG } from '../config/ai';
+import { detectSquircleSupport } from '../utils/squircleDetect.ts';
 
 interface SettingsProps {
   accentColor?: string;
@@ -1698,9 +1699,12 @@ export default function Settings({
         </div>
       </div>
 
-      <div className="text-center py-2">
+      <div className="text-center py-2 space-y-1">
         <p className="text-xs font-tag font-bold text-muted-light dark:text-muted-dark tracking-wider uppercase">
           v<span className="font-stat">{CURRENT_VERSION_NAME}</span> (Build <span className="font-stat">{CURRENT_VERSION_CODE}</span>) · Native Baseline
+        </p>
+        <p className="text-[10.5px] font-mono text-secondary-light/70 dark:text-secondary-dark/70">
+          Squircle Engine: <span className="text-accent font-bold">{detectSquircleSupport().mode === 'native' ? 'Native Superellipse (CSS corner-shape)' : 'Fallback Rounding (border-radius)'}</span>
         </p>
       </div>
 
