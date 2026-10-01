@@ -24,6 +24,20 @@ import { usePerformanceMode, PerformanceMode } from '../utils/performanceMode';
 import SegmentedTogglePill from '../components/SegmentedTogglePill';
 import M3ToggleChip from '../components/M3ToggleChip';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
+import {
+  getGroqApiKey,
+  setGroqApiKey,
+  getAiProxyUrl,
+  setAiProxyUrl,
+  getLetAiReadData,
+  setLetAiReadData,
+  getSectionPermissions,
+  setSectionPermission,
+  getLetAiMakeChanges,
+  setLetAiMakeChanges,
+  AiSectionPermissions,
+} from '../utils/aiSecurity';
+import { GROQ_CONFIG } from '../config/ai';
 
 interface SettingsProps {
   accentColor?: string;
@@ -194,10 +208,59 @@ export default function Settings({
     }
   };
 
-  // Private Groq API Key State
-  const [apiKeyInput, setApiKeyInput] = useState(data.geminiApiKey || '');
+  // Private Groq API Key & AI Security State
+  const [apiKeyInput, setApiKeyInput] = useState(() => getGroqApiKey() || data.geminiApiKey || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
+
+  const [proxyUrlInput, setProxyUrlInput] = useState(() => getAiProxyUrl());
+  const [proxyUrlSaved, setProxyUrlSaved] = useState(false);
+
+  const [letAiReadDataState, setLetAiReadDataState] = useState(() => getLetAiReadData());
+  const [sectionPermissionsState, setSectionPermissionsState] = useState(() => getSectionPermissions());
+  const [letAiMakeChangesState, setLetAiMakeChangesState] = useState(() => getLetAiMakeChanges());
+  const [chatClearedNotice, setChatClearedNotice] = useState(false);
+
+  const handleSaveApiKey = async () => {
+    await setGroqApiKey(apiKeyInput);
+    await updateData({ geminiApiKey: apiKeyInput.trim() });
+    setApiKeySaved(true);
+    setTimeout(() => setApiKeySaved(false), 2500);
+  };
+
+  const handleSaveProxyUrl = async () => {
+    await setAiProxyUrl(proxyUrlInput);
+    setProxyUrlSaved(true);
+    setTimeout(() => setProxyUrlSaved(false), 2500);
+  };
+
+  const handleToggleReadData = (val: boolean) => {
+    triggerHaptic('medium');
+    setLetAiReadData(val);
+    setLetAiReadDataState(val);
+  };
+
+  const handleToggleSectionPermission = (sec: keyof AiSectionPermissions, val: boolean) => {
+    if (sec === 'vault') return;
+    triggerHaptic('light');
+    setSectionPermission(sec, val);
+    setSectionPermissionsState(getSectionPermissions());
+  };
+
+  const handleToggleMakeChanges = (val: boolean) => {
+    triggerHaptic('medium');
+    setLetAiMakeChanges(val);
+    setLetAiMakeChangesState(val);
+  };
+
+  const handleClearChatHistory = () => {
+    triggerHaptic('heavy');
+    try {
+      localStorage.removeItem(GROQ_CONFIG.STORAGE_KEYS.CHAT_HISTORY);
+      setChatClearedNotice(true);
+      setTimeout(() => setChatClearedNotice(false), 3000);
+    } catch {}
+  };
 
   // Haptic feedback preference state
   const [hapticLevel, setHapticLevelState] = useState<HapticLevel>(() => getHapticLevel());
@@ -228,12 +291,6 @@ export default function Settings({
       triggerHaptic('save');
     }
     setTimeout(() => setHapticSaved(false), 2500);
-  };
-
-  const handleSaveApiKey = async () => {
-    await updateData({ geminiApiKey: apiKeyInput.trim() });
-    setApiKeySaved(true);
-    setTimeout(() => setApiKeySaved(false), 2500);
   };
 
   // App Security & Lock state
@@ -879,40 +936,173 @@ export default function Settings({
               style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-3">
-                <div className="relative flex items-center">
-                  <input
-                    type={showApiKey ? 'text' : 'password'}
-                    value={apiKeyInput}
-                    onChange={e => setApiKeyInput(e.target.value)}
-                    placeholder="gsk_..."
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
-                  >
-                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-5">
+                {/* ── Mode A: Direct Groq Key ── */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                      Groq API Key (Mode A)
+                    </label>
+                    <a
+                      href="https://console.groq.com/keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-accent hover:underline font-mono"
+                    >
+                      Get Free Key →
+                    </a>
+                  </div>
+                  <div className="relative flex items-center">
+                    <input
+                      type={showApiKey ? 'text' : 'password'}
+                      value={apiKeyInput}
+                      onChange={e => setApiKeyInput(e.target.value)}
+                      placeholder="gsk_..."
+                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+                    >
+                      {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveApiKey}
+                      disabled={!apiKeyInput.trim()}
+                      className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
+                    >
+                      {apiKeySaved ? 'Saved ✓' : 'Save Key'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <a
-                    href="https://console.groq.com/keys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-bold text-accent hover:underline font-mono"
-                  >
-                    Get Free Key →
-                  </a>
+                {/* ── Mode B: Proxy URL ── */}
+                <div className="space-y-2 pt-3 border-t border-black/5 dark:border-white/5">
+                  <div>
+                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark block">
+                      Custom Proxy URL (Mode B)
+                    </label>
+                    <span className="text-[11px] text-secondary-light dark:text-secondary-dark block">
+                      Optional Cloudflare Worker proxy endpoint
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={proxyUrlInput}
+                      onChange={e => setProxyUrlInput(e.target.value)}
+                      placeholder="https://lifeos-ai-proxy.workers.dev"
+                      className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveProxyUrl}
+                      className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-sm"
+                    >
+                      {proxyUrlSaved ? 'Saved ✓' : 'Save URL'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Privacy & Reading Data ── */}
+                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                        Let AI Read Data Context
+                      </p>
+                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                        Allows AI to summarize section data for personalized answers
+                      </p>
+                    </div>
+                    <M3ToggleChip
+                      checked={letAiReadDataState}
+                      onChange={(checked) => handleToggleReadData(checked)}
+                    />
+                  </div>
+
+                  {letAiReadDataState && (
+                    <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-2.5">
+                      <p className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+                        Section Context Permissions
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {[
+                          { key: 'gym', label: 'Gym & Workouts' },
+                          { key: 'nutrition', label: 'Nutrition & Meals' },
+                          { key: 'study', label: 'Study Sessions' },
+                          { key: 'todo', label: 'Tasks & To-Dos' },
+                          { key: 'spending', label: 'Expenses & Budget' },
+                          { key: 'notes', label: 'Notes' },
+                          { key: 'timetable', label: 'Timetable' },
+                          { key: 'outings', label: 'Outings' },
+                          { key: 'shopping', label: 'Shopping Lists' },
+                        ].map(({ key, label }) => {
+                          const isPermitted = sectionPermissionsState[key as keyof AiSectionPermissions] ?? true;
+                          return (
+                            <label
+                              key={key}
+                              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer select-none"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isPermitted}
+                                onChange={(e) => handleToggleSectionPermission(key as keyof AiSectionPermissions, e.target.checked)}
+                                className="accent-accent rounded"
+                              />
+                              <span className="text-[11px] font-medium text-primary-light dark:text-primary-dark">{label}</span>
+                            </label>
+                          );
+                        })}
+
+                        {/* Immutable Vault Prohibition Label */}
+                        <div className="flex items-center gap-2 p-1.5 rounded-xl bg-red-500/10 border border-red-500/20 col-span-2">
+                          <Lock size={12} className="text-red-500 shrink-0" />
+                          <span className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                            Vault Data: Strictly Excluded (Cannot be enabled)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Action Proposals Toggle ── */}
+                <div className="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                      Allow AI Action Proposals
+                    </p>
+                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      Show interactive confirmation cards to log meals, tasks, or workouts
+                    </p>
+                  </div>
+                  <M3ToggleChip
+                    checked={letAiMakeChangesState}
+                    onChange={(checked) => handleToggleMakeChanges(checked)}
+                  />
+                </div>
+
+                {/* ── Clear Chat History ── */}
+                <div className="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                      Chat History
+                    </p>
+                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      {chatClearedNotice ? 'Chat history cleared ✓' : 'Local conversation transcript stored on device'}
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={handleSaveApiKey}
-                    disabled={!apiKeyInput.trim()}
-                    className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
+                    onClick={handleClearChatHistory}
+                    className="px-3.5 py-1.5 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 text-xs font-bold active:scale-95 transition-all"
                   >
-                    {apiKeySaved ? 'Saved ✓' : 'Save Key'}
+                    Clear Chat
                   </button>
                 </div>
               </div>

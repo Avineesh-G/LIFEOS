@@ -6,17 +6,22 @@ import { usePerformanceMode } from '../../hooks/usePerformanceMode';
 
 export interface AskLifeOSPillProps {
   onAsk?: (prompt: string) => void;
+  onClick?: () => void;
   className?: string;
 }
 
-export function AskLifeOSPill({ onAsk, className = '' }: AskLifeOSPillProps) {
+export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillProps) {
   const { isLite } = usePerformanceMode();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
 
   const handleOpen = () => {
     triggerHaptic('light');
-    setIsOpen(true);
+    if (onClick) {
+      onClick();
+    } else {
+      setIsOpen(true);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
