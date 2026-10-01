@@ -151,6 +151,7 @@ export type PortionSize = 0.5 | 1 | 1.5 | 2;
 export interface MenuItem {
   name: string;
   estCalories: number;
+  diet?: 'veg' | 'non-veg' | null;
 }
 
 export interface MealMenu {
