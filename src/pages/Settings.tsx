@@ -35,8 +35,11 @@ import {
   setSectionPermission,
   getLetAiMakeChanges,
   setLetAiMakeChanges,
+  getTrackAppUsage,
+  setTrackAppUsage,
   AiSectionPermissions,
 } from '../utils/aiSecurity';
+import { clearUsageHistory } from '../services/aiUsageTracker';
 import { GROQ_CONFIG } from '../config/ai';
 
 interface SettingsProps {
@@ -219,7 +222,9 @@ export default function Settings({
   const [letAiReadDataState, setLetAiReadDataState] = useState(() => getLetAiReadData());
   const [sectionPermissionsState, setSectionPermissionsState] = useState(() => getSectionPermissions());
   const [letAiMakeChangesState, setLetAiMakeChangesState] = useState(() => getLetAiMakeChanges());
+  const [trackUsageState, setTrackUsageState] = useState(() => getTrackAppUsage());
   const [chatClearedNotice, setChatClearedNotice] = useState(false);
+  const [usageClearedNotice, setUsageClearedNotice] = useState(false);
 
   const handleSaveApiKey = async () => {
     await setGroqApiKey(apiKeyInput);
@@ -251,6 +256,19 @@ export default function Settings({
     triggerHaptic('medium');
     setLetAiMakeChanges(val);
     setLetAiMakeChangesState(val);
+  };
+
+  const handleToggleTrackUsage = (val: boolean) => {
+    triggerHaptic('medium');
+    setTrackAppUsage(val);
+    setTrackUsageState(val);
+  };
+
+  const handleClearUsageHistory = () => {
+    triggerHaptic('heavy');
+    clearUsageHistory();
+    setUsageClearedNotice(true);
+    setTimeout(() => setUsageClearedNotice(false), 3000);
   };
 
   const handleClearChatHistory = () => {
@@ -1032,15 +1050,17 @@ export default function Settings({
                       </p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {[
+                          { key: 'todo', label: 'Tasks & To-Dos' },
+                          { key: 'timetable', label: 'Timetable' },
                           { key: 'gym', label: 'Gym & Workouts' },
                           { key: 'nutrition', label: 'Nutrition & Meals' },
-                          { key: 'study', label: 'Study Sessions' },
-                          { key: 'todo', label: 'Tasks & To-Dos' },
                           { key: 'spending', label: 'Expenses & Budget' },
+                          { key: 'study', label: 'Study Sessions' },
                           { key: 'notes', label: 'Notes' },
-                          { key: 'timetable', label: 'Timetable' },
-                          { key: 'outings', label: 'Outings' },
                           { key: 'shopping', label: 'Shopping Lists' },
+                          { key: 'outings', label: 'Outings & Trips' },
+                          { key: 'laundry', label: 'Laundry Tracker' },
+                          { key: 'history', label: 'Activity History' },
                         ].map(({ key, label }) => {
                           const isPermitted = sectionPermissionsState[key as keyof AiSectionPermissions] ?? true;
                           return (
@@ -1085,6 +1105,37 @@ export default function Settings({
                     checked={letAiMakeChangesState}
                     onChange={(checked) => handleToggleMakeChanges(checked)}
                   />
+                </div>
+
+                {/* ── App Usage Tracking ── */}
+                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                        Track My App Usage
+                      </p>
+                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                        Aggregated daily counts & last-used timestamps (stored locally, 90 days retention)
+                      </p>
+                    </div>
+                    <M3ToggleChip
+                      checked={trackUsageState}
+                      onChange={(checked) => handleToggleTrackUsage(checked)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      {usageClearedNotice ? 'Usage history cleared ✓' : 'Local 90-day usage metrics'}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearUsageHistory}
+                      className="px-3.5 py-1.5 rounded-xl border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-bold active:scale-95 transition-all"
+                    >
+                      Clear Usage History
+                    </button>
+                  </div>
                 </div>
 
                 {/* ── Clear Chat History ── */}

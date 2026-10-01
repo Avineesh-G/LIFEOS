@@ -20,6 +20,8 @@ import {
   Utensils,
   HelpCircle,
   Palette,
+  Eye,
+  ShieldCheck,
 } from 'lucide-react';
 import GlassSheet from '../glass/GlassSheet';
 import GlassSurface from '../glass/GlassSurface';
@@ -31,6 +33,8 @@ import { GROQ_CONFIG } from '../../config/ai';
 import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent } from '../../utils/aiSecurity';
 import { streamChatCompletion, transcribeAudio, stripUrls, ChatMessage } from '../../services/aiClient';
 import { extractAiActionProposals, AiActionProposal } from '../../services/aiActionEngine';
+import { buildTargetedAiContext } from '../../services/aiContextBuilder';
+import { recordScreenView } from '../../services/aiUsageTracker';
 import { triggerHaptic } from '../../utils/haptics';
 
 interface AskLifeOSModalProps {
@@ -66,6 +70,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showConsentSheet, setShowConsentSheet] = useState(false);
+  const [previewDataContext, setPreviewDataContext] = useState<string | null>(null);
 
   // Active proposals associated with recent message
   const [actionProposals, setActionProposals] = useState<Record<string, AiActionProposal[]>>({});
@@ -76,6 +81,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+  // Record screen usage when opening AI assistant
+  useEffect(() => {
+    if (isOpen) {
+      recordScreenView('Ask LifeOS Assistant');
+    }
+  }, [isOpen]);
 
   // Persist messages to LocalStorage
   useEffect(() => {
@@ -153,12 +165,15 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       timestamp: new Date().toISOString(),
     };
 
+    const dataContext = buildTargetedAiContext(trimmed, data);
+
     const assistantMsgId = `ast_${Date.now()}`;
     const initialAssistantMsg: ChatMessage = {
       id: assistantMsgId,
       role: 'assistant',
       content: '',
       timestamp: new Date().toISOString(),
+      dataSentContext: dataContext,
     };
 
     const updatedMessages = [...messages, userMsg];
@@ -172,6 +187,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     await streamChatCompletion(
       historyPayload,
       location.pathname || '/',
+      dataContext,
       (chunkText) => {
         const cleanChunk = stripUrls(chunkText);
         setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: cleanChunk } : m));
@@ -401,14 +417,26 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       {!isUser && msg.content && (
                         <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/10 text-[10px] text-secondary-light dark:text-secondary-dark font-mono">
                           <span>Groq AI • App Guide</span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="flex items-center gap-1 hover:text-accent transition-colors"
-                          >
-                            {copiedId === msg.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
-                            <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
-                          </button>
+                          <div className="flex items-center gap-2.5">
+                            {msg.dataSentContext && (
+                              <button
+                                type="button"
+                                onClick={() => setPreviewDataContext(msg.dataSentContext || null)}
+                                className="flex items-center gap-1 hover:text-accent transition-colors cursor-pointer"
+                              >
+                                <Eye size={11} />
+                                <span>Data Sent</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleCopyMessage(msg.id, msg.content)}
+                              className="flex items-center gap-1 hover:text-accent transition-colors"
+                            >
+                              {copiedId === msg.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                              <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </GlassSurface>
@@ -503,6 +531,40 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         }}
         onClose={() => setShowConsentSheet(false)}
       />
+
+      {/* Data Sent Preview Modal */}
+      {previewDataContext !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-md bg-slate-900 border border-accent/30 rounded-3xl p-4 space-y-3 text-white shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-accent">
+                <ShieldCheck size={18} />
+                <span className="text-xs font-bold font-mono">Data Sent Preview (Redacted)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewDataContext(null)}
+                className="p-1 rounded-full bg-white/10 text-white/70 hover:text-white"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-300">
+              This exact redacted summary context was transmitted securely to Groq AI for your question:
+            </p>
+            <div className="p-3 rounded-xl bg-slate-950 border border-white/10 text-[11px] font-mono leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap text-emerald-400">
+              {previewDataContext}
+            </div>
+            <button
+              type="button"
+              onClick={() => setPreviewDataContext(null)}
+              className="w-full py-2.5 rounded-xl btn-primary font-bold text-xs"
+            >
+              Close Preview
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

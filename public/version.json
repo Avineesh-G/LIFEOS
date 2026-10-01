@@ -1,10 +1,10 @@
 {
-  "versionCode": 38,
-  "versionName": "2.1.4",
+  "versionCode": 39,
+  "versionName": "2.1.5",
   "releaseDate": "2026-10-01",
-  "apkSize": "14.4 MB",
-  "apkSizeBytes": 14410000,
-  "releaseNotes": "LifeOS v2.1.4 (Build 38):\n• Updated VIT-AP Mess Menu for October 2026 with full date-by-date calendar integration\n• Enhanced nutrition protocol tracking and item diet indicators",
+  "apkSize": "14.5 MB",
+  "apkSizeBytes": 14500000,
+  "releaseNotes": "LifeOS v2.1.5 (Build 39):\n• Ask LifeOS AI Privacy Controls & Data Access Layer\n• Automatic sensitive data redaction, prompt injection defense, 90-day local usage history",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
   "sha256": "dec636fa5f7b8e4f435d492f740322c0385e3b065f1edc38a1e7a712a82086e1"
 }

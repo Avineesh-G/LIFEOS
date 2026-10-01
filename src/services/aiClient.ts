@@ -1,12 +1,13 @@
-import { GROQ_CONFIG } from '../config/ai';
-import { getGroqApiKey, getAiProxyUrl } from '../utils/aiSecurity';
-import { getSystemPromptForContext } from '../ai/appGuide';
+import { GROQ_CONFIG } from '../config/ai.ts';
+import { getGroqApiKey, getAiProxyUrl } from '../utils/aiSecurity.ts';
+import { getSystemPromptForContext } from '../ai/appGuide.ts';
 
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
+  dataSentContext?: string;
 }
 
 /**
@@ -30,6 +31,7 @@ export function stripUrls(text: string): string {
 export async function streamChatCompletion(
   messages: { role: string; content: string }[],
   currentPathname: string,
+  userDataContext: string,
   onChunk: (chunkText: string) => void,
   onComplete: (fullText: string) => void,
   onError: (err: Error) => void,
@@ -50,10 +52,13 @@ export async function streamChatCompletion(
 
   const targetUrl = proxyUrl ? `${proxyUrl.replace(/\/$/, '')}/v1/chat/completions` : GROQ_CONFIG.CHAT_COMPLETIONS_ENDPOINT;
 
-  const systemPrompt = getSystemPromptForContext(currentPathname);
+  const baseSystemPrompt = getSystemPromptForContext(currentPathname);
+  const fullSystemPrompt = userDataContext
+    ? `${baseSystemPrompt}\n\nUSER DATA CONTEXT:\n${userDataContext}`
+    : baseSystemPrompt;
 
   const fullMessages = [
-    { role: 'system', content: systemPrompt },
+    { role: 'system', content: fullSystemPrompt },
     ...messages,
   ];
 

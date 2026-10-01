@@ -17,6 +17,9 @@ import {
   RefreshCw,
   Smartphone,
   ChevronDown,
+  EyeOff,
+  Eye,
+  Lock,
 } from 'lucide-react';
 import {
   LightbulbIcon,
@@ -133,6 +136,7 @@ export default function Notes({ data, updateData }: NotesProps) {
   const [editorTitle, setEditorTitle] = useState('');
   const [editorContent, setEditorContent] = useState('');
   const [editorPageView, setEditorPageView] = useState<PageViewMode>('white');
+  const [editorHideFromAi, setEditorHideFromAi] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
   const [draftAlert, setDraftAlert] = useState<string | null>(null);
@@ -210,6 +214,7 @@ export default function Notes({ data, updateData }: NotesProps) {
         setEditorTitle('');
         setEditorContent('');
         setEditorPageView('white');
+        setEditorHideFromAi(false);
         setIsEditing(true);
       } else {
         const found = (data.notes || []).find((n) => n.id === routeNoteId);
@@ -218,6 +223,7 @@ export default function Notes({ data, updateData }: NotesProps) {
           setEditorTitle(found.title);
           setEditorContent(found.content);
           setEditorPageView(found.pageView || 'white');
+          setEditorHideFromAi(found.hideFromAi ?? false);
           setIsEditing(true);
         }
       }
@@ -316,6 +322,7 @@ export default function Notes({ data, updateData }: NotesProps) {
     setEditorTitle(prompt.title);
     setEditorContent(prompt.template);
     setEditorPageView(prompt.pageView);
+    setEditorHideFromAi(false);
     setIsEditing(true);
   };
 
@@ -353,6 +360,7 @@ export default function Notes({ data, updateData }: NotesProps) {
       title: editorTitle.trim() || 'Untitled Idea',
       content: editorContent,
       pageView: editorPageView,
+      hideFromAi: editorHideFromAi,
       updatedAt: new Date().toISOString(),
       monthKey: activeNote.monthKey || currentMonthKey,
       syncStatus: isOnline ? 'synced' : 'pending',
@@ -689,6 +697,16 @@ export default function Notes({ data, updateData }: NotesProps) {
                     <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-accent/10 dark:bg-accent/15 text-accent">
                       {pageView === 'white' ? 'White Page' : pageView === 'lined' ? 'Lined Rule' : 'Grid Paper'}
                     </span>
+                    {note.hideFromAi && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                        <EyeOff size={10} /> Hidden from AI
+                      </span>
+                    )}
+                    {note.isLocked && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded-md">
+                        <Lock size={10} /> Locked
+                      </span>
+                    )}
                     <span className="text-[11px] text-secondary-light/70 dark:text-secondary-dark/70 whitespace-nowrap">
                       {format(new Date(note.updatedAt || note.createdAt), 'MMM d, h:mm a')}
                     </span>
@@ -876,6 +894,35 @@ export default function Notes({ data, updateData }: NotesProps) {
                 <span>Grid View</span>
               </button>
             </div>
+          </div>
+
+          {/* Privacy Control: Hide from AI */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${editorHideFromAi ? 'bg-amber-500/15 text-amber-500' : 'bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark'}`}>
+                <EyeOff size={16} />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-primary-light dark:text-primary-dark">Hide from AI Assistant</div>
+                <div className="text-[10px] text-secondary-light dark:text-secondary-dark">Exclude this note from Ask LifeOS context</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setEditorHideFromAi(!editorHideFromAi);
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                editorHideFromAi ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  editorHideFromAi ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Note Content */}

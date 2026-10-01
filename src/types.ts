@@ -261,6 +261,8 @@ export interface NoteItem {
   pageView: 'white' | 'lined' | 'grid';
   monthKey: string; // 'YYYY-MM'
   isArchived: boolean;
+  hideFromAi?: boolean;
+  isLocked?: boolean;
   colorTone?: string;
   syncStatus?: 'synced' | 'syncing' | 'pending' | 'error';
   createdAt: string;
