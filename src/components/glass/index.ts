@@ -6,4 +6,6 @@ export * from './LiquidFrame';
 export * from './GlassSheet';
 export * from './GlassOrb';
 export * from './AskLifeOSPill';
+export * from './FloatingPopup';
+
 

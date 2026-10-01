@@ -610,7 +610,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Fixed Bottom Divided Navigation Bar (Pill + Squircle, Per-Interface Color) ── */}
       {(() => {
-        const isNavHidden = isKeyboardOpen || subInterfaceOpen || isSubRoute || (!navVisible && !menuOpen);
+        const isNavHidden = isKeyboardOpen || isSubRoute || (!navVisible && !menuOpen);
         return (
           <motion.nav
             ref={navRef}
