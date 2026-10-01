@@ -1,5 +1,6 @@
 import { GROQ_CONFIG } from '../config/ai';
 import { getGroqApiKey, getAiProxyUrl } from '../utils/aiSecurity';
+import { getSystemPromptForContext } from '../ai/appGuide';
 
 export interface ChatMessage {
   id: string;
@@ -8,29 +9,27 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-const SYSTEM_PROMPT = `You are "Ask LifeOS", a friendly, ultra-concise personal AI assistant built into the user's LifeOS mobile app.
-
-GUIDELINES:
-1. Speak in a warm, direct, concise mobile-first tone. Use short paragraphs and clear bullet points where helpful.
-2. For personal data questions (spending, tasks, gym, nutrition, study, notes), rely STRICTLY on the provided LifeOS Data Context.
-3. If the provided context does not contain the answer, state clearly: "I don't have that information in your logged LifeOS data."
-4. NEVER invent or hallucinate fake numbers, dates, or records.
-5. If the user asks general questions or advice, answer helpful & concisely.
-6. When proposed actions (adding a task, logging a meal/workout/shopping item) are requested and AI changes are enabled, you may append a structured JSON action block formatted exactly as:
-\`\`\`json_action
-{
-  "type": "ADD_TASK" | "LOG_MEAL" | "LOG_WORKOUT" | "ADD_SHOPPING_ITEM",
-  "payload": { ... }
+/**
+ * Code Enforcement Filter: Strips ALL URLs, web links, and domain references
+ * from responses before display.
+ */
+export function stripUrls(text: string): string {
+  if (!text) return '';
+  // 1. Convert markdown links [text](http...) -> text
+  let cleaned = text.replace(/\[([^\]]+)\]\((https?:\/\/|www\.)[^\)]+\)/gi, '$1');
+  // 2. Strip standard URLs starting with http://, https://, www.
+  cleaned = cleaned.replace(/(https?:\/\/|www\.)[^\s<>\)\]}]+/gi, '');
+  // 3. Strip common domain names (e.g. google.com, example.org)
+  cleaned = cleaned.replace(/\b[a-zA-Z0-9-]+\.(com|org|net|io|co|dev|ai|app|gov|edu)(\/[^\s<>\)\]}]*)?/gi, '');
+  return cleaned;
 }
-\`\`\`
-7. Always keep security and user control paramount.`;
 
 /**
  * Streams chat completions from Groq (Mode A) or Proxy URL (Mode B).
  */
 export async function streamChatCompletion(
   messages: { role: string; content: string }[],
-  contextSummary: string,
+  currentPathname: string,
   onChunk: (chunkText: string) => void,
   onComplete: (fullText: string) => void,
   onError: (err: Error) => void,
@@ -51,10 +50,10 @@ export async function streamChatCompletion(
 
   const targetUrl = proxyUrl ? `${proxyUrl.replace(/\/$/, '')}/v1/chat/completions` : GROQ_CONFIG.CHAT_COMPLETIONS_ENDPOINT;
 
-  const systemMessageContent = `${SYSTEM_PROMPT}\n\n[USER LIFEOS DATA CONTEXT]\n${contextSummary}`;
+  const systemPrompt = getSystemPromptForContext(currentPathname);
 
   const fullMessages = [
-    { role: 'system', content: systemMessageContent },
+    { role: 'system', content: systemPrompt },
     ...messages,
   ];
 
@@ -73,7 +72,7 @@ export async function streamChatCompletion(
       body: JSON.stringify({
         model: GROQ_CONFIG.MODELS.CHAT_PRIMARY,
         messages: fullMessages,
-        temperature: 0.5,
+        temperature: 0.3,
         max_tokens: 1024,
         stream: true,
       }),
@@ -113,7 +112,8 @@ export async function streamChatCompletion(
         if (trimmed.startsWith('data: ')) {
           const dataStr = trimmed.replace(/^data:\s*/, '');
           if (dataStr === '[DONE]') {
-            onComplete(accumulatedText);
+            const cleanFinal = stripUrls(accumulatedText);
+            onComplete(cleanFinal);
             return;
           }
           try {
@@ -121,14 +121,16 @@ export async function streamChatCompletion(
             const delta = parsed.choices?.[0]?.delta?.content || '';
             if (delta) {
               accumulatedText += delta;
-              onChunk(accumulatedText);
+              const cleanChunk = stripUrls(accumulatedText);
+              onChunk(cleanChunk);
             }
           } catch {}
         }
       }
     }
 
-    onComplete(accumulatedText);
+    const cleanFinal = stripUrls(accumulatedText);
+    onComplete(cleanFinal);
   } catch (err: any) {
     if (err.name === 'AbortError') return;
     onError(err instanceof Error ? err : new Error(String(err)));

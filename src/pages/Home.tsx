@@ -27,7 +27,6 @@ import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import { M3_SHAPES } from '../theme/shapes';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
 import { LiquidFrame, GlassSurface, SuggestionChip, AskLifeOSPill } from '../components/glass';
-import AskLifeOSModal from '../components/ai/AskLifeOSModal';
 
 // ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
 const LiveClock = memo(function LiveClock() {
@@ -121,7 +120,6 @@ const item = {
 
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
   // 'ready' = data is not DEFAULT_DATA (i.e. real user data has hydrated)
@@ -327,7 +325,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
       {/* ── Ask LifeOS Pill Floating Capsule ── */}
       <motion.div variants={item}>
-        <AskLifeOSPill onClick={() => setIsAiModalOpen(true)} />
+        <AskLifeOSPill onClick={() => window.dispatchEvent(new CustomEvent('lifeos-open-ai'))} />
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
@@ -773,14 +771,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       )}
 
       </motion.div>
-
-      {/* ── Ask LifeOS AI Chatbot Modal ── */}
-      <AskLifeOSModal
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-        data={data}
-        updateData={updateData || (async () => data)}
-      />
     </SkeletonGate>
   );
 }

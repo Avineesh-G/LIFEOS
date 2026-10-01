@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback, startTransition } fr
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  RotateCw, Bell
+  RotateCw, Bell, Sparkles
 } from 'lucide-react';
+import AskLifeOSModal from './ai/AskLifeOSModal';
 import { ExpandAllIcon, CollapseContentIcon, CloudDoneIcon, CloudOffIcon } from './icons/MaterialSymbols';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -49,14 +50,21 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const permissionCheckedRef = useRef(false);
   const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
 
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
+    const handleOpenAi = () => setAiSheetOpen(true);
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    window.addEventListener('lifeos-open-ai', handleOpenAi);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('lifeos-open-ai', handleOpenAi);
     };
   }, []);
 
@@ -105,8 +113,8 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       longPressTimerRef.current = null;
     }
 
-    if (slotIndex === 0) {
-      // Home is fixed and cannot be customized
+    if (slotIndex === 0 || slotIndex === 3) {
+      // Home (0) and AI (3) are fixed and cannot be customized
       return;
     }
 
@@ -470,6 +478,15 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       label: pillDestinations[2].label,
       slotIndex: 2,
     },
+    {
+      id: 'ai',
+      path: '#ai',
+      icon: Sparkles,
+      isActive: aiSheetOpen,
+      label: 'Ask LifeOS AI',
+      slotIndex: 3,
+      isAiButton: true,
+    },
   ];
 
   return (
@@ -646,7 +663,11 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                         }
                         triggerHaptic('nav');
                         if (menuOpen) setMenuOpen(false);
-                        startTransition(() => { navigate(tab.path); });
+                        if ((tab as any).isAiButton) {
+                          setAiSheetOpen(true);
+                        } else {
+                          startTransition(() => { navigate(tab.path); });
+                        }
                       }}
                       className="relative w-[34px] h-[34px] compact:w-[38px] compact:h-[38px] sm:w-[40px] sm:h-[40px] flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
                       aria-label={tab.label}
@@ -753,6 +774,13 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         );
       })()}
 
+      {/* ── Global Ask LifeOS AI Assistant Sheet (Pop-Up over active interface) ── */}
+      <AskLifeOSModal
+        isOpen={aiSheetOpen}
+        onClose={() => setAiSheetOpen(false)}
+        data={data || ({} as any)}
+        updateData={updateData || (async () => ({} as any))}
+      />
     </div>
   );
 }

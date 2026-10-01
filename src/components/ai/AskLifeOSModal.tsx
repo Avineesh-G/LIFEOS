@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
@@ -17,6 +18,8 @@ import {
   CheckSquare,
   Dumbbell,
   Utensils,
+  HelpCircle,
+  Palette,
 } from 'lucide-react';
 import GlassSheet from '../glass/GlassSheet';
 import GlassSurface from '../glass/GlassSurface';
@@ -24,10 +27,9 @@ import SuggestionChip from '../glass/SuggestionChip';
 import GlowCard from '../glass/GlowCard';
 import AiConsentSheet from './AiConsentSheet';
 import ActionConfirmationCard from './ActionConfirmationCard';
-import { STARTER_SUGGESTION_CHIPS, GROQ_CONFIG } from '../../config/ai';
+import { GROQ_CONFIG } from '../../config/ai';
 import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent } from '../../utils/aiSecurity';
-import { buildTargetedAiContext } from '../../services/aiContextBuilder';
-import { streamChatCompletion, transcribeAudio, ChatMessage } from '../../services/aiClient';
+import { streamChatCompletion, transcribeAudio, stripUrls, ChatMessage } from '../../services/aiClient';
 import { extractAiActionProposals, AiActionProposal } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -38,7 +40,15 @@ interface AskLifeOSModalProps {
   updateData: (partial: any) => Promise<any>;
 }
 
+export const SPEC_STARTER_CHIPS = [
+  { id: 'how_add_expense', label: 'How do I add an expense?', icon: 'Wallet' },
+  { id: 'where_change_color', label: 'Where do I change the app color?', icon: 'Palette' },
+  { id: 'how_use_screen', label: 'How do I use this screen?', icon: 'HelpCircle' },
+  { id: 'app_features', label: 'What features are in this app?', icon: 'Sparkles' },
+];
+
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
+  const location = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
       const saved = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.CHAT_HISTORY);
@@ -155,20 +165,21 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     setMessages([...updatedMessages, initialAssistantMsg]);
     setIsGenerating(true);
 
-    const contextSummary = buildTargetedAiContext(trimmed, data);
     const historyPayload = updatedMessages.slice(-6).map(m => ({ role: m.role, content: m.content }));
 
     abortControllerRef.current = new AbortController();
 
     await streamChatCompletion(
       historyPayload,
-      contextSummary,
+      location.pathname || '/',
       (chunkText) => {
-        setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: chunkText } : m));
+        const cleanChunk = stripUrls(chunkText);
+        setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: cleanChunk } : m));
       },
       (fullText) => {
         setIsGenerating(false);
-        const { cleanText, proposals } = extractAiActionProposals(fullText);
+        const cleanFull = stripUrls(fullText);
+        const { cleanText, proposals } = extractAiActionProposals(cleanFull);
         setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: cleanText } : m));
         if (proposals.length > 0) {
           setActionProposals(prev => ({ ...prev, [assistantMsgId]: proposals }));
@@ -241,6 +252,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const getChipIcon = (iconName: string) => {
     switch (iconName) {
       case 'Wallet': return <Wallet size={13} />;
+      case 'Palette': return <Palette size={13} />;
+      case 'HelpCircle': return <HelpCircle size={13} />;
       case 'CheckSquare': return <CheckSquare size={13} />;
       case 'Dumbbell': return <Dumbbell size={13} />;
       case 'Utensils': return <Utensils size={13} />;
@@ -251,48 +264,48 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   return (
     <>
       <GlassSheet isOpen={isOpen} onClose={onClose}>
-        <div className="flex flex-col h-[85vh] sm:h-[680px] max-w-2xl mx-auto select-none overflow-hidden relative">
+        <div className="flex flex-col h-full max-w-2xl mx-auto select-none overflow-hidden relative">
           
           {/* ── Top Header ── */}
-          <div className="flex items-center justify-between pb-3 border-b border-black/[0.08] dark:border-white/[0.08] shrink-0">
+          <div className="flex items-center justify-between pb-2.5 border-b border-white/10 shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
-                <Sparkles size={18} />
+              <div className="w-8 h-8 rounded-2xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
+                <Sparkles size={16} />
               </div>
               <div>
-                <h2 className="text-base font-black text-primary-light dark:text-primary-dark tracking-tight">
+                <h2 className="text-sm font-black text-primary-light dark:text-primary-dark tracking-tight leading-tight">
                   Ask LifeOS
                 </h2>
-                <p className="text-[10px] text-muted-light dark:text-muted-dark font-mono">
-                  Groq Intelligence • Gemini Glass System
+                <p className="text-[10px] text-secondary-light dark:text-secondary-dark font-mono">
+                  Groq Intelligence • App Guide Mode
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               {messages.length > 0 && (
                 <button
                   type="button"
                   title="Clear Chat History"
                   onClick={handleClearChat}
-                  className="p-2 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-white/10 transition-colors"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={15} />
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-white/10 transition-colors"
               >
-                <X size={18} />
+                <X size={17} />
               </button>
             </div>
           </div>
 
           {/* ── Offline Banner ── */}
           {!isOnline && (
-            <div className="my-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2 shrink-0">
+            <div className="my-1.5 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2 shrink-0">
               <WifiOff size={14} className="text-amber-500 shrink-0" />
               <span>AI needs internet connection. Offline mode active.</span>
             </div>
@@ -305,7 +318,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="my-2 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between shrink-0"
+                className="my-1.5 p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-700 dark:text-emerald-300 flex items-center justify-between shrink-0"
               >
                 <span className="font-semibold">{toastMessage}</span>
                 <Check size={14} className="text-emerald-500" />
@@ -315,7 +328,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
           {/* ── Error Banner ── */}
           {errorMessage && (
-            <div className="my-2 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 flex items-center justify-between gap-2 shrink-0">
+            <div className="my-1.5 p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 flex items-center justify-between gap-2 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <AlertCircle size={14} className="shrink-0" />
                 <span className="truncate">{errorMessage}</span>
@@ -331,24 +344,24 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           )}
 
           {/* ── Chat Scroll Messages Area ── */}
-          <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-4 space-y-3.5 scrollbar-none">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-3 space-y-3 scrollbar-none">
             {messages.length === 0 ? (
-              <div className="text-center py-10 px-4 space-y-4">
-                <div className="w-12 h-12 mx-auto rounded-3xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
-                  <Sparkles size={24} />
+              <div className="text-center py-6 px-3 space-y-3">
+                <div className="w-10 h-10 mx-auto rounded-2xl bg-accent/15 border border-accent/25 flex items-center justify-center text-accent">
+                  <Sparkles size={20} />
                 </div>
                 <div className="space-y-1 max-w-xs mx-auto">
                   <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark">
-                    How can I assist you today?
+                    Ask me anything about LifeOS
                   </h3>
                   <p className="text-xs text-secondary-light dark:text-secondary-dark">
-                    Ask about your spending, tasks, nutrition, workout records, or get general advice.
+                    I can explain features, navigation, step-by-step guides, and settings locations.
                   </p>
                 </div>
 
                 {/* Starter Chips */}
                 <div className="pt-2 flex flex-wrap items-center justify-center gap-1.5 max-w-md mx-auto">
-                  {STARTER_SUGGESTION_CHIPS.map((chip) => (
+                  {SPEC_STARTER_CHIPS.map((chip) => (
                     <SuggestionChip
                       key={chip.id}
                       icon={getChipIcon(chip.icon)}
@@ -386,8 +399,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       )}
 
                       {!isUser && msg.content && (
-                        <div className="flex items-center justify-between pt-2 mt-2 border-t border-black/5 dark:border-white/5 text-[10px] text-muted-light dark:text-muted-dark font-mono">
-                          <span>Groq AI</span>
+                        <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/10 text-[10px] text-secondary-light dark:text-secondary-dark font-mono">
+                          <span>Groq AI • App Guide</span>
                           <button
                             type="button"
                             onClick={() => handleCopyMessage(msg.id, msg.content)}
@@ -427,7 +440,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           </div>
 
           {/* ── Bottom Input GlowCard Bar ── */}
-          <div className="pt-2 shrink-0">
+          <div className="pt-1 shrink-0">
             <GlowCard className="p-2 flex items-center gap-2">
               <input
                 type="text"
@@ -444,7 +457,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     ? 'Transcribing voice...'
                     : isRecording
                     ? 'Listening... tap mic to finish'
-                    : 'Ask LifeOS anything...'
+                    : 'Ask Ask LifeOS anything...'
                 }
                 disabled={isGenerating || transcribing}
                 className="flex-1 bg-transparent px-2 text-xs sm:text-sm font-medium text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark focus:outline-none"
