@@ -4,12 +4,11 @@ import { useThemeMode } from './useDayPhase';
 import {
   getM3ThemeForSection,
   getSectionFromPathname,
-  getRoutePersonalizedColorFamily,
   SectionM3Theme,
   M3ColorScheme,
   AppSection,
 } from '../theme/sectionSeedColors';
-import { ColorFamily } from '../theme/colorFamilies';
+import { getActiveAccent, ThemeAccent } from '../theme/themeColorManager';
 
 export interface UseMaterialThemeReturn {
   theme: SectionM3Theme;
@@ -17,16 +16,10 @@ export interface UseMaterialThemeReturn {
   isDark: boolean;
   section: AppSection;
   seedHex: string;
-  colorFamily: ColorFamily | null;
-  // Backwards compatibility alias
+  accent: ThemeAccent;
   phase: string;
 }
 
-/**
- * Reactive hook that generates the full Material 3 Expressive role set
- * from the active route section seed color, personalized interface color family,
- * and Light/Dark scheme mode, and synchronizes all CSS variables onto document.documentElement.
- */
 export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialThemeReturn {
   let pathname = '/';
   try {
@@ -38,29 +31,24 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
     }
   }
 
-  const [colorVersion, setColorVersion] = useState(0);
+  const [accent, setAccent] = useState<ThemeAccent>(getActiveAccent);
 
   useEffect(() => {
-    const handleColorsChanged = () => {
-      setColorVersion((v) => v + 1);
+    const handleAccentChanged = (e: any) => {
+      setAccent(e.detail || getActiveAccent());
     };
-    window.addEventListener('lifeos:interface-colors-changed', handleColorsChanged);
-    return () => window.removeEventListener('lifeos:interface-colors-changed', handleColorsChanged);
+    window.addEventListener('lifeos:theme-accent-changed', handleAccentChanged);
+    return () => window.removeEventListener('lifeos:theme-accent-changed', handleAccentChanged);
   }, []);
 
   const section = sectionOverride || getSectionFromPathname(pathname);
   const [themeMode] = useThemeMode();
 
-  const isNightLocked = themeMode === 'night';
-  const isDark = isNightLocked;
-
-  const colorFamily = useMemo(() => {
-    return getRoutePersonalizedColorFamily(pathname);
-  }, [pathname, colorVersion]);
+  const isDark = themeMode === 'night';
 
   const theme = useMemo(() => {
-    return getM3ThemeForSection(section, isDark, colorFamily || undefined);
-  }, [section, isDark, colorFamily]);
+    return getM3ThemeForSection(section, isDark, accent);
+  }, [section, isDark, accent]);
 
   return {
     theme,
@@ -68,7 +56,7 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
     isDark,
     section,
     seedHex: theme.seedHex,
-    colorFamily,
+    accent,
     phase: section,
   };
 }

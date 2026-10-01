@@ -45,7 +45,7 @@ export default function Settings({
   const navigate = useNavigate();
   const { confirmDelete, showSavedFeedback } = useM3Feedback();
   const [themeMode, setThemeMode] = useThemeMode();
-  const [perfMode, setPerfMode, effectivePerfMode] = usePerformanceMode();
+  const [perfMode, setPerfMode, effectivePerfMode, reduceBlurEffects, setReduceBlurEffects] = usePerformanceMode();
 
   const [backupLoading, setBackupLoading] = useState(false);
   const [backupFeedback, setBackupFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -582,6 +582,33 @@ export default function Settings({
               {mode}
             </button>
           ))}
+        </div>
+
+        {/* Reduce blur effects toggle (Android 17 Accessibility & Readability) */}
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/5 dark:border-white/10">
+          <div>
+            <div className="text-xs font-bold text-primary-light dark:text-primary-dark">
+              Reduce blur effects
+            </div>
+            <div className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
+              Replaces glass backdrop blurs with crisp translucent surfaces for enhanced readability & performance
+            </div>
+          </div>
+          <M3ToggleChip
+            checked={reduceBlurEffects}
+            onChange={(checked) => {
+              triggerHaptic('medium');
+              setReduceBlurEffects(checked);
+              if (updateData && data?.settings) {
+                updateData({
+                  settings: {
+                    ...data.settings,
+                    reduceBlurEffects: checked,
+                  },
+                }).catch(() => {});
+              }
+            }}
+          />
         </div>
       </div>
 

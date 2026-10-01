@@ -10,17 +10,8 @@ import { triggerHaptic } from '../utils/haptics';
 import { registerDismissible } from '../utils/backNavigation';
 import {
   AppSection,
-  SECTION_SEED_COLORS,
-  SECTION_BLOB_POSITIONS,
   hexToRgb,
-  blendHex,
-  getNavPillBg,
 } from '../theme/sectionSeedColors';
-import {
-  getRawUserCustomColors,
-  INTERFACE_COLORS_STORAGE_KEY,
-} from '../theme/interfaceColorManager';
-import { COLOR_FAMILIES, DEFAULT_INTERFACE_COLORS } from '../theme/colorFamilies';
 
 import {
   DESTINATIONS,
@@ -82,58 +73,27 @@ const BLOB_CORNER_STYLES: Record<string, React.CSSProperties> = {
  * Resolves the accent hex color for a given destination based on user's
  * per-interface color assignments. Falls back to HUB_FAMILY_CONFIG if unchanged.
  */
-function useInterfaceColorAssignments(): Record<string, string> {
-  const [assignments, setAssignments] = useState<Record<string, string>>(() => {
-    const custom = getRawUserCustomColors();
-    return custom ? { ...DEFAULT_INTERFACE_COLORS, ...custom } : { ...DEFAULT_INTERFACE_COLORS };
-  });
+import { getActiveAccent } from '../theme/themeColorManager';
 
-  useEffect(() => {
-    const sync = () => {
-      const custom = getRawUserCustomColors();
-      setAssignments(custom ? { ...DEFAULT_INTERFACE_COLORS, ...custom } : { ...DEFAULT_INTERFACE_COLORS });
-    };
-    window.addEventListener('lifeos:interface-colors-changed', sync);
-    window.addEventListener('storage', (e) => {
-      if (e.key === INTERFACE_COLORS_STORAGE_KEY) sync();
-    });
-    return () => {
-      window.removeEventListener('lifeos:interface-colors-changed', sync);
-    };
-  }, []);
-
-  return assignments;
-}
-
-/**
- * Build a resolved color spec for a destination tile, preferring the user's
- * per-interface color family assignment over the hardcoded HUB_FAMILY_CONFIG.
- */
 function resolveDestinationColor(
-  destId: string,
-  family: HubFamily,
-  assignments: Record<string, string>,
+  _destId: string,
+  _family: HubFamily,
+  _assignments: Record<string, string>,
   isDark: boolean
 ): { seed: string; rgb: [number, number, number]; darkGlyph: string; textAccent: string; onAccent: string; darkStrong: string } {
-  const familyId = assignments[destId];
-  if (familyId && COLOR_FAMILIES[familyId as keyof typeof COLOR_FAMILIES]) {
-    const cf = COLOR_FAMILIES[familyId as keyof typeof COLOR_FAMILIES];
-    const seed = isDark ? cf.dark.primary : cf.primary;
-    // Parse hex to rgb
-    const r = parseInt(seed.slice(1, 3), 16);
-    const g = parseInt(seed.slice(3, 5), 16);
-    const b = parseInt(seed.slice(5, 7), 16);
-    return {
-      seed,
-      rgb: [r, g, b],
-      darkGlyph: cf.dark.icon,
-      textAccent: cf.icon,
-      onAccent: '#FFFFFF',
-      darkStrong: cf.dark.primary,
-    };
-  }
-  // Fallback to static hub family config
-  return HUB_FAMILY_CONFIG[family];
+  const accent = getActiveAccent();
+  const seed = accent.primary;
+  const [r, g, b] = hexToRgb(seed);
+  const textAccent = isDark ? accent.primary : accent.darkText;
+
+  return {
+    seed,
+    rgb: [r, g, b],
+    darkGlyph: accent.primary,
+    textAccent,
+    onAccent: '#FFFFFF',
+    darkStrong: seed,
+  };
 }
 
 const DestinationTile = React.memo(function DestinationTile({
@@ -142,17 +102,15 @@ const DestinationTile = React.memo(function DestinationTile({
   isEditMode,
   isDark,
   onSelect,
-  colorAssignments,
 }: {
   destination: HubDestination;
   isCurrent: boolean;
   isEditMode: boolean;
   isDark: boolean;
   onSelect: (dest: HubDestination) => void;
-  colorAssignments: Record<string, string>;
 }) {
   const Icon = destination.icon;
-  const config = resolveDestinationColor(destination.id, destination.family, colorAssignments, isDark);
+  const config = resolveDestinationColor(destination.id, destination.family, {}, isDark);
   const [r, g, b] = config.rgb;
 
   const currentOpacity = (destination.family === 'history' || destination.family === 'outing') ? 0.28 : (isDark ? 0.32 : 0.22);
@@ -240,8 +198,6 @@ export function NavigationHubSheet({
   initialSelectedSlot = 1,
   onExitEditMode,
 }: NavigationHubSheetProps) {
-  // Reactive interface color assignments (updates live when user changes colors in Settings)
-  const colorAssignments = useInterfaceColorAssignments();
   const navigate = useNavigate();
   const location = useLocation();
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -285,20 +241,19 @@ export function NavigationHubSheet({
     }
   }, [isOpen, isEditMode, onExitEditMode, onClose]);
 
-  const activeSeed = SECTION_SEED_COLORS[activeSection] || SECTION_SEED_COLORS.home;
+  const activeSeed = getActiveAccent().primary;
   const [aR, aG, aB] = hexToRgb(activeSeed);
-  const activePosition = SECTION_BLOB_POSITIONS[activeSection] || 'top-right';
+  const activePosition = 'top-right';
 
-  // Base canvas faintly tinted (~5%) toward active seed
+  // Base canvas background
   const sheetBg = useMemo(() => {
-    const base = isDark ? '#121316' : '#FDFDFD';
-    return blendHex(base, activeSeed, 0.05);
-  }, [activeSeed, isDark]);
+    return isDark ? '#050B0D' : '#EEF6F7';
+  }, [isDark]);
 
   // Pill container background for slot selector
   const pillBg = useMemo(() => {
-    return getNavPillBg(activeSection, isDark);
-  }, [activeSection, isDark]);
+    return isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  }, [isDark]);
 
   // Reduced motion preference
   const prefersReducedMotion = useMemo(() => {
@@ -785,7 +740,6 @@ export function NavigationHubSheet({
                   isEditMode={isEditMode}
                   isDark={isDark}
                   onSelect={handleSelectDestination}
-                  colorAssignments={colorAssignments}
                 />
               ))}
             </div>

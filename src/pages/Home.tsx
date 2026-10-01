@@ -24,9 +24,9 @@ import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
 import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { CATEGORY_COLORS } from '../theme/cardThemeTokens';
 import { M3_SHAPES } from '../theme/shapes';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
+import { LiquidFrame, GlassSurface, SuggestionChip, AskLifeOSPill } from '../components/glass';
 
 // ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
 const LiveClock = memo(function LiveClock() {
@@ -134,6 +134,24 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
   // ── Selected Date State (Defaults to Today) ──
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+
+  const greetingTime = useMemo(() => {
+    const hr = new Date().getHours();
+    if (hr < 12) return 'Good morning';
+    if (hr < 17) return 'Good afternoon';
+    return 'Good evening';
+  }, []);
+
+  const userName = useMemo(() => {
+    try {
+      const cached = localStorage.getItem('lifeos_cached_auth_user');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.displayName) return parsed.displayName.split(' ')[0];
+      }
+    } catch {}
+    return 'Avineesh';
+  }, []);
 
   // 7-day rolling window centered on today: 3 past, today, 3 future
   const weekDays = useMemo(() => {
@@ -262,48 +280,52 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
-      {/* ── Ambient Executive Greeting Hero Card (M3 Signature Asymmetric Shape) ── */}
-      <motion.div
-        variants={item}
-        className={`${M3_SHAPES.asymmetricHero} p-6 sm:p-7 m3-elevation-1 border border-[var(--md-outline-variant)] space-y-4 select-none`}
-      >
-        {/* Top Header Row: Date Pill, Mode Badge & Streak */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <LiveClock />
+      {/* ── Ambient Executive Greeting Hero Card (LiquidFrame Concave Refractive Border) ── */}
+      <motion.div variants={item}>
+        <LiquidFrame className="space-y-4 select-none">
+          {/* Top Header Row: Date Pill, Mode Badge & Streak */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <LiveClock />
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border-[var(--md-outline-variant)] shadow-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
-            Active Session
-          </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase border bg-[var(--glass-2)] text-primary border-[var(--rim)] shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              Active Session
+            </span>
 
-          <StreakIndicator
-            streak={data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length || 1}
-            size="sm"
-          />
-        </div>
-
-        {/* Hero Title Row with AI Coach Avatar on Right */}
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-[var(--md-on-surface)] leading-tight">
-              Welcome to{' '}
-              <span
-                style={{ backgroundImage: 'var(--headline-gradient)' }}
-                className="bg-clip-text text-transparent"
-              >
-                LifeOS
-              </span>
-            </h1>
-
-            {/* Motivational Subline */}
-            <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
-              <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-90" />
-              <span>Your personal operating system · Focus and execute</span>
-            </p>
+            <StreakIndicator
+              streak={data.studySessions.filter((s, i, arr) => i === 0 || s.date !== arr[i-1].date).length || 1}
+              size="sm"
+            />
           </div>
 
-          <AiCoachAvatar state="idle" size={54} />
-        </div>
+          {/* Hero Title Row with AI Coach Avatar on Right */}
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-primary leading-tight font-medium">
+                {greetingTime},{' '}
+                <span
+                  style={{ backgroundImage: 'var(--headline-gradient)' }}
+                  className="bg-clip-text text-transparent font-semibold"
+                >
+                  {userName}
+                </span>
+              </h1>
+
+              {/* Motivational Subline */}
+              <p className="text-xs sm:text-[13px] font-medium text-secondary mt-1.5 tracking-tight flex items-center gap-1.5">
+                <Sparkles size={13} className="text-accent shrink-0 opacity-90" />
+                <span>Your personal operating system · Focus and execute</span>
+              </p>
+            </div>
+
+            <AiCoachAvatar state="idle" size={54} />
+          </div>
+        </LiquidFrame>
+      </motion.div>
+
+      {/* ── Ask LifeOS Pill Floating Capsule ── */}
+      <motion.div variants={item}>
+        <AskLifeOSPill />
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}

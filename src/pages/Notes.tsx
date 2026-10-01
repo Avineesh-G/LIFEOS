@@ -489,10 +489,10 @@ export default function Notes({ data, updateData }: NotesProps) {
       `}</style>
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#8436E9]/15 via-[#8436E9]/08 to-[#BAA8FE]/15 dark:from-[#8436E9]/25 dark:via-[#8436E9]/15 dark:to-[#121316] border border-[#8436E9]/20 dark:border-[#8436E9]/30 p-5 sm:p-7 shadow-xs">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent/15 via-accent/08 to-accent/15 dark:from-accent/25 dark:via-accent/15 dark:to-surface-dark border border-accent/20 dark:border-accent/30 p-5 sm:p-7 shadow-xs">
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1.5 min-w-0">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8436E9]/10 dark:bg-[#BAA8FE]/15 border border-[#8436E9]/20 text-[#8436E9] dark:text-[#BAA8FE] text-xs font-semibold tracking-wide">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 dark:bg-accent/15 border border-accent/20 text-accent text-xs font-semibold tracking-wide">
               <NotebookPen size={13} className="shrink-0" />
               <span>Boundless Notes & Ideas</span>
             </div>
@@ -507,7 +507,7 @@ export default function Notes({ data, updateData }: NotesProps) {
           <button
             type="button"
             onClick={handleOpenNewNote}
-            className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-[#8436E9] hover:bg-[#7225D4] text-white font-bold text-sm shadow-md shadow-[#8436E9]/25 flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
+            className="w-full sm:w-auto px-5 py-3 rounded-2xl btn-primary font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 shrink-0"
           >
             <Plus size={18} />
             <span>New Note / Idea</span>
@@ -519,7 +519,7 @@ export default function Notes({ data, updateData }: NotesProps) {
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1 gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
-            <ThingsToDoIcon size={15} className="text-[#8436E9] dark:text-[#BAA8FE] shrink-0" />
+            <ThingsToDoIcon size={15} className="text-accent shrink-0" />
             <span
               className="text-xs font-semibold text-primary-light dark:text-primary-dark tracking-tight truncate"
               style={{ fontFamily: 'var(--font-family-primary)', fontVariationSettings: "'wght' 600, 'ROND' 50" }}
@@ -542,13 +542,13 @@ export default function Notes({ data, updateData }: NotesProps) {
                 key={prompt.id}
                 type="button"
                 onClick={() => handleSelectPrompt(prompt)}
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-white/70 dark:bg-[#1E1929]/70 hover:bg-[#8436E9]/10 dark:hover:bg-[#8436E9]/20 border border-[#8436E9]/20 dark:border-[#8436E9]/30 text-primary-light dark:text-primary-dark transition-all active:scale-95 shrink-0 shadow-2xs group cursor-pointer"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-white/70 dark:bg-surface-dark border border-accent/20 dark:border-accent/30 text-primary-light dark:text-primary-dark transition-all active:scale-95 shrink-0 shadow-2xs group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-[#8436E9]/10 dark:bg-[#BAA8FE]/15 flex items-center justify-center text-[#8436E9] dark:text-[#BAA8FE] shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-xl bg-accent/10 dark:bg-accent/15 flex items-center justify-center text-accent shrink-0 group-hover:scale-110 transition-transform">
                   <IconComponent size={18} />
                 </div>
                 <div className="text-left">
-                  <div className="text-xs font-bold leading-tight group-hover:text-[#8436E9] dark:group-hover:text-[#BAA8FE] transition-colors whitespace-nowrap">
+                  <div className="text-xs font-bold leading-tight group-hover:text-accent transition-colors whitespace-nowrap">
                     {prompt.label}
                   </div>
                   <div className="text-[10px] text-secondary-light dark:text-secondary-dark leading-tight whitespace-nowrap">
@@ -573,7 +573,7 @@ export default function Notes({ data, updateData }: NotesProps) {
             }}
             className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
               activeTab === 'active'
-                ? 'bg-white dark:bg-[#1E1929] text-[#8436E9] dark:text-[#BAA8FE] shadow-xs'
+                ? 'bg-white dark:bg-surface-dark text-accent shadow-xs'
                 : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
             }`}
           >
@@ -587,7 +587,7 @@ export default function Notes({ data, updateData }: NotesProps) {
             }}
             className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 whitespace-nowrap transition-all ${
               activeTab === 'archived'
-                ? 'bg-white dark:bg-[#1E1929] text-[#8436E9] dark:text-[#BAA8FE] shadow-xs'
+                ? 'bg-white dark:bg-surface-dark text-accent shadow-xs'
                 : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
             }`}
           >
@@ -606,7 +606,7 @@ export default function Notes({ data, updateData }: NotesProps) {
                   triggerHaptic('light');
                   setSelectedMonth(e.target.value);
                 }}
-                className="appearance-none pl-3 pr-8 py-2.5 rounded-2xl text-xs font-bold bg-white/70 dark:bg-[#1E1929]/70 border border-[#8436E9]/20 dark:border-[#8436E9]/30 text-primary-light dark:text-primary-dark focus:outline-none focus:ring-2 focus:ring-[#8436E9]"
+                className="appearance-none pl-3 pr-8 py-2.5 rounded-2xl text-xs font-bold bg-white/70 dark:bg-surface-dark border border-accent/20 dark:border-accent/30 text-primary-light dark:text-primary-dark focus:outline-none focus:ring-2 focus:ring-accent"
               >
                 {availableMonths.map((m) => (
                   <option key={m} value={m}>
@@ -616,7 +616,7 @@ export default function Notes({ data, updateData }: NotesProps) {
               </select>
               <ChevronDown
                 size={14}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#8436E9] dark:text-[#BAA8FE]"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-accent"
               />
             </div>
           )}
@@ -631,7 +631,7 @@ export default function Notes({ data, updateData }: NotesProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search thoughts & notes..."
-              className="w-full pl-9 pr-3 py-2.5 rounded-2xl text-xs bg-white/70 dark:bg-[#1E1929]/70 border border-[#8436E9]/20 dark:border-[#8436E9]/30 text-primary-light dark:text-primary-dark placeholder:text-secondary-light/60 dark:placeholder:text-secondary-dark/60 focus:outline-none focus:ring-2 focus:ring-[#8436E9]"
+              className="w-full pl-9 pr-3 py-2.5 rounded-2xl text-xs bg-white/70 dark:bg-surface-dark border border-accent/20 dark:border-accent/30 text-primary-light dark:text-primary-dark placeholder:text-secondary-light/60 dark:placeholder:text-secondary-dark/60 focus:outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
         </div>
@@ -639,8 +639,8 @@ export default function Notes({ data, updateData }: NotesProps) {
 
       {/* Notes Grid */}
       {displayedNotes.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-3xl border border-dashed border-[#8436E9]/20 dark:border-[#8436E9]/30 bg-[#8436E9]/04 dark:bg-[#8436E9]/08 space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-[#8436E9]/10 dark:bg-[#BAA8FE]/15 flex items-center justify-center text-[#8436E9] dark:text-[#BAA8FE]">
+        <div className="text-center py-16 px-4 rounded-3xl border border-dashed border-accent/20 dark:border-accent/30 bg-accent/04 dark:bg-accent/08 space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-accent/10 dark:bg-accent/15 flex items-center justify-center text-accent">
             <NotebookPen size={28} />
           </div>
           <div className="space-y-1 max-w-sm mx-auto">
@@ -657,7 +657,7 @@ export default function Notes({ data, updateData }: NotesProps) {
             <button
               type="button"
               onClick={handleOpenNewNote}
-              className="px-4 py-2 rounded-xl bg-[#8436E9] text-white text-xs font-bold hover:bg-[#7225D4] transition-colors inline-flex items-center gap-1.5 shadow-sm"
+              className="px-4 py-2 rounded-xl btn-primary text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
             >
               <Plus size={14} /> Add First Note
             </button>
@@ -677,16 +677,16 @@ export default function Notes({ data, updateData }: NotesProps) {
                 onClick={() => handleOpenExistingNote(note)}
                 className={`relative flex flex-col justify-between p-4 sm:p-5 rounded-3xl border cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 min-w-0 ${
                   pageView === 'lined'
-                    ? 'notebook-lined-bg border-[#8436E9]/20 dark:border-[#8436E9]/30 bg-white dark:bg-[#1A1624]'
+                    ? 'notebook-lined-bg border-accent/20 dark:border-accent/30 bg-white dark:bg-surface-dark'
                     : pageView === 'grid'
-                    ? 'notebook-grid-bg border-[#8436E9]/20 dark:border-[#8436E9]/30 bg-white dark:bg-[#1A1624]'
-                    : 'bg-white dark:bg-[#1A1624] border-[#8436E9]/15 dark:border-[#8436E9]/25 shadow-xs'
+                    ? 'notebook-grid-bg border-accent/20 dark:border-accent/30 bg-white dark:bg-surface-dark'
+                    : 'bg-white dark:bg-surface-dark border-accent/15 dark:border-accent/25 shadow-xs'
                 }`}
               >
                 {/* Note Top Meta */}
                 <div className="space-y-2 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#8436E9]/10 dark:bg-[#BAA8FE]/15 text-[#8436E9] dark:text-[#BAA8FE]">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-accent/10 dark:bg-accent/15 text-accent">
                       {pageView === 'white' ? 'White Page' : pageView === 'lined' ? 'Lined Rule' : 'Grid Paper'}
                     </span>
                     <span className="text-[11px] text-secondary-light/70 dark:text-secondary-dark/70 whitespace-nowrap">
@@ -714,7 +714,7 @@ export default function Notes({ data, updateData }: NotesProps) {
                       type="button"
                       title={note.isArchived ? 'Restore to Active' : 'Archive Note'}
                       onClick={(e) => handleToggleArchive(note, e)}
-                      className="p-1.5 rounded-lg hover:bg-[#8436E9]/10 text-[#8436E9] dark:text-[#BAA8FE] transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-accent/10 text-accent transition-colors"
                     >
                       {note.isArchived ? <RotateCcw size={14} /> : <Archive size={14} />}
                     </button>
@@ -744,7 +744,7 @@ export default function Notes({ data, updateData }: NotesProps) {
             <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
               {activeNote ? 'Update Note' : 'New Note / Idea'}
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#8436E9]/15 text-[#8436E9] dark:text-[#BAA8FE]">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
               {activeNote ? 'Editing' : 'Boundless'}
             </span>
           </div>
@@ -778,7 +778,7 @@ export default function Notes({ data, updateData }: NotesProps) {
           {/* Quick Prompts Picker in Editor */}
           <div>
             <div className="flex items-center gap-1.5 mb-1.5">
-              <ThingsToDoIcon size={13} className="text-[#8436E9] dark:text-[#BAA8FE] shrink-0" />
+              <ThingsToDoIcon size={13} className="text-accent shrink-0" />
               <span
                 className="text-[11px] font-semibold text-secondary-light dark:text-secondary-dark"
                 style={{ fontFamily: 'var(--font-family-primary)', fontVariationSettings: "'wght' 600, 'ROND' 50" }}
@@ -799,9 +799,9 @@ export default function Notes({ data, updateData }: NotesProps) {
                       setEditorContent(p.template);
                       setEditorPageView(p.pageView);
                     }}
-                    className="px-2.5 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-[#8436E9]/15 border border-[#8436E9]/25 text-[11px] font-semibold text-primary-light dark:text-primary-dark flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors cursor-pointer active:scale-95"
+                    className="px-2.5 py-1.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] hover:bg-accent/15 border border-accent/25 text-[11px] font-semibold text-primary-light dark:text-primary-dark flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors cursor-pointer active:scale-95"
                   >
-                    <IconComponent size={13} className="text-[#8436E9] dark:text-[#BAA8FE] shrink-0" />
+                    <IconComponent size={13} className="text-accent shrink-0" />
                     <span>{p.label}</span>
                   </button>
                 );
@@ -820,7 +820,7 @@ export default function Notes({ data, updateData }: NotesProps) {
               onChange={(e) => setEditorTitle(e.target.value)}
               placeholder="e.g. Complete Machine Learning assignment"
               autoFocus
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#8436E9]/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
             />
           </div>
 
@@ -838,7 +838,7 @@ export default function Notes({ data, updateData }: NotesProps) {
                 }}
                 className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                   editorPageView === 'white'
-                    ? 'bg-white dark:bg-[#2B233C] text-[#8436E9] dark:text-[#BAA8FE] shadow-xs'
+                    ? 'bg-white dark:bg-surface-dark text-accent shadow-xs'
                     : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
                 }`}
               >
@@ -853,7 +853,7 @@ export default function Notes({ data, updateData }: NotesProps) {
                 }}
                 className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                   editorPageView === 'lined'
-                    ? 'bg-white dark:bg-[#2B233C] text-[#8436E9] dark:text-[#BAA8FE] shadow-xs'
+                    ? 'bg-white dark:bg-surface-dark text-accent shadow-xs'
                     : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
                 }`}
               >
@@ -868,7 +868,7 @@ export default function Notes({ data, updateData }: NotesProps) {
                 }}
                 className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                   editorPageView === 'grid'
-                    ? 'bg-white dark:bg-[#2B233C] text-[#8436E9] dark:text-[#BAA8FE] shadow-xs'
+                    ? 'bg-white dark:bg-surface-dark text-accent shadow-xs'
                     : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
                 }`}
               >
@@ -901,7 +901,7 @@ export default function Notes({ data, updateData }: NotesProps) {
               value={editorContent}
               onChange={(e) => setEditorContent(e.target.value)}
               placeholder="Start writing your thoughts, ideas, brainstorms, formulas, or reminders... There is no limit to this page."
-              className={`w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#8436E9]/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark min-h-[160px] sm:min-h-[200px] resize-none leading-relaxed ${
+              className={`w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark min-h-[160px] sm:min-h-[200px] resize-none leading-relaxed ${
                 editorPageView === 'lined'
                   ? 'notebook-lined-bg'
                   : editorPageView === 'grid'
@@ -924,7 +924,7 @@ export default function Notes({ data, updateData }: NotesProps) {
               type="button"
               onClick={handleSaveNote}
               disabled={saveStatus === 'saving' || (!editorTitle.trim() && !editorContent.trim())}
-              className="py-3 rounded-2xl bg-[#8436E9] hover:bg-[#7225D4] text-white font-bold text-xs shadow-md shadow-[#8436E9]/25 hover:opacity-95 transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
+              className="py-3 rounded-2xl btn-primary font-bold text-xs shadow-md hover:opacity-95 transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
             >
               {saveStatus === 'saved' ? (
                 <>

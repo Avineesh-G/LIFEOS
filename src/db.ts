@@ -1,7 +1,6 @@
 import { doc, getDoc, getDocFromServer, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase.ts';
 import type { AppData } from './types';
-import { DEFAULT_INTERFACE_COLORS } from './theme/colorFamilies.ts';
 
 const DEFAULT_DATA: AppData = {
   studySessions: [],
@@ -19,7 +18,7 @@ const DEFAULT_DATA: AppData = {
   timetable: [],
   tasks: [],
   reviews: [],
-  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {} },
+  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {}, performanceMode: 'auto', reduceBlurEffects: false },
   profile: null,
   menuMonths: [],
   nutritionLogs: [],
@@ -141,16 +140,12 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
   merged.settings = {
     ...DEFAULT_DATA.settings,
     ...(merged.settings || {}),
+    performanceMode: merged.settings?.performanceMode || 'auto',
+    reduceBlurEffects: Boolean(merged.settings?.reduceBlurEffects),
     navPinned:
       Array.isArray(merged.settings?.navPinned) && merged.settings.navPinned.length === 2
         ? [String(merged.settings.navPinned[0]), String(merged.settings.navPinned[1])]
         : ['gym', 'nutrition'],
-    interfaceColors: {
-      ...DEFAULT_INTERFACE_COLORS,
-      ...(merged.settings?.interfaceColors && typeof merged.settings.interfaceColors === 'object'
-        ? merged.settings.interfaceColors
-        : {}),
-    },
   };
 
   return merged;

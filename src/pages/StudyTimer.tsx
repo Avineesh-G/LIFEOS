@@ -303,7 +303,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
           <div className="flex gap-3">
             <button
               onClick={handleSave}
-              className="flex-1 py-3.5 rounded-full bg-[#4F378B] dark:bg-[#D0BCFF] text-white dark:text-[#231E2E] font-bold text-sm shadow-md active:scale-[0.97] transition-all"
+              className="flex-1 py-3.5 rounded-full btn-primary font-bold text-sm shadow-md active:scale-[0.97] transition-all"
             >
               Save Session
             </button>

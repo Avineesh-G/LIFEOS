@@ -111,6 +111,8 @@ export interface AppSettings {
   timetableNotificationsEnabled?: boolean;
   navPinned?: [string, string];
   interfaceColors?: Record<string, string>;
+  performanceMode?: 'auto' | 'full' | 'lite';
+  reduceBlurEffects?: boolean;
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────
