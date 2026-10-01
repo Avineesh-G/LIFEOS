@@ -500,7 +500,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                   onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
                   className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#F5A623]/12 border border-[#F5A623]/20 flex items-center justify-center text-[#F5A623] flex-shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-accent/12 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0">
                     <Wallet size={15} strokeWidth={2.2} />
                   </div>
                   <div className="min-w-0 flex-1">

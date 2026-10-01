@@ -20,6 +20,7 @@ export const PRESET_ACCENTS: ThemeAccent[] = [
 export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Gemini Teal #2DD4BF
 
 export const THEME_ACCENT_STORAGE_KEY = 'lifeos_unified_accent';
+export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';
 
 export function hexToRgbTuple(hex: string): [number, number, number] {
   const clean = hex.replace('#', '');
@@ -30,14 +31,20 @@ export function hexToRgbTuple(hex: string): [number, number, number] {
 }
 
 /**
- * Migration engine: purges legacy per-interface color storage keys on boot
+ * Migration engine: purges legacy per-interface color storage keys ONCE on startup.
+ * Guarded by MIGRATION_VERSION_KEY.
  */
 export function migrateLegacyThemeStorage(): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.removeItem('lifeos_interface_colors');
-    localStorage.removeItem('interfaceColors');
-    localStorage.removeItem('accentColor');
+    const isMigrated = localStorage.getItem(MIGRATION_VERSION_KEY);
+    if (!isMigrated) {
+      localStorage.removeItem('lifeos_interface_colors');
+      localStorage.removeItem('interfaceColors');
+      localStorage.removeItem('accentColor');
+      localStorage.removeItem('settings.interfaceColors');
+      localStorage.setItem(MIGRATION_VERSION_KEY, 'true');
+    }
   } catch {}
 }
 

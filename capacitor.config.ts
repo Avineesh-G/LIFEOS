@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_lifeos',
-      iconColor: '#6366F1'
+      iconColor: '#2DD4BF'
     }
   }
 };

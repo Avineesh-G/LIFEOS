@@ -15,39 +15,6 @@
     --vh: 1vh;
     --font-weight-heading: 600;
     --font-weight-body: 400;
-    --history-seed: #8C1D40;
-    --history-dark-strong: #AA3B58;
-    --history-dark-tint: #D66FA0;
-    --outing-seed: #8C500A;
-    --outing-light-text: #78350F;
-    --outing-dark-strong: #A05F0A;
-    --outing-dark-tint: #C88A58;
-    --shopping-seed: #172554;
-    --shopping-light-text: #1E3A8A;
-    --shopping-dark-strong: #254BB5;
-    --shopping-dark-tint: #93C5FD;
-    --vault-seed: #2034A0;
-    --vault-light-text: #1E40AF;
-    --vault-dark-strong: #3B82F6;
-    --vault-dark-tint: #818CF8;
-    --finance-seed: #15803D;
-    --finance-dark-strong: #15803D;
-    --finance-dark-tint: #82CB92;
-    --study-seed: #0891B2;
-    --study-on-accent: #1A1A1F;
-    --study-light-text: #0E7D9A;
-    --study-dark-strong: #0891B2;
-    --study-dark-tint: #80D2ED;
-    --settings-seed: #475569;
-    --settings-dark-strong: #556378;
-    --settings-dark-tint: #A7AEBB;
-    --streak-seed: #FF6B35;
-    --streak-on-accent: #1A1A1F;
-    --streak-light-text: #CB470D;
-    --streak-dark-strong: #FF6B35;
-    --streak-dark-tint: #FCA487;
-    --more-fill: #1B1C22;
-    --more-icon: #FFFFFF;
   }
 
   html.dark {
