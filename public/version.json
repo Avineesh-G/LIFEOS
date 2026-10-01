@@ -1,10 +1,10 @@
 {
-  "versionCode": 37,
-  "versionName": "2.1.3",
-  "releaseDate": "2026-09-25",
+  "versionCode": 38,
+  "versionName": "2.1.4",
+  "releaseDate": "2026-10-01",
   "apkSize": "14.4 MB",
   "apkSizeBytes": 14410000,
-  "releaseNotes": "LifeOS v2.1.3 (Build 37):\n• Removed startup greeting screen for instant, frictionless app launching\n• Rebuilt M3 wavy progress indicator with hardware vector stenciling and smooth 4-quarter sine wave for butter-smooth 120 FPS downloads",
+  "releaseNotes": "LifeOS v2.1.4 (Build 38):\n• Updated VIT-AP Mess Menu for October 2026 with full date-by-date calendar integration\n• Enhanced nutrition protocol tracking and item diet indicators",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "405aa6e93edc79b5818ad7967dcee8756963c048e253b3bc02b6603dca88aa12"
+  "sha256": "dec636fa5f7b8e4f435d492f740322c0385e3b065f1edc38a1e7a712a82086e1"
 }
