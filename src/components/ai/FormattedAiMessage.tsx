@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Share2, CheckSquare, Square } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
+import { shareContent } from '../../utils/shareUtils';
 
 interface FormattedAiMessageProps {
   content: string;
@@ -17,7 +18,7 @@ function stripJsonActions(text: string): string {
   let cleaned = text.replace(/```json_action[\s\S]*?```/g, '');
   // Remove open trailing ```json_action during streaming
   cleaned = cleaned.replace(/```json_action[\s\S]*$/g, '');
-  // Strip common emoji clutter from headers if any
+  // Strip emojis from headers and text (icons only per requirement)
   cleaned = cleaned.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '');
   return cleaned.trim();
 }
@@ -110,25 +111,92 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerHaptic('light');
+    await shareContent(code);
+  };
+
   const isWhatsAppFormat = code.includes('Trip') || code.includes('Plan') || code.includes('Meetup') || code.includes('Reply');
 
   return (
     <div className="my-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] overflow-hidden shadow-xs font-sans">
       <div className="flex items-center justify-between px-3 py-1.5 bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)] text-[11px] font-medium text-[var(--md-on-surface-variant)]">
         <span>{isWhatsAppFormat ? 'WhatsApp Itinerary Format' : 'Formatted Text'}</span>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] hover:opacity-90 font-bold transition-all active:scale-95"
-          title="Copy to clipboard"
-        >
-          {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-          <span>{copied ? 'Copied' : 'Copy'}</span>
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--md-surface-container-highest)] hover:bg-[var(--md-secondary-container)] text-[var(--md-on-surface)] text-[10.5px] font-semibold border border-[var(--md-outline-variant)] transition-all active:scale-95"
+            title="Share to WhatsApp / Contacts"
+          >
+            <Share2 size={11} />
+            <span>Share</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] hover:opacity-90 font-bold text-[10.5px] transition-all active:scale-95"
+            title="Copy to clipboard"
+          >
+            {copied ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+            <span>{copied ? 'Copied' : 'Copy'}</span>
+          </button>
+        </div>
       </div>
       <pre className="p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words text-[var(--md-on-surface)] overflow-x-auto">
         {code}
       </pre>
+    </div>
+  );
+};
+
+const InteractiveChecklist: React.FC<{ items: Array<{ id: string; text: string; initialChecked: boolean }>; isUser?: boolean }> = ({ items, isUser = false }) => {
+  const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    items.forEach((item) => {
+      initial[item.id] = item.initialChecked;
+    });
+    return initial;
+  });
+
+  const toggleItem = (id: string) => {
+    triggerHaptic('light');
+    setCheckedMap((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  return (
+    <div className="space-y-1 my-2 font-sans">
+      {items.map((item) => {
+        const isChecked = !!checkedMap[item.id];
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => toggleItem(item.id)}
+            className={`w-full flex items-start gap-2.5 p-2 rounded-xl text-left transition-all ${
+              isChecked
+                ? 'bg-[var(--md-surface-container-high)]/30 opacity-60'
+                : 'bg-[var(--md-surface-container-high)]/70 hover:bg-[var(--md-surface-container-high)]'
+            }`}
+          >
+            <div className="mt-0.5 shrink-0">
+              {isChecked ? (
+                <CheckSquare size={15} className="text-[var(--md-primary)]" />
+              ) : (
+                <Square size={15} className="text-[var(--md-on-surface-variant)]" />
+              )}
+            </div>
+            <span
+              className={`flex-1 min-w-0 text-xs sm:text-sm leading-relaxed ${
+                isChecked ? 'line-through text-[var(--md-on-surface-variant)]' : 'text-[var(--md-on-surface)]'
+              }`}
+            >
+              {parseInlineContent(item.text, isUser)}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 };
@@ -300,6 +368,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
 
       const lines = seg.text.split('\n');
       let currentBullets: string[] = [];
+      let currentChecklist: Array<{ id: string; text: string; initialChecked: boolean }> = [];
       let currentTableRows: string[][] = [];
 
       const flushBullets = (keyIdx: number) => {
@@ -320,11 +389,30 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         }
       };
 
+      const flushChecklist = (keyIdx: number) => {
+        if (currentChecklist.length > 0) {
+          blocks.push(
+            <InteractiveChecklist
+              key={`checklist-${segIdx}-${keyIdx}`}
+              items={[...currentChecklist]}
+              isUser={isUser}
+            />
+          );
+          currentChecklist = [];
+        }
+      };
+
       const flushTable = (keyIdx: number) => {
         if (currentTableRows.length > 0) {
           blocks.push(<MarkdownTable key={`table-${segIdx}-${keyIdx}`} rows={currentTableRows} isUser={isUser} />);
           currentTableRows = [];
         }
+      };
+
+      const flushAll = (keyIdx: number) => {
+        flushBullets(keyIdx);
+        flushChecklist(keyIdx);
+        flushTable(keyIdx);
       };
 
       lines.forEach((rawLine, idx) => {
@@ -333,6 +421,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Check for table row (starts and ends with |)
         if (line.startsWith('|') && line.endsWith('|')) {
           flushBullets(idx);
+          flushChecklist(idx);
           const cols = line.split('|').slice(1, -1);
           // Check if delimiter row (|---|---|)
           const isDelimiter = cols.every(c => /^[\s\-:]+$/.test(c));
@@ -347,22 +436,39 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Empty line
         if (!line) {
           flushBullets(idx);
+          flushChecklist(idx);
           return;
         }
 
         // Horizontal rule
         if (line === '---' || line === '***' || line === '___') {
-          flushBullets(idx);
+          flushAll(idx);
           blocks.push(
             <hr key={`hr-${segIdx}-${idx}`} className="my-2.5 border-t border-[var(--md-outline-variant)]/40" />
           );
           return;
         }
 
+        // Check for interactive checkbox line: e.g. "- [ ] item" or "- [x] item"
+        const taskCheckMatch = line.match(/^[-*•]?\s*\[([ xX])\]\s*(.*)$/);
+        if (taskCheckMatch) {
+          flushBullets(idx);
+          const isChecked = taskCheckMatch[1].toLowerCase() === 'x';
+          const taskText = taskCheckMatch[2].trim();
+          currentChecklist.push({
+            id: `chk-${segIdx}-${idx}`,
+            text: taskText,
+            initialChecked: isChecked,
+          });
+          return;
+        } else {
+          flushChecklist(idx);
+        }
+
         // Check for numbered step: e.g. "1. Open the Spending screen"
         const stepMatch = line.match(/^(\d+)[\.\)](.*)$/);
         if (stepMatch) {
-          flushBullets(idx);
+          flushAll(idx);
           const stepNum = stepMatch[1];
           const stepText = stepMatch[2].trim();
           blocks.push(
@@ -384,6 +490,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Check for bullet line: e.g. "- Amount", "* Amount", "• Amount"
         const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
         if (bulletMatch) {
+          flushChecklist(idx);
           currentBullets.push(bulletMatch[1]);
           return;
         }
@@ -391,7 +498,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Headers: e.g. "### Title" or "## Title"
         const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
         if (headerMatch) {
-          flushBullets(idx);
+          flushAll(idx);
           const headerText = headerMatch[2];
           blocks.push(
             <h4
@@ -405,7 +512,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         }
 
         // Normal paragraph line
-        flushBullets(idx);
+        flushAll(idx);
         blocks.push(
           <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans text-[var(--md-on-surface)]">
             {parseInlineContent(line, isUser)}
@@ -413,8 +520,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         );
       });
 
-      flushBullets(lines.length);
-      flushTable(lines.length);
+      flushAll(lines.length);
     });
 
     return blocks;

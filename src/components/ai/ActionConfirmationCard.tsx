@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Sparkles, Loader2, CheckSquare, ShoppingCart, MapPin, Utensils, Dumbbell } from 'lucide-react';
+import { Check, X, Sparkles, Loader2, CheckSquare, ShoppingCart, MapPin, Utensils, Dumbbell, Wallet } from 'lucide-react';
 import { AiActionProposal, executeConfirmedAiAction } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -25,6 +25,8 @@ export default function ActionConfirmationCard({
     switch (proposal.type) {
       case 'ADD_TASK':
         return <CheckSquare size={14} className="text-[var(--md-primary)]" />;
+      case 'ADD_EXPENSE':
+        return <Wallet size={14} className="text-emerald-500" />;
       case 'ADD_SHOPPING_ITEM':
       case 'ADD_MULTIPLE_SHOPPING_ITEMS':
         return <ShoppingCart size={14} className="text-emerald-500" />;

@@ -31,6 +31,9 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  Volume2,
+  VolumeX,
+  Share2,
 } from 'lucide-react';
 import GlassSheet from '../glass/GlassSheet';
 import GlassSurface from '../glass/GlassSurface';
@@ -45,6 +48,8 @@ import { buildTargetedAiContext } from '../../services/aiContextBuilder';
 import { recordScreenView } from '../../services/aiUsageTracker';
 import { triggerHaptic } from '../../utils/haptics';
 import { speechRecognizer } from '../../utils/speechRecognition';
+import { speakText, stopSpeaking, isSpeaking } from '../../utils/textToSpeech';
+import { shareContent } from '../../utils/shareUtils';
 import type { AiChatSession } from '../../types';
 
 import { PulseBubbleIcon } from '../icons/PulseBubbleIcon';
@@ -94,6 +99,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showConsentSheet, setShowConsentSheet] = useState(false);
   const [previewDataContext, setPreviewDataContext] = useState<string | null>(null);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
 
   // Active proposals associated with recent message
   const [actionProposals, setActionProposals] = useState<Record<string, AiActionProposal[]>>({});
@@ -106,7 +112,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
-  // Auto-focus input when opening AI assistant
+  // Auto-focus input and clean speech when modal closes
   useEffect(() => {
     if (isOpen) {
       recordScreenView('Ask LifeOS Assistant');
@@ -116,6 +122,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         }
       }, 150);
       return () => clearTimeout(timer);
+    } else {
+      stopSpeaking();
+      setSpeakingMsgId(null);
     }
   }, [isOpen, activeTab]);
 
@@ -424,6 +433,61 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     }
   };
 
+  const handleToggleSpeak = (msgId: string, text: string) => {
+    triggerHaptic('light');
+    if (speakingMsgId === msgId) {
+      stopSpeaking();
+      setSpeakingMsgId(null);
+    } else {
+      stopSpeaking();
+      setSpeakingMsgId(msgId);
+      speakText(text, (speaking) => {
+        if (!speaking) {
+          setSpeakingMsgId(null);
+        }
+      });
+    }
+  };
+
+  const handleShareResponse = async (text: string) => {
+    triggerHaptic('light');
+    await shareContent(text, 'LifeOS AI Guide');
+  };
+
+  const getDynamicFollowUps = (lastMsg?: ChatMessage): Array<{ id: string; label: string; query: string }> => {
+    if (!lastMsg || lastMsg.role !== 'assistant' || !lastMsg.content) return [];
+    const text = lastMsg.content.toLowerCase();
+
+    if (text.includes('bus') || text.includes('travel') || text.includes('trip') || text.includes('train') || text.includes('itinerary')) {
+      return [
+        { id: 'f1', label: 'What to pack?', query: 'What essential checklist items should I pack for this trip?' },
+        { id: 'f2', label: 'Return options', query: 'What are the return options and schedules for this trip?' },
+        { id: 'f3', label: 'Create reminder', query: 'Add a to-do reminder for this trip tomorrow morning' },
+      ];
+    }
+
+    if (text.includes('spend') || text.includes('expense') || text.includes('budget') || text.includes('cost') || text.includes('rupees') || text.includes('₹')) {
+      return [
+        { id: 'f1', label: 'Log this expense', query: 'Help me log this estimated expense into my Spending tracker' },
+        { id: 'f2', label: 'Budget advice', query: 'How can I optimize this budget further?' },
+        { id: 'f3', label: 'Cost summary', query: 'Give me a quick summary breakdown of these costs' },
+      ];
+    }
+
+    if (text.includes('workout') || text.includes('exercise') || text.includes('gym') || text.includes('diet') || text.includes('protein') || text.includes('meal')) {
+      return [
+        { id: 'f1', label: 'Recovery tips', query: 'What are the best recovery and hydration tips for this?' },
+        { id: 'f2', label: 'Snack ideas', query: 'Suggest quick high-protein snack ideas for this routine' },
+        { id: 'f3', label: 'Add to tasks', query: 'Add this workout routine to my to-dos' },
+      ];
+    }
+
+    return [
+      { id: 'f1', label: 'Summarize steps', query: 'Can you summarize this into 3 quick actionable steps?' },
+      { id: 'f2', label: 'Add to tasks', query: 'Add the main action item from this as a to-do task' },
+    ];
+  };
+
   // Filter history items by search query
   const historyItems: AiChatSession[] = data?.aiChatHistory || [];
   const filteredHistory = historyItems.filter((session) => {
@@ -709,14 +773,32 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           )}
 
                           {msg.content && (
-                            <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[var(--md-outline-variant)]/60 text-[10px] text-[var(--md-on-surface-variant)] font-mono">
-                              <span>Groq AI • App Guide</span>
-                              <div className="flex items-center gap-2.5">
+                            <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--md-outline-variant)]/60 text-[10.5px] text-[var(--md-on-surface-variant)] font-mono">
+                              <div className="flex items-center gap-1.5">
+                                <span>Groq AI</span>
+                                <span className="opacity-40">•</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSpeak(msg.id, msg.content)}
+                                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all cursor-pointer ${
+                                    speakingMsgId === msg.id
+                                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold animate-pulse'
+                                      : 'hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)]'
+                                  }`}
+                                  title={speakingMsgId === msg.id ? 'Stop Voice Read-Aloud' : 'Read Aloud with Voice'}
+                                >
+                                  {speakingMsgId === msg.id ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                                  <span>{speakingMsgId === msg.id ? 'Stop' : 'Listen'}</span>
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-2">
                                 {msg.dataSentContext && (
                                   <button
                                     type="button"
                                     onClick={() => setPreviewDataContext(msg.dataSentContext || null)}
                                     className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
+                                    title="Inspect Context Sent"
                                   >
                                     <Eye size={11} />
                                     <span>Data Sent</span>
@@ -724,8 +806,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                                 )}
                                 <button
                                   type="button"
+                                  onClick={() => handleShareResponse(msg.content)}
+                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
+                                  title="Share formatted response"
+                                >
+                                  <Share2 size={11} />
+                                  <span>Share</span>
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors"
+                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
                                 >
                                   {copiedId === msg.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
                                   <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
@@ -761,8 +852,29 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 )}
               </div>
 
+              {/* ── Dynamic Follow-Up Suggestion Chips ── */}
+              {messages.length > 0 && !isGenerating && (
+                <div className="pt-1 pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+                  <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] flex items-center gap-1 pl-1 shrink-0 opacity-75">
+                    <Sparkles size={11} className="text-[var(--md-primary)]" />
+                    <span>Suggested:</span>
+                  </span>
+                  {getDynamicFollowUps(messages[messages.length - 1]).map((chip) => (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      onClick={() => handleSendQuery(chip.query)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] transition-all active:scale-95 whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
+                    >
+                      <span>{chip.label}</span>
+                      <ArrowRight size={10} className="opacity-60" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* ── Bottom Input Row (Pill Input in M3 Surface Container Highest) ── */}
-              <div className="pt-1.5 shrink-0 relative z-30">
+              <div className="pt-1 shrink-0 relative z-30">
                 {isRecording && (
                   <div className="mb-2 px-3.5 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-pulse">
                     <div className="flex items-center gap-2">

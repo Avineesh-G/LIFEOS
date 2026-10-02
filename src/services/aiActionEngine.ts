@@ -11,7 +11,8 @@ export type AiActionType =
   | 'LOG_WORKOUT' 
   | 'ADD_SHOPPING_ITEM'
   | 'ADD_MULTIPLE_SHOPPING_ITEMS'
-  | 'CREATE_OUTING';
+  | 'CREATE_OUTING'
+  | 'ADD_EXPENSE';
 
 export interface AiActionProposal {
   id: string;
@@ -71,7 +72,8 @@ function isAllowListedAction(type: string): boolean {
     'LOG_WORKOUT', 
     'ADD_SHOPPING_ITEM', 
     'ADD_MULTIPLE_SHOPPING_ITEMS',
-    'CREATE_OUTING'
+    'CREATE_OUTING',
+    'ADD_EXPENSE'
   ].includes(type);
 }
 
@@ -80,6 +82,8 @@ function buildActionTitle(parsed: any): string {
   switch (parsed.type) {
     case 'ADD_TASK':
       return `Add Task: ${p.text || p.title || 'New Task'}`;
+    case 'ADD_EXPENSE':
+      return `Log Expense: ₹${p.amount || 0} (${p.category || 'General'})`;
     case 'ADD_SHOPPING_ITEM':
       return `Add to Shopping: ${p.name || 'Item'}`;
     case 'ADD_MULTIPLE_SHOPPING_ITEMS':
@@ -103,6 +107,12 @@ function buildActionDescription(parsed: any): string {
       const timeStr = p.startTime ? ` at ${p.startTime}` : '';
       const prio = p.priority ? ` • Priority: ${p.priority}` : '';
       return `Due: ${due}${timeStr}${prio}`;
+    }
+    case 'ADD_EXPENSE': {
+      const cat = p.category ? `Category: ${p.category}` : 'General';
+      const note = p.note ? ` • Note: ${p.note}` : '';
+      const date = p.date ? ` • Date: ${p.date}` : '';
+      return `${cat}${note}${date}`;
     }
     case 'ADD_SHOPPING_ITEM':
       return `Item: "${p.name || 'Item'}" ${p.quantity ? `(${p.quantity})` : ''} ${p.estimatedCost ? `• Est: ₹${p.estimatedCost}` : ''}`;
@@ -244,6 +254,25 @@ export async function executeConfirmedAiAction(
         return { 
           success: true, 
           message: `Outing "${newOuting.name}" added to Outings planner.` 
+        };
+      }
+
+      case 'ADD_EXPENSE': {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const newExpense = {
+          id: `exp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          amount: Math.abs(Number(p.amount)) || 0,
+          category: p.category || 'General',
+          note: p.note || p.title || 'AI Logged Expense',
+          date: p.date || todayStr,
+        };
+        const existingExpenses = Array.isArray(currentData.expenses) ? currentData.expenses : [];
+        const updatedExpenses = [newExpense, ...existingExpenses];
+        await updateData({ expenses: updatedExpenses });
+        return {
+          success: true,
+          message: `Logged ₹${newExpense.amount} (${newExpense.category}) in Spending.`,
+          undoPayload: { expenses: existingExpenses }
         };
       }
 
