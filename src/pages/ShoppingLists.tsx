@@ -259,16 +259,14 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                       <span className="font-stat text-[var(--text-secondary)] font-medium">
                         {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
                       </span>
-                      <span className={`font-stat font-bold text-[11px] ${isAllDone ? 'text-emerald-500' : 'text-[var(--accent-primary)]'}`}>
+                      <span className="font-stat font-bold text-[11px] text-[var(--md-primary)]">
                         {percent}%
                       </span>
                     </div>
 
-                    <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
+                    <div className="h-1.5 w-full rounded-full bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          isAllDone ? 'bg-emerald-500' : 'bg-[var(--accent-primary)]'
-                        }`}
+                        className="h-full rounded-full bg-[var(--md-primary)] transition-all duration-300"
                         style={{ width: `${percent}%` }}
                       />
                     </div>

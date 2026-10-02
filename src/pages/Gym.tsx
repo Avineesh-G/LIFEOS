@@ -394,7 +394,7 @@ export default function Gym({ data, updateData }: GymProps) {
       <div className="liquid-glass border border-[var(--card-border)] rounded-[30px] p-4 sm:p-5 shadow-[var(--shadow-card)] space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-full bg-[var(--pill-active-bg)] text-[var(--accent-primary)] flex items-center justify-center shrink-0 border border-[var(--card-border)]">
+            <span className="w-8 h-8 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0 border border-[var(--md-outline-variant)]">
               <Calendar size={15} />
             </span>
             <div>
@@ -404,7 +404,7 @@ export default function Gym({ data, updateData }: GymProps) {
               <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 mt-0.5">
                 <span>{isSelectedToday ? `${selectedDay} (Today)` : selectedDay}</span>
                 <span className="text-[var(--text-muted)] font-normal">·</span>
-                <span className="text-[var(--pill-active-text)] font-black">{activePlan?.type || 'Rest'}</span>
+                <span className="text-[var(--md-primary)] font-black">{activePlan?.type || 'Rest'}</span>
               </h3>
             </div>
           </div>
@@ -416,7 +416,7 @@ export default function Gym({ data, updateData }: GymProps) {
                 triggerHaptic(5);
                 setSelectedDay(shortDay);
               }}
-              className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] active:scale-95 transition-all"
+              className="text-[11px] font-mono font-bold px-3 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border border-[var(--md-outline-variant)] active:scale-95 transition-all"
             >
               Back to Today ({shortDay})
             </button>

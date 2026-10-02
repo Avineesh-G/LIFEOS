@@ -507,7 +507,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               data-header-action="cloud"
               className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center border transition-all shadow-xs shrink-0 select-none ${
                 isOnline
-                  ? 'bg-[var(--md-surface-container-high)] text-emerald-500 border-[var(--md-outline-variant)]'
+                  ? 'bg-[var(--md-surface-container-high)] text-[var(--md-primary)] border-[var(--md-outline-variant)]'
                   : 'bg-amber-500/20 text-amber-500 border-amber-500/40 animate-pulse'
               }`}
               title={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}

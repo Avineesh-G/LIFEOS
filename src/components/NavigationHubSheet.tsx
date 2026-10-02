@@ -661,10 +661,10 @@ export function NavigationHubSheet({
                       style={{
                         backgroundColor:
                           selectedSlot === 1
-                            ? HUB_FAMILY_CONFIG[slot1Dest.family].seed
+                            ? activeSeed
                             : 'transparent',
-                        borderColor: HUB_FAMILY_CONFIG[slot1Dest.family].seed,
-                        outlineColor: HUB_FAMILY_CONFIG[slot1Dest.family].seed,
+                        borderColor: activeSeed,
+                        outlineColor: activeSeed,
                       }}
                       role="radio"
                       aria-checked={selectedSlot === 1}
@@ -697,10 +697,10 @@ export function NavigationHubSheet({
                       style={{
                         backgroundColor:
                           selectedSlot === 2
-                            ? HUB_FAMILY_CONFIG[slot2Dest.family].seed
+                            ? activeSeed
                             : 'transparent',
-                        borderColor: HUB_FAMILY_CONFIG[slot2Dest.family].seed,
-                        outlineColor: HUB_FAMILY_CONFIG[slot2Dest.family].seed,
+                        borderColor: activeSeed,
+                        outlineColor: activeSeed,
                       }}
                       role="radio"
                       aria-checked={selectedSlot === 2}

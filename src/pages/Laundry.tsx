@@ -299,10 +299,10 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       onClick={() => toggleBatchStatus(batch)}
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border inline-flex items-center gap-1 ${
                         isReturned
-                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                          ? 'bg-[var(--md-primary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-primary-container)]'
                           : isSubmitted
-                            ? 'bg-teal-500/15 border-teal-500/30 text-teal-700 dark:text-teal-300'
-                            : 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                            ? 'bg-[var(--md-secondary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-secondary-container)]'
+                            : 'bg-[var(--md-tertiary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-tertiary-container)]'
                       }`}
                     >
                       {isReturned ? (

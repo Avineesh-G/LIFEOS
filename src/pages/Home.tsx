@@ -66,9 +66,9 @@ const DayCell = memo(function DayCell({
       }}
       className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all select-none focus:outline-none bouncy-tap ${
         !isSel && isCur
-          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
+          ? 'border border-[var(--md-primary)]/40 bg-[var(--md-primary-container)]/40 rounded-[18px] sm:rounded-[20px]'
           : !isSel
-          ? 'hover:bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
+          ? 'hover:bg-[var(--md-surface-container-high)] rounded-[18px] sm:rounded-[20px]'
           : ''
       }`}
     >
@@ -90,10 +90,10 @@ const DayCell = memo(function DayCell({
         {format(d, 'd')}
       </span>
       <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
-        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#3B82F6]'}`} />}
-        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#22C55E]'}`} />}
-        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[var(--accent-primary)]'}`} />}
-        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#F5A623]'}`} />}
+        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#3B82F6]'}`} />}
+        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
+        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
+        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#F5A623]'}`} />}
         {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
           <span className="w-1 h-1 rounded-full opacity-0" />
         )}
@@ -362,7 +362,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                   ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-[var(--md-outline-variant)]'
                   : selectedDateData.isSelPast
                   ? 'bg-[var(--md-surface-container-low)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)]'
-                  : 'bg-emerald-500/12 text-[#22C55E] border-[#22C55E]/20'
+                  : 'bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] border-[var(--md-outline-variant)]'
               }`}
             >
               {selectedDateData.isSelToday ? 'Live Today' : selectedDateData.isSelPast ? 'Completed' : 'Upcoming'}
@@ -570,11 +570,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="p-3 rounded-[18px] bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/50 text-center">
-                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-1.5">
+                    <div className="p-3 rounded-[18px] bg-[var(--md-primary-container)]/30 border border-[var(--md-outline-variant)] text-center">
+                      <p className="text-xs font-semibold text-[var(--md-on-primary-container)] flex items-center justify-center gap-1.5">
                         {selectedDateData.tasks.length > 0 ? (
                           <>
-                            <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                            <CheckCircle2 size={15} className="text-[var(--md-primary)] shrink-0" />
                             <span>All tasks completed for today</span>
                           </>
                         ) : (

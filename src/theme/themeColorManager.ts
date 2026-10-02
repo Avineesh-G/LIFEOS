@@ -30,9 +30,9 @@ export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';
 
 export function hexToRgbTuple(hex: string): [number, number, number] {
   const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16) || 45;
-  const g = parseInt(clean.substring(2, 4), 16) || 212;
-  const b = parseInt(clean.substring(4, 6), 16) || 191;
+  const r = parseInt(clean.substring(0, 2), 16) || 128;
+  const g = parseInt(clean.substring(2, 4), 16) || 0;
+  const b = parseInt(clean.substring(4, 6), 16) || 32;
   return [r, g, b];
 }
 
