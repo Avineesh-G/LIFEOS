@@ -1,10 +1,10 @@
 {
-  "versionCode": 1,
+  "versionCode": 50,
   "versionName": "3.0.0",
   "releaseDate": "2026-10-02",
   "apkSize": "13.8 MB",
   "apkSizeBytes": 14423674,
   "releaseNotes": "LifeOS v3.0.0 (Build 1):\n• Elevated floating navigation dock with frosted glass atmosphere\n• Centered pop-up interfaces with body gesture lock\n• Document-root portal rendering for full device compatibility",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "78e9f1621c6310e0dade41bfef4b13f282333fe9c85c0e2148d15c44d314221c"
+  "sha256": "d2afd3603ae66f5aa7c2d459eaa1fa99d7b8278025188647b4aac279fc99832a"
 }
