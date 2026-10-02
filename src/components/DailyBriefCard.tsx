@@ -124,10 +124,10 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
         )}
       </div>
 
-      {/* ── Greeting & Contextual State Line ── */}
+      {/* ── Actionable Phase Headline & Contextual State Line ── */}
       <div className="space-y-0.5">
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gradient-dark leading-snug">
-          {brief.greeting}
+        <h2 className="text-lg sm:text-xl font-heading font-bold tracking-tight text-gradient-dark leading-snug">
+          {brief.headline}
         </h2>
         <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] leading-relaxed tracking-tight">
           {brief.contextSummary}
