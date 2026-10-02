@@ -635,10 +635,10 @@ export default function Tasks({ data, updateData }: TasksProps) {
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+            <h2 className="text-lg sm:text-xl font-bold text-[var(--md-on-surface)] font-sans tracking-tight">
               {editingTaskId ? 'Update TO-DO' : 'New TO-DO'}
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]">
               {editingTaskId ? 'Editing' : 'Scheduled'}
             </span>
           </div>
@@ -648,7 +648,8 @@ export default function Tasks({ data, updateData }: TasksProps) {
               setShowAdd(false);
               setEditingTaskId(null);
             }}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-secondary-light dark:text-secondary-dark"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-colors active:scale-95"
+            aria-label="Close"
           >
             <X size={16} />
           </button>
@@ -657,7 +658,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
         <div className="space-y-3.5">
           {/* Task Name */}
           <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono">
               Task Title
             </label>
             <input
@@ -666,13 +667,13 @@ export default function Tasks({ data, updateData }: TasksProps) {
               onChange={e => setNewTask(e.target.value)}
               placeholder="e.g. Complete Machine Learning assignment"
               autoFocus
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)]/60"
             />
           </div>
 
           {/* Subtask */}
           <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono">
               Subtask / Note (Optional)
             </label>
             <input
@@ -680,58 +681,58 @@ export default function Tasks({ data, updateData }: TasksProps) {
               value={newSubtask}
               onChange={e => setNewSubtask(e.target.value)}
               placeholder="e.g. Submit PDF to LMS portal"
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark placeholder-muted-light dark:placeholder-muted-dark"
+              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)]/60"
             />
           </div>
 
           {/* Date Selector */}
           <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
-              <CalendarIcon size={11} className="text-accent" /> Date
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
+              <CalendarIcon size={12} className="text-[var(--md-primary)]" /> Date
             </label>
             <input
               type="date"
               value={newDate}
               onChange={e => setNewDate(e.target.value)}
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
             />
           </div>
 
           {/* Time: Start & End */}
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
-                <Clock size={11} className="text-accent" /> Start Time
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
+                <Clock size={12} className="text-[var(--md-primary)]" /> Start Time
               </label>
               <input
                 type="time"
                 value={newStartTime}
                 onChange={e => setNewStartTime(e.target.value)}
-                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1.5 font-mono flex items-center gap-1">
-                <Clock size={11} className="text-accent" /> End Time
+              <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
+                <Clock size={12} className="text-[var(--md-primary)]" /> End Time
               </label>
               <input
                 type="time"
                 value={newEndTime}
                 onChange={e => setNewEndTime(e.target.value)}
-                className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-3">
+          <div className="grid grid-cols-2 gap-3 pt-2">
             <button
               type="button"
               onClick={() => {
                 setShowAdd(false);
                 setEditingTaskId(null);
               }}
-              className="py-3 rounded-2xl border border-border-light/80 dark:border-border-dark/80 text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+              className="py-3 rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] text-[var(--md-on-surface)] font-bold text-xs hover:bg-[var(--md-surface-container-high)] active:scale-95 transition-all"
             >
               Cancel
             </button>
@@ -739,7 +740,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
               type="button"
               onClick={saveTask}
               disabled={!newTask.trim()}
-              className="py-3 rounded-2xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:opacity-95 transition-all disabled:opacity-40"
+              className="py-3 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs shadow-md shadow-[var(--md-primary)]/25 hover:opacity-95 active:scale-95 transition-all disabled:opacity-40"
             >
               {editingTaskId ? 'Update TO-DO' : 'Save TO-DO'}
             </button>

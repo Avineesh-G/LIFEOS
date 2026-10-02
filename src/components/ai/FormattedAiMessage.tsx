@@ -374,11 +374,11 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
       const flushBullets = (keyIdx: number) => {
         if (currentBullets.length > 0) {
           blocks.push(
-            <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5 font-sans">
+            <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5 font-sans w-full min-w-0">
               {currentBullets.map((bullet, bIdx) => (
-                <li key={bIdx} className="flex items-start gap-2 leading-relaxed text-xs sm:text-sm">
+                <li key={bIdx} className="flex items-start gap-2 leading-relaxed text-xs sm:text-sm w-full min-w-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] mt-1.5 shrink-0 opacity-85" />
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 break-words [overflow-wrap:anywhere]">
                     {parseInlineContent(bullet, isUser)}
                   </div>
                 </li>
@@ -474,12 +474,12 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <div
               key={`step-${segIdx}-${idx}`}
-              className="flex items-start gap-2.5 my-1.5 p-2.5 rounded-2xl bg-[var(--md-surface-container-high)]/70 border border-[var(--md-outline-variant)]/40 shadow-none font-sans"
+              className="flex items-start gap-2 my-1.5 p-2 rounded-xl bg-[var(--md-surface-container-high)]/60 border border-[var(--md-outline-variant)]/30 font-sans"
             >
-              <span className="w-5 h-5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10.5px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+              <span className="w-4 h-4 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[9.5px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                 {stepNum}
               </span>
-              <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed">
+              <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere]">
                 {parseInlineContent(stepText, isUser)}
               </div>
             </div>
@@ -503,7 +503,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <h4
               key={`heading-${segIdx}-${idx}`}
-              className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2.5 mb-1 tracking-tight font-sans"
+              className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2 mb-1 tracking-tight font-sans break-words [overflow-wrap:anywhere]"
             >
               {parseInlineContent(headerText, isUser)}
             </h4>
@@ -514,7 +514,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Normal paragraph line
         flushAll(idx);
         blocks.push(
-          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans text-[var(--md-on-surface)]">
+          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans text-[var(--md-on-surface)] break-words [overflow-wrap:anywhere]">
             {parseInlineContent(line, isUser)}
           </p>
         );
@@ -527,7 +527,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
   }, [cleanContent, isUser]);
 
   return (
-    <div className="allow-select select-text space-y-0.5 break-words font-sans">
+    <div className="allow-select select-text space-y-1 break-words [overflow-wrap:anywhere] max-w-full font-sans">
       {renderedBlocks}
     </div>
   );

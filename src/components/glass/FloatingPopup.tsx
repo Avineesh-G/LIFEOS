@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, AlertTriangle, Check } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
@@ -154,7 +155,9 @@ export default function FloatingPopup({
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[140] pointer-events-none flex flex-col justify-end">
@@ -163,9 +166,9 @@ export default function FloatingPopup({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18 }}
             onClick={handleAttemptClose}
-            className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[140] cursor-pointer pointer-events-auto touch-none"
+            className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[140] cursor-pointer pointer-events-auto touch-none gpu-composited"
             aria-hidden="true"
           />
 
@@ -179,25 +182,26 @@ export default function FloatingPopup({
               prefersReducedMotion
                 ? { opacity: 0 }
                 : variant === 'chat'
-                ? { opacity: 0, scale: 0.90, y: -20 }
-                : { opacity: 0, scale: 0.96, y: 30 }
+                ? { opacity: 0, scale: 0.92, y: -16 }
+                : { opacity: 0, scale: 0.96, y: 24 }
             }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 0.95, y: 20 }
+                : { opacity: 0, scale: 0.95, y: 16 }
             }
             transition={{
               type: 'spring',
-              stiffness: 340,
-              damping: 30,
-              mass: 0.8,
+              stiffness: 360,
+              damping: 32,
+              mass: 0.7,
             }}
             drag={variant === 'form' ? 'y' : false}
+            dragListener={false}
             dragControls={variant === 'form' ? dragControls : undefined}
             dragConstraints={variant === 'form' ? { top: -200, bottom: 0 } : undefined}
-            dragElastic={variant === 'form' ? { top: 0.1, bottom: 0.5 } : undefined}
+            dragElastic={variant === 'form' ? { top: 0.05, bottom: 0.4 } : undefined}
             onDragEnd={variant === 'form' ? (_, info) => {
               if (info.offset.y > 90 || info.velocity.y > 400) {
                 handleAttemptClose();
@@ -205,10 +209,10 @@ export default function FloatingPopup({
                 setIsExpanded(true);
               }
             } : undefined}
-            className={`fixed z-[150] left-3 right-3 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-24px)] sm:w-[calc(100vw-28px)] ${maxWidth} pointer-events-auto bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-m3-elevation-3 rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-200`}
+            className={`fixed z-[150] left-2 right-2 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-16px)] sm:w-[calc(100vw-28px)] max-w-full ${maxWidth} pointer-events-auto bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-m3-elevation-3 rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-150 gpu-composited will-change-transform`}
             style={{
               bottom: keyboardOffset > 0
-                ? `calc(${keyboardOffset}px + 12px)`
+                ? `calc(${keyboardOffset}px + 8px)`
                 : 'calc(var(--nav-h, 56px) + max(8px, var(--sab, env(safe-area-inset-bottom, 0px))) + 8px)',
               maxHeight: isExpanded
                 ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - 24px)'
@@ -227,14 +231,14 @@ export default function FloatingPopup({
                   dragControls.start(e);
                 }
               }}
-              className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
+              className="w-full py-2 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
               <div className="w-9 h-1 rounded-full bg-[var(--md-outline-variant)] hover:bg-[var(--md-primary)] transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
             {(title || icon) && (
-              <div className="px-5 pb-3 flex items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 shrink-0 select-none">
+              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {icon && (
                     <div className="w-8 h-8 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0">
@@ -271,7 +275,7 @@ export default function FloatingPopup({
 
             {/* Scrollable Body Content with overscroll containment */}
             <div
-              className={`flex-1 ${variant === 'chat' ? 'flex flex-col min-h-0 overflow-hidden p-3 sm:p-4' : 'overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4'}`}
+              className={`flex-1 ${variant === 'chat' ? 'flex flex-col min-h-0 min-w-0 overflow-hidden w-full px-2.5 pt-0.5 pb-2.5 sm:px-4 sm:pt-1 sm:pb-3' : 'overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4'}`}
               style={{
                 overscrollBehavior: 'contain',
                 touchAction: 'pan-y',
@@ -351,6 +355,7 @@ export default function FloatingPopup({
           </AnimatePresence>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

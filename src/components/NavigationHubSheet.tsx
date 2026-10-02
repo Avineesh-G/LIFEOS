@@ -112,34 +112,23 @@ const DestinationTile = React.memo(function DestinationTile({
 }) {
   const Icon = destination.icon;
   const config = resolveDestinationColor(destination.id, destination.family, {}, isDark);
-  const [r, g, b] = config.rgb;
-
-  const currentOpacity = (destination.family === 'history' || destination.family === 'outing') ? 0.28 : (isDark ? 0.32 : 0.22);
   const tileBg = isCurrent
-    ? `rgba(${r}, ${g}, ${b}, ${currentOpacity})`
-    : isDark
-    ? `rgba(${r}, ${g}, ${b}, 0.16)`
-    : `rgba(${r}, ${g}, ${b}, 0.08)`;
+    ? 'var(--md-secondary-container)'
+    : 'var(--md-surface-container)';
 
   const tileBorder = isEditMode
-    ? `1px solid rgba(${r}, ${g}, ${b}, ${isDark ? 0.6 : 0.45})`
+    ? '1px dashed var(--md-primary)'
     : isCurrent
-    ? `1px solid ${config.seed}`
-    : isDark
-    ? `0.5px solid rgba(${r}, ${g}, ${b}, 0.38)`
-    : `0.5px solid rgba(${r}, ${g}, ${b}, 0.25)`;
+    ? '1px solid var(--md-primary)'
+    : '1px solid var(--md-outline-variant)';
 
   const squircleBg = isCurrent
-    ? (isDark ? (config.darkStrong || config.seed) : config.seed)
-    : isDark
-    ? `rgba(${r}, ${g}, ${b}, 0.30)`
-    : `rgba(${r}, ${g}, ${b}, 0.14)`;
+    ? 'var(--md-primary)'
+    : 'var(--md-surface-container-highest)';
 
   const glyphColor = isCurrent
-    ? (config.onAccent || '#FFFFFF')
-    : isDark
-    ? config.darkGlyph
-    : (config.textAccent || config.seed);
+    ? 'var(--md-on-primary)'
+    : 'var(--md-primary)';
 
   return (
     <button
@@ -149,7 +138,6 @@ const DestinationTile = React.memo(function DestinationTile({
       style={{
         backgroundColor: tileBg,
         border: tileBorder,
-        outlineColor: config.seed,
       }}
       className="group relative min-h-[80px] rounded-[20px] py-[10px] px-1 flex flex-col items-center justify-center gap-[6px] select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none transition-transform duration-100 active:scale-95"
       aria-label={
@@ -162,8 +150,7 @@ const DestinationTile = React.memo(function DestinationTile({
       {/* Subtle + indicator badge when in edit mode */}
       {isEditMode && (
         <span
-          className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-xs"
-          style={{ backgroundColor: config.seed }}
+          className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[var(--md-on-primary)] bg-[var(--md-primary)] text-[10px] font-bold shadow-xs"
           aria-hidden="true"
         >
           <Plus size={10} strokeWidth={3} />
@@ -179,7 +166,7 @@ const DestinationTile = React.memo(function DestinationTile({
       </div>
 
       {/* Label */}
-      <span className="text-[12px] font-medium leading-[1.25] text-center line-clamp-2 px-1 text-[var(--text-primary)] select-none">
+      <span className="text-[12px] font-medium leading-[1.25] text-center line-clamp-2 px-1 text-[var(--md-on-surface)] select-none">
         {destination.label}
       </span>
     </button>
@@ -251,12 +238,12 @@ export function NavigationHubSheet({
 
   // Base canvas background
   const sheetBg = useMemo(() => {
-    return isDark ? '#050B0D' : '#EEF6F7';
+    return isDark ? 'var(--md-surface-container-high)' : 'var(--md-surface-container-high)';
   }, [isDark]);
 
   // Pill container background for slot selector
   const pillBg = useMemo(() => {
-    return isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+    return isDark ? 'var(--md-surface-container)' : 'var(--md-surface-container)';
   }, [isDark]);
 
   // Reduced motion preference
@@ -517,32 +504,18 @@ export function NavigationHubSheet({
                         setIsEditMode(true);
                         setSelectedSlot(1);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center border border-black/[0.08] dark:border-white/20 bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-full flex items-center justify-center border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] active:scale-95 transition-all cursor-pointer"
                       aria-label="Edit navigation"
                       title="Edit navigation"
                     >
                       <Pencil size={15} strokeWidth={2.2} />
                     </button>
 
-                    <div
-                      className="px-2.5 py-1 rounded-full flex items-center gap-1.5 border"
-                      style={{
-                        backgroundColor: `rgba(${aR}, ${aG}, ${aB}, 0.20)`,
-                        borderColor: `rgba(${aR}, ${aG}, ${aB}, 0.35)`,
-                      }}
-                    >
+                    <div className="px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-[var(--md-outline-variant)] bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]">
                       <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: activeSeed }}
+                        className="w-1.5 h-1.5 rounded-full shrink-0 bg-[var(--md-primary)]"
                       />
-                      <span
-                        className="text-[12px] font-medium leading-none"
-                        style={{
-                          color: isDark
-                            ? (HUB_FAMILY_CONFIG[SECTION_TO_HUB_FAMILY[activeSection]]?.darkGlyph || activeSeed)
-                            : activeSeed,
-                        }}
-                      >
+                      <span className="text-[12px] font-medium leading-none">
                         {HUB_SECTION_NAMES[activeSection] || 'LifeOS'}
                       </span>
                     </div>

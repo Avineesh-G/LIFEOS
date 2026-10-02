@@ -501,32 +501,31 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   return (
     <>
       <GlassSheet isOpen={isOpen} onClose={onClose}>
-        <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden relative text-[var(--md-on-surface)]">
+        <div className="flex flex-col h-full w-full max-w-full min-w-0 overflow-hidden relative text-[var(--md-on-surface)]">
           
           {/* ── Top Header with Mode Tabs ── */}
-          <div className="flex items-center justify-between py-1.5 mb-1 shrink-0">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-on-primary-container)] shrink-0 shadow-xs">
-                <PulseBubbleIcon size={20} />
+          <div className="flex items-center justify-between gap-1.5 py-1 mb-1 w-full min-w-0 shrink-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-8 h-8 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-on-primary-container)] shrink-0 shadow-xs">
+                <PulseBubbleIcon size={18} />
               </div>
-              <div className="min-w-0">
-
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm sm:text-base font-bold text-gradient-dark tracking-tight leading-tight truncate">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-xs sm:text-base font-bold text-gradient-dark tracking-tight leading-tight truncate">
                     Ask LifeOS
                   </h2>
-                  <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
+                  <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
                     Groq AI
                   </span>
                 </div>
-                <p className="text-[10px] text-[var(--md-on-surface-variant)] font-medium truncate">
+                <p className="text-[9.5px] text-[var(--md-on-surface-variant)] font-medium truncate hidden xs:block">
                   Offline-First System Intelligence
                 </p>
               </div>
             </div>
 
             {/* Header Controls: Chat/History Tabs & Close */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               <div className="flex items-center p-0.5 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
                 <button
                   type="button"
@@ -535,13 +534,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     setActiveTab('chat');
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold transition-all ${
                     activeTab === 'chat'
                       ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
                       : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
                   }`}
                 >
-                  <MessageSquare size={12} />
+                  <MessageSquare size={11} />
                   <span>Chat</span>
                 </button>
                 <button
@@ -550,16 +549,16 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     triggerHaptic('light');
                     setActiveTab('history');
                   }}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold transition-all ${
                     activeTab === 'history'
                       ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
                       : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
                   }`}
                 >
-                  <History size={12} />
+                  <History size={11} />
                   <span>History</span>
                   {historyItems.length > 0 && (
-                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[9px] flex items-center justify-center font-bold">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[8.5px] flex items-center justify-center font-bold">
                       {historyItems.length}
                     </span>
                   )}
@@ -571,25 +570,25 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   title="New Chat Session"
                   onClick={handleStartNewChat}
-                  className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
+                  className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95 shrink-0"
                 >
-                  <Plus size={16} />
+                  <Plus size={15} />
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
+                className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95 shrink-0"
                 aria-label="Close Ask LifeOS"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
           </div>
 
           {/* ── Assist Chip: Screen Context ── */}
-          <div className="pb-1.5 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] border border-[var(--md-outline-variant)]">
+          <div className="pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none w-full min-w-0 shrink-0 border-b border-[var(--md-outline-variant)]/25">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-semibold bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] border border-[var(--md-outline-variant)]">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)]" />
               <span>Screen: {location.pathname === '/' ? 'Home' : location.pathname.replace('/', '')}</span>
             </span>
@@ -714,7 +713,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {/* ── VIEW 1: ACTIVE CHAT SCREEN ── */}
           {activeTab === 'chat' && (
             <>
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto pt-2 pb-3 px-0.5 space-y-3 scrollbar-none flex flex-col min-h-0">
+              <div ref={chatContainerRef} className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden pt-1.5 pb-2 px-0.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
                 {messages.length === 0 ? (
                   <div className="text-center py-2 px-2 space-y-3">
                     <div className="space-y-1 max-w-sm mx-auto">
@@ -752,8 +751,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                     if (isUser) {
                       return (
-                        <div key={msg.id} className="w-full flex justify-end">
-                          <div className="max-w-[85%] sm:max-w-[80%] px-3.5 py-2.5 rounded-[18px] rounded-br-xs bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs text-xs sm:text-sm leading-relaxed">
+                        <div key={msg.id} className="w-full min-w-0 flex justify-end">
+                          <div className="max-w-[85%] sm:max-w-[80%] min-w-0 px-3.5 py-2.5 rounded-[18px] rounded-br-xs bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere]">
                             <FormattedAiMessage content={msg.content} isUser={true} />
                           </div>
                         </div>
@@ -761,8 +760,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     }
 
                     return (
-                      <div key={msg.id} className="w-full flex flex-col items-start space-y-1">
-                        <div className="w-full p-3.5 rounded-[20px] rounded-bl-xs bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs overflow-hidden text-xs sm:text-sm leading-relaxed">
+                      <div key={msg.id} className="w-full min-w-0 flex flex-col items-stretch space-y-1">
+                        <div className="w-full min-w-0 p-3 rounded-2xl rounded-bl-xs bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs text-xs sm:text-sm leading-relaxed">
                           {msg.content ? (
                             <FormattedAiMessage content={msg.content} isUser={false} />
                           ) : (
@@ -773,8 +772,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           )}
 
                           {msg.content && (
-                            <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--md-outline-variant)]/60 text-[10.5px] text-[var(--md-on-surface-variant)] font-mono">
-                              <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center justify-between gap-1.5 pt-2 mt-2 border-t border-[var(--md-outline-variant)]/60 text-[9.5px] text-[var(--md-on-surface-variant)] font-mono w-full min-w-0">
+                              <div className="flex items-center gap-1.5 shrink-0">
                                 <span>Groq AI</span>
                                 <span className="opacity-40">•</span>
                                 <button
@@ -787,38 +786,39 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                                   }`}
                                   title={speakingMsgId === msg.id ? 'Stop Voice Read-Aloud' : 'Read Aloud with Voice'}
                                 >
-                                  {speakingMsgId === msg.id ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                                  {speakingMsgId === msg.id ? <VolumeX size={10} /> : <Volume2 size={10} />}
                                   <span>{speakingMsgId === msg.id ? 'Stop' : 'Listen'}</span>
                                 </button>
                               </div>
 
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 shrink-0 ml-auto">
                                 {msg.dataSentContext && (
                                   <button
                                     type="button"
                                     onClick={() => setPreviewDataContext(msg.dataSentContext || null)}
-                                    className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
+                                    className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
                                     title="Inspect Context Sent"
                                   >
-                                    <Eye size={11} />
-                                    <span>Data Sent</span>
+                                    <Eye size={10} />
+                                    <span className="hidden xs:inline">Data</span>
                                   </button>
                                 )}
                                 <button
                                   type="button"
                                   onClick={() => handleShareResponse(msg.content)}
-                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
+                                  className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
                                   title="Share formatted response"
                                 >
-                                  <Share2 size={11} />
+                                  <Share2 size={10} />
                                   <span>Share</span>
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
+                                  className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
+                                  title="Copy text"
                                 >
-                                  {copiedId === msg.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                                  {copiedId === msg.id ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
                                   <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
                                 </button>
                               </div>
@@ -828,7 +828,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                         {/* Action Confirmation Cards */}
                         {proposals.map((prop) => (
-                          <div key={prop.id} className="w-full pt-1">
+                          <div key={prop.id} className="w-full min-w-0 pt-1">
                             <ActionConfirmationCard
                               proposal={prop}
                               updateData={updateData}
@@ -854,17 +854,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
               {/* ── Dynamic Follow-Up Suggestion Chips ── */}
               {messages.length > 0 && !isGenerating && (
-                <div className="pt-1 pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
-                  <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] flex items-center gap-1 pl-1 shrink-0 opacity-75">
-                    <Sparkles size={11} className="text-[var(--md-primary)]" />
-                    <span>Suggested:</span>
+                <div className="pt-1 pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0 w-full min-w-0">
+                  <span className="text-[9.5px] font-mono text-[var(--md-on-surface-variant)] flex items-center gap-1 pl-0.5 shrink-0 opacity-75">
+                    <Sparkles size={10} className="text-[var(--md-primary)] shrink-0" />
+                    <span className="hidden xs:inline">Suggested:</span>
                   </span>
                   {getDynamicFollowUps(messages[messages.length - 1]).map((chip) => (
                     <button
                       key={chip.id}
                       type="button"
                       onClick={() => handleSendQuery(chip.query)}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] transition-all active:scale-95 whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-medium bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] transition-all active:scale-95 whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
                     >
                       <span>{chip.label}</span>
                       <ArrowRight size={10} className="opacity-60" />
@@ -874,18 +874,18 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               )}
 
               {/* ── Bottom Input Row (Pill Input in M3 Surface Container Highest) ── */}
-              <div className="pt-1 shrink-0 relative z-30">
+              <div className="pt-1 shrink-0 relative z-30 w-full min-w-0">
                 {isRecording && (
-                  <div className="mb-2 px-3.5 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-pulse">
-                    <div className="flex items-center gap-2">
+                  <div className="mb-1.5 px-3 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-pulse w-full min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
                       <span className="font-semibold text-[11px] truncate">Listening live... (Speak task or query)</span>
                     </div>
-                    <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] shrink-0 ml-2">Tap red stop when done</span>
+                    <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] shrink-0 ml-2">Tap stop</span>
                   </div>
                 )}
 
-                <div className="flex items-center gap-1.5 p-1.5 pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
+                <div className="flex items-center gap-1 p-1 pl-2.5 sm:pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] w-full min-w-0">
                   {/* Left input field */}
                   <div className="flex-1 flex items-center min-w-0">
                     <input
@@ -913,7 +913,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           ? 'Listening in real-time...'
                           : 'Ask LifeOS or say "Add to-do task..."'
                       }
-                      className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text"
+                      className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text min-w-0"
                       style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
                     />
                     
@@ -929,13 +929,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all shrink-0 mr-1"
                         title="Clear text"
                       >
-                        <X size={14} />
+                        <X size={13} />
                       </button>
                     )}
                   </div>
 
                   {/* Actions: Voice Mic & Send Buttons */}
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -944,7 +944,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       }}
                       disabled={isGenerating || transcribing}
                       title={isRecording ? 'Stop Recording' : 'Voice Input'}
-                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
                         isRecording
                           ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
                           : transcribing
@@ -952,7 +952,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] hover:text-[var(--md-primary)]'
                       }`}
                     >
-                      {isRecording ? <Square size={13} /> : transcribing ? <Loader2 size={14} /> : <Mic size={16} strokeWidth={2.2} />}
+                      {isRecording ? <Square size={11} /> : transcribing ? <Loader2 size={12} /> : <Mic size={14} strokeWidth={2.2} />}
                     </button>
 
                     {inputQuery.trim().length > 0 && (
@@ -964,9 +964,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         }}
                         disabled={isGenerating || transcribing}
                         title="Send query"
-                        className="w-9 h-9 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
                       >
-                        <Send size={15} className="ml-[-1px]" strokeWidth={2.2} />
+                        <Send size={13} className="ml-[-1px]" strokeWidth={2.2} />
                       </button>
                     )}
                   </div>

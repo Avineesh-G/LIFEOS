@@ -542,17 +542,17 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         </div>
       </header>
 
-      {/* ── Main content (Streamlined with precise bottom dock clearance) ── */}
+      {/* ── Main content (Streamlined with clean top alignment under sticky header) ── */}
       <main 
         className="relative z-10 w-full box-border"
         style={{
-          paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
+          paddingTop: '4px',
           paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 24px)',
           paddingLeft: 'var(--sal, 0px)',
           paddingRight: 'var(--sar, 0px)',
         }}
       >
-        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-1 sm:pt-2">
+        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-0.5 sm:pt-1">
           <M3NotificationBanner />
           {children}
         </div>
