@@ -8,13 +8,26 @@ interface FormattedAiMessageProps {
 }
 
 /**
+ * Strips json_action blocks (both closed and open during streaming)
+ * so raw JSON never leaks into the visual message bubbles.
+ */
+function stripJsonActions(text: string): string {
+  if (!text) return '';
+  // Remove closed ```json_action ... ```
+  let cleaned = text.replace(/```json_action[\s\S]*?```/g, '');
+  // Remove open trailing ```json_action during streaming
+  cleaned = cleaned.replace(/```json_action[\s\S]*$/g, '');
+  // Strip common emoji clutter from headers if any
+  cleaned = cleaned.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '');
+  return cleaned.trim();
+}
+
+/**
  * Parses inline markdown: **bold**, __bold__, *italic*, _italic_, `code`
- * and strips stray unparsed asterisks/markdown artifacts cleanly.
  */
 function parseInlineContent(text: string, isUser: boolean): React.ReactNode[] {
   if (!text) return [];
 
-  // Match: **bold**, __bold__, `code`, *italic*, _italic_
   const regex = /(\*\*.*?\*\*|__.*?__|`.*?`|\*.*?\*|_.*?_)/g;
   const parts = text.split(regex);
 
@@ -81,7 +94,6 @@ function parseInlineContent(text: string, isUser: boolean): React.ReactNode[] {
       );
     }
 
-    // Clean any stray literal double asterisks if any remain
     const cleanText = part.replace(/\*\*/g, '');
     return <span key={index}>{cleanText}</span>;
   });
@@ -98,12 +110,12 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isWhatsAppFormat = code.includes('Weekend Outing') || code.includes('Plan') || code.includes('Meetup') || code.includes('Reply');
+  const isWhatsAppFormat = code.includes('Trip') || code.includes('Plan') || code.includes('Meetup') || code.includes('Reply');
 
   return (
-    <div className="my-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] overflow-hidden shadow-xs">
+    <div className="my-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] overflow-hidden shadow-xs font-sans">
       <div className="flex items-center justify-between px-3 py-1.5 bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)] text-[11px] font-medium text-[var(--md-on-surface-variant)]">
-        <span>{isWhatsAppFormat ? 'WhatsApp Itinerary Card' : 'Formatted Text'}</span>
+        <span>{isWhatsAppFormat ? 'WhatsApp Itinerary Format' : 'Formatted Text'}</span>
         <button
           type="button"
           onClick={handleCopy}
@@ -111,7 +123,7 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
           title="Copy to clipboard"
         >
           {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-          <span>{copied ? 'Copied!' : 'Copy'}</span>
+          <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
       <pre className="p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words text-[var(--md-on-surface)] overflow-x-auto">
@@ -121,9 +133,44 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
   );
 };
 
+const MarkdownTable: React.FC<{ rows: string[][]; isUser?: boolean }> = ({ rows, isUser = false }) => {
+  if (rows.length === 0) return null;
+  const headers = rows[0];
+  const dataRows = rows.slice(1);
+
+  return (
+    <div className="my-3 overflow-x-auto rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] shadow-xs">
+      <table className="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr className="bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)]">
+            {headers.map((h, i) => (
+              <th key={i} className="py-2 px-3 font-bold text-[var(--md-on-surface)] whitespace-nowrap text-[11px]">
+                {parseInlineContent(h.trim(), isUser)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--md-outline-variant)]/50">
+          {dataRows.map((r, rIdx) => (
+            <tr key={rIdx} className="hover:bg-[var(--md-surface-container-high)]/40 transition-colors">
+              {r.map((cell, cIdx) => (
+                <td key={cIdx} className="py-2 px-3 text-[var(--md-on-surface-variant)] leading-relaxed text-xs">
+                  {parseInlineContent(cell.trim(), isUser)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content, isUser = false }) => {
+  const cleanContent = useMemo(() => stripJsonActions(content), [content]);
+
   const renderedBlocks = useMemo(() => {
-    if (!content) return null;
+    if (!cleanContent) return null;
 
     // Handle code blocks (e.g. ```text ... ```)
     const codeBlockRegex = /```(?:[a-zA-Z]*)\n([\s\S]*?)```/g;
@@ -131,16 +178,16 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
     let lastIndex = 0;
     let match;
 
-    while ((match = codeBlockRegex.exec(content)) !== null) {
+    while ((match = codeBlockRegex.exec(cleanContent)) !== null) {
       if (match.index > lastIndex) {
-        segments.push({ type: 'text', text: content.slice(lastIndex, match.index) });
+        segments.push({ type: 'text', text: cleanContent.slice(lastIndex, match.index) });
       }
       segments.push({ type: 'code', text: match[1].trim() });
       lastIndex = match.index + match[0].length;
     }
 
-    if (lastIndex < content.length) {
-      segments.push({ type: 'text', text: content.slice(lastIndex) });
+    if (lastIndex < cleanContent.length) {
+      segments.push({ type: 'text', text: cleanContent.slice(lastIndex) });
     }
 
     const blocks: React.ReactNode[] = [];
@@ -153,13 +200,14 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
 
       const lines = seg.text.split('\n');
       let currentBullets: string[] = [];
+      let currentTableRows: string[][] = [];
 
       const flushBullets = (keyIdx: number) => {
         if (currentBullets.length > 0) {
           blocks.push(
-            <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5">
+            <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5 font-sans">
               {currentBullets.map((bullet, bIdx) => (
-                <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
+                <li key={bIdx} className="flex items-start gap-2 leading-relaxed text-xs sm:text-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] mt-1.5 shrink-0 opacity-85" />
                   <div className="flex-1 min-w-0">
                     {parseInlineContent(bullet, isUser)}
@@ -172,8 +220,29 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         }
       };
 
+      const flushTable = (keyIdx: number) => {
+        if (currentTableRows.length > 0) {
+          blocks.push(<MarkdownTable key={`table-${segIdx}-${keyIdx}`} rows={currentTableRows} isUser={isUser} />);
+          currentTableRows = [];
+        }
+      };
+
       lines.forEach((rawLine, idx) => {
         const line = rawLine.trim();
+
+        // Check for table row (starts and ends with |)
+        if (line.startsWith('|') && line.endsWith('|')) {
+          flushBullets(idx);
+          const cols = line.split('|').slice(1, -1);
+          // Check if delimiter row (|---|---|)
+          const isDelimiter = cols.every(c => /^[\s\-:]+$/.test(c));
+          if (!isDelimiter) {
+            currentTableRows.push(cols);
+          }
+          return;
+        } else {
+          flushTable(idx);
+        }
 
         // Empty line
         if (!line) {
@@ -181,7 +250,16 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           return;
         }
 
-        // Check for numbered step: e.g. "1. Open the Spending screen" or "1) Open..."
+        // Horizontal rule
+        if (line === '---' || line === '***' || line === '___') {
+          flushBullets(idx);
+          blocks.push(
+            <hr key={`hr-${segIdx}-${idx}`} className="my-2.5 border-t border-[var(--md-outline-variant)]/40" />
+          );
+          return;
+        }
+
+        // Check for numbered step: e.g. "1. Open the Spending screen"
         const stepMatch = line.match(/^(\d+)[\.\)](.*)$/);
         if (stepMatch) {
           flushBullets(idx);
@@ -190,7 +268,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <div
               key={`step-${segIdx}-${idx}`}
-              className="flex items-start gap-2.5 my-2 p-2.5 rounded-2xl bg-[var(--md-surface-container-high)]/70 border border-[var(--md-outline-variant)]/40 shadow-none"
+              className="flex items-start gap-2.5 my-1.5 p-2.5 rounded-2xl bg-[var(--md-surface-container-high)]/70 border border-[var(--md-outline-variant)]/40 shadow-none font-sans"
             >
               <span className="w-5 h-5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10.5px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                 {stepNum}
@@ -218,7 +296,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <h4
               key={`heading-${segIdx}-${idx}`}
-              className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2.5 mb-1 tracking-tight"
+              className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2.5 mb-1 tracking-tight font-sans"
             >
               {parseInlineContent(headerText, isUser)}
             </h4>
@@ -229,20 +307,21 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         // Normal paragraph line
         flushBullets(idx);
         blocks.push(
-          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed">
+          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans text-[var(--md-on-surface)]">
             {parseInlineContent(line, isUser)}
           </p>
         );
       });
 
       flushBullets(lines.length);
+      flushTable(lines.length);
     });
 
     return blocks;
-  }, [content, isUser]);
+  }, [cleanContent, isUser]);
 
   return (
-    <div className="allow-select select-text space-y-0.5 break-words">
+    <div className="allow-select select-text space-y-0.5 break-words font-sans">
       {renderedBlocks}
     </div>
   );
