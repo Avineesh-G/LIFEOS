@@ -15,15 +15,11 @@ export const GROQ_CONFIG = {
   CHAT_COMPLETIONS_ENDPOINT: 'https://api.groq.com/openai/v1/chat/completions',
   TRANSCRIPTION_ENDPOINT: 'https://api.groq.com/openai/v1/audio/transcriptions',
   MODELS: {
-    CHAT_PRIMARY: 'llama-3.1-8b-instant',
+    CHAT_PRIMARY: 'llama-3.3-70b-versatile',
     CHAT_FAST: 'llama-3.1-8b-instant',
     CHAT_FALLBACKS: [
-      'llama-3.1-8b-instant',
       'llama-3.3-70b-versatile',
-      'llama-3.1-70b-versatile',
-      'llama3-70b-8192',
-      'mixtral-8x7b-32768',
-      'gemma2-9b-it'
+      'llama-3.1-8b-instant'
     ] as const,
     AUDIO_TRANSCRIBE: 'whisper-large-v3-turbo',
     AUDIO_TRANSCRIBE_FALLBACK: 'whisper-large-v3',

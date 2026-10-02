@@ -310,12 +310,14 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         (err) => {
           setIsGenerating(false);
           setErrorMessage(err.message || 'An error occurred while calling Groq AI.');
+          setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
         },
         abortControllerRef.current.signal
       );
     } catch (e: any) {
       setIsGenerating(false);
       setErrorMessage(e?.message || 'Failed to complete AI query.');
+      setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
     }
   };
 
@@ -402,29 +404,27 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden relative">
           
           {/* ── Top Header with Mode Tabs ── */}
-          <div className="flex items-center justify-between py-1.5 mb-1 shrink-0 gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-[var(--accent-primary)]/15 flex items-center justify-center text-[var(--accent-primary)] shrink-0">
-                <Sparkles size={16} />
+          <div className="flex items-center justify-between py-1 mb-1.5 shrink-0 gap-1.5 min-w-0">
+            {/* Left Brand */}
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <div className="w-7 h-7 rounded-lg bg-[var(--accent-primary)]/15 flex items-center justify-center text-[var(--accent-primary)] shrink-0">
+                <Sparkles size={14} />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight truncate">
+              <div className="min-w-0 truncate">
+                <div className="flex items-center gap-1">
+                  <h2 className="text-xs sm:text-sm font-bold text-white tracking-tight leading-tight truncate">
                     Ask LifeOS
                   </h2>
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] tracking-wide shrink-0">
-                    Groq AI
+                  <span className="px-1 py-0.2 rounded text-[8px] font-semibold bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] tracking-wide shrink-0">
+                    Groq
                   </span>
                 </div>
-                <p className="text-[10px] text-white/50 font-medium truncate">
-                  App Assistant & Intelligence
-                </p>
               </div>
             </div>
 
-            {/* Header Controls: Chat/History Tabs & Close */}
+            {/* Header Controls: Chat/History Tabs & Action Buttons */}
             <div className="flex items-center gap-1 shrink-0">
-              <div className="flex items-center p-0.5 rounded-xl bg-white/10 border border-white/10">
+              <div className="flex items-center p-0.5 rounded-lg bg-white/10 border border-white/10 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -432,13 +432,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     setActiveTab('chat');
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-all ${
                     activeTab === 'chat'
                       ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
                       : 'text-white/70 hover:text-white'
                   }`}
                 >
-                  <MessageSquare size={12} />
+                  <MessageSquare size={11} />
                   <span>Chat</span>
                 </button>
                 <button
@@ -447,16 +447,16 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     triggerHaptic('light');
                     setActiveTab('history');
                   }}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-all ${
                     activeTab === 'history'
                       ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
                       : 'text-white/70 hover:text-white'
                   }`}
                 >
-                  <History size={12} />
+                  <History size={11} />
                   <span>History</span>
                   {historyItems.length > 0 && (
-                    <span className="w-3.5 h-3.5 rounded-full bg-white/20 text-[9px] flex items-center justify-center font-bold">
+                    <span className="w-3.5 h-3.5 rounded-full bg-white/20 text-[8px] flex items-center justify-center font-bold">
                       {historyItems.length}
                     </span>
                   )}
@@ -468,17 +468,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   title="New Chat Session"
                   onClick={handleStartNewChat}
-                  className="p-1.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                  className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap shrink-0"
                 >
-                  <Plus size={15} />
+                  <Plus size={14} />
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                className="p-1 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap shrink-0"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
           </div>
@@ -487,7 +487,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {!isOnline && (
             <div className="my-1.5 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 flex items-center gap-2 shrink-0">
               <WifiOff size={14} className="text-amber-500 shrink-0" />
-              <span>AI needs internet connection. Offline mode active.</span>
+              <span className="break-words">AI needs internet connection. Offline mode active.</span>
             </div>
           )}
 
@@ -500,35 +500,35 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 exit={{ opacity: 0, y: -10 }}
                 className="my-1.5 p-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shrink-0"
               >
-                <span className="font-semibold">{toastMessage}</span>
-                <Check size={14} className="text-emerald-500" />
+                <span className="font-semibold break-words">{toastMessage}</span>
+                <Check size={14} className="text-emerald-500 shrink-0 ml-2" />
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* ── Error Banner ── */}
           {errorMessage && (
-            <div className="my-1.5 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300 space-y-2 shrink-0">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <AlertCircle size={15} className="shrink-0 text-red-400" />
-                  <span className="font-medium leading-tight">{errorMessage}</span>
+            <div className="my-1.5 p-2.5 rounded-2xl bg-red-500/15 border border-red-500/30 text-xs text-red-200 space-y-2 shrink-0 overflow-hidden">
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <div className="flex items-start gap-1.5 min-w-0 flex-1">
+                  <AlertCircle size={14} className="shrink-0 text-red-400 mt-0.5" />
+                  <span className="font-medium leading-tight break-words [overflow-wrap:anywhere] text-[11px] text-red-200">{errorMessage}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setErrorMessage(null)}
-                  className="text-xs font-bold underline shrink-0 opacity-80 hover:opacity-100"
+                  className="text-[11px] font-bold underline shrink-0 text-red-300 hover:text-white px-1"
                 >
                   Dismiss
                 </button>
               </div>
 
               {(errorMessage.includes('API key') || errorMessage.includes('Key missing')) && (
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-1.5 pt-1 w-full min-w-0">
                   <input
                     type="password"
-                    placeholder="Paste AI API Key (gsk_... or AI key)"
-                    className="flex-1 px-3 py-1.5 rounded-xl bg-black/40 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
+                    placeholder="Paste AI API Key (gsk_...)"
+                    className="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-black/50 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
                     onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
                         const val = (e.target as HTMLInputElement).value.trim();
@@ -550,7 +550,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         setToastMessage('API Key saved and synced successfully!');
                       }
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer shrink-0"
                   >
                     Save Key
                   </button>
@@ -661,15 +661,6 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       </div>
                     );
                   })
-                )}
-
-                {isGenerating && (
-                  <div className="flex justify-start">
-                    <GlassSurface level={1} className="p-3 rounded-2xl text-xs text-accent flex items-center gap-2 bg-white/10 border-white/15">
-                      <Loader2 size={13} className="animate-spin" />
-                      <span>Streaming response...</span>
-                    </GlassSurface>
-                  </div>
                 )}
               </div>
 

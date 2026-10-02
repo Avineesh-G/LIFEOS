@@ -74,8 +74,6 @@ export async function streamChatCompletion(
     GROQ_CONFIG.MODELS.CHAT_PRIMARY,
     'llama-3.1-8b-instant',
     'llama-3.3-70b-versatile',
-    'llama3-70b-8192',
-    'mixtral-8x7b-32768'
   ];
 
   let lastError: Error | null = null;
@@ -103,13 +101,24 @@ export async function streamChatCompletion(
           throw new Error('Invalid Groq API Key. Please verify your key in Settings > AI.');
         }
         const errText = await response.text();
-        // If model not found (404) or bad model parameter, continue to next fallback model
-        if (response.status === 404 || errText.includes('model') || errText.includes('does not exist')) {
-          console.warn(`[AI Client] Model ${modelToTry} unavailable (${response.status}), trying fallback...`);
-          lastError = new Error(`AI request failed (${response.status}): ${errText.substring(0, 100)}`);
+        let cleanErrorMessage = errText;
+        try {
+          const parsed = JSON.parse(errText);
+          cleanErrorMessage = parsed.error?.message || errText;
+        } catch {}
+
+        // If model decommissioned, not found, or invalid parameter, try next model in candidate list
+        if (
+          response.status === 404 ||
+          response.status === 400 && (cleanErrorMessage.toLowerCase().includes('model') || cleanErrorMessage.toLowerCase().includes('decommissioned') || cleanErrorMessage.toLowerCase().includes('deprecated')) ||
+          cleanErrorMessage.toLowerCase().includes('does not exist')
+        ) {
+          console.warn(`[AI Client] Model ${modelToTry} unavailable: ${cleanErrorMessage}, attempting fallback...`);
+          lastError = new Error(cleanErrorMessage);
           continue;
         }
-        throw new Error(`AI request failed (${response.status}): ${errText.substring(0, 100)}`);
+
+        throw new Error(cleanErrorMessage);
       }
 
       if (!response.body) {

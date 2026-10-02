@@ -176,7 +176,7 @@ export default function FloatingPopup({
             transition={{ duration: 0.2 }}
             onClick={handleAttemptClose}
             onTouchMove={(e) => e.preventDefault()}
-            className="fixed inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-xs ask-lifeos-backdrop z-[1100] cursor-pointer pointer-events-auto touch-none"
+            className="fixed inset-0 bg-black/75 dark:bg-black/80 backdrop-blur-sm ask-lifeos-backdrop z-[1100] cursor-pointer pointer-events-auto touch-none"
             aria-hidden="true"
           />
 
@@ -220,7 +220,7 @@ export default function FloatingPopup({
             } : undefined}
             className={`relative z-[1200] mx-auto w-full ${maxWidth} pointer-events-auto my-auto ask-lifeos-card ${
               variant === 'chat'
-                ? 'bg-[#050B0D]/95 dark:bg-[#050B0D]/95 text-white border border-teal-500/30 backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.75)]'
+                ? 'bg-[#060D10]/98 dark:bg-[#060D10]/98 text-white border border-teal-500/40 backdrop-blur-3xl shadow-[0_24px_64px_rgba(0,0,0,0.85)]'
                 : 'liquid-glass border border-[var(--card-border)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)]'
             } rounded-[28px] overflow-hidden flex flex-col transition-all duration-200`}
             style={{
@@ -243,17 +243,17 @@ export default function FloatingPopup({
                 : undefined,
             }}
           >
-            {/* Top Grab Handle Bar */}
-            <div
-              onPointerDown={(e) => {
-                if (variant === 'form') {
+            {/* Top Grab Handle Bar (Form variant only) */}
+            {variant === 'form' && (
+              <div
+                onPointerDown={(e) => {
                   dragControls.start(e);
-                }
-              }}
-              className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
-            >
-              <div className="w-9 h-1 rounded-full bg-white/25 hover:bg-accent/40 transition-colors" />
-            </div>
+                }}
+                className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
+              >
+                <div className="w-9 h-1 rounded-full bg-white/25 hover:bg-accent/40 transition-colors" />
+              </div>
+            )}
 
             {/* Header */}
             {(title || icon) && (
