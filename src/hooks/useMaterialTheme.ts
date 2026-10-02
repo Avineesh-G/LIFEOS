@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useThemeMode } from './useDayPhase';
 import {
   getM3ThemeForSection,
   getSectionFromPathname,
@@ -8,7 +7,8 @@ import {
   M3ColorScheme,
   AppSection,
 } from '../theme/sectionSeedColors';
-import { getActiveAccent, ThemeAccent } from '../theme/themeColorManager';
+import { ThemeAccent } from '../theme/themeColorManager';
+import { useM3Theme } from '../theme/ThemeContext';
 
 export interface UseMaterialThemeReturn {
   theme: SectionM3Theme;
@@ -31,20 +31,16 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
     }
   }
 
-  const [accent, setAccent] = useState<ThemeAccent>(getActiveAccent);
-
-  useEffect(() => {
-    const handleAccentChanged = (e: any) => {
-      setAccent(e.detail || getActiveAccent());
-    };
-    window.addEventListener('lifeos:theme-accent-changed', handleAccentChanged);
-    return () => window.removeEventListener('lifeos:theme-accent-changed', handleAccentChanged);
-  }, []);
-
+  const { isDark, activePalette } = useM3Theme();
   const section = sectionOverride || getSectionFromPathname(pathname);
-  const [themeMode] = useThemeMode();
 
-  const isDark = themeMode === 'night';
+  const accent: ThemeAccent = useMemo(() => ({
+    id: activePalette.id,
+    name: activePalette.name,
+    primary: activePalette.seed,
+    secondary: activePalette.seed,
+    darkText: '#5A0015',
+  }), [activePalette]);
 
   const theme = useMemo(() => {
     return getM3ThemeForSection(section, isDark, accent);
@@ -62,3 +58,4 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
 }
 
 export default useMaterialTheme;
+
