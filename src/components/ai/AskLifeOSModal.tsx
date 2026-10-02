@@ -47,6 +47,7 @@ import { triggerHaptic } from '../../utils/haptics';
 import type { AiChatSession } from '../../types';
 
 import { PulseBubbleIcon } from '../icons/PulseBubbleIcon';
+import FormattedAiMessage from './FormattedAiMessage';
 
 interface AskLifeOSModalProps {
   isOpen: boolean;
@@ -260,7 +261,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       timestamp: new Date().toISOString(),
     };
 
-    const dataContext = buildTargetedAiContext(trimmed, data);
+    // Gather recent conversation topics to maintain seamless multi-turn context
+    const recentConvoContext = messages
+      .slice(-4)
+      .map(m => m.content)
+      .join(' ');
+    const contextQuery = recentConvoContext ? `${trimmed} ${recentConvoContext}` : trimmed;
+    const dataContext = buildTargetedAiContext(contextQuery, data);
 
     const assistantMsgId = `ast_${Date.now()}`;
     const initialAssistantMsg: ChatMessage = {
@@ -275,7 +282,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     setMessages([...updatedMessages, initialAssistantMsg]);
     setIsGenerating(true);
 
-    const historyPayload = updatedMessages.slice(-6).map(m => ({ role: m.role, content: m.content }));
+    // Multi-turn continuity: pass up to 14 messages (7 complete conversation turns)
+    const historyPayload = updatedMessages.slice(-14).map(m => ({ role: m.role, content: m.content }));
     abortControllerRef.current = new AbortController();
 
     try {
@@ -663,7 +671,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           }`}
                         >
                           {msg.content ? (
-                            <div className="whitespace-pre-wrap break-words allow-select select-text">{msg.content}</div>
+                            <FormattedAiMessage content={msg.content} isUser={isUser} />
                           ) : (
                             <div className="flex items-center gap-2 text-[var(--md-primary)] italic">
                               <Loader2 size={14} className="animate-spin" />
