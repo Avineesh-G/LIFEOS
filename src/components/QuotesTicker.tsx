@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import { getDailyQuotesStream, QuoteItem } from '../data/quotes';
 
 export default function QuotesTicker() {
   const [isPaused, setIsPaused] = useState(false);
 
-  // Deterministically fetch today's unique pool of quotes (guaranteed to not repeat on the same date)
+  // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)
   const quotes: QuoteItem[] = useMemo(() => {
     return getDailyQuotesStream(new Date(), 8);
   }, []);
@@ -15,10 +14,10 @@ export default function QuotesTicker() {
 
   return (
     <div
-      className="relative w-full py-1 overflow-hidden select-none"
+      className="relative w-full py-1.5 overflow-hidden select-none cursor-default"
       style={{
-        maskImage: 'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
+        maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -26,18 +25,10 @@ export default function QuotesTicker() {
       onTouchEnd={() => setIsPaused(false)}
       aria-label="Daily Inspirational Quotes Marquee"
     >
-      <motion.div
-        className="flex items-center gap-10 whitespace-nowrap will-change-transform cursor-default"
-        animate={{
-          x: isPaused ? undefined : ['0%', '-50%'],
-        }}
-        transition={{
-          x: {
-            repeat: Infinity,
-            repeatType: 'loop',
-            duration: 75,
-            ease: 'linear',
-          },
+      <div
+        className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap"
+        style={{
+          animationPlayState: isPaused ? 'paused' : 'running',
         }}
       >
         {marqueeItems.map((item, idx) => (
@@ -48,7 +39,7 @@ export default function QuotesTicker() {
             <span className="text-[var(--md-primary)] font-bold text-sm leading-none opacity-80 select-none">
               “
             </span>
-            <span className="text-[var(--md-on-surface)] italic leading-relaxed">
+            <span className="text-[var(--md-on-surface)] italic leading-relaxed font-sans">
               {item.quote}
             </span>
             <span className="text-[var(--md-primary)] font-bold text-sm leading-none opacity-80 select-none">
@@ -61,11 +52,11 @@ export default function QuotesTicker() {
               {item.author}
             </strong>
 
-            {/* Subtle separator dot between quotes */}
-            <span className="w-1 h-1 rounded-full bg-[var(--md-outline-variant)] ml-8 select-none shrink-0 opacity-80" />
+            {/* Glowing subtle divider between quote items */}
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)]/40 ml-10 select-none shrink-0" />
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

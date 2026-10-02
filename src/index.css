@@ -1010,6 +1010,22 @@
   }
 }
 
+/* ── Ultra-Smooth 120 FPS Quotes Marquee Ticker ── */
+@keyframes lifeos-marquee-flow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
 
-
-
+.animate-quote-marquee {
+  display: inline-flex;
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: lifeos-marquee-flow 38s linear infinite;
+}
