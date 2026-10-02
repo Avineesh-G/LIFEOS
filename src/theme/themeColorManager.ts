@@ -9,16 +9,20 @@ export interface ThemeAccent {
 }
 
 export const PRESET_ACCENTS: ThemeAccent[] = [
-  { id: 'burgundy', name: 'Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
-  { id: 'ocean-blue', name: 'Ocean Blue', primary: '#1E6FD9', secondary: '#4D96FF', darkText: '#0B4DA2' },
-  { id: 'teal', name: 'Teal', primary: '#0F8B8D', secondary: '#2EC4B6', darkText: '#085355' },
-  { id: 'forest-green', name: 'Forest Green', primary: '#2E7D4F', secondary: '#4EBA77', darkText: '#1B4D31' },
-  { id: 'amber', name: 'Amber', primary: '#C77700', secondary: '#FFAA33', darkText: '#7A4800' },
-  { id: 'violet', name: 'Violet', primary: '#6D4AFF', secondary: '#9B7FFF', darkText: '#4320C7' },
-  { id: 'graphite', name: 'Graphite', primary: '#5F6B76', secondary: '#8D9CA8', darkText: '#3B444C' },
+  { id: 'classic-burgundy', name: 'Classic Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
+  { id: 'midnight-burgundy', name: 'Midnight Burgundy', primary: '#35000C', secondary: '#5A0015', darkText: '#200007' },
+  { id: 'deep-burgundy', name: 'Deep Burgundy', primary: '#4A0012', secondary: '#6D001E', darkText: '#30000B' },
+  { id: 'dark-burgundy', name: 'Dark Burgundy', primary: '#5C0018', secondary: '#800020', darkText: '#3D0010' },
+  { id: 'maroon-burgundy', name: 'Maroon Burgundy', primary: '#6D001E', secondary: '#8E0528', darkText: '#4A0014' },
+  { id: 'rich-burgundy', name: 'Rich Burgundy', primary: '#8B1E3F', secondary: '#AB2850', darkText: '#5E1029' },
+  { id: 'royal-burgundy', name: 'Royal Burgundy', primary: '#92243F', secondary: '#B23051', darkText: '#641329' },
+  { id: 'warm-burgundy', name: 'Warm Burgundy', primary: '#9E3048', secondary: '#BF3D59', darkText: '#6F1B2D' },
+  { id: 'soft-burgundy', name: 'Soft Burgundy', primary: '#A83D55', secondary: '#C74F69', darkText: '#762438' },
+  { id: 'rose-burgundy', name: 'Rose Burgundy', primary: '#B66A7A', secondary: '#D17F90', darkText: '#823D4D' },
 ];
 
-export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #800020
+export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Classic Burgundy #800020
+
 
 export const THEME_ACCENT_STORAGE_KEY = 'lifeos_unified_accent';
 export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';

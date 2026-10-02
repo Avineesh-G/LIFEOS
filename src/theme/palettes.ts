@@ -13,54 +13,73 @@ export interface PaletteDefinition {
 
 export const PALETTES: PaletteDefinition[] = [
   {
-    id: 'burgundy',
-    name: 'Burgundy',
+    id: 'classic-burgundy',
+    name: 'Classic Burgundy',
     seed: '#800020',
-    description: 'Classic rich burgundy (#800020) — deep wine in light mode, luminous pink-wine primary in dark mode',
+    description: 'Iconic flagship burgundy (#800020) — deep wine in light mode, luminous pink-wine in dark mode',
     isDefault: true,
   },
   {
-    id: 'ocean-blue',
-    name: 'Ocean Blue',
-    seed: '#1E6FD9',
-    description: 'Crisp energetic cobalt blue',
+    id: 'midnight-burgundy',
+    name: 'Midnight Burgundy',
+    seed: '#35000C',
+    description: 'Ultra-deep ink burgundy with obsidian undertones (#35000C)',
   },
   {
-    id: 'teal',
-    name: 'Teal',
-    seed: '#0F8B8D',
-    description: 'Modern botanical cyan-teal',
+    id: 'deep-burgundy',
+    name: 'Deep Burgundy',
+    seed: '#4A0012',
+    description: 'Heavy vintage cabernet wine tone (#4A0012)',
   },
   {
-    id: 'forest-green',
-    name: 'Forest Green',
-    seed: '#2E7D4F',
-    description: 'Natural balanced evergreen',
+    id: 'dark-burgundy',
+    name: 'Dark Burgundy',
+    seed: '#5C0018',
+    description: 'Rich dark Bordeaux velvet (#5C0018)',
   },
   {
-    id: 'amber',
-    name: 'Amber',
-    seed: '#C77700',
-    description: 'Warm vibrant golden amber',
+    id: 'maroon-burgundy',
+    name: 'Maroon Burgundy',
+    seed: '#6D001E',
+    description: 'Intense crimson-maroon profile (#6D001E)',
   },
   {
-    id: 'violet',
-    name: 'Violet',
-    seed: '#6D4AFF',
-    description: 'Expressive rich royal violet',
+    id: 'rich-burgundy',
+    name: 'Rich Burgundy',
+    seed: '#8B1E3F',
+    description: 'Vibrant ruby-tinted berry burgundy (#8B1E3F)',
   },
   {
-    id: 'graphite',
-    name: 'Graphite',
-    seed: '#5F6B76',
-    description: 'Refined neutral slate',
+    id: 'royal-burgundy',
+    name: 'Royal Burgundy',
+    seed: '#92243F',
+    description: 'Expressive jewel-toned royal garnet (#92243F)',
+  },
+  {
+    id: 'warm-burgundy',
+    name: 'Warm Burgundy',
+    seed: '#9E3048',
+    description: 'Warm terracotta-infused wine red (#9E3048)',
+  },
+  {
+    id: 'soft-burgundy',
+    name: 'Soft Burgundy',
+    seed: '#A83D55',
+    description: 'Softened mellow plum burgundy (#A83D55)',
+  },
+  {
+    id: 'rose-burgundy',
+    name: 'Rose Burgundy',
+    seed: '#B66A7A',
+    description: 'Luminous antique rose burgundy (#B66A7A)',
   },
 ];
 
-export const DEFAULT_PALETTE_ID = 'burgundy';
+export const DEFAULT_PALETTE_ID = 'classic-burgundy';
 export const DEFAULT_THEME_MODE = 'light' as const;
 
-
 export function getPaletteById(id: string): PaletteDefinition {
+  if (id === 'burgundy') return PALETTES[0];
   return PALETTES.find((p) => p.id === id) || PALETTES[0];
 }
+

@@ -132,16 +132,17 @@ export default function ThemeSettings() {
         </div>
       </div>
 
-      {/* ── 2. Palette Swatches Grid (7 options, Burgundy first) ── */}
+      {/* ── 2. Palette Swatches Grid (10 Burgundy Tonal Options) ── */}
       <div className="p-5 rounded-[28px] bg-surface-container-low border border-outline-variant/40 space-y-3.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-on-surface uppercase tracking-wider block">
-            Expressive Palettes (7 Seed Colors)
+            Burgundy Palettes (10 Seed Tones)
           </label>
           <span className="text-[11px] font-mono text-on-surface-variant">
             {PALETTES.find((p) => p.id === pendingPaletteId)?.name}
           </span>
         </div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {PALETTES.map((palette) => {
