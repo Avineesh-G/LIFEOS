@@ -511,8 +511,8 @@ export default function Settings({
                 )}
 
                 {/* Master Notification Toggle */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)]">
-                  <div>
+                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Enable System Notifications
                     </p>
@@ -522,7 +522,6 @@ export default function Settings({
                   </div>
 
                   <M3ToggleChip
-                    label={notificationsEnabled ? 'Active' : 'Off'}
                     checked={notificationsEnabled}
                     onChange={() => handleToggleNotifications()}
                   />
@@ -679,14 +678,14 @@ export default function Settings({
           ))}
         </div>
 
-        {/* Reduce blur effects toggle (Android 17 Accessibility & Readability) */}
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/5 dark:border-white/10">
-          <div>
-            <div className="text-xs font-bold text-primary-light dark:text-primary-dark">
+        {/* Reduce blur effects toggle (Accessibility & Readability) */}
+        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold text-[var(--md-on-surface)]">
               Reduce blur effects
             </div>
-            <div className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
-              Replaces glass backdrop blurs with crisp translucent surfaces for enhanced readability & performance
+            <div className="text-[11px] font-medium text-[var(--md-on-surface-variant)] mt-0.5">
+              Replaces glass backdrop blurs with crisp flat surfaces for enhanced readability & performance
             </div>
           </div>
           <M3ToggleChip
@@ -974,11 +973,11 @@ export default function Settings({
               style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-5">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
                 {/* ── Mode A: Direct Groq Key ── */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                    <label className="text-xs font-bold text-[var(--md-on-surface)]">
                       Groq API Key (Mode A)
                     </label>
                     <a
@@ -990,18 +989,19 @@ export default function Settings({
                       Get Free Key →
                     </a>
                   </div>
-                  <div className="relative flex items-center">
+                  <div className="flex items-center gap-2 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3.5 py-1.5 focus-within:ring-2 focus-within:ring-[var(--md-primary)]">
                     <input
                       type={showApiKey ? 'text' : 'password'}
                       value={apiKeyInput}
                       onChange={e => setApiKeyInput(e.target.value)}
                       placeholder="gsk_..."
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                      className="flex-1 bg-transparent py-1.5 text-xs font-mono focus:outline-none text-[var(--md-on-surface)] placeholder:text-[var(--md-on-surface-variant)]/60 min-w-0"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)] transition-all active:scale-95"
+                      title={showApiKey ? 'Hide Key' : 'Show Key'}
                     >
                       {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -1011,7 +1011,7 @@ export default function Settings({
                       type="button"
                       onClick={handleSaveApiKey}
                       disabled={!apiKeyInput.trim()}
-                      className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
+                      className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40 active:scale-95 transition-all"
                     >
                       {apiKeySaved ? 'Saved ✓' : 'Save Key'}
                     </button>
@@ -1019,12 +1019,12 @@ export default function Settings({
                 </div>
 
                 {/* ── Mode B: Proxy URL ── */}
-                <div className="space-y-2 pt-3 border-t border-black/5 dark:border-white/5">
+                <div className="space-y-2 pt-3 border-t border-[var(--md-outline-variant)]/40">
                   <div>
-                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark block">
+                    <label className="text-xs font-bold text-[var(--md-on-surface)] block">
                       Custom Proxy URL (Mode B)
                     </label>
-                    <span className="text-[11px] text-secondary-light dark:text-secondary-dark block">
+                    <span className="text-[11px] text-[var(--md-on-surface-variant)] block">
                       Optional Cloudflare Worker proxy endpoint
                     </span>
                   </div>
@@ -1034,12 +1034,12 @@ export default function Settings({
                       value={proxyUrlInput}
                       onChange={e => setProxyUrlInput(e.target.value)}
                       placeholder="https://lifeos-ai-proxy.workers.dev"
-                      className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                      className="flex-1 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/30 text-[var(--md-on-surface)] placeholder:text-[var(--md-on-surface-variant)]/60 min-w-0"
                     />
                     <button
                       type="button"
                       onClick={handleSaveProxyUrl}
-                      className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-sm"
+                      className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-sm shrink-0 active:scale-95 transition-all"
                     >
                       {proxyUrlSaved ? 'Saved ✓' : 'Save URL'}
                     </button>
@@ -1047,13 +1047,13 @@ export default function Settings({
                 </div>
 
                 {/* ── Privacy & Reading Data ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="space-y-3 pt-3 border-t border-[var(--md-outline-variant)]/40">
+                  <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[var(--md-on-surface)]">
                         Let AI Read Data Context
                       </p>
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                         Allows AI to summarize section data for personalized answers
                       </p>
                     </div>
@@ -1064,8 +1064,8 @@ export default function Settings({
                   </div>
 
                   {letAiReadDataState && (
-                    <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-2.5">
-                      <p className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+                    <div className="p-4 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] space-y-3">
+                      <p className="text-[11px] font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
                         Section Context Permissions
                       </p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1086,21 +1086,21 @@ export default function Settings({
                           return (
                             <label
                               key={key}
-                              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer select-none"
+                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[var(--md-surface-container-high)]/60 cursor-pointer select-none transition-colors"
                             >
                               <input
                                 type="checkbox"
                                 checked={isPermitted}
                                 onChange={(e) => handleToggleSectionPermission(key as keyof AiSectionPermissions, e.target.checked)}
-                                className="accent-accent rounded"
+                                className="accent-[var(--md-primary)] rounded w-4 h-4 cursor-pointer"
                               />
-                              <span className="text-[11px] font-medium text-primary-light dark:text-primary-dark">{label}</span>
+                              <span className="text-[11px] font-medium text-[var(--md-on-surface)]">{label}</span>
                             </label>
                           );
                         })}
 
                         {/* Immutable Vault Prohibition Label */}
-                        <div className="flex items-center gap-2 p-1.5 rounded-xl bg-red-500/10 border border-red-500/20 col-span-2">
+                        <div className="flex items-center gap-2 p-2 rounded-xl bg-red-500/10 border border-red-500/20 col-span-2">
                           <Lock size={12} className="text-red-500 shrink-0" />
                           <span className="text-[10px] font-bold text-red-600 dark:text-red-400">
                             Vault Data: Strictly Excluded (Cannot be enabled)
@@ -1112,12 +1112,12 @@ export default function Settings({
                 </div>
 
                 {/* ── Action Proposals Toggle ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Allow AI Action Proposals
                     </p>
-                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                    <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                       Show interactive confirmation cards to log meals, tasks, or workouts
                     </p>
                   </div>
@@ -1128,13 +1128,13 @@ export default function Settings({
                 </div>
 
                 {/* ── App Usage Tracking ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[var(--md-on-surface)]">
                         Track My App Usage
                       </p>
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                         Aggregated daily counts & last-used timestamps (stored locally, 90 days retention)
                       </p>
                     </div>
@@ -1144,8 +1144,8 @@ export default function Settings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[var(--md-outline-variant)]/50">
+                    <p className="text-[11px] text-[var(--md-on-surface-variant)]">
                       {usageClearedNotice ? 'Usage history cleared ✓' : 'Local 90-day usage metrics'}
                     </p>
                     <button
@@ -1159,9 +1159,9 @@ export default function Settings({
                 </div>
 
                 {/* ── Active Models & Build Info ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-2.5">
+                <div className="pt-3 border-t border-[var(--md-outline-variant)]/40 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                    <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Active AI Runtime & Models
                     </p>
                     <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
@@ -1673,17 +1673,17 @@ export default function Settings({
           </label>
         </div>
 
-        <div className="flex items-center gap-2 pt-1 text-[11px] text-secondary-light dark:text-secondary-dark">
+        <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center justify-between gap-3 text-xs">
+          <label htmlFor="includeAiKeys" className="cursor-pointer select-none text-[11px] text-[var(--md-on-surface-variant)] leading-snug flex-1">
+            Include Gemini &amp; AI API keys in export (uncheck if sharing backup file)
+          </label>
           <input
             type="checkbox"
             id="includeAiKeys"
             checked={includeAiKeysInExport}
             onChange={(e) => setIncludeAiKeysInExport(e.target.checked)}
-            className="rounded border-gray-400 text-primary focus:ring-0"
+            className="accent-[var(--md-primary)] rounded w-4 h-4 cursor-pointer shrink-0"
           />
-          <label htmlFor="includeAiKeys" className="cursor-pointer select-none">
-            Include Gemini &amp; AI API keys in export (uncheck if sharing backup file)
-          </label>
         </div>
       </div>
 
