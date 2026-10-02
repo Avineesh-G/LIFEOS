@@ -42,26 +42,15 @@ let cachedConsentAgreed = false;
 let cachedTrackUsage = true;
 
 /**
- * Initialize AI Security settings from Capacitor Preferences, LocalStorage & AppData
+ * Initialize AI Security settings from Capacitor Preferences & LocalStorage
  */
-export async function initAiSecurity(data?: any): Promise<void> {
+export async function initAiSecurity(): Promise<void> {
   if (typeof window === 'undefined') return;
 
   try {
-    // API Key from secure Preferences or fallback stores
+    // API Key from secure Preferences
     const keyPref = await Preferences.get({ key: GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY });
-    const foundKey = keyPref.value ||
-                     localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY) ||
-                     localStorage.getItem('lifeos_gemini_api_key') ||
-                     (data && data.geminiApiKey) || '';
-
-    if (foundKey) {
-      cachedApiKey = foundKey.trim();
-      try {
-        localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, cachedApiKey);
-        localStorage.setItem('lifeos_gemini_api_key', cachedApiKey);
-      } catch {}
-    }
+    cachedApiKey = keyPref.value || localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY) || '';
 
     // Proxy URL
     const proxyPref = await Preferences.get({ key: GROQ_CONFIG.STORAGE_KEYS.PROXY_URL });
@@ -94,26 +83,17 @@ export async function initAiSecurity(data?: any): Promise<void> {
   }
 }
 
-/**
- * Gets active API key from all available storage locations (Preferences, LocalStorage, AppData, Env)
- */
-export function getGroqApiKey(appData?: any): string {
+export function getGroqApiKey(): string {
   if (cachedApiKey) return cachedApiKey;
-  if (appData && appData.geminiApiKey && appData.geminiApiKey.trim()) {
-    cachedApiKey = appData.geminiApiKey.trim();
-    return cachedApiKey;
-  }
   if (typeof localStorage !== 'undefined') {
-    const val = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY) ||
-                localStorage.getItem('lifeos_gemini_api_key');
-    if (val && val.trim()) {
-      cachedApiKey = val.trim();
-      return cachedApiKey;
+    const val = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY);
+    if (val) {
+      cachedApiKey = val;
+      return val;
     }
   }
-  if (typeof import.meta !== 'undefined') {
-    const envKey = (import.meta as any).env?.VITE_GROQ_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-    if (envKey) return envKey;
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GROQ_API_KEY) {
+    return (import.meta as any).env.VITE_GROQ_API_KEY;
   }
   return '';
 }

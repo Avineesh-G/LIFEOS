@@ -27,7 +27,7 @@ import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import { M3_SHAPES } from '../theme/shapes';
 import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
-import { LiquidFrame, GlassSurface, SuggestionChip } from '../components/glass';
+import { LiquidFrame, GlassSurface, SuggestionChip, AskLifeOSPill } from '../components/glass';
 
 // ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
 const LiveClock = memo(function LiveClock() {

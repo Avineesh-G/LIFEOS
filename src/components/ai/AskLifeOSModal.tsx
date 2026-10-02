@@ -40,9 +40,8 @@ import GlassSurface from '../glass/GlassSurface';
 import GlowCard from '../glass/GlowCard';
 import AiConsentSheet from './AiConsentSheet';
 import ActionConfirmationCard from './ActionConfirmationCard';
-import ChatPillInput, { USE_PILL_INPUT } from './ChatPillInput';
 import { GROQ_CONFIG } from '../../config/ai';
-import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent, setGroqApiKey, syncApiKeyFromAppData, getLetAiReadData, setLetAiReadData } from '../../utils/aiSecurity';
+import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent, setGroqApiKey } from '../../utils/aiSecurity';
 import { streamChatCompletion, transcribeAudio, stripUrls, ChatMessage } from '../../services/aiClient';
 import { extractAiActionProposals, AiActionProposal } from '../../services/aiActionEngine';
 import { buildTargetedAiContext } from '../../services/aiContextBuilder';
@@ -117,13 +116,6 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   useEffect(() => {
     if (isOpen) {
       recordScreenView('Ask LifeOS Assistant');
-      const activeKey = syncApiKeyFromAppData(data);
-      const proxyUrl = getAiProxyUrl();
-      if (!activeKey && !proxyUrl) {
-        setErrorMessage('API key is not saved. Please set your API key in Settings > AI or enter key below.');
-      } else if (errorMessage?.includes('API key') || errorMessage?.includes('Key missing')) {
-        setErrorMessage(null);
-      }
       const timer = setTimeout(() => {
         if (activeTab === 'chat') {
           inputRef.current?.focus();
@@ -134,7 +126,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       stopSpeaking();
       setSpeakingMsgId(null);
     }
-  }, [isOpen, activeTab, data]);
+  }, [isOpen, activeTab]);
 
   // Persist messages to LocalStorage
   useEffect(() => {
@@ -258,10 +250,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       return;
     }
 
-    const apiKey = getGroqApiKey(data);
+    const apiKey = getGroqApiKey();
     const proxyUrl = getAiProxyUrl();
     if (!apiKey && !proxyUrl) {
-      setErrorMessage('API key is not saved. Please set your API key in Settings > AI or enter key below.');
+      setErrorMessage('Groq API Key missing. Please set your key in Settings > AI or enter key below.');
       return;
     }
 
@@ -581,7 +573,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   onClick={handleStartNewChat}
                   className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
                 >
-                  <Plus size={14} />
+                  <Plus size={16} />
                 </button>
               )}
               <button
@@ -590,7 +582,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
                 aria-label="Close Ask LifeOS"
               >
-                <X size={15} />
+                <X size={18} />
               </button>
             </div>
           </div>
@@ -607,7 +599,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {!isOnline && (
             <div className="my-1.5 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 flex items-center gap-2 shrink-0">
               <WifiOff size={14} className="text-amber-500 shrink-0" />
-              <span className="break-words">AI needs internet connection. Offline mode active.</span>
+              <span>AI needs internet connection. Offline mode active.</span>
             </div>
           )}
 
@@ -620,8 +612,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 exit={{ opacity: 0, y: -10 }}
                 className="my-1.5 p-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shrink-0"
               >
-                <span className="font-semibold break-words">{toastMessage}</span>
-                <Check size={14} className="text-emerald-500 shrink-0 ml-2" />
+                <span className="font-semibold">{toastMessage}</span>
+                <Check size={14} className="text-emerald-500" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -685,8 +677,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 <div className="flex items-center gap-1.5 pt-1 w-full min-w-0">
                   <input
                     type="password"
-                    placeholder="Paste AI API Key (gsk_...)"
-                    className="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-black/50 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
+                    placeholder="Paste Groq API Key (gsk_...)"
+                    className="flex-1 px-3 py-1.5 rounded-xl bg-black/40 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
                     onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
                         const val = (e.target as HTMLInputElement).value.trim();
@@ -710,7 +702,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         setToastMessage('API Key saved and synced successfully!');
                       }
                     }}
-                    className="px-2.5 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer shrink-0"
+                    className="px-3 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer"
                   >
                     Save Key
                   </button>
@@ -979,7 +971,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     )}
                   </div>
                 </div>
-              )}
+              </div>
             </>
           )}
 

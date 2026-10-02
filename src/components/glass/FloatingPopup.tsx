@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, AlertTriangle, Check } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
@@ -90,20 +89,12 @@ export default function FloatingPopup({
     onClose();
   };
 
-  // Hardware Back Button Integration & Strict Body Scroll/Gesture Lock
+  // Hardware Back Button Integration: Dismiss popup before page back navigation
   useEffect(() => {
     if (!isOpen) return;
 
     document.body.setAttribute('data-subinterface-open', 'true');
     window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
-
-    // Lock body scrolling & touch gestures while modal/floating interface is active
-    const prevOverflow = document.body.style.overflow;
-    const prevTouchAction = document.body.style.touchAction;
-    document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
-
-    window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: true } }));
 
     const unregister = registerDismissible('floating-popup', () => {
       handleAttemptCloseRef.current();
@@ -112,13 +103,10 @@ export default function FloatingPopup({
 
     return () => {
       unregister();
-      window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: false } }));
       document.body.removeAttribute('data-subinterface-open');
-      document.body.style.overflow = prevOverflow;
-      document.body.style.touchAction = prevTouchAction;
       window.dispatchEvent(new CustomEvent('lifeos-subinterface-close'));
     };
-  }, [isOpen, variant]);
+  }, [isOpen]);
 
   // Restore focus if component unmounts while still open
   useEffect(() => {
@@ -166,9 +154,7 @@ export default function FloatingPopup({
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
 
-  if (typeof document === 'undefined') return null;
-
-  return createPortal(
+  return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[140] pointer-events-none flex flex-col justify-end">
@@ -189,8 +175,6 @@ export default function FloatingPopup({
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? 'popup-title' : undefined}
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
             initial={
               prefersReducedMotion
                 ? { opacity: 0 }
@@ -227,11 +211,7 @@ export default function FloatingPopup({
                 ? `calc(${keyboardOffset}px + 12px)`
                 : 'calc(var(--nav-h, 56px) + max(8px, var(--sab, env(safe-area-inset-bottom, 0px))) + 8px)',
               maxHeight: isExpanded
-                ? 'calc(100dvh - var(--sat, env(safe-area-inset-top, 0px)) - 24px)'
-                : (keyboardOffset > 0 && variant === 'chat')
-                ? `calc(100dvh - ${keyboardOffset}px - var(--sat, env(safe-area-inset-top, 0px)) - 24px)`
-                : keyboardOffset > 0
-                ? `calc(100dvh - ${keyboardOffset}px - var(--sat, env(safe-area-inset-top, 0px)) - 24px)`
+                ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - 24px)'
                 : variant === 'chat'
                 ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 56px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 72px)'
                 : 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 56px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 48px)',
@@ -240,10 +220,10 @@ export default function FloatingPopup({
                 : undefined,
             }}
           >
-            {/* Top Grab Handle Bar (Form variant only) */}
-            {variant === 'form' && (
-              <div
-                onPointerDown={(e) => {
+            {/* Top Grab Handle Bar */}
+            <div
+              onPointerDown={(e) => {
+                if (variant === 'form') {
                   dragControls.start(e);
                 }
               }}
@@ -252,7 +232,7 @@ export default function FloatingPopup({
               <div className="w-9 h-1 rounded-full bg-[var(--md-outline-variant)] hover:bg-[var(--md-primary)] transition-colors" />
             </div>
 
-            {/* Header */}
+            {/* Header (if title or icon provided) */}
             {(title || icon) && (
               <div className="px-5 pb-3 flex items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -300,7 +280,7 @@ export default function FloatingPopup({
               {children}
             </div>
 
-            {/* Footer */}
+            {/* Footer Actions (for form variant if onSave or cancel provided) */}
             {variant === 'form' && onSave && (
               <div className="p-3.5 sm:p-4 border-t border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] flex items-center justify-end gap-2.5 shrink-0">
                 <button
@@ -332,10 +312,10 @@ export default function FloatingPopup({
             )}
           </motion.div>
 
-          {/* Unsaved Changes Confirmation Modal */}
+          {/* Unsaved Changes Confirmation Modal (Inside Popup system) */}
           <AnimatePresence>
             {showDiscardConfirm && (
-              <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
                 <motion.div
                   initial={{ scale: 0.92, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -371,7 +351,6 @@ export default function FloatingPopup({
           </AnimatePresence>
         </div>
       )}
-    </AnimatePresence>,
-    document.body
+    </AnimatePresence>
   );
 }

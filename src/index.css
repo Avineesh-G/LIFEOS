@@ -282,6 +282,7 @@
     left: 0;
     right: 0;
     bottom: 0;
+    height: 108px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -290,16 +291,40 @@
     z-index: 100;
   }
 
+  .bottom-nav-atmosphere {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 82px;
+    background: rgba(7, 20, 29, 0.25);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 30%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.35) 30%, black 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .nav-active-glow {
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 95px;
+    height: 95px;
     border-radius: 50%;
-    background: rgba(40, 220, 202, 0.2);
-    filter: blur(18px);
+    background: rgba(40, 220, 202, 0.18);
+    filter: blur(22px);
     opacity: 0.65;
     z-index: -1;
     pointer-events: none;
+  }
+
+  @media (max-width: 480px) {
+    .bottom-nav-wrapper {
+      height: 100px;
+    }
+    .bottom-nav-atmosphere {
+      height: 76px;
+    }
   }
 
   /* iOS safe area top */

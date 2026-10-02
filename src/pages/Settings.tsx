@@ -279,7 +279,8 @@ export default function Settings({
   };
 
   const handleSaveApiKey = async () => {
-    await setGroqApiKey(apiKeyInput, updateData);
+    await setGroqApiKey(apiKeyInput);
+    await updateData({ geminiApiKey: apiKeyInput.trim() });
     setApiKeySaved(true);
     setTimeout(() => setApiKeySaved(false), 2500);
   };

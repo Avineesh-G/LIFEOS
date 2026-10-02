@@ -9,7 +9,7 @@
 
 <br />
 
-[![Version](https://img.shields.io/badge/Version-v3.0.0_(Build_1)-3B82F6?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v2.1.3_(Build_37)-3B82F6?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![UI/UX](https://img.shields.io/badge/Design-Material_3_Expressive-8B5CF6?style=for-the-badge&logo=materialdesign&logoColor=white)](https://m3.material.io/)
 [![Android 17](https://img.shields.io/badge/Platform-Android_17_Ready-10B981?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
 [![Gemini AI](https://img.shields.io/badge/AI_Core-Gemini_Powered-F59E0B?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
@@ -18,7 +18,7 @@
 
 <br />
 
-[📲 **Download Release APK (v3.0.0)**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
+[📲 **Download Release APK (v2.1.3)**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
 [🌐 **Live Showcase Website**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) &nbsp;•&nbsp; 
 [⚡ **Launch Web App**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) &nbsp;•&nbsp; 
 [📋 **View Release Manifest**](public/version.json)
@@ -61,14 +61,14 @@ High-performing students, athletes, and builders consistently suffer from **subs
 
 ---
 
-## 🌟 What's New in v3.0.0 (Build 1)
+## 🌟 What's New in v2.1.3 (Build 37)
 
-* **Elevated Bottom Dock v2**: Dual-row navigation pill (`Home`, `Gym`, `Nutrition`, `More`) paired with a dynamic `Ask LifeOS` pill input. Features passive scroll-aware compression (compacts on scroll down > 24px) and intelligent auto-hiding during active pop-up interactions.
-* **Document-Root Portal Architecture**: Complete modal isolation via React Portals directly into `document.body` with `dvh` dynamic viewport height capping, `z-[1100]` scrims, backdrop blur, and background scroll locking for zero clipping across all mobile viewports, aspect ratios, and tablets.
-* **Authentic Teal Glass AI Bar**: Precision-crafted translucent capsule interface with mint green mic indicator (`#2DD4BF`), real-time voice waveform visualization, and deep teal submit action (`#0D9488`).
-* **Android 17 Ambient Atmosphere Engine**: Elevated bottom atmosphere panel with 180px dynamic backdrop blur (`blur(28px) saturate(150%)`) extending smoothly above safe-area insets (`env(safe-area-inset-bottom)`).
-* **Autonomous In-App Updater v3**: Sideload updater client powered by edge CDN streaming, SHA-256 cryptographic verification (`d2afd360...`), auto-retry logic, and Android `PackageInstaller` sessions.
-* **Instant Zero-Friction Cold Start**: 0ms app boot directly to your primary dashboard with zero splash barriers or greeting delays.
+* **Instant Zero-Friction Cold Start**: Permanently removed startup greeting screens and splash barriers to guarantee instant 0ms app boot directly to your primary dashboard.
+* **120 FPS Wavy Progress Indicator**: Rebuilt in-app download and audio progress indicators with hardware vector stenciling and smooth 4-quarter continuous sine waves, delivering stutter-free 120 FPS animations on flagship displays.
+* **Material 3 Expressive Design System**: Upgraded to Google's Material 3 Expressive specification, introducing scalloped action chips, divided navigation pills, and high-contrast surface elevations.
+* **Android 17 Ambient Intelligence**: Real-time context system bar displaying connection status, cryptographic integrity, battery optimization, and on-device processing guarantees.
+* **Interactive Gemini AI Core Sandbox**: Integrated conversational intelligence helper capable of generating custom workout splits, optimized study agendas, and macro targets.
+* **Autonomous In-App Updater**: Direct sideload updater client powered by edge CDN streaming, SHA-256 cryptographic verification, and Android `PackageInstaller` sessions.
 
 ---
 
@@ -146,7 +146,7 @@ graph TD
     
     subgraph UI_UX ["Material 3 Expressive UI & Engine"]
         M3["M3 Expressive Tokens & Shape Scale"]
-        Dock["Elevated Bottom Dock v2 Engine"]
+        Wavy["120 FPS Wavy Progress Engine"]
         Circadian["Circadian Day-Phase Provider"]
     end
     
@@ -233,11 +233,10 @@ Open **`http://localhost:5173/`** for the web application or **`http://localhost
 |---|---|
 | `npm run dev` | Boots local Vite server with instant HMR |
 | `npm run build` | Compiles TypeScript and builds production distribution |
-| `npm run release:prep` | Updates release manifest, computes SHA-256, and prepares `public/LifeOS.apk` |
-| `npm run cap:build` | Compiles web bundle and generates native Android release APK via Gradle |
 | `npm run check:palette` | Verifies WCAG AAA contrast and Delta E perceptual color distance |
 | `npm run test:updater` | Tests version parsing, downgrade prevention, and SHA-256 verification |
 | `npm run test:matrix` | Executes 1,260-point multi-viewport layout validation across all routes |
+| `npm run cap:sync` | Compiles web assets and syncs to the native Android platform |
 
 ---
 
@@ -245,10 +244,11 @@ Open **`http://localhost:5173/`** for the web application or **`http://localhost
 
 1. Open your Android mobile browser and visit:  
    👉 **[https://lifeos-gujjeti-avineeshs-projects.vercel.app/download](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)**
-2. Tap **Download LifeOS for Android** to download `LifeOS.apk` (13.8 MB).
+2. Tap **Download LifeOS for Android** to download `LifeOS.apk` (14.4 MB).
 3. If Android displays the standard sideload prompt (*"File might be harmful"*), tap **Download anyway**.
 4. Open the APK file and select **Install** (enable *Allow from this source* in browser permissions if requested).
 5. Open LifeOS and pin the **LifeOS Glanceable Widget** to your home screen!
+
 
 ---
 
