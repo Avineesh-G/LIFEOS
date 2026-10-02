@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 import DailyBriefCard from '../components/DailyBriefCard';
+import QuotesTicker from '../components/QuotesTicker';
 import AiCoachAvatar from '../components/rive/AiCoachAvatar';
 import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
@@ -313,6 +314,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             <AiCoachAvatar state="idle" size={54} />
           </div>
         </div>
+      </motion.div>
+
+      {/* ── Philosophical & Life Quotations Live Ticker (Seamless, no card) ── */}
+      <motion.div variants={item} className="px-1 -my-1">
+        <QuotesTicker />
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
