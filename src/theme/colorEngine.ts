@@ -186,11 +186,22 @@ export function generateSchemeFromSeed(seedHex: string, isDark: boolean): M3Colo
   };
 }
 
+function hexToRgbTuple(hex: string): [number, number, number] {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.substring(0, 2), 16) || 0;
+  const g = parseInt(clean.substring(2, 4), 16) || 0;
+  const b = parseInt(clean.substring(4, 6), 16) || 0;
+  return [r, g, b];
+}
+
 /**
  * Returns a CSS variables dictionary for the given scheme
  */
 export function schemeToCssVariables(scheme: M3ColorScheme): Record<string, string> {
+  const [pr, pg, pb] = hexToRgbTuple(scheme.primary);
+
   return {
+    // Full Material 3 System Color tokens
     '--md-sys-color-primary': scheme.primary,
     '--md-sys-color-on-primary': scheme.onPrimary,
     '--md-sys-color-primary-container': scheme.primaryContainer,
@@ -241,6 +252,59 @@ export function schemeToCssVariables(scheme: M3ColorScheme): Record<string, stri
     '--md-sys-color-inverse-surface': scheme.inverseSurface,
     '--md-sys-color-inverse-on-surface': scheme.inverseOnSurface,
 
+    // Material 3 Shorthand tokens
+    '--md-primary': scheme.primary,
+    '--md-on-primary': scheme.onPrimary,
+    '--md-primary-container': scheme.primaryContainer,
+    '--md-on-primary-container': scheme.onPrimaryContainer,
+    '--md-inverse-primary': scheme.inversePrimary,
+
+    '--md-secondary': scheme.secondary,
+    '--md-on-secondary': scheme.onSecondary,
+    '--md-secondary-container': scheme.secondaryContainer,
+    '--md-on-secondary-container': scheme.onSecondaryContainer,
+
+    '--md-tertiary': scheme.tertiary,
+    '--md-on-tertiary': scheme.onTertiary,
+    '--md-tertiary-container': scheme.tertiaryContainer,
+    '--md-on-tertiary-container': scheme.onTertiaryContainer,
+
+    '--md-error': scheme.error,
+    '--md-on-error': scheme.onError,
+    '--md-error-container': scheme.errorContainer,
+    '--md-on-error-container': scheme.onErrorContainer,
+
+    '--md-surface': scheme.surface,
+    '--md-on-surface': scheme.onSurface,
+    '--md-surface-variant': scheme.surfaceVariant,
+    '--md-on-surface-variant': scheme.onSurfaceVariant,
+    '--md-surface-dim': scheme.surfaceDim,
+    '--md-surface-bright': scheme.surfaceBright,
+    '--md-surface-container-lowest': scheme.surfaceContainerLowest,
+    '--md-surface-container-low': scheme.surfaceContainerLow,
+    '--md-surface-container': scheme.surfaceContainer,
+    '--md-surface-container-high': scheme.surfaceContainerHigh,
+    '--md-surface-container-highest': scheme.surfaceContainerHighest,
+
+    '--md-outline': scheme.outline,
+    '--md-outline-variant': scheme.outlineVariant,
+    '--md-shadow': scheme.shadow,
+    '--md-scrim': scheme.scrim,
+    '--md-inverse-surface': scheme.inverseSurface,
+    '--md-inverse-on-surface': scheme.inverseOnSurface,
+
+    '--md-primary-rgb': `${pr}, ${pg}, ${pb}`,
+    '--primary-rgb': `${pr}, ${pg}, ${pb}`,
+    '--accent-rgb': `${pr}, ${pg}, ${pb}`,
+    '--accent-soft': `rgba(${pr}, ${pg}, ${pb}, 0.15)`,
+    '--accent-glow': `rgba(${pr}, ${pg}, ${pb}, 0.35)`,
+    '--pill-active-bg': `rgba(${pr}, ${pg}, ${pb}, 0.18)`,
+    '--pill-active-text': scheme.primary,
+    '--accent-blob': scheme.primary,
+    '--scene-bg': scheme.surface,
+    '--on-scene-bg': scheme.onSurface,
+    '--md-scene-bg': scheme.surface,
+
     // Bridge legacy variables to unified single M3 theme
     '--accent': scheme.primary,
     '--accent-primary': scheme.primary,
@@ -270,3 +334,4 @@ export function getSchemeForPalette(paletteId: string, isDark: boolean): M3Color
   const palette = getPaletteById(paletteId);
   return generateSchemeFromSeed(palette.seed, isDark);
 }
+

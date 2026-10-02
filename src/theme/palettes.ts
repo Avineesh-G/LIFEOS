@@ -15,8 +15,8 @@ export const PALETTES: PaletteDefinition[] = [
   {
     id: 'burgundy',
     name: 'Burgundy',
-    seed: '#8C1D40',
-    description: 'Deep wine in light mode, pink-tinted primary in dark mode',
+    seed: '#800020',
+    description: 'Classic rich burgundy (#800020) — deep wine in light mode, luminous pink-wine primary in dark mode',
     isDefault: true,
   },
   {
@@ -58,7 +58,7 @@ export const PALETTES: PaletteDefinition[] = [
 ];
 
 export const DEFAULT_PALETTE_ID = 'burgundy';
-export const DEFAULT_THEME_MODE = 'dark' as const;
+export const DEFAULT_THEME_MODE = 'system' as const;
 
 export function getPaletteById(id: string): PaletteDefinition {
   return PALETTES.find((p) => p.id === id) || PALETTES[0];

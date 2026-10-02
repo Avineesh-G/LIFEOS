@@ -9,15 +9,16 @@ export interface ThemeAccent {
 }
 
 export const PRESET_ACCENTS: ThemeAccent[] = [
-  { id: 'teal', name: 'Gemini Teal', primary: '#2DD4BF', secondary: '#22D3EE', darkText: '#0F766E' },
-  { id: 'cyan', name: 'Electric Cyan', primary: '#06B6D4', secondary: '#38BDF8', darkText: '#0E7490' },
-  { id: 'emerald', name: 'Jade Emerald', primary: '#10B981', secondary: '#34D399', darkText: '#047857' },
-  { id: 'sky', name: 'Celestial Sky', primary: '#38BDF8', secondary: '#818CF8', darkText: '#0284C7' },
-  { id: 'mint', name: 'Polar Mint', primary: '#5EEAD4', secondary: '#7DD3FC', darkText: '#0D9488' },
-  { id: 'azure', name: 'Deep Azure', primary: '#3B82F6', secondary: '#60A5FA', darkText: '#1D4ED8' },
+  { id: 'burgundy', name: 'Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
+  { id: 'ocean-blue', name: 'Ocean Blue', primary: '#1E6FD9', secondary: '#4D96FF', darkText: '#0B4DA2' },
+  { id: 'teal', name: 'Teal', primary: '#0F8B8D', secondary: '#2EC4B6', darkText: '#085355' },
+  { id: 'forest-green', name: 'Forest Green', primary: '#2E7D4F', secondary: '#4EBA77', darkText: '#1B4D31' },
+  { id: 'amber', name: 'Amber', primary: '#C77700', secondary: '#FFAA33', darkText: '#7A4800' },
+  { id: 'violet', name: 'Violet', primary: '#6D4AFF', secondary: '#9B7FFF', darkText: '#4320C7' },
+  { id: 'graphite', name: 'Graphite', primary: '#5F6B76', secondary: '#8D9CA8', darkText: '#3B444C' },
 ];
 
-export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Gemini Teal #2DD4BF
+export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #800020
 
 export const THEME_ACCENT_STORAGE_KEY = 'lifeos_unified_accent';
 export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';
