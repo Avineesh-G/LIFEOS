@@ -249,7 +249,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    height: 128px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -258,40 +257,16 @@
     z-index: 100;
   }
 
-  .bottom-nav-atmosphere {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 180px;
-    background: linear-gradient(to top, rgba(5, 11, 13, 0.85) 0%, rgba(13, 148, 136, 0.14) 45%, rgba(5, 11, 13, 0.25) 75%, transparent 100%);
-    backdrop-filter: blur(28px) saturate(150%);
-    -webkit-backdrop-filter: blur(28px) saturate(150%);
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 15%, black 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 15%, black 100%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
   .nav-active-glow {
     position: absolute;
-    width: 95px;
-    height: 95px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: rgba(40, 220, 202, 0.18);
-    filter: blur(22px);
+    background: rgba(40, 220, 202, 0.2);
+    filter: blur(18px);
     opacity: 0.65;
     z-index: -1;
     pointer-events: none;
-  }
-
-  @media (max-width: 480px) {
-    .bottom-nav-wrapper {
-      height: 120px;
-    }
-    .bottom-nav-atmosphere {
-      height: 128px;
-    }
   }
 
   /* iOS safe area top */

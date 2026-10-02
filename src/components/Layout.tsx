@@ -152,13 +152,13 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
   // Compute and set --dock-h CSS variable dynamically for exact page bottom clearance
   useEffect(() => {
-    const row1H = isShortScreen ? 44 : 48;
-    const row2H = isFormPopupOpen ? 0 : isPillSlim ? (isShortScreen ? 32 : 36) : (isShortScreen ? 44 : 48);
-    const gap = isFormPopupOpen ? 0 : 6;
-    const bottomMargin = isShortScreen ? 24 : 32;
+    const row1H = isShortScreen ? 38 : 42;
+    const row2H = (isFormPopupOpen || aiSheetOpen) ? 0 : isPillSlim ? 32 : (isShortScreen ? 36 : 40);
+    const gap = (isFormPopupOpen || aiSheetOpen) ? 0 : 7;
+    const bottomMargin = isShortScreen ? 28 : 34;
     const totalDockH = row1H + row2H + gap + bottomMargin;
     document.documentElement.style.setProperty('--dock-h', `${totalDockH}px`);
-  }, [isShortScreen, isFormPopupOpen, isPillSlim]);
+  }, [isShortScreen, isFormPopupOpen, aiSheetOpen, isPillSlim]);
 
   // Dynamic Navigation Configuration Hook
   const {
@@ -614,7 +614,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         className="relative z-10 min-h-screen box-border"
         style={{
           paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
-          paddingBottom: 'calc(var(--dock-h, 126px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 16px)',
+          paddingBottom: 'calc(var(--dock-h, 118px) + var(--sab, env(safe-area-inset-bottom, 0px)))',
           paddingLeft: 'var(--sal, 0px)',
           paddingRight: 'var(--sar, 0px)',
         }}
@@ -645,55 +645,41 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Compact Bottom Navigation Dock v2 (.bottom-nav-wrapper) ── */}
       {typeof document !== 'undefined' && createPortal(
-        <div className="bottom-nav-wrapper fixed inset-x-0 bottom-0 pointer-events-none z-[1000] flex justify-center px-3 sm:px-4 box-border">
-          {/* Atmospheric Blur Layer (.bottom-nav-atmosphere) */}
-          <motion.div
-            className="bottom-nav-atmosphere"
-            initial={false}
-            animate={{
-              y: (isKeyboardOpen && !aiSheetOpen) ? 160 : 0,
-              opacity: (isKeyboardOpen && !aiSheetOpen) ? 0 : 1,
-            }}
-            transition={{
-              y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
-              opacity: { duration: 0.2 },
-            }}
-          />
-
-          {/* Compact Dock Container (Row 1 + Row 2) */}
+        <div className="bottom-nav-wrapper fixed inset-x-0 bottom-0 pointer-events-none z-[1000] flex justify-center px-3.5 sm:px-4 box-border">
+          {/* Dock Container (Row 1 + Row 2) */}
           <motion.nav
             ref={navRef}
             initial={false}
             animate={{
-              y: (isKeyboardOpen && !aiSheetOpen) ? 160 : 0,
-              opacity: (isKeyboardOpen && !aiSheetOpen) ? 0 : 1,
+              y: (isKeyboardOpen || aiSheetOpen || isFormPopupOpen) ? 140 : 0,
+              opacity: (isKeyboardOpen || aiSheetOpen || isFormPopupOpen) ? 0 : 1,
             }}
             transition={{
               type: 'spring',
-              stiffness: 300,
+              stiffness: 320,
               damping: 28,
               mass: 0.8,
             }}
             style={{
-              marginBottom: `calc(max(12px, var(--sab, env(safe-area-inset-bottom, 0px))) + ${isShortScreen ? '8px' : '16px'})`,
-              pointerEvents: (isKeyboardOpen && !aiSheetOpen) ? 'none' : 'auto',
+              marginBottom: `calc(max(14px, var(--sab, env(safe-area-inset-bottom, 0px))) + ${isShortScreen ? '14px' : '20px'})`,
+              pointerEvents: (isKeyboardOpen || aiSheetOpen || isFormPopupOpen) ? 'none' : 'auto',
               touchAction: 'manipulation',
             }}
-            className="relative z-10 flex flex-col items-center gap-1.5 w-full max-w-[560px] mx-auto gpu-composited select-none box-border"
+            className="relative z-10 flex flex-col items-center gap-1.5 w-full max-w-[375px] mx-auto gpu-composited select-none box-border"
             role="navigation"
             aria-label="Main Navigation"
           >
             {/* ROW 1: Nav Pill (Home, Gym, Nutrition) + More Orb */}
-            <div className="flex items-center gap-2.5 sm:gap-3 w-full min-w-0 pointer-events-auto box-border">
-              {/* 1. Nav pill (left element): compact stadium container with glass backdrop */}
+            <div className="flex items-center gap-2 w-full min-w-0 pointer-events-auto box-border">
+              {/* 1. Nav pill (left element): stadium container with glass backdrop */}
               <div
-                className={`flex-1 min-w-0 rounded-full flex items-center justify-around border border-teal-500/25 dark:border-teal-500/35 shadow-[0_8px_32px_rgba(0,0,0,0.35)] select-none relative transition-all duration-200 ${
-                  isShortScreen ? 'h-[44px] px-2 sm:px-3' : 'h-[48px] px-2.5 sm:px-3.5'
+                className={`flex-1 min-w-0 rounded-full flex items-center justify-around border border-teal-500/40 dark:border-teal-400/45 shadow-[0_8px_24px_rgba(0,0,0,0.4)] select-none relative transition-all duration-200 ${
+                  isShortScreen ? 'h-[38px] px-2' : 'h-[42px] px-2 sm:px-2.5'
                 }`}
                 style={{
-                  backgroundColor: 'rgba(5, 13, 15, 0.88)',
-                  backdropFilter: 'blur(22px) saturate(135%)',
-                  WebkitBackdropFilter: 'blur(22px) saturate(135%)',
+                  backgroundColor: 'rgba(5, 13, 15, 0.94)',
+                  backdropFilter: 'blur(20px) saturate(135%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(135%)',
                 }}
               >
                 {navTabs.map((tab) => {
@@ -717,8 +703,8 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                         if (menuOpen) setMenuOpen(false);
                         startTransition(() => { navigate(tab.path); });
                       }}
-                      className={`relative flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer min-w-[44px] ${
-                        isShortScreen ? 'w-9 h-9' : 'w-10 h-10'
+                      className={`relative flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer min-w-[36px] ${
+                        isShortScreen ? 'w-7 h-7' : 'w-8 h-8'
                       }`}
                       aria-label={tab.label}
                     >
@@ -741,7 +727,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       </div>
                       {/* Icon */}
                       <Icon
-                        className="relative z-10 transition-colors duration-200 w-5 h-5 sm:w-6 sm:h-6"
+                        className="relative z-10 transition-colors duration-200 w-4 h-4"
                         strokeWidth={active ? 2.5 : 2.2}
                         style={{
                           color: active ? '#FFFFFF' : inactiveColor,
@@ -768,7 +754,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   setMenuOpen(prev => !prev);
                 }}
                 className={`shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative rounded-full ${
-                  isShortScreen ? 'w-[44px] h-[44px]' : 'w-[48px] h-[48px]'
+                  isShortScreen ? 'w-[38px] h-[38px]' : 'w-[42px] h-[42px]'
                 }`}
                 style={{
                   transition: 'filter 220ms cubic-bezier(0.2, 0, 0, 1)',
@@ -778,7 +764,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 aria-expanded={menuOpen}
               >
                 {/* Scallop shape background */}
-                <div className="absolute inset-[-2px] pointer-events-none flex items-center justify-center">
+                <div className="absolute inset-[-1.5px] pointer-events-none flex items-center justify-center">
                   <ScallopShape
                     fill={squircleBg}
                     className="w-full h-full"
@@ -791,7 +777,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                 {/* Active accent dot when current route is in the hub */}
                 {isHubActive && !menuOpen && (
                   <span
-                    className="absolute top-[8px] right-[8px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
+                    className="absolute top-[6px] right-[6px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
                     aria-hidden="true"
                   />
                 )}
@@ -806,7 +792,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <CollapseContentIcon className="w-5 h-5 text-white" />
+                      <CollapseContentIcon className="w-4 h-4 text-white" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -817,7 +803,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <ExpandAllIcon className="w-5 h-5 text-white" />
+                      <ExpandAllIcon className="w-4 h-4 text-white" />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -826,25 +812,25 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
             {/* ROW 2: Ask LifeOS Pill (ChatPillInput) */}
             <AnimatePresence>
-              {!isFormPopupOpen && (
+              {!isFormPopupOpen && !aiSheetOpen && (
                 <motion.div
-                  initial={{ y: 40, opacity: 0, height: 0 }}
+                  initial={{ y: 30, opacity: 0, height: 0 }}
                   animate={{
                     y: 0,
                     opacity: 1,
-                    height: isPillSlim ? (isShortScreen ? 32 : 36) : (isShortScreen ? 44 : 48),
+                    height: isPillSlim ? 32 : (isShortScreen ? 36 : 40),
                   }}
-                  exit={{ y: 40, opacity: 0, height: 0 }}
+                  exit={{ y: 30, opacity: 0, height: 0 }}
                   transition={{
                     type: 'spring',
-                    stiffness: 300,
+                    stiffness: 320,
                     damping: 28,
                   }}
                   onClick={() => {
                     if (isPillSlim) setIsPillSlim(false);
                     setAiSheetOpen(true);
                   }}
-                  className="w-full pointer-events-auto cursor-pointer relative overflow-hidden rounded-full shrink-0 min-w-0 box-border"
+                  className="w-full pointer-events-auto cursor-pointer relative rounded-full shrink-0 min-w-0 box-border"
                 >
                   <ChatPillInput
                     inputQuery={""}

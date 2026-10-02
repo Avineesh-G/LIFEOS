@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 50,
+  versionCode: 51,
   versionName: '3.0.0',
   releaseDate: '2026-10-02',
   apkSize: '13.8 MB',
-  apkSizeBytes: 14424159,
-  releaseNotes: 'LifeOS v3.0.0 (Build 1):\n• Elevated floating navigation dock with frosted glass atmosphere\n• Centered pop-up interfaces with body gesture lock\n• Document-root portal rendering for full device compatibility',
+  apkSizeBytes: 14424234,
+  releaseNotes: 'LifeOS v3.0.0 (Build 2):\n• Refined compact bottom navigation dock with thin theme borders\n• Centered mobile Ask LifeOS chat pop-up with keyboard awareness\n• Improved Groq AI multi-model fallbacks & voice transcription',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

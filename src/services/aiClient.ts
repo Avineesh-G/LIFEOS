@@ -70,75 +70,102 @@ export async function streamChatCompletion(
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  try {
-    const response = await fetch(targetUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model: GROQ_CONFIG.MODELS.CHAT_PRIMARY,
-        messages: fullMessages,
-        temperature: 0.3,
-        max_tokens: 1024,
-        stream: true,
-      }),
-      signal,
-    });
+  const candidateModels = GROQ_CONFIG.MODELS.CHAT_FALLBACKS || [
+    GROQ_CONFIG.MODELS.CHAT_PRIMARY,
+    'llama-3.1-8b-instant',
+    'llama-3.3-70b-versatile',
+    'llama3-70b-8192',
+    'mixtral-8x7b-32768'
+  ];
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error('Groq API Rate Limit reached. Please wait a moment and try again.');
+  let lastError: Error | null = null;
+
+  for (const modelToTry of candidateModels) {
+    try {
+      const response = await fetch(targetUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model: modelToTry,
+          messages: fullMessages,
+          temperature: 0.3,
+          max_tokens: 1024,
+          stream: true,
+        }),
+        signal,
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Groq API Rate Limit reached. Please wait a moment and try again.');
+        }
+        if (response.status === 401) {
+          throw new Error('Invalid Groq API Key. Please verify your key in Settings > AI.');
+        }
+        const errText = await response.text();
+        // If model not found (404) or bad model parameter, continue to next fallback model
+        if (response.status === 404 || errText.includes('model') || errText.includes('does not exist')) {
+          console.warn(`[AI Client] Model ${modelToTry} unavailable (${response.status}), trying fallback...`);
+          lastError = new Error(`AI request failed (${response.status}): ${errText.substring(0, 100)}`);
+          continue;
+        }
+        throw new Error(`AI request failed (${response.status}): ${errText.substring(0, 100)}`);
       }
-      if (response.status === 401) {
-        throw new Error('Invalid Groq API Key. Please verify your key in Settings > AI.');
+
+      if (!response.body) {
+        throw new Error('Response body is unavailable for streaming.');
       }
-      const errText = await response.text();
-      throw new Error(`AI request failed (${response.status}): ${errText.substring(0, 100)}`);
-    }
 
-    if (!response.body) {
-      throw new Error('Response body is unavailable for streaming.');
-    }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let accumulatedText = '';
+      let buffer = '';
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let accumulatedText = '';
-    let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('data: ')) {
-          const dataStr = trimmed.replace(/^data:\s*/, '');
-          if (dataStr === '[DONE]') {
-            const cleanFinal = stripUrls(accumulatedText);
-            onComplete(cleanFinal);
-            return;
-          }
-          try {
-            const parsed = JSON.parse(dataStr);
-            const delta = parsed.choices?.[0]?.delta?.content || '';
-            if (delta) {
-              accumulatedText += delta;
-              const cleanChunk = stripUrls(accumulatedText);
-              onChunk(cleanChunk);
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const dataStr = trimmed.replace(/^data:\s*/, '');
+            if (dataStr === '[DONE]') {
+              const cleanFinal = stripUrls(accumulatedText);
+              onComplete(cleanFinal);
+              return;
             }
-          } catch {}
+            try {
+              const parsed = JSON.parse(dataStr);
+              const delta = parsed.choices?.[0]?.delta?.content || '';
+              if (delta) {
+                accumulatedText += delta;
+                const cleanChunk = stripUrls(accumulatedText);
+                onChunk(cleanChunk);
+              }
+            } catch {}
+          }
         }
       }
-    }
 
-    const cleanFinal = stripUrls(accumulatedText);
-    onComplete(cleanFinal);
-  } catch (err: any) {
-    if (err.name === 'AbortError') return;
-    onError(err instanceof Error ? err : new Error(String(err)));
+      const cleanFinal = stripUrls(accumulatedText);
+      onComplete(cleanFinal);
+      return; // Successful stream completion
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      lastError = err instanceof Error ? err : new Error(String(err));
+      // If error is rate limit or auth, don't keep trying models
+      if (lastError.message.includes('Rate Limit') || lastError.message.includes('Invalid Groq API Key')) {
+        break;
+      }
+    }
+  }
+
+  if (lastError) {
+    onError(lastError);
   }
 }
 

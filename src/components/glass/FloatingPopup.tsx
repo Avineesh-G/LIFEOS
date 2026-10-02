@@ -102,9 +102,7 @@ export default function FloatingPopup({
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
 
-    if (variant === 'form') {
-      window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: true } }));
-    }
+    window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: true } }));
 
     const unregister = registerDismissible('floating-popup', () => {
       handleAttemptCloseRef.current();
@@ -113,9 +111,7 @@ export default function FloatingPopup({
 
     return () => {
       unregister();
-      if (variant === 'form') {
-        window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: false } }));
-      }
+      window.dispatchEvent(new CustomEvent('lifeos-form-popup-toggle', { detail: { isOpen: false } }));
       document.body.removeAttribute('data-subinterface-open');
       document.body.style.overflow = prevOverflow;
       document.body.style.touchAction = prevTouchAction;

@@ -402,29 +402,29 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden relative">
           
           {/* ── Top Header with Mode Tabs ── */}
-          <div className="flex items-center justify-between py-2 mb-1 shrink-0">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--accent-primary)]/15 flex items-center justify-center text-[var(--accent-primary)] shrink-0">
-                <Sparkles size={19} />
+          <div className="flex items-center justify-between py-1.5 mb-1 shrink-0 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-[var(--accent-primary)]/15 flex items-center justify-center text-[var(--accent-primary)] shrink-0">
+                <Sparkles size={16} />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-white tracking-tight leading-tight truncate">
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-sm sm:text-base font-bold text-white tracking-tight leading-tight truncate">
                     Ask LifeOS
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] tracking-wide shrink-0">
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] tracking-wide shrink-0">
                     Groq AI
                   </span>
                 </div>
-                <p className="text-[11px] text-white/50 font-medium mt-0.5 truncate">
-                  App Assistant & Saved Intelligence
+                <p className="text-[10px] text-white/50 font-medium truncate">
+                  App Assistant & Intelligence
                 </p>
               </div>
             </div>
 
             {/* Header Controls: Chat/History Tabs & Close */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex items-center p-1 rounded-2xl bg-white/10 border border-white/10">
+            <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center p-0.5 rounded-xl bg-white/10 border border-white/10">
                 <button
                   type="button"
                   onClick={() => {
@@ -432,13 +432,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     setActiveTab('chat');
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                     activeTab === 'chat'
                       ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
                       : 'text-white/70 hover:text-white'
                   }`}
                 >
-                  <MessageSquare size={13} />
+                  <MessageSquare size={12} />
                   <span>Chat</span>
                 </button>
                 <button
@@ -447,16 +447,16 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     triggerHaptic('light');
                     setActiveTab('history');
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                     activeTab === 'history'
                       ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
                       : 'text-white/70 hover:text-white'
                   }`}
                 >
-                  <History size={13} />
+                  <History size={12} />
                   <span>History</span>
                   {historyItems.length > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-white/20 text-[10px] flex items-center justify-center font-bold">
+                    <span className="w-3.5 h-3.5 rounded-full bg-white/20 text-[9px] flex items-center justify-center font-bold">
                       {historyItems.length}
                     </span>
                   )}
@@ -468,17 +468,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   title="New Chat Session"
                   onClick={handleStartNewChat}
-                  className="p-2 rounded-2xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                  className="p-1.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
                 >
-                  <Plus size={16} />
+                  <Plus size={15} />
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-2xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                className="p-1.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
           </div>

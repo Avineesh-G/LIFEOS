@@ -60,7 +60,7 @@ export function ChatPillInput({
   };
 
   return (
-    <div className="pt-1.5 shrink-0 relative z-30 select-none">
+    <div className="w-full shrink-0 relative z-30 select-none">
       {/* ── Optional Floating "+" Quick Actions Glass Menu ── */}
       <AnimatePresence>
         {showPlusMenu && (
@@ -115,14 +115,12 @@ export function ChatPillInput({
       </AnimatePresence>
 
       {/* ── Main Outer Pill Capsule Container ── */}
-      <div className={`relative rounded-full p-[1.5px] bg-gradient-to-r from-teal-500/60 via-cyan-400/50 to-purple-500/60 shadow-[0_0_24px_-4px_rgba(45,212,191,0.3)] transition-all ${
+      <div className={`relative w-full rounded-full border border-teal-500/40 dark:border-teal-400/45 shadow-[0_4px_20px_-2px_rgba(45,212,191,0.3)] transition-all box-border ${
         disabled ? 'opacity-50 pointer-events-none' : ''
-      }`}>
+      } ${isSlim ? 'h-[32px]' : 'h-[40px]'}`}>
         <div
           onClick={() => inputRef.current?.focus()}
-          className={`relative z-10 flex items-center gap-1.5 sm:gap-2 w-full pl-2 pr-1.5 sm:pl-3 sm:pr-2 rounded-full bg-[#050B0D] overflow-hidden cursor-text transition-all ${
-            isSlim ? 'py-0.5 sm:py-1' : 'py-1 sm:py-1.5'
-          }`}
+          className="relative z-10 flex items-center gap-1.5 sm:gap-2 w-full h-full px-2 sm:px-2.5 rounded-full bg-[#050B0D] overflow-hidden cursor-text transition-all box-border"
         >
           {/* Grain texture overlay strongest at bottom-left */}
           <div 
@@ -137,9 +135,9 @@ export function ChatPillInput({
 
           {/* Organic right-side fluid glow layer (teal into purple) */}
           <div
-            className="pointer-events-none absolute right-0 top-0 bottom-0 w-3/5 rounded-full blur-xl opacity-40"
+            className="pointer-events-none absolute right-0 top-0 bottom-0 w-3/5 rounded-full blur-xl opacity-35"
             style={{
-              background: 'radial-gradient(ellipse at 80% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(20, 184, 166, 0.25) 50%, transparent 80%)',
+              background: 'radial-gradient(ellipse at 80% 50%, rgba(168, 85, 247, 0.4) 0%, rgba(20, 184, 166, 0.25) 50%, transparent 80%)',
             }}
           />
 
@@ -152,11 +150,11 @@ export function ChatPillInput({
               setShowPlusMenu(prev => !prev);
             }}
             className={`relative z-20 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 active:scale-95 transition-all shrink-0 ${
-              isSlim ? 'w-7 h-7' : 'w-8 h-8'
+              isSlim ? 'w-4 h-4' : 'w-5 h-5'
             }`}
             title="Options & Quick Actions"
           >
-            <Plus size={isSlim ? 16 : 18} strokeWidth={2} />
+            <Plus size={isSlim ? 12 : 14} strokeWidth={2.2} />
           </button>
 
           {/* 2. Text Input Area */}
@@ -181,9 +179,7 @@ export function ChatPillInput({
                   ? 'Listening... tap mic to finish'
                   : 'Ask LifeOS'
               }
-              className={`w-full bg-transparent px-1 font-medium text-white placeholder-white/40 focus:outline-none focus:ring-0 allow-select select-text cursor-text ${
-                isSlim ? 'py-0 text-xs' : 'py-1 text-xs sm:text-sm'
-              }`}
+              className="w-full bg-transparent px-1 font-medium text-white placeholder-white/40 focus:outline-none focus:ring-0 allow-select select-text cursor-text text-xs leading-none"
               style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
             />
 
@@ -199,13 +195,13 @@ export function ChatPillInput({
                 className="p-1 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all shrink-0 mr-1"
                 title="Clear text"
               >
-                <X size={14} />
+                <X size={11} />
               </button>
             )}
           </div>
 
           {/* 3. Right Action Cluster: Squircle Mic + Circle Send + Waveform */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative z-20">
+          <div className="flex items-center gap-1.5 shrink-0 relative z-20">
             {/* Waveform graphic (visible ONLY when expanded, empty input & not recording) */}
             {!isSlim && !hasText && !isRecording && !transcribing && (
               <button
@@ -214,12 +210,12 @@ export function ChatPillInput({
                   e.stopPropagation();
                   onToggleRecord();
                 }}
-                className="flex items-center gap-0.5 px-1 py-1 text-white/70 hover:text-teal-300 transition-colors cursor-pointer"
+                className="flex items-center gap-0.5 px-0.5 py-1 text-white/70 hover:text-teal-300 transition-colors cursor-pointer"
                 title="Voice Input Waveform"
               >
-                <div className="w-[2px] h-3 bg-teal-300/80 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-                <div className="w-[2px] h-5 bg-teal-300/90 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                <div className="w-[2px] h-2.5 bg-teal-300/80 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+                <div className="w-[2px] h-1.5 bg-teal-300/80 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+                <div className="w-[2px] h-3 bg-teal-300/90 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+                <div className="w-[2px] h-1.5 bg-teal-300/80 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
               </button>
             )}
 
@@ -232,8 +228,8 @@ export function ChatPillInput({
               }}
               disabled={isGenerating || transcribing}
               title={isRecording ? 'Stop Recording' : 'Voice Input'}
-              className={`rounded-full flex items-center justify-center transition-all ${
-                isSlim ? 'w-7 h-7' : 'w-9 h-9 sm:w-10 sm:h-10'
+              className={`rounded-full flex items-center justify-center transition-all shrink-0 ${
+                isSlim ? 'w-5 h-5' : 'w-[26px] h-[26px]'
               } ${
                 isRecording
                   ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
@@ -242,7 +238,7 @@ export function ChatPillInput({
                   : 'bg-[#2DD4BF] text-slate-950 font-bold shadow-md shadow-teal-500/25 hover:bg-[#26bba8] active:scale-95'
               }`}
             >
-              {isRecording ? <Square size={13} /> : transcribing ? <Loader2 size={14} /> : <Mic size={isSlim ? 15 : 17} strokeWidth={2.4} />}
+              {isRecording ? <Square size={9} /> : transcribing ? <Loader2 size={10} /> : <Mic size={isSlim ? 11 : 13} strokeWidth={2.4} />}
             </button>
 
             {/* Send Button: perfect circle (rounded-full) */}
@@ -254,15 +250,15 @@ export function ChatPillInput({
               }}
               disabled={isGenerating || !hasText || transcribing}
               title="Send Prompt"
-              className={`rounded-full flex items-center justify-center transition-all ${
-                isSlim ? 'w-7 h-7' : 'w-9 h-9 sm:w-10 sm:h-10'
+              className={`rounded-full flex items-center justify-center transition-all shrink-0 ${
+                isSlim ? 'w-5 h-5' : 'w-[26px] h-[26px]'
               } ${
                 hasText && !isGenerating && !transcribing
                   ? 'bg-[#0D9488] text-white font-bold shadow-md shadow-teal-500/30 hover:bg-[#14b8a6] hover:scale-105 active:scale-95'
                   : 'bg-white/10 text-white/30 cursor-not-allowed'
               }`}
             >
-              {isGenerating ? <Loader2 size={14} className="animate-spin text-white" /> : <Send size={isSlim ? 14 : 16} className="translate-x-[0.5px]" />}
+              {isGenerating ? <Loader2 size={10} className="animate-spin text-white" /> : <Send size={isSlim ? 10 : 12} className="translate-x-[0.5px]" />}
             </button>
           </div>
         </div>
