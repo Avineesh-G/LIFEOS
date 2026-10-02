@@ -45,6 +45,22 @@
     -webkit-backdrop-filter: none !important;
   }
 
+  /* Custom smooth horizontal table scrollbar */
+  .custom-table-scrollbar::-webkit-scrollbar {
+    height: 5px;
+  }
+  .custom-table-scrollbar::-webkit-scrollbar-track {
+    background: var(--md-surface-container-highest, rgba(128, 128, 128, 0.15));
+    border-radius: 9999px;
+  }
+  .custom-table-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--md-outline-variant, rgba(128, 128, 128, 0.4));
+    border-radius: 9999px;
+  }
+  .custom-table-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--md-primary, #8B1E3F);
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }

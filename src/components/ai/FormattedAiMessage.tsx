@@ -137,31 +137,79 @@ const MarkdownTable: React.FC<{ rows: string[][]; isUser?: boolean }> = ({ rows,
   if (rows.length === 0) return null;
   const headers = rows[0];
   const dataRows = rows.slice(1);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [canScroll, setCanScroll] = useState(false);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      setCanScroll(maxScroll > 6);
+      if (maxScroll > 0) {
+        setScrollProgress(Math.min(100, Math.max(0, (scrollLeft / maxScroll) * 100)));
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    const handleResize = () => checkScroll();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [rows]);
 
   return (
-    <div className="my-3 overflow-x-auto rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] shadow-xs">
-      <table className="w-full text-left text-xs border-collapse">
-        <thead>
-          <tr className="bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)]">
-            {headers.map((h, i) => (
-              <th key={i} className="py-2 px-3 font-bold text-[var(--md-on-surface)] whitespace-nowrap text-[11px]">
-                {parseInlineContent(h.trim(), isUser)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[var(--md-outline-variant)]/50">
-          {dataRows.map((r, rIdx) => (
-            <tr key={rIdx} className="hover:bg-[var(--md-surface-container-high)]/40 transition-colors">
-              {r.map((cell, cIdx) => (
-                <td key={cIdx} className="py-2 px-3 text-[var(--md-on-surface-variant)] leading-relaxed text-xs">
-                  {parseInlineContent(cell.trim(), isUser)}
-                </td>
+    <div className="my-3 space-y-1.5 w-full">
+      <div
+        ref={scrollRef}
+        onScroll={checkScroll}
+        className="w-full overflow-x-auto rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] shadow-xs custom-table-scrollbar"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <table className="min-w-[520px] w-full text-left text-xs border-collapse font-sans">
+          <thead>
+            <tr className="bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)]">
+              {headers.map((h, i) => (
+                <th key={i} className="py-2.5 px-3.5 font-bold text-[var(--md-on-surface)] whitespace-nowrap text-[11px] tracking-tight">
+                  {parseInlineContent(h.trim(), isUser)}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-[var(--md-outline-variant)]/50">
+            {dataRows.map((r, rIdx) => (
+              <tr key={rIdx} className="hover:bg-[var(--md-surface-container-high)]/40 transition-colors">
+                {r.map((cell, cIdx) => (
+                  <td key={cIdx} className="py-2.5 px-3.5 text-[var(--md-on-surface-variant)] leading-relaxed text-xs">
+                    {parseInlineContent(cell.trim(), isUser)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Horizontal Slider Indicator (Shown when table overflows) */}
+      {canScroll && (
+        <div className="flex items-center justify-between px-1.5 text-[10px] font-mono text-[var(--md-on-surface-variant)]">
+          <span className="text-[9.5px] opacity-75">
+            Slide to view full table →
+          </span>
+          <div className="w-24 h-1.5 rounded-full bg-[var(--md-surface-container-highest)] overflow-hidden relative border border-[var(--md-outline-variant)]">
+            <div
+              className="h-full rounded-full bg-[var(--md-primary)] transition-all duration-75"
+              style={{
+                width: '40%',
+                transform: `translateX(${(scrollProgress / 100) * (96 - 96 * 0.4)}px)`,
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

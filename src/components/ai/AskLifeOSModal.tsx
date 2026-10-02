@@ -692,10 +692,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`}
                       >
                         <div
-                          className={`max-w-[88%] p-3.5 rounded-[20px] text-xs sm:text-sm leading-relaxed ${
+                          className={`w-full max-w-[94%] sm:max-w-[88%] p-3.5 rounded-[20px] text-xs sm:text-sm leading-relaxed overflow-hidden ${
                             isUser
-                              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-br-xs shadow-xs'
-                              : 'bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] rounded-bl-xs'
+                              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-br-xs shadow-xs self-end'
+                              : 'bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] rounded-bl-xs self-start'
                           }`}
                         >
                           {msg.content ? (
