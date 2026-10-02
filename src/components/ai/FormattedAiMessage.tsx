@@ -148,7 +148,27 @@ const MarkdownTable: React.FC<{ rows: string[][]; isUser?: boolean }> = ({ rows,
       setCanScroll(maxScroll > 6);
       if (maxScroll > 0) {
         setScrollProgress(Math.min(100, Math.max(0, (scrollLeft / maxScroll) * 100)));
+      } else {
+        setScrollProgress(0);
       }
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    setScrollProgress(val);
+    if (scrollRef.current) {
+      const { scrollWidth, clientWidth } = scrollRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      scrollRef.current.scrollLeft = (val / 100) * maxScroll;
+    }
+  };
+
+  const handleNudge = (direction: 'left' | 'right') => {
+    triggerHaptic('light');
+    if (scrollRef.current) {
+      const offset = direction === 'left' ? -140 : 140;
+      scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
     }
   };
 
@@ -160,54 +180,86 @@ const MarkdownTable: React.FC<{ rows: string[][]; isUser?: boolean }> = ({ rows,
   }, [rows]);
 
   return (
-    <div className="my-3 space-y-1.5 w-full">
-      <div
-        ref={scrollRef}
-        onScroll={checkScroll}
-        className="w-full overflow-x-auto rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] shadow-xs custom-table-scrollbar"
-        style={{
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        <table className="min-w-[520px] w-full text-left text-xs border-collapse font-sans">
-          <thead>
-            <tr className="bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)]">
-              {headers.map((h, i) => (
-                <th key={i} className="py-2.5 px-3.5 font-bold text-[var(--md-on-surface)] whitespace-nowrap text-[11px] tracking-tight">
-                  {parseInlineContent(h.trim(), isUser)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--md-outline-variant)]/50">
-            {dataRows.map((r, rIdx) => (
-              <tr key={rIdx} className="hover:bg-[var(--md-surface-container-high)]/40 transition-colors">
-                {r.map((cell, cIdx) => (
-                  <td key={cIdx} className="py-2.5 px-3.5 text-[var(--md-on-surface-variant)] leading-relaxed text-xs">
-                    {parseInlineContent(cell.trim(), isUser)}
-                  </td>
+    <div className="my-2.5 space-y-1.5 w-full">
+      {/* Table Container with Smooth Native Touch Scroll & Edge Elevation */}
+      <div className="relative rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] shadow-xs overflow-hidden">
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="w-full overflow-x-auto custom-table-scrollbar"
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+          }}
+        >
+          <table className="min-w-full w-full text-left text-xs border-collapse font-sans">
+            <thead>
+              <tr className="bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)]">
+                {headers.map((h, i) => (
+                  <th
+                    key={i}
+                    className="py-2.5 px-3 font-bold text-[var(--md-on-surface)] text-[11px] tracking-tight uppercase min-w-[95px] max-w-[180px] whitespace-normal break-words"
+                  >
+                    {parseInlineContent(h.trim(), isUser)}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-[var(--md-outline-variant)]/50">
+              {dataRows.map((r, rIdx) => (
+                <tr key={rIdx} className="hover:bg-[var(--md-surface-container-high)]/40 transition-colors">
+                  {r.map((cell, cIdx) => (
+                    <td
+                      key={cIdx}
+                      className="py-2.5 px-3 text-[var(--md-on-surface-variant)] leading-relaxed text-xs min-w-[95px] max-w-[200px] whitespace-normal break-words align-top"
+                    >
+                      {parseInlineContent(cell.trim(), isUser)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Horizontal Slider Indicator (Shown when table overflows) */}
+      {/* Interactive Mobile Slider Controller for Wide Responses */}
       {canScroll && (
-        <div className="flex items-center justify-between px-1.5 text-[10px] font-mono text-[var(--md-on-surface-variant)]">
-          <span className="text-[9.5px] opacity-75">
-            Slide to view full table →
-          </span>
-          <div className="w-24 h-1.5 rounded-full bg-[var(--md-surface-container-highest)] overflow-hidden relative border border-[var(--md-outline-variant)]">
-            <div
-              className="h-full rounded-full bg-[var(--md-primary)] transition-all duration-75"
-              style={{
-                width: '40%',
-                transform: `translateX(${(scrollProgress / 100) * (96 - 96 * 0.4)}px)`,
-              }}
+        <div className="flex items-center gap-2 px-1 py-1 rounded-xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] text-[10.5px] font-medium text-[var(--md-on-surface-variant)]">
+          <button
+            type="button"
+            onClick={() => handleNudge('left')}
+            disabled={scrollProgress <= 1}
+            className="p-1 rounded-lg hover:bg-[var(--md-surface-container-highest)] disabled:opacity-30 transition-all active:scale-95 shrink-0"
+            title="Scroll Left"
+          >
+            ←
+          </button>
+
+          <div className="flex-1 flex items-center gap-2 min-w-0">
+            <span className="text-[9.5px] font-mono shrink-0 select-none opacity-80">
+              Slide
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={scrollProgress}
+              onChange={handleSliderChange}
+              aria-label="Table horizontal scroll slider"
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-[var(--md-surface-container-highest)] accent-[var(--md-primary)] focus:outline-none"
             />
           </div>
+
+          <button
+            type="button"
+            onClick={() => handleNudge('right')}
+            disabled={scrollProgress >= 99}
+            className="p-1 rounded-lg hover:bg-[var(--md-surface-container-highest)] disabled:opacity-30 transition-all active:scale-95 shrink-0"
+            title="Scroll Right"
+          >
+            →
+          </button>
         </div>
       )}
     </div>

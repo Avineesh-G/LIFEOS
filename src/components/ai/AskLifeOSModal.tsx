@@ -650,7 +650,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {/* ── VIEW 1: ACTIVE CHAT SCREEN ── */}
           {activeTab === 'chat' && (
             <>
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-1.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto pt-2 pb-3 px-0.5 space-y-3 scrollbar-none flex flex-col min-h-0">
                 {messages.length === 0 ? (
                   <div className="text-center py-2 px-2 space-y-3">
                     <div className="space-y-1 max-w-sm mx-auto">
@@ -686,20 +686,21 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     const isUser = msg.role === 'user';
                     const proposals = actionProposals[msg.id] || [];
 
+                    if (isUser) {
+                      return (
+                        <div key={msg.id} className="w-full flex justify-end">
+                          <div className="max-w-[85%] sm:max-w-[80%] px-3.5 py-2.5 rounded-[18px] rounded-br-xs bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs text-xs sm:text-sm leading-relaxed">
+                            <FormattedAiMessage content={msg.content} isUser={true} />
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`}
-                      >
-                        <div
-                          className={`w-full max-w-[94%] sm:max-w-[88%] p-3.5 rounded-[20px] text-xs sm:text-sm leading-relaxed overflow-hidden ${
-                            isUser
-                              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-br-xs shadow-xs self-end'
-                              : 'bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] rounded-bl-xs self-start'
-                          }`}
-                        >
+                      <div key={msg.id} className="w-full flex flex-col items-start space-y-1">
+                        <div className="w-full p-3.5 rounded-[20px] rounded-bl-xs bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs overflow-hidden text-xs sm:text-sm leading-relaxed">
                           {msg.content ? (
-                            <FormattedAiMessage content={msg.content} isUser={isUser} />
+                            <FormattedAiMessage content={msg.content} isUser={false} />
                           ) : (
                             <div className="flex items-center gap-2 text-[var(--md-primary)] italic">
                               <Loader2 size={14} className="animate-spin" />
@@ -707,8 +708,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                             </div>
                           )}
 
-                          {!isUser && msg.content && (
-                            <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--md-outline-variant)] text-[10px] text-[var(--md-on-surface-variant)] font-mono">
+                          {msg.content && (
+                            <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[var(--md-outline-variant)]/60 text-[10px] text-[var(--md-on-surface-variant)] font-mono">
                               <span>Groq AI • App Guide</span>
                               <div className="flex items-center gap-2.5">
                                 {msg.dataSentContext && (
@@ -736,7 +737,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                         {/* Action Confirmation Cards */}
                         {proposals.map((prop) => (
-                          <div key={prop.id} className="max-w-[88%] w-full">
+                          <div key={prop.id} className="w-full pt-1">
                             <ActionConfirmationCard
                               proposal={prop}
                               updateData={updateData}
