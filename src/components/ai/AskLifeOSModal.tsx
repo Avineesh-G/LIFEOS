@@ -44,6 +44,7 @@ import { extractAiActionProposals, AiActionProposal } from '../../services/aiAct
 import { buildTargetedAiContext } from '../../services/aiContextBuilder';
 import { recordScreenView } from '../../services/aiUsageTracker';
 import { triggerHaptic } from '../../utils/haptics';
+import { speechRecognizer } from '../../utils/speechRecognition';
 import type { AiChatSession } from '../../types';
 
 import { PulseBubbleIcon } from '../icons/PulseBubbleIcon';
@@ -329,11 +330,14 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     }
   };
 
-  // Voice recording Rambler style (Records mic -> transcribes -> puts text in input)
+  // Voice recording: Native Web Speech API with seamless MediaRecorder fallback
   const handleToggleRecord = async () => {
     if (isRecording) {
       triggerHaptic('medium');
       setIsRecording(false);
+      if (speechRecognizer.isSupported()) {
+        speechRecognizer.stop();
+      }
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
       }
@@ -341,13 +345,36 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     }
 
     if (!isOnline) {
-      setErrorMessage('AI needs internet connection for voice recording.');
+      setErrorMessage('AI needs internet connection for voice recognition.');
       return;
     }
 
+    triggerHaptic('medium');
+
+    // 1. Try Native Web Speech API (Live zero-latency dictation)
+    if (speechRecognizer.isSupported()) {
+      setIsRecording(true);
+      const started = speechRecognizer.start(
+        (result) => {
+          if (result.transcript) {
+            setInputQuery(result.transcript);
+          }
+        },
+        (err) => {
+          console.warn('[Speech Recognition Error]', err);
+          setIsRecording(false);
+        },
+        () => {
+          setIsRecording(false);
+        }
+      );
+
+      if (started) return;
+    }
+
+    // 2. Fallback to MediaRecorder + Whisper Audio Transcription
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      triggerHaptic('medium');
       audioChunksRef.current = [];
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -381,6 +408,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       setIsRecording(true);
     } catch (err: any) {
       setErrorMessage('Microphone access denied or unsupported on this device.');
+      setIsRecording(false);
     }
   };
 
@@ -734,7 +762,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
               {/* ── Bottom Input Row (Pill Input in M3 Surface Container Highest) ── */}
               <div className="pt-1.5 shrink-0 relative z-30">
-                <div className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
+                {isRecording && (
+                  <div className="mb-2 px-3.5 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-pulse">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
+                      <span className="font-semibold text-[11px] truncate">Listening live... (Speak task or query)</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] shrink-0 ml-2">Tap red stop when done</span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-1.5 p-1.5 pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
                   {/* Left input field */}
                   <div className="flex-1 flex items-center min-w-0">
                     <input
@@ -759,8 +797,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         transcribing
                           ? 'Transcribing voice...'
                           : isRecording
-                          ? 'Listening... tap mic to finish'
-                          : 'Ask LifeOS anything...'
+                          ? 'Listening in real-time...'
+                          : 'Ask LifeOS or say "Add to-do task..."'
                       }
                       className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text"
                       style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
@@ -783,21 +821,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     )}
                   </div>
 
-                  {/* Dynamic Right Action Button: Mic when empty -> Send when text present */}
-                  {inputQuery.trim().length > 0 ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSendQuery();
-                      }}
-                      disabled={isGenerating || transcribing}
-                      title="Send query"
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
-                    >
-                      <Send size={15} className="ml-[-1px]" strokeWidth={2.2} />
-                    </button>
-                  ) : (
+                  {/* Actions: Voice Mic & Send Buttons */}
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -806,17 +831,32 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       }}
                       disabled={isGenerating || transcribing}
                       title={isRecording ? 'Stop Recording' : 'Voice Input'}
-                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
+                      className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                         isRecording
                           ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
                           : transcribing
                           ? 'bg-[var(--md-primary-container)] text-[var(--md-primary)] animate-spin'
-                          : 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] hover:opacity-90 active:scale-95'
+                          : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] hover:text-[var(--md-primary)]'
                       }`}
                     >
-                      {isRecording ? <Square size={14} /> : transcribing ? <Loader2 size={15} /> : <Mic size={17} strokeWidth={2.2} />}
+                      {isRecording ? <Square size={13} /> : transcribing ? <Loader2 size={14} /> : <Mic size={16} strokeWidth={2.2} />}
                     </button>
-                  )}
+
+                    {inputQuery.trim().length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSendQuery();
+                        }}
+                        disabled={isGenerating || transcribing}
+                        title="Send query"
+                        className="w-9 h-9 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
+                      >
+                        <Send size={15} className="ml-[-1px]" strokeWidth={2.2} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
