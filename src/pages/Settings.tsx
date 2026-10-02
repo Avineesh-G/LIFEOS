@@ -228,8 +228,7 @@ export default function Settings({
   const [usageClearedNotice, setUsageClearedNotice] = useState(false);
 
   const handleSaveApiKey = async () => {
-    await setGroqApiKey(apiKeyInput);
-    await updateData({ geminiApiKey: apiKeyInput.trim() });
+    await setGroqApiKey(apiKeyInput, updateData);
     setApiKeySaved(true);
     setTimeout(() => setApiKeySaved(false), 2500);
   };

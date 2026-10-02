@@ -34,8 +34,9 @@ import GlassSurface from '../glass/GlassSurface';
 import GlowCard from '../glass/GlowCard';
 import AiConsentSheet from './AiConsentSheet';
 import ActionConfirmationCard from './ActionConfirmationCard';
+import ChatPillInput, { USE_PILL_INPUT } from './ChatPillInput';
 import { GROQ_CONFIG } from '../../config/ai';
-import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent, setGroqApiKey } from '../../utils/aiSecurity';
+import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent, setGroqApiKey, syncApiKeyFromAppData, getLetAiReadData, setLetAiReadData } from '../../utils/aiSecurity';
 import { streamChatCompletion, transcribeAudio, stripUrls, ChatMessage } from '../../services/aiClient';
 import { extractAiActionProposals, AiActionProposal } from '../../services/aiActionEngine';
 import { buildTargetedAiContext } from '../../services/aiContextBuilder';
@@ -83,6 +84,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showConsentSheet, setShowConsentSheet] = useState(false);
   const [previewDataContext, setPreviewDataContext] = useState<string | null>(null);
+  const [letAiReadDataState, setLetAiReadDataState] = useState(() => getLetAiReadData());
+
+  const handleToggleReadData = (val: boolean) => {
+    triggerHaptic('medium');
+    setLetAiReadData(val);
+    setLetAiReadDataState(val);
+  };
 
   // Active proposals associated with recent message
   const [actionProposals, setActionProposals] = useState<Record<string, AiActionProposal[]>>({});
@@ -95,10 +103,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
-  // Auto-focus input when opening AI assistant
+  // Auto-focus input & sync API key when opening AI assistant
   useEffect(() => {
     if (isOpen) {
       recordScreenView('Ask LifeOS Assistant');
+      const activeKey = syncApiKeyFromAppData(data);
+      const proxyUrl = getAiProxyUrl();
+      if (!activeKey && !proxyUrl) {
+        setErrorMessage('API key is not saved. Please set your API key in Settings > AI or enter key below.');
+      } else if (errorMessage?.includes('API key') || errorMessage?.includes('Key missing')) {
+        setErrorMessage(null);
+      }
       const timer = setTimeout(() => {
         if (activeTab === 'chat') {
           inputRef.current?.focus();
@@ -106,7 +121,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, data]);
 
   // Persist messages to LocalStorage
   useEffect(() => {
@@ -230,10 +245,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       return;
     }
 
-    const apiKey = getGroqApiKey();
+    const apiKey = getGroqApiKey(data);
     const proxyUrl = getAiProxyUrl();
     if (!apiKey && !proxyUrl) {
-      setErrorMessage('Groq API Key missing. Please set your key in Settings > AI or enter key below.');
+      setErrorMessage('API key is not saved. Please set your API key in Settings > AI or enter key below.');
       return;
     }
 
@@ -508,19 +523,19 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 </button>
               </div>
 
-              {errorMessage.includes('API Key missing') && (
+              {(errorMessage.includes('API key') || errorMessage.includes('Key missing')) && (
                 <div className="flex items-center gap-2 pt-1">
                   <input
                     type="password"
-                    placeholder="Paste Groq API Key (gsk_...)"
+                    placeholder="Paste AI API Key (gsk_... or AI key)"
                     className="flex-1 px-3 py-1.5 rounded-xl bg-black/40 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
                     onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
                         const val = (e.target as HTMLInputElement).value.trim();
                         if (val) {
-                          await setGroqApiKey(val);
+                          await setGroqApiKey(val, updateData);
                           setErrorMessage(null);
-                          setToastMessage('Groq API Key saved successfully!');
+                          setToastMessage('API Key saved and synced successfully!');
                         }
                       }
                     }}
@@ -530,9 +545,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     onClick={async (e) => {
                       const input = (e.currentTarget.previousElementSibling as HTMLInputElement)?.value.trim();
                       if (input) {
-                        await setGroqApiKey(input);
+                        await setGroqApiKey(input, updateData);
                         setErrorMessage(null);
-                        setToastMessage('Groq API Key saved successfully!');
+                        setToastMessage('API Key saved and synced successfully!');
                       }
                     }}
                     className="px-3 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer"
@@ -659,107 +674,123 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               </div>
 
               {/* ── Bottom Input Bar ("Chat Dialer") Matching User Visual Design ── */}
-              <div className="pt-1.5 shrink-0 relative z-30">
-                <div className="relative rounded-full p-[1.5px] bg-gradient-to-r from-teal-500/60 via-cyan-400/50 to-purple-500/60 shadow-[0_0_24px_-4px_rgba(45,212,191,0.3)] transition-all">
-                  <div
-                    onClick={() => inputRef.current?.focus()}
-                    className="relative z-10 flex items-center gap-2.5 w-full pl-3.5 pr-2 py-1.5 sm:pl-4 sm:pr-2.5 sm:py-2 rounded-full bg-[#050B0D] overflow-hidden cursor-text"
-                  >
-                    {/* Organic right-side fluid glow layer (soft teal into violet/purple) */}
+              {USE_PILL_INPUT ? (
+                <ChatPillInput
+                  inputQuery={inputQuery}
+                  setInputQuery={setInputQuery}
+                  onSend={handleSendQuery}
+                  isGenerating={isGenerating}
+                  isRecording={isRecording}
+                  transcribing={transcribing}
+                  onToggleRecord={handleToggleRecord}
+                  inputRef={inputRef}
+                  onStartNewChat={handleStartNewChat}
+                  letAiReadData={letAiReadDataState}
+                  onToggleReadData={handleToggleReadData}
+                />
+              ) : (
+                <div className="pt-1.5 shrink-0 relative z-30">
+                  <div className="relative rounded-full p-[1.5px] bg-gradient-to-r from-teal-500/60 via-cyan-400/50 to-purple-500/60 shadow-[0_0_24px_-4px_rgba(45,212,191,0.3)] transition-all">
                     <div
-                      className="pointer-events-none absolute right-0 top-0 bottom-0 w-3/5 rounded-full blur-xl opacity-40"
-                      style={{
-                        background: 'radial-gradient(ellipse at 80% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(20, 184, 166, 0.25) 50%, transparent 80%)',
-                      }}
-                    />
-
-                    {/* Left text input box */}
-                    <div className="flex-1 flex items-center min-w-0 relative z-20">
-                      <input
-                        id="ask-lifeos-input"
-                        name="ask-lifeos-query"
-                        ref={inputRef}
-                        type="text"
-                        value={inputQuery}
-                        onChange={(e) => setInputQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendQuery();
-                          }
+                      onClick={() => inputRef.current?.focus()}
+                      className="relative z-10 flex items-center gap-2.5 w-full pl-3.5 pr-2 py-1.5 sm:pl-4 sm:pr-2.5 sm:py-2 rounded-full bg-[#050B0D] overflow-hidden cursor-text"
+                    >
+                      {/* Organic right-side fluid glow layer (soft teal into violet/purple) */}
+                      <div
+                        className="pointer-events-none absolute right-0 top-0 bottom-0 w-3/5 rounded-full blur-xl opacity-40"
+                        style={{
+                          background: 'radial-gradient(ellipse at 80% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(20, 184, 166, 0.25) 50%, transparent 80%)',
                         }}
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="sentences"
-                        spellCheck={false}
-                        tabIndex={0}
-                        placeholder={
-                          transcribing
-                            ? 'Transcribing voice...'
-                            : isRecording
-                            ? 'Listening... tap mic to finish'
-                            : 'Ask LifeOS anything...'
-                        }
-                        className="w-full bg-transparent px-1.5 py-1 text-xs sm:text-sm font-medium text-white placeholder-white/40 focus:outline-none focus:ring-0 allow-select select-text cursor-text"
-                        style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
                       />
-                      
-                      {/* Clear text X button inside input */}
-                      {inputQuery.length > 0 && (
+
+                      {/* Left text input box */}
+                      <div className="flex-1 flex items-center min-w-0 relative z-20">
+                        <input
+                          id="ask-lifeos-input"
+                          name="ask-lifeos-query"
+                          ref={inputRef}
+                          type="text"
+                          value={inputQuery}
+                          onChange={(e) => setInputQuery(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendQuery();
+                            }
+                          }}
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="sentences"
+                          spellCheck={false}
+                          tabIndex={0}
+                          placeholder={
+                            transcribing
+                              ? 'Transcribing voice...'
+                              : isRecording
+                              ? 'Listening... tap mic to finish'
+                              : 'Ask LifeOS anything...'
+                          }
+                          className="w-full bg-transparent px-1.5 py-1 text-xs sm:text-sm font-medium text-white placeholder-white/40 focus:outline-none focus:ring-0 allow-select select-text cursor-text"
+                          style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
+                        />
+                        
+                        {/* Clear text X button inside input */}
+                        {inputQuery.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setInputQuery('');
+                              inputRef.current?.focus();
+                            }}
+                            className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all shrink-0 mr-1"
+                            title="Clear text"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Action buttons on the right: Squircle Mic + Circle Send */}
+                      <div className="flex items-center gap-2 shrink-0 relative z-20">
+                        {/* Mic Button: rounded squircle (rounded-2xl) */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setInputQuery('');
-                            inputRef.current?.focus();
+                            handleToggleRecord();
                           }}
-                          className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all shrink-0 mr-1"
-                          title="Clear text"
+                          disabled={isGenerating || transcribing}
+                          title={isRecording ? 'Stop Recording' : 'Voice Input'}
+                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all ${
+                            isRecording
+                              ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
+                              : transcribing
+                              ? 'bg-accent/20 text-accent animate-spin'
+                              : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white backdrop-blur-md active:scale-95'
+                          }`}
                         >
-                          <X size={14} />
+                          {isRecording ? <Square size={14} /> : transcribing ? <Loader2 size={15} /> : <Mic size={17} strokeWidth={2.2} />}
                         </button>
-                      )}
-                    </div>
 
-                    {/* Action buttons on the right: Squircle Mic + Circle Send */}
-                    <div className="flex items-center gap-2 shrink-0 relative z-20">
-                      {/* Mic Button: rounded squircle (rounded-2xl) */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleRecord();
-                        }}
-                        disabled={isGenerating || transcribing}
-                        title={isRecording ? 'Stop Recording' : 'Voice Input'}
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all ${
-                          isRecording
-                            ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
-                            : transcribing
-                            ? 'bg-accent/20 text-accent animate-spin'
-                            : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white backdrop-blur-md active:scale-95'
-                        }`}
-                      >
-                        {isRecording ? <Square size={14} /> : transcribing ? <Loader2 size={15} /> : <Mic size={17} strokeWidth={2.2} />}
-                      </button>
-
-                      {/* Send Button: perfect circle (rounded-full) */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSendQuery();
-                        }}
-                        disabled={isGenerating || !inputQuery.trim() || transcribing}
-                        title="Send query"
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0D9488] hover:bg-[#14B8A6] active:scale-95 text-white flex items-center justify-center shadow-md disabled:opacity-40 transition-all shrink-0"
-                      >
-                        <Send size={15} className="ml-[-1px] text-white/95" strokeWidth={2.2} />
-                      </button>
+                        {/* Send Button: perfect circle (rounded-full) */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSendQuery();
+                          }}
+                          disabled={isGenerating || !inputQuery.trim() || transcribing}
+                          title="Send query"
+                          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0D9488] hover:bg-[#14B8A6] active:scale-95 text-white flex items-center justify-center shadow-md disabled:opacity-40 transition-all shrink-0"
+                        >
+                          <Send size={15} className="ml-[-1px] text-white/95" strokeWidth={2.2} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </>
           )}
 
