@@ -1027,5 +1027,5 @@
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  animation: lifeos-marquee-flow 38s linear infinite;
+  animation: lifeos-marquee-flow 110s linear infinite;
 }
