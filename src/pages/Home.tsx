@@ -296,8 +296,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           {/* Hero Title Row with AI Coach Avatar on Right */}
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-[var(--md-on-primary-container)] leading-tight">
-                {greetingTime},{' '}
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold leading-tight">
+                <span className="text-gradient-dark">{greetingTime},</span>{' '}
                 <span className="text-[var(--md-primary)] font-extrabold">
                   {userName}
                 </span>

@@ -18,7 +18,8 @@ export interface PixelTextStyle {
   fontVariantNumeric?: string;
 }
 
-export const FONT_STACK_GOOGLE_SANS_FLEX = '"Google Sans Flex", sans-serif';
+export const FONT_STACK_GOOGLE_SANS_FLEX = '"Google Sans Flex", "Google Sans", sans-serif';
+
 
 /**
  * Core Typography Tokens

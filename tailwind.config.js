@@ -11,13 +11,13 @@ export default {
         'expanded': '840px',
       },
       fontFamily: {
-        heading: ['"Google Sans Flex"', 'sans-serif'],
-        body: ['"Google Sans Flex"', 'sans-serif'],
-        stat: ['"Google Sans Flex"', 'sans-serif'],
-        tag: ['"Google Sans Flex"', 'sans-serif'],
-        sans: ['"Google Sans Flex"', 'sans-serif'],
-        display: ['"Google Sans Flex"', 'sans-serif'],
-        mono: ['"Google Sans Flex"', 'sans-serif'],
+        heading: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        body: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        stat: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        tag: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        sans: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        display: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        mono: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
       },
       colors: {
         // ── Material 3 Expressive System Roles ──

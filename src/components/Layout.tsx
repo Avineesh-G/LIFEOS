@@ -459,7 +459,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
             aria-label="LifeOS, scroll to top"
           >
             <span className="w-2 h-2 rounded-full bg-[var(--md-primary)] animate-pulse shrink-0" />
-            <span className="font-bold text-xs tracking-tight truncate">
+            <span className="font-bold text-xs tracking-tight truncate text-gradient-dark">
               LifeOS
             </span>
           </button>

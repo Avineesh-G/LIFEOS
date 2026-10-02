@@ -76,7 +76,7 @@ export default function ThemeSettings() {
           <ArrowLeft size={18} />
         </button>
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-heading font-bold text-on-surface">Appearance & Theme</h1>
+          <h1 className="text-xl font-heading font-bold text-gradient-dark">Appearance & Theme</h1>
           <p className="text-xs text-on-surface-variant">Material 3 Expressive System Palettes</p>
         </div>
         <div className="w-10" />

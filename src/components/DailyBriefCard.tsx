@@ -126,7 +126,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
 
       {/* ── Greeting & Contextual State Line ── */}
       <div className="space-y-0.5">
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[var(--md-on-surface)] leading-snug">
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gradient-dark leading-snug">
           {brief.greeting}
         </h2>
         <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] leading-relaxed tracking-tight">
@@ -145,7 +145,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-[var(--md-on-surface)] leading-snug break-words">
+            <h3 className="text-base sm:text-lg font-bold text-gradient-title leading-snug break-words">
               {brief.recommendation.title}
             </h3>
 

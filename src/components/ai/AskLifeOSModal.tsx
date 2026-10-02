@@ -412,7 +412,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               <div className="min-w-0">
 
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] tracking-tight leading-tight truncate">
+                  <h2 className="text-sm sm:text-base font-bold text-gradient-dark tracking-tight leading-tight truncate">
                     Ask LifeOS
                   </h2>
                   <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
