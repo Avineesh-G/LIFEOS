@@ -46,6 +46,8 @@ import { recordScreenView } from '../../services/aiUsageTracker';
 import { triggerHaptic } from '../../utils/haptics';
 import type { AiChatSession } from '../../types';
 
+import { PulseBubbleIcon } from '../icons/PulseBubbleIcon';
+
 interface AskLifeOSModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,6 +69,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [activeTab, setActiveTab] = useState<'chat' | 'history'>('chat');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistoryQuery, setSearchHistoryQuery] = useState('');
+
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -404,9 +407,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           <div className="flex items-center justify-between py-1.5 mb-1 shrink-0">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-on-primary-container)] shrink-0 shadow-xs">
-                <Sparkles size={18} />
+                <PulseBubbleIcon size={20} />
               </div>
               <div className="min-w-0">
+
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] tracking-tight leading-tight truncate">
                     Ask LifeOS
@@ -816,20 +820,20 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               
               {/* Search History Filter Bar & New Chat Button */}
               <div className="flex items-center gap-2 shrink-0">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/10 border border-white/15 text-white">
-                  <Search size={15} className="text-white/50 shrink-0" />
+                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)]">
+                  <Search size={15} className="text-[var(--md-on-surface-variant)] shrink-0" />
                   <input
                     type="text"
                     value={searchHistoryQuery}
                     onChange={(e) => setSearchHistoryQuery(e.target.value)}
                     placeholder="Search past questions & answers..."
-                    className="w-full bg-transparent text-xs text-white placeholder-white/40 focus:outline-none allow-select select-text"
+                    className="w-full bg-transparent text-xs text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text"
                   />
                   {searchHistoryQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchHistoryQuery('')}
-                      className="p-1 text-white/50 hover:text-white shrink-0"
+                      className="p-1 text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] shrink-0"
                     >
                       <X size={13} />
                     </button>
@@ -839,7 +843,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 <button
                   type="button"
                   onClick={handleStartNewChat}
-                  className="px-3.5 py-2 rounded-2xl bg-[var(--accent-primary)] text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm hover:opacity-90 active:scale-95 transition-all shrink-0"
+                  className="px-3.5 py-2 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs flex items-center gap-1.5 shadow-xs hover:opacity-90 active:scale-95 transition-all shrink-0"
                 >
                   <Plus size={15} />
                   <span>New Chat</span>
@@ -850,14 +854,14 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
                 {filteredHistory.length === 0 ? (
                   <div className="text-center py-12 px-4 space-y-3 my-auto">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white/40 mx-auto">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--md-surface-container-highest)] flex items-center justify-center text-[var(--md-on-surface-variant)] mx-auto">
                       <Clock size={22} />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-white">
+                      <h4 className="text-sm font-bold text-[var(--md-on-surface)]">
                         {searchHistoryQuery ? 'No matching saved chats' : 'No Saved Search History'}
                       </h4>
-                      <p className="text-xs text-white/50 max-w-xs mx-auto">
+                      <p className="text-xs text-[var(--md-on-surface-variant)] max-w-xs mx-auto">
                         {searchHistoryQuery
                           ? 'Try searching with a different keyword or topic.'
                           : 'Your past questions and search conversations will be automatically saved here for instant reuse.'}
@@ -876,34 +880,33 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     });
 
                     return (
-                      <GlassSurface
+                      <div
                         key={session.id}
-                        level={1}
                         onClick={() => handleReopenSession(session)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all hover:border-[var(--accent-primary)]/50 group relative ${
+                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all hover:border-[var(--md-primary)]/50 group relative ${
                           isCurrent
-                            ? 'bg-[var(--accent-primary)]/15 border-[var(--accent-primary)]/50'
-                            : 'bg-white/5 hover:bg-white/10 border-white/10'
+                            ? 'bg-[var(--md-primary-container)] border-[var(--md-primary)] text-[var(--md-on-primary-container)] shadow-xs'
+                            : 'bg-[var(--md-surface-container)] hover:bg-[var(--md-surface-container-high)] border-[var(--md-outline-variant)] text-[var(--md-on-surface)]'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1 min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-white tracking-tight truncate group-hover:text-[var(--accent-primary)] transition-colors">
+                              <h4 className="text-xs font-bold text-[var(--md-on-surface)] tracking-tight truncate group-hover:text-[var(--md-primary)] transition-colors">
                                 {session.title}
                               </h4>
                               {isCurrent && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-accent text-slate-950 shrink-0">
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--md-primary)] text-[var(--md-on-primary)] shrink-0">
                                   Active
                                 </span>
                               )}
                             </div>
                             {lastMsg && (
-                              <p className="text-[11px] text-white/60 line-clamp-2 leading-relaxed">
+                              <p className="text-[11px] text-[var(--md-on-surface-variant)] line-clamp-2 leading-relaxed">
                                 {stripUrls(lastMsg.content)}
                               </p>
                             )}
-                            <div className="flex items-center gap-3 pt-1 text-[10px] text-white/40 font-mono">
+                            <div className="flex items-center gap-3 pt-1 text-[10px] text-[var(--md-on-surface-variant)] font-mono">
                               <span>{dateStr}</span>
                               <span>•</span>
                               <span>{session.messages.length} messages</span>
@@ -915,22 +918,23 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                               type="button"
                               onClick={(e) => handleDeleteSession(session.id, e)}
                               title="Delete saved session"
-                              className="p-1.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                              className="p-1.5 rounded-xl text-[var(--md-on-surface-variant)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>
-                            <div className="w-7 h-7 rounded-xl bg-white/10 group-hover:bg-[var(--accent-primary)] group-hover:text-slate-950 text-white flex items-center justify-center transition-all">
+                            <div className="w-7 h-7 rounded-xl bg-[var(--md-surface-container-highest)] group-hover:bg-[var(--md-primary)] group-hover:text-[var(--md-on-primary)] text-[var(--md-on-surface)] flex items-center justify-center transition-all">
                               <ArrowRight size={14} />
                             </div>
                           </div>
                         </div>
-                      </GlassSurface>
+                      </div>
                     );
                   })
                 )}
               </div>
             </div>
           )}
+
 
         </div>
       </GlassSheet>
