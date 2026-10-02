@@ -1,4 +1,4 @@
-import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers, Palette, ChevronRight } from 'lucide-react';
+import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers, Palette, ChevronRight, Zap, Feather, Cpu, Activity } from 'lucide-react';
 import { checkForAppUpdate, VERCEL_APK_URL, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
 import { getReceiptsStorageSize, clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
 import { exportBackupFile, previewBackupPackage, restoreBackupPackage, BackupPreviewSummary } from '../utils/backupRestore.ts';
@@ -631,51 +631,118 @@ export default function Settings({
         </button>
       </div>
 
-      {/* ── 2b. Performance Mode: Auto / Full / Lite ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden p-5 sm:p-6 space-y-3">
+      {/* ── 2b. Performance Mode: Auto / Full / Lite with Live Visual Sandbox ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-3 text-left">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0 shadow-xs">
               <Gauge size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
-                  Performance Mode
+                  Performance &amp; Graphics
                 </h3>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark">
-                  Active: {effectivePerfMode}
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+                  effectivePerfMode === 'full'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                }`}>
+                  {perfMode === 'auto' ? `Auto → ${effectivePerfMode.toUpperCase()}` : effectivePerfMode.toUpperCase()}
                 </span>
               </div>
               <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
                 {perfMode === 'auto' 
-                  ? 'Auto-adapts to device hardware (Lite on low-end chipsets, Full on flagship)' 
+                  ? 'Hardware-aware engine: automatically scales shaders & physics to device' 
                   : perfMode === 'lite' 
-                    ? 'Lite: disables ambient blobs, stagger animations, and spring overshoot' 
-                    : 'Full: full 120 FPS spring physics and expressive background shaders'}
+                    ? 'Lite: eliminates GPU blurs, ambient blobs, and springs for instant battery-saving response' 
+                    : 'Full: 120 FPS fluid spring physics, ambient background shaders & glass depth'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 pt-1">
-          {(['auto', 'full', 'lite'] as PerformanceMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setPerfMode(mode);
-              }}
-              className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold capitalize transition-all border ${
-                perfMode === mode
-                  ? 'bg-accent text-white border-accent shadow-sm'
-                  : 'bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
-              }`}
-            >
-              {mode}
-            </button>
-          ))}
+        {/* 3-Way Mode Segmented Selector with Icons */}
+        <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+          {[
+            { mode: 'auto' as PerformanceMode, label: 'Auto', icon: Sparkles, desc: 'Hardware-Adaptive' },
+            { mode: 'full' as PerformanceMode, label: 'Full', icon: Zap, desc: '120 FPS & Glass' },
+            { mode: 'lite' as PerformanceMode, label: 'Lite', icon: Feather, desc: '0ms Overhead' },
+          ].map(({ mode, label, icon: Icon, desc }) => {
+            const isSelected = perfMode === mode;
+            return (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setPerfMode(mode);
+                }}
+                className={`py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                  isSelected
+                    ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-sm'
+                    : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)]/60'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Icon size={14} className={isSelected ? 'text-[var(--md-on-primary)]' : 'text-[var(--md-primary)]'} />
+                  <span>{label}</span>
+                </div>
+                <span className={`text-[9.5px] font-medium ${isSelected ? 'opacity-90 text-[var(--md-on-primary)]' : 'opacity-70 text-[var(--md-on-surface-variant)]'}`}>
+                  {desc}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Live Visual Demonstration Sandbox (Reacts instantly) */}
+        <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
+            <span className="flex items-center gap-1.5">
+              <Activity size={12} className="text-[var(--md-primary)]" />
+              Live Graphics Sandbox
+            </span>
+            <span className="font-mono text-[10px] text-[var(--md-primary)]">
+              {effectivePerfMode === 'full' ? 'Glass + Blob Shaders Active' : 'Crisp Flat Mode (0 Blur)'}
+            </span>
+          </div>
+
+          <div className={`p-3 rounded-xl border transition-all duration-300 relative overflow-hidden flex items-center justify-between gap-3 ${
+            effectivePerfMode === 'full'
+              ? 'bg-[var(--md-surface-container-high)]/80 backdrop-blur-xl border-[var(--md-primary)]/40 shadow-xs'
+              : 'bg-[var(--md-surface-container-highest)] border-[var(--md-outline-variant)] shadow-none'
+          }`}>
+            <div className="space-y-0.5 relative z-10">
+              <span className="text-xs font-bold text-[var(--md-on-surface)] block">
+                {effectivePerfMode === 'full' ? 'Expressive Glass Physics' : 'Flat Solid Opaque Surface'}
+              </span>
+              <span className="text-[11px] text-[var(--md-on-surface-variant)] block">
+                {effectivePerfMode === 'full' 
+                  ? 'Dynamic 24px backdrop blur + ambient gradient lighting' 
+                  : 'Zero backdrop filter passes · Maximum battery efficiency'}
+              </span>
+            </div>
+
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border relative z-10 ${
+              effectivePerfMode === 'full'
+                ? 'bg-[var(--md-primary-container)] border-[var(--md-primary)] text-[var(--md-primary)] shadow-sm animate-pulse'
+                : 'bg-[var(--md-surface-container)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
+            }`}>
+              {effectivePerfMode === 'full' ? <Zap size={16} /> : <Feather size={16} />}
+            </div>
+          </div>
+
+          {/* Hardware Telemetry Row */}
+          <div className="flex items-center justify-between text-[10.5px] font-mono text-[var(--md-on-surface-variant)] pt-1">
+            <span className="flex items-center gap-1">
+              <Cpu size={11} className="text-[var(--md-primary)] shrink-0" />
+              Hardware: {typeof navigator !== 'undefined' && navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : 'Multi-Core'}
+            </span>
+            <span>
+              Engine: <strong className="text-[var(--md-on-surface)] uppercase">{effectivePerfMode}</strong>
+            </span>
+          </div>
         </div>
 
         {/* Reduce blur effects toggle (Accessibility & Readability) */}
@@ -685,7 +752,7 @@ export default function Settings({
               Reduce blur effects
             </div>
             <div className="text-[11px] font-medium text-[var(--md-on-surface-variant)] mt-0.5">
-              Replaces glass backdrop blurs with crisp flat surfaces for enhanced readability & performance
+              Replaces glass backdrop blurs with crisp flat surfaces for enhanced readability &amp; performance
             </div>
           </div>
           <M3ToggleChip
