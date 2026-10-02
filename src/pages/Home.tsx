@@ -281,14 +281,14 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
-      {/* ── Material 3 Expressive Greeting Hero Card (primaryContainer) ── */}
+      {/* ── Material 3 Expressive Greeting Hero Card (surfaceContainer) ── */}
       <motion.div variants={item}>
-        <div className="rounded-[28px] p-5 sm:p-6 bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border border-[var(--md-outline-variant)]/30 shadow-xs space-y-3.5 select-none relative overflow-hidden transition-all duration-300">
+        <div className="rounded-[28px] p-5 sm:p-6 bg-[var(--md-surface-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs space-y-3.5 select-none relative overflow-hidden transition-all duration-300">
           {/* Top Header Row: Date Pill & Mode Badge */}
           <div className="flex items-center gap-2 flex-wrap">
             <LiveClock />
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] shadow-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-none">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
               Active Session
             </span>
@@ -305,7 +305,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               </h1>
 
               {/* Motivational Subline */}
-              <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-primary-container)]/80 mt-1.5 tracking-tight flex items-center gap-1.5">
+              <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
                 <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-95" />
                 <span>Your personal operating system · Focus and execute</span>
               </p>
