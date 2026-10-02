@@ -1,8 +1,8 @@
 {
-  "versionCode": 38,
-  "versionName": "2.1.4",
-  "releaseDate": "2026-10-01",
-  "apkSize": "14.4 MB",
-  "apkSizeBytes": 14410000,
-  "releaseNotes": "LifeOS v2.1.4 (Build 38):\n• Android 17 / Gemini Intelligence design language restyle with glass, light & blur tokens\n• Performance mode system with Auto/Full/Lite tiers and Reduce blur effects setting"
+  "versionCode": 53,
+  "versionName": "3.0.0",
+  "releaseDate": "2026-10-02",
+  "apkSize": "14.5 MB",
+  "apkSizeBytes": 14500000,
+  "releaseNotes": "LifeOS v3.0.0 (Build 53):\n• Fix Ask LifeOS Groq model retirement with dynamic gpt-oss runtime resolution\n• Support reasoning stream parsing and retry for empty answers\n• Added AI connection tester, build badge, and settings reset in Settings > AI"
 }

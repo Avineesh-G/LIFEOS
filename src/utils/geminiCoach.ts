@@ -1,3 +1,5 @@
+import { ALLOWED_CHAT_MODELS } from '../config/aiModels.ts';
+
 // ── Load Groq API key from Vercel / .env or user settings in Settings page ──
 export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || '';
 // ──────────────────────────────────────────────────────────────────────────
@@ -50,31 +52,27 @@ async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJ
   messages.push({ role: 'user', content: prompt });
 
   const tryCall = async (model: string, keyToUse: string) => {
-    const cappedTokens = model.includes('qwen3.8') ? Math.min(maxTokens, 600) : maxTokens;
+    const payload: any = {
+      model,
+      messages,
+      max_completion_tokens: Math.max(maxTokens, 1024),
+      temperature: expectJson ? 0.1 : 0.7,
+      ...(expectJson ? { response_format: { type: 'json_object' } } : {})
+    };
+    if (model.includes('gpt-oss')) {
+      payload.reasoning_effort = 'low';
+    }
     return await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${keyToUse}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        max_completion_tokens: cappedTokens,
-        temperature: expectJson ? 0.1 : 0.7,
-        ...(expectJson ? { response_format: { type: 'json_object' } } : {})
-      })
+      body: JSON.stringify(payload)
     });
   };
 
-  // High rate-limit and active models on Groq
-  const MODELS = [
-    'groq/compound-mini',      // 70,000 TPM limit (Fastest, highest quota on Groq)
-    'openai/gpt-oss-120b',      // 8,000 TPM limit (Powerful 120B reasoning)
-    'qwen/qwen3.6-27b',         // 8,000 TPM limit
-    'openai/gpt-oss-20b',       // 8,000 TPM limit
-    'qwen/qwen3.8-27b',         // High quality
-  ];
+  const MODELS = [...ALLOWED_CHAT_MODELS];
 
   let response: Response = null!;
   let lastError = '';

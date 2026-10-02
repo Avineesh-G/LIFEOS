@@ -41,6 +41,9 @@ import {
 } from '../utils/aiSecurity';
 import { clearUsageHistory } from '../services/aiUsageTracker';
 import { GROQ_CONFIG } from '../config/ai';
+import { CHAT_PRIMARY, STT_PRIMARY, GROQ_STORAGE_KEYS } from '../config/aiModels';
+import { testAiConnection, resetAiSettings, resolveActiveChatModel } from '../services/aiModelResolver';
+import { APP_VERSION } from '../version';
 import { detectSquircleSupport } from '../utils/squircleDetect.ts';
 
 interface SettingsProps {
@@ -226,6 +229,54 @@ export default function Settings({
   const [trackUsageState, setTrackUsageState] = useState(() => getTrackAppUsage());
   const [chatClearedNotice, setChatClearedNotice] = useState(false);
   const [usageClearedNotice, setUsageClearedNotice] = useState(false);
+  const [aiResetNotice, setAiResetNotice] = useState(false);
+
+  // Live Model Diagnostics State
+  const [activeChatModel, setActiveChatModel] = useState<string>(
+    () => localStorage.getItem(GROQ_STORAGE_KEYS.ACTIVE_CHAT_MODEL) || CHAT_PRIMARY
+  );
+  const [lastAiError, setLastAiError] = useState<string | null>(() => {
+    try {
+      const e = localStorage.getItem(GROQ_STORAGE_KEYS.LAST_AI_ERROR);
+      return e ? (JSON.parse(e)?.friendlyMessage || e) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [testResults, setTestResults] = useState<{
+    step1Models: { success: boolean; message: string; details?: string; modelCount?: number };
+    step2Chat: { success: boolean; message: string; details?: string; modelUsed?: string; latencyMs?: number };
+  } | null>(null);
+
+  const handleTestConnection = async () => {
+    triggerHaptic('medium');
+    setIsTestingConnection(true);
+    setTestResults(null);
+    try {
+      const res = await testAiConnection(apiKeyInput);
+      setTestResults(res);
+      const currentResolved = localStorage.getItem(GROQ_STORAGE_KEYS.ACTIVE_CHAT_MODEL) || CHAT_PRIMARY;
+      setActiveChatModel(currentResolved);
+    } catch (err: any) {
+      setTestResults({
+        step1Models: { success: false, message: 'Test execution failed', details: err?.message },
+        step2Chat: { success: false, message: 'Skipped', details: 'Test aborted' },
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
+  const handleResetAiSettings = () => {
+    triggerHaptic('heavy');
+    resetAiSettings();
+    setActiveChatModel(CHAT_PRIMARY);
+    setLastAiError(null);
+    setTestResults(null);
+    setAiResetNotice(true);
+    setTimeout(() => setAiResetNotice(false), 3000);
+  };
 
   const handleSaveApiKey = async () => {
     await setGroqApiKey(apiKeyInput);
@@ -1136,6 +1187,110 @@ export default function Settings({
                     >
                       Clear Usage History
                     </button>
+                  </div>
+                </div>
+
+                {/* ── Active Models & Build Info ── */}
+                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                      Active AI Runtime & Models
+                    </p>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
+                      v{APP_VERSION.versionName} (Build {APP_VERSION.versionCode})
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                      <span className="text-[10px] font-bold text-secondary-light dark:text-secondary-dark block">
+                        Chat Model (Auto-Resolved)
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-primary-light dark:text-primary-dark break-all">
+                        {activeChatModel}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                      <span className="text-[10px] font-bold text-secondary-light dark:text-secondary-dark block">
+                        Voice Model (STT)
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-primary-light dark:text-primary-dark break-all">
+                        {STT_PRIMARY}
+                      </span>
+                    </div>
+                  </div>
+
+                  {lastAiError && (
+                    <div className="p-2.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300">
+                      <span className="text-[10px] font-bold uppercase tracking-wider block text-red-400">
+                        Last Upstream Error:
+                      </span>
+                      <span className="break-words [overflow-wrap:anywhere] leading-snug">{lastAiError}</span>
+                    </div>
+                  )}
+
+                  {/* ── Test Connection Button & Results ── */}
+                  <div className="pt-1 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={handleTestConnection}
+                        disabled={isTestingConnection}
+                        className="px-3.5 py-1.5 rounded-xl bg-accent/20 border border-accent/30 text-accent hover:bg-accent/30 text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <Sparkles size={13} />
+                        <span>{isTestingConnection ? 'Testing Connection...' : 'Test Connection'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleResetAiSettings}
+                        className="px-3.5 py-1.5 rounded-xl border border-white/10 hover:bg-white/5 text-secondary-light dark:text-secondary-dark text-xs font-bold active:scale-95 transition-all"
+                      >
+                        {aiResetNotice ? 'Reset Done ✓' : 'Reset AI Settings'}
+                      </button>
+                    </div>
+
+                    {testResults && (
+                      <div className="p-3 rounded-2xl bg-black/40 border border-white/10 space-y-2 text-xs">
+                        {/* Step 1: Model discovery */}
+                        <div className="flex items-start gap-2">
+                          <div className="shrink-0 mt-0.5">
+                            {testResults.step1Models.success ? (
+                              <CheckCircle2 size={14} className="text-emerald-400" />
+                            ) : (
+                              <AlertTriangle size={14} className="text-rose-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold text-white block">Step 1: Models Discovery</span>
+                            <span className="text-[11px] text-white/70 block">{testResults.step1Models.message}</span>
+                            {testResults.step1Models.details && (
+                              <span className="text-[10px] font-mono text-white/50 block break-words">{testResults.step1Models.details}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Step 2: Mini chat request */}
+                        <div className="flex items-start gap-2 pt-1.5 border-t border-white/10">
+                          <div className="shrink-0 mt-0.5">
+                            {testResults.step2Chat.success ? (
+                              <CheckCircle2 size={14} className="text-emerald-400" />
+                            ) : (
+                              <AlertTriangle size={14} className="text-rose-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold text-white block">Step 2: Chat API Request</span>
+                            <span className="text-[11px] text-white/70 block">{testResults.step2Chat.message}</span>
+                            {testResults.step2Chat.details && (
+                              <span className="text-[10px] font-mono text-white/50 block break-words">{testResults.step2Chat.details}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

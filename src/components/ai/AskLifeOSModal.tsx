@@ -28,6 +28,9 @@ import {
   Plus,
   Clock,
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  RefreshCw,
 } from 'lucide-react';
 import GlassSheet from '../glass/GlassSheet';
 import GlassSurface from '../glass/GlassSurface';
@@ -79,6 +82,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [isRecording, setIsRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showConsentSheet, setShowConsentSheet] = useState(false);
@@ -239,6 +245,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
     triggerHaptic('light');
     setErrorMessage(null);
+    setErrorDetails(null);
+    setShowErrorDetails(false);
+    setLastFailedPrompt(null);
     setInputQuery('');
 
     const userMsg: ChatMessage = {
@@ -292,15 +301,20 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             setActionProposals(prev => ({ ...prev, [assistantMsgId]: proposals }));
           }
         },
-        (err) => {
+        (err, payload) => {
           setIsGenerating(false);
-          setErrorMessage(err.message || 'An error occurred while calling Groq AI.');
+          setErrorMessage(payload?.friendlyMessage || err.message || 'An error occurred while calling Groq AI.');
+          setErrorDetails(payload?.rawDetails || null);
+          setLastFailedPrompt(trimmed);
+          setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
         },
         abortControllerRef.current.signal
       );
     } catch (e: any) {
       setIsGenerating(false);
       setErrorMessage(e?.message || 'Failed to complete AI query.');
+      setLastFailedPrompt(trimmed);
+      setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
     }
   };
 
@@ -497,19 +511,57 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <AlertCircle size={15} className="shrink-0 text-red-400" />
-                  <span className="font-medium leading-tight">{errorMessage}</span>
+                  <span className="font-medium leading-tight break-words [overflow-wrap:anywhere]">{errorMessage}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setErrorMessage(null)}
-                  className="text-xs font-bold underline shrink-0 opacity-80 hover:opacity-100"
-                >
-                  Dismiss
-                </button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {lastFailedPrompt && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const q = lastFailedPrompt;
+                        setErrorMessage(null);
+                        setErrorDetails(null);
+                        handleSendQuery(q);
+                      }}
+                      className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline px-1 py-0.5"
+                    >
+                      <RefreshCw size={10} />
+                      <span>Retry</span>
+                    </button>
+                  )}
+                  {errorDetails && (
+                    <button
+                      type="button"
+                      onClick={() => setShowErrorDetails(!showErrorDetails)}
+                      className="flex items-center gap-0.5 text-[11px] font-bold text-white/70 hover:text-white px-1 py-0.5"
+                    >
+                      <span>Details</span>
+                      {showErrorDetails ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setErrorDetails(null);
+                      setShowErrorDetails(false);
+                    }}
+                    className="text-[11px] font-bold underline text-red-300 hover:text-white px-1"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
 
-              {errorMessage.includes('API Key missing') && (
-                <div className="flex items-center gap-2 pt-1">
+              {/* Collapsible Sanitize Details */}
+              {showErrorDetails && errorDetails && (
+                <div className="p-2 rounded-xl bg-black/40 border border-white/10 text-[10px] font-mono text-red-300 max-h-24 overflow-y-auto break-words select-text allow-select leading-tight">
+                  {errorDetails}
+                </div>
+              )}
+
+              {(errorMessage.includes('API key') || errorMessage.includes('Key missing')) && (
+                <div className="flex items-center gap-1.5 pt-1 w-full min-w-0">
                   <input
                     type="password"
                     placeholder="Paste Groq API Key (gsk_...)"
@@ -518,9 +570,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       if (e.key === 'Enter') {
                         const val = (e.target as HTMLInputElement).value.trim();
                         if (val) {
-                          await setGroqApiKey(val);
+                          await setGroqApiKey(val, updateData);
                           setErrorMessage(null);
-                          setToastMessage('Groq API Key saved successfully!');
+                          setErrorDetails(null);
+                          setToastMessage('API Key saved and synced successfully!');
                         }
                       }
                     }}
@@ -530,9 +583,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     onClick={async (e) => {
                       const input = (e.currentTarget.previousElementSibling as HTMLInputElement)?.value.trim();
                       if (input) {
-                        await setGroqApiKey(input);
+                        await setGroqApiKey(input, updateData);
                         setErrorMessage(null);
-                        setToastMessage('Groq API Key saved successfully!');
+                        setErrorDetails(null);
+                        setToastMessage('API Key saved and synced successfully!');
                       }
                     }}
                     className="px-3 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer"
@@ -547,20 +601,20 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {/* ── VIEW 1: ACTIVE CHAT SCREEN ── */}
           {activeTab === 'chat' && (
             <>
-              <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-2 space-y-3 scrollbar-none flex flex-col min-h-0">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-1.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
                 {messages.length === 0 ? (
-                  <div className="text-center py-6 px-3 space-y-5 my-auto">
-                    <div className="space-y-1.5 max-w-sm mx-auto">
-                      <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  <div className="text-center py-2 px-2 space-y-3">
+                    <div className="space-y-1 max-w-sm mx-auto">
+                      <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
                         Ask me anything about LifeOS
                       </h3>
-                      <p className="text-xs text-white/60 leading-relaxed">
-                        I can explain features, navigation, step-by-step guides, and settings locations.
+                      <p className="text-[11px] text-white/60 leading-relaxed">
+                        Features, navigation, step-by-step guides, and settings locations.
                       </p>
                     </div>
 
                     {/* 2-Column Responsive Starter Chips Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-md mx-auto w-full pt-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md mx-auto w-full pt-0.5">
                       {SPEC_STARTER_CHIPS.map((chip) => (
                         <button
                           key={chip.id}

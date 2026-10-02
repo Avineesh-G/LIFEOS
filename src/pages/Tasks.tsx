@@ -267,7 +267,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
 
       {/* Header Hero Card */}
       <div className="rounded-[30px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex items-end justify-between gap-4">

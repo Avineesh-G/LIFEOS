@@ -5,11 +5,13 @@ import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { applyPerformanceMode } from './utils/performanceMode';
 import { initAiSecurity } from './utils/aiSecurity';
+import { migrateAiSettings } from './services/aiModelResolver';
 import './index.css';
 
 // Apply performance mode (Auto / Full / Lite) immediately before first paint
 applyPerformanceMode();
 initAiSecurity().catch(() => {});
+migrateAiSettings();
 
 // ── 1. Dev Hygiene: Unregister any legacy/cached service workers & clear stale caches in dev ──
 if (import.meta.env.DEV) {

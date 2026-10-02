@@ -82,7 +82,7 @@ export default function Study({ data }: StudyProps) {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
       {/* Material 3 Expressive Sky Blue Hero Container */}
       <motion.div

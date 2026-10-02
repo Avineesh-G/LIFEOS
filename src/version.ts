@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 40,
-  versionName: '2.1.6',
+  versionCode: 53,
+  versionName: '3.0.0',
   releaseDate: '2026-10-02',
   apkSize: '14.5 MB',
   apkSizeBytes: 14500000,
-  releaseNotes: 'LifeOS v2.1.6 (Build 40):\n• Fix Ask LifeOS AI input interaction and focus stability\n• Authentic organic glow pill dialer with instant single-tap responsiveness\n• Saved intelligence and persistent chat history',
+  releaseNotes: 'LifeOS v3.0.0 (Build 53):\n• Fix Ask LifeOS Groq model retirement with dynamic gpt-oss runtime resolution\n• Support reasoning stream parsing and retry for empty answers\n• Added AI connection tester, build badge, and settings reset in Settings > AI',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

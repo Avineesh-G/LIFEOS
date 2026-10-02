@@ -166,7 +166,7 @@ export default function Gym({ data, updateData }: GymProps) {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7">
+    <div className="space-y-4">
 
       {/* Material 3 Expressive Coral/Rose Hero Card */}
       <motion.div

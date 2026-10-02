@@ -278,7 +278,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </div>
       }
     >
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
       {/* ── Ambient Executive Greeting Hero Card (Borderless LiquidFrame) ── */}
       <motion.div variants={item}>

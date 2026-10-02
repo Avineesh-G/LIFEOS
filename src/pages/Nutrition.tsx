@@ -484,7 +484,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
   const isYesterday = selectedDate === format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-3.5 max-w-xl mx-auto">
       {/* Header Card */}
       <motion.div
         variants={item}
@@ -1091,24 +1091,24 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       {/* Save Button & Locked Protection */}
       <motion.div variants={item} className="pt-4">
         {draftLog.isSaved && isLocked ? (
-          <div className="card p-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
+          <div className="card p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center space-y-2.5">
             <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
-              <Check size={20} className="stroke-[3]" />
-              <p className="font-bold text-base">Day's Nutrition Saved & Protected!</p>
+              <Check size={18} className="stroke-[3]" />
+              <p className="font-bold text-sm">Day's Nutrition Saved & Protected!</p>
             </div>
             <p className="text-xs text-secondary-light dark:text-secondary-dark">
               Total: {Math.round(draftLog.dailyTotal)} kcal. Locked against accidental overwriting.
             </p>
-            <div className="pt-1 flex gap-2">
+            <div className="pt-0.5 flex gap-2">
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic(10);
                   setIsLocked(false);
                 }}
-                className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
+                className="btn-ghost-pill flex-1 py-2 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
               >
-                <Unlock size={14} /> Unlock to Edit
+                <Unlock size={13} /> Unlock to Edit
               </button>
               <button
                 type="button"
@@ -1116,7 +1116,7 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                   window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
                   navigate('/');
                 }}
-                className="btn-pill flex-1 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
+                className="btn-pill flex-1 py-2 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
               >
                 Back to Home
               </button>

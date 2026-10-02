@@ -449,9 +449,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Top In-Page Minimalist Controls (Floating Minimalist Pill Directly on Wallpaper) ── */}
       <header 
-        className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited w-full overflow-hidden"
+        className="sticky top-0 left-0 right-0 z-30 pointer-events-none gpu-composited w-full overflow-hidden"
         style={{
-          paddingTop: 'max(var(--sat, env(safe-area-inset-top, 0px)), 12px)',
+          paddingTop: 'max(var(--sat, env(safe-area-inset-top, 0px)), 8px)',
+          paddingBottom: '6px',
           paddingLeft: 'max(var(--sal, 0px), 12px)',
           paddingRight: 'max(var(--sar, 0px), 12px)',
         }}
@@ -529,7 +530,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Main content (Streamlined with precise bottom dock clearance) ── */}
       <main 
-        className="relative z-10 min-h-screen box-border"
+        className="relative z-10 w-full box-border"
         style={{
           paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
           paddingBottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 24px)',
@@ -537,7 +538,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           paddingRight: 'var(--sar, 0px)',
         }}
       >
-        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
+        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-1 sm:pt-2">
           <M3NotificationBanner />
           {children}
         </div>
