@@ -83,8 +83,9 @@ export function setActiveAccent(accent: ThemeAccent): void {
 /**
  * Apply dynamic single source of truth tokens to document.documentElement
  */
-export function applyUnifiedThemeToDocument(accent: ThemeAccent = activeAccent, isDark = true): void {
+export function applyUnifiedThemeToDocument(accent: ThemeAccent = activeAccent, isDark = false): void {
   if (typeof document === 'undefined') return;
+
   const root = document.documentElement;
   const [r, g, b] = hexToRgbTuple(accent.primary);
 

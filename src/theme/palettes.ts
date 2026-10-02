@@ -58,7 +58,8 @@ export const PALETTES: PaletteDefinition[] = [
 ];
 
 export const DEFAULT_PALETTE_ID = 'burgundy';
-export const DEFAULT_THEME_MODE = 'system' as const;
+export const DEFAULT_THEME_MODE = 'light' as const;
+
 
 export function getPaletteById(id: string): PaletteDefinition {
   return PALETTES.find((p) => p.id === id) || PALETTES[0];

@@ -69,8 +69,9 @@ export function isDarkModeActive(mode: ThemeMode): boolean {
   if (typeof window !== 'undefined' && window.matchMedia) {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
-  return true;
+  return false;
 }
+
 
 /**
  * Writes CSS variables to documentElement
