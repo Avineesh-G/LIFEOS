@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Copy, Check } from 'lucide-react';
+import { triggerHaptic } from '../../utils/haptics';
 
 interface FormattedAiMessageProps {
   content: string;
@@ -85,96 +87,157 @@ function parseInlineContent(text: string, isUser: boolean): React.ReactNode[] {
   });
 }
 
+const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerHaptic('light');
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const isWhatsAppFormat = code.includes('Weekend Outing') || code.includes('Plan') || code.includes('Meetup') || code.includes('Reply');
+
+  return (
+    <div className="my-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] overflow-hidden shadow-xs">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[var(--md-surface-container-high)] border-b border-[var(--md-outline-variant)] text-[11px] font-medium text-[var(--md-on-surface-variant)]">
+        <span>{isWhatsAppFormat ? 'WhatsApp Itinerary Card' : 'Formatted Text'}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] hover:opacity-90 font-bold transition-all active:scale-95"
+          title="Copy to clipboard"
+        >
+          {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+          <span>{copied ? 'Copied!' : 'Copy'}</span>
+        </button>
+      </div>
+      <pre className="p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words text-[var(--md-on-surface)] overflow-x-auto">
+        {code}
+      </pre>
+    </div>
+  );
+};
+
 export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content, isUser = false }) => {
   const renderedBlocks = useMemo(() => {
     if (!content) return null;
 
-    const lines = content.split('\n');
+    // Handle code blocks (e.g. ```text ... ```)
+    const codeBlockRegex = /```(?:[a-zA-Z]*)\n([\s\S]*?)```/g;
+    const segments: Array<{ type: 'code' | 'text'; text: string }> = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ type: 'text', text: content.slice(lastIndex, match.index) });
+      }
+      segments.push({ type: 'code', text: match[1].trim() });
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+      segments.push({ type: 'text', text: content.slice(lastIndex) });
+    }
+
     const blocks: React.ReactNode[] = [];
-    let currentBullets: string[] = [];
 
-    const flushBullets = (keyIdx: number) => {
-      if (currentBullets.length > 0) {
-        blocks.push(
-          <ul key={`bullets-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5">
-            {currentBullets.map((bullet, bIdx) => (
-              <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] mt-1.5 shrink-0 opacity-85" />
-                <div className="flex-1 min-w-0">
-                  {parseInlineContent(bullet, isUser)}
-                </div>
-              </li>
-            ))}
-          </ul>
-        );
-        currentBullets = [];
-      }
-    };
-
-    lines.forEach((rawLine, idx) => {
-      const line = rawLine.trim();
-
-      // Empty line
-      if (!line) {
-        flushBullets(idx);
+    segments.forEach((seg, segIdx) => {
+      if (seg.type === 'code') {
+        blocks.push(<CodeBlockWithCopy key={`code-${segIdx}`} code={seg.text} />);
         return;
       }
 
-      // Check for numbered step: e.g. "1. Open the Spending screen" or "1) Open..."
-      const stepMatch = line.match(/^(\d+)[\.\)](.*)$/);
-      if (stepMatch) {
-        flushBullets(idx);
-        const stepNum = stepMatch[1];
-        const stepText = stepMatch[2].trim();
-        blocks.push(
-          <div
-            key={`step-${idx}`}
-            className="flex items-start gap-2.5 my-2 p-2.5 rounded-2xl bg-[var(--md-surface-container-high)]/70 border border-[var(--md-outline-variant)]/40 shadow-none"
-          >
-            <span className="w-5 h-5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10.5px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-              {stepNum}
-            </span>
-            <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed">
-              {parseInlineContent(stepText, isUser)}
+      const lines = seg.text.split('\n');
+      let currentBullets: string[] = [];
+
+      const flushBullets = (keyIdx: number) => {
+        if (currentBullets.length > 0) {
+          blocks.push(
+            <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5">
+              {currentBullets.map((bullet, bIdx) => (
+                <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] mt-1.5 shrink-0 opacity-85" />
+                  <div className="flex-1 min-w-0">
+                    {parseInlineContent(bullet, isUser)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          );
+          currentBullets = [];
+        }
+      };
+
+      lines.forEach((rawLine, idx) => {
+        const line = rawLine.trim();
+
+        // Empty line
+        if (!line) {
+          flushBullets(idx);
+          return;
+        }
+
+        // Check for numbered step: e.g. "1. Open the Spending screen" or "1) Open..."
+        const stepMatch = line.match(/^(\d+)[\.\)](.*)$/);
+        if (stepMatch) {
+          flushBullets(idx);
+          const stepNum = stepMatch[1];
+          const stepText = stepMatch[2].trim();
+          blocks.push(
+            <div
+              key={`step-${segIdx}-${idx}`}
+              className="flex items-start gap-2.5 my-2 p-2.5 rounded-2xl bg-[var(--md-surface-container-high)]/70 border border-[var(--md-outline-variant)]/40 shadow-none"
+            >
+              <span className="w-5 h-5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10.5px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                {stepNum}
+              </span>
+              <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed">
+                {parseInlineContent(stepText, isUser)}
+              </div>
             </div>
-          </div>
-        );
-        return;
-      }
+          );
+          return;
+        }
 
-      // Check for bullet line: e.g. "- Amount", "* Amount", "• Amount"
-      const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
-      if (bulletMatch) {
-        currentBullets.push(bulletMatch[1]);
-        return;
-      }
+        // Check for bullet line: e.g. "- Amount", "* Amount", "• Amount"
+        const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
+        if (bulletMatch) {
+          currentBullets.push(bulletMatch[1]);
+          return;
+        }
 
-      // Headers: e.g. "### Title" or "## Title"
-      const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
-      if (headerMatch) {
+        // Headers: e.g. "### Title" or "## Title"
+        const headerMatch = line.match(/^(#{1,4})\s+(.*)$/);
+        if (headerMatch) {
+          flushBullets(idx);
+          const headerText = headerMatch[2];
+          blocks.push(
+            <h4
+              key={`heading-${segIdx}-${idx}`}
+              className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2.5 mb-1 tracking-tight"
+            >
+              {parseInlineContent(headerText, isUser)}
+            </h4>
+          );
+          return;
+        }
+
+        // Normal paragraph line
         flushBullets(idx);
-        const headerText = headerMatch[2];
         blocks.push(
-          <h4
-            key={`heading-${idx}`}
-            className="font-bold text-xs sm:text-sm text-[var(--md-on-surface)] mt-2.5 mb-1 tracking-tight"
-          >
-            {parseInlineContent(headerText, isUser)}
-          </h4>
+          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed">
+            {parseInlineContent(line, isUser)}
+          </p>
         );
-        return;
-      }
+      });
 
-      // Normal paragraph line
-      flushBullets(idx);
-      blocks.push(
-        <p key={`p-${idx}`} className="my-1 leading-relaxed">
-          {parseInlineContent(line, isUser)}
-        </p>
-      );
+      flushBullets(lines.length);
     });
 
-    flushBullets(lines.length);
     return blocks;
   }, [content, isUser]);
 
