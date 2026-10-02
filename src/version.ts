@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 54,
-  versionName: '3.1.0',
-  releaseDate: '2026-10-02',
-  apkSize: '14.5 MB',
-  apkSizeBytes: 14500000,
-  releaseNotes: 'LifeOS v3.1.0 (Build 54):\n• Material 3 Expressive Single Seed Color Engine (Burgundy Default + 6 Palettes)\n• Tonal surface elevation (zero blur overhead, instant performance)\n• Header Chat Icon (Pulse bubble) with container transform panel\n• M3 3-Slot bottom navigation + More orb\n• Frozen background layer manager on all popups & sheets',
+  versionCode: 55,
+  versionName: '3.1.1',
+  releaseDate: '2026-10-03',
+  apkSize: '13.78 MB',
+  apkSizeBytes: 14453592,
+  releaseNotes: 'LifeOS v3.1.1 (Build 55):\n• Expressive Burgundy Material 3 Seed Theme & System-wide Palette Engine\n• AI Chat Mobile Layout & Responsive Card Positioning\n• Interactive Response Table with Touch Slider & Nudge Controls\n• In-Message Interactive Task & Itinerary Checklists\n• 1-Tap WhatsApp & Native Response Sharing\n• Native Web Speech TTS Voice Read-Aloud\n• Dynamic Contextual Smart Follow-Up Suggestions\n• 1-Tap Expense Quick-Logging',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;
