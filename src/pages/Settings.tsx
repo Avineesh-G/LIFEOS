@@ -593,72 +593,38 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 2. Appearance & Theme ── */}
+      {/* ── 2. Appearance & Theme (Material 3 Expressive System Palettes) ── */}
       <div className="rounded-[30px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-none overflow-hidden">
-        <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shrink-0">
-              <Sun size={22} strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
-                Appearance & Theme
-              </h3>
-              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
-                Material 3 Expressive surface modes
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <M3ToggleChip
-              label={themeMode === 'dynamic' ? 'Light Mode' : 'Dark Mode'}
-              checked={themeMode === 'night'}
-              onChange={() => handleToggleThemeMode()}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2a. Per-Interface Color Personalization ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => {
             triggerHaptic('selection');
-            navigate('/settings/interface-colors');
+            navigate('/settings/appearance');
           }}
-          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
+          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left hover:bg-[var(--md-surface-container-high)]/50 transition-colors group"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--pill-active-bg)] text-[var(--accent-primary)] shadow-xs shrink-0 transition-transform group-hover:scale-105">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shadow-xs shrink-0 transition-transform group-hover:scale-105">
               <Palette size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
-                  Interface Colors
+                <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
+                  Appearance & Theme
                 </h3>
-                <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/15 text-[var(--accent-text)] border border-[var(--card-border)]">
-                  Personalize
+                <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">
+                  M3 Expressive
                 </span>
               </div>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
-                Assign distinct tonal color families for each of the 11 app interfaces
+              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
+                7 unified app-wide palettes (Burgundy default), Light/Dark modes & live preview
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Tonal preview swatches */}
-            <div className="hidden sm:flex items-center -space-x-1 px-2">
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-blue-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-emerald-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-violet-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-amber-500 shadow-xs" />
-            </div>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-muted-light dark:text-muted-dark group-hover:text-primary-light dark:group-hover:text-primary-dark group-hover:translate-x-0.5 transition-all">
-              <ChevronRight size={18} />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-on-surface-variant)] group-hover:text-[var(--md-on-surface)] group-hover:translate-x-0.5 transition-all">
+              <ChevronRight size={20} />
             </div>
           </div>
         </button>

@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 53,
-  versionName: '3.0.0',
+  versionCode: 54,
+  versionName: '3.1.0',
   releaseDate: '2026-10-02',
   apkSize: '14.5 MB',
   apkSizeBytes: 14500000,
-  releaseNotes: 'LifeOS v3.0.0 (Build 53):\n• Fix Ask LifeOS Groq model retirement with dynamic gpt-oss runtime resolution\n• Support reasoning stream parsing and retry for empty answers\n• Added AI connection tester, build badge, and settings reset in Settings > AI',
+  releaseNotes: 'LifeOS v3.1.0 (Build 54):\n• Material 3 Expressive Single Seed Color Engine (Burgundy Default + 6 Palettes)\n• Tonal surface elevation (zero blur overhead, instant performance)\n• Header Chat Icon (Pulse bubble) with container transform panel\n• M3 3-Slot bottom navigation + More orb\n• Frozen background layer manager on all popups & sheets',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

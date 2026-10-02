@@ -398,32 +398,32 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   return (
     <>
       <GlassSheet isOpen={isOpen} onClose={onClose}>
-        <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden relative">
+        <div className="flex flex-col h-full max-w-2xl mx-auto overflow-hidden relative text-[var(--md-on-surface)]">
           
           {/* ── Top Header with Mode Tabs ── */}
-          <div className="flex items-center justify-between py-2 mb-1 shrink-0">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--accent-primary)]/15 flex items-center justify-center text-[var(--accent-primary)] shrink-0">
-                <Sparkles size={19} />
+          <div className="flex items-center justify-between py-1.5 mb-1 shrink-0">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-on-primary-container)] shrink-0 shadow-xs">
+                <Sparkles size={18} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-white tracking-tight leading-tight truncate">
+                  <h2 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] tracking-tight leading-tight truncate">
                     Ask LifeOS
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] tracking-wide shrink-0">
+                  <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
                     Groq AI
                   </span>
                 </div>
-                <p className="text-[11px] text-white/50 font-medium mt-0.5 truncate">
-                  App Assistant & Saved Intelligence
+                <p className="text-[10px] text-[var(--md-on-surface-variant)] font-medium truncate">
+                  Offline-First System Intelligence
                 </p>
               </div>
             </div>
 
             {/* Header Controls: Chat/History Tabs & Close */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <div className="flex items-center p-1 rounded-2xl bg-white/10 border border-white/10">
+              <div className="flex items-center p-0.5 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
                 <button
                   type="button"
                   onClick={() => {
@@ -431,13 +431,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     setActiveTab('chat');
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     activeTab === 'chat'
-                      ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
+                      : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
                   }`}
                 >
-                  <MessageSquare size={13} />
+                  <MessageSquare size={12} />
                   <span>Chat</span>
                 </button>
                 <button
@@ -446,16 +446,16 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     triggerHaptic('light');
                     setActiveTab('history');
                   }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
                     activeTab === 'history'
-                      ? 'bg-[var(--accent-primary)] text-slate-950 shadow-sm'
-                      : 'text-white/70 hover:text-white'
+                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
+                      : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
                   }`}
                 >
-                  <History size={13} />
+                  <History size={12} />
                   <span>History</span>
                   {historyItems.length > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-white/20 text-[10px] flex items-center justify-center font-bold">
+                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[9px] flex items-center justify-center font-bold">
                       {historyItems.length}
                     </span>
                   )}
@@ -467,7 +467,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   title="New Chat Session"
                   onClick={handleStartNewChat}
-                  className="p-2 rounded-2xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                  className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
                 >
                   <Plus size={16} />
                 </button>
@@ -475,11 +475,20 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-2xl text-white/60 hover:text-white hover:bg-white/10 transition-all bouncy-tap"
+                className="p-1.5 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95"
+                aria-label="Close Ask LifeOS"
               >
                 <X size={18} />
               </button>
             </div>
+          </div>
+
+          {/* ── Assist Chip: Screen Context ── */}
+          <div className="pb-1.5 flex items-center gap-2 overflow-x-auto scrollbar-none shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] border border-[var(--md-outline-variant)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)]" />
+              <span>Screen: {location.pathname === '/' ? 'Home' : location.pathname.replace('/', '')}</span>
+            </span>
           </div>
 
           {/* ── Offline Banner ── */}
@@ -605,10 +614,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 {messages.length === 0 ? (
                   <div className="text-center py-2 px-2 space-y-3">
                     <div className="space-y-1 max-w-sm mx-auto">
-                      <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+                      <h3 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] tracking-tight">
                         Ask me anything about LifeOS
                       </h3>
-                      <p className="text-[11px] text-white/60 leading-relaxed">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] leading-relaxed">
                         Features, navigation, step-by-step guides, and settings locations.
                       </p>
                     </div>
@@ -620,12 +629,12 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           key={chip.id}
                           type="button"
                           onClick={() => handleSendQuery(chip.label)}
-                          className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.06] hover:bg-[var(--accent-primary)]/15 border border-white/10 hover:border-[var(--accent-primary)]/40 text-left transition-all bouncy-tap group"
+                          className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-left transition-all active:scale-98 group"
                         >
-                          <div className="w-8 h-8 rounded-xl bg-white/10 group-hover:bg-[var(--accent-primary)]/20 flex items-center justify-center text-[var(--accent-primary)] shrink-0 transition-colors">
+                          <div className="w-8 h-8 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0 transition-colors">
                             {getChipIcon(chip.icon)}
                           </div>
-                          <span className="text-xs font-medium text-white/90 group-hover:text-white leading-snug">
+                          <span className="text-xs font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-snug">
                             {chip.label}
                           </span>
                         </button>
@@ -642,32 +651,31 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         key={msg.id}
                         className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1`}
                       >
-                        <GlassSurface
-                          level={isUser ? 2 : 1}
-                          className={`max-w-[88%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                        <div
+                          className={`max-w-[88%] p-3.5 rounded-[20px] text-xs sm:text-sm leading-relaxed ${
                             isUser
-                              ? 'bg-accent/20 border-accent/40 text-white rounded-br-none'
-                              : 'bg-white/10 dark:bg-white/10 border-white/15 text-white rounded-bl-none'
+                              ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-br-xs shadow-xs'
+                              : 'bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] rounded-bl-xs'
                           }`}
                         >
                           {msg.content ? (
                             <div className="whitespace-pre-wrap break-words allow-select select-text">{msg.content}</div>
                           ) : (
-                            <div className="flex items-center gap-2 text-accent italic">
+                            <div className="flex items-center gap-2 text-[var(--md-primary)] italic">
                               <Loader2 size={14} className="animate-spin" />
                               <span>Thinking...</span>
                             </div>
                           )}
 
                           {!isUser && msg.content && (
-                            <div className="flex items-center justify-between pt-2 mt-2 border-t border-white/10 text-[10px] text-teal-200/70 font-mono">
+                            <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--md-outline-variant)] text-[10px] text-[var(--md-on-surface-variant)] font-mono">
                               <span>Groq AI • App Guide</span>
                               <div className="flex items-center gap-2.5">
                                 {msg.dataSentContext && (
                                   <button
                                     type="button"
                                     onClick={() => setPreviewDataContext(msg.dataSentContext || null)}
-                                    className="flex items-center gap-1 hover:text-accent transition-colors cursor-pointer"
+                                    className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors cursor-pointer"
                                   >
                                     <Eye size={11} />
                                     <span>Data Sent</span>
@@ -676,7 +684,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                                 <button
                                   type="button"
                                   onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                  className="flex items-center gap-1 hover:text-accent transition-colors"
+                                  className="flex items-center gap-1 hover:text-[var(--md-primary)] transition-colors"
                                 >
                                   {copiedId === msg.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
                                   <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
@@ -684,7 +692,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                               </div>
                             </div>
                           )}
-                        </GlassSurface>
+                        </div>
 
                         {/* Action Confirmation Cards */}
                         {proposals.map((prop) => (
@@ -704,114 +712,99 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                 {isGenerating && (
                   <div className="flex justify-start">
-                    <GlassSurface level={1} className="p-3 rounded-2xl text-xs text-accent flex items-center gap-2 bg-white/10 border-white/15">
+                    <div className="p-3 rounded-2xl text-xs text-[var(--md-primary)] flex items-center gap-2 bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
                       <Loader2 size={13} className="animate-spin" />
                       <span>Streaming response...</span>
-                    </GlassSurface>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* ── Bottom Input Bar ("Chat Dialer") Matching User Visual Design ── */}
+              {/* ── Bottom Input Row (Pill Input in M3 Surface Container Highest) ── */}
               <div className="pt-1.5 shrink-0 relative z-30">
-                <div className="relative rounded-full p-[1.5px] bg-gradient-to-r from-teal-500/60 via-cyan-400/50 to-purple-500/60 shadow-[0_0_24px_-4px_rgba(45,212,191,0.3)] transition-all">
-                  <div
-                    onClick={() => inputRef.current?.focus()}
-                    className="relative z-10 flex items-center gap-2.5 w-full pl-3.5 pr-2 py-1.5 sm:pl-4 sm:pr-2.5 sm:py-2 rounded-full bg-[#050B0D] overflow-hidden cursor-text"
-                  >
-                    {/* Organic right-side fluid glow layer (soft teal into violet/purple) */}
-                    <div
-                      className="pointer-events-none absolute right-0 top-0 bottom-0 w-3/5 rounded-full blur-xl opacity-40"
-                      style={{
-                        background: 'radial-gradient(ellipse at 80% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(20, 184, 166, 0.25) 50%, transparent 80%)',
-                      }}
-                    />
-
-                    {/* Left text input box */}
-                    <div className="flex-1 flex items-center min-w-0 relative z-20">
-                      <input
-                        id="ask-lifeos-input"
-                        name="ask-lifeos-query"
-                        ref={inputRef}
-                        type="text"
-                        value={inputQuery}
-                        onChange={(e) => setInputQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendQuery();
-                          }
-                        }}
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="sentences"
-                        spellCheck={false}
-                        tabIndex={0}
-                        placeholder={
-                          transcribing
-                            ? 'Transcribing voice...'
-                            : isRecording
-                            ? 'Listening... tap mic to finish'
-                            : 'Ask LifeOS anything...'
-                        }
-                        className="w-full bg-transparent px-1.5 py-1 text-xs sm:text-sm font-medium text-white placeholder-white/40 focus:outline-none focus:ring-0 allow-select select-text cursor-text"
-                        style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
-                      />
-                      
-                      {/* Clear text X button inside input */}
-                      {inputQuery.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setInputQuery('');
-                            inputRef.current?.focus();
-                          }}
-                          className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all shrink-0 mr-1"
-                          title="Clear text"
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Action buttons on the right: Squircle Mic + Circle Send */}
-                    <div className="flex items-center gap-2 shrink-0 relative z-20">
-                      {/* Mic Button: rounded squircle (rounded-2xl) */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleRecord();
-                        }}
-                        disabled={isGenerating || transcribing}
-                        title={isRecording ? 'Stop Recording' : 'Voice Input'}
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center transition-all ${
-                          isRecording
-                            ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
-                            : transcribing
-                            ? 'bg-accent/20 text-accent animate-spin'
-                            : 'bg-white/10 hover:bg-white/15 text-white/90 hover:text-white backdrop-blur-md active:scale-95'
-                        }`}
-                      >
-                        {isRecording ? <Square size={14} /> : transcribing ? <Loader2 size={15} /> : <Mic size={17} strokeWidth={2.2} />}
-                      </button>
-
-                      {/* Send Button: perfect circle (rounded-full) */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                <div className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
+                  {/* Left input field */}
+                  <div className="flex-1 flex items-center min-w-0">
+                    <input
+                      id="ask-lifeos-input"
+                      name="ask-lifeos-query"
+                      ref={inputRef}
+                      type="text"
+                      value={inputQuery}
+                      onChange={(e) => setInputQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
                           handleSendQuery();
+                        }
+                      }}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="sentences"
+                      spellCheck={false}
+                      tabIndex={0}
+                      placeholder={
+                        transcribing
+                          ? 'Transcribing voice...'
+                          : isRecording
+                          ? 'Listening... tap mic to finish'
+                          : 'Ask LifeOS anything...'
+                      }
+                      className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text"
+                      style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
+                    />
+                    
+                    {/* Clear text X button inside input */}
+                    {inputQuery.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInputQuery('');
+                          inputRef.current?.focus();
                         }}
-                        disabled={isGenerating || !inputQuery.trim() || transcribing}
-                        title="Send query"
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0D9488] hover:bg-[#14B8A6] active:scale-95 text-white flex items-center justify-center shadow-md disabled:opacity-40 transition-all shrink-0"
+                        className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all shrink-0 mr-1"
+                        title="Clear text"
                       >
-                        <Send size={15} className="ml-[-1px] text-white/95" strokeWidth={2.2} />
+                        <X size={14} />
                       </button>
-                    </div>
+                    )}
                   </div>
+
+                  {/* Dynamic Right Action Button: Mic when empty -> Send when text present */}
+                  {inputQuery.trim().length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSendQuery();
+                      }}
+                      disabled={isGenerating || transcribing}
+                      title="Send query"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
+                    >
+                      <Send size={15} className="ml-[-1px]" strokeWidth={2.2} />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleRecord();
+                      }}
+                      disabled={isGenerating || transcribing}
+                      title={isRecording ? 'Stop Recording' : 'Voice Input'}
+                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all ${
+                        isRecording
+                          ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
+                          : transcribing
+                          ? 'bg-[var(--md-primary-container)] text-[var(--md-primary)] animate-spin'
+                          : 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] hover:opacity-90 active:scale-95'
+                      }`}
+                    >
+                      {isRecording ? <Square size={14} /> : transcribing ? <Loader2 size={15} /> : <Mic size={17} strokeWidth={2.2} />}
+                    </button>
+                  )}
                 </div>
               </div>
             </>

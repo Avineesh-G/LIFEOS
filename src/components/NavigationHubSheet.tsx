@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '../utils/haptics';
 import { registerDismissible } from '../utils/backNavigation';
+import { useModalLayer } from '../hooks/useModalLayer';
 import {
   AppSection,
   hexToRgb,
@@ -240,6 +241,9 @@ export function NavigationHubSheet({
       });
     }
   }, [isOpen, isEditMode, onExitEditMode, onClose]);
+
+  // Freeze background when sheet is open
+  useModalLayer(isOpen, { id: 'nav-hub-sheet' });
 
   const activeSeed = getActiveAccent().primary;
   const [aR, aG, aB] = hexToRgb(activeSeed);

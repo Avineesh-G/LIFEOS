@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, AlertTriangle, Check } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
 import { registerDismissible } from '../../utils/backNavigation';
+import { useModalLayer } from '../../hooks/useModalLayer';
 
 export interface FloatingPopupProps {
   isOpen: boolean;
@@ -116,6 +117,9 @@ export default function FloatingPopup({
     };
   }, []);
 
+  // Prompt L: Freeze background while popup is open
+  useModalLayer(isOpen, { allowHeaderChat: variant === 'chat' });
+
   // Virtual Keyboard resize observer via visualViewport
   useEffect(() => {
     if (!isOpen) return;
@@ -154,21 +158,18 @@ export default function FloatingPopup({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[140] pointer-events-none flex flex-col justify-end">
-          {/* 1. Flat Transparent Scrim (z-140): Allows dashboard visibility below floating panel */}
+          {/* 1. Flat Scrim (z-140): Blocks background taps and absorbs touch */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={handleAttemptClose}
-            className="fixed inset-0 bg-transparent ask-lifeos-backdrop z-[140] cursor-pointer pointer-events-auto"
-            style={{
-              bottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)))',
-            }}
+            className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[140] cursor-pointer pointer-events-auto touch-none"
             aria-hidden="true"
           />
 
-          {/* 2. Floating Pop-Up Card (z-150): Placed 12px inset from sides, bottom 24px above nav bar */}
+          {/* 2. Floating Pop-Up Card (z-150): Material 3 Tonal Surface Container */}
           <motion.div
             ref={popupRef}
             role="dialog"
@@ -178,19 +179,19 @@ export default function FloatingPopup({
               prefersReducedMotion
                 ? { opacity: 0 }
                 : variant === 'chat'
-                ? { opacity: 0, scale: 0.88, y: 40 }
+                ? { opacity: 0, scale: 0.90, y: -20 }
                 : { opacity: 0, scale: 0.96, y: 30 }
             }
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={
               prefersReducedMotion
                 ? { opacity: 0 }
-                : { opacity: 0, scale: 0.95, y: 25 }
+                : { opacity: 0, scale: 0.95, y: 20 }
             }
             transition={{
               type: 'spring',
-              stiffness: 320,
-              damping: 28,
+              stiffness: 340,
+              damping: 30,
               mass: 0.8,
             }}
             drag={variant === 'form' ? 'y' : false}
@@ -204,21 +205,19 @@ export default function FloatingPopup({
                 setIsExpanded(true);
               }
             } : undefined}
-            className={`fixed z-[150] left-3.5 right-3.5 mx-auto w-[calc(100vw-28px)] ${maxWidth} pointer-events-auto ask-lifeos-card ${
-              variant === 'chat'
-                ? 'bg-[#050B0D]/95 dark:bg-[#050B0D]/95 text-white border border-teal-500/30 backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.65)]'
-                : 'liquid-glass border border-[var(--card-border)] shadow-[0_16px_48px_rgba(0,0,0,0.35)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.65)]'
-            } rounded-[28px] overflow-hidden flex flex-col transition-all duration-200`}
+            className={`fixed z-[150] left-3 right-3 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-24px)] sm:w-[calc(100vw-28px)] ${maxWidth} pointer-events-auto bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-m3-elevation-3 rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-200`}
             style={{
               bottom: keyboardOffset > 0
-                ? `calc(${keyboardOffset}px + 16px)`
-                : 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 36px)',
+                ? `calc(${keyboardOffset}px + 12px)`
+                : 'calc(var(--nav-h, 56px) + max(8px, var(--sab, env(safe-area-inset-bottom, 0px))) + 8px)',
               maxHeight: isExpanded
                 ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - 24px)'
                 : variant === 'chat'
-                ? 'calc(75vh - var(--nav-h, 64px))'
-                : 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 64px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 48px)',
-              height: variant === 'chat' ? 'calc(72vh - var(--nav-h, 64px))' : undefined,
+                ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 56px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 72px)'
+                : 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 56px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 48px)',
+              height: variant === 'chat'
+                ? 'calc(100vh - var(--sat, env(safe-area-inset-top, 0px)) - var(--nav-h, 56px) - var(--sab, env(safe-area-inset-bottom, 0px)) - 72px)'
+                : undefined,
             }}
           >
             {/* Top Grab Handle Bar */}
@@ -230,7 +229,7 @@ export default function FloatingPopup({
               }}
               className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
-              <div className="w-9 h-1 rounded-full bg-white/25 hover:bg-accent/40 transition-colors" />
+              <div className="w-9 h-1 rounded-full bg-[var(--md-outline-variant)] hover:bg-[var(--md-primary)] transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
@@ -238,7 +237,7 @@ export default function FloatingPopup({
               <div className="px-5 pb-3 flex items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {icon && (
-                    <div className="w-8 h-8 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0">
                       {icon}
                     </div>
                   )}
@@ -246,13 +245,13 @@ export default function FloatingPopup({
                     {title && (
                       <h2
                         id="popup-title"
-                        className="text-base font-black text-primary-light dark:text-primary-dark tracking-tight leading-tight truncate"
+                        className="text-base font-bold text-[var(--md-on-surface)] tracking-tight leading-tight truncate"
                       >
                         {title}
                       </h2>
                     )}
                     {subtitle && (
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-mono truncate">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] font-mono truncate">
                         {subtitle}
                       </p>
                     )}
@@ -262,7 +261,7 @@ export default function FloatingPopup({
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark active:scale-95 transition-all shrink-0"
+                  className="w-8 h-8 rounded-full bg-[var(--md-surface-container-highest)] flex items-center justify-center text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] active:scale-95 transition-all shrink-0"
                   aria-label="Close dialog"
                 >
                   <X size={16} />
@@ -270,18 +269,24 @@ export default function FloatingPopup({
               </div>
             )}
 
-            {/* Scrollable Body Content */}
-            <div className={`flex-1 ${variant === 'chat' ? 'flex flex-col min-h-0 overflow-hidden p-3.5 sm:p-4' : 'overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4'}`}>
+            {/* Scrollable Body Content with overscroll containment */}
+            <div
+              className={`flex-1 ${variant === 'chat' ? 'flex flex-col min-h-0 overflow-hidden p-3 sm:p-4' : 'overflow-y-auto p-4 sm:p-5 scrollbar-none space-y-4'}`}
+              style={{
+                overscrollBehavior: 'contain',
+                touchAction: 'pan-y',
+              }}
+            >
               {children}
             </div>
 
             {/* Footer Actions (for form variant if onSave or cancel provided) */}
             {variant === 'form' && onSave && (
-              <div className="p-3.5 sm:p-4 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 border-t border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] flex items-center justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="px-4 py-2.5 rounded-2xl border border-black/10 dark:border-white/10 text-xs font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all"
+                  className="px-4 py-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] text-xs font-bold text-[var(--md-on-surface)] hover:opacity-90 active:scale-95 transition-all"
                 >
                   {cancelLabel}
                 </button>
@@ -292,7 +297,7 @@ export default function FloatingPopup({
                     onSave();
                   }}
                   disabled={saveDisabled || saveLoading}
-                  className="px-5 py-2.5 rounded-2xl btn-primary text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
+                  className="px-5 py-2.5 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
                 >
                   {saveLoading ? (
                     <span>Saving...</span>
