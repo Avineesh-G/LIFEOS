@@ -616,7 +616,7 @@ export default function Settings({
                 </span>
               </div>
               <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
-                10 curated expressive palettes (Burgundy #800020 default), Light/Dark modes & live preview
+                10 curated expressive palettes (Burgundy #8B1E3F default), Light/Dark modes & live preview
               </p>
 
 

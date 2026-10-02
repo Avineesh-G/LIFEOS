@@ -9,7 +9,7 @@ export interface ThemeAccent {
 }
 
 export const PRESET_ACCENTS: ThemeAccent[] = [
-  { id: 'burgundy', name: 'Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
+  { id: 'burgundy', name: 'Burgundy', primary: '#8B1E3F', secondary: '#B82E58', darkText: '#5A0B22' },
   { id: 'deep-navy', name: 'Deep Navy', primary: '#183B5B', secondary: '#2C5784', darkText: '#0E2338' },
   { id: 'emerald', name: 'Emerald', primary: '#087F5B', secondary: '#12B886', darkText: '#05523A' },
   { id: 'plum', name: 'Plum', primary: '#6A1B6D', secondary: '#9C27B0', darkText: '#451047' },
@@ -21,7 +21,7 @@ export const PRESET_ACCENTS: ThemeAccent[] = [
   { id: 'slate', name: 'Slate', primary: '#53616D', secondary: '#738494', darkText: '#343E47' },
 ];
 
-export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #800020
+export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #8B1E3F
 
 
 

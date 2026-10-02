@@ -55,7 +55,7 @@
   /* Dark Gradient Typography Tokens */
   --gradient-text-dark: linear-gradient(135deg, #111418 0%, #2A2E36 50%, #484E5B 100%);
   --gradient-text-light: linear-gradient(135deg, #FFFFFF 0%, #E3E5EB 50%, #B8BBC3 100%);
-  --gradient-text-accent: linear-gradient(135deg, var(--md-on-surface, #1E2024) 0%, var(--md-primary, #800020) 100%);
+  --gradient-text-accent: linear-gradient(135deg, var(--md-on-surface, #1E2024) 0%, var(--md-primary, #8B1E3F) 100%);
 }
 
 /* Light mode tonal overrides: Soft off-dark neutrals */

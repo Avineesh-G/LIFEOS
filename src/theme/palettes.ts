@@ -15,8 +15,8 @@ export const PALETTES: PaletteDefinition[] = [
   {
     id: 'burgundy',
     name: 'Burgundy',
-    seed: '#800020',
-    description: 'Elegant + premium (#800020)',
+    seed: '#8B1E3F',
+    description: 'Expressive ruby burgundy (#8B1E3F)',
     isDefault: true,
   },
   {
