@@ -13,73 +13,74 @@ export interface PaletteDefinition {
 
 export const PALETTES: PaletteDefinition[] = [
   {
-    id: 'classic-burgundy',
-    name: 'Classic Burgundy',
+    id: 'burgundy',
+    name: 'Burgundy',
     seed: '#800020',
-    description: 'Iconic flagship burgundy (#800020) — deep wine in light mode, luminous pink-wine in dark mode',
+    description: 'Elegant + premium (#800020)',
     isDefault: true,
   },
   {
-    id: 'midnight-burgundy',
-    name: 'Midnight Burgundy',
-    seed: '#35000C',
-    description: 'Ultra-deep ink burgundy with obsidian undertones (#35000C)',
+    id: 'deep-navy',
+    name: 'Deep Navy',
+    seed: '#183B5B',
+    description: 'Professional + sophisticated (#183B5B)',
   },
   {
-    id: 'deep-burgundy',
-    name: 'Deep Burgundy',
-    seed: '#4A0012',
-    description: 'Heavy vintage cabernet wine tone (#4A0012)',
+    id: 'emerald',
+    name: 'Emerald',
+    seed: '#087F5B',
+    description: 'Fresh + modern (#087F5B)',
   },
   {
-    id: 'dark-burgundy',
-    name: 'Dark Burgundy',
-    seed: '#5C0018',
-    description: 'Rich dark Bordeaux velvet (#5C0018)',
+    id: 'plum',
+    name: 'Plum',
+    seed: '#6A1B6D',
+    description: 'Expressive + luxurious (#6A1B6D)',
   },
   {
-    id: 'maroon-burgundy',
-    name: 'Maroon Burgundy',
-    seed: '#6D001E',
-    description: 'Intense crimson-maroon profile (#6D001E)',
+    id: 'indigo',
+    name: 'Indigo',
+    seed: '#4936A3',
+    description: 'Modern + slightly futuristic (#4936A3)',
   },
   {
-    id: 'rich-burgundy',
-    name: 'Rich Burgundy',
-    seed: '#8B1E3F',
-    description: 'Vibrant ruby-tinted berry burgundy (#8B1E3F)',
+    id: 'terracotta',
+    name: 'Terracotta',
+    seed: '#A84A32',
+    description: 'Warm + distinctive (#A84A32)',
   },
   {
-    id: 'royal-burgundy',
-    name: 'Royal Burgundy',
-    seed: '#92243F',
-    description: 'Expressive jewel-toned royal garnet (#92243F)',
+    id: 'teal',
+    name: 'Teal',
+    seed: '#087F83',
+    description: 'Clean + technological (#087F83)',
   },
   {
-    id: 'warm-burgundy',
-    name: 'Warm Burgundy',
-    seed: '#9E3048',
-    description: 'Warm terracotta-infused wine red (#9E3048)',
+    id: 'rose',
+    name: 'Rose',
+    seed: '#A83F5D',
+    description: 'Soft + expressive (#A83F5D)',
   },
   {
-    id: 'soft-burgundy',
-    name: 'Soft Burgundy',
-    seed: '#A83D55',
-    description: 'Softened mellow plum burgundy (#A83D55)',
+    id: 'mocha',
+    name: 'Mocha',
+    seed: '#765548',
+    description: 'Warm + minimal (#765548)',
   },
   {
-    id: 'rose-burgundy',
-    name: 'Rose Burgundy',
-    seed: '#B66A7A',
-    description: 'Luminous antique rose burgundy (#B66A7A)',
+    id: 'slate',
+    name: 'Slate',
+    seed: '#53616D',
+    description: 'Neutral + professional (#53616D)',
   },
 ];
 
-export const DEFAULT_PALETTE_ID = 'classic-burgundy';
+export const DEFAULT_PALETTE_ID = 'burgundy';
 export const DEFAULT_THEME_MODE = 'light' as const;
 
 export function getPaletteById(id: string): PaletteDefinition {
-  if (id === 'burgundy') return PALETTES[0];
+  if (id === 'classic-burgundy') return PALETTES[0];
   return PALETTES.find((p) => p.id === id) || PALETTES[0];
 }
+
 

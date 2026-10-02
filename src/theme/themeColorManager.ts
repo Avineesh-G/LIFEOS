@@ -9,19 +9,20 @@ export interface ThemeAccent {
 }
 
 export const PRESET_ACCENTS: ThemeAccent[] = [
-  { id: 'classic-burgundy', name: 'Classic Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
-  { id: 'midnight-burgundy', name: 'Midnight Burgundy', primary: '#35000C', secondary: '#5A0015', darkText: '#200007' },
-  { id: 'deep-burgundy', name: 'Deep Burgundy', primary: '#4A0012', secondary: '#6D001E', darkText: '#30000B' },
-  { id: 'dark-burgundy', name: 'Dark Burgundy', primary: '#5C0018', secondary: '#800020', darkText: '#3D0010' },
-  { id: 'maroon-burgundy', name: 'Maroon Burgundy', primary: '#6D001E', secondary: '#8E0528', darkText: '#4A0014' },
-  { id: 'rich-burgundy', name: 'Rich Burgundy', primary: '#8B1E3F', secondary: '#AB2850', darkText: '#5E1029' },
-  { id: 'royal-burgundy', name: 'Royal Burgundy', primary: '#92243F', secondary: '#B23051', darkText: '#641329' },
-  { id: 'warm-burgundy', name: 'Warm Burgundy', primary: '#9E3048', secondary: '#BF3D59', darkText: '#6F1B2D' },
-  { id: 'soft-burgundy', name: 'Soft Burgundy', primary: '#A83D55', secondary: '#C74F69', darkText: '#762438' },
-  { id: 'rose-burgundy', name: 'Rose Burgundy', primary: '#B66A7A', secondary: '#D17F90', darkText: '#823D4D' },
+  { id: 'burgundy', name: 'Burgundy', primary: '#800020', secondary: '#A31D45', darkText: '#5A0015' },
+  { id: 'deep-navy', name: 'Deep Navy', primary: '#183B5B', secondary: '#2C5784', darkText: '#0E2338' },
+  { id: 'emerald', name: 'Emerald', primary: '#087F5B', secondary: '#12B886', darkText: '#05523A' },
+  { id: 'plum', name: 'Plum', primary: '#6A1B6D', secondary: '#9C27B0', darkText: '#451047' },
+  { id: 'indigo', name: 'Indigo', primary: '#4936A3', secondary: '#6741D9', darkText: '#2F2070' },
+  { id: 'terracotta', name: 'Terracotta', primary: '#A84A32', secondary: '#D95B3B', darkText: '#702D1E' },
+  { id: 'teal', name: 'Teal', primary: '#087F83', secondary: '#15AABF', darkText: '#055356' },
+  { id: 'rose', name: 'Rose', primary: '#A83F5D', secondary: '#D64E77', darkText: '#702339' },
+  { id: 'mocha', name: 'Mocha', primary: '#765548', secondary: '#966B5A', darkText: '#4A342B' },
+  { id: 'slate', name: 'Slate', primary: '#53616D', secondary: '#738494', darkText: '#343E47' },
 ];
 
-export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Classic Burgundy #800020
+export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #800020
+
 
 
 export const THEME_ACCENT_STORAGE_KEY = 'lifeos_unified_accent';

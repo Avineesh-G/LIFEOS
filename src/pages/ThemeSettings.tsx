@@ -132,17 +132,16 @@ export default function ThemeSettings() {
         </div>
       </div>
 
-      {/* ── 2. Palette Swatches Grid (10 Burgundy Tonal Options) ── */}
+      {/* ── 2. Palette Swatches Grid (10 Curated Options) ── */}
       <div className="p-5 rounded-[28px] bg-surface-container-low border border-outline-variant/40 space-y-3.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-on-surface uppercase tracking-wider block">
-            Burgundy Palettes (10 Seed Tones)
+            Curated Palettes (10 Presets)
           </label>
           <span className="text-[11px] font-mono text-on-surface-variant">
             {PALETTES.find((p) => p.id === pendingPaletteId)?.name}
           </span>
         </div>
-
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {PALETTES.map((palette) => {
@@ -176,11 +175,12 @@ export default function ThemeSettings() {
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-on-surface-variant font-mono">
-                      {palette.seed}
+                    <span className="text-[10px] text-on-surface-variant line-clamp-1">
+                      {palette.description}
                     </span>
                   </div>
                 </div>
+
 
                 {isSelected && (
                   <div className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse" />
