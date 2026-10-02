@@ -1,28 +1,30 @@
 /**
  * LifeOS AI Configuration - Groq API Models, Endpoints & Rate Limits
- * Verification Date: 2026-10-01
- * 
- * Verified Groq API Specifications:
- * - OpenAI-compatible Chat Completions: https://api.groq.com/openai/v1/chat/completions
- * - OpenAI-compatible Transcriptions (STT): https://api.groq.com/openai/v1/audio/transcriptions
- * - Streaming Format: Server-Sent Events (SSE) data: { ... }, ended by data: [DONE]
- * - Chat Models: llama-3.3-70b-versatile (Primary high intelligence), llama-3.1-8b-instant (Fast response)
- * - Audio Model: whisper-large-v3-turbo (Ultra-fast speech-to-text)
  */
+import {
+  CHAT_PRIMARY,
+  CHAT_FALLBACKS,
+  STT_PRIMARY,
+  STT_FALLBACKS,
+  ALLOWED_CHAT_MODELS,
+  ALLOWED_STT_MODELS,
+  RETIRED_MODELS,
+  GROQ_STORAGE_KEYS,
+} from './aiModels.ts';
 
 export const GROQ_CONFIG = {
   BASE_URL: 'https://api.groq.com/openai/v1',
   CHAT_COMPLETIONS_ENDPOINT: 'https://api.groq.com/openai/v1/chat/completions',
   TRANSCRIPTION_ENDPOINT: 'https://api.groq.com/openai/v1/audio/transcriptions',
   MODELS: {
-    CHAT_PRIMARY: 'llama-3.3-70b-versatile',
-    CHAT_FAST: 'llama-3.1-8b-instant',
-    CHAT_FALLBACKS: [
-      'llama-3.3-70b-versatile',
-      'llama-3.1-8b-instant'
-    ] as const,
-    AUDIO_TRANSCRIBE: 'whisper-large-v3-turbo',
-    AUDIO_TRANSCRIBE_FALLBACK: 'whisper-large-v3',
+    CHAT_PRIMARY,
+    CHAT_FAST: CHAT_FALLBACKS[0],
+    CHAT_FALLBACKS,
+    AUDIO_TRANSCRIBE: STT_PRIMARY,
+    AUDIO_TRANSCRIBE_FALLBACK: STT_FALLBACKS[0],
+    ALLOWED_CHAT_MODELS,
+    ALLOWED_STT_MODELS,
+    RETIRED_MODELS,
   },
   RATE_LIMITS: {
     REQUESTS_PER_MINUTE: 30,
@@ -37,6 +39,7 @@ export const GROQ_CONFIG = {
     ACTION_ALLOW_CHANGES: 'lifeos_ai_allow_changes',
     CONSENT_AGREED: 'lifeos_ai_consent_agreed',
     CHAT_HISTORY: 'lifeos_ai_chat_history',
+    ...GROQ_STORAGE_KEYS,
   },
 } as const;
 

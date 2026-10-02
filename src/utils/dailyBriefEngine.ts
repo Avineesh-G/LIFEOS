@@ -44,6 +44,7 @@ export interface AttentionItem {
 }
 
 export interface DailyBriefData {
+  headline: string;
   greeting: string;
   timeOfDay: TimeOfDay;
   timeOfDayLabel: string;
@@ -536,7 +537,30 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
     actionRoute: '/tasks',
   });
 
-  // ── 10. Context Summary One-Liner ──
+  // ── 10. Intelligent Non-Greeting Actionable Headline ──
+  let headline = '';
+  if (isAllClear) {
+    headline = 'All Scheduled Targets Accomplished ✓';
+  } else if (timeWindow.type === 'in_progress' && timeWindow.currentBlock) {
+    headline = `In Session · ${timeWindow.currentBlock.subject}`;
+  } else if (pendingTodayTasks.length > 0 || overdueTasks.length > 0) {
+    const totalCount = pendingTodayTasks.length + overdueTasks.length;
+    headline = `${totalCount} Action ${totalCount === 1 ? 'Item' : 'Items'} Ready`;
+  } else if (plannedWorkout && !isWorkoutDone) {
+    headline = `${plannedWorkout.type} Split Ready`;
+  } else if (totalStudyMinutes > 0) {
+    headline = `Academic Momentum · ${studyFormatted} Logged`;
+  } else if (timeOfDay === 'morning') {
+    headline = "Today's Focus & Targets";
+  } else if (timeOfDay === 'afternoon') {
+    headline = 'Midday Action Plan';
+  } else if (timeOfDay === 'evening') {
+    headline = 'Evening Wrap-Up & Priorities';
+  } else {
+    headline = "Night Summary & Tomorrow's Plan";
+  }
+
+  // ── 11. Context Summary One-Liner ──
   let contextSummary = '';
   if (isAllClear) {
     contextSummary = "You're completely clear. All planned work for today is finished.";
@@ -554,6 +578,7 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
   }
 
   return {
+    headline,
     greeting,
     timeOfDay,
     timeOfDayLabel: timeOfDayLabels[timeOfDay],

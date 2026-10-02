@@ -1,4 +1,4 @@
-import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers, Palette, ChevronRight } from 'lucide-react';
+import { Sun, Monitor, Check, LogOut, AlertTriangle, Dumbbell, Key, Eye, EyeOff, Smartphone, Volume2, Volume1, VolumeX, Save, Gauge, ChevronDown, ChevronUp, ShieldCheck, Lock, Fingerprint, Bell, Clock, RefreshCw, Sparkles, CheckCircle2, Download, HardDrive, Receipt, Trash2, Layers, Palette, ChevronRight, Zap, Feather, Cpu, Activity } from 'lucide-react';
 import { checkForAppUpdate, VERCEL_APK_URL, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
 import { getReceiptsStorageSize, clearAllReceiptBlobs } from '../features/outings/storage/outingsIdb';
 import { exportBackupFile, previewBackupPackage, restoreBackupPackage, BackupPreviewSummary } from '../utils/backupRestore.ts';
@@ -41,6 +41,9 @@ import {
 } from '../utils/aiSecurity';
 import { clearUsageHistory } from '../services/aiUsageTracker';
 import { GROQ_CONFIG } from '../config/ai';
+import { CHAT_PRIMARY, STT_PRIMARY, GROQ_STORAGE_KEYS } from '../config/aiModels';
+import { testAiConnection, resetAiSettings, resolveActiveChatModel } from '../services/aiModelResolver';
+import { APP_VERSION } from '../version';
 import { detectSquircleSupport } from '../utils/squircleDetect.ts';
 
 interface SettingsProps {
@@ -226,6 +229,54 @@ export default function Settings({
   const [trackUsageState, setTrackUsageState] = useState(() => getTrackAppUsage());
   const [chatClearedNotice, setChatClearedNotice] = useState(false);
   const [usageClearedNotice, setUsageClearedNotice] = useState(false);
+  const [aiResetNotice, setAiResetNotice] = useState(false);
+
+  // Live Model Diagnostics State
+  const [activeChatModel, setActiveChatModel] = useState<string>(
+    () => localStorage.getItem(GROQ_STORAGE_KEYS.ACTIVE_CHAT_MODEL) || CHAT_PRIMARY
+  );
+  const [lastAiError, setLastAiError] = useState<string | null>(() => {
+    try {
+      const e = localStorage.getItem(GROQ_STORAGE_KEYS.LAST_AI_ERROR);
+      return e ? (JSON.parse(e)?.friendlyMessage || e) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [testResults, setTestResults] = useState<{
+    step1Models: { success: boolean; message: string; details?: string; modelCount?: number };
+    step2Chat: { success: boolean; message: string; details?: string; modelUsed?: string; latencyMs?: number };
+  } | null>(null);
+
+  const handleTestConnection = async () => {
+    triggerHaptic('medium');
+    setIsTestingConnection(true);
+    setTestResults(null);
+    try {
+      const res = await testAiConnection(apiKeyInput);
+      setTestResults(res);
+      const currentResolved = localStorage.getItem(GROQ_STORAGE_KEYS.ACTIVE_CHAT_MODEL) || CHAT_PRIMARY;
+      setActiveChatModel(currentResolved);
+    } catch (err: any) {
+      setTestResults({
+        step1Models: { success: false, message: 'Test execution failed', details: err?.message },
+        step2Chat: { success: false, message: 'Skipped', details: 'Test aborted' },
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
+
+  const handleResetAiSettings = () => {
+    triggerHaptic('heavy');
+    resetAiSettings();
+    setActiveChatModel(CHAT_PRIMARY);
+    setLastAiError(null);
+    setTestResults(null);
+    setAiResetNotice(true);
+    setTimeout(() => setAiResetNotice(false), 3000);
+  };
 
   const handleSaveApiKey = async () => {
     await setGroqApiKey(apiKeyInput, updateData);
@@ -459,8 +510,8 @@ export default function Settings({
                 )}
 
                 {/* Master Notification Toggle */}
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)]">
-                  <div>
+                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Enable System Notifications
                     </p>
@@ -470,7 +521,6 @@ export default function Settings({
                   </div>
 
                   <M3ToggleChip
-                    label={notificationsEnabled ? 'Active' : 'Off'}
                     checked={notificationsEnabled}
                     onChange={() => handleToggleNotifications()}
                   />
@@ -541,132 +591,167 @@ export default function Settings({
         </AnimatePresence>
       </div>
 
-      {/* ── 2. Appearance & Theme ── */}
+      {/* ── 2. Appearance & Theme (Material 3 Expressive System Palettes) ── */}
       <div className="rounded-[30px] bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-none overflow-hidden">
-        <div className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left">
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shrink-0">
-              <Sun size={22} strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
-                Appearance & Theme
-              </h3>
-              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
-                Material 3 Expressive surface modes
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <M3ToggleChip
-              label={themeMode === 'dynamic' ? 'Light Mode' : 'Dark Mode'}
-              checked={themeMode === 'night'}
-              onChange={() => handleToggleThemeMode()}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2a. Per-Interface Color Personalization ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => {
             triggerHaptic('selection');
-            navigate('/settings/interface-colors');
+            navigate('/settings/appearance');
           }}
-          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group"
+          className="w-full p-5 sm:p-6 flex items-center justify-between gap-3 text-left hover:bg-[var(--md-surface-container-high)]/50 transition-colors group"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--pill-active-bg)] text-[var(--accent-primary)] shadow-xs shrink-0 transition-transform group-hover:scale-105">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] shadow-xs shrink-0 transition-transform group-hover:scale-105">
               <Palette size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-heading font-bold text-primary-light dark:text-primary-dark leading-snug break-words">
-                  Interface Colors
+                <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
+                  Appearance & Theme
                 </h3>
-                <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent/15 text-[var(--accent-text)] border border-[var(--card-border)]">
-                  Personalize
+                <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)]">
+                  M3 Expressive
                 </span>
               </div>
-              <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium mt-0.5 line-clamp-2">
-                Assign distinct tonal color families for each of the 11 app interfaces
+              <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
+                10 curated expressive palettes (Burgundy #8B1E3F default), Light/Dark modes & live preview
               </p>
+
+
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Tonal preview swatches */}
-            <div className="hidden sm:flex items-center -space-x-1 px-2">
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-blue-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-emerald-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-violet-500 shadow-xs" />
-              <span className="w-3.5 h-3.5 rounded-full border border-white dark:border-neutral-900 bg-amber-500 shadow-xs" />
-            </div>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-muted-light dark:text-muted-dark group-hover:text-primary-light dark:group-hover:text-primary-dark group-hover:translate-x-0.5 transition-all">
-              <ChevronRight size={18} />
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-on-surface-variant)] group-hover:text-[var(--md-on-surface)] group-hover:translate-x-0.5 transition-all">
+              <ChevronRight size={20} />
             </div>
           </div>
         </button>
       </div>
 
-      {/* ── 2b. Performance Mode: Auto / Full / Lite ── */}
-      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden p-5 sm:p-6 space-y-3">
+      {/* ── 2b. Performance Mode: Auto / Full / Lite with Live Visual Sandbox ── */}
+      <div className="rounded-[30px] liquid-glass border border-[var(--card-border)] shadow-sm overflow-hidden p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between gap-3 text-left">
           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
+            <div className="w-11 h-11 rounded-[16px] flex items-center justify-center bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0 shadow-xs">
               <Gauge size={22} strokeWidth={2.2} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-heading font-bold text-[var(--md-on-surface)] leading-snug break-words">
-                  Performance Mode
+                  Performance &amp; Graphics
                 </h3>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-secondary-light dark:text-secondary-dark">
-                  Active: {effectivePerfMode}
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+                  effectivePerfMode === 'full'
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                }`}>
+                  {perfMode === 'auto' ? `Auto → ${effectivePerfMode.toUpperCase()}` : effectivePerfMode.toUpperCase()}
                 </span>
               </div>
               <p className="text-xs text-[var(--md-on-surface-variant)] font-medium mt-0.5 line-clamp-2">
                 {perfMode === 'auto' 
-                  ? 'Auto-adapts to device hardware (Lite on low-end chipsets, Full on flagship)' 
+                  ? 'Hardware-aware engine: automatically scales shaders & physics to device' 
                   : perfMode === 'lite' 
-                    ? 'Lite: disables ambient blobs, stagger animations, and spring overshoot' 
-                    : 'Full: full 120 FPS spring physics and expressive background shaders'}
+                    ? 'Lite: eliminates GPU blurs, ambient blobs, and springs for instant battery-saving response' 
+                    : 'Full: 120 FPS fluid spring physics, ambient background shaders & glass depth'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 pt-1">
-          {(['auto', 'full', 'lite'] as PerformanceMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => {
-                triggerHaptic('selection');
-                setPerfMode(mode);
-              }}
-              className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold capitalize transition-all border ${
-                perfMode === mode
-                  ? 'bg-accent text-white border-accent shadow-sm'
-                  : 'bg-black/[0.03] dark:bg-white/[0.04] text-secondary-light dark:text-secondary-dark border-black/5 dark:border-white/10 hover:bg-black/[0.06]'
-              }`}
-            >
-              {mode}
-            </button>
-          ))}
+        {/* 3-Way Mode Segmented Selector with Icons */}
+        <div className="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+          {[
+            { mode: 'auto' as PerformanceMode, label: 'Auto', icon: Sparkles, desc: 'Hardware-Adaptive' },
+            { mode: 'full' as PerformanceMode, label: 'Full', icon: Zap, desc: '120 FPS & Glass' },
+            { mode: 'lite' as PerformanceMode, label: 'Lite', icon: Feather, desc: '0ms Overhead' },
+          ].map(({ mode, label, icon: Icon, desc }) => {
+            const isSelected = perfMode === mode;
+            return (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setPerfMode(mode);
+                }}
+                className={`py-2.5 px-2 rounded-xl flex flex-col items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                  isSelected
+                    ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-sm'
+                    : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)]/60'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Icon size={14} className={isSelected ? 'text-[var(--md-on-primary)]' : 'text-[var(--md-primary)]'} />
+                  <span>{label}</span>
+                </div>
+                <span className={`text-[9.5px] font-medium ${isSelected ? 'opacity-90 text-[var(--md-on-primary)]' : 'opacity-70 text-[var(--md-on-surface-variant)]'}`}>
+                  {desc}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Reduce blur effects toggle (Android 17 Accessibility & Readability) */}
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/5 dark:border-white/10">
-          <div>
-            <div className="text-xs font-bold text-primary-light dark:text-primary-dark">
+        {/* Live Visual Demonstration Sandbox (Reacts instantly) */}
+        <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
+            <span className="flex items-center gap-1.5">
+              <Activity size={12} className="text-[var(--md-primary)]" />
+              Live Graphics Sandbox
+            </span>
+            <span className="font-mono text-[10px] text-[var(--md-primary)]">
+              {effectivePerfMode === 'full' ? 'Glass + Blob Shaders Active' : 'Crisp Flat Mode (0 Blur)'}
+            </span>
+          </div>
+
+          <div className={`p-3 rounded-xl border transition-all duration-300 relative overflow-hidden flex items-center justify-between gap-3 ${
+            effectivePerfMode === 'full'
+              ? 'bg-[var(--md-surface-container-high)]/80 backdrop-blur-xl border-[var(--md-primary)]/40 shadow-xs'
+              : 'bg-[var(--md-surface-container-highest)] border-[var(--md-outline-variant)] shadow-none'
+          }`}>
+            <div className="space-y-0.5 relative z-10">
+              <span className="text-xs font-bold text-[var(--md-on-surface)] block">
+                {effectivePerfMode === 'full' ? 'Expressive Glass Physics' : 'Flat Solid Opaque Surface'}
+              </span>
+              <span className="text-[11px] text-[var(--md-on-surface-variant)] block">
+                {effectivePerfMode === 'full' 
+                  ? 'Dynamic 24px backdrop blur + ambient gradient lighting' 
+                  : 'Zero backdrop filter passes · Maximum battery efficiency'}
+              </span>
+            </div>
+
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border relative z-10 ${
+              effectivePerfMode === 'full'
+                ? 'bg-[var(--md-primary-container)] border-[var(--md-primary)] text-[var(--md-primary)] shadow-sm animate-pulse'
+                : 'bg-[var(--md-surface-container)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
+            }`}>
+              {effectivePerfMode === 'full' ? <Zap size={16} /> : <Feather size={16} />}
+            </div>
+          </div>
+
+          {/* Hardware Telemetry Row */}
+          <div className="flex items-center justify-between text-[10.5px] font-mono text-[var(--md-on-surface-variant)] pt-1">
+            <span className="flex items-center gap-1">
+              <Cpu size={11} className="text-[var(--md-primary)] shrink-0" />
+              Hardware: {typeof navigator !== 'undefined' && navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : 'Multi-Core'}
+            </span>
+            <span>
+              Engine: <strong className="text-[var(--md-on-surface)] uppercase">{effectivePerfMode}</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* Reduce blur effects toggle (Accessibility & Readability) */}
+        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold text-[var(--md-on-surface)]">
               Reduce blur effects
             </div>
-            <div className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark mt-0.5">
-              Replaces glass backdrop blurs with crisp translucent surfaces for enhanced readability & performance
+            <div className="text-[11px] font-medium text-[var(--md-on-surface-variant)] mt-0.5">
+              Replaces glass backdrop blurs with crisp flat surfaces for enhanced readability &amp; performance
             </div>
           </div>
           <M3ToggleChip
@@ -954,11 +1039,11 @@ export default function Settings({
               style={{ transformOrigin: 'top' }}
               className="overflow-hidden"
             >
-              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-5">
+              <div className="p-5 sm:p-6 pt-0 border-t border-white/[0.05] space-y-4">
                 {/* ── Mode A: Direct Groq Key ── */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                    <label className="text-xs font-bold text-[var(--md-on-surface)]">
                       Groq API Key (Mode A)
                     </label>
                     <a
@@ -970,18 +1055,19 @@ export default function Settings({
                       Get Free Key →
                     </a>
                   </div>
-                  <div className="relative flex items-center">
+                  <div className="flex items-center gap-2 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3.5 py-1.5 focus-within:ring-2 focus-within:ring-[var(--md-primary)]">
                     <input
                       type={showApiKey ? 'text' : 'password'}
                       value={apiKeyInput}
                       onChange={e => setApiKeyInput(e.target.value)}
                       placeholder="gsk_..."
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 pr-11 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                      className="flex-1 bg-transparent py-1.5 text-xs font-mono focus:outline-none text-[var(--md-on-surface)] placeholder:text-[var(--md-on-surface-variant)]/60 min-w-0"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 text-secondary-light dark:text-secondary-dark hover:text-primary-light"
+                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)] transition-all active:scale-95"
+                      title={showApiKey ? 'Hide Key' : 'Show Key'}
                     >
                       {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -991,7 +1077,7 @@ export default function Settings({
                       type="button"
                       onClick={handleSaveApiKey}
                       disabled={!apiKeyInput.trim()}
-                      className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40"
+                      className="px-4 py-2 rounded-full text-xs font-bold bg-accent text-white shadow-sm disabled:opacity-40 active:scale-95 transition-all"
                     >
                       {apiKeySaved ? 'Saved ✓' : 'Save Key'}
                     </button>
@@ -999,12 +1085,12 @@ export default function Settings({
                 </div>
 
                 {/* ── Mode B: Proxy URL ── */}
-                <div className="space-y-2 pt-3 border-t border-black/5 dark:border-white/5">
+                <div className="space-y-2 pt-3 border-t border-[var(--md-outline-variant)]/40">
                   <div>
-                    <label className="text-xs font-bold text-primary-light dark:text-primary-dark block">
+                    <label className="text-xs font-bold text-[var(--md-on-surface)] block">
                       Custom Proxy URL (Mode B)
                     </label>
-                    <span className="text-[11px] text-secondary-light dark:text-secondary-dark block">
+                    <span className="text-[11px] text-[var(--md-on-surface-variant)] block">
                       Optional Cloudflare Worker proxy endpoint
                     </span>
                   </div>
@@ -1014,12 +1100,12 @@ export default function Settings({
                       value={proxyUrlInput}
                       onChange={e => setProxyUrlInput(e.target.value)}
                       placeholder="https://lifeos-ai-proxy.workers.dev"
-                      className="flex-1 bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
+                      className="flex-1 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/30 text-[var(--md-on-surface)] placeholder:text-[var(--md-on-surface-variant)]/60 min-w-0"
                     />
                     <button
                       type="button"
                       onClick={handleSaveProxyUrl}
-                      className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-sm"
+                      className="px-4 py-2.5 rounded-2xl text-xs font-bold bg-accent text-white shadow-sm shrink-0 active:scale-95 transition-all"
                     >
                       {proxyUrlSaved ? 'Saved ✓' : 'Save URL'}
                     </button>
@@ -1027,13 +1113,13 @@ export default function Settings({
                 </div>
 
                 {/* ── Privacy & Reading Data ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="space-y-3 pt-3 border-t border-[var(--md-outline-variant)]/40">
+                  <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[var(--md-on-surface)]">
                         Let AI Read Data Context
                       </p>
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                         Allows AI to summarize section data for personalized answers
                       </p>
                     </div>
@@ -1044,8 +1130,8 @@ export default function Settings({
                   </div>
 
                   {letAiReadDataState && (
-                    <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-2.5">
-                      <p className="text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+                    <div className="p-4 rounded-2xl bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] space-y-3">
+                      <p className="text-[11px] font-tag font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
                         Section Context Permissions
                       </p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1066,21 +1152,21 @@ export default function Settings({
                           return (
                             <label
                               key={key}
-                              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer select-none"
+                              className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[var(--md-surface-container-high)]/60 cursor-pointer select-none transition-colors"
                             >
                               <input
                                 type="checkbox"
                                 checked={isPermitted}
                                 onChange={(e) => handleToggleSectionPermission(key as keyof AiSectionPermissions, e.target.checked)}
-                                className="accent-accent rounded"
+                                className="accent-[var(--md-primary)] rounded w-4 h-4 cursor-pointer"
                               />
-                              <span className="text-[11px] font-medium text-primary-light dark:text-primary-dark">{label}</span>
+                              <span className="text-[11px] font-medium text-[var(--md-on-surface)]">{label}</span>
                             </label>
                           );
                         })}
 
                         {/* Immutable Vault Prohibition Label */}
-                        <div className="flex items-center gap-2 p-1.5 rounded-xl bg-red-500/10 border border-red-500/20 col-span-2">
+                        <div className="flex items-center gap-2 p-2 rounded-xl bg-red-500/10 border border-red-500/20 col-span-2">
                           <Lock size={12} className="text-red-500 shrink-0" />
                           <span className="text-[10px] font-bold text-red-600 dark:text-red-400">
                             Vault Data: Strictly Excluded (Cannot be enabled)
@@ -1092,12 +1178,12 @@ export default function Settings({
                 </div>
 
                 {/* ── Action Proposals Toggle ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-[var(--md-on-surface)]">
                       Allow AI Action Proposals
                     </p>
-                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                    <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                       Show interactive confirmation cards to log meals, tasks, or workouts
                     </p>
                   </div>
@@ -1108,13 +1194,13 @@ export default function Settings({
                 </div>
 
                 {/* ── App Usage Tracking ── */}
-                <div className="pt-3 border-t border-black/5 dark:border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark">
+                <div className="p-4 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[var(--md-on-surface)]">
                         Track My App Usage
                       </p>
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                      <p className="text-[11px] text-[var(--md-on-surface-variant)] mt-0.5 font-medium">
                         Aggregated daily counts & last-used timestamps (stored locally, 90 days retention)
                       </p>
                     </div>
@@ -1124,8 +1210,8 @@ export default function Settings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] text-secondary-light dark:text-secondary-dark">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[var(--md-outline-variant)]/50">
+                    <p className="text-[11px] text-[var(--md-on-surface-variant)]">
                       {usageClearedNotice ? 'Usage history cleared ✓' : 'Local 90-day usage metrics'}
                     </p>
                     <button
@@ -1135,6 +1221,110 @@ export default function Settings({
                     >
                       Clear Usage History
                     </button>
+                  </div>
+                </div>
+
+                {/* ── Active Models & Build Info ── */}
+                <div className="pt-3 border-t border-[var(--md-outline-variant)]/40 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-[var(--md-on-surface)]">
+                      Active AI Runtime & Models
+                    </p>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent">
+                      v{APP_VERSION.versionName} (Build {APP_VERSION.versionCode})
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                      <span className="text-[10px] font-bold text-secondary-light dark:text-secondary-dark block">
+                        Chat Model (Auto-Resolved)
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-primary-light dark:text-primary-dark break-all">
+                        {activeChatModel}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5">
+                      <span className="text-[10px] font-bold text-secondary-light dark:text-secondary-dark block">
+                        Voice Model (STT)
+                      </span>
+                      <span className="text-xs font-mono font-semibold text-primary-light dark:text-primary-dark break-all">
+                        {STT_PRIMARY}
+                      </span>
+                    </div>
+                  </div>
+
+                  {lastAiError && (
+                    <div className="p-2.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300">
+                      <span className="text-[10px] font-bold uppercase tracking-wider block text-red-400">
+                        Last Upstream Error:
+                      </span>
+                      <span className="break-words [overflow-wrap:anywhere] leading-snug">{lastAiError}</span>
+                    </div>
+                  )}
+
+                  {/* ── Test Connection Button & Results ── */}
+                  <div className="pt-1 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={handleTestConnection}
+                        disabled={isTestingConnection}
+                        className="px-3.5 py-1.5 rounded-xl bg-accent/20 border border-accent/30 text-accent hover:bg-accent/30 text-xs font-bold active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <Sparkles size={13} />
+                        <span>{isTestingConnection ? 'Testing Connection...' : 'Test Connection'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleResetAiSettings}
+                        className="px-3.5 py-1.5 rounded-xl border border-white/10 hover:bg-white/5 text-secondary-light dark:text-secondary-dark text-xs font-bold active:scale-95 transition-all"
+                      >
+                        {aiResetNotice ? 'Reset Done ✓' : 'Reset AI Settings'}
+                      </button>
+                    </div>
+
+                    {testResults && (
+                      <div className="p-3 rounded-2xl bg-black/40 border border-white/10 space-y-2 text-xs">
+                        {/* Step 1: Model discovery */}
+                        <div className="flex items-start gap-2">
+                          <div className="shrink-0 mt-0.5">
+                            {testResults.step1Models.success ? (
+                              <CheckCircle2 size={14} className="text-emerald-400" />
+                            ) : (
+                              <AlertTriangle size={14} className="text-rose-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold text-white block">Step 1: Models Discovery</span>
+                            <span className="text-[11px] text-white/70 block">{testResults.step1Models.message}</span>
+                            {testResults.step1Models.details && (
+                              <span className="text-[10px] font-mono text-white/50 block break-words">{testResults.step1Models.details}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Step 2: Mini chat request */}
+                        <div className="flex items-start gap-2 pt-1.5 border-t border-white/10">
+                          <div className="shrink-0 mt-0.5">
+                            {testResults.step2Chat.success ? (
+                              <CheckCircle2 size={14} className="text-emerald-400" />
+                            ) : (
+                              <AlertTriangle size={14} className="text-rose-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="font-bold text-white block">Step 2: Chat API Request</span>
+                            <span className="text-[11px] text-white/70 block">{testResults.step2Chat.message}</span>
+                            {testResults.step2Chat.details && (
+                              <span className="text-[10px] font-mono text-white/50 block break-words">{testResults.step2Chat.details}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1549,17 +1739,17 @@ export default function Settings({
           </label>
         </div>
 
-        <div className="flex items-center gap-2 pt-1 text-[11px] text-secondary-light dark:text-secondary-dark">
+        <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center justify-between gap-3 text-xs">
+          <label htmlFor="includeAiKeys" className="cursor-pointer select-none text-[11px] text-[var(--md-on-surface-variant)] leading-snug flex-1">
+            Include Gemini &amp; AI API keys in export (uncheck if sharing backup file)
+          </label>
           <input
             type="checkbox"
             id="includeAiKeys"
             checked={includeAiKeysInExport}
             onChange={(e) => setIncludeAiKeysInExport(e.target.checked)}
-            className="rounded border-gray-400 text-primary focus:ring-0"
+            className="accent-[var(--md-primary)] rounded w-4 h-4 cursor-pointer shrink-0"
           />
-          <label htmlFor="includeAiKeys" className="cursor-pointer select-none">
-            Include Gemini &amp; AI API keys in export (uncheck if sharing backup file)
-          </label>
         </div>
       </div>
 

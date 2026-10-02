@@ -8,6 +8,7 @@ import {
 import AskLifeOSModal from './ai/AskLifeOSModal';
 import ChatPillInput from './ai/ChatPillInput';
 import { ExpandAllIcon, CollapseContentIcon, CloudDoneIcon, CloudOffIcon } from './icons/MaterialSymbols';
+import { PulseBubbleIcon } from './icons/PulseBubbleIcon';
 import { triggerHaptic } from '../utils/haptics';
 import {
   checkNotificationPermission,
@@ -525,36 +526,37 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   ];
 
   return (
-    <div className="relative min-h-screen text-primary-light dark:text-primary-dark transition-colors duration-200 w-full max-w-full">
+    <div className="relative min-h-screen text-[var(--md-on-surface)] transition-colors duration-200 w-full max-w-full bg-[var(--md-surface)]">
       {/* ── Material 3 Expressive Background System: Neutral Canvas + Single Off-Canvas Organic Blob ── */}
       <SectionAccentBlob />
 
-      {/* ── Top In-Page Minimalist Controls (Floating Minimalist Pill Directly on Wallpaper) ── */}
+      {/* ── Top Header (LifeOS Chip + 3-Button Cluster: Chat, Cloud, Refresh) ── */}
       <header 
-        className="absolute top-0 left-0 right-0 z-30 pointer-events-none gpu-composited w-full overflow-hidden"
+        className="sticky top-0 left-0 right-0 z-30 pointer-events-none gpu-composited w-full overflow-hidden"
         style={{
-          paddingTop: 'max(var(--sat, env(safe-area-inset-top, 0px)), 12px)',
+          paddingTop: 'max(var(--sat, env(safe-area-inset-top, 0px)), 8px)',
+          paddingBottom: '6px',
           paddingLeft: 'max(var(--sal, 0px), 12px)',
           paddingRight: 'max(var(--sar, 0px), 12px)',
         }}
       >
-        <div className="flex items-center justify-between h-9 w-full max-w-[720px] md:max-w-[800px] mx-auto min-w-0">
+        <div className="flex items-center justify-between h-10 w-full max-w-[720px] md:max-w-[800px] mx-auto min-w-0">
           {/* Left: LifeOS Floating Micro-Badge directly on wallpaper */}
           <button
             onPointerDown={() => triggerHaptic('light')}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="pointer-events-auto inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-black/50 border border-white/20 text-white active:scale-95 transition-transform select-none shadow-sm cursor-pointer shrink-0"
+            className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)]/90 border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] active:scale-95 transition-transform select-none shadow-xs cursor-pointer shrink-0 max-w-[140px]"
             title="Scroll to top"
             aria-label="LifeOS, scroll to top"
           >
-            <span className="w-2 h-2 rounded-full bg-[var(--md-primary)] animate-pulse" />
-            <span className="font-bold text-xs tracking-tight font-sans text-white">
+            <span className="w-2 h-2 rounded-full bg-[var(--md-primary)] animate-pulse shrink-0" />
+            <span className="font-bold text-xs tracking-tight truncate text-gradient-dark">
               LifeOS
             </span>
           </button>
 
-          {/* Right Controls: Notification Enable Alert + Reload Squircle Button */}
-          <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right Controls: Three 40px Tonal Circle Buttons [Chat, Cloud, Refresh] (8px gap) */}
+          <div className="pointer-events-auto flex items-center gap-2 shrink-0">
             {!hasNotificationPermission && (
               <button
                 onPointerDown={() => triggerHaptic('light')}
@@ -563,46 +565,68 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   const granted = await requestAndSyncNotifications(data, updateData);
                   setHasNotificationPermission(granted);
                 }}
-                className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-black/50 border border-white/20 text-white font-bold text-xs active:scale-95 transition-transform shadow-sm cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-[var(--md-on-secondary-container)] font-bold text-[11px] active:scale-95 transition-transform shadow-xs cursor-pointer shrink-0 mr-1"
                 title="Allow phone notifications for Timetable & Tasks"
               >
-                <Bell size={13} className="text-white animate-bounce shrink-0" />
+                <Bell size={13} className="animate-bounce shrink-0 text-[var(--md-primary)]" />
                 <span className="hidden compact:inline">Allow Alerts</span>
               </button>
             )}
 
-            {/* Network Status Symbol: Cloud symbol when online, offline symbol when offline */}
+            {/* 1. Header Chat Icon Button (Pulse Bubble) */}
+            <button
+              data-header-action="chat"
+              onPointerDown={() => triggerHaptic('light')}
+              onClick={() => {
+                triggerHaptic('medium');
+                setAiSheetOpen(prev => !prev);
+              }}
+              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center transition-all select-none cursor-pointer shrink-0 shadow-xs active:scale-95 ${
+                aiSheetOpen
+                  ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-2 border-[var(--md-primary)] ring-2 ring-[var(--md-primary)]/20'
+                  : 'bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]'
+              }`}
+              title={aiSheetOpen ? 'Close Ask LifeOS' : 'Ask LifeOS AI Assistant'}
+              aria-label="Ask LifeOS"
+              aria-expanded={aiSheetOpen}
+            >
+              <PulseBubbleIcon size={20} filled={aiSheetOpen} />
+            </button>
+
+            {/* 2. Cloud Sync Status Symbol */}
             <div
-              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden border transition-all shadow-sm shrink-0 select-none ${
+              data-header-action="cloud"
+              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center border transition-all shadow-xs shrink-0 select-none ${
                 isOnline
-                  ? 'bg-black/30 dark:bg-black/55 border-white/20 text-emerald-400'
-                  : 'bg-amber-500/25 border-amber-500/40 text-amber-300 animate-pulse'
+                  ? 'bg-[var(--md-surface-container-high)] text-[var(--md-primary)] border-[var(--md-outline-variant)]'
+                  : 'bg-amber-500/20 text-amber-500 border-amber-500/40 animate-pulse'
               }`}
               title={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
               aria-label={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
             >
               {isOnline ? (
-                <CloudDoneIcon size={16} />
+                <CloudDoneIcon size={18} />
               ) : (
-                <CloudOffIcon size={16} />
+                <CloudOffIcon size={18} />
               )}
             </div>
 
+            {/* 3. Refresh and Sync Data Button */}
             <button
+              data-header-action="refresh"
               onPointerDown={() => triggerHaptic('light')}
               onClick={handleReload}
               disabled={isReloading}
-              className={`w-8 h-8 flex items-center justify-center rounded-[12px] overflow-hidden bg-black/30 dark:bg-black/55 border border-white/20 text-white active:scale-95 transition-all shadow-sm cursor-pointer shrink-0 ${
-                isReloading ? 'border-white/60 bg-white/20' : ''
+              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center bg-[var(--md-surface-container-high)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] active:scale-95 transition-all shadow-xs cursor-pointer shrink-0 ${
+                isReloading ? 'border-[var(--md-primary)] bg-[var(--md-primary-container)] text-[var(--md-primary)]' : ''
               }`}
-              style={{ contain: 'paint' }}
               aria-label="Reload and sync data"
               title="Reload and sync data"
             >
               {isReloading ? (
-                <M3ProgressIndicator size={16} color="#FFFFFF" />
+                <M3ProgressIndicator size={18} color="var(--md-primary)" />
               ) : (
-                <RotateCw size={14} strokeWidth={2.4} className="text-white transition-transform duration-300" />
+                <RotateCw size={16} strokeWidth={2.2} className="transition-transform duration-300" />
               )}
             </button>
           </div>
@@ -611,7 +635,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
       {/* ── Main content (Streamlined with precise bottom dock clearance via --dock-h) ── */}
       <main 
-        className="relative z-10 min-h-screen box-border"
+        className="relative z-10 w-full box-border"
         style={{
           paddingTop: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 44px)',
           paddingBottom: 'calc(var(--dock-h, 118px) + var(--sab, env(safe-area-inset-bottom, 0px)))',
@@ -619,7 +643,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           paddingRight: 'var(--sar, 0px)',
         }}
       >
-        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-2 sm:pt-4">
+        <div className="w-full max-w-[720px] md:max-w-[800px] mx-auto px-2.5 compact:px-3 sm:px-4 md:px-6 pt-1 sm:pt-2">
           <M3NotificationBanner />
           {children}
         </div>
@@ -711,34 +735,89 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       {/* Localized active turquoise glow centered on active element */}
                       {active && <div className="nav-active-glow" />}
 
-                      {/* Active icon chip: 12-lobed scallop shape */}
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                          active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
-                        }`}
-                      >
-                        <motion.div
-                          animate={{ rotate: scallopRotation }}
-                          transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
-                          className="w-full h-full flex items-center justify-center"
+        {/* Compact Floating Navigation Bar */}
+        {(() => {
+          const isNavHidden = aiSheetOpen;
+          return (
+            <motion.nav
+              ref={navRef}
+              initial={false}
+              animate={{
+                y: isNavHidden ? 120 : 0,
+                opacity: isNavHidden ? 0 : 1,
+                scale: isNavHidden ? 0.93 : 1,
+              }}
+              transition={{
+                y: { type: 'spring', stiffness: 300, damping: 28, mass: 0.8 },
+                opacity: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+                scale: { duration: 0.28, ease: [0.22, 1, 0.36, 1] },
+              }}
+              style={{
+                marginBottom: 'max(8px, env(safe-area-inset-bottom, 0px))',
+                pointerEvents: isNavHidden ? 'none' : 'auto',
+                touchAction: 'manipulation',
+              }}
+              className="relative z-10 flex items-center justify-center px-3 compact:px-3 sm:px-4 gpu-composited select-none"
+              role="navigation"
+              aria-label="Main Navigation"
+            >
+                <div className="relative pointer-events-auto flex items-center gap-2.5 sm:gap-3">
+                  {/* 1. Nav pill (left element): 3 quick items in M3 surface container */}
+                  <div
+                    className="h-[52px] compact:h-[56px] px-3.5 sm:px-5 rounded-full flex items-center gap-3 sm:gap-6 bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] shadow-m3-elevation-2 select-none relative transition-colors duration-250"
+                  >
+                    {navTabs.map((tab) => {
+                      const Icon = tab.icon;
+                      const active = tab.isActive;
+                      return (
+                        <button
+                          key={tab.id}
+                          data-no-ripple="true"
+                          onPointerDown={(e) => handleSlotPointerDown(tab.slotIndex, e)}
+                          onPointerMove={handleSlotPointerMove}
+                          onPointerUp={handleSlotPointerUpOrLeave}
+                          onPointerCancel={handleSlotPointerUpOrLeave}
+                          onPointerLeave={handleSlotPointerUpOrLeave}
+                          onClick={() => {
+                            if (isLongPressTriggeredRef.current) {
+                              isLongPressTriggeredRef.current = false;
+                              return;
+                            }
+                            triggerHaptic('nav');
+                            if (menuOpen) setMenuOpen(false);
+                            startTransition(() => { navigate(tab.path); });
+                          }}
+                          className="relative w-9 h-9 compact:w-10 compact:h-10 flex items-center justify-center select-none focus:outline-none transition-transform active:scale-95 cursor-pointer"
+                          aria-label={tab.label}
                         >
-                          <ScallopShape fill={solidAccent} className="w-full h-full drop-shadow-sm" />
-                        </motion.div>
-                      </div>
-                      {/* Icon */}
-                      <Icon
-                        className="relative z-10 transition-colors duration-200 w-4 h-4"
-                        strokeWidth={active ? 2.5 : 2.2}
-                        style={{
-                          color: active ? '#FFFFFF' : inactiveColor,
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
+                          {/* Active icon chip: 12-lobed scallop shape with primary fill */}
+                          <div
+                            className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                              active ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+                            }`}
+                          >
+                            <motion.div
+                              animate={{ rotate: scallopRotation }}
+                              transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
+                              className="w-full h-full flex items-center justify-center"
+                            >
+                              <ScallopShape fill="var(--md-primary)" className="w-full h-full drop-shadow-sm" />
+                            </motion.div>
+                          </div>
+                          {/* Icon */}
+                          <Icon
+                            className="relative z-10 transition-colors duration-200 w-5 h-5 compact:w-5.5 compact:h-5.5"
+                            strokeWidth={active ? 2.5 : 2.2}
+                            style={{
+                              color: active ? 'var(--md-on-primary, #FFFFFF)' : 'var(--md-on-surface-variant)',
+                            }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              {/* 2. More button (right element, flat surface without blur) */}
+              {/* 2. More button (right element, separate scallop shape): M3 primary fill */}
               <motion.button
                 ref={squircleRef}
                 data-no-ripple="true"
@@ -753,31 +832,25 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                   }
                   setMenuOpen(prev => !prev);
                 }}
-                className={`shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative rounded-full ${
-                  isShortScreen ? 'w-[38px] h-[38px]' : 'w-[42px] h-[42px]'
-                }`}
+                className="w-[52px] h-[52px] compact:w-[56px] compact:h-[56px] shrink-0 flex items-center justify-center select-none focus:outline-none cursor-pointer relative"
                 style={{
-                  transition: 'filter 220ms cubic-bezier(0.2, 0, 0, 1)',
-                  filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.3))',
+                  filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.18))',
                 }}
                 aria-label="More Menu"
                 aria-expanded={menuOpen}
               >
                 {/* Scallop shape background */}
-                <div className="absolute inset-[-1.5px] pointer-events-none flex items-center justify-center">
+                <div className="absolute inset-[-2px] pointer-events-none flex items-center justify-center">
                   <ScallopShape
-                    fill={squircleBg}
+                    fill="var(--md-primary)"
                     className="w-full h-full"
-                    pathStyle={{
-                      transition: 'fill 220ms cubic-bezier(0.2, 0, 0, 1)',
-                    }}
                   />
                 </div>
 
                 {/* Active accent dot when current route is in the hub */}
                 {isHubActive && !menuOpen && (
                   <span
-                    className="absolute top-[6px] right-[6px] w-2 h-2 rounded-full bg-white ring-2 ring-black/20 z-10"
+                    className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[var(--md-on-primary)] ring-2 ring-[var(--md-primary)] z-10"
                     aria-hidden="true"
                   />
                 )}
@@ -792,7 +865,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: 45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <CollapseContentIcon className="w-4 h-4 text-white" />
+                      <CollapseContentIcon className="w-6 h-6 text-[var(--md-on-primary, #FFFFFF)]" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -803,7 +876,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
                       exit={{ rotate: -45, opacity: 0, scale: 0.75 }}
                       transition={{ type: 'tween', duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      <ExpandAllIcon className="w-4 h-4 text-white" />
+                      <ExpandAllIcon className="w-6 h-6 text-[var(--md-on-primary, #FFFFFF)]" />
                     </motion.div>
                   )}
                 </AnimatePresence>

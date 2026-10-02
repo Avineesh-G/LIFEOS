@@ -267,7 +267,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
 
       {/* Header Hero Card */}
       <div className="rounded-[30px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex items-end justify-between gap-4">
@@ -399,12 +399,12 @@ export default function Tasks({ data, updateData }: TasksProps) {
           </span>
           <span className={`px-3 py-0.5 rounded-full text-xs font-bold shadow-xs border ${
             pct === 100 && filteredTasks.length > 0
-              ? 'bg-emerald-500/15 border-emerald-500/25 text-emerald-700 dark:text-emerald-300'
+              ? 'bg-[var(--md-primary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-primary-container)]'
               : pct >= 50
-                ? 'bg-indigo-500/15 border-indigo-500/25 text-indigo-700 dark:text-indigo-300'
+                ? 'bg-[var(--md-secondary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-secondary-container)]'
                 : filteredTasks.length === 0
-                  ? 'bg-neutral-500/10 border-neutral-500/20 text-neutral-600 dark:text-neutral-400'
-                  : 'bg-amber-500/15 border-amber-500/25 text-amber-700 dark:text-amber-300'
+                  ? 'bg-[var(--md-surface-container-high)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
+                  : 'bg-[var(--md-tertiary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-tertiary-container)]'
           }`}>
             {filteredTasks.length === 0 ? 'No Tasks' : pct === 100 ? 'Completed' : `${pct}% Done`}
           </span>
@@ -413,25 +413,14 @@ export default function Tasks({ data, updateData }: TasksProps) {
         {/* Segmented bar */}
         {filteredTasks.length > 0 ? (
           <div className="flex items-center gap-1.5 py-1">
-            {filteredTasks.map((task, i) => {
-              const palette = [
-                'bg-purple-500',
-                'bg-indigo-500',
-                'bg-emerald-500',
-                'bg-amber-500',
-                'bg-rose-500',
-                'bg-cyan-500',
-                'bg-orange-500',
-                'bg-teal-500',
-              ];
-              const color = palette[i % palette.length];
+            {filteredTasks.map((task) => {
               return (
                 <div
                   key={task.id}
                   className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                     task.completed
-                      ? `${color} opacity-100`
-                      : 'bg-black/10 dark:bg-white/10'
+                      ? 'bg-[var(--md-primary)] opacity-100'
+                      : 'bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)]'
                   }`}
                 />
               );

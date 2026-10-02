@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Sparkles, Loader2 } from 'lucide-react';
+import { Check, X, Sparkles, Loader2, CheckSquare, ShoppingCart, MapPin, Utensils, Dumbbell, Wallet } from 'lucide-react';
 import { AiActionProposal, executeConfirmedAiAction } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -20,6 +20,26 @@ export default function ActionConfirmationCard({
   const [status, setStatus] = useState<'pending' | 'confirmed' | 'cancelled'>(
     proposal.confirmed ? 'confirmed' : 'pending'
   );
+
+  const getActionIcon = () => {
+    switch (proposal.type) {
+      case 'ADD_TASK':
+        return <CheckSquare size={14} className="text-[var(--md-primary)]" />;
+      case 'ADD_EXPENSE':
+        return <Wallet size={14} className="text-emerald-500" />;
+      case 'ADD_SHOPPING_ITEM':
+      case 'ADD_MULTIPLE_SHOPPING_ITEMS':
+        return <ShoppingCart size={14} className="text-emerald-500" />;
+      case 'CREATE_OUTING':
+        return <MapPin size={14} className="text-amber-500" />;
+      case 'LOG_MEAL':
+        return <Utensils size={14} className="text-orange-500" />;
+      case 'LOG_WORKOUT':
+        return <Dumbbell size={14} className="text-cyan-500" />;
+      default:
+        return <Sparkles size={14} className="text-[var(--md-primary)]" />;
+    }
+  };
 
   const handleConfirm = async () => {
     triggerHaptic('medium');
@@ -48,7 +68,7 @@ export default function ActionConfirmationCard({
 
   if (status === 'cancelled') {
     return (
-      <div className="p-3 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs text-muted-light dark:text-muted-dark italic">
+      <div className="p-3 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface-variant)] italic">
         Action cancelled.
       </div>
     );
@@ -57,25 +77,30 @@ export default function ActionConfirmationCard({
   if (status === 'confirmed') {
     return (
       <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2">
-        <Check size={14} className="text-emerald-500 shrink-0" />
+        <Check size={15} className="text-emerald-500 shrink-0" />
         <span>Confirmed & Executed: {proposal.title}</span>
       </div>
     );
   }
 
   return (
-    <div className="p-3.5 rounded-2xl bg-accent/10 border border-accent/30 space-y-2.5 my-2">
-      <div className="flex items-center gap-2 text-xs font-bold text-accent">
-        <Sparkles size={14} />
-        <span>Proposed AI Action</span>
+    <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] hover:border-[var(--md-primary)]/40 shadow-xs space-y-2.5 my-2.5 transition-all">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs font-bold text-[var(--md-primary)]">
+          {getActionIcon()}
+          <span>Proposed AI Action</span>
+        </div>
+        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]">
+          1-Tap Save
+        </span>
       </div>
 
       <div>
-        <h4 className="text-xs font-extrabold text-primary-light dark:text-primary-dark">
+        <h4 className="text-xs font-bold text-[var(--md-on-surface)] leading-snug">
           {proposal.title}
         </h4>
         {proposal.description && (
-          <p className="text-[11px] text-secondary-light dark:text-secondary-dark font-mono mt-0.5">
+          <p className="text-[11px] text-[var(--md-on-surface-variant)] font-mono mt-0.5 leading-relaxed">
             {proposal.description}
           </p>
         )}
@@ -86,7 +111,7 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className="py-1.5 px-3 rounded-xl border border-border-light dark:border-border-dark text-[11px] font-bold text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+          className="py-1.5 px-3 rounded-xl border border-[var(--md-outline-variant)] text-[11px] font-bold text-[var(--md-on-surface-variant)] hover:bg-[var(--md-surface-container-highest)] transition-all"
         >
           Cancel
         </button>
@@ -94,10 +119,10 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="py-1.5 px-3 rounded-xl btn-primary text-[11px] font-bold shadow-sm flex items-center justify-center gap-1 active:scale-95 transition-all"
+          className="py-1.5 px-3 rounded-xl bg-[var(--md-primary)] text-[var(--md-on-primary)] hover:opacity-90 active:scale-95 text-[11px] font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all"
         >
-          {loading ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-          <span>Confirm</span>
+          {loading ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+          <span>Confirm & Add</span>
         </button>
       </div>
     </div>

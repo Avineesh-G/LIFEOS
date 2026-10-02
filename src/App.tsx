@@ -34,7 +34,7 @@ import { detectSquircleSupport } from './utils/squircleDetect';
 
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
-const InterfaceColorsSettings = lazy(() => import('./pages/InterfaceColorsSettings'));
+const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
 const Notes = lazy(() => import('./pages/Notes'));
 import { auth } from './firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
@@ -46,6 +46,7 @@ import InAppUpdateModal from './components/InAppUpdateModal';
 import NetworkStatusModal from './components/NetworkStatusModal';
 import CloudMigrationModal from './components/CloudMigrationModal';
 import { DayThemeProvider } from './theme/DayThemeProvider';
+import { ThemeProvider } from './theme/ThemeContext';
 import { M3FeedbackProvider } from './components/m3/M3FeedbackContext';
 const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/PaletteBoard')) : null;
 const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
@@ -109,7 +110,8 @@ function MainContent({
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} onSignOut={onSignOut} /></RouteErrorBoundary> },
-    { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Interface Colors"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Interface Colors...</div>}><InterfaceColorsSettings data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/settings/appearance', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
+    { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
@@ -433,62 +435,70 @@ function App() {
 
   if (location.pathname.toLowerCase().startsWith('/download')) {
     return (
-      <DayThemeProvider>
-        <DownloadPage />
-      </DayThemeProvider>
+      <ThemeProvider>
+        <DayThemeProvider>
+          <DownloadPage />
+        </DayThemeProvider>
+      </ThemeProvider>
     );
   }
 
   if (authLoading && !user) {
     return (
-      <DayThemeProvider>
-        <div className="min-h-screen flex items-center justify-center bg-transparent">
-          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-        </div>
-      </DayThemeProvider>
+      <ThemeProvider>
+        <DayThemeProvider>
+          <div className="min-h-screen flex items-center justify-center bg-transparent">
+            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        </DayThemeProvider>
+      </ThemeProvider>
     );
   }
 
   if (!user) {
     return (
-      <DayThemeProvider>
-        <NetworkStatusModal />
-        <Auth />
-      </DayThemeProvider>
+      <ThemeProvider>
+        <DayThemeProvider>
+          <NetworkStatusModal />
+          <Auth />
+        </DayThemeProvider>
+      </ThemeProvider>
     );
   }
 
   return (
-    <DayThemeProvider>
-      <M3FeedbackProvider>
-        <NetworkStatusModal />
-        <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
-        <AppLockOverlay />
-        <InAppUpdateModal />
-        <div
-          className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
-          style={{
-            filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
-            opacity: isLocked ? 0.2 : 1,
-            pointerEvents: isLocked ? 'none' : 'auto',
-          }}
-        >
-          <Layout refresh={refresh} data={safeData} updateData={updateData}>
-            <ErrorBoundary>
-              <OutingsProvider>
-                <MainContent
-                  data={safeData}
-                  refresh={refresh}
-                  updateData={updateData}
-                  resetAllData={resetAllData}
-                  onSignOut={handleSignOut}
-                />
-              </OutingsProvider>
-            </ErrorBoundary>
-          </Layout>
-        </div>
-      </M3FeedbackProvider>
-    </DayThemeProvider>
+    <ThemeProvider>
+      <DayThemeProvider>
+        <M3FeedbackProvider>
+          <NetworkStatusModal />
+          <CloudMigrationModal user={user} data={safeData} updateData={updateData} />
+          <AppLockOverlay />
+          <InAppUpdateModal />
+          <div
+            className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
+            style={{
+              filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
+              opacity: isLocked ? 0.2 : 1,
+              pointerEvents: isLocked ? 'none' : 'auto',
+            }}
+          >
+            <Layout refresh={refresh} data={safeData} updateData={updateData}>
+              <ErrorBoundary>
+                <OutingsProvider>
+                  <MainContent
+                    data={safeData}
+                    refresh={refresh}
+                    updateData={updateData}
+                    resetAllData={resetAllData}
+                    onSignOut={handleSignOut}
+                  />
+                </OutingsProvider>
+              </ErrorBoundary>
+            </Layout>
+          </div>
+        </M3FeedbackProvider>
+      </DayThemeProvider>
+    </ThemeProvider>
   );
 }
 

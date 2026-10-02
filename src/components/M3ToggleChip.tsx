@@ -36,26 +36,31 @@ export default function M3ToggleChip({
       aria-checked={checked}
       disabled={disabled}
       onClick={handleToggle}
-      className={`relative inline-flex items-center gap-2 select-none focus:outline-none active:scale-95 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`relative inline-flex items-center justify-center gap-2.5 select-none focus:outline-none active:scale-95 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 min-h-[36px] cursor-pointer ${className}`}
     >
+      {label && (
+        <span className="text-xs font-semibold text-[var(--md-on-surface)] tracking-tight select-none">
+          {label}
+        </span>
+      )}
+
       {/* Switch track pill */}
       <motion.div
         animate={{
-          backgroundColor: checked ? 'var(--md-primary)' : 'transparent',
+          backgroundColor: checked ? 'var(--md-primary)' : 'var(--md-surface-container-highest)',
           borderColor: checked ? 'var(--md-primary)' : 'var(--md-outline)',
         }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className="w-13 h-7 rounded-full p-0.5 border-2 flex items-center transition-colors shadow-none relative"
-        style={{ width: '52px', height: '28px' }}
+        className="w-[52px] h-[30px] rounded-full p-[3px] border-2 flex items-center transition-colors shadow-none relative shrink-0"
       >
         {/* Sliding Thumb */}
         <motion.div
           animate={{
-            x: checked ? 24 : 2,
+            x: checked ? 22 : 1,
             scale: checked ? 1 : 0.85,
           }}
           transition={{ type: 'spring', stiffness: 550, damping: 32 }}
-          className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors shadow-sm ${
+          className={`w-[20px] h-[20px] rounded-full flex items-center justify-center transition-colors shadow-sm shrink-0 ${
             checked
               ? 'bg-[var(--md-on-primary)] text-[var(--md-primary)]'
               : 'bg-[var(--md-outline)] text-transparent'
@@ -72,12 +77,6 @@ export default function M3ToggleChip({
           )}
         </motion.div>
       </motion.div>
-
-      {label && (
-        <span className="text-xs font-semibold text-[var(--md-on-surface)] tracking-tight">
-          {label}
-        </span>
-      )}
     </button>
   );
 }

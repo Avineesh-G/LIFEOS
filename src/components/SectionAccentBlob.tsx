@@ -61,8 +61,8 @@ export function SectionAccentBlob() {
           // but zero GPU compositing cost. Outer stop at 70% creates the
           // same feathered edge that blur would produce.
           background: `radial-gradient(ellipse at center,
-            var(--md-accent-blob, #2563EB) 0%,
-            color-mix(in srgb, var(--md-accent-blob, #2563EB) 40%, transparent) 40%,
+            var(--md-accent-blob, var(--md-primary, #8B1E3F)) 0%,
+            color-mix(in srgb, var(--md-accent-blob, var(--md-primary, #8B1E3F)) 40%, transparent) 40%,
             transparent 70%
           )`,
           opacity: (section === 'history' || section === 'outing') ? (isDark ? 0.18 : 0.10) : (isDark ? 0.32 : 0.22),

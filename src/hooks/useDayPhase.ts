@@ -29,18 +29,18 @@ export const FIXED_NIGHT_STATE: DayPhaseState = {
 };
 
 // ── In-Memory Reactive Store with Preferences Persistence ──
-let currentThemeMode: ThemeMode = 'night';
+let currentThemeMode: ThemeMode = 'dynamic';
 const themeModeListeners = new Set<(mode: ThemeMode) => void>();
 
-// Synchronous hydration from localStorage (defaults to 'night' / black mode if unset)
+// Synchronous hydration from localStorage (defaults to 'dynamic' mode if unset)
 if (typeof window !== 'undefined') {
   try {
     const cached = localStorage.getItem(THEME_MODE_PREF_KEY);
     if (cached === 'night' || cached === 'dynamic') {
       currentThemeMode = cached;
     } else {
-      currentThemeMode = 'night';
-      localStorage.setItem(THEME_MODE_PREF_KEY, 'night');
+      currentThemeMode = 'dynamic';
+      localStorage.setItem(THEME_MODE_PREF_KEY, 'dynamic');
     }
   } catch {}
 }
@@ -54,11 +54,12 @@ Preferences.get({ key: THEME_MODE_PREF_KEY })
         themeModeListeners.forEach(fn => fn(currentThemeMode));
       }
     } else {
-      currentThemeMode = 'night';
-      Preferences.set({ key: THEME_MODE_PREF_KEY, value: 'night' }).catch(() => {});
+      currentThemeMode = 'dynamic';
+      Preferences.set({ key: THEME_MODE_PREF_KEY, value: 'dynamic' }).catch(() => {});
     }
   })
   .catch(() => {});
+
 
 export function getThemeMode(): ThemeMode {
   return currentThemeMode;

@@ -279,7 +279,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
         </div>
       }
     >
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
         {/* Top Material 3 Segmented Mode Pill Switcher */}
         <motion.div variants={item} className="flex justify-center">

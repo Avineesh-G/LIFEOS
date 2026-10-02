@@ -138,9 +138,9 @@ export function getM3ThemeForSection(
   const rawScheme = isDark ? theme.schemes.dark : theme.schemes.light;
   const neutral = theme.palettes.neutral;
 
-  const baseLight = '#EEF6F7';
-  const baseDark = '#050B0D';
-  const sceneBg = isDark ? blendHex(baseDark, seedHex, 0.04) : blendHex(baseLight, seedHex, 0.04);
+  const baseLight = '#FAF8F8';
+  const baseDark = '#111318';
+  const sceneBg = isDark ? blendHex(baseDark, seedHex, 0.04) : blendHex(baseLight, seedHex, 0.03);
   const onSceneBg = isDark ? '#F2F3F5' : '#1E2024';
 
   let surfaceContainerLowest: string;

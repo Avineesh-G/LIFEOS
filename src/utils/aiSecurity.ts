@@ -118,37 +118,13 @@ export function getGroqApiKey(appData?: any): string {
   return '';
 }
 
-/**
- * Syncs API key dynamically from AppData context into memory & local storage
- */
-export function syncApiKeyFromAppData(data?: any): string {
-  if (!data) return getGroqApiKey();
-  if (data.geminiApiKey && data.geminiApiKey.trim()) {
-    const key = data.geminiApiKey.trim();
-    cachedApiKey = key;
-    if (typeof localStorage !== 'undefined') {
-      try {
-        localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, key);
-        localStorage.setItem('lifeos_gemini_api_key', key);
-      } catch {}
-    }
-    return key;
-  }
-  return getGroqApiKey(data);
-}
-
-/**
- * Sets API key securely across Preferences, LocalStorage, and optional AppData patch callback
- */
 export async function setGroqApiKey(key: string, updateDataFn?: (patch: any) => Promise<any>): Promise<void> {
-  const trimmed = key.trim();
-  cachedApiKey = trimmed;
+  cachedApiKey = key.trim();
   try {
-    await Preferences.set({ key: GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, value: trimmed });
-    localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, trimmed);
-    localStorage.setItem('lifeos_gemini_api_key', trimmed);
+    await Preferences.set({ key: GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, value: cachedApiKey });
+    localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, cachedApiKey);
     if (updateDataFn) {
-      await updateDataFn({ geminiApiKey: trimmed });
+      await updateDataFn({ geminiApiKey: cachedApiKey });
     }
   } catch {}
 }

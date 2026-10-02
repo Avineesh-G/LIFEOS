@@ -9,24 +9,30 @@ export interface ThemeAccent {
 }
 
 export const PRESET_ACCENTS: ThemeAccent[] = [
-  { id: 'teal', name: 'Gemini Teal', primary: '#2DD4BF', secondary: '#22D3EE', darkText: '#0F766E' },
-  { id: 'cyan', name: 'Electric Cyan', primary: '#06B6D4', secondary: '#38BDF8', darkText: '#0E7490' },
-  { id: 'emerald', name: 'Jade Emerald', primary: '#10B981', secondary: '#34D399', darkText: '#047857' },
-  { id: 'sky', name: 'Celestial Sky', primary: '#38BDF8', secondary: '#818CF8', darkText: '#0284C7' },
-  { id: 'mint', name: 'Polar Mint', primary: '#5EEAD4', secondary: '#7DD3FC', darkText: '#0D9488' },
-  { id: 'azure', name: 'Deep Azure', primary: '#3B82F6', secondary: '#60A5FA', darkText: '#1D4ED8' },
+  { id: 'burgundy', name: 'Burgundy', primary: '#8B1E3F', secondary: '#B82E58', darkText: '#5A0B22' },
+  { id: 'deep-navy', name: 'Deep Navy', primary: '#183B5B', secondary: '#2C5784', darkText: '#0E2338' },
+  { id: 'emerald', name: 'Emerald', primary: '#087F5B', secondary: '#12B886', darkText: '#05523A' },
+  { id: 'plum', name: 'Plum', primary: '#6A1B6D', secondary: '#9C27B0', darkText: '#451047' },
+  { id: 'indigo', name: 'Indigo', primary: '#4936A3', secondary: '#6741D9', darkText: '#2F2070' },
+  { id: 'terracotta', name: 'Terracotta', primary: '#A84A32', secondary: '#D95B3B', darkText: '#702D1E' },
+  { id: 'teal', name: 'Teal', primary: '#087F83', secondary: '#15AABF', darkText: '#055356' },
+  { id: 'rose', name: 'Rose', primary: '#A83F5D', secondary: '#D64E77', darkText: '#702339' },
+  { id: 'mocha', name: 'Mocha', primary: '#765548', secondary: '#966B5A', darkText: '#4A342B' },
+  { id: 'slate', name: 'Slate', primary: '#53616D', secondary: '#738494', darkText: '#343E47' },
 ];
 
-export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Gemini Teal #2DD4BF
+export const DEFAULT_ACCENT = PRESET_ACCENTS[0]; // Burgundy #8B1E3F
+
+
 
 export const THEME_ACCENT_STORAGE_KEY = 'lifeos_unified_accent';
 export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';
 
 export function hexToRgbTuple(hex: string): [number, number, number] {
   const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16) || 45;
-  const g = parseInt(clean.substring(2, 4), 16) || 212;
-  const b = parseInt(clean.substring(4, 6), 16) || 191;
+  const r = parseInt(clean.substring(0, 2), 16) || 128;
+  const g = parseInt(clean.substring(2, 4), 16) || 0;
+  const b = parseInt(clean.substring(4, 6), 16) || 32;
   return [r, g, b];
 }
 
@@ -82,8 +88,9 @@ export function setActiveAccent(accent: ThemeAccent): void {
 /**
  * Apply dynamic single source of truth tokens to document.documentElement
  */
-export function applyUnifiedThemeToDocument(accent: ThemeAccent = activeAccent, isDark = true): void {
+export function applyUnifiedThemeToDocument(accent: ThemeAccent = activeAccent, isDark = false): void {
   if (typeof document === 'undefined') return;
+
   const root = document.documentElement;
   const [r, g, b] = hexToRgbTuple(accent.primary);
 

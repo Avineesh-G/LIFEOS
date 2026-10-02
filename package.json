@@ -1,7 +1,7 @@
 {
   "name": "lifeos",
   "private": true,
-  "version": "3.0.0",
+  "version": "3.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -22,6 +22,7 @@
     "test:scroll": "node --experimental-strip-types scripts/test-scroll-regression.ts",
     "test:app-guide": "node --experimental-strip-types scripts/verify-app-guide.ts",
     "test:ai-privacy": "node --experimental-strip-types scripts/verify-ai-privacy.ts",
+    "test:ai-models": "node --experimental-strip-types scripts/test-ai-models.ts",
     "check:squircles": "node --experimental-strip-types scripts/check-squircle-tokens.ts"
   },
   "dependencies": {

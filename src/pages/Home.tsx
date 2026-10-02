@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData } from '../types';
 import DailyBriefCard from '../components/DailyBriefCard';
+import QuotesTicker from '../components/QuotesTicker';
 import AiCoachAvatar from '../components/rive/AiCoachAvatar';
 import StreakIndicator from '../components/rive/StreakIndicator';
 import InteractiveClock from '../components/interactive/InteractiveClock';
@@ -66,9 +67,9 @@ const DayCell = memo(function DayCell({
       }}
       className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all select-none focus:outline-none bouncy-tap ${
         !isSel && isCur
-          ? 'border border-[var(--accent-primary)]/40 bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
+          ? 'border border-[var(--md-primary)]/40 bg-[var(--md-primary-container)]/40 rounded-[18px] sm:rounded-[20px]'
           : !isSel
-          ? 'hover:bg-[var(--pill-active-bg)] rounded-[18px] sm:rounded-[20px]'
+          ? 'hover:bg-[var(--md-surface-container-high)] rounded-[18px] sm:rounded-[20px]'
           : ''
       }`}
     >
@@ -90,10 +91,10 @@ const DayCell = memo(function DayCell({
         {format(d, 'd')}
       </span>
       <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
-        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#3B82F6]'}`} />}
-        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#22C55E]'}`} />}
-        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[var(--accent-primary)]'}`} />}
-        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--accent-contrast)]' : 'bg-[#F5A623]'}`} />}
+        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#3B82F6]'}`} />}
+        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
+        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
+        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#F5A623]'}`} />}
         {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
           <span className="w-1 h-1 rounded-full opacity-0" />
         )}
@@ -278,17 +279,17 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </div>
       }
     >
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
-      {/* ── Ambient Executive Greeting Hero Card (Borderless LiquidFrame) ── */}
+      {/* ── Material 3 Expressive Greeting Hero Card (surfaceContainer) ── */}
       <motion.div variants={item}>
-        <LiquidFrame noBorder className="space-y-4 select-none border-none outline-none ring-0 focus:outline-none focus:ring-0">
+        <div className="rounded-[28px] p-5 sm:p-6 bg-[var(--md-surface-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs space-y-3.5 select-none relative overflow-hidden transition-all duration-300">
           {/* Top Header Row: Date Pill & Mode Badge */}
           <div className="flex items-center gap-2 flex-wrap">
             <LiveClock />
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--glass-2)] text-primary shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
               Active Session
             </span>
           </div>
@@ -296,26 +297,28 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           {/* Hero Title Row with AI Coach Avatar on Right */}
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="m3-headline-l-emphasized text-2xl sm:text-3xl md:text-4xl text-primary leading-tight font-medium">
-                {greetingTime},{' '}
-                <span
-                  style={{ backgroundImage: 'var(--headline-gradient)' }}
-                  className="bg-clip-text text-transparent font-semibold"
-                >
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold leading-tight">
+                <span className="text-gradient-dark">{greetingTime},</span>{' '}
+                <span className="text-[var(--md-primary)] font-extrabold">
                   {userName}
                 </span>
               </h1>
 
               {/* Motivational Subline */}
-              <p className="text-xs sm:text-[13px] font-medium text-secondary mt-1.5 tracking-tight flex items-center gap-1.5">
-                <Sparkles size={13} className="text-accent shrink-0 opacity-90" />
+              <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
+                <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-95" />
                 <span>Your personal operating system · Focus and execute</span>
               </p>
             </div>
 
             <AiCoachAvatar state="idle" size={54} />
           </div>
-        </LiquidFrame>
+        </div>
+      </motion.div>
+
+      {/* ── Philosophical & Life Quotations Live Ticker (Seamless, no card) ── */}
+      <motion.div variants={item} className="px-1 -my-1">
+        <QuotesTicker />
       </motion.div>
 
       {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
@@ -365,7 +368,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                   ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-[var(--md-outline-variant)]'
                   : selectedDateData.isSelPast
                   ? 'bg-[var(--md-surface-container-low)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)]'
-                  : 'bg-emerald-500/12 text-[#22C55E] border-[#22C55E]/20'
+                  : 'bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] border-[var(--md-outline-variant)]'
               }`}
             >
               {selectedDateData.isSelToday ? 'Live Today' : selectedDateData.isSelPast ? 'Completed' : 'Upcoming'}
@@ -573,11 +576,11 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                       )}
                     </div>
                   ) : (
-                    <div className="p-3 rounded-[18px] bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-800/50 text-center">
-                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-1.5">
+                    <div className="p-3 rounded-[18px] bg-[var(--md-primary-container)]/30 border border-[var(--md-outline-variant)] text-center">
+                      <p className="text-xs font-semibold text-[var(--md-on-primary-container)] flex items-center justify-center gap-1.5">
                         {selectedDateData.tasks.length > 0 ? (
                           <>
-                            <CheckCircle2 size={15} className="text-emerald-500 shrink-0" />
+                            <CheckCircle2 size={15} className="text-[var(--md-primary)] shrink-0" />
                             <span>All tasks completed for today</span>
                           </>
                         ) : (

@@ -1,6 +1,14 @@
 import { GROQ_CONFIG } from '../config/ai.ts';
+import {
+  CHAT_PRIMARY,
+  CHAT_FALLBACKS,
+  STT_PRIMARY,
+  STT_FALLBACKS,
+  GROQ_STORAGE_KEYS,
+} from '../config/aiModels.ts';
 import { getGroqApiKey, getAiProxyUrl } from '../utils/aiSecurity.ts';
 import { getSystemPromptForContext } from '../ai/appGuide.ts';
+import { resolveActiveChatModel, markModelFailedInSession } from './aiModelResolver.ts';
 
 export interface ChatMessage {
   id: string;
@@ -8,6 +16,13 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   dataSentContext?: string;
+}
+
+export interface AiErrorPayload {
+  friendlyMessage: string;
+  rawDetails?: string;
+  statusCode?: number;
+  retryAfterSeconds?: number;
 }
 
 /**
@@ -26,6 +41,85 @@ export function stripUrls(text: string): string {
 }
 
 /**
+ * Redacts any API keys from error messages and debug outputs
+ */
+export function redactKeys(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/gsk_[a-zA-Z0-9_-]{10,}/g, 'gsk_***[REDACTED]***')
+    .replace(/AIza[a-zA-Z0-9_-]{10,}/g, 'AIza***[REDACTED]***')
+    .replace(/Bearer\s+[a-zA-Z0-9_\.-]+/gi, 'Bearer ***[REDACTED]***');
+}
+
+/**
+ * Parses upstream Groq error and returns friendly message + sanitized details
+ */
+export function formatAiError(err: any, status?: number, headers?: Headers): AiErrorPayload {
+  const raw = typeof err === 'string' ? err : err?.message || JSON.stringify(err);
+  const sanitizedDetails = redactKeys(raw);
+
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    return {
+      friendlyMessage: 'AI needs internet.',
+      rawDetails: 'Browser is currently offline.',
+      statusCode: 0,
+    };
+  }
+
+  if (status === 401 || sanitizedDetails.toLowerCase().includes('invalid api key') || sanitizedDetails.toLowerCase().includes('unauthorized')) {
+    return {
+      friendlyMessage: 'Your Groq key was rejected. Check it in Settings > AI.',
+      rawDetails: sanitizedDetails,
+      statusCode: 401,
+    };
+  }
+
+  if (status === 429 || sanitizedDetails.toLowerCase().includes('rate limit') || sanitizedDetails.toLowerCase().includes('rate_limit_exceeded')) {
+    let retrySec = 10;
+    if (headers?.get('retry-after')) {
+      const parsed = parseInt(headers.get('retry-after') || '', 10);
+      if (!isNaN(parsed) && parsed > 0) retrySec = parsed;
+    }
+    return {
+      friendlyMessage: `Rate limit reached. Try again in ${retrySec} seconds.`,
+      rawDetails: sanitizedDetails,
+      statusCode: 429,
+      retryAfterSeconds: retrySec,
+    };
+  }
+
+  if (status === 404 || sanitizedDetails.toLowerCase().includes('does not exist') || sanitizedDetails.toLowerCase().includes('model_not_found') || sanitizedDetails.toLowerCase().includes('model_decommissioned')) {
+    return {
+      friendlyMessage: 'No supported AI model is available.',
+      rawDetails: sanitizedDetails,
+      statusCode: 404,
+    };
+  }
+
+  if (status === 400) {
+    return {
+      friendlyMessage: 'The AI request was rejected.',
+      rawDetails: sanitizedDetails,
+      statusCode: 400,
+    };
+  }
+
+  if (sanitizedDetails.toLowerCase().includes('timeout') || sanitizedDetails.toLowerCase().includes('abort')) {
+    return {
+      friendlyMessage: 'The AI took too long. Try again.',
+      rawDetails: sanitizedDetails,
+      statusCode: 408,
+    };
+  }
+
+  return {
+    friendlyMessage: sanitizedDetails.length > 80 ? 'An error occurred while calling Groq AI.' : sanitizedDetails,
+    rawDetails: sanitizedDetails,
+    statusCode: status || 500,
+  };
+}
+
+/**
  * Streams chat completions from Groq (Mode A) or Proxy URL (Mode B).
  */
 export async function streamChatCompletion(
@@ -34,11 +128,12 @@ export async function streamChatCompletion(
   userDataContext: string,
   onChunk: (chunkText: string) => void,
   onComplete: (fullText: string) => void,
-  onError: (err: Error) => void,
+  onError: (err: Error, errorPayload?: AiErrorPayload) => void,
   signal?: AbortSignal
 ): Promise<void> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    onError(new Error('AI needs internet connection. Please connect to the internet and try again.'));
+    const payload = formatAiError('Offline');
+    onError(new Error(payload.friendlyMessage), payload);
     return;
   }
 
@@ -46,7 +141,12 @@ export async function streamChatCompletion(
   const apiKey = getGroqApiKey();
 
   if (!proxyUrl && !apiKey) {
-    onError(new Error('Groq API Key is missing. Please enter your API key in Settings > AI.'));
+    const payload: AiErrorPayload = {
+      friendlyMessage: 'Groq API Key is missing. Please enter your API key in Settings > AI.',
+      rawDetails: 'No API key or Proxy URL configured in user storage.',
+      statusCode: 401,
+    };
+    onError(new Error(payload.friendlyMessage), payload);
     return;
   }
 
@@ -70,36 +170,41 @@ export async function streamChatCompletion(
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  const candidateModels = GROQ_CONFIG.MODELS.CHAT_FALLBACKS || [
-    GROQ_CONFIG.MODELS.CHAT_PRIMARY,
-    'llama-3.1-8b-instant',
-    'llama-3.3-70b-versatile',
-  ];
+  // Resolve best active model dynamically
+  const resolution = await resolveActiveChatModel(apiKey);
+  const initialModel = resolution.activeModel;
 
-  let lastError: Error | null = null;
+  const candidateModels = [
+    initialModel,
+    ...CHAT_FALLBACKS.filter(m => m !== initialModel),
+    CHAT_PRIMARY,
+  ].filter((v, i, a) => a.indexOf(v) === i);
+
+  let lastErrorPayload: AiErrorPayload | null = null;
+  let lastErrorObj: Error | null = null;
 
   for (const modelToTry of candidateModels) {
     try {
+      const requestPayload: any = {
+        model: modelToTry,
+        messages: fullMessages,
+        temperature: 0.3,
+        max_completion_tokens: 2048,
+        stream: true,
+      };
+
+      if (modelToTry.includes('gpt-oss')) {
+        requestPayload.reasoning_effort = 'low';
+      }
+
       const response = await fetch(targetUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          model: modelToTry,
-          messages: fullMessages,
-          temperature: 0.3,
-          max_tokens: 1024,
-          stream: true,
-        }),
+        body: JSON.stringify(requestPayload),
         signal,
       });
 
       if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('Groq API Rate Limit reached. Please wait a moment and try again.');
-        }
-        if (response.status === 401) {
-          throw new Error('Invalid Groq API Key. Please verify your key in Settings > AI.');
-        }
         const errText = await response.text();
         let cleanErrorMessage = errText;
         try {
@@ -107,18 +212,27 @@ export async function streamChatCompletion(
           cleanErrorMessage = parsed.error?.message || errText;
         } catch {}
 
-        // If model decommissioned, not found, or invalid parameter, try next model in candidate list
+        const parsedPayload = formatAiError(cleanErrorMessage, response.status, response.headers);
+        lastErrorPayload = parsedPayload;
+        lastErrorObj = new Error(parsedPayload.friendlyMessage);
+
+        try {
+          localStorage.setItem(GROQ_STORAGE_KEYS.LAST_AI_ERROR, JSON.stringify(parsedPayload));
+        } catch {}
+
+        // Model not found, decommissioned, or invalid model 404/400 -> mark failed for session and fallback
         if (
           response.status === 404 ||
-          response.status === 400 && (cleanErrorMessage.toLowerCase().includes('model') || cleanErrorMessage.toLowerCase().includes('decommissioned') || cleanErrorMessage.toLowerCase().includes('deprecated')) ||
-          cleanErrorMessage.toLowerCase().includes('does not exist')
+          (response.status === 400 && (cleanErrorMessage.toLowerCase().includes('model') || cleanErrorMessage.toLowerCase().includes('decommissioned') || cleanErrorMessage.toLowerCase().includes('deprecated') || cleanErrorMessage.toLowerCase().includes('does not exist')))
         ) {
-          console.warn(`[AI Client] Model ${modelToTry} unavailable: ${cleanErrorMessage}, attempting fallback...`);
-          lastError = new Error(cleanErrorMessage);
+          console.warn(`[AI Client] Model ${modelToTry} unavailable: ${cleanErrorMessage}, marking bad and trying fallback...`);
+          markModelFailedInSession(modelToTry);
           continue;
         }
 
-        throw new Error(cleanErrorMessage);
+        // Fatal errors (401 invalid key, rate limits) should stop trying
+        onError(lastErrorObj, parsedPayload);
+        return;
       }
 
       if (!response.body) {
@@ -127,7 +241,7 @@ export async function streamChatCompletion(
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
-      let accumulatedText = '';
+      let accumulatedVisibleText = '';
       let buffer = '';
 
       while (true) {
@@ -143,16 +257,16 @@ export async function streamChatCompletion(
           if (trimmed.startsWith('data: ')) {
             const dataStr = trimmed.replace(/^data:\s*/, '');
             if (dataStr === '[DONE]') {
-              const cleanFinal = stripUrls(accumulatedText);
-              onComplete(cleanFinal);
-              return;
+              break;
             }
             try {
               const parsed = JSON.parse(dataStr);
-              const delta = parsed.choices?.[0]?.delta?.content || '';
-              if (delta) {
-                accumulatedText += delta;
-                const cleanChunk = stripUrls(accumulatedText);
+              // Ignore reasoning chunks in delta (gpt-oss reasoning)
+              // Only collect delta.content (visible text)
+              const deltaContent = parsed.choices?.[0]?.delta?.content;
+              if (deltaContent && typeof deltaContent === 'string') {
+                accumulatedVisibleText += deltaContent;
+                const cleanChunk = stripUrls(accumulatedVisibleText);
                 onChunk(cleanChunk);
               }
             } catch {}
@@ -160,21 +274,58 @@ export async function streamChatCompletion(
         }
       }
 
-      const cleanFinal = stripUrls(accumulatedText);
+      // Step 5: If stream ended with no visible text, fallback once to non-streaming
+      if (!accumulatedVisibleText.trim()) {
+        console.warn(`[AI Client] Stream finished with 0 visible text. Attempting non-streaming retry on ${modelToTry}...`);
+        const nonStreamPayload = {
+          ...requestPayload,
+          stream: false,
+        };
+
+        const retryRes = await fetch(targetUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(nonStreamPayload),
+          signal,
+        });
+
+        if (retryRes.ok) {
+          const retryData = await retryRes.json();
+          let fallbackReply = retryData.choices?.[0]?.message?.content || '';
+          fallbackReply = fallbackReply.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+          if (fallbackReply) {
+            const cleanFinal = stripUrls(fallbackReply);
+            onComplete(cleanFinal);
+            return;
+          }
+        }
+
+        const emptyPayload: AiErrorPayload = {
+          friendlyMessage: 'The AI returned an empty answer. Try again.',
+          rawDetails: 'Both streaming and non-streaming responses contained 0 visible completion characters.',
+          statusCode: 200,
+        };
+        onError(new Error(emptyPayload.friendlyMessage), emptyPayload);
+        return;
+      }
+
+      const cleanFinal = stripUrls(accumulatedVisibleText);
       onComplete(cleanFinal);
-      return; // Successful stream completion
+      return; // Successful completion
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      lastError = err instanceof Error ? err : new Error(String(err));
-      // If error is rate limit or auth, don't keep trying models
-      if (lastError.message.includes('Rate Limit') || lastError.message.includes('Invalid Groq API Key')) {
-        break;
-      }
+      const parsedPayload = formatAiError(err);
+      lastErrorPayload = parsedPayload;
+      lastErrorObj = new Error(parsedPayload.friendlyMessage);
     }
   }
 
-  if (lastError) {
-    onError(lastError);
+  if (lastErrorPayload && lastErrorObj) {
+    onError(lastErrorObj, lastErrorPayload);
+  } else {
+    const generic = formatAiError('No response received from AI');
+    onError(new Error(generic.friendlyMessage), generic);
   }
 }
 
@@ -183,41 +334,57 @@ export async function streamChatCompletion(
  */
 export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    throw new Error('AI needs internet connection for voice transcription.');
+    throw new Error('AI needs internet.');
   }
 
   const proxyUrl = getAiProxyUrl();
   const apiKey = getGroqApiKey();
 
   if (!proxyUrl && !apiKey) {
-    throw new Error('Groq API Key is missing. Please enter your API key in Settings > AI.');
+    throw new Error('Your Groq key was rejected. Check it in Settings > AI.');
   }
 
   const targetUrl = proxyUrl ? `${proxyUrl.replace(/\/$/, '')}/v1/audio/transcriptions` : GROQ_CONFIG.TRANSCRIPTION_ENDPOINT;
 
-  const formData = new FormData();
-  formData.append('file', audioBlob, 'voice_recording.webm');
-  formData.append('model', GROQ_CONFIG.MODELS.AUDIO_TRANSCRIBE);
-  formData.append('response_format', 'json');
+  const candidateAudioModels = [STT_PRIMARY, ...STT_FALLBACKS];
+  let lastError: Error | null = null;
 
-  const headers: Record<string, string> = {};
-  if (!proxyUrl && apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
-  }
+  for (const modelToTry of candidateAudioModels) {
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice_recording.webm');
+      formData.append('model', modelToTry);
+      formData.append('response_format', 'json');
 
-  const response = await fetch(targetUrl, {
-    method: 'POST',
-    headers,
-    body: formData,
-  });
+      const headers: Record<string, string> = {};
+      if (!proxyUrl && apiKey) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
 
-  if (!response.ok) {
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded during voice transcription.');
+      const response = await fetch(targetUrl, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        if (response.status === 404 || response.status === 400) {
+          lastError = new Error(errText);
+          continue;
+        }
+        if (response.status === 429) {
+          throw new Error('Rate limit reached during voice transcription.');
+        }
+        throw new Error(`Voice transcription failed (${response.status}).`);
+      }
+
+      const json = await response.json();
+      return json.text || '';
+    } catch (err: any) {
+      lastError = err instanceof Error ? err : new Error(String(err));
     }
-    throw new Error(`Voice transcription failed (${response.status}).`);
   }
 
-  const json = await response.json();
-  return json.text || '';
+  throw lastError || new Error('Voice transcription failed with all available models.');
 }
