@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
 import { haptics } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { triggerConfettiBurst } from '../utils/confetti';
 import { AppData, Task, Expense, NoteItem } from '../types';
 
@@ -154,7 +155,7 @@ export const BrainDump: React.FC<BrainDumpProps> = ({ data, updateData }) => {
     });
 
     setTimeout(() => {
-      navigate('/');
+      handleAppBack(navigate);
     }, 1500);
   };
 
@@ -164,8 +165,8 @@ export const BrainDump: React.FC<BrainDumpProps> = ({ data, updateData }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/')}
-            className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors"
+            onClick={() => handleAppBack(navigate)}
+            className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors active:scale-95"
             aria-label="Back"
           >
             <ChevronLeft size={22} />

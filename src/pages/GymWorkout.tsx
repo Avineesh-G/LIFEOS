@@ -4,6 +4,7 @@ import { ChevronLeft, Plus, Minus, Check, Save, Brain, TrendingUp, Activity, Awa
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import {
   WORKOUT_MUSCLES,
   getPreWorkoutTip,
@@ -396,8 +397,8 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
 
       {/* Header */}
       <div className="flex items-center justify-between pt-1">
-        <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono">
-          <ChevronLeft size={16} /> Back to Gym
+        <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95">
+          <ChevronLeft size={16} /> Back
         </button>
         <div className="label-mono font-bold text-xs text-secondary-light dark:text-secondary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1 rounded-full border border-border-light dark:border-border-dark flex items-center gap-1.5">
           {!isRest && pct === 100 && <Check size={12} className="text-emerald-500 stroke-[3]" />}

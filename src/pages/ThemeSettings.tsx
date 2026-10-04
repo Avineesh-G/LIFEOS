@@ -16,6 +16,7 @@ import { getSchemeForPalette, schemeToCssVariables, M3ColorScheme } from '../the
 import { useM3Theme } from '../theme/ThemeContext';
 import { ThemeMode, isDarkModeActive } from '../theme/themeStore';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 
 export default function ThemeSettings() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function ThemeSettings() {
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => handleAppBack(navigate)}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors active:scale-95"
           aria-label="Go Back"
         >

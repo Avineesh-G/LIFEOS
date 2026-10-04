@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 60,
-  versionName: '3.2.2',
+  versionCode: 61,
+  versionName: '3.2.3',
   releaseDate: '2026-10-04',
   apkSize: '13.85 MB',
   apkSizeBytes: 14520000,
-  releaseNotes: 'LifeOS v3.2.2 (Build 60):\n• Navigation Hub Fix: Removed frozen background shift so More menu opens instantly without jumping the page\n• Hub Grid Polish: Fixed word cropping across 2-line destination titles (Active Recall, To-Do Tasks, Shopping Lists, etc.)\n• Google Sans Flex & Letter Depth: Enhanced global typography, optical depth, and crisp headers across all interfaces\n• AI Action Automation: Resolved AI action proposal execution so commands to add tasks/expenses/lists directly commit to their interfaces',
+  releaseNotes: 'LifeOS v3.2.3 (Build 61):\n• Path Memory Navigation: Sequential back navigation across all interfaces so pressing back retraces your exact steps\n• Unified Hardware & Gesture Back: Closes active overlays/sheets first, then traverses path history step-by-step to root exit guard\n• Universal In-App Back Polish: All screen header back buttons and chevrons now seamlessly follow path memory',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

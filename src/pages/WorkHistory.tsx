@@ -15,6 +15,7 @@ import {
 } from '../components/icons/MaterialSymbols';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { SkeletonGate, SkeletonCard } from '../components/Skeleton';
 import type { AppData, NutritionLog, WorkoutLog, Task, Expense } from '../types';
@@ -274,7 +275,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
       >
         <button
-          onClick={() => { triggerHaptic(10); navigate(-1); }}
+          onClick={() => { handleAppBack(navigate); }}
           className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
           aria-label="Go Back"
         >

@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar,
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, parseISO, addDays, subDays } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import NightCanteenSection from '../components/nutrition/NightCanteenSection';
@@ -492,9 +493,8 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
       >
         <button
           onClick={() => {
-            triggerHaptic(10);
             window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-            navigate('/');
+            handleAppBack(navigate);
           }}
           className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
           aria-label="Go Back"
@@ -1114,11 +1114,11 @@ Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized nam
                 type="button"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-                  navigate('/');
+                  handleAppBack(navigate);
                 }}
                 className="btn-pill flex-1 py-2 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
               >
-                Back to Home
+                Back
               </button>
             </div>
           </div>

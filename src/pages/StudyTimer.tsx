@@ -4,6 +4,7 @@ import { Play, Pause, Square, RotateCcw, ChevronLeft, Check, Sparkles, Clock } f
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { Capacitor } from '@capacitor/core';
 import { TimerNotification } from '../plugins/timerNotification';
 import type { AppData, StudySession } from '../types';
@@ -273,10 +274,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     return (
       <div className="max-w-md mx-auto space-y-6 pt-4">
         <button
-          onClick={() => navigate('/study')}
-          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans"
+          onClick={() => handleAppBack(navigate)}
+          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95"
         >
-          <ChevronLeft size={16} /> Back to Study
+          <ChevronLeft size={16} /> Back
         </button>
 
         <motion.div
@@ -322,10 +323,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   return (
     <div className="max-w-md mx-auto space-y-6 pt-2">
       <button
-        onClick={() => navigate('/study')}
-        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono"
+        onClick={() => handleAppBack(navigate)}
+        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95"
       >
-        <ChevronLeft size={16} /> Back to Study
+        <ChevronLeft size={16} /> Back
       </button>
 
       {timerState === 'idle' ? (

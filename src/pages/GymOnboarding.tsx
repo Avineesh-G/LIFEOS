@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { DynamicAnimatedIcon, AnimatedTrophy, AnimatedTarget, AnimatedDumbbell, AnimatedUser, AnimatedFlame, AnimatedActivity, AnimatedZap } from '../components/AnimatedIcons';
 import type { AppData } from '../types';
 
@@ -100,7 +101,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
   const handleBack = () => {
     triggerHaptic(10);
     if (step > 1) setStep(step - 1);
-    else navigate('/gym');
+    else handleAppBack(navigate);
   };
 
   const stepVariant = {

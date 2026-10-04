@@ -17,6 +17,7 @@ import {
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import { Modal } from '../components/BottomSheet';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
@@ -224,13 +225,12 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
       <div className="flex items-center justify-between gap-3">
         <button
           onClick={() => {
-            triggerHaptic('nav');
-            navigate('/shopping');
+            handleAppBack(navigate);
           }}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-95"
         >
           <ArrowLeft size={16} />
-          <span>All Lists</span>
+          <span>Back</span>
         </button>
 
         <div className="flex items-center gap-2">

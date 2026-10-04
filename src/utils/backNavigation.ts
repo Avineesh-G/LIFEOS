@@ -61,6 +61,98 @@ export function triggerTopDismissible(): boolean {
   return false;
 }
 
+// ── Path Memory Navigation Stack (LIFO History Tracking) ──
+
+const navPathStack: string[] = ['/'];
+let isPoppingNav = false;
+
+/**
+ * Record a route into the path memory stack.
+ * Prevents duplicates when staying on the same screen or when stepping backwards.
+ */
+export function recordNavigation(path: string): void {
+  if (!path) return;
+  const normalized = (path.startsWith('/') ? path : `/${path}`).split('?')[0].split('#')[0] || '/';
+
+  // If this route transition was triggered by our own back navigation, do not push
+  if (isPoppingNav) {
+    isPoppingNav = false;
+    return;
+  }
+
+  // Prevent duplicate consecutive entries
+  const currentTop = navPathStack[navPathStack.length - 1];
+  if (currentTop === normalized) {
+    return;
+  }
+
+  navPathStack.push(normalized);
+
+  // Keep history buffer bounded to 50 steps
+  if (navPathStack.length > 50) {
+    navPathStack.shift();
+  }
+}
+
+/**
+ * Check if there is history to navigate backwards.
+ */
+export function canGoBack(): boolean {
+  return navPathStack.length > 1;
+}
+
+/**
+ * Get a copy of the current navigation history.
+ */
+export function getNavigationHistory(): string[] {
+  return [...navPathStack];
+}
+
+/**
+ * Main application back press handler.
+ * 1. Closes topmost active modal/sheet/dialog (if open).
+ * 2. Closes speed dial or floating menus (if open).
+ * 3. Retraces navigation path history step-by-step.
+ * 4. At root ('/'), shows the double-tap exit guard toast.
+ */
+export function handleAppBack(navigate: (to: any, options?: any) => void): boolean {
+  // 1. Topmost active overlay (modals, bottom sheets, dialogs)
+  if (triggerTopDismissible()) {
+    triggerHaptic('light');
+    return true;
+  }
+
+  // 2. Speed dial or quick floating action menus
+  if ((window as any).__lifeos_menu_open) {
+    window.dispatchEvent(new CustomEvent('lifeos-close-menu'));
+    triggerHaptic('light');
+    return true;
+  }
+
+  // 3. Sequential Path History Retracing
+  if (navPathStack.length > 1) {
+    navPathStack.pop(); // Remove current route
+    const prevRoute = navPathStack[navPathStack.length - 1] || '/';
+    isPoppingNav = true;
+    triggerHaptic('nav');
+    navigate(prevRoute);
+    return true;
+  }
+
+  // If at root with only 1 item or empty, ensure at home
+  if (navPathStack.length === 1 && navPathStack[0] !== '/') {
+    navPathStack[0] = '/';
+    isPoppingNav = true;
+    triggerHaptic('nav');
+    navigate('/');
+    return true;
+  }
+
+  // 4. Root Home Page double-tap exit guard
+  handleRootBackPress();
+  return false;
+}
+
 // ── Root Page Double-Tap Exit Guard ──
 
 let lastBackPressedTime = 0;

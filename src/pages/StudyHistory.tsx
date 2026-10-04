@@ -4,6 +4,7 @@ import { ChevronLeft, Clock, BookOpen, HelpCircle, Save, Check, ChevronDown, Che
 import { format, parseISO, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData, StudySession } from '../types';
 
 interface StudyHistoryProps {
@@ -109,8 +110,8 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
 
   return (
     <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
-      <button onClick={() => navigate('/study')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1">
-        <ChevronLeft size={16} /> Back to Study
+      <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1 active:scale-95">
+        <ChevronLeft size={16} /> Back
       </button>
 
       <div>

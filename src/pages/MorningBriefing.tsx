@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
 import { haptics } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { triggerConfettiBurst } from '../utils/confetti';
 import { AppData, Task } from '../types';
 
@@ -99,7 +100,7 @@ export const MorningBriefing: React.FC<MorningBriefingProps> = ({ data, updateDa
     triggerConfettiBurst();
     setLaunched(true);
     setTimeout(() => {
-      navigate('/');
+      handleAppBack(navigate);
     }, 1200);
   };
 
@@ -117,9 +118,9 @@ export const MorningBriefing: React.FC<MorningBriefingProps> = ({ data, updateDa
           </h1>
         </div>
         <button
-          onClick={() => navigate('/')}
-          className="p-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface-variant)] transition-colors"
-          aria-label="Back to home"
+          onClick={() => handleAppBack(navigate)}
+          className="p-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface-variant)] transition-colors active:scale-95"
+          aria-label="Back"
         >
           <ChevronRight size={20} />
         </button>

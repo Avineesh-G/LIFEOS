@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { getAiWorkoutPlan, GEMINI_API_KEY } from '../utils/geminiCoach';
 import { FITNESS_GOALS } from '../utils/calculations';
 import type { AppData, WorkoutPlan, Exercise } from '../types';
@@ -281,7 +282,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   return (
     <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
       <div className="flex items-center justify-between pt-1">
-        <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono">
+        <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95">
           <ChevronLeft size={16} /> Back
         </button>
         <button onPointerDown={() => triggerHaptic('save')} onClick={handleSave} className="flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold hover:opacity-90 active:scale-[0.96] transition-all shadow-sm">

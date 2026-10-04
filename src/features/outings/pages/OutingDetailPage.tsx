@@ -43,6 +43,7 @@ import { AddExpenseSheet } from '../components/AddExpenseSheet';
 import { ManualEntrySheet } from '../components/ManualEntrySheet';
 import { SettleUpModal } from '../components/SettleUpModal';
 import { triggerHaptic } from '../../../utils/haptics';
+import { handleAppBack } from '../../../utils/backNavigation';
 import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
 import type { OutingExpense } from '../types';
 
@@ -188,11 +189,10 @@ export default function OutingDetailPage() {
         <button
           type="button"
           onClick={() => {
-            triggerHaptic('nav');
-            navigate('/outings');
+            handleAppBack(navigate);
           }}
           className="w-9 h-9 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 text-primary-light dark:text-primary-dark active:scale-95 transition-all cursor-pointer"
-          aria-label="Back to outings list"
+          aria-label="Back"
         >
           <ArrowLeft size={18} />
         </button>

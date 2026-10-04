@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
 import { haptics } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import { triggerConfettiBurst } from '../utils/confetti';
 import { AppData, StudySession, NoteItem } from '../types';
 
@@ -232,9 +233,9 @@ export const FlowRoom: React.FC<FlowRoomProps> = ({ data, updateData }) => {
         <button
           onClick={() => {
             stopSound();
-            navigate('/');
+            handleAppBack(navigate);
           }}
-          className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors"
+          className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors active:scale-95"
           aria-label="Back"
         >
           <ChevronLeft size={22} />

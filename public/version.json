@@ -1,10 +1,10 @@
 {
-  "versionCode": 60,
-  "versionName": "3.2.2",
+  "versionCode": 61,
+  "versionName": "3.2.3",
   "releaseDate": "2026-10-04",
-  "apkSize": "13.85 MB",
-  "apkSizeBytes": 14520000,
-  "releaseNotes": "LifeOS v3.2.2 (Build 60):\n• Navigation Hub Fix: Removed frozen background shift so More menu opens instantly without jumping the page\n• Hub Grid Polish: Fixed word cropping across 2-line destination titles (Active Recall, To-Do Tasks, Shopping Lists, etc.)\n• Google Sans Flex & Letter Depth: Enhanced global typography, optical depth, and crisp headers across all interfaces\n• AI Action Automation: Resolved AI action proposal execution so commands to add tasks/expenses/lists directly commit to their interfaces",
+  "apkSize": "13.84 MB",
+  "apkSizeBytes": 14515510,
+  "releaseNotes": "LifeOS v3.2.3 (Build 61):\n• Path Memory Navigation: Sequential back navigation across all interfaces so pressing back retraces your exact steps\n• Unified Hardware & Gesture Back: Closes active overlays/sheets first, then traverses path history step-by-step to root exit guard\n• Universal In-App Back Polish: All screen header back buttons and chevrons now seamlessly follow path memory",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "91f13faf16087c688607432e81481db3d37468609103aedc022daeda030bbc3f"
+  "sha256": "8dc9fea3069739b71599194a48ab83e84bf12e15cad7c7649f4b9b16ef65980d"
 }

@@ -62,7 +62,7 @@ import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppFore
 import { DEFAULT_DATA } from './db';
 import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
 import { scheduleWidgetSync } from './utils/widgetBridge';
-import { triggerTopDismissible, handleRootBackPress } from './utils/backNavigation';
+import { triggerTopDismissible, handleRootBackPress, recordNavigation, handleAppBack } from './utils/backNavigation';
 
 function MainContent({
   data,
@@ -287,48 +287,17 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    recordNavigation(location.pathname);
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Hardware Back Button: LIFO overlay dismissal -> sub-route history traversal -> root double-tap exit guard
+  // Hardware / System Back Button: LIFO overlays -> Speed dial -> Sequential Path Memory -> Root Double-Tap Exit
   useEffect(() => {
     let backListener: any;
     const registerBackButton = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
-          // 1. Topmost active overlay (modals, sheets, dialogs)
-          if (triggerTopDismissible()) {
-            return;
-          }
-
-          // 2. If speed dial menu is currently open, close it first without navigating away
-          if ((window as any).__lifeos_menu_open) {
-            window.dispatchEvent(new CustomEvent('lifeos-close-menu'));
-            return;
-          }
-
-          // 3. Hierarchical navigation for sub-routes
-          const path = location.pathname.toLowerCase();
-          if (path !== '/' && path !== '') {
-            // Check if nested sub-route (e.g. /gym/workout, /study/timer, /shopping/:id, /outings/:id, etc.)
-            const isNestedRoute = (
-              (path.startsWith('/gym/') && path !== '/gym') ||
-              (path.startsWith('/study/') && path !== '/study') ||
-              (path.startsWith('/shopping/') && path !== '/shopping') ||
-              (path.startsWith('/outings/') && path !== '/outings') ||
-              (path.startsWith('/settings/') && path !== '/settings')
-            );
-
-            if (isNestedRoute) {
-              navigate(-1);
-            } else {
-              // Primary sections return to Home ('/')
-              navigate('/');
-            }
-          } else {
-            // 4. Root Home Page double-tap exit protection
-            handleRootBackPress();
-          }
+          handleAppBack(navigate);
         });
       } catch {
         // Safe fallback on desktop browsers where Capacitor App plugin is idle
@@ -341,7 +310,7 @@ function App() {
         backListener.remove();
       }
     };
-  }, [location.pathname, navigate]);
+  }, [navigate]);
 
   // Deep linking for widget tap targets: lifeos://tasks, lifeos://study, lifeos://progress
   useEffect(() => {

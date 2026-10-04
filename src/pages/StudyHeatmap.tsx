@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { format, subDays, parseISO, startOfDay, isSameDay } from 'date-fns';
+import { handleAppBack } from '../utils/backNavigation';
 import { SkeletonGate, SkeletonStatRow, SkeletonCard } from '../components/Skeleton';
 import type { AppData } from '../types';
 
@@ -53,8 +54,8 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
 
   return (
     <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
-      <button onClick={() => navigate('/study')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1">
-        <ChevronLeft size={16} /> Back to Study
+      <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1 active:scale-95">
+        <ChevronLeft size={16} /> Back
       </button>
 
       <div>

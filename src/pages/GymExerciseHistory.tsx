@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData } from '../types';
 
 interface GymExerciseHistoryProps {
@@ -51,8 +52,8 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
 
   return (
     <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
-      <button onClick={() => navigate('/gym')} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-mono pt-1">
-        <ChevronLeft size={16} /> Back to Gym
+      <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1 active:scale-95">
+        <ChevronLeft size={16} /> Back
       </button>
 
       <div>
