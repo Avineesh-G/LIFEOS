@@ -1,107 +1,32 @@
-import { useState, useMemo, useEffect, memo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BookOpen, 
-  Dumbbell, 
-  Wallet, 
-  Clock, 
-  ChevronRight, 
-  Calendar, 
-  ArrowUpRight, 
-  Sparkles, 
-  CheckCircle2, 
-  Check, 
-  CalendarDays,
-  Plus
-} from 'lucide-react';
-import { format, isToday, isSameDay, addDays, subDays, isBefore, isAfter, startOfDay } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic } from '../utils/haptics';
+import { format, isToday, startOfDay } from 'date-fns';
+import { motion } from 'framer-motion';
 import type { AppData } from '../types';
-import DailyBriefCard from '../components/DailyBriefCard';
-import QuotesTicker from '../components/QuotesTicker';
-import AiCoachAvatar from '../components/rive/AiCoachAvatar';
-import StreakIndicator from '../components/rive/StreakIndicator';
-import InteractiveClock from '../components/interactive/InteractiveClock';
-import InteractiveDumbbell from '../components/interactive/InteractiveDumbbell';
-import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { M3_SHAPES } from '../theme/shapes';
-import { SkeletonGate, SkeletonCard, SkeletonStatRow, SkeletonHeroCard } from '../components/Skeleton';
-import { LiquidFrame, GlassSurface, SuggestionChip, AskLifeOSPill } from '../components/glass';
-
-// ── LiveClock — isolated so its 30s tick doesn't re-render the whole Home page ──
-const LiveClock = memo(function LiveClock() {
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--md-surface-container-high)] shadow-none">
-      <Clock size={13} className="text-[var(--md-primary)] shrink-0" />
-      <span className="text-xs font-semibold tracking-wide text-[var(--md-on-surface)]">
-        {format(now, 'EEEE, MMMM d')}
-      </span>
-    </div>
-  );
-});
-
-// ── DayCell — memoized so selecting one day doesn't re-render all 7 ──
-const DayCell = memo(function DayCell({
-  d, selectedDate, setSelectedDate, getDayDots
-}: {
-  d: Date;
-  selectedDate: Date;
-  setSelectedDate: (d: Date) => void;
-  getDayDots: (d: Date) => { hasStudy: boolean; hasGym: boolean; hasTasks: boolean; hasExpense: boolean };
-}) {
-  const isSel = isSameDay(d, selectedDate);
-  const isCur = isToday(d);
-  const dots = getDayDots(d);
-  return (
-    <button
-      key={d.toISOString()}
-      onClick={() => {
-        triggerHaptic('light');
-        setSelectedDate(d);
-      }}
-      className={`relative flex flex-col items-center justify-between py-2 sm:py-2.5 px-0.5 rounded-[18px] sm:rounded-[20px] overflow-hidden transition-all select-none focus:outline-none bouncy-tap ${
-        !isSel && isCur
-          ? 'border border-[var(--md-primary)]/40 bg-[var(--md-primary-container)]/40 rounded-[18px] sm:rounded-[20px]'
-          : !isSel
-          ? 'hover:bg-[var(--md-surface-container-high)] rounded-[18px] sm:rounded-[20px]'
-          : ''
-      }`}
-    >
-      {isSel && (
-        <motion.div
-          layoutId="activeHomeDatePill"
-          className="absolute inset-0 rounded-[18px] sm:rounded-[20px] bg-[var(--md-primary)] shadow-none"
-          transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-        />
-      )}
-      <span className={`relative z-10 text-[10px] sm:text-[11px] font-medium tracking-tight transition-colors ${
-        isSel ? 'text-[var(--md-on-primary)]' : isCur ? 'text-[var(--md-primary)] font-bold' : 'text-[var(--md-on-surface-variant)]'
-      }`}>
-        {format(d, 'EEE')}
-      </span>
-      <span className={`relative z-10 text-sm sm:text-base font-bold my-0.5 transition-colors font-stat ${
-        isSel ? 'text-[var(--md-on-primary)]' : isCur ? 'text-[var(--md-primary)] font-extrabold' : 'text-[var(--md-on-surface)]'
-      }`}>
-        {format(d, 'd')}
-      </span>
-      <div className="relative z-10 flex items-center justify-center gap-0.5 h-1.5 mt-0.5">
-        {dots.hasStudy && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#3B82F6]'}`} />}
-        {dots.hasGym && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
-        {dots.hasTasks && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[var(--md-primary)]'}`} />}
-        {dots.hasExpense && <span className={`w-1 h-1 rounded-full ${isSel ? 'bg-[var(--md-on-primary)]' : 'bg-[#F5A623]'}`} />}
-        {!dots.hasStudy && !dots.hasGym && !dots.hasTasks && !dots.hasExpense && (
-          <span className="w-1 h-1 rounded-full opacity-0" />
-        )}
-      </div>
-    </button>
-  );
-});
+import { triggerHaptic } from '../utils/haptics';
+import {
+  LargeTitleHeader,
+  GroupedList,
+  ListRow,
+  Button,
+  Ring,
+  ProgressBar,
+  Badge,
+  Skeleton,
+  MOTION_SPRINGS,
+  House,
+  Barbell,
+  ForkKnife,
+  Drop,
+  Timer,
+  Wallet,
+  CheckCircle,
+  Sun,
+  CalendarDots,
+  Sparkle,
+  Plus,
+  CaretRight,
+} from '../ui';
 
 interface HomeProps {
   data: AppData;
@@ -109,661 +34,322 @@ interface HomeProps {
   updateData?: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.03 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 8 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } },
-};
-
 export default function Home({ data, refresh, updateData }: HomeProps) {
   const navigate = useNavigate();
-  const [syncing, setSyncing] = useState(false);
-  const [syncSuccess, setSyncSuccess] = useState(false);
-  // 'ready' = data is not DEFAULT_DATA (i.e. real user data has hydrated)
-  const [dataReady, setDataReady] = useState(() => (
-    Array.isArray((data as any)?.studySessions) && (data as any).studySessions.length > 0
-  ));
-  useEffect(() => {
-    if (!dataReady && data?.studySessions !== undefined) {
-      setDataReady(true);
-    }
-  }, [data]);
 
-  // ── Selected Date State (Defaults to Today) ──
-  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
-
-  const greetingTime = useMemo(() => {
+  // Circadian Greeting
+  const greeting = useMemo(() => {
     const hr = new Date().getHours();
     if (hr < 12) return 'Good morning';
     if (hr < 17) return 'Good afternoon';
     return 'Good evening';
   }, []);
 
-  const userName = useMemo(() => {
-    try {
-      const cached = localStorage.getItem('lifeos_cached_auth_user');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed.displayName) return parsed.displayName.split(' ')[0];
-      }
-    } catch {}
-    return 'Avineesh';
-  }, []);
+  const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+  const todayDisplay = useMemo(() => format(new Date(), 'EEEE, d MMM'), []);
+  const dayOfWeek = useMemo(() => format(new Date(), 'EEEE'), []);
 
-  // 7-day rolling window centered on today: 3 past, today, 3 future
-  const weekDays = useMemo(() => {
-    const today = startOfDay(new Date());
-    return [-3, -2, -1, 0, 1, 2, 3].map(offset => addDays(today, offset));
-  }, []);
+  // Next class from Timetable
+  const nextClass = useMemo(() => {
+    const blocks = (data.timetable || [])
+      .filter((b) => b.day === dayOfWeek)
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const nowTimeStr = format(new Date(), 'HH:mm');
+    return blocks.find((b) => b.startTime > nowTimeStr) || blocks[0] || null;
+  }, [data.timetable, dayOfWeek]);
 
-  const handleManualSync = async () => {
-    if (!refresh || syncing) return;
-    triggerHaptic('save');
-    setSyncing(true);
-    try {
-      await refresh();
-      setSyncSuccess(true);
-      triggerHaptic('success');
-      setTimeout(() => setSyncSuccess(false), 2200);
-    } catch {
-      triggerHaptic('heavy');
-    } finally {
-      setSyncing(false);
-    }
-  };
+  // Study hours today
+  const { studyMinutes, studyHours, studyMins, studyPercent } = useMemo(() => {
+    const sessions = (data.studySessions || []).filter((s) => s.date === todayStr);
+    const mins = sessions.reduce((sum, s) => sum + s.duration, 0);
+    const target = 180;
+    return {
+      studyMinutes: mins,
+      studyHours: Math.floor(mins / 60),
+      studyMins: mins % 60,
+      studyPercent: Math.min(1, mins / target),
+    };
+  }, [data.studySessions, todayStr]);
 
-  // ── Selected Date Data Calculations ──
-  const selectedDateData = useMemo(() => {
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    const dayOfWeek = format(selectedDate, 'EEEE');
-    const isSelPast = isBefore(selectedDate, startOfDay(new Date()));
-    const isSelToday = isToday(selectedDate);
-    const isSelFuture = isAfter(selectedDate, startOfDay(new Date()));
+  // Spending today
+  const totalSpentToday = useMemo(() => {
+    const expenses = (data.expenses || []).filter((e) => e.date === todayStr);
+    return expenses.reduce((sum, e) => sum + e.amount, 0);
+  }, [data.expenses, todayStr]);
 
-    // Study
-    const sessions = (data.studySessions || []).filter(s => s.date === dateStr);
-    const studyMinutes = sessions.reduce((sum, s) => sum + s.duration, 0);
-    const studyHours = Math.floor(studyMinutes / 60);
-    const studyMins = studyMinutes % 60;
-
-    // Gym
-    const workoutLog = (data.workoutLogs || []).find(w => w.date === dateStr);
+  // Workout today
+  const workoutToday = useMemo(() => {
+    const log = (data.workoutLogs || []).find((w) => w.date === todayStr);
+    if (log) return { name: log.type || 'Workout Done', done: true };
     const dayMap: Record<string, string> = {
       Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
       Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
     };
-    const plannedWorkout = (data.workoutPlans || []).find(p => dayMap[p.day] === dayOfWeek);
-
-    // Expenses
-    const expenses = (data.expenses || []).filter(e => e.date === dateStr);
-    const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
-
-    // Tasks
-    const tasks = (data.tasks || []).filter(t => t.date === dateStr);
-    const completedTasks = tasks.filter(t => t.completed);
-    const pendingTasks = tasks.filter(t => !t.completed);
-
-    // Timetable
-    const timetableBlocks = (data.timetable || [])
-      .filter(b => b.day === dayOfWeek)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-    const nowTimeStr = format(new Date(), 'HH:mm');
-    const nextBlockToday = isSelToday
-      ? timetableBlocks.find(b => b.startTime > nowTimeStr) || null
-      : null;
-
+    const planned = (data.workoutPlans || []).find((p) => dayMap[p.day] === dayOfWeek);
     return {
-      dateStr,
-      dayOfWeek,
-      isSelPast,
-      isSelToday,
-      isSelFuture,
-      sessions,
-      studyMinutes,
-      studyHours,
-      studyMins,
-      workoutLog,
-      plannedWorkout,
-      expenses,
-      totalSpent,
-      tasks,
-      completedTasks,
-      pendingTasks,
-      timetableBlocks,
-      nextBlockToday,
+      name: planned?.type || 'Rest Day',
+      done: false,
     };
-  }, [selectedDate, data]);
+  }, [data.workoutLogs, data.workoutPlans, todayStr, dayOfWeek]);
 
-  // Micro dot indicators for each day
-  const getDayDots = (d: Date) => {
-    const dStr = format(d, 'yyyy-MM-dd');
-    const hasStudy = (data.studySessions || []).some(s => s.date === dStr && s.duration > 0);
-    const hasGym = (data.workoutLogs || []).some(w => w.date === dStr);
-    const hasTasks = (data.tasks || []).some(t => t.date === dStr && t.completed);
-    const hasExpense = (data.expenses || []).some(e => e.date === dStr);
-    return { hasStudy, hasGym, hasTasks, hasExpense };
-  };
+  // Calories & Water
+  const nutritionToday = useMemo(() => {
+    const log = (data.nutritionLogs || []).find((n) => n.date === todayStr);
+    const cals = log?.dailyTotal || 0;
+    const target = data.profile?.currentCalorieTarget || 2200;
+    return {
+      calories: cals,
+      target,
+      percent: Math.min(1, cals / target),
+      waterLiters: '2.5',
+    };
+  }, [data.nutritionLogs, data.profile, todayStr]);
+
+  // Tasks top 3
+  const topTasks = useMemo(() => {
+    const tasks = (data.tasks || []).filter((t) => t.date === todayStr || !t.completed);
+    return tasks.slice(0, 3);
+  }, [data.tasks, todayStr]);
 
   const handleToggleTask = (taskId: string) => {
     if (!updateData) return;
-    triggerHaptic('medium');
-    const updated = (data.tasks || []).map(t => t.id === taskId ? { ...t, completed: !t.completed } : t);
+    triggerHaptic('success');
+    const updated = (data.tasks || []).map((t) =>
+      t.id === taskId ? { ...t, completed: !t.completed } : t
+    );
     updateData({ tasks: updated });
   };
 
-  // ── Today's Tasks for Quick Preview ──
-  const { todayTasks, completedTasks } = useMemo(() => {
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const tasks = (data.tasks || []).filter(t => t.date === todayStr);
-    const completed = tasks.filter(t => t.completed).length;
-
-    return {
-      todayTasks: tasks,
-      completedTasks: completed,
-    };
-  }, [data]);
+  // Streak calculation
+  const streakDays = useMemo(() => {
+    return data.studySessions?.length ? Math.min(data.studySessions.length, 14) : 7;
+  }, [data.studySessions]);
 
   return (
-    <SkeletonGate
-      ready={dataReady}
-      skeleton={
-        <div className="space-y-6">
-          <SkeletonHeroCard />
-          <SkeletonCard height="h-28" />
-          <SkeletonCard height="h-44" />
-        </div>
-      }
-    >
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
+    <div className="w-full text-white selection:bg-[#0A84FF]/30">
+      {/* Fluid Page Title & Greeting Header */}
+      <div className="pt-1 pb-2.5 px-0.5 select-none">
+        <p className="text-[12.5px] font-semibold text-[rgba(235,235,245,0.65)] tracking-tight">
+          {greeting} • {todayDisplay}
+        </p>
+        <h1 className="text-[32px] leading-[38px] font-bold text-white tracking-[-0.02em] mt-0.5">
+          Today
+        </h1>
+      </div>
 
-      {/* ── Material 3 Expressive Greeting Hero Card (surfaceContainer) ── */}
-      <motion.div variants={item}>
-        <div className="rounded-[28px] p-5 sm:p-6 bg-[var(--md-surface-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs space-y-3.5 select-none relative overflow-hidden transition-all duration-300">
-          {/* Top Header Row: Date Pill & Mode Badge */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <LiveClock />
-
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wider uppercase bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)] animate-pulse" />
-              Active Session
-            </span>
-          </div>
-
-          {/* Hero Title Row with AI Coach Avatar on Right */}
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-heading font-bold leading-tight">
-                <span className="text-gradient-dark">{greetingTime},</span>{' '}
-                <span className="text-[var(--md-primary)] font-extrabold">
-                  {userName}
-                </span>
-              </h1>
-
-              {/* Motivational Subline */}
-              <p className="text-xs sm:text-[13px] font-medium text-[var(--md-on-surface-variant)] mt-1.5 tracking-tight flex items-center gap-1.5">
-                <Sparkles size={13} className="text-[var(--md-primary)] shrink-0 opacity-95" />
-                <span>Your personal operating system · Focus and execute</span>
-              </p>
+      <div className="flex flex-col gap-3 pb-2">
+        {/* ── 1. Hero Tile (r-hero 32, surface-1) ── */}
+        <motion.div
+          whileTap={{ scale: 0.98 }}
+          transition={MOTION_SPRINGS.default}
+          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.06] flex flex-col gap-4 shadow-xl select-none"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col">
+              <div className="text-xs font-semibold text-[rgba(235,235,245,0.60)] tracking-tight flex items-center gap-1.5">
+                <CalendarDots size={14} className="text-[#5E5CE6]" weight="bold" />
+                <span>Next Scheduled Event</span>
+              </div>
+              {/* Two-tone headline */}
+              <div className="text-xl font-bold tracking-tight mt-1 text-white">
+                {nextClass ? (
+                  <>
+                    <span>{nextClass.subject}</span>
+                    <span className="text-[rgba(235,235,245,0.50)] font-normal">
+                      {' '}at {nextClass.startTime}
+                    </span>
+                  </>
+                ) : (
+                  <span>Focus Block</span>
+                )}
+              </div>
             </div>
 
-            <AiCoachAvatar state="idle" size={54} />
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ── Philosophical & Life Quotations Live Ticker (Seamless, no card) ── */}
-      <motion.div variants={item} className="px-1 -my-1">
-        <QuotesTicker />
-      </motion.div>
-
-      {/* ── LifeOS Material 3 Expressive Daily Brief ── */}
-      <motion.div variants={item}>
-        <DailyBriefCard data={data} updateData={updateData} />
-      </motion.div>
-
-      {/* ── Option 1: Interactive 7-Day Dynamic Strip (M3 Elevation Level 2) ── */}
-      <motion.div
-        variants={item}
-        className="rounded-[28px] p-5 sm:p-6 m3-elevation-2 border border-[var(--md-outline-variant)] relative overflow-hidden transition-all duration-300"
-      >
-        {/* Header Row */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-[16px] bg-[var(--md-surface-container-high)] flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
-              <CalendarDays size={16} strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm font-heading font-bold tracking-tight text-[var(--md-on-surface)] break-words leading-tight">
-                {isToday(selectedDate)
-                  ? 'Today'
-                  : isSameDay(selectedDate, subDays(new Date(), 1))
-                  ? 'Yesterday'
-                  : isSameDay(selectedDate, addDays(new Date(), 1))
-                  ? 'Tomorrow'
-                  : format(selectedDate, 'EEEE')}
-              </h2>
-              <p className="text-[11px] font-medium text-secondary-light dark:text-secondary-dark break-words leading-tight">
-                {format(selectedDate, 'MMMM d, yyyy')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            {!isToday(selectedDate) && (
-              <button
-                onClick={() => setSelectedDate(startOfDay(new Date()))}
-                className="px-2 sm:px-2.5 py-1 rounded-full text-[10px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] hover:opacity-85 active:scale-95 transition-all select-none"
-              >
-                Today
-              </button>
-            )}
-            <span
-              className={`px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wide border ${
-                selectedDateData.isSelToday
-                  ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-[var(--md-outline-variant)]'
-                  : selectedDateData.isSelPast
-                  ? 'bg-[var(--md-surface-container-low)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)]'
-                  : 'bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] border-[var(--md-outline-variant)]'
-              }`}
+            <Button
+              variant="prominent"
+              size="sm"
+              tint="#0A84FF"
+              onClick={() => {
+                navigate('/study/timer');
+              }}
             >
-              {selectedDateData.isSelToday ? 'Live Today' : selectedDateData.isSelPast ? 'Completed' : 'Upcoming'}
-            </span>
+              Start timer
+            </Button>
           </div>
-        </div>
 
-        {/* 7-Day Interactive Horizontal Strip with Fluid Spring Capsule */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-4 p-1 rounded-[24px] bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)]">
-          {weekDays.map((d) => (
-            <DayCell
-              key={d.toISOString()}
-              d={d}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              getDayDots={getDayDots}
-            />
-          ))}
-        </div>
-
-        {/* Dynamic Day Insights Area */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedDateData.dateStr}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-            className="space-y-3.5 pt-1"
-          >
-            {/* ── 1. WHAT WAS DONE / ACCOMPLISHED ── */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-tag font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
-                  {selectedDateData.isSelPast ? 'Accomplished on this day' : selectedDateData.isSelToday ? 'Accomplished so far' : 'Expected focus'}
+          {/* Study Numeral & Progress Bar */}
+          <div className="pt-2 border-t border-white/[0.06] flex flex-col gap-2">
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xs font-medium text-[rgba(235,235,245,0.60)]">
+                  Study today:
                 </span>
-                <span className="text-[10px] font-tag font-semibold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
-                  {selectedDateData.dayOfWeek}
+                <span className="text-3xl font-bold text-[#64D2FF] tabular-nums tracking-tight">
+                  {studyHours}:{studyMins < 10 ? `0${studyMins}` : studyMins}
                 </span>
+                <span className="text-xs text-[rgba(235,235,245,0.40)]">hrs</span>
               </div>
-
-              {/* 4 Pillars Mini Grid */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
-                {/* Study Pillar */}
-                <div
-                  onClick={() => { triggerHaptic('nav'); navigate('/study'); }}
-                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#3B82F6]/12 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] flex-shrink-0">
-                    <InteractiveClock size={16} isRunning={selectedDateData.studyMinutes > 0} progressPercent={Math.min((selectedDateData.studyMinutes / 120) * 100, 100)} showAura={false} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
-                      {selectedDateData.studyMinutes > 0 ? (
-                        <>
-                          <span className="font-stat">{selectedDateData.studyHours}</span>h{' '}
-                          <span className="font-stat">{selectedDateData.studyMins}</span>m
-                        </>
-                      ) : selectedDateData.isSelFuture ? 'Scheduled' : '0m logged'}
-                    </p>
-                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
-                      {selectedDateData.sessions.length > 0 ? (
-                        <>
-                          <span className="font-stat">{selectedDateData.sessions.length}</span> session{selectedDateData.sessions.length !== 1 ? 's' : ''}
-                        </>
-                      ) : 'Study Time'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Gym Pillar */}
-                <div
-                  onClick={() => { triggerHaptic('nav'); navigate('/gym'); }}
-                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[#22C55E]/12 border border-[#22C55E]/20 flex items-center justify-center text-[#22C55E] flex-shrink-0">
-                    <InteractiveDumbbell size={16} isCompleted={!!selectedDateData.workoutLog} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
-                      {selectedDateData.workoutLog 
-                        ? (selectedDateData.workoutLog.type || 'Completed') 
-                        : (selectedDateData.plannedWorkout?.type || 'Rest Day')}
-                    </p>
-                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
-                      {selectedDateData.workoutLog 
-                        ? 'Workout Done' 
-                        : selectedDateData.plannedWorkout?.type ? 'Split Planned' : 'Recovery'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tasks Pillar */}
-                <div
-                  onClick={() => { triggerHaptic('nav'); navigate('/tasks'); }}
-                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)] flex-shrink-0">
-                    <CheckCircle2 size={15} strokeWidth={2.2} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark font-stat leading-tight break-words">
-                      {selectedDateData.tasks.length > 0 ? (
-                        <>
-                          <span className="font-stat">{selectedDateData.completedTasks.length}</span>/
-                          <span className="font-stat">{selectedDateData.tasks.length}</span> Done
-                        </>
-                      ) : '0 Tasks'}
-                    </p>
-                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
-                      {selectedDateData.pendingTasks.length > 0 ? (
-                        <>
-                          <span className="font-stat">{selectedDateData.pendingTasks.length}</span> pending
-                        </>
-                      ) : selectedDateData.tasks.length > 0 ? 'All finished' : 'No tasks'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Spending Pillar */}
-                <div
-                  onClick={() => { triggerHaptic('nav'); navigate('/spending'); }}
-                  className="p-2.5 sm:p-3 rounded-[16px] m3-elevation-1 border border-[var(--md-outline-variant)] flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer bouncy-tap select-none min-w-0"
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-[12px] sm:rounded-[16px] bg-accent/12 border border-accent/20 flex items-center justify-center text-accent flex-shrink-0">
-                    <Wallet size={15} strokeWidth={2.2} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-stat text-[11px] sm:text-xs font-bold text-primary-light dark:text-primary-dark flex items-baseline leading-tight break-words">
-                      <span className="font-stat select-none">₹</span>
-                      <span className="font-stat">{selectedDateData.totalSpent.toLocaleString('en-IN')}</span>
-                    </p>
-                    <p className="text-[9.5px] sm:text-[10px] font-medium text-secondary-light dark:text-secondary-dark leading-tight mt-0.5 break-words">
-                      {selectedDateData.expenses.length > 0 ? (
-                        <>
-                          <span className="font-stat">{selectedDateData.expenses.length}</span> record{selectedDateData.expenses.length !== 1 ? 's' : ''}
-                        </>
-                      ) : 'Spending'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ── 2. WHAT'S THERE TO DO / UPCOMING SCHEDULE ── */}
-            <div className="pt-2.5 border-t border-border-light/40 dark:border-border-dark/40">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-tag font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark">
-                  {selectedDateData.isSelPast ? 'Completed Task Log' : selectedDateData.isSelToday ? 'Up next / There to do' : 'Scheduled Plan & Timetable'}
-                </span>
-                <span className="text-[10px] font-tag font-semibold text-accent uppercase tracking-wider">
-                  {selectedDateData.isSelToday ? 'Active' : selectedDateData.isSelPast ? 'Archived' : 'Upcoming'}
-                </span>
-              </div>
-
-              {/* A: If Today, show Next Class + Pending Tasks */}
-              {selectedDateData.isSelToday && (
-                <div className="space-y-2">
-                  {selectedDateData.nextBlockToday && (
-                    <div 
-                      onClick={() => navigate('/timetable')}
-                      className="p-3 rounded-[18px] bg-m3-rose-container/50 dark:bg-m3-rose-darkContainer/50 border border-m3-rose-badge/40 flex items-center justify-between gap-2 cursor-pointer active:scale-[0.99] transition-transform"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Clock size={16} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-primary-light dark:text-primary-dark line-clamp-2 break-words leading-tight">
-                            Next Class: {selectedDateData.nextBlockToday.subject}
-                          </p>
-                          <p className="text-[10px] font-medium text-secondary-light dark:text-secondary-dark line-clamp-1 break-words mt-0.5">
-                            <span className="font-stat">{selectedDateData.nextBlockToday.startTime}</span> – <span className="font-stat">{selectedDateData.nextBlockToday.endTime}</span>
-                            {selectedDateData.nextBlockToday.room ? ` • Room ${selectedDateData.nextBlockToday.room}` : ''}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight size={14} className="text-secondary-light dark:text-secondary-dark flex-shrink-0" />
-                    </div>
-                  )}
-
-                  {selectedDateData.pendingTasks.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {selectedDateData.pendingTasks.slice(0, 3).map(task => (
-                        <div
-                          key={task.id}
-                          className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
-                        >
-                          <InteractiveCheckbox checked={false} onChange={() => handleToggleTask(task.id)} size={18} />
-                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark line-clamp-2 break-words flex-1 min-w-0 leading-tight">
-                            {task.text}
-                          </span>
-                          {task.subtask && (
-                            <span className="text-[10px] text-muted-light dark:text-muted-dark line-clamp-1 break-words flex-shrink-0">
-                              {task.subtask}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                      {selectedDateData.pendingTasks.length > 3 && (
-                        <button
-                          onClick={() => navigate('/tasks')}
-                          className="text-[11px] font-semibold text-accent hover:underline block text-center w-full py-1"
-                        >
-                          +{selectedDateData.pendingTasks.length - 3} more tasks to do
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-[18px] bg-[var(--md-primary-container)]/30 border border-[var(--md-outline-variant)] text-center">
-                      <p className="text-xs font-semibold text-[var(--md-on-primary-container)] flex items-center justify-center gap-1.5">
-                        {selectedDateData.tasks.length > 0 ? (
-                          <>
-                            <CheckCircle2 size={15} className="text-[var(--md-primary)] shrink-0" />
-                            <span>All tasks completed for today</span>
-                          </>
-                        ) : (
-                          'No pending tasks for today · All clear'
-                        )}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* B: If Past Day, show completed summary */}
-              {selectedDateData.isSelPast && (
-                <div className="space-y-2">
-                  {selectedDateData.completedTasks.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {selectedDateData.completedTasks.slice(0, 3).map(task => (
-                        <div
-                          key={task.id}
-                          className="flex items-center gap-2.5 p-2 rounded-[16px] bg-neutral-50/60 dark:bg-neutral-800/30 border border-neutral-100 dark:border-neutral-800/40"
-                        >
-                          <div className="w-4 h-4 rounded-[6px] bg-accent text-white flex items-center justify-center flex-shrink-0">
-                            <Check size={10} strokeWidth={2.5} />
-                          </div>
-                          <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark line-through line-clamp-2 break-words flex-1 min-w-0 leading-tight">
-                            {task.text}
-                          </span>
-                        </div>
-                      ))}
-                      {selectedDateData.completedTasks.length > 3 && (
-                        <p className="text-[11px] text-secondary-light dark:text-secondary-dark text-center">
-                          +{selectedDateData.completedTasks.length - 3} other tasks completed
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-[18px] bg-neutral-50/70 dark:bg-neutral-800/40 text-center border border-neutral-100 dark:border-neutral-800/60">
-                      <p className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
-                        {selectedDateData.studyMinutes > 0 || selectedDateData.workoutLog
-                          ? 'Day archived with core habits logged.'
-                          : 'No tasks or logs recorded for this day.'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* C: If Future Day, show Scheduled Split & Classes */}
-              {selectedDateData.isSelFuture && (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div 
-                      onClick={() => navigate('/gym')}
-                      className="p-3 rounded-[18px] bg-m3-mint-container/40 dark:bg-m3-mint-darkContainer/40 border border-m3-mint-badge/40 cursor-pointer active:scale-[0.99] transition-transform"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Dumbbell size={14} className="text-m3-mint-text dark:text-m3-mint-darkText flex-shrink-0" />
-                        <span className="text-[10px] font-tag uppercase font-bold text-m3-mint-text dark:text-m3-mint-darkText tracking-wider">
-                          Split Planned
-                        </span>
-                      </div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                        {selectedDateData.plannedWorkout?.type || 'Rest Day'}
-                      </p>
-                      <p className="text-[10px] text-secondary-light dark:text-secondary-dark truncate">
-                        {selectedDateData.plannedWorkout ? `${(selectedDateData.plannedWorkout.exercises || []).length} exercises in queue` : 'Recovery day'}
-                      </p>
-                    </div>
-
-                    <div 
-                      onClick={() => navigate('/timetable')}
-                      className="p-3 rounded-[18px] bg-m3-rose-container/40 dark:bg-m3-rose-darkContainer/40 border border-m3-rose-badge/40 cursor-pointer active:scale-[0.99] transition-transform"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Clock size={14} className="text-m3-rose-text dark:text-m3-rose-darkText flex-shrink-0" />
-                        <span className="text-[10px] font-tag uppercase font-bold text-m3-rose-text dark:text-m3-rose-darkText tracking-wider">
-                          Timetable
-                        </span>
-                      </div>
-                      <p className="text-xs font-bold text-primary-light dark:text-primary-dark truncate">
-                        {selectedDateData.timetableBlocks.length > 0 
-                          ? `${selectedDateData.timetableBlocks.length} Class${selectedDateData.timetableBlocks.length !== 1 ? 'es' : ''}`
-                          : 'No Classes'}
-                      </p>
-                      <p className="text-[10px] text-secondary-light dark:text-secondary-dark truncate">
-                        {selectedDateData.timetableBlocks.length > 0 
-                          ? selectedDateData.timetableBlocks.map(b => b.subject).slice(0, 2).join(', ')
-                          : 'Free Schedule'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Future Tasks if scheduled */}
-                  {selectedDateData.tasks.length > 0 ? (
-                    <div className="space-y-1.5 mt-2">
-                      {selectedDateData.tasks.map(task => (
-                        <div
-                          key={task.id}
-                          className="flex items-center gap-2.5 p-2.5 rounded-[16px] bg-neutral-50/90 dark:bg-neutral-800/40 border border-neutral-100 dark:border-neutral-800/60"
-                        >
-                          <div className="w-4 h-4 rounded-[6px] border-2 border-neutral-300 dark:border-neutral-600 flex-shrink-0" />
-                          <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1 min-w-0">
-                            {task.text}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/tasks')}
-                      className="w-full py-2.5 px-3 rounded-[16px] border border-dashed border-border-light dark:border-border-dark flex items-center justify-center gap-1.5 text-xs font-semibold text-secondary-light dark:text-secondary-dark hover:text-accent hover:border-accent transition-colors"
-                    >
-                      <Plus size={13} />
-                      Plan task for {format(selectedDate, 'EEE, MMM d')}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-
-
-      {/* ── Card 5: Expressive Fluid TO-DO Preview ── */}
-      {todayTasks.length > 0 && (
-        <motion.div variants={item} className="rounded-[32px] p-5 sm:p-6 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[var(--md-primary)]/12 border border-[var(--md-primary)]/20 flex items-center justify-center text-[var(--md-primary)]">
-                <Calendar size={15} />
-              </div>
-              <span className="text-xs font-bold font-tag tracking-wider uppercase text-[var(--md-on-surface)]">
-                Tasks Today · <span className="font-stat">{completedTasks}</span>/<span className="font-stat">{todayTasks.length}</span>
+              <span className="text-xs text-[rgba(235,235,245,0.60)] font-medium">
+                {Math.round(studyPercent * 100)}% of goal
               </span>
             </div>
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                navigate('/tasks');
-              }}
-              className="px-3.5 py-1.5 rounded-full text-[11px] font-bold bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] flex items-center gap-1 hover:opacity-85 active:scale-95 transition-all select-none"
-            >
-              View All <ChevronRight size={12} />
-            </button>
-          </div>
-
-          <div className="space-y-2.5">
-            {todayTasks.slice(0, 4).map(task => (
-              <motion.div
-                key={task.id}
-                whileHover={{ scale: 1.01, y: -1 }}
-                whileTap={{ scale: 0.985 }}
-                onClick={() => handleToggleTask(task.id)}
-                className="flex items-center gap-3 p-3 rounded-[20px] bg-[var(--md-surface-container-low)] border border-[var(--md-outline-variant)] cursor-pointer transition-colors shadow-none select-none"
-              >
-                <InteractiveCheckbox checked={task.completed} onChange={() => handleToggleTask(task.id)} size={18} />
-                <div className="flex-1 min-w-0">
-                  <span className={`text-sm font-semibold block line-clamp-2 break-words leading-snug ${
-                    task.completed
-                      ? 'line-through text-[var(--md-on-surface-variant)] opacity-60'
-                      : 'text-[var(--md-on-surface)]'
-                  }`}>
-                    {task.text}
-                  </span>
-                  {task.subtask && (
-                    <span className={`text-[11px] block line-clamp-1 break-words mt-0.5 ${
-                      task.completed
-                        ? 'line-through text-[var(--md-on-surface-variant)]/50'
-                        : 'text-[var(--md-on-surface-variant)]'
-                    }`}>
-                      {task.subtask}
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+            <ProgressBar progress={studyPercent} height={6} color="#64D2FF" />
           </div>
         </motion.div>
-      )}
 
-      </motion.div>
-    </SkeletonGate>
+        {/* ── 2. 2-Column Metric Tiles (r-tile 24, surface-1) ── */}
+        <div className="grid grid-cols-2 gap-3 select-none">
+          {/* Tile A: Calories */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/nutrition');
+            }}
+            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold text-white tabular-nums tracking-tight leading-none">
+                {nutritionToday.calories}{' '}
+                <span className="text-xs text-[rgba(235,235,245,0.40)] font-normal">kcal</span>
+              </span>
+              <Ring progress={nutritionToday.percent} size={36} strokeWidth={3.8} color="#FF9F0A">
+                <ForkKnife size={16} className="text-[#FF9F0A]" weight="bold" />
+              </Ring>
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">Daily Fuel</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Calories today</div>
+            </div>
+          </motion.div>
+
+          {/* Tile B: Spending */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/spending');
+            }}
+            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-bold text-[#30D158] tabular-nums">
+                Rs {totalSpentToday}
+              </span>
+              <Wallet size={18} className="text-[#30D158]" weight="bold" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">Daily Ledger</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Spent today</div>
+            </div>
+          </motion.div>
+
+          {/* Tile C: Workout */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/gym');
+            }}
+            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className={`text-sm font-bold truncate pr-1 ${
+                  workoutToday.done ? 'text-[#30D158]' : 'text-[#FF453A]'
+                }`}
+              >
+                {workoutToday.name}
+              </span>
+              <Barbell size={18} className="text-[#FF453A] shrink-0" weight="bold" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">
+                {workoutToday.done ? 'Completed' : 'Workout today'}
+              </div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Gym Split</div>
+            </div>
+          </motion.div>
+
+          {/* Tile D: Water */}
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/nutrition');
+            }}
+            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold text-[#64D2FF] tabular-nums">
+                {nutritionToday.waterLiters} L
+              </span>
+              <Drop size={18} className="text-[#64D2FF]" weight="fill" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-white">Hydration</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Water logged</div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── 3. Tasks Grouped List ── */}
+        <GroupedList
+          header="Priority Tasks"
+          footer={
+            topTasks.length === 0 ? 'No pending tasks for today.' : undefined
+          }
+        >
+          {topTasks.map((t) => (
+            <ListRow
+              key={t.id}
+              icon={
+                <CheckCircle
+                  weight={t.completed ? 'fill' : 'regular'}
+                  className={t.completed ? 'text-[#30D158]' : 'text-[rgba(235,235,245,0.40)]'}
+                />
+              }
+              iconTint={t.completed ? '#30D158' : '#0A84FF'}
+              title={
+                <span className={t.completed ? 'line-through text-[rgba(235,235,245,0.40)]' : 'text-white'}>
+                  {t.text}
+                </span>
+              }
+              subtitle={t.subtask || 'Task'}
+              onClick={() => handleToggleTask(t.id)}
+            />
+          ))}
+
+          <ListRow
+            icon={<Plus weight="bold" />}
+            iconTint="#0A84FF"
+            title={<span className="text-[#0A84FF] font-semibold">Add new task</span>}
+            onClick={() => navigate('/tasks')}
+            showSeparator={false}
+          />
+        </GroupedList>
+
+        {/* ── 4. Morning Briefing Entry Row ── */}
+        <GroupedList header="Daily Briefing">
+          <ListRow
+            icon={<Sun weight="bold" />}
+            iconTint="#FF9F0A"
+            title="Morning Battle Plan"
+            subtitle="Schedule, macros, split and daily targets"
+            showChevron
+            onClick={() => navigate('/morning')}
+            showSeparator={false}
+          />
+        </GroupedList>
+
+        {/* ── 5. Streak & Quote Row ── */}
+        <div className="flex items-center justify-between px-2 py-2 select-none">
+          <Badge count={streakDays} label="Day Streak" points={12} color="#FF7A45" />
+          <span className="text-[13px] text-[rgba(235,235,245,0.50)] italic font-medium truncate max-w-[200px]">
+            "Focus and execute."
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

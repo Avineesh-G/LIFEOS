@@ -1,61 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { OrbiCompanion } from '../illustrations/OrbiCompanion';
-import { haptics } from '../../utils/haptics';
 import {
-  Sparkles,
-  Send,
-  Mic,
-  Square,
+  Sparkle,
+  PaperPlaneRight,
+  Microphone,
+  Stop,
   Copy,
-  Trash2,
+  Trash,
   X,
-  WifiOff,
-  AlertCircle,
+  WifiSlash,
+  WarningCircle,
   Check,
-  RotateCcw,
-  Loader2,
+  ArrowClockwise,
+  SpinnerGap,
   Wallet,
   CheckSquare,
-  Dumbbell,
-  Utensils,
-  HelpCircle,
-  Palette,
-  Eye,
-  ShieldCheck,
-  History,
-  MessageSquare,
-  Search,
+  Barbell,
+  BookOpen,
+  ChatCircleText,
+  ClockCounterClockwise,
+  MagnifyingGlass,
   Plus,
-  Clock,
-  ArrowRight,
-  ChevronDown,
-  ChevronUp,
-  RefreshCw,
-  Volume2,
-  VolumeX,
-  Share2,
-} from 'lucide-react';
-import GlassSheet from '../glass/GlassSheet';
-import GlassSurface from '../glass/GlassSurface';
-import GlowCard from '../glass/GlowCard';
-import AiConsentSheet from './AiConsentSheet';
-import ActionConfirmationCard from './ActionConfirmationCard';
+  SpeakerHigh,
+  ShareNetwork,
+} from '../../ui/tokens/icons';
+import { GlassSurface } from '../../ui/glass/GlassSurface';
+import { Sheet } from '../../ui/feedback/Sheet';
 import { GROQ_CONFIG } from '../../config/ai';
-import { getGroqApiKey, getAiProxyUrl, getHasAgreedConsent, setGroqApiKey } from '../../utils/aiSecurity';
+import { getHasAgreedConsent } from '../../utils/aiSecurity';
 import { streamChatCompletion, transcribeAudio, stripUrls, ChatMessage } from '../../services/aiClient';
 import { extractAiActionProposals, AiActionProposal } from '../../services/aiActionEngine';
 import { buildTargetedAiContext } from '../../services/aiContextBuilder';
 import { recordScreenView } from '../../services/aiUsageTracker';
 import { triggerHaptic } from '../../utils/haptics';
-import { speechRecognizer } from '../../utils/speechRecognition';
-import { speakText, stopSpeaking, isSpeaking } from '../../utils/textToSpeech';
+import { speakText, stopSpeaking } from '../../utils/textToSpeech';
 import { shareContent } from '../../utils/shareUtils';
-import type { AiChatSession } from '../../types';
-
-import { PulseBubbleIcon } from '../icons/PulseBubbleIcon';
 import FormattedAiMessage from './FormattedAiMessage';
+import ActionConfirmationCard from './ActionConfirmationCard';
+import type { AiChatSession } from '../../types';
 
 interface AskLifeOSModalProps {
   isOpen: boolean;
@@ -65,21 +48,19 @@ interface AskLifeOSModalProps {
 }
 
 export const SPEC_STARTER_CHIPS = [
-  { id: 'tasks_today', label: 'What are my top tasks today?', icon: 'CheckSquare' },
-  { id: 'study_focus', label: 'How is my study focus this week?', icon: 'HelpCircle' },
-  { id: 'gym_split', label: 'What workout is scheduled today?', icon: 'Dumbbell' },
-  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: 'Wallet' },
+  { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />, tint: '#0A84FF' },
+  { id: 'study_focus', label: 'How is my study focus this week?', icon: <BookOpen size={16} weight="duotone" className="text-[#64D2FF]" />, tint: '#64D2FF' },
+  { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" className="text-[#FF453A]" />, tint: '#FF453A' },
+  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" className="text-[#30D158]" />, tint: '#30D158' },
 ];
 
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Tab State: 'chat' | 'history'
   const [activeTab, setActiveTab] = useState<'chat' | 'history'>('chat');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistoryQuery, setSearchHistoryQuery] = useState('');
-
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
@@ -95,16 +76,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const [isRecording, setIsRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
-  const [lastFailedPrompt, setLastFailedPrompt] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [showConsentSheet, setShowConsentSheet] = useState(false);
-  const [previewDataContext, setPreviewDataContext] = useState<string | null>(null);
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
-
-  // Active proposals associated with recent message
   const [actionProposals, setActionProposals] = useState<Record<string, AiActionProposal[]>>({});
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -115,7 +89,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
-  // Auto-focus input and clean speech when modal closes
+  // Auto focus & cleanup on modal open/close
   useEffect(() => {
     if (isOpen) {
       recordScreenView('Ask LifeOS Assistant');
@@ -123,7 +97,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         if (activeTab === 'chat') {
           inputRef.current?.focus();
         }
-      }, 150);
+      }, 200);
       return () => clearTimeout(timer);
     } else {
       stopSpeaking();
@@ -138,22 +112,21 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     } catch {}
   }, [messages]);
 
-  // Auto scroll to bottom in chat view
+  // Auto-scroll chat to bottom
   useEffect(() => {
     if (chatContainerRef.current && activeTab === 'chat') {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages, isGenerating, activeTab]);
 
-  // Toast timer
+  // Toast auto-hide
   useEffect(() => {
     if (toastMessage) {
-      const timer = setTimeout(() => setToastMessage(null), 3500);
+      const timer = setTimeout(() => setToastMessage(null), 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
-  // Helper to persist current active chat session into database history
   const persistSessionToHistory = (sessionMessages: ChatMessage[], currentSessionId: string | null) => {
     if (sessionMessages.length === 0) return currentSessionId;
     const firstUserMsg = sessionMessages.find(m => m.role === 'user');
@@ -193,14 +166,6 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     return sessionId;
   };
 
-  const handleOpenConsentCheck = () => {
-    if (!getHasAgreedConsent()) {
-      setShowConsentSheet(true);
-      return false;
-    }
-    return true;
-  };
-
   const handleStartNewChat = () => {
     triggerHaptic('medium');
     setMessages([]);
@@ -232,7 +197,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       setActiveSessionId(null);
       setMessages([]);
     }
-    setToastMessage('Saved search session deleted.');
+    setToastMessage('Session deleted.');
   };
 
   const handleCopyMessage = (msgId: string, text: string) => {
@@ -246,145 +211,96 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     const trimmed = queryText.trim();
     if (!trimmed || isGenerating) return;
 
-    if (!handleOpenConsentCheck()) return;
-
-    if (!isOnline) {
-      setErrorMessage('AI needs internet connection. Please connect to the internet and try again.');
-      return;
-    }
-
-    const apiKey = getGroqApiKey();
-    const proxyUrl = getAiProxyUrl();
-    if (!apiKey && !proxyUrl) {
-      setErrorMessage('Groq API Key missing. Please set your key in Settings > AI or enter key below.');
-      return;
-    }
-
-    triggerHaptic('light');
-    setErrorMessage(null);
-    setErrorDetails(null);
-    setShowErrorDetails(false);
-    setLastFailedPrompt(null);
+    triggerHaptic('selection');
     setInputQuery('');
+    setErrorMessage(null);
+
+    const userMessageId = `msg_${Date.now()}_u`;
+    const assistantMessageId = `msg_${Date.now()}_a`;
 
     const userMsg: ChatMessage = {
-      id: `usr_${Date.now()}`,
+      id: userMessageId,
       role: 'user',
       content: trimmed,
       timestamp: new Date().toISOString(),
     };
 
-    // Gather recent conversation topics to maintain seamless multi-turn context
-    const recentConvoContext = messages
-      .slice(-4)
-      .map(m => m.content)
-      .join(' ');
-    const contextQuery = recentConvoContext ? `${trimmed} ${recentConvoContext}` : trimmed;
-    const dataContext = buildTargetedAiContext(contextQuery, data);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setIsGenerating(true);
 
-    const assistantMsgId = `ast_${Date.now()}`;
     const initialAssistantMsg: ChatMessage = {
-      id: assistantMsgId,
+      id: assistantMessageId,
       role: 'assistant',
       content: '',
       timestamp: new Date().toISOString(),
-      dataSentContext: dataContext,
     };
 
-    const updatedMessages = [...messages, userMsg];
-    setMessages([...updatedMessages, initialAssistantMsg]);
-    setIsGenerating(true);
+    setMessages([...newMessages, initialAssistantMsg]);
 
-    // Multi-turn continuity: pass up to 14 messages (7 complete conversation turns)
-    const historyPayload = updatedMessages.slice(-14).map(m => ({ role: m.role, content: m.content }));
+    const targetedContext = buildTargetedAiContext(trimmed, data);
     abortControllerRef.current = new AbortController();
 
     try {
+      let accumulatedResponse = '';
       await streamChatCompletion(
-        historyPayload,
+        newMessages.map((m) => ({ role: m.role, content: m.content })),
         location.pathname || '/',
-        dataContext,
-        (chunkText) => {
-          const cleanChunk = stripUrls(chunkText);
-          setMessages(prev => {
-            const next = prev.map(m => m.id === assistantMsgId ? { ...m, content: cleanChunk } : m);
-            return next;
-          });
+        targetedContext,
+        (token: string) => {
+          accumulatedResponse += token;
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: accumulatedResponse }
+                : msg
+            )
+          );
         },
-        (fullText) => {
-          setIsGenerating(false);
-          const cleanFull = stripUrls(fullText);
-          const { cleanText, proposals } = extractAiActionProposals(cleanFull);
-          setMessages(prev => {
-            const next = prev.map(m => m.id === assistantMsgId ? { ...m, content: cleanText } : m);
-            const newSessionId = persistSessionToHistory(next, activeSessionId);
-            setActiveSessionId(newSessionId);
-            return next;
-          });
+        (fullText: string) => {
+          accumulatedResponse = fullText;
+          const { proposals } = extractAiActionProposals(accumulatedResponse);
           if (proposals.length > 0) {
-            setActionProposals(prev => ({ ...prev, [assistantMsgId]: proposals }));
+            setActionProposals((prev) => ({
+              ...prev,
+              [assistantMessageId]: proposals,
+            }));
           }
+
+          const finalMessages = newMessages.map((m) =>
+            m.id === assistantMessageId ? { ...m, content: accumulatedResponse } : m
+          );
+
+          const updatedSessionId = persistSessionToHistory(finalMessages, activeSessionId);
+          setActiveSessionId(updatedSessionId);
         },
-        (err, payload) => {
-          setIsGenerating(false);
-          setErrorMessage(payload?.friendlyMessage || err.message || 'An error occurred while calling Groq AI.');
-          setErrorDetails(payload?.rawDetails || null);
-          setLastFailedPrompt(trimmed);
-          setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
+        (err: Error) => {
+          setErrorMessage(err.message || 'Unable to generate response.');
         },
         abortControllerRef.current.signal
       );
-    } catch (e: any) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        setErrorMessage('Query cancelled.');
+      } else {
+        setErrorMessage(err.message || 'Unable to generate response.');
+      }
+    } finally {
       setIsGenerating(false);
-      setErrorMessage(e?.message || 'Failed to complete AI query.');
-      setLastFailedPrompt(trimmed);
-      setMessages(prev => prev.filter(m => m.id !== assistantMsgId || m.content.trim().length > 0));
+      abortControllerRef.current = null;
     }
   };
 
-  // Voice recording: Native Web Speech API with seamless MediaRecorder fallback
-  const handleToggleRecord = async () => {
+  const handleToggleVoiceRecord = async () => {
+    triggerHaptic('medium');
     if (isRecording) {
-      triggerHaptic('medium');
-      setIsRecording(false);
-      if (speechRecognizer.isSupported()) {
-        speechRecognizer.stop();
-      }
-      if (mediaRecorderRef.current) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
+      setIsRecording(false);
       return;
     }
 
-    if (!isOnline) {
-      setErrorMessage('AI needs internet connection for voice recognition.');
-      return;
-    }
-
-    triggerHaptic('medium');
-
-    // 1. Try Native Web Speech API (Live zero-latency dictation)
-    if (speechRecognizer.isSupported()) {
-      setIsRecording(true);
-      const started = speechRecognizer.start(
-        (result) => {
-          if (result.transcript) {
-            setInputQuery(result.transcript);
-          }
-        },
-        (err) => {
-          console.warn('[Speech Recognition Error]', err);
-          setIsRecording(false);
-        },
-        () => {
-          setIsRecording(false);
-        }
-      );
-
-      if (started) return;
-    }
-
-    // 2. Fallback to MediaRecorder + Whisper Audio Transcription
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
@@ -398,7 +314,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       };
 
       mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         if (audioBlob.size === 0) return;
 
@@ -406,7 +322,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         try {
           const text = await transcribeAudio(audioBlob);
           if (text) {
-            setInputQuery(prev => (prev ? `${prev} ${text}` : text));
+            setInputQuery((prev) => (prev ? `${prev} ${text}` : text));
             triggerHaptic('light');
           }
         } catch (err: any) {
@@ -419,20 +335,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err: any) {
-      setErrorMessage('Microphone access denied or unsupported on this device.');
+      setErrorMessage('Microphone access denied or unavailable.');
       setIsRecording(false);
-    }
-  };
-
-  const getChipIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Wallet': return <Wallet size={13} />;
-      case 'Palette': return <Palette size={13} />;
-      case 'HelpCircle': return <HelpCircle size={13} />;
-      case 'CheckSquare': return <CheckSquare size={13} />;
-      case 'Dumbbell': return <Dumbbell size={13} />;
-      case 'Utensils': return <Utensils size={13} />;
-      default: return <Sparkles size={13} />;
     }
   };
 
@@ -445,9 +349,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       stopSpeaking();
       setSpeakingMsgId(msgId);
       speakText(text, (speaking) => {
-        if (!speaking) {
-          setSpeakingMsgId(null);
-        }
+        if (!speaking) setSpeakingMsgId(null);
       });
     }
   };
@@ -457,782 +359,401 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     await shareContent(text, 'LifeOS AI Guide');
   };
 
-  const getDynamicFollowUps = (lastMsg?: ChatMessage): Array<{ id: string; label: string; query: string }> => {
-    if (!lastMsg || lastMsg.role !== 'assistant' || !lastMsg.content) return [];
-    const text = lastMsg.content.toLowerCase();
-
-    if (text.includes('bus') || text.includes('travel') || text.includes('trip') || text.includes('train') || text.includes('itinerary')) {
-      return [
-        { id: 'f1', label: 'What to pack?', query: 'What essential checklist items should I pack for this trip?' },
-        { id: 'f2', label: 'Return options', query: 'What are the return options and schedules for this trip?' },
-        { id: 'f3', label: 'Create reminder', query: 'Add a to-do reminder for this trip tomorrow morning' },
-      ];
-    }
-
-    if (text.includes('spend') || text.includes('expense') || text.includes('budget') || text.includes('cost') || text.includes('rupees') || text.includes('₹')) {
-      return [
-        { id: 'f1', label: 'Log this expense', query: 'Help me log this estimated expense into my Spending tracker' },
-        { id: 'f2', label: 'Budget advice', query: 'How can I optimize this budget further?' },
-        { id: 'f3', label: 'Cost summary', query: 'Give me a quick summary breakdown of these costs' },
-      ];
-    }
-
-    if (text.includes('workout') || text.includes('exercise') || text.includes('gym') || text.includes('diet') || text.includes('protein') || text.includes('meal')) {
-      return [
-        { id: 'f1', label: 'Recovery tips', query: 'What are the best recovery and hydration tips for this?' },
-        { id: 'f2', label: 'Snack ideas', query: 'Suggest quick high-protein snack ideas for this routine' },
-        { id: 'f3', label: 'Add to tasks', query: 'Add this workout routine to my to-dos' },
-      ];
-    }
-
-    return [
-      { id: 'f1', label: 'Summarize steps', query: 'Can you summarize this into 3 quick actionable steps?' },
-      { id: 'f2', label: 'Add to tasks', query: 'Add the main action item from this as a to-do task' },
-    ];
-  };
-
-  // Filter history items by search query
   const historyItems: AiChatSession[] = data?.aiChatHistory || [];
   const filteredHistory = historyItems.filter((session) => {
     if (!searchHistoryQuery.trim()) return true;
     const query = searchHistoryQuery.toLowerCase();
     const titleMatch = session.title.toLowerCase().includes(query);
-    const messageMatch = session.messages.some(m => m.content.toLowerCase().includes(query));
+    const messageMatch = session.messages.some((m) => m.content.toLowerCase().includes(query));
     return titleMatch || messageMatch;
   });
 
   return (
-    <>
-      <GlassSheet isOpen={isOpen} onClose={onClose}>
-        <div className="flex flex-col h-full w-full max-w-full min-w-0 overflow-hidden relative text-[var(--md-on-surface)]">
-          
-          {/* ── Top Header with Mode Tabs ── */}
-          <div className="flex items-center justify-between gap-1.5 py-1 mb-1 w-full min-w-0 shrink-0">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0 shadow-xs">
-                <Sparkles size={16} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-xs sm:text-base font-bold text-gradient-dark tracking-tight leading-tight truncate">
-                    Luna AI
-                  </h2>
-                  <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
-                    Groq AI
-                  </span>
-                </div>
-                <p className="text-[9.5px] text-[var(--md-on-surface-variant)] font-medium truncate hidden xs:block">
-                  Live LifeOS Assistant & Intelligence
-                </p>
+    <Sheet
+      isOpen={isOpen}
+      onClose={onClose}
+      detent="full"
+      className="bg-[#000000]/95 backdrop-blur-2xl border border-white/12"
+      title={
+        <div className="flex items-center justify-between w-full px-1">
+          {/* Left: Luna AI Branding */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] flex items-center justify-center text-white shadow-lg shadow-[#BF5AF2]/20">
+              <Sparkle size={17} weight="fill" />
+            </div>
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-base text-white tracking-tight leading-none">Luna AI</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#BF5AF2]/20 text-[#BF5AF2] uppercase tracking-wider">
+                  Groq AI
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* Header Controls: Chat/History Tabs & Close */}
-            <div className="flex items-center gap-1 shrink-0">
-              <div className="flex items-center p-0.5 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setActiveTab('chat');
-                    setTimeout(() => inputRef.current?.focus(), 100);
-                  }}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold transition-all ${
-                    activeTab === 'chat'
-                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
-                      : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
-                  }`}
-                >
-                  <MessageSquare size={11} />
-                  <span>Chat</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setActiveTab('history');
-                  }}
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold transition-all ${
-                    activeTab === 'history'
-                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
-                      : 'text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)]'
-                  }`}
-                >
-                  <History size={11} />
-                  <span>History</span>
-                  {historyItems.length > 0 && (
-                    <span className="w-3.5 h-3.5 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[8.5px] flex items-center justify-center font-bold">
-                      {historyItems.length}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              {messages.length > 0 && activeTab === 'chat' && (
-                <button
-                  type="button"
-                  title="New Chat Session"
-                  onClick={handleStartNewChat}
-                  className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95 shrink-0"
-                >
-                  <Plus size={15} />
-                </button>
-              )}
+          {/* Right: Segmented Mode Tabs & Close */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center p-0.5 rounded-full bg-[#1C1C1E] border border-white/10">
               <button
                 type="button"
-                onClick={onClose}
-                className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] transition-all active:scale-95 shrink-0"
-                aria-label="Close Ask LifeOS"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setActiveTab('chat');
+                  setTimeout(() => inputRef.current?.focus(), 100);
+                }}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                  activeTab === 'chat'
+                    ? 'bg-[#BF5AF2] text-white shadow-sm'
+                    : 'text-white/60 hover:text-white'
+                }`}
               >
-                <X size={16} />
+                <ChatCircleText size={13} weight="bold" />
+                <span>Chat</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setActiveTab('history');
+                }}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                  activeTab === 'history'
+                    ? 'bg-[#BF5AF2] text-white shadow-sm'
+                    : 'text-white/60 hover:text-white'
+                }`}
+              >
+                <ClockCounterClockwise size={13} weight="bold" />
+                <span>History</span>
+                {historyItems.length > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-white/20 text-white text-[9px] flex items-center justify-center font-bold">
+                    {historyItems.length}
+                  </span>
+                )}
               </button>
             </div>
-          </div>
 
-          {/* ── Assist Chip: Screen Context ── */}
-          <div className="pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none w-full min-w-0 shrink-0 border-b border-[var(--md-outline-variant)]/25">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-semibold bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] border border-[var(--md-outline-variant)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--md-primary)]" />
-              <span>Screen: {location.pathname === '/' ? 'Home' : location.pathname.replace('/', '')}</span>
-            </span>
-          </div>
-
-          {/* ── Offline Banner ── */}
-          {!isOnline && (
-            <div className="my-1.5 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 flex items-center gap-2 shrink-0">
-              <WifiOff size={14} className="text-amber-500 shrink-0" />
-              <span>AI needs internet connection. Offline mode active.</span>
-            </div>
-          )}
-
-          {/* ── Toast Notification ── */}
-          <AnimatePresence>
-            {toastMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="my-1.5 p-2.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-300 flex items-center justify-between shrink-0"
+            {messages.length > 0 && activeTab === 'chat' && (
+              <button
+                type="button"
+                title="New Chat"
+                onClick={handleStartNewChat}
+                className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
               >
-                <span className="font-semibold">{toastMessage}</span>
-                <Check size={14} className="text-emerald-500" />
-              </motion.div>
+                <Plus size={16} weight="bold" />
+              </button>
             )}
-          </AnimatePresence>
 
-          {/* ── Error Banner ── */}
-          {errorMessage && (
-            <div className="my-1.5 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-300 space-y-2 shrink-0">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <AlertCircle size={15} className="shrink-0 text-red-400" />
-                  <span className="font-medium leading-tight break-words [overflow-wrap:anywhere]">{errorMessage}</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {lastFailedPrompt && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const q = lastFailedPrompt;
-                        setErrorMessage(null);
-                        setErrorDetails(null);
-                        handleSendQuery(q);
-                      }}
-                      className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline px-1 py-0.5"
-                    >
-                      <RefreshCw size={10} />
-                      <span>Retry</span>
-                    </button>
-                  )}
-                  {errorDetails && (
-                    <button
-                      type="button"
-                      onClick={() => setShowErrorDetails(!showErrorDetails)}
-                      className="flex items-center gap-0.5 text-[11px] font-bold text-white/70 hover:text-white px-1 py-0.5"
-                    >
-                      <span>Details</span>
-                      {showErrorDetails ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setErrorMessage(null);
-                      setErrorDetails(null);
-                      setShowErrorDetails(false);
-                    }}
-                    className="text-[11px] font-bold underline text-red-300 hover:text-white px-1"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
+              aria-label="Close"
+            >
+              <X size={16} weight="bold" />
+            </button>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex flex-col h-full w-full min-w-0 pb-3">
+        {/* Offline Banner */}
+        {!isOnline && (
+          <div className="mb-3 px-3 py-2 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center gap-2 text-amber-300 text-xs font-medium shrink-0">
+            <WifiSlash size={16} weight="bold" className="shrink-0" />
+            <span>You are offline. Luna AI requires internet access.</span>
+          </div>
+        )}
 
-              {/* Collapsible Sanitize Details */}
-              {showErrorDetails && errorDetails && (
-                <div className="p-2 rounded-xl bg-black/40 border border-white/10 text-[10px] font-mono text-red-300 max-h-24 overflow-y-auto break-words select-text allow-select leading-tight">
-                  {errorDetails}
-                </div>
-              )}
-
-              {(errorMessage.includes('API key') || errorMessage.includes('Key missing')) && (
-                <div className="flex items-center gap-1.5 pt-1 w-full min-w-0">
-                  <input
-                    type="password"
-                    placeholder="Paste Groq API Key (gsk_...)"
-                    className="flex-1 px-3 py-1.5 rounded-xl bg-black/40 border border-white/20 text-xs text-white placeholder-white/40 focus:outline-none focus:border-accent allow-select select-text"
-                    onKeyDown={async (e) => {
-                      if (e.key === 'Enter') {
-                        const val = (e.target as HTMLInputElement).value.trim();
-                        if (val) {
-                          await setGroqApiKey(val, updateData);
-                          setErrorMessage(null);
-                          setErrorDetails(null);
-                          setToastMessage('API Key saved and synced successfully!');
-                        }
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={async (e) => {
-                      const input = (e.currentTarget.previousElementSibling as HTMLInputElement)?.value.trim();
-                      if (input) {
-                        await setGroqApiKey(input, updateData);
-                        setErrorMessage(null);
-                        setErrorDetails(null);
-                        setToastMessage('API Key saved and synced successfully!');
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-accent text-slate-950 font-bold text-xs shadow-sm hover:opacity-90 cursor-pointer"
-                  >
-                    Save Key
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── VIEW 1: ACTIVE CHAT SCREEN ── */}
-          {activeTab === 'chat' && (
-            <>
-              <div ref={chatContainerRef} className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden pt-1.5 pb-2 px-0.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
-                {messages.length === 0 ? (
-                  <div className="flex-1 flex flex-col justify-between py-1 px-1 min-h-[340px]">
-                    {/* Top / Center: Prominent Luna AI Mascot */}
-                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3.5 my-auto py-2">
-                      <div className="relative flex flex-col items-center justify-center p-2">
-                        {/* Ambient Aura Glow */}
-                        <div className="absolute inset-0 m-auto w-36 h-36 rounded-full bg-[var(--md-primary)]/10 blur-2xl pointer-events-none" />
-                        <div className="relative z-10 transition-transform hover:scale-105 active:scale-95 duration-200">
-                          <OrbiCompanion variant="notes-spark" size={150} interactive={true} />
-                        </div>
-                      </div>
-                      <div className="space-y-1.5 max-w-xs mx-auto">
-                        <h3 className="text-lg sm:text-xl font-black text-[var(--md-on-surface)] tracking-tight">
-                          Hi! I am Luna AI
-                        </h3>
-                        <p className="text-[12px] text-[var(--md-on-surface-variant)] leading-relaxed font-medium">
-                          I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bottom: Compact Quick Question Cards near Chat Input */}
-                    <div className="w-full pt-2 pb-1">
-                      <div className="grid grid-cols-2 gap-2 w-full">
-                        {SPEC_STARTER_CHIPS.map((chip) => (
-                          <button
-                            key={chip.id}
-                            type="button"
-                            onClick={() => handleSendQuery(chip.label)}
-                            className="flex items-center gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)]/60 text-left transition-all active:scale-97 group cursor-pointer shadow-xs hover:shadow-sm"
-                          >
-                            <div className="w-7 h-7 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                              {getChipIcon(chip.icon)}
-                            </div>
-                            <span className="text-[11px] font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-tight line-clamp-2">
-                              {chip.label}
-                            </span>
-                          </button>
-                        ))}
+        {/* ── Chat Tab View ── */}
+        {activeTab === 'chat' ? (
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Scrollable Message History or Empty State */}
+            <div
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto space-y-4 pr-1 overscroll-contain"
+            >
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 px-2 text-center space-y-5">
+                  {/* Glowing Animated Luna AI Orb */}
+                  <div className="relative flex items-center justify-center my-2">
+                    <motion.div
+                      animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.65, 0.35] }}
+                      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                      className="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] blur-2xl -z-10"
+                    />
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] p-[2px] shadow-2xl">
+                      <div className="w-full h-full rounded-full bg-[#000000] flex items-center justify-center">
+                        <Sparkle size={36} weight="fill" className="text-white animate-pulse" />
                       </div>
                     </div>
                   </div>
-                ) : (
-                  messages.map((msg) => {
-                    const isUser = msg.role === 'user';
-                    const proposals = actionProposals[msg.id] || [];
 
-                    if (isUser) {
-                      return (
-                        <div key={msg.id} className="w-full min-w-0 flex justify-end">
-                          <div className="max-w-[85%] sm:max-w-[80%] min-w-0 px-3.5 py-2.5 rounded-[18px] rounded-br-xs bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere]">
-                            <FormattedAiMessage content={msg.content} isUser={true} />
+                  <div>
+                    <h3 className="text-2xl font-bold text-white tracking-tight">Hi! I am Luna AI</h3>
+                    <p className="text-sm text-white/60 max-w-xs mx-auto mt-1 leading-relaxed">
+                      I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
+                    </p>
+                  </div>
+
+                  {/* 4 Starter Chips in Solid #1C1C1E Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md pt-2">
+                    {SPEC_STARTER_CHIPS.map((chip) => (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        onClick={() => handleSendQuery(chip.label)}
+                        className="p-3.5 rounded-[20px] bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-95 transition-all text-left flex items-center gap-3 group"
+                      >
+                        <div
+                          className="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
+                          style={{ backgroundColor: `${chip.tint}20`, color: chip.tint }}
+                        >
+                          {chip.icon}
+                        </div>
+                        <span className="text-xs font-semibold text-white/90 leading-snug group-hover:text-white">
+                          {chip.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isUser = msg.role === 'user';
+                  const proposals = actionProposals[msg.id] || [];
+
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1.5`}
+                    >
+                      {/* Message Bubble */}
+                      <div
+                        className={`max-w-[88%] p-3.5 rounded-[22px] ${
+                          isUser
+                            ? 'bg-[#0A84FF] text-white rounded-br-[6px] shadow-md'
+                            : 'bg-[#1C1C1E] text-white/95 rounded-bl-[6px] border border-white/10 shadow-lg'
+                        }`}
+                      >
+                        {isUser ? (
+                          <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                        ) : (
+                          <div className="space-y-2">
+                            <FormattedAiMessage content={msg.content} />
+                            {msg.content === '' && isGenerating && (
+                              <div className="flex items-center gap-1.5 py-1 text-white/50 text-xs">
+                                <SpinnerGap size={15} className="animate-spin text-[#BF5AF2]" />
+                                <span>Luna is thinking...</span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      );
-                    }
+                        )}
+                      </div>
 
-                    return (
-                      <div key={msg.id} className="w-full min-w-0 flex flex-col items-stretch space-y-1">
-                        <div className="w-full min-w-0 p-3 rounded-2xl rounded-bl-xs bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-xs text-xs sm:text-sm leading-relaxed">
-                          {msg.content ? (
-                            <FormattedAiMessage content={msg.content} isUser={false} />
-                          ) : (
-                            <div className="flex items-center gap-2 text-[var(--md-primary)] italic">
-                              <Loader2 size={14} className="animate-spin" />
-                              <span>Thinking...</span>
-                            </div>
-                          )}
-
-                          {msg.content && (
-                            <div className="flex flex-wrap items-center justify-between gap-1.5 pt-2 mt-2 border-t border-[var(--md-outline-variant)]/60 text-[9.5px] text-[var(--md-on-surface-variant)] font-mono w-full min-w-0">
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <span>Groq AI</span>
-                                <span className="opacity-40">•</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleSpeak(msg.id, msg.content)}
-                                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md transition-all cursor-pointer ${
-                                    speakingMsgId === msg.id
-                                      ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold animate-pulse'
-                                      : 'hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)]'
-                                  }`}
-                                  title={speakingMsgId === msg.id ? 'Stop Voice Read-Aloud' : 'Read Aloud with Voice'}
-                                >
-                                  {speakingMsgId === msg.id ? <VolumeX size={10} /> : <Volume2 size={10} />}
-                                  <span>{speakingMsgId === msg.id ? 'Stop' : 'Listen'}</span>
-                                </button>
-                              </div>
-
-                              <div className="flex items-center gap-1 shrink-0 ml-auto">
-                                {msg.dataSentContext && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewDataContext(msg.dataSentContext || null)}
-                                    className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
-                                    title="Inspect Context Sent"
-                                  >
-                                    <Eye size={10} />
-                                    <span className="hidden xs:inline">Data</span>
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleShareResponse(msg.content)}
-                                  className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
-                                  title="Share formatted response"
-                                >
-                                  <Share2 size={10} />
-                                  <span>Share</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                  className="flex items-center gap-1 px-1.5 py-0.5 hover:text-[var(--md-primary)] hover:bg-[var(--md-surface-container-high)] rounded-md transition-colors cursor-pointer text-[9.5px]"
-                                  title="Copy text"
-                                >
-                                  {copiedId === msg.id ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
-                                  <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          {msg.content && (
-                            <div className="flex flex-wrap gap-1.5 pt-2">
-                              {(msg.content.toLowerCase().includes('workout') || msg.content.toLowerCase().includes('gym')) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    haptics.tap();
-                                    onClose();
-                                    navigate('/gym/workout');
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
-                                >
-                                  <Dumbbell size={11} />
-                                  <span>Open Workout</span>
-                                </button>
-                              )}
-                              {(msg.content.toLowerCase().includes('focus') || msg.content.toLowerCase().includes('study') || msg.content.toLowerCase().includes('timer') || msg.content.toLowerCase().includes('flow')) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    haptics.tap();
-                                    onClose();
-                                    navigate('/flow');
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
-                                >
-                                  <Sparkles size={11} />
-                                  <span>Open Flow Room</span>
-                                </button>
-                              )}
-                              {(msg.content.toLowerCase().includes('task') || msg.content.toLowerCase().includes('to-do')) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    haptics.tap();
-                                    onClose();
-                                    navigate('/tasks');
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-tertiary-container)] text-[var(--md-on-tertiary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
-                                >
-                                  <CheckSquare size={11} />
-                                  <span>View Tasks</span>
-                                </button>
-                              )}
-                              {(msg.content.toLowerCase().includes('morning') || msg.content.toLowerCase().includes('routine')) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    haptics.tap();
-                                    onClose();
-                                    navigate('/morning');
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-surface-container-high)] text-[var(--md-primary)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all border border-[var(--md-outline-variant)] shadow-xs"
-                                >
-                                  <ArrowRight size={11} />
-                                  <span>Morning Plan</span>
-                                </button>
-                              )}
-                              {(msg.content.toLowerCase().includes('spending') || msg.content.toLowerCase().includes('budget') || msg.content.toLowerCase().includes('expense')) && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    haptics.tap();
-                                    onClose();
-                                    navigate('/spending');
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all border border-[var(--md-outline-variant)] shadow-xs"
-                                >
-                                  <Wallet size={11} />
-                                  <span>View Spending</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Action Confirmation Cards */}
-                        {proposals.map((prop) => (
-                          <div key={prop.id} className="w-full min-w-0 pt-1">
+                      {/* Action Proposals (1-Tap Save actions) */}
+                      {!isUser && proposals.length > 0 && (
+                        <div className="w-full max-w-sm space-y-2 pt-1">
+                          {proposals.map((prop, idx) => (
                             <ActionConfirmationCard
+                              key={idx}
                               proposal={prop}
                               updateData={updateData}
                               currentData={data}
                               onExecuted={(msg) => setToastMessage(msg)}
                             />
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })
-                )}
+                          ))}
+                        </div>
+                      )}
 
-                {isGenerating && (
-                  <div className="flex justify-start">
-                    <div className="p-3 rounded-2xl text-xs text-[var(--md-primary)] flex items-center gap-2 bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]">
-                      <Loader2 size={13} className="animate-spin" />
-                      <span>Streaming response...</span>
+                      {/* Assistant Action Bar (Copy, Speak, Share) */}
+                      {!isUser && msg.content && (
+                        <div className="flex items-center gap-2 px-1 text-white/40 text-xs">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyMessage(msg.id, msg.content)}
+                            className="hover:text-white transition-colors flex items-center gap-1"
+                          >
+                            {copiedId === msg.id ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
+                            <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
+                          </button>
+                          <span>•</span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSpeak(msg.id, msg.content)}
+                            className={`hover:text-white transition-colors flex items-center gap-1 ${
+                              speakingMsgId === msg.id ? 'text-[#BF5AF2]' : ''
+                            }`}
+                          >
+                            <SpeakerHigh size={13} />
+                            <span>{speakingMsgId === msg.id ? 'Stop' : 'Read'}</span>
+                          </button>
+                          <span>•</span>
+                          <button
+                            type="button"
+                            onClick={() => handleShareResponse(msg.content)}
+                            className="hover:text-white transition-colors flex items-center gap-1"
+                          >
+                            <ShareNetwork size={13} />
+                            <span>Share</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Dynamic Follow-Up Suggestion Chips ── */}
-              {messages.length > 0 && !isGenerating && (
-                <div className="pt-1 pb-1 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0 w-full min-w-0">
-                  <span className="text-[9.5px] font-mono text-[var(--md-on-surface-variant)] flex items-center gap-1 pl-0.5 shrink-0 opacity-75">
-                    <Sparkles size={10} className="text-[var(--md-primary)] shrink-0" />
-                    <span className="hidden xs:inline">Suggested:</span>
-                  </span>
-                  {getDynamicFollowUps(messages[messages.length - 1]).map((chip) => (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      onClick={() => handleSendQuery(chip.query)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-medium bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] transition-all active:scale-95 whitespace-nowrap shrink-0 cursor-pointer shadow-2xs"
-                    >
-                      <span>{chip.label}</span>
-                      <ArrowRight size={10} className="opacity-60" />
-                    </button>
-                  ))}
-                </div>
+                  );
+                })
               )}
+            </div>
 
-              {/* ── Bottom Input Row (Pill Input in M3 Surface Container Highest) ── */}
-              <div className="pt-1 shrink-0 relative z-30 w-full min-w-0">
-                {isRecording && (
-                  <div className="mb-1.5 px-3 py-1.5 rounded-2xl bg-red-500/10 border border-red-500/25 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-pulse w-full min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
-                      <span className="font-semibold text-[11px] truncate">Listening live... (Speak task or query)</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-[var(--md-on-surface-variant)] shrink-0 ml-2">Tap stop</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-1 p-1 pl-2.5 sm:pl-3 rounded-full bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] w-full min-w-0">
-                  {/* Left input field */}
-                  <div className="flex-1 flex items-center min-w-0">
-                    <input
-                      id="ask-lifeos-input"
-                      name="ask-lifeos-query"
-                      ref={inputRef}
-                      type="text"
-                      value={inputQuery}
-                      onChange={(e) => setInputQuery(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendQuery();
-                        }
-                      }}
-                      autoComplete="off"
-                      autoCorrect="off"
-                      autoCapitalize="sentences"
-                      spellCheck={false}
-                      tabIndex={0}
-                      placeholder={
-                        transcribing
-                          ? 'Transcribing voice...'
-                          : isRecording
-                          ? 'Listening in real-time...'
-                          : 'Ask Luna AI or say "Add to-do task..."'
-                      }
-                      className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text min-w-0"
-                      style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}
-                    />
-                    
-                    {/* Clear text X button inside input */}
-                    {inputQuery.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInputQuery('');
-                          inputRef.current?.focus();
-                        }}
-                        className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-all shrink-0 mr-1"
-                        title="Clear text"
-                      >
-                        <X size={13} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Actions: Voice Mic & Send Buttons */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleRecord();
-                      }}
-                      disabled={isGenerating || transcribing}
-                      title={isRecording ? 'Stop Recording' : 'Voice Input'}
-                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                        isRecording
-                          ? 'bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30'
-                          : transcribing
-                          ? 'bg-[var(--md-primary-container)] text-[var(--md-primary)] animate-spin'
-                          : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] hover:text-[var(--md-primary)]'
-                      }`}
-                    >
-                      {isRecording ? <Square size={11} /> : transcribing ? <Loader2 size={12} /> : <Mic size={14} strokeWidth={2.2} />}
-                    </button>
-
-                    {inputQuery.trim().length > 0 && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSendQuery();
-                        }}
-                        disabled={isGenerating || transcribing}
-                        title="Send query"
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--md-primary)] hover:opacity-95 active:scale-95 text-[var(--md-on-primary)] flex items-center justify-center shadow-xs disabled:opacity-40 transition-all shrink-0"
-                      >
-                        <Send size={13} className="ml-[-1px]" strokeWidth={2.2} />
-                      </button>
-                    )}
-                  </div>
+            {/* Error Message Alert */}
+            {errorMessage && (
+              <div className="my-2 p-2.5 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <WarningCircle size={15} weight="bold" />
+                  <span>{errorMessage}</span>
                 </div>
-              </div>
-            </>
-          )}
-
-          {/* ── VIEW 2: SAVED SEARCH HISTORY SCREEN ── */}
-          {activeTab === 'history' && (
-            <div className="flex-1 flex flex-col min-h-0 space-y-3 py-1 overflow-hidden">
-              
-              {/* Search History Filter Bar & New Chat Button */}
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)]">
-                  <Search size={15} className="text-[var(--md-on-surface-variant)] shrink-0" />
-                  <input
-                    type="text"
-                    value={searchHistoryQuery}
-                    onChange={(e) => setSearchHistoryQuery(e.target.value)}
-                    placeholder="Search past questions & answers..."
-                    className="w-full bg-transparent text-xs text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text"
-                  />
-                  {searchHistoryQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchHistoryQuery('')}
-                      className="p-1 text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] shrink-0"
-                    >
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-
                 <button
                   type="button"
-                  onClick={handleStartNewChat}
-                  className="px-3.5 py-2 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs flex items-center gap-1.5 shadow-xs hover:opacity-90 active:scale-95 transition-all shrink-0"
+                  onClick={() => setErrorMessage(null)}
+                  className="p-1 hover:text-white"
                 >
-                  <Plus size={15} />
-                  <span>New Chat</span>
+                  <X size={14} />
                 </button>
               </div>
+            )}
 
-              {/* Saved History List */}
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 scrollbar-none">
-                {filteredHistory.length === 0 ? (
-                  <div className="text-center py-12 px-4 space-y-3 my-auto">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--md-surface-container-highest)] flex items-center justify-center text-[var(--md-on-surface-variant)] mx-auto">
-                      <Clock size={22} />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-bold text-[var(--md-on-surface)]">
-                        {searchHistoryQuery ? 'No matching saved chats' : 'No Saved Search History'}
-                      </h4>
-                      <p className="text-xs text-[var(--md-on-surface-variant)] max-w-xs mx-auto">
-                        {searchHistoryQuery
-                          ? 'Try searching with a different keyword or topic.'
-                          : 'Your past questions and search conversations will be automatically saved here for instant reuse.'}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  filteredHistory.map((session) => {
-                    const isCurrent = activeSessionId === session.id;
-                    const lastMsg = session.messages[session.messages.length - 1];
-                    const dateStr = new Date(session.updatedAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
-
-                    return (
-                      <div
-                        key={session.id}
-                        onClick={() => handleReopenSession(session)}
-                        className={`p-3.5 rounded-2xl border cursor-pointer transition-all hover:border-[var(--md-primary)]/50 group relative ${
-                          isCurrent
-                            ? 'bg-[var(--md-primary-container)] border-[var(--md-primary)] text-[var(--md-on-primary-container)] shadow-xs'
-                            : 'bg-[var(--md-surface-container)] hover:bg-[var(--md-surface-container-high)] border-[var(--md-outline-variant)] text-[var(--md-on-surface)]'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="space-y-1 min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-[var(--md-on-surface)] tracking-tight truncate group-hover:text-[var(--md-primary)] transition-colors">
-                                {session.title}
-                              </h4>
-                              {isCurrent && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--md-primary)] text-[var(--md-on-primary)] shrink-0">
-                                  Active
-                                </span>
-                              )}
-                            </div>
-                            {lastMsg && (
-                              <p className="text-[11px] text-[var(--md-on-surface-variant)] line-clamp-2 leading-relaxed">
-                                {stripUrls(lastMsg.content)}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-3 pt-1 text-[10px] text-[var(--md-on-surface-variant)] font-mono">
-                              <span>{dateStr}</span>
-                              <span>•</span>
-                              <span>{session.messages.length} messages</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1 shrink-0 pt-0.5">
-                            <button
-                              type="button"
-                              onClick={(e) => handleDeleteSession(session.id, e)}
-                              title="Delete saved session"
-                              className="p-1.5 rounded-xl text-[var(--md-on-surface-variant)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                            <div className="w-7 h-7 rounded-xl bg-[var(--md-surface-container-highest)] group-hover:bg-[var(--md-primary)] group-hover:text-[var(--md-on-primary)] text-[var(--md-on-surface)] flex items-center justify-center transition-all">
-                              <ArrowRight size={14} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
-
-
-        </div>
-      </GlassSheet>
-
-      {/* One-time Privacy Consent Sheet */}
-      <AiConsentSheet
-        isOpen={showConsentSheet}
-        onAccept={() => {
-          setShowConsentSheet(false);
-          handleSendQuery();
-        }}
-        onClose={() => setShowConsentSheet(false)}
-      />
-
-      {/* Data Sent Preview Modal */}
-      {previewDataContext !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent">
-          <div className="w-full max-w-md bg-slate-900 border border-accent/30 rounded-3xl p-4 space-y-3 text-white shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-accent">
-                <ShieldCheck size={18} />
-                <span className="text-xs font-bold font-mono">Data Sent Preview (Redacted)</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewDataContext(null)}
-                className="p-1 rounded-full bg-white/10 text-white/70 hover:text-white"
+            {/* ── Bottom Floating Input Bar ── */}
+            <div className="pt-2 shrink-0">
+              <GlassSurface
+                className="rounded-full p-1.5 flex items-center gap-2 border border-white/16 shadow-2xl"
               >
-                <X size={15} />
-              </button>
+                {/* Voice Dictation Mic Button */}
+                <button
+                  type="button"
+                  onClick={handleToggleVoiceRecord}
+                  disabled={isGenerating || transcribing}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                    isRecording
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20'
+                  }`}
+                  title={isRecording ? 'Stop Recording' : 'Voice Input'}
+                >
+                  {transcribing ? (
+                    <SpinnerGap size={16} className="animate-spin text-white" />
+                  ) : isRecording ? (
+                    <Stop size={16} weight="bold" />
+                  ) : (
+                    <Microphone size={16} weight="bold" />
+                  )}
+                </button>
+
+                {/* Text Input Field */}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputQuery}
+                  onChange={(e) => setInputQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendQuery();
+                    }
+                  }}
+                  placeholder={transcribing ? 'Transcribing speech...' : 'Ask Luna AI or say "Add to-do task..."'}
+                  disabled={isGenerating}
+                  className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none px-2 min-w-0"
+                />
+
+                {/* Send Button */}
+                <button
+                  type="button"
+                  onClick={() => handleSendQuery()}
+                  disabled={!inputQuery.trim() || isGenerating}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                    inputQuery.trim() && !isGenerating
+                      ? 'bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] text-white shadow-md active:scale-95 cursor-pointer'
+                      : 'bg-white/5 text-white/30 cursor-not-allowed'
+                  }`}
+                  aria-label="Send message"
+                >
+                  {isGenerating ? (
+                    <SpinnerGap size={16} className="animate-spin text-white" />
+                  ) : (
+                    <PaperPlaneRight size={16} weight="fill" />
+                  )}
+                </button>
+              </GlassSurface>
             </div>
-            <p className="text-[11px] text-slate-300">
-              This exact redacted summary context was transmitted securely to Groq AI for your question:
-            </p>
-            <div className="p-3 rounded-xl bg-slate-950 border border-white/10 text-[11px] font-mono leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap text-emerald-400 allow-select select-text">
-              {previewDataContext}
-            </div>
-            <button
-              type="button"
-              onClick={() => setPreviewDataContext(null)}
-              className="w-full py-2.5 rounded-xl btn-primary font-bold text-xs"
-            >
-              Close Preview
-            </button>
           </div>
-        </div>
-      )}
-    </>
+        ) : (
+          /* ── History Tab View ── */
+          <div className="flex-1 flex flex-col min-h-0 space-y-3">
+            {/* Search History Pill */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#1C1C1E] border border-white/10 text-white/80">
+              <MagnifyingGlass size={16} className="text-white/50" />
+              <input
+                type="text"
+                value={searchHistoryQuery}
+                onChange={(e) => setSearchHistoryQuery(e.target.value)}
+                placeholder="Search past conversations..."
+                className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
+              />
+              {searchHistoryQuery && (
+                <button type="button" onClick={() => setSearchHistoryQuery('')}>
+                  <X size={14} className="text-white/50 hover:text-white" />
+                </button>
+              )}
+            </div>
+
+            {/* History List */}
+            <div className="flex-1 overflow-y-auto space-y-2 overscroll-contain">
+              {filteredHistory.length === 0 ? (
+                <div className="py-12 text-center text-white/40 text-sm">
+                  {searchHistoryQuery ? 'No matching conversations found.' : 'No conversation history saved yet.'}
+                </div>
+              ) : (
+                filteredHistory.map((session) => (
+                  <div
+                    key={session.id}
+                    onClick={() => handleReopenSession(session)}
+                    className="p-3.5 rounded-[22px] bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-[0.98] transition-all flex items-center justify-between cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                      <div className="w-9 h-9 rounded-2xl bg-[#BF5AF2]/20 text-[#BF5AF2] flex items-center justify-center shrink-0">
+                        <ChatCircleText size={18} weight="duotone" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-xs font-bold text-white truncate leading-tight group-hover:text-[#BF5AF2]">
+                          {session.title}
+                        </h4>
+                        <span className="text-[10px] text-white/40 mt-0.5 block">
+                          {new Date(session.updatedAt).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                          {' • '}
+                          {session.messages.length} messages
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteSession(session.id, e)}
+                      className="p-2 rounded-full text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
+                      title="Delete Session"
+                    >
+                      <Trash size={15} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </Sheet>
   );
 }

@@ -1,23 +1,19 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+/**
+ * LifeOS — ShoppingLists Component (iOS 26 Liquid Glass)
+ */
+
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
   Plus,
-  Trash2,
-  ChevronRight,
-  Sparkles,
-  Copy,
-  CheckCircle2,
-  ListTodo,
-  Layers,
+  Trash,
+  ListChecks,
+  Stack,
   ArrowRight,
-  X
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic, haptics } from '../utils/haptics';
-import { Modal } from '../components/BottomSheet';
-import M3Button from '../components/m3/M3Button';
+import { triggerHaptic } from '../utils/haptics';
 import {
   createShoppingList,
   createListFromTemplate,
@@ -25,7 +21,14 @@ import {
   STARTER_TEMPLATES,
 } from '../utils/shoppingStorage';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
-import { EmptyState } from '../components/common/EmptyState';
+import { LargeTitleHeader } from '../ui/navigation/LargeTitleHeader';
+import { Button } from '../ui/controls/Button';
+import { Segmented } from '../ui/controls/Segmented';
+import { TextField } from '../ui/controls/TextField';
+import { ProgressBar } from '../ui/visualization/ProgressBar';
+import { EmptyState } from '../ui/feedback/EmptyState';
+import { Sheet } from '../ui/feedback/Sheet';
+import { Badge } from '../ui/controls/Badge';
 import type { AppData, ShoppingList } from '../types';
 
 interface ShoppingListsProps {
@@ -53,7 +56,6 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
   const [newMode, setNewMode] = useState<'scratch' | 'template'>('scratch');
   const [newListName, setNewListName] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [listToDelete, setListToDelete] = useState<ShoppingList | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -84,7 +86,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
     setShowNewModal(false);
     setNewListName('');
     showSavedFeedback({
-      title: 'List Created!',
+      title: 'List Created',
       message: newList.name,
       section: 'shopping',
     });
@@ -97,371 +99,309 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
     const updated = [...allLists, newList];
     await updateData({ shoppingLists: updated });
     showSavedFeedback({
-      title: 'Template Added!',
+      title: 'Template Added',
       message: newList.name,
       section: 'shopping',
     });
     navigate(`/shopping/${newList.id}`);
   };
 
-  const handleDeleteList = async () => {
-    if (!listToDelete) return;
+  const handleDeleteList = async (list: ShoppingList) => {
     await confirmDelete({
       title: 'Delete Shopping List?',
-      itemName: listToDelete.name,
+      itemName: list.name,
       message: 'Are you sure you want to delete this shopping list and all its checklist items?',
       section: 'shopping',
       onConfirm: async () => {
-        const updated = allLists.filter(l => l.id !== listToDelete.id);
+        const updated = allLists.filter(l => l.id !== list.id);
         await updateData({ shoppingLists: updated });
-        setListToDelete(null);
       },
     });
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-4 animate-fade-in">
-      {/* ── Top Header ── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-ping" />
-            <span className="text-[10.5px] font-tag font-bold tracking-wider uppercase text-[var(--text-muted)]">
-              Checklists & Outings
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-[var(--text-primary)] mt-1">
-            Shopping Lists
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
-            Organize items before heading out, check off while shopping, and reuse templates.
-          </p>
-        </div>
-
-        <M3Button
-          onClick={() => {
-            setNewMode('scratch');
-            setNewListName('');
-            setShowNewModal(true);
-          }}
-          icon={<Plus size={16} strokeWidth={2.8} />}
-          size="sm"
-          className="shrink-0"
-        >
-          New List
-        </M3Button>
-      </div>
-
-      {/* ── Empty State ── */}
-      {allLists.length === 0 && (
-        <div className="rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] text-center space-y-4">
-          <EmptyState
-            variant="tasks-empty"
-            title="No Shopping Lists Yet"
-            description="Create a checklist for your next store run or weekend outing, or tap a starter template below."
-            action={{
-              label: 'Create List',
-              icon: <Plus size={16} strokeWidth={2.5} />,
-              onClick: () => setShowNewModal(true),
+    <div className="w-full text-white pb-2">
+      <LargeTitleHeader
+        title="Shopping"
+        subtitle="Checklists, store runs, and templates"
+        onBack={() => navigate('/')}
+        actions={
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              setNewMode('scratch');
+              setNewListName('');
+              setShowNewModal(true);
             }}
-          />
+            className="p-2 rounded-full bg-[#FF375F]/15 text-[#FF375F] hover:bg-[#FF375F]/25 transition-colors"
+            title="New List"
+          >
+            <Plus size={20} weight="bold" />
+          </button>
+        }
+      />
 
-          <div className="pt-2">
-            <p className="label-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3">
-              Starter Outing Templates
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
-              {STARTER_TEMPLATES.map(starter => (
-                <button
-                  key={starter.name}
-                  onClick={() => handleCreateStarterTemplate(starter)}
-                  className="p-3.5 rounded-[20px] bg-[var(--card-surface)]/80 border border-[var(--card-border)] hover:border-[var(--accent-primary)]/50 transition-all text-left group active:scale-[0.98]"
-                >
-                  <div className="flex items-center justify-between gap-1 mb-1.5">
-                    <span className="text-[9.5px] font-tag font-semibold uppercase px-2 py-0.5 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)]">
-                      {starter.category}
-                    </span>
-                    <ArrowRight size={13} className="text-[var(--text-muted)] group-hover:text-[var(--accent-primary)] transition-colors" />
-                  </div>
-                  <p className="text-xs font-bold text-[var(--text-primary)] leading-tight">
-                    {starter.name}
-                  </p>
-                  <p className="text-[11px] text-[var(--text-muted)] font-stat mt-1">
-                    {starter.items.length} items
-                  </p>
-                </button>
-              ))}
+      <div className="flex flex-col gap-3 pb-2">
+        {/* ── Empty State ── */}
+        {allLists.length === 0 && (
+          <div className="space-y-6">
+            <EmptyState
+              icon={<ShoppingBag size={36} weight="light" className="text-[#FF375F]" />}
+              title="No Shopping Lists Yet"
+              description="Create a checklist for your next store run or weekend outing, or tap a starter template below."
+              actionLabel="Create List"
+              onAction={() => setShowNewModal(true)}
+              tint="#FF375F"
+            />
+
+            <div className="space-y-3">
+              <h3 className="text-xs uppercase tracking-wider text-[#8E8E93] font-semibold px-1">
+                Starter Outing Templates
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {STARTER_TEMPLATES.map((starter) => (
+                  <button
+                    key={starter.name}
+                    onClick={() => handleCreateStarterTemplate(starter)}
+                    className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] hover:border-[#FF375F]/40 transition-all text-left group active:scale-[0.98]"
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-2">
+                      <Badge label={starter.category} color="#8E8E93" />
+                      <ArrowRight size={14} className="text-[#8E8E93] group-hover:text-[#FF375F] transition-colors" />
+                    </div>
+                    <p className="text-sm font-semibold text-white leading-tight">
+                      {starter.name}
+                    </p>
+                    <p className="text-xs text-[#8E8E93] mt-1">
+                      {starter.items.length} items
+                    </p>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Active Lists Section ── */}
-      {activeLists.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <ListTodo size={15} className="text-[var(--accent-primary)]" />
-              <h2 className="text-xs font-bold font-tag uppercase tracking-wider text-[var(--text-secondary)]">
-                Active Lists · <span className="font-stat">{activeLists.length}</span>
+        {/* ── Active Lists Section ── */}
+        {activeLists.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <ListChecks size={18} weight="bold" className="text-[#FF375F]" />
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
+                Active Lists · {activeLists.length}
               </h2>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {activeLists.map(list => {
-              const { checkedCount, totalCount, percent } = calculateListProgress(list);
-              const isAllDone = totalCount > 0 && checkedCount === totalCount;
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {activeLists.map((list) => {
+                const { checkedCount, totalCount, percent } = calculateListProgress(list);
+                const isAllDone = totalCount > 0 && checkedCount === totalCount;
 
-              return (
-                <motion.div
-                  key={list.id}
-                  whileHover={{ scale: 1.01, y: -2 }}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() => {
-                    triggerHaptic('nav');
-                    navigate(`/shopping/${list.id}`);
-                  }}
-                  className={`card p-4 sm:p-5 rounded-[24px] cursor-pointer transition-all border select-none ${
-                    isAllDone
-                      ? 'border-emerald-500/30 bg-[var(--card-surface)]/70'
-                      : 'border-[var(--card-border)] hover:border-[var(--accent-primary)]/50 shadow-xs'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-bold text-sm sm:text-base text-[var(--text-primary)] truncate">
-                        {list.name}
-                      </h3>
-                      <p className="text-[10px] font-tag text-[var(--text-muted)] mt-0.5">
-                        Updated {format(new Date(list.updatedAt), 'MMM d, h:mm a')}
-                      </p>
+                return (
+                  <div
+                    key={list.id}
+                    onClick={() => {
+                      triggerHaptic('nav');
+                      navigate(`/shopping/${list.id}`);
+                    }}
+                    className={`p-4 rounded-2xl cursor-pointer transition-all border select-none ${
+                      isAllDone
+                        ? 'border-[#30D158]/30 bg-[#1C1C1E]'
+                        : 'border-white/[0.08] bg-[#1C1C1E] hover:border-[#FF375F]/40'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-base text-white truncate">
+                          {list.name}
+                        </h3>
+                        <p className="text-xs text-[#8E8E93] mt-0.5">
+                          Updated {format(new Date(list.updatedAt), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          triggerHaptic('light');
+                          handleDeleteList(list);
+                        }}
+                        className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                        title="Delete List"
+                      >
+                        <Trash size={15} />
+                      </button>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        triggerHaptic('light');
-                        setListToDelete(list);
-                      }}
-                      className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                      title="Delete List"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-
-                  {/* Progress Row */}
-                  <div className="mt-3.5 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-stat text-[var(--text-secondary)] font-medium">
-                        {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
-                      </span>
-                      <span className="font-stat font-bold text-[11px] text-[var(--md-primary)]">
-                        {percent}%
-                      </span>
-                    </div>
-
-                    <div className="h-1.5 w-full rounded-full bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-[var(--md-primary)] transition-all duration-300"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Saved Templates Section ── */}
-      {templates.length > 0 && (
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <Layers size={15} className="text-purple-500" />
-              <h2 className="text-xs font-bold font-tag uppercase tracking-wider text-[var(--text-secondary)]">
-                Saved Templates · <span className="font-stat">{templates.length}</span>
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {templates.map(tmpl => {
-              const itemCount = tmpl.items.length;
-
-              return (
-                <div
-                  key={tmpl.id}
-                  className="card p-4 sm:p-5 rounded-[24px] border border-[var(--card-border)] bg-[var(--card-surface)]/80 flex flex-col justify-between gap-3 select-none"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded-full text-[9px] font-tag font-bold tracking-wider uppercase bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)]">
-                          TEMPLATE
+                    {/* Progress Row */}
+                    <div className="mt-3.5 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-[#8E8E93]">
+                          {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
                         </span>
-                        <span className="text-[10px] font-stat text-[var(--text-muted)]">
-                          {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                        <span className="font-semibold text-[#FF375F]">
+                          {percent}%
                         </span>
                       </div>
 
-                      <h3 className="font-bold text-sm sm:text-base text-[var(--text-primary)] truncate">
-                        {tmpl.name}
-                      </h3>
+                      <ProgressBar
+                        progress={percent / 100}
+                        color={isAllDone ? '#30D158' : '#FF375F'}
+                        height={6}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Saved Templates Section ── */}
+        {templates.length > 0 && (
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-2 px-1">
+              <Stack size={18} weight="bold" className="text-[#BF5AF2]" />
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
+                Saved Templates · {templates.length}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {templates.map((tmpl) => {
+                const itemCount = tmpl.items.length;
+
+                return (
+                  <div
+                    key={tmpl.id}
+                    className="p-4 rounded-2xl border border-white/[0.08] bg-[#1C1C1E] flex flex-col justify-between gap-3 select-none"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge label="TEMPLATE" color="#BF5AF2" />
+                          <span className="text-xs text-[#8E8E93]">
+                            {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                          </span>
+                        </div>
+
+                        <h3 className="font-semibold text-base text-white truncate">
+                          {tmpl.name}
+                        </h3>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('light');
+                          handleDeleteList(tmpl);
+                        }}
+                        className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                        title="Delete Template"
+                      >
+                        <Trash size={15} />
+                      </button>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setListToDelete(tmpl);
-                      }}
-                      className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                      title="Delete Template"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.04]">
+                      <button
+                        onClick={() => {
+                          triggerHaptic('nav');
+                          navigate(`/shopping/${tmpl.id}`);
+                        }}
+                        className="text-xs font-semibold text-[#8E8E93] hover:text-white transition-colors"
+                      >
+                        Edit Items
+                      </button>
+
+                      <Button
+                        size="sm"
+                        variant="glass"
+                        icon={<Plus size={14} weight="bold" />}
+                        onClick={() => handleCreateFromTemplate(tmpl)}
+                      >
+                        Start Outing
+                      </Button>
+                    </div>
                   </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--card-border)]/50">
-                    <button
-                      onClick={() => {
-                        triggerHaptic('nav');
-                        navigate(`/shopping/${tmpl.id}`);
-                      }}
-                      className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                    >
-                      Edit Items
-                    </button>
-
-                    <button
-                      onClick={() => handleCreateFromTemplate(tmpl)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] text-xs font-bold hover:bg-[var(--accent-primary)] hover:text-white transition-all active:scale-95"
-                    >
-                      <Plus size={13} strokeWidth={2.6} />
-                      <span>Start Outing</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* ── New List Flow Modal ── */}
-      <Modal isOpen={showNewModal} onClose={() => setShowNewModal(false)}>
-        <div className="space-y-4 pt-1">
-          <div className="flex items-center justify-between pb-1">
-            <h3 className="font-heading text-lg font-bold text-[var(--text-primary)]">
-              Create Shopping List
-            </h3>
-            <button
-              onClick={() => setShowNewModal(false)}
-              className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          {/* Path Toggle: Scratch vs Template */}
-          <div className="grid grid-cols-2 p-1 rounded-2xl bg-black/5 dark:bg-white/5 border border-[var(--card-border)]">
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                setNewMode('scratch');
-              }}
-              className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
-                newMode === 'scratch'
-                  ? 'bg-[var(--card-surface)] text-[var(--text-primary)] shadow-xs font-bold'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              }`}
-            >
-              From Scratch
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                setNewMode('template');
-                if (templates.length > 0 && !selectedTemplateId) {
-                  setSelectedTemplateId(templates[0].id);
-                  setNewListName(templates[0].name.replace(/\s*\(Template\)$/i, ''));
-                }
-              }}
-              className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
-                newMode === 'template'
-                  ? 'bg-[var(--card-surface)] text-[var(--text-primary)] shadow-xs font-bold'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              }`}
-            >
-              From Template
-            </button>
-          </div>
+      {/* ── New List Sheet ── */}
+      <Sheet
+        isOpen={showNewModal}
+        onClose={() => setShowNewModal(false)}
+        title="Create Shopping List"
+      >
+        <div className="space-y-4">
+          <Segmented
+            options={[
+              { value: 'scratch', label: 'From Scratch' },
+              { value: 'template', label: 'From Template' },
+            ]}
+            value={newMode}
+            onChange={(val) => {
+              triggerHaptic('light');
+              setNewMode(val as 'scratch' | 'template');
+              if (val === 'template' && templates.length > 0 && !selectedTemplateId) {
+                setSelectedTemplateId(templates[0].id);
+                setNewListName(templates[0].name.replace(/\s*\(Template\)$/i, ''));
+              }
+            }}
+            tint="#FF375F"
+          />
 
           {newMode === 'scratch' ? (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                  List Name
-                </label>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={newListName}
-                  onChange={e => setNewListName(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleCreateScratch();
-                  }}
-                  placeholder="e.g. Trader Joe's, Target, Weekend BBQ..."
-                  className="w-full px-4 py-2.5 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
-                />
-              </div>
+            <div className="space-y-4">
+              <TextField
+                label="List Name"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateScratch();
+                }}
+                placeholder="e.g. Trader Joe's, Target, Weekend BBQ..."
+              />
 
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  onClick={() => setShowNewModal(false)}
-                  className="px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                >
+                <Button variant="glass" onClick={() => setShowNewModal(false)}>
                   Cancel
-                </button>
-                <button
-                  onClick={handleCreateScratch}
-                  className="px-5 py-2 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold shadow-md hover:opacity-95 active:scale-95 transition-all"
-                >
+                </Button>
+                <Button variant="prominent" tint="#FF375F" onClick={handleCreateScratch}>
                   Create List
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {templates.length === 0 ? (
-                <div className="text-center p-4 rounded-2xl border border-[var(--card-border)] bg-[var(--card-surface)]/60 space-y-2">
-                  <p className="text-xs text-[var(--text-muted)]">No custom templates saved yet.</p>
-                  <p className="text-xs text-[var(--text-secondary)]">Pick a starter template to get started:</p>
+                <div className="text-center p-4 rounded-2xl border border-white/[0.08] bg-[#2C2C2E] space-y-3">
+                  <p className="text-xs text-[#8E8E93]">No custom templates saved yet.</p>
+                  <p className="text-xs text-white font-medium">Pick a starter template:</p>
                   <div className="flex flex-col gap-2 pt-1">
-                    {STARTER_TEMPLATES.map(st => (
+                    {STARTER_TEMPLATES.map((st) => (
                       <button
                         key={st.name}
                         onClick={() => handleCreateStarterTemplate(st)}
-                        className="p-2.5 rounded-xl border border-[var(--card-border)] hover:border-[var(--accent-primary)]/40 text-left text-xs font-bold text-[var(--text-primary)] flex items-center justify-between"
+                        className="p-3 rounded-xl border border-white/[0.08] hover:border-[#FF375F]/40 text-left text-xs font-semibold text-white flex items-center justify-between"
                       >
                         <span>{st.name}</span>
-                        <span className="font-stat text-[10px] text-[var(--text-muted)]">{st.items.length} items</span>
+                        <span className="text-[11px] text-[#8E8E93]">{st.items.length} items</span>
                       </button>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                      Select Template
-                    </label>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[#8E8E93]">Select Template</label>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {templates.map(tmpl => {
+                      {templates.map((tmpl) => {
                         const isSelected = selectedTemplateId === tmpl.id;
                         return (
                           <div
@@ -472,82 +412,46 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                             }}
                             className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
                               isSelected
-                                ? 'border-[var(--accent-primary)] bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] font-bold'
-                                : 'border-[var(--card-border)] hover:border-[var(--card-border)]/80 text-[var(--text-primary)]'
+                                ? 'border-[#FF375F] bg-[#FF375F]/15 text-white font-semibold'
+                                : 'border-white/[0.08] bg-[#2C2C2E] text-white'
                             }`}
                           >
                             <span className="text-xs truncate">{tmpl.name}</span>
-                            <span className="text-[10px] font-stat opacity-75">{tmpl.items.length} items</span>
+                            <span className="text-[11px] text-[#8E8E93]">{tmpl.items.length} items</span>
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-                      List Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newListName}
-                      onChange={e => setNewListName(e.target.value)}
-                      placeholder="Name for this outing..."
-                      className="w-full px-4 py-2 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
-                    />
-                  </div>
+                  <TextField
+                    label="List Name"
+                    value={newListName}
+                    onChange={(e) => setNewListName(e.target.value)}
+                    placeholder="Name for this outing..."
+                  />
 
                   <div className="flex items-center justify-end gap-2 pt-2">
-                    <button
-                      onClick={() => setShowNewModal(false)}
-                      className="px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                    >
+                    <Button variant="glass" onClick={() => setShowNewModal(false)}>
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="prominent"
+                      tint="#FF375F"
                       onClick={() => {
-                        const chosen = templates.find(t => t.id === selectedTemplateId) || templates[0];
+                        const chosen = templates.find((t) => t.id === selectedTemplateId) || templates[0];
                         if (chosen) handleCreateFromTemplate(chosen, newListName);
                       }}
-                      className="px-5 py-2 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold shadow-md hover:opacity-95 active:scale-95 transition-all"
                     >
                       Create from Template
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
             </div>
           )}
         </div>
-      </Modal>
-
-      {/* ── Delete Confirmation Modal ── */}
-      <Modal isOpen={!!listToDelete} onClose={() => setListToDelete(null)}>
-        <div className="space-y-4 pt-1 text-left">
-          <h3 className="font-heading text-lg font-bold text-[var(--text-primary)]">
-            Delete List
-          </h3>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Are you sure you want to delete{' '}
-            <strong className="text-[var(--text-primary)] font-bold">"{listToDelete?.name}"</strong>? This action cannot be undone.
-          </p>
-
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <button
-              onClick={() => setListToDelete(null)}
-              className="px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteList}
-              className="px-4 py-2 rounded-full bg-red-500 text-white text-xs font-bold shadow-md hover:bg-red-600 active:scale-95 transition-all"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </Modal>
+      </Sheet>
     </div>
   );
 }

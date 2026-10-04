@@ -153,6 +153,31 @@ export function handleAppBack(navigate: (to: any, options?: any) => void): boole
   return false;
 }
 
+/**
+ * Direct back navigation function used by in-app back buttons and headers.
+ * Retraces the exact same route step-by-step (LIFO path memory).
+ */
+export function navigateBack(navigate: (to: any, options?: any) => void): void {
+  // 1. Close any active overlay first if open
+  if (triggerTopDismissible()) {
+    triggerHaptic('light');
+    return;
+  }
+
+  // 2. Retrace navigation history step-by-step
+  if (navPathStack.length > 1) {
+    navPathStack.pop(); // Remove current route
+    const prevRoute = navPathStack[navPathStack.length - 1] || '/';
+    isPoppingNav = true;
+    triggerHaptic('nav');
+    navigate(prevRoute);
+  } else {
+    isPoppingNav = true;
+    triggerHaptic('nav');
+    navigate('/');
+  }
+}
+
 // ── Root Page Double-Tap Exit Guard ──
 
 let lastBackPressedTime = 0;

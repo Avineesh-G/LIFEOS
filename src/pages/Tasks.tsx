@@ -1,781 +1,260 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight, Sparkles, Pencil } from 'lucide-react';
-import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic, haptics } from '../utils/haptics';
-import { triggerConfettiBurst } from '../utils/confetti';
-import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
-import { BottomSheet, Modal } from '../components/BottomSheet';
-import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import M3Button from '../components/m3/M3Button';
-import { useM3Feedback } from '../components/m3/M3FeedbackContext';
-import { EmptyState } from '../components/common/EmptyState';
 import type { AppData, Task } from '../types';
-
+import { triggerHaptic } from '../utils/haptics';
+import { triggerConfettiBurst } from '../utils/confetti';
+import { syncTaskNotifications } from '../utils/notifications';
+import {
+  LargeTitleHeader,
+  GroupedList,
+  ListRow,
+  SwipeActions,
+  Segmented,
+  Button,
+  TextField,
+  Sheet,
+  EmptyState,
+  CheckCircle,
+  Plus,
+  Trash,
+  Check,
+  CalendarDots,
+  Sparkle,
+} from '../ui';
 
 interface TasksProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
+type TaskFilter = 'today' | 'upcoming' | 'done';
+
 export default function Tasks({ data, updateData }: TasksProps) {
-  const { confirmDelete, showSavedFeedback } = useM3Feedback();
-  const [newTask, setNewTask] = useState('');
-  const [newSubtask, setNewSubtask] = useState('');
-  const [newDate, setNewDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
-  const [newStartTime, setNewStartTime] = useState('');
-  const [newEndTime, setNewEndTime] = useState('');
-  const [selectedDate, setSelectedDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
-  const [showAdd, setShowAdd] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState<TaskFilter>('today');
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('General');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
 
-  const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const yesterday = useMemo(() => format(subDays(new Date(), 1), 'yyyy-MM-dd'), []);
+  const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
-  const TASK_DRAFT_KEY = 'lifeos_task_draft';
-
-  // Restore task draft when switching back to Tasks interface
   useEffect(() => {
-    try {
-      const savedDraft = localStorage.getItem(TASK_DRAFT_KEY);
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (parsed && (parsed.newTask || parsed.newSubtask)) {
-          setNewTask(parsed.newTask || '');
-          setNewSubtask(parsed.newSubtask || '');
-          if (parsed.newDate) setNewDate(parsed.newDate);
-          if (parsed.newStartTime) setNewStartTime(parsed.newStartTime);
-          if (parsed.newEndTime) setNewEndTime(parsed.newEndTime);
-          setShowAdd(true);
-        }
-      }
-    } catch {}
-  }, []);
-
-  // Auto-save draft on input change so switching interfaces or dropping internet preserves input
-  useEffect(() => {
-    if (showAdd && (newTask.trim() || newSubtask.trim())) {
-      try {
-        localStorage.setItem(
-          TASK_DRAFT_KEY,
-          JSON.stringify({
-            newTask,
-            newSubtask,
-            newDate,
-            newStartTime,
-            newEndTime,
-          })
-        );
-      } catch {}
+    if (data?.tasks) {
+      syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
     }
-  }, [showAdd, newTask, newSubtask, newDate, newStartTime, newEndTime]);
+  }, [data?.tasks, data?.settings?.notificationLeadMinutes]);
 
-  // Sync native OS notification center reminders on mount or task update, prompting phone permission if not yet allowed
-  useEffect(() => {
-    checkNotificationPermission().then(granted => {
-      if (!granted) {
-        const handled = localStorage.getItem('lifeos_permission_prompt_handled');
-        if (!handled) {
-          localStorage.setItem('lifeos_permission_prompt_handled', 'true');
-          requestAndSyncNotifications(data, updateData);
-        }
-      } else if (data?.tasks) {
-        setTimeout(() => {
-          syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-        }, 80);
-      }
-    });
-  }, [data?.tasks, data?.settings?.notificationLeadMinutes, data?.settings?.notificationsEnabled]);
-
-  // Tasks for the selected calendar date
   const filteredTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === selectedDate);
-  }, [data?.tasks, selectedDate]);
-
-  // Today's scheduled tasks for completion rate
-  const todayTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === today);
-  }, [data?.tasks, today]);
-
-  // Yesterday's & Previous Days' Uncompleted Tasks
-  const previousPendingTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => {
-      const taskD = t?.dueDate || t?.date;
-      return taskD && taskD < today && !t.completed;
-    });
-  }, [data?.tasks, today]);
-
-  const completedCount = useMemo(() => {
-    return filteredTasks.filter(t => t.completed).length;
-  }, [filteredTasks]);
-
-  const pct = filteredTasks.length > 0 ? Math.round((completedCount / filteredTasks.length) * 100) : 0;
-
-  // Weekdays carousel around selected date
-  const weekDates = useMemo(() => {
-    const current = parseISO(selectedDate);
-    const dates = [];
-    for (let i = -3; i <= 3; i++) {
-      dates.push(addDays(current, i));
+    const all = data.tasks || [];
+    if (filter === 'done') {
+      return all.filter((t) => t.completed);
     }
-    return dates;
-  }, [selectedDate]);
-
-  const saveTask = async () => {
-    if (!newTask.trim()) return;
-    triggerHaptic('save');
-    if (editingTaskId) {
-      const updated = (data?.tasks || []).map(t => {
-        if (t.id === editingTaskId) {
-          return {
-            ...t,
-            text: newTask.trim(),
-            subtask: newSubtask.trim() || undefined,
-            date: newDate,
-            dueDate: newDate,
-            startTime: newStartTime.trim() || undefined,
-            endTime: newEndTime.trim() || undefined,
-            reminderTime: newStartTime.trim() || undefined,
-          };
-        }
-        return t;
-      });
-      await updateData({ tasks: updated });
-    } else {
-      const task: Task = {
-        id: crypto.randomUUID(),
-        text: newTask.trim(),
-        subtask: newSubtask.trim() || undefined,
-        completed: false,
-        date: newDate,
-        dueDate: newDate,
-        startTime: newStartTime.trim() || undefined,
-        endTime: newEndTime.trim() || undefined,
-        reminderTime: newStartTime.trim() || undefined,
-      };
-      await updateData({ tasks: [...(data?.tasks || []), task] });
+    if (filter === 'upcoming') {
+      return all.filter((t) => !t.completed && t.date > todayStr);
     }
-    showSavedFeedback({
-      title: editingTaskId ? 'Task Updated!' : 'Task Saved!',
-      message: newTask.trim(),
-      section: 'tasks',
-    });
-    try {
-      localStorage.removeItem(TASK_DRAFT_KEY);
-    } catch {}
-    setNewTask('');
-    setNewSubtask('');
-    setNewStartTime('');
-    setNewEndTime('');
-    setNewDate(today);
-    setEditingTaskId(null);
-    setShowAdd(false);
-  };
+    // Today
+    return all.filter((t) => !t.completed && t.date <= todayStr);
+  }, [data.tasks, filter, todayStr]);
 
-  const toggleTask = (id: string) => {
-    let willComplete = false;
-    const updatedTasks = (data?.tasks || []).map(t => {
-      if (t.id === id) {
-        const nextCompleted = !t.completed;
-        willComplete = nextCompleted;
-        const currentTaskDate = t.dueDate || t.date;
-        return {
-          ...t,
-          completed: nextCompleted,
-          date: nextCompleted && currentTaskDate < today ? today : t.date,
-          dueDate: nextCompleted && currentTaskDate < today ? today : t.dueDate,
-        };
-      }
-      return t;
-    });
-
-    if (willComplete) {
-      const remaining = updatedTasks.filter(t => (t?.dueDate || t?.date) === selectedDate && !t.completed).length;
-      if (remaining === 0) {
-        haptics.milestone();
-        triggerConfettiBurst({ count: 56, spread: 85 });
-      } else {
-        haptics.success();
-      }
-    } else {
-      haptics.snap();
+  const handleToggleTask = async (task: Task) => {
+    triggerHaptic('success');
+    if (!task.completed) {
+      triggerConfettiBurst();
     }
-
-    updateData({ tasks: updatedTasks });
+    const updated = (data.tasks || []).map((t) =>
+      t.id === task.id ? { ...t, completed: !t.completed } : t
+    );
+    await updateData({ tasks: updated });
   };
 
-  const moveToToday = async (id: string) => {
-    triggerHaptic('medium');
-    await updateData({
-      tasks: (data?.tasks || []).map(t => (t.id === id ? { ...t, date: today, dueDate: today } : t))
-    });
+  const handleDeleteTask = async (taskId: string) => {
+    triggerHaptic('error');
+    const updated = (data.tasks || []).filter((t) => t.id !== taskId);
+    await updateData({ tasks: updated });
   };
 
-  const rolloverAllToToday = async () => {
-    triggerHaptic('save');
-    await updateData({
-      tasks: (data?.tasks || []).map(t => {
-        const taskD = t.dueDate || t.date;
-        if (taskD && taskD < today && !t.completed) {
-          return { ...t, date: today, dueDate: today };
-        }
-        return t;
-      })
-    });
+  const handleCreateTask = async () => {
+    if (!title.trim()) return;
+    triggerHaptic('success');
+    const newTask: Task = {
+      id: `task_${Date.now()}`,
+      text: title.trim(),
+      subtask: category.trim() || undefined,
+      completed: false,
+      date: todayStr,
+    };
+    const updated = [newTask, ...(data.tasks || [])];
+    await updateData({ tasks: updated });
+    setTitle('');
+    setIsAddOpen(false);
   };
 
-  const promptDeleteTask = (task: Task) => {
-    confirmDelete({
-      title: 'Delete Task?',
-      itemName: task.text,
-      message: 'Are you sure you want to delete this task? It will be permanently removed.',
-      section: 'tasks',
-      onConfirm: async () => {
-        const remaining = (data?.tasks || []).filter(t => t.id !== task.id);
-        await updateData({ tasks: remaining });
-        if (editingTaskId === task.id) {
-          setShowAdd(false);
-          setEditingTaskId(null);
-        }
-      },
-    });
-  };
-
-  // Long-press handler ref
-  const pressTimer = useRef<NodeJS.Timeout | null>(null);
-  const isLongPressActive = useRef<boolean>(false);
-
-  const handlePointerDown = (task: Task) => {
-    isLongPressActive.current = false;
-    pressTimer.current = setTimeout(() => {
-      isLongPressActive.current = true;
-      promptDeleteTask(task);
-    }, 550);
-  };
-
-  const handlePointerUp = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
-  const handlePointerCancel = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
-  const handlePointerMove = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
-  const formatTimeRange = (start?: string, end?: string) => {
-    if (!start && !end) return null;
-    if (start && end) return `${start} → ${end}`;
-    if (start) return `Starts ${start}`;
-    return `Ends ${end}`;
+  const priorityColor = (p?: string) => {
+    if (p === 'high') return '#FF453A';
+    if (p === 'medium') return '#FF9F0A';
+    return '#0A84FF';
   };
 
   return (
-    <div className="space-y-4">
-
-      {/* Header Hero Card */}
-      <div className="rounded-[30px] p-5 sm:p-6 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] flex items-end justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] text-[10.5px] font-tag font-bold tracking-wider uppercase mb-2 border border-[var(--card-border)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
-            {selectedDate === today ? 'Today' : format(parseISO(selectedDate), 'EEEE, MMM d')}
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-[var(--text-primary)] font-heading">
-            To-Do List
-          </h1>
-          <p className="text-xs text-[var(--text-secondary)] mt-1.5 font-medium">
-            Daily execution · Long-press any task to delete
-          </p>
-        </div>
-        <M3Button
-          onClick={() => {
-            setEditingTaskId(null);
-            setNewTask('');
-            setNewSubtask('');
-            setNewDate(selectedDate);
-            setNewStartTime('');
-            setNewEndTime('');
-            setShowAdd(true);
-          }}
-          icon={<Plus size={16} strokeWidth={2.5} />}
-          size="sm"
-          className="shrink-0"
-        >
-          Add Task
-        </M3Button>
-      </div>
-
-      {/* ── Fluid Calendar Strip ── */}
-      <div className="liquid-glass rounded-[28px] p-3 border border-[var(--card-border)] shadow-sm">
-        <div className="flex items-center justify-between px-2 mb-2">
-          <div className="flex items-center gap-2">
-            <CalendarIcon size={14} className="text-accent" />
-            <span className="text-xs font-bold text-primary-light dark:text-primary-dark">
-              {format(parseISO(selectedDate), 'MMMM yyyy')}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => {
-                triggerHaptic('selection');
-                setSelectedDate(format(addDays(parseISO(selectedDate), -1), 'yyyy-MM-dd'));
-              }}
-              className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-secondary-light dark:text-secondary-dark"
-              aria-label="Previous day"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('selection');
-                setSelectedDate(today);
-              }}
-              className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-black/5 dark:bg-white/10 text-primary-light dark:text-primary-dark"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('selection');
-                setSelectedDate(format(addDays(parseISO(selectedDate), 1), 'yyyy-MM-dd'));
-              }}
-              className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-secondary-light dark:text-secondary-dark"
-              aria-label="Next day"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Day Pills Carousel */}
-        <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-1">
-          {weekDates.map(d => {
-            const dateStr = format(d, 'yyyy-MM-dd');
-            const isSelected = dateStr === selectedDate;
-            const isTodayDate = dateStr === today;
-            const tasksOnDay = (data?.tasks || []).filter(t => (t?.dueDate || t?.date) === dateStr);
-            const hasTasks = tasksOnDay.length > 0;
-            const allDone = hasTasks && tasksOnDay.every(t => t.completed);
-
-            return (
-              <button
-                key={dateStr}
-                onClick={() => {
-                  triggerHaptic('selection');
-                  setSelectedDate(dateStr);
-                }}
-                className={`flex-1 min-w-[42px] py-2 px-1 rounded-2xl flex flex-col items-center gap-0.5 transition-all text-center ${
-                  isSelected
-                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.04]'
-                    : isTodayDate
-                      ? 'bg-accent/10 dark:bg-accent/20 text-accent font-bold'
-                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-secondary-light dark:text-secondary-dark'
-                }`}
-              >
-                <span className="text-[10px] uppercase font-bold tracking-tight opacity-75">
-                  {format(d, 'EEE')}
-                </span>
-                <span className="text-sm font-black leading-tight">
-                  {format(d, 'd')}
-                </span>
-                <div className="h-1 flex items-center justify-center mt-0.5">
-                  {hasTasks && (
-                    <span className={`w-1 h-1 rounded-full ${
-                      isSelected
-                        ? 'bg-white'
-                        : allDone
-                          ? 'bg-emerald-500'
-                          : 'bg-accent'
-                    }`} />
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Completion Progress Card */}
-      <div className="rounded-[30px] p-5 liquid-glass border border-[var(--card-border)] shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-            {selectedDate === today ? "Today's Completion" : "Day's Progress"}
-          </span>
-          <span className={`px-3 py-0.5 rounded-full text-xs font-bold shadow-xs border ${
-            pct === 100 && filteredTasks.length > 0
-              ? 'bg-[var(--md-primary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-primary-container)]'
-              : pct >= 50
-                ? 'bg-[var(--md-secondary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-secondary-container)]'
-                : filteredTasks.length === 0
-                  ? 'bg-[var(--md-surface-container-high)] border-[var(--md-outline-variant)] text-[var(--md-on-surface-variant)]'
-                  : 'bg-[var(--md-tertiary-container)] border-[var(--md-outline-variant)] text-[var(--md-on-tertiary-container)]'
-          }`}>
-            {filteredTasks.length === 0 ? 'No Tasks' : pct === 100 ? 'Completed' : `${pct}% Done`}
-          </span>
-        </div>
-
-        {/* Segmented bar */}
-        {filteredTasks.length > 0 ? (
-          <div className="flex items-center gap-1.5 py-1">
-            {filteredTasks.map((task) => {
-              return (
-                <div
-                  key={task.id}
-                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                    task.completed
-                      ? 'bg-[var(--md-primary)] opacity-100'
-                      : 'bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)]'
-                  }`}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="w-full h-2 rounded-full bg-black/5 dark:bg-white/10" />
-        )}
-
-        <div className="flex items-center justify-between text-[11px] font-mono font-semibold text-muted-light dark:text-muted-dark">
-          <span>{completedCount} of {filteredTasks.length} finished</span>
-          <span>{filteredTasks.length - completedCount} remaining</span>
-        </div>
-      </div>
-
-      {/* Yesterday's / Overdue Pending Tasks (Rollover subsection) */}
-      {selectedDate === today && previousPendingTasks.length > 0 && (
-        <div className="rounded-[30px] p-5 liquid-glass border border-amber-500/30 glow-peach shadow-sm space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/25">
-                <Clock size={16} className="stroke-[2.5]" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black text-amber-900 dark:text-amber-300 font-sans tracking-tight">
-                    Yesterday's Tasks Are Pending
-                  </h3>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/25">
-                    {previousPendingTasks.length}
-                  </span>
-                </div>
-                <p className="text-[11px] text-amber-800/80 dark:text-amber-400/80 font-medium line-clamp-2 break-words">
-                  Unfinished tasks carried forward so you don't forget
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={rolloverAllToToday}
-              className="bouncy-tap flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition-colors"
-              title="Move all pending tasks to today"
-            >
-              <RotateCcw size={12} className="stroke-[2.5]" />
-              <span>Forward All</span>
-            </button>
-          </div>
-
-          <div className="space-y-2 pt-1">
-            {previousPendingTasks.map(task => {
-              const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
-              const isYesterday = (task.dueDate || task.date) === yesterday;
-              return (
-                <div
-                  key={task.id}
-                  onPointerDown={() => handlePointerDown(task)}
-                  onPointerUp={handlePointerUp}
-                  onPointerMove={handlePointerMove}
-                  onPointerCancel={handlePointerCancel}
-                  className="rounded-[22px] border border-amber-500/20 bg-white/80 dark:bg-white/[0.04] p-3.5 flex items-center gap-3 shadow-xs hover:border-amber-500/40 transition-colors select-none"
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleTask(task.id)}
-                    className="w-6 h-6 rounded-[8px] flex-shrink-0 flex items-center justify-center border-2 border-amber-400 dark:border-amber-500/60 hover:bg-amber-500 hover:text-white transition-all bg-amber-500/5 text-transparent"
-                  >
-                    <Check size={14} className="stroke-[3]" />
-                  </button>
-
-                  <div className="flex-1 min-w-0" onClick={() => toggleTask(task.id)}>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs sm:text-sm font-bold text-primary-light dark:text-primary-dark leading-tight">
-                        {task.text}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                        <CalendarIcon size={9} />
-                        {isYesterday ? 'Yesterday' : (task.dueDate || task.date)}
-                      </span>
-                    </div>
-                    {hasValidSubtask && (
-                      <span className="text-[11px] block mt-0.5 text-secondary-light dark:text-secondary-dark font-medium">
-                        {task.subtask}
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => moveToToday(task.id)}
-                    className="bouncy-tap inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-white transition-colors"
-                  >
-                    <ArrowRight size={11} className="stroke-[2.5]" />
-                    <span>Today</span>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Main Task List: NO TRASH ICON, LONG-PRESS TO DELETE, TIME RANGE BESIDE TASK */}
-      <div className="space-y-3">
-        {filteredTasks.map(task => {
-          const hasValidSubtask = task.subtask && task.subtask.trim() !== '' && task.subtask.trim().toUpperCase() !== 'NA';
-          const timeRange = formatTimeRange(task.startTime, task.endTime);
-
-          return (
-            <div
-              key={task.id}
-              onPointerDown={() => handlePointerDown(task)}
-              onPointerUp={handlePointerUp}
-              onPointerMove={handlePointerMove}
-              onPointerCancel={handlePointerCancel}
-              onContextMenu={e => {
-                e.preventDefault();
-                setTaskToDelete(task);
-              }}
-              className={`rounded-[26px] border p-4 flex items-center gap-3.5 transition-all select-none ${
-                task.completed
-                  ? 'liquid-glass border-[var(--card-border)] bg-[var(--card-surface)]/70'
-                  : 'liquid-glass border-[var(--card-border)] hover:border-[var(--accent-primary)]/40 shadow-xs'
-              }`}
-            >
-              {/* Interactive Spring Checkbox */}
-              <InteractiveCheckbox
-                checked={task.completed}
-                onChange={() => toggleTask(task.id)}
-                size={26}
-              />
-
-              <div
-                className="flex-1 min-w-0 cursor-pointer"
-                onClick={() => {
-                  if (!isLongPressActive.current) toggleTask(task.id);
-                }}
-              >
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <span className={`text-sm leading-snug font-bold transition-all ${
-                    task.completed
-                      ? 'line-through text-[var(--text-secondary)] font-semibold'
-                      : 'text-[var(--text-primary)]'
-                  }`}>
-                    {task.text}
-                  </span>
-
-                  {/* Start time → End time Range Capsule beside task */}
-                  {timeRange && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] flex-shrink-0">
-                      <Clock size={10} className="stroke-[2.5]" />
-                      {timeRange}
-                    </span>
-                  )}
-                </div>
-
-                {hasValidSubtask && (
-                  <span className={`text-xs block mt-1 leading-normal font-medium ${
-                    task.completed
-                      ? 'line-through text-[var(--text-muted)]'
-                      : 'text-[var(--text-secondary)]'
-                  }`}>
-                    {task.subtask}
-                  </span>
-                )}
-              </div>
-
-              {/* Task Edit Button */}
-              {!task.completed && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    triggerHaptic('light');
-                    setEditingTaskId(task.id);
-                    setNewTask(task.text);
-                    setNewSubtask(task.subtask || '');
-                    setNewDate(task.dueDate || task.date || today);
-                    setNewStartTime(task.startTime || '');
-                    setNewEndTime(task.endTime || '');
-                    setShowAdd(true);
-                  }}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-primary)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all shrink-0"
-                  title="Update Task"
-                  aria-label={`Update ${task.text}`}
-                >
-                  <Pencil size={13} strokeWidth={2.2} />
-                </button>
-              )}
-            </div>
-          );
-        })}
-
-        {filteredTasks.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-6 sm:p-8 text-center border border-[var(--card-border)]">
-            <EmptyState
-              variant="tasks-empty"
-              title="A Clear Slate For Today"
-              description="No tasks scheduled yet. Tap below to capture what's on your mind."
-              action={{
-                label: 'Add Task',
-                icon: <Plus size={16} strokeWidth={2.5} />,
-                onClick: () => {
-                  setEditingTaskId(null);
-                  setNewTask('');
-                  setNewSubtask('');
-                  setNewDate(selectedDate);
-                  setNewStartTime('');
-                  setNewEndTime('');
-                  setShowAdd(true);
-                },
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-
-      {/* ── Add / Update Task Elevated Modal with Date Picker & Start/End Time (Rendered via Portal) ── */}
-      <BottomSheet
-        isOpen={showAdd}
-        onClose={() => {
-          setShowAdd(false);
-          setEditingTaskId(null);
-        }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg sm:text-xl font-bold text-[var(--md-on-surface)] font-sans tracking-tight">
-              {editingTaskId ? 'Update TO-DO' : 'New TO-DO'}
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]">
-              {editingTaskId ? 'Editing' : 'Scheduled'}
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setShowAdd(false);
-              setEditingTaskId(null);
-            }}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--md-surface-container-highest)] text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] transition-colors active:scale-95"
-            aria-label="Close"
+    <div className="w-full text-white">
+      <LargeTitleHeader
+        title="Tasks"
+        subtitle={`${(data.tasks || []).filter((t) => !t.completed).length} pending`}
+        onBack={() => navigate('/')}
+        actions={
+          <Button
+            variant="glass"
+            tint="#0A84FF"
+            size="sm"
+            onClick={() => setIsAddOpen(true)}
+            icon={<Plus size={16} weight="bold" />}
           >
-            <X size={16} />
-          </button>
-        </div>
+            Add Task
+          </Button>
+        }
+      />
 
-        <div className="space-y-3.5">
-          {/* Task Name */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono">
-              Task Title
+      <div className="flex flex-col gap-3 pb-2">
+        {/* Filter Segmented Control */}
+        <Segmented<TaskFilter>
+          options={[
+            { value: 'today', label: 'Today' },
+            { value: 'upcoming', label: 'Upcoming' },
+            { value: 'done', label: 'Done' },
+          ]}
+          value={filter}
+          onChange={setFilter}
+          tint="#0A84FF"
+        />
+
+        {/* Task List */}
+        {filteredTasks.length === 0 ? (
+          <EmptyState
+            icon={<CheckCircle weight="bold" />}
+            title={filter === 'done' ? 'No completed tasks' : 'All clear for now'}
+            description={
+              filter === 'done'
+                ? 'Finish tasks to see them archived here.'
+                : 'Great job staying ahead of your schedule!'
+            }
+            actionLabel={filter !== 'done' ? 'Add Task' : undefined}
+            onAction={() => setIsAddOpen(true)}
+            tint="#0A84FF"
+          />
+        ) : (
+          <GroupedList
+            header={
+              filter === 'today'
+                ? "Today's Schedule"
+                : filter === 'upcoming'
+                ? 'Upcoming Queue'
+                : 'Completed Log'
+            }
+          >
+            {filteredTasks.map((task) => (
+              <SwipeActions
+                key={task.id}
+                actions={[
+                  {
+                    key: 'toggle',
+                    label: task.completed ? 'Undo' : 'Done',
+                    icon: <Check size={18} weight="bold" />,
+                    color: '#30D158',
+                    onClick: () => handleToggleTask(task),
+                  },
+                  {
+                    key: 'delete',
+                    label: 'Delete',
+                    icon: <Trash size={18} weight="bold" />,
+                    color: '#FF453A',
+                    onClick: () => handleDeleteTask(task.id),
+                  },
+                ]}
+              >
+                <ListRow
+                  icon={
+                    <CheckCircle
+                      weight={task.completed ? 'fill' : 'regular'}
+                      className={task.completed ? 'text-[#30D158]' : 'text-[rgba(235,235,245,0.40)]'}
+                    />
+                  }
+                  iconTint={task.completed ? '#30D158' : '#0A84FF'}
+                  title={
+                    <span
+                      className={
+                        task.completed
+                          ? 'line-through text-[rgba(235,235,245,0.40)]'
+                          : 'text-white'
+                      }
+                    >
+                      {task.text}
+                    </span>
+                  }
+                  subtitle={task.subtask || undefined}
+                  trailing={task.startTime || undefined}
+                  onClick={() => handleToggleTask(task)}
+                />
+              </SwipeActions>
+            ))}
+          </GroupedList>
+        )}
+      </div>
+
+      {/* Add Task Sheet */}
+      <Sheet
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        detent="half"
+        title="New Task"
+      >
+        <div className="flex flex-col gap-4 py-2">
+          <TextField
+            label="Title"
+            placeholder="What needs to be done?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+          />
+
+          <TextField
+            label="Category"
+            placeholder="Work, Study, Personal..."
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-[rgba(235,235,245,0.60)] pl-1">
+              Priority
             </label>
-            <input
-              type="text"
-              value={newTask}
-              onChange={e => setNewTask(e.target.value)}
-              placeholder="e.g. Complete Machine Learning assignment"
-              autoFocus
-              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)]/60"
+            <Segmented<'low' | 'medium' | 'high'>
+              options={[
+                { value: 'low', label: 'Low' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'high', label: 'High' },
+              ]}
+              value={priority}
+              onChange={setPriority}
+              tint={priorityColor(priority)}
             />
           </div>
 
-          {/* Subtask */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono">
-              Subtask / Note (Optional)
-            </label>
-            <input
-              type="text"
-              value={newSubtask}
-              onChange={e => setNewSubtask(e.target.value)}
-              placeholder="e.g. Submit PDF to LMS portal"
-              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-4 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)]/60"
-            />
-          </div>
-
-          {/* Date Selector */}
-          <div>
-            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
-              <CalendarIcon size={12} className="text-[var(--md-primary)]" /> Date
-            </label>
-            <input
-              type="date"
-              value={newDate}
-              onChange={e => setNewDate(e.target.value)}
-              className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
-            />
-          </div>
-
-          {/* Time: Start & End */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
-                <Clock size={12} className="text-[var(--md-primary)]" /> Start Time
-              </label>
-              <input
-                type="time"
-                value={newStartTime}
-                onChange={e => setNewStartTime(e.target.value)}
-                className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] block mb-1.5 font-mono flex items-center gap-1">
-                <Clock size={12} className="text-[var(--md-primary)]" /> End Time
-              </label>
-              <input
-                type="time"
-                value={newEndTime}
-                onChange={e => setNewEndTime(e.target.value)}
-                className="w-full bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] rounded-2xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]/40 text-[var(--md-on-surface)]"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowAdd(false);
-                setEditingTaskId(null);
-              }}
-              className="py-3 rounded-2xl border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] text-[var(--md-on-surface)] font-bold text-xs hover:bg-[var(--md-surface-container-high)] active:scale-95 transition-all"
+          <div className="pt-3">
+            <Button
+              variant="prominent"
+              tint="#0A84FF"
+              className="w-full"
+              disabled={!title.trim()}
+              onClick={handleCreateTask}
             >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={saveTask}
-              disabled={!newTask.trim()}
-              className="py-3 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs shadow-md shadow-[var(--md-primary)]/25 hover:opacity-95 active:scale-95 transition-all disabled:opacity-40"
-            >
-              {editingTaskId ? 'Update TO-DO' : 'Save TO-DO'}
-            </button>
+              Add Task
+            </Button>
           </div>
         </div>
-      </BottomSheet>
+      </Sheet>
     </div>
   );
 }

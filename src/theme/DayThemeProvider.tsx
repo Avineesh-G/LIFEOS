@@ -84,26 +84,22 @@ export function DayThemeProvider({ children }: { children: React.ReactNode }) {
     root.dataset.section = section;
     root.dataset.dayPhase = phase;
 
-    root.style.backgroundColor = scheme.sceneBg;
-    root.style.color = tonal.primary;
+    root.style.backgroundColor = '#000000';
+    root.style.color = '#FFFFFF';
     if (document.body) {
-      document.body.style.backgroundColor = scheme.sceneBg;
-      document.body.style.color = tonal.primary;
+      document.body.style.backgroundColor = '#000000';
+      document.body.style.color = '#FFFFFF';
     }
 
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    root.classList.add('dark');
 
     const metaThemeTags = document.querySelectorAll('meta[name="theme-color"]');
     metaThemeTags.forEach(tag => {
-      tag.setAttribute('content', scheme.sceneBg);
+      tag.setAttribute('content', '#000000');
     });
 
     if (Capacitor.isNativePlatform()) {
-      ThemeBridge.setSystemBarsTheme({ isDark, sceneBg: scheme.sceneBg }).catch(() => {});
+      ThemeBridge.setSystemBarsTheme({ isDark: true, sceneBg: '#000000' }).catch(() => {});
     }
   }, [section, m3Theme, scheme, isDark, phase]);
 

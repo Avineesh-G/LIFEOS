@@ -1,1151 +1,557 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, Sparkles, Plus, X, Upload, Loader2, Sunrise, Sun, Cloud, Moon, Check, AlertTriangle, Leaf, Save, Edit2, Trash2, Clock, History, Lock, Unlock } from 'lucide-react';
+import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, parseISO, addDays, subDays } from 'date-fns';
-import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
-import { getCoachTip, getDietAdvice, askFoodDoubt, generateFallbackDietAdvice, GEMINI_API_KEY } from '../utils/geminiCoach';
-import { MONTHLY_MESS_MENU } from '../data/messMenu';
-import NightCanteenSection from '../components/nutrition/NightCanteenSection';
-import { FITNESS_GOALS } from '../utils/calculations';
-import InteractiveWaterGlass from '../components/interactive/InteractiveWaterGlass';
-import M3StatWidget from '../components/M3StatWidget';
-import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
-
+import { triggerHaptic } from '../utils/haptics';
+import { navigateBack } from '../utils/backNavigation';
+import { MONTHLY_MESS_MENU } from '../data/messMenu';
+import {
+  Ring,
+  ProgressBar,
+  Sheet,
+  TextField,
+  Button,
+  MOTION_SPRINGS,
+  Sun,
+  Moon,
+  Plus,
+  Check,
+  Trash,
+  Drop,
+  CaretLeft,
+} from '../ui';
 
 interface NutritionProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const MEALS: { slot: MealSlot; label: string; icon: React.ReactNode; time: string; dotColor: string }[] = [
-  { slot: 'breakfast', label: 'Breakfast', icon: <Sunrise size={16} className="text-amber-500" />, time: '7:00–9:00 AM', dotColor: 'bg-amber-400' },
-  { slot: 'lunch', label: 'Lunch', icon: <Sun size={16} className="text-orange-500" />, time: '12:30–2:00 PM', dotColor: 'bg-orange-400' },
-  { slot: 'snacks', label: 'Snacks', icon: <Cloud size={16} className="text-sky-500" />, time: '5:00–6:00 PM', dotColor: 'bg-sky-400' },
-  { slot: 'dinner', label: 'Dinner', icon: <Moon size={16} className="text-indigo-500" />, time: '7:30–9:00 PM', dotColor: 'bg-indigo-400' },
-  { slot: 'nightCanteen', label: 'Night Canteen', icon: <Moon size={16} className="text-purple-500" />, time: '10:30 PM–12:30 AM', dotColor: 'bg-purple-400' },
+const MEAL_SLOTS: { slot: MealSlot; label: string; icon: React.ReactNode; time: string }[] = [
+  { slot: 'breakfast', label: 'Breakfast', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM' },
+  { slot: 'lunch', label: 'Lunch', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM' },
+  { slot: 'snacks', label: 'Snacks', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM' },
+  { slot: 'dinner', label: 'Dinner', icon: <Moon size={18} weight="bold" />, time: '7:15–9:30 PM' },
+  { slot: 'nightCanteen', label: 'Night Canteen', icon: <Moon size={18} weight="bold" />, time: '10:30 PM–12:30 AM' },
 ];
 
-// Returns active meal slot ONLY during active mess hours; otherwise returns null (closed)
-const getActiveMessTimeSlot = (): MealSlot | null => {
-  const now = new Date();
-  const totalMin = now.getHours() * 60 + now.getMinutes();
-  // Breakfast: 7:30 AM – 9:45 AM (450 – 585 mins)
-  if (totalMin >= 450 && totalMin <= 585) return 'breakfast';
-  // Lunch: 12:15 PM – 2:45 PM (735 – 885 mins)
-  if (totalMin >= 735 && totalMin <= 885) return 'lunch';
-  // Snacks: 4:15 PM – 6:15 PM (975 – 1095 mins)
-  if (totalMin >= 975 && totalMin <= 1095) return 'snacks';
-  // Dinner: 7:15 PM – 9:30 PM (1155 – 1290 mins)
-  if (totalMin >= 1155 && totalMin <= 1290) return 'dinner';
-  // Night Canteen: 10:30 PM – 12:30 AM (1350 – 1440 or 0 – 30 mins)
-  if (totalMin >= 1350 || totalMin <= 30) return 'nightCanteen';
-  return null;
-};
-
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.44, ease: 'easeOut' } } };
+const NIGHT_CANTEEN_PRESETS = [
+  { name: 'Maggi (Plain / Masala)', estCalories: 280 },
+  { name: 'Egg Roll / Paneer Roll', estCalories: 320 },
+  { name: 'Cold Coffee / Milkshake', estCalories: 220 },
+  { name: 'Bread Omelette (2 Eggs)', estCalories: 260 },
+  { name: 'Grilled Sandwich', estCalories: 250 },
+];
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const dayOfMonth = new Date().getDate();
 
-  // Selected date menu resolution
-  const selectedDateObj = useMemo(() => {
-    try {
-      return parseISO(selectedDate);
-    } catch {
-      return new Date();
-    }
-  }, [selectedDate]);
+  // Active day's nutrition log
+  const todayLog = useMemo(() => {
+    return (
+      (data.nutritionLogs || []).find((n) => n.date === todayStr) || {
+        id: `nut_${todayStr}`,
+        date: todayStr,
+        dailyTotal: 0,
+        mealsEaten: [],
+      }
+    );
+  }, [data.nutritionLogs, todayStr]);
 
-  const selectedDayOfMonth = selectedDateObj.getDate();
-  const todayMenu = MONTHLY_MESS_MENU.find(m => m.date === selectedDayOfMonth) || MONTHLY_MESS_MENU[0];
+  const calorieTarget = data.profile?.currentCalorieTarget || 2200;
+  const caloriesEaten = todayLog.dailyTotal || 0;
+  const caloriesRemaining = Math.max(0, calorieTarget - caloriesEaten);
+  const caloriePercent = Math.min(1, caloriesEaten / calorieTarget);
 
-  const [coachAdvice, setCoachAdvice] = useState<any>(null);
-  const [fetchingAdvice, setFetchingAdvice] = useState(false);
-  const [showCoach, setShowCoach] = useState(false);
-
-  // Daily Water Tracker State
+  // Water tracking state
   const [waterLiters, setWaterLiters] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem(`lifeos_water_${selectedDate}`);
+      const saved = localStorage.getItem(`lifeos_water_${todayStr}`);
       return saved ? parseFloat(saved) : 1.5;
     } catch {
       return 1.5;
     }
   });
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`lifeos_water_${selectedDate}`);
-      setWaterLiters(saved ? parseFloat(saved) : 1.5);
-    } catch {}
-  }, [selectedDate]);
-
-  const handleAddWater = () => {
-    setWaterLiters(prev => {
-      const next = Math.round((prev + 0.25) * 100) / 100;
+  const handleAddWater = (amountLiters: number) => {
+    triggerHaptic('light');
+    setWaterLiters((prev) => {
+      const next = Math.round((prev + amountLiters) * 100) / 100;
       try {
-        localStorage.setItem(`lifeos_water_${selectedDate}`, next.toString());
+        localStorage.setItem(`lifeos_water_${todayStr}`, next.toString());
       } catch {}
       return next;
     });
   };
 
+  // Today's mess menu items mapped by meal slot
+  const todayMess = useMemo(() => {
+    return MONTHLY_MESS_MENU.find((m) => m.date === dayOfMonth) || MONTHLY_MESS_MENU[0];
+  }, [dayOfMonth]);
 
-  // Auto-expand current meal slot ONLY when mess time is active and it hasn't been saved yet
-  const [expanded, setExpanded] = useState<MealSlot | null>(() => {
-    const todayLog = (data.nutritionLogs || []).find(l => l.date === todayStr);
-    if (todayLog?.isSaved) return null;
-    const activeSlot = getActiveMessTimeSlot();
-    if (!activeSlot) return null;
-    const slotLog = todayLog?.mealsEaten?.find(m => m.slot === activeSlot);
-    if (slotLog && slotLog.items && slotLog.items.length > 0) return null;
-    return activeSlot;
-  });
-  const [showSavedFeedback, setShowSavedFeedback] = useState(false);
-  const { confirmDelete, showSavedFeedback: showM3Saved } = useM3Feedback();
+  const messItemsBySlot = useMemo(() => {
+    const map: Record<string, { name: string; estCalories: number }[]> = {
+      breakfast: [],
+      lunch: [],
+      snacks: [],
+      dinner: [],
+      nightCanteen: NIGHT_CANTEEN_PRESETS,
+    };
 
-  // Food Doubt State (AI Can I eat this?)
-  const [foodDoubtQuery, setFoodDoubtQuery] = useState('');
-  const [foodDoubtAnswer, setFoodDoubtAnswer] = useState<string | null>(null);
-  const [foodDoubtLoading, setFoodDoubtLoading] = useState(false);
-  const [foodDoubtError, setFoodDoubtError] = useState<string | null>(null);
+    (todayMess?.meals || []).forEach((m) => {
+      if (map[m.slot]) {
+        map[m.slot] = m.items;
+      }
+    });
 
-  // Free text extra items per slot
-  const [extraTexts, setExtraTexts] = useState<Record<string, string>>({});
-  const [estimatingSlot, setEstimatingSlot] = useState<MealSlot | null>(null);
+    return map;
+  }, [todayMess]);
 
-  // Edit Extra Item state
-  const [editingExtraId, setEditingExtraId] = useState<string | null>(null);
-  const [editExtraName, setEditExtraName] = useState('');
-  const [editExtraCals, setEditExtraCals] = useState('');
+  // Custom Item Modal State
+  const [isAddCustomOpen, setIsAddCustomOpen] = useState(false);
+  const [customSlot, setCustomSlot] = useState<MealSlot>('lunch');
+  const [customName, setCustomName] = useState('');
+  const [customCalories, setCustomCalories] = useState('250');
 
-  // Draft Log initialization for selected date
-  const existingLogForDate = useMemo(() => {
-    return (data.nutritionLogs || []).find(l => l.date === selectedDate);
-  }, [data.nutritionLogs, selectedDate]);
+  // Toggle or select a mess item directly from the meals diary
+  const handleToggleMessItem = async (slot: MealSlot, itemName: string, estCalories: number) => {
+    triggerHaptic('selection');
+    const currentMeals = [...(todayLog.mealsEaten || [])];
+    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
 
-  const [isLocked, setIsLocked] = useState(!!existingLogForDate?.isSaved);
-  const [draftLog, setDraftLog] = useState<NutritionLog>(() => {
-    if (existingLogForDate) {
-      const isOldFormat = existingLogForDate.mealsEaten?.some((m: any) => 'itemsSelected' in m);
-      if (isOldFormat) {
+    if (slotIndex >= 0) {
+      const existingItemIndex = currentMeals[slotIndex].items.findIndex(
+        (it) => it.name.toLowerCase() === itemName.toLowerCase()
+      );
+
+      if (existingItemIndex >= 0) {
+        // Deselect / remove
+        currentMeals[slotIndex].items.splice(existingItemIndex, 1);
+      } else {
+        // Select / add
+        currentMeals[slotIndex].items.push({
+          id: `item_${Date.now()}_${Math.random()}`,
+          name: itemName,
+          calories: estCalories,
+          portion: 1,
+          isExtra: false,
+        });
+      }
+    } else {
+      // First item in this slot
+      currentMeals.push({
+        slot,
+        items: [
+          {
+            id: `item_${Date.now()}_${Math.random()}`,
+            name: itemName,
+            calories: estCalories,
+            portion: 1,
+            isExtra: false,
+          },
+        ],
+      });
+    }
+
+    const newDailyTotal = currentMeals.reduce(
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      0
+    );
+
+    const updatedLog: NutritionLog = {
+      ...todayLog,
+      dailyTotal: newDailyTotal,
+      mealsEaten: currentMeals,
+      isSaved: true,
+    };
+
+    const updatedLogs = [
+      updatedLog,
+      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+    ];
+    await updateData({ nutritionLogs: updatedLogs });
+  };
+
+  // Add a custom extra food item
+  const handleLogCustomFood = async () => {
+    if (!customName.trim()) return;
+    triggerHaptic('success');
+    const caloriesNum = parseInt(customCalories, 10) || 250;
+
+    const newItem: MealItemLog = {
+      id: `item_${Date.now()}`,
+      name: customName.trim(),
+      calories: caloriesNum,
+      portion: 1,
+      isExtra: true,
+    };
+
+    const currentMeals = [...(todayLog.mealsEaten || [])];
+    const slotIndex = currentMeals.findIndex((m) => m.slot === customSlot);
+
+    if (slotIndex >= 0) {
+      currentMeals[slotIndex].items.push(newItem);
+    } else {
+      currentMeals.push({ slot: customSlot, items: [newItem] });
+    }
+
+    const newDailyTotal = currentMeals.reduce(
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      0
+    );
+
+    const updatedLog: NutritionLog = {
+      ...todayLog,
+      dailyTotal: newDailyTotal,
+      mealsEaten: currentMeals,
+      isSaved: true,
+    };
+
+    const updatedLogs = [
+      updatedLog,
+      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+    ];
+    await updateData({ nutritionLogs: updatedLogs });
+
+    setCustomName('');
+    setIsAddCustomOpen(false);
+  };
+
+  // Remove an item from the meal slot
+  const handleRemoveItem = async (slot: MealSlot, itemId: string) => {
+    triggerHaptic('light');
+    const currentMeals = (todayLog.mealsEaten || []).map((m) => {
+      if (m.slot === slot) {
         return {
-          id: `nut-${selectedDate}`,
-          date: selectedDate,
-          isSaved: false,
-          mealsEaten: [],
-          dailyTotal: 0
+          ...m,
+          items: m.items.filter((it) => it.id !== itemId),
         };
       }
-      return existingLogForDate;
-    }
-    return {
-      id: `nut-${selectedDate}`,
-      date: selectedDate,
-      isSaved: false,
-      mealsEaten: [],
-      dailyTotal: 0
+      return m;
+    });
+
+    const newDailyTotal = currentMeals.reduce(
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      0
+    );
+
+    const updatedLog: NutritionLog = {
+      ...todayLog,
+      dailyTotal: newDailyTotal,
+      mealsEaten: currentMeals,
+      isSaved: true,
     };
-  });
 
-  // When selectedDate changes, sync draftLog & isLocked with data
-  useEffect(() => {
-    const log = (data.nutritionLogs || []).find(l => l.date === selectedDate);
-    if (log) {
-      const isOldFormat = log.mealsEaten?.some((m: any) => 'itemsSelected' in m);
-      if (isOldFormat) {
-        setDraftLog({
-          id: `nut-${selectedDate}`,
-          date: selectedDate,
-          isSaved: false,
-          mealsEaten: [],
-          dailyTotal: 0
-        });
-      } else {
-        setDraftLog(log);
-      }
-      setIsLocked(!!log.isSaved);
-    } else {
-      setDraftLog({
-        id: `nut-${selectedDate}`,
-        date: selectedDate,
-        isSaved: false,
-        mealsEaten: [],
-        dailyTotal: 0
-      });
-      setIsLocked(false);
-    }
-
-    // Always close enlarged state when viewing other days or if day is already saved
-    if (selectedDate !== todayStr || log?.isSaved) {
-      setExpanded(null);
-    }
-
-    // Ensure floating bottom navigation dock is visible whenever switching dates
-    window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-  }, [selectedDate, data.nutritionLogs, todayStr]);
-
-  const targetCals = data.profile?.currentCalorieTarget || 2000;
-  const totalConsumed = draftLog.dailyTotal;
-  const ringPct = Math.min((totalConsumed / targetCals) * 100, 100);
-  const ringColor = ringPct < 85 ? '#10b981' : ringPct <= 100 ? '#f59e0b' : '#ef4444';
-  const circumference = 2 * Math.PI * 42;
-  const strokeDash = (ringPct / 100) * circumference;
-
-  const activeGoalConfig = FITNESS_GOALS.find(g => g.id === data.profile?.fitnessGoal);
-  const currentWeight = data.profile?.weightHistory?.[(data.profile.weightHistory.length || 1) - 1]?.weight || 75;
-  const targetProtein = data.profile?.dailyProteinTarget || Math.round(currentWeight * (activeGoalConfig?.proteinMultiplier || 1.8));
-
-  const handleGetAdvice = async () => {
-    if (!todayMenu) return;
-    setFetchingAdvice(true);
-    setShowCoach(true);
-    triggerHaptic('ai');
-    try {
-      const p = data.profile || { goalWeight: 70, currentCalorieTarget: 2000, fitnessGoal: 'weight_loss' };
-      const advice = await getDietAdvice(todayMenu, p, data.geminiApiKey || GEMINI_API_KEY);
-      setCoachAdvice(advice);
-      triggerHaptic('success');
-    } catch (err: any) {
-      console.warn('[Nutrition] handleGetAdvice fallback triggered:', err);
-      const p = data.profile || { goalWeight: 70, currentCalorieTarget: 2000, fitnessGoal: 'weight_loss' };
-      const fallback = generateFallbackDietAdvice(todayMenu, p);
-      setCoachAdvice(fallback);
-      triggerHaptic('success');
-    } finally {
-      setFetchingAdvice(false);
-    }
+    const updatedLogs = [
+      updatedLog,
+      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+    ];
+    await updateData({ nutritionLogs: updatedLogs });
   };
-
-  const handleAskFoodDoubt = async () => {
-    if (!foodDoubtQuery.trim()) return;
-    triggerHaptic('ai');
-    setFoodDoubtLoading(true);
-    setFoodDoubtError(null);
-    setFoodDoubtAnswer(null);
-    try {
-      const res = await askFoodDoubt(foodDoubtQuery.trim(), data.profile, data.geminiApiKey || GEMINI_API_KEY);
-      setFoodDoubtAnswer(res);
-      triggerHaptic('success');
-    } catch (err: any) {
-      console.error(err);
-      if (err?.message === 'NO_API_KEY') {
-        setFoodDoubtError('API Key not configured. Please enter your Groq or Gemini API key in Settings > API Keys to use Food Doubt.');
-      } else {
-        setFoodDoubtError('Failed to get answer. Please check connection and try again.');
-      }
-    } finally {
-      setFoodDoubtLoading(false);
-    }
-  };
-
-  const calculateDailyTotal = (meals: NutritionLog['mealsEaten']) => {
-    let total = 0;
-    meals.forEach(m => {
-      m.items.forEach(i => {
-        total += (i.calories * i.portion);
-      });
-    });
-    return total;
-  };
-
-  const toggleMenuItem = (mealSlot: MealSlot, itemName: string, estCals: number) => {
-    triggerHaptic(5);
-    setDraftLog(prev => {
-      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-
-      let mealLog;
-      if (mealIdx >= 0) {
-        mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-        newLog.mealsEaten[mealIdx] = mealLog;
-      } else {
-        mealLog = { slot: mealSlot, items: [] };
-        newLog.mealsEaten.push(mealLog);
-      }
-
-      const existingItemIdx = mealLog.items.findIndex(i => i.id === itemName && !i.isExtra);
-      if (existingItemIdx >= 0) {
-        // Remove item
-        mealLog.items.splice(existingItemIdx, 1);
-      } else {
-        // Add item with portion 1
-        mealLog.items.push({
-          id: itemName,
-          name: itemName,
-          calories: estCals,
-          portion: 1,
-          isExtra: false
-        });
-      }
-
-      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-      newLog.isSaved = false;
-      return newLog;
-    });
-  };
-
-  const updateItemPortion = (mealSlot: MealSlot, itemId: string, change: number) => {
-    triggerHaptic(5);
-    setDraftLog(prev => {
-      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-      if (mealIdx === -1) return prev;
-
-      const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-      newLog.mealsEaten[mealIdx] = mealLog;
-
-      const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
-      if (itemIdx === -1) return prev;
-
-      const item = { ...mealLog.items[itemIdx] };
-      mealLog.items[itemIdx] = item;
-
-      // Update portion
-      item.portion += change;
-
-      // Prevent portion dropping below 0
-      if (item.portion <= 0) {
-        mealLog.items.splice(itemIdx, 1);
-      }
-
-      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-      newLog.isSaved = false;
-      return newLog;
-    });
-  };
-
-  const handleAddExtraItem = async (mealSlot: MealSlot) => {
-    const txt = extraTexts[mealSlot] || '';
-    if (!txt.trim()) return;
-
-    setEstimatingSlot(mealSlot);
-    triggerHaptic(10);
-
-    try {
-      const prompt = `Estimate the calories for this food item eaten: "${txt}".
-Return ONLY a valid JSON object like {"calories": 250, "name": "Standardized name"}. No markdown, no backticks.`;
-
-      const res = await getCoachTip(prompt, data.geminiApiKey || GEMINI_API_KEY);
-      const parsed = JSON.parse(res);
-
-      setDraftLog(prev => {
-        const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-        const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-
-        let mealLog;
-        if (mealIdx >= 0) {
-          mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-          newLog.mealsEaten[mealIdx] = mealLog;
-        } else {
-          mealLog = { slot: mealSlot, items: [] };
-          newLog.mealsEaten.push(mealLog);
-        }
-
-        mealLog.items.push({
-          id: Date.now().toString(),
-          name: parsed.name,
-          calories: parsed.calories,
-          portion: 1,
-          isExtra: true
-        });
-
-        newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-        newLog.isSaved = false;
-        return newLog;
-      });
-
-      setExtraTexts(prev => ({ ...prev, [mealSlot]: '' }));
-    } catch (err: any) {
-      console.error(err);
-      if (err.message === 'NO_API_KEY' || (err instanceof Error && err.message === 'NO_API_KEY')) {
-        alert("Please enter your Groq API Key in Settings to estimate calories.");
-      } else {
-        alert("Failed to estimate calories. Please try again.");
-      }
-    } finally {
-      setEstimatingSlot(null);
-    }
-  };
-
-  const handleDeleteExtraItem = (mealSlot: MealSlot, itemId: string) => {
-    const meal = draftLog.mealsEaten.find(m => m.slot === mealSlot);
-    const item = meal?.items.find(i => i.id === itemId);
-    const itemName = item?.name || 'Food item';
-
-    confirmDelete({
-      title: 'Remove Food Item?',
-      itemName,
-      message: 'This extra item will be removed from your meal log.',
-      section: 'nutrition',
-      onConfirm: async () => {
-        setDraftLog(prev => {
-          const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-          const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-          if (mealIdx >= 0) {
-            const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-            newLog.mealsEaten[mealIdx] = mealLog;
-            mealLog.items = mealLog.items.filter(i => i.id !== itemId);
-          }
-          newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-          newLog.isSaved = false;
-          return newLog;
-        });
-      },
-    });
-  };
-
-  const handleSkipMeal = (mealSlot: MealSlot) => {
-    triggerHaptic(5);
-    setDraftLog(prev => {
-      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-
-      let mealLog;
-      if (mealIdx >= 0) {
-        mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-        newLog.mealsEaten[mealIdx] = mealLog;
-      } else {
-        mealLog = { slot: mealSlot, items: [] };
-        newLog.mealsEaten.push(mealLog);
-      }
-
-      const skippedIdx = mealLog.items.findIndex(i => i.id === 'skipped');
-      if (skippedIdx >= 0) {
-        mealLog.items.splice(skippedIdx, 1);
-      } else {
-        mealLog.items = [{
-          id: 'skipped',
-          name: 'Meal Skipped',
-          calories: 0,
-          portion: 1,
-          isExtra: false
-        }];
-      }
-
-      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-      newLog.isSaved = false;
-      return newLog;
-    });
-  };
-
-  const saveEditedExtraItem = (mealSlot: MealSlot, itemId: string) => {
-    triggerHaptic(5);
-    const parsedCals = parseInt(editExtraCals);
-
-    setDraftLog(prev => {
-      const newLog = { ...prev, mealsEaten: [...prev.mealsEaten] };
-      const mealIdx = newLog.mealsEaten.findIndex(m => m.slot === mealSlot);
-      if (mealIdx >= 0) {
-        const mealLog = { ...newLog.mealsEaten[mealIdx], items: [...newLog.mealsEaten[mealIdx].items] };
-        newLog.mealsEaten[mealIdx] = mealLog;
-
-        const itemIdx = mealLog.items.findIndex(i => i.id === itemId);
-        if (itemIdx >= 0) {
-          const item = { ...mealLog.items[itemIdx] };
-          mealLog.items[itemIdx] = item;
-
-          if (editExtraName.trim()) item.name = editExtraName.trim();
-          if (!isNaN(parsedCals) && parsedCals >= 0) item.calories = parsedCals;
-        }
-      }
-      newLog.dailyTotal = calculateDailyTotal(newLog.mealsEaten);
-      newLog.isSaved = false;
-      return newLog;
-    });
-    setEditingExtraId(null);
-  }
-
-  const handleSaveDay = async () => {
-    triggerHaptic('save');
-    const finalLog = { ...draftLog, date: selectedDate, isSaved: true };
-    setDraftLog(finalLog);
-    setIsLocked(true);
-    setExpanded(null); // Close enlarged state so it doesn't stay open after saving
-
-    setShowSavedFeedback(true);
-    showM3Saved({
-      title: 'Nutrition Saved',
-      message: `Logged ${finalLog.dailyTotal} kcal for ${format(new Date(finalLog.date), 'MMM d')}`,
-      section: 'nutrition',
-    });
-    setTimeout(() => setShowSavedFeedback(false), 2000);
-
-    const otherLogs = (data.nutritionLogs || []).filter(l => l.date !== selectedDate);
-    await updateData({ nutritionLogs: [...otherLogs, finalLog] });
-  };
-
-  const isToday = selectedDate === todayStr;
-  const isYesterday = selectedDate === format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-3.5 max-w-xl mx-auto">
-      {/* Header Card */}
-      <motion.div
-        variants={item}
-        className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
-      >
-        <button
-          onClick={() => {
-            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-            handleAppBack(navigate);
-          }}
-          className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
-          aria-label="Go Back"
-        >
-          <ArrowLeft size={18} strokeWidth={2.2} />
-        </button>
-        <div className="text-center min-w-0 flex-1">
-          <p className="text-[10px] sm:text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-0.5 truncate">
-            {format(selectedDateObj, 'EEEE, d MMM yyyy')}
-          </p>
-          <h1 className="text-lg sm:text-xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight truncate">
-            Nutrition Protocol
-          </h1>
-        </div>
-        <div className="w-10 flex justify-end shrink-0">
-          {!isToday ? (
-            <button
-              onClick={() => {
-                triggerHaptic(5);
-                setSelectedDate(todayStr);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-              }}
-              className="text-[11px] font-tag font-bold px-2.5 py-1 rounded-full bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-90 active:scale-95 transition-all shadow-xs"
-              title="Jump to Today"
-            >
-              Today
-            </button>
-          ) : (
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 mr-3" title="Current Day" />
-          )}
-        </div>
-      </motion.div>
-
-      {/* ── Date Navigator Bar (Log any particular date) ── */}
-      <motion.div variants={item} className="rounded-[24px] p-2.5 liquid-glass border border-[var(--card-border)] flex items-center justify-between gap-2 shadow-xs">
-        <button
-          onClick={() => {
-            triggerHaptic(5);
-            setSelectedDate(prev => format(subDays(parseISO(prev), 1), 'yyyy-MM-dd'));
-            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-          }}
-          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
-          title="Previous Day"
-        >
-          <ChevronLeft size={18} />
-        </button>
-
-        {/* Date Selector Pill with Native Date Picker */}
-        <label className="relative flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-[16px] bg-[var(--card-surface)] border border-[var(--card-border)] cursor-pointer hover:border-accent/40 transition-colors">
-          <Calendar size={15} className="text-accent flex-shrink-0" />
-          <span className="text-xs font-bold text-primary-light dark:text-primary-dark font-heading">
-            {isToday ? 'Today' : isYesterday ? 'Yesterday' : format(selectedDateObj, 'EEE, d MMM')}
-          </span>
-          <span className="text-[10px] text-muted-light dark:text-muted-dark font-tag tracking-wider uppercase">
-            ({format(selectedDateObj, 'yyyy-MM-dd')})
-          </span>
-          {existingLogForDate?.isSaved ? (
-            <span className="ml-1 w-2 h-2 rounded-full bg-emerald-500" title="Saved" />
-          ) : draftLog.dailyTotal > 0 ? (
-            <span className="ml-1 w-2 h-2 rounded-full bg-amber-500" title="Unsaved changes" />
-          ) : null}
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => {
-              if (e.target.value) {
-                triggerHaptic(5);
-                setSelectedDate(e.target.value);
-              }
-              e.currentTarget.blur();
-              window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-            }}
-            onBlur={() => {
-              window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-            }}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </label>
-
-        <button
-          onClick={() => {
-            triggerHaptic(5);
-            setSelectedDate(prev => format(addDays(parseISO(prev), 1), 'yyyy-MM-dd'));
-            window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-          }}
-          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
-          title="Next Day"
-        >
-          <ChevronRight size={18} />
-        </button>
-      </motion.div>
-
-      {/* Material 3 Expressive Amber Calorie Hero Card */}
-      {(() => {
-        const isOverBudget = totalConsumed > targetCals;
-        const overAmount = Math.round(totalConsumed - targetCals);
-        const remainingAmount = Math.round(Math.max(0, targetCals - totalConsumed));
-        const strokeColor = isOverBudget ? '#EF4444' : 'var(--md-primary)';
-        const barBgColor = isOverBudget ? 'bg-red-500' : 'bg-[var(--md-primary)]';
-
-        return (
-          <motion.div
-            variants={item}
-            className={`rounded-[32px] sm:rounded-[36px] p-5 sm:p-7 card bg-[var(--md-surface-container-low)] border ${
-              isOverBudget ? 'border-red-500/40 ring-1 ring-red-500/30' : 'border-[var(--md-outline-variant)]'
-            } text-[var(--md-on-surface)] shadow-none flex flex-col compact:flex-row items-center gap-5 sm:gap-6 relative overflow-hidden`}
+    <div className="w-full text-white selection:bg-[#FF9F0A]/30 font-sans">
+      {/* ── Page Header ── */}
+      <div className="pt-1 pb-2.5 px-0.5 flex items-center justify-between select-none">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigateBack(navigate)}
+            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer mr-1"
+            title="Back"
           >
-            <div className="relative flex-shrink-0">
-              <svg width="104" height="104" viewBox="0 0 104 104">
-                <circle cx="52" cy="52" r="44" fill="none" stroke="currentColor" strokeWidth="9" className="text-black/10 dark:text-white/10" />
-                <circle
-                  cx="52" cy="52" r="44"
-                  fill="none"
-                  stroke={strokeColor}
-                  strokeWidth="9"
-                  strokeLinecap="round"
-                  strokeDasharray={`${strokeDash} ${circumference}`}
-                  transform="rotate(-90 52 52)"
-                  style={{ transition: 'stroke-dasharray 0.5s ease, stroke 0.3s ease' }}
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="stat-clamp-tile font-bold font-stat leading-none text-[var(--md-on-surface)]">{Math.round(totalConsumed)}</span>
-                <span className="text-[10px] font-bold tracking-wider uppercase text-[var(--md-on-surface-variant)] font-tag mt-0.5">kcal</span>
-              </div>
-            </div>
+            <CaretLeft size={20} weight="bold" />
+          </button>
+          <div>
+            <p className="text-[12.5px] font-semibold text-[rgba(235,235,245,0.65)] tracking-tight">
+              Day {dayOfMonth} Mess Menu & Diary
+            </p>
+            <h1 className="text-[32px] leading-[38px] font-bold text-white tracking-[-0.02em]">
+              Nutrition
+            </h1>
+          </div>
+        </div>
 
-            <div className="flex-1 w-full space-y-2">
-              {activeGoalConfig && (
-                <div className="flex items-center justify-between gap-2 pb-1 border-b border-[var(--md-outline-variant)]/60">
-                  <span className="text-[10px] font-tag font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] truncate min-w-0">
-                    {activeGoalConfig.label}
-                  </span>
-                  <span className="text-[11px] font-stat font-semibold text-[var(--md-primary)] shrink-0 whitespace-nowrap">
-                    {targetProtein}g Protein
-                  </span>
-                </div>
-              )}
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">Target</span>
-                <span className="font-stat font-bold text-sm text-[var(--md-on-surface)] whitespace-nowrap">{targetCals} kcal</span>
-              </div>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] font-tag shrink-0">
-                  {isOverBudget ? 'Budget Status' : 'Remaining'}
+        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#FF9F0A]/15 text-[#FF9F0A] border border-[#FF9F0A]/25">
+          {caloriesRemaining} kcal left
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-3 pb-2">
+        {/* ── 1. Hero Calorie Ring & Macro Stats ── */}
+        <motion.div
+          whileTap={{ scale: 0.99 }}
+          transition={MOTION_SPRINGS.default}
+          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.08] flex flex-col items-center gap-4 shadow-xl select-none"
+        >
+          {/* Main Calorie Ring */}
+          <div className="flex flex-col items-center justify-center">
+            <Ring
+              progress={caloriePercent}
+              size={120}
+              strokeWidth={10}
+              color="#FF9F0A"
+              trackColor="#2C2C2E"
+            >
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-2xl font-extrabold text-white tabular-nums tracking-tight">
+                  {caloriesRemaining}
                 </span>
-                <span className={`font-stat font-bold text-sm whitespace-nowrap ${isOverBudget ? 'text-red-500 dark:text-red-400' : 'text-emerald-500'}`}>
-                  {isOverBudget ? `Over by ${overAmount} kcal` : `${remainingAmount} kcal`}
+                <span className="text-[10px] uppercase font-bold text-[rgba(235,235,245,0.50)] tracking-wider">
+                  kcal left
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[var(--md-surface-container)] overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${barBgColor}`}
-                  style={{ width: `${Math.min(100, ringPct)}%` }}
-                />
+            </Ring>
+          </div>
+
+          {/* Macro Breakdown */}
+          <div className="grid grid-cols-3 gap-2.5 w-full pt-3 border-t border-white/[0.06]">
+            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
+              <span className="text-xs font-bold text-[#FF453A] tabular-nums">
+                {Math.round(caloriesEaten * 0.06)} / 140g
+              </span>
+              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.06) / 140)} height={4} color="#FF453A" />
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Protein</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
+              <span className="text-xs font-bold text-[#FF9F0A] tabular-nums">
+                {Math.round(caloriesEaten * 0.12)} / 220g
+              </span>
+              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.12) / 220)} height={4} color="#FF9F0A" />
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Carbs</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
+              <span className="text-xs font-bold text-[#FF375F] tabular-nums">
+                {Math.round(caloriesEaten * 0.03)} / 60g
+              </span>
+              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.03) / 60)} height={4} color="#FF375F" />
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Fats</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── 2. Water Hydration Tile ── */}
+        <div className="w-full bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.08] flex items-center justify-between gap-3 select-none shadow-md">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-[14px] bg-[#64D2FF]/20 flex items-center justify-center text-[#64D2FF] shrink-0">
+              <Drop size={22} weight="fill" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="text-base font-bold text-white tabular-nums">
+                {waterLiters.toFixed(2)} L{' '}
+                <span className="text-xs text-[rgba(235,235,245,0.40)] font-normal">
+                  / 3.5 L target
+                </span>
+              </div>
+              <div className="text-xs text-[rgba(235,235,245,0.60)] truncate">
+                Daily Hydration Goal
               </div>
             </div>
-          </motion.div>
-        );
-      })()}
-
-      {/* ── Nutrition Interaction Personality: Widget-Style Single-Highlight Stat Cards (Image 9 pattern) ── */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-3 sm:gap-4">
-        <M3StatWidget
-          label="Calories"
-          value={Math.round(totalConsumed)}
-          unit="kcal"
-          sublabel="Daily intake"
-          highlight={{ text: `${Math.round((totalConsumed / targetCals) * 100)}% of goal` }}
-        />
-        <M3StatWidget
-          label="Target Protein"
-          value={targetProtein}
-          unit="g"
-          sublabel="Muscle maintenance"
-          highlight={{ text: activeGoalConfig ? activeGoalConfig.label : 'Target' }}
-        />
-        <M3StatWidget
-          label="Daily Hydration"
-          value={waterLiters}
-          unit="L"
-          sublabel="Hydration target: 2.5L"
-          onClick={handleAddWater}
-          highlight={{ text: '+250ml tap' }}
-        />
-        <M3StatWidget
-          label="Remaining"
-          value={Math.round(Math.max(0, targetCals - totalConsumed))}
-          unit="kcal"
-          sublabel={totalConsumed > targetCals ? 'Exceeded goal' : 'Calorie room left'}
-          highlight={{ text: totalConsumed > targetCals ? 'Over Budget' : 'On Protocol' }}
-        />
-      </motion.div>
-
-
-
-
-      {/* ── Food Doubt Card (Liquid Spring Capsule) ── */}
-      <motion.div variants={item} className="liquid-glass rounded-[30px] p-5 sm:p-6 border border-purple-500/25 glow-lavender shadow-sm space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-[14px] bg-purple-500/15 border border-purple-500/25 text-purple-700 dark:text-purple-300 flex items-center justify-center shadow-xs">
-              <Sparkles size={18} />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark">Food Doubt · Can I eat this?</h3>
-              <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark">Instant AI verdict for items outside your meal</p>
-            </div>
-          </div>
-          {foodDoubtAnswer && (
-            <button
-              onClick={() => {
-                setFoodDoubtAnswer(null);
-                setFoodDoubtQuery('');
-              }}
-              className="text-xs font-bold text-accent hover:underline"
-            >
-              Ask Another
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={foodDoubtQuery}
-            onChange={(e) => setFoodDoubtQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !foodDoubtLoading && handleAskFoodDoubt()}
-            placeholder="e.g. 2 slices of pepperoni pizza, iced mocha, samosa..."
-            className="flex-1 min-w-0 input-field rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/30 text-primary-light dark:text-primary-dark"
-          />
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.94 }}
-            onPointerDown={() => triggerHaptic('ai')}
-            onClick={handleAskFoodDoubt}
-            disabled={foodDoubtLoading || !foodDoubtQuery.trim()}
-            className="px-4 py-2.5 min-h-[44px] rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-40 flex items-center justify-center gap-1.5 shadow-sm shrink-0"
-          >
-            {foodDoubtLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            <span>Ask</span>
-          </motion.button>
-        </div>
-
-        {foodDoubtError && (
-          <p className="text-xs text-red-500">{foodDoubtError}</p>
-        )}
-
-        <AnimatePresence>
-          {foodDoubtAnswer && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs text-primary-light dark:text-primary-dark leading-relaxed flex items-start gap-2.5"
-            >
-              <div className="w-2 h-2 rounded-full bg-purple-500 mt-1 flex-shrink-0" />
-              <p className="flex-1 font-medium">{foodDoubtAnswer}</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Menu Cards */}
-      {todayMenu && (
-        <motion.div variants={item} className="space-y-3">
-          <div className="flex items-center justify-between mb-1 gap-2">
-            <h2 className="label-mono text-secondary-light dark:text-secondary-dark break-words min-w-0">Today's Mess Menu ({todayMenu.dayName} {todayMenu.date})</h2>
-            <button
-              onPointerDown={() => triggerHaptic('ai')}
-              onClick={handleGetAdvice}
-              className="btn-ghost-pill px-3 py-1.5 min-h-[44px] flex items-center gap-1.5 text-xs text-emerald-500 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/20 transition-colors shrink-0"
-            >
-              <Sparkles size={13} className="shrink-0" />
-              <span className="hidden compact:inline">AI Diet Coach</span>
-              <span className="inline compact:hidden">Coach</span>
-            </button>
           </div>
 
-          <AnimatePresence>
-            {showCoach && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden mb-4">
-                <div className="card p-4 border border-emerald-500/30 bg-emerald-500/5 relative">
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 text-sm">
-                        <Sparkles size={16} className="flex-shrink-0" /> Personalized Advice
-                      </span>
-                      {activeGoalConfig && (
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
-                          {activeGoalConfig.label}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => setShowCoach(false)}
-                      className="p-1 rounded-lg text-emerald-500/70 hover:text-emerald-500 hover:bg-emerald-500/10 active:scale-95 transition-all flex-shrink-0"
-                      aria-label="Close advice"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="glass"
+              tint="#64D2FF"
+              size="sm"
+              onClick={() => handleAddWater(0.25)}
+            >
+              +250ml
+            </Button>
+            <Button
+              variant="glass"
+              tint="#64D2FF"
+              size="sm"
+              onClick={() => handleAddWater(0.5)}
+            >
+              +500ml
+            </Button>
+          </div>
+        </div>
 
-                  {fetchingAdvice ? (
-                    <div className="flex flex-col items-center justify-center py-6 gap-3">
-                      <Loader2 size={24} className="animate-spin text-emerald-500" />
-                      <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Analyzing menu & goals...</p>
-                    </div>
-                  ) : coachAdvice?.error ? (
-                    <p className="text-sm text-red-500">{coachAdvice.error}</p>
-                  ) : coachAdvice && (
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mb-1">Recommended</h4>
-                        <ul className="text-sm text-secondary-light dark:text-secondary-dark space-y-1 list-disc pl-4">
-                          {coachAdvice.recommended?.map((r: any, i: number) => <li key={i}><strong>{r.item}</strong>: {r.reason}</li>)}
-                        </ul>
-                      </div>
-                      {coachAdvice.avoid && coachAdvice.avoid.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider mb-1">Danger / Avoid</h4>
-                          <ul className="text-sm text-secondary-light dark:text-secondary-dark space-y-1 list-disc pl-4 marker:text-red-500">
-                            {coachAdvice.avoid.map((a: any, i: number) => <li key={i}><strong>{a.item}</strong>: {a.reason}</li>)}
-                          </ul>
-                        </div>
-                      )}
-                      <div className="p-3 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-                        <p className="text-xs text-primary-light dark:text-primary-dark italic">"{coachAdvice.strategy}"</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {MEALS.map(mealObj => {
-            const mealData = todayMenu.meals.find((m: any) => m.slot === mealObj.slot);
-            const mealLog = draftLog.mealsEaten.find(m => m.slot === mealObj.slot);
-            const isOpen = expanded === mealObj.slot;
+        {/* ── 3. Integrated Meals Diary with Direct Mess Menu Selection ── */}
+        <div className="flex flex-col gap-3 pt-1">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs uppercase font-bold tracking-wider text-[rgba(235,235,245,0.50)]">
+              Today's Meals Diary & Mess Menu
+            </span>
+            <span className="text-xs text-white/50">
+              Tap items to log eaten
+            </span>
+          </div>
 
-            // Calculate total calories for this slot
-            const slotCals = mealLog ? mealLog.items.reduce((s, i) => s + (i.calories * i.portion), 0) : 0;
-            const isSkipped = mealLog?.items.some(i => i.id === 'skipped');
+          {MEAL_SLOTS.map((slot) => {
+            const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
+            const slotCalories = (slotLog?.items || []).reduce(
+              (s, it) => s + it.calories * it.portion,
+              0
+            );
+
+            const messItems = messItemsBySlot[slot.slot] || [];
+            const loggedItemNames = new Set(
+              (slotLog?.items || []).map((it) => it.name.toLowerCase().trim())
+            );
+
+            // Custom extra items not matching mess list
+            const customItems = (slotLog?.items || []).filter(
+              (it) => it.isExtra || !messItems.some((m) => m.name.toLowerCase().trim() === it.name.toLowerCase().trim())
+            );
 
             return (
-              <div key={mealObj.slot} className="rounded-[28px] liquid-glass border border-[var(--card-border)] overflow-hidden shadow-xs transition-shadow">
-                <button
-                  className="w-full flex items-center justify-between p-4 sm:p-5 active:bg-black/[0.02] dark:active:bg-white/[0.02] transition-colors"
-                  onClick={() => {
-                    triggerHaptic('light');
-                    setExpanded(isOpen ? null : mealObj.slot);
-                  }}
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mealObj.dotColor} bg-opacity-20 text-current shadow-xs`}>
-                      {mealObj.icon}
+              <div
+                key={slot.slot}
+                className="w-full bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.08] flex flex-col gap-3 shadow-lg"
+              >
+                {/* Header Row */}
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-[10px] bg-[#FF9F0A]/15 text-[#FF9F0A] flex items-center justify-center">
+                      {slot.icon}
                     </div>
-                    <div className="text-left">
-                      <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{mealObj.label}</p>
-                      <p className="label-mono text-[10px] text-muted-light dark:text-muted-dark">{mealObj.time}</p>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-white tracking-tight">
+                        {slot.label}
+                      </h3>
+                      <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
+                        {slot.time}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {slotCals > 0 && !isSkipped && (
-                      <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-accent/10 text-accent border border-accent/20">
-                        {Math.round(slotCals)} kcal
-                      </span>
-                    )}
-                    {isSkipped && (
-                      <span className="text-xs font-bold text-amber-500 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-                        Skipped
-                      </span>
-                    )}
-                    {isOpen ? <ChevronUp size={16} className="text-muted-light dark:text-muted-dark" /> : <ChevronDown size={16} className="text-muted-light dark:text-muted-dark" />}
-                  </div>
-                </button>
 
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 border-t border-white/[0.05] pt-3">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider">
-                            {mealObj.slot === 'nightCanteen' ? 'Night Canteen (10:30 PM–12:30 AM)' : 'Menu Items'}
-                          </h4>
-                          <button onClick={() => handleSkipMeal(mealObj.slot)} className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${isSkipped ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-bg-light dark:hover:bg-bg-dark text-secondary-light dark:text-secondary-dark'}`}>
-                            {isSkipped ? 'Undo Skip' : 'Skip Meal'}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#FF9F0A] tabular-nums">
+                      {slotCalories} kcal
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setCustomSlot(slot.slot);
+                        setIsAddCustomOpen(true);
+                      }}
+                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                      title="Add Custom Item"
+                    >
+                      <Plus size={12} weight="bold" />
+                      <span>Custom</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Direct Mess Menu Selectable Pills */}
+                {messItems.length > 0 && (
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
+                      Mess Menu Items:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {messItems.map((item, idx) => {
+                        const isSelected = loggedItemNames.has(item.name.toLowerCase().trim());
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleToggleMessItem(slot.slot, item.name, item.estCalories)}
+                            className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
+                              isSelected
+                                ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
+                                : 'bg-[#2C2C2E] text-white/80 hover:text-white hover:bg-[#3A3A3C] border border-white/6'
+                            }`}
+                          >
+                            {isSelected ? (
+                              <Check size={13} weight="bold" />
+                            ) : (
+                              <Plus size={13} weight="bold" className="text-white/40" />
+                            )}
+                            <span>{item.name}</span>
+                            <span className={`text-[10px] ${isSelected ? 'text-black/70 font-bold' : 'text-white/40'}`}>
+                              {item.estCalories} kcal
+                            </span>
                           </button>
-                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-                        {isSkipped ? (
-                          <div className="py-6 text-center bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                            <p className="text-amber-600 dark:text-amber-400 font-medium text-sm">You skipped {mealObj.label.toLowerCase()}</p>
+                {/* Custom Logged Items */}
+                {customItems.length > 0 && (
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.04]">
+                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
+                      Custom Logged Foods:
+                    </span>
+                    <div className="flex flex-col gap-1">
+                      {customItems.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between px-3 py-1.5 rounded-[12px] bg-[#2C2C2E]/60 text-xs"
+                        >
+                          <span className="text-white/90 font-medium">{item.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#FF9F0A] font-semibold tabular-nums">
+                              {item.calories * item.portion} kcal
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(slot.slot, item.id)}
+                              className="text-white/40 hover:text-[#FF453A] p-0.5 transition-colors cursor-pointer"
+                              title="Delete food"
+                            >
+                              <Trash size={13} />
+                            </button>
                           </div>
-                        ) : mealObj.slot === 'nightCanteen' ? (
-                          <NightCanteenSection
-                            mealLog={mealLog}
-                            onToggleItem={(name, cals) => toggleMenuItem('nightCanteen', name, cals)}
-                            onUpdatePortion={(id, change) => updateItemPortion('nightCanteen', id, change)}
-                            extraTexts={extraTexts}
-                            setExtraTexts={setExtraTexts}
-                            editingExtraId={editingExtraId}
-                            setEditingExtraId={setEditingExtraId}
-                            editExtraName={editExtraName}
-                            setEditExtraName={setEditExtraName}
-                            editExtraCals={editExtraCals}
-                            setEditExtraCals={setEditExtraCals}
-                            onSaveExtraEdit={saveEditedExtraItem}
-                            onDeleteExtraItem={handleDeleteExtraItem}
-                            onAddExtraItem={handleAddExtraItem}
-                            estimatingSlot={estimatingSlot}
-                          />
-                        ) : (
-                          <>
-                            {/* Standard Menu Items if present */}
-                            {mealData && mealData.items.length > 0 && (
-                              <div className="space-y-2 mb-4">
-                                {mealData.items.map((item: any) => {
-                                  const loggedItem = mealLog?.items.find(i => i.id === item.name && !i.isExtra);
-                                  const isSelected = !!loggedItem;
-
-                                  const isRecommended = coachAdvice?.recommended?.some((r: any) => item.name.toLowerCase().includes(r.item?.toLowerCase()) || r.item?.toLowerCase().includes(item.name.toLowerCase()));
-                                  const isAvoid = coachAdvice?.avoid?.some((a: any) => item.name.toLowerCase().includes(a.item?.toLowerCase()) || a.item?.toLowerCase().includes(item.name.toLowerCase()));
-
-                                  return (
-                                    <div
-                                      key={item.name}
-                                      className={`w-full flex flex-col p-3 rounded-2xl border transition-all ${isSelected
-                                          ? 'bg-accent/10 border-accent/30 shadow-xs'
-                                          : 'bg-white/60 dark:bg-white/[0.03] border-black/5 dark:border-white/5'
-                                        }`}
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <button
-                                          className="flex items-center gap-3 flex-1 text-left"
-                                          onClick={() => toggleMenuItem(mealObj.slot, item.name, item.estCalories)}
-                                        >
-                                          <div className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center transition-colors ${isSelected ? 'border-accent bg-accent text-white' : 'border-neutral-300 dark:border-neutral-600 text-transparent'}`}>
-                                            <Check size={12} strokeWidth={3} />
-                                          </div>
-                                          <span className={`text-sm font-semibold flex flex-wrap items-center gap-2 ${isSelected ? 'text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}>
-                                            {item.name}
-                                            {isRecommended && <Leaf size={14} className="text-emerald-500" />}
-                                            {isAvoid && <AlertTriangle size={14} className="text-red-500" />}
-                                          </span>
-                                        </button>
-
-                                        {/* Bouncy Spring Micro-Stepper */}
-                                        {isSelected && (
-                                          <div className="flex items-center gap-1.5 ml-2 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl px-2 py-1 shadow-xs">
-                                            <motion.button
-                                              whileTap={{ scale: 0.8 }}
-                                              className="w-5 h-5 rounded-lg flex items-center justify-center text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark font-bold text-xs bg-black/5 dark:bg-white/5"
-                                              onClick={(e) => { e.stopPropagation(); triggerHaptic('light'); updateItemPortion(mealObj.slot, item.name, -0.5); }}
-                                            >
-                                              -
-                                            </motion.button>
-                                            <span className="text-xs font-bold font-mono w-6 text-center">{loggedItem.portion}</span>
-                                            <motion.button
-                                              whileTap={{ scale: 0.8 }}
-                                              className="w-5 h-5 rounded-lg flex items-center justify-center text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark font-bold text-xs bg-black/5 dark:bg-white/5"
-                                              onClick={(e) => { e.stopPropagation(); triggerHaptic('light'); updateItemPortion(mealObj.slot, item.name, 0.5); }}
-                                            >
-                                              +
-                                            </motion.button>
-                                          </div>
-                                        )}
-                                        {!isSelected && (
-                                          <span className={`label-mono text-[10px] text-muted-light dark:text-muted-dark ml-2 font-mono`}>
-                                            {item.estCalories} kcal
-                                          </span>
-                                        )}
-                                      </div>
-                                      {isSelected && (
-                                        <div className="text-[10px] text-muted-light dark:text-muted-dark mt-2 ml-8 font-mono">
-                                          Total: {Math.round(loggedItem.calories * loggedItem.portion)} kcal
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {/* Extra / Logged Items List for this slot */}
-                            {mealLog && mealLog.items.filter(i => i.isExtra).length > 0 && (
-                              <div className="mt-4 mb-4 space-y-2">
-                                <h4 className="text-xs font-bold text-secondary-light dark:text-secondary-dark uppercase tracking-wider mb-2">
-                                  Extra Items
-                                </h4>
-                                {mealLog.items.filter(i => i.isExtra).map((extra) => (
-                                  <div key={extra.id} className="p-3 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl">
-                                    {editingExtraId === extra.id ? (
-                                      <div className="space-y-3">
-                                        <input
-                                          type="text"
-                                          value={editExtraName}
-                                          onChange={(e) => setEditExtraName(e.target.value)}
-                                          className="input-field text-sm w-full py-1.5 px-3"
-                                          placeholder="Item name"
-                                        />
-                                        <div className="flex gap-2">
-                                          <input
-                                            type="number"
-                                            value={editExtraCals}
-                                            onChange={(e) => setEditExtraCals(e.target.value)}
-                                            className="input-field text-sm flex-1 py-1.5 px-3"
-                                            placeholder="Calories for 1 portion"
-                                          />
-                                          <button onClick={() => saveEditedExtraItem(mealObj.slot, extra.id)} className="btn-primary py-1 px-3 text-xs">Save</button>
-                                          <button onClick={() => setEditingExtraId(null)} className="btn-secondary py-1 px-3 text-xs">Cancel</button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="flex flex-col">
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-sm font-medium text-primary-light dark:text-primary-dark">{extra.name}</span>
-                                          <div className="flex items-center gap-1">
-                                            {/* Extra Item Portions Stepper */}
-                                            <div className="flex items-center gap-2 bg-bg-light dark:bg-bg-dark rounded-lg px-2 py-0.5">
-                                              <button
-                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, -0.5); }}
-                                              >
-                                                -
-                                              </button>
-                                              <span className="text-xs font-bold w-6 text-center">{extra.portion}</span>
-                                              <button
-                                                className="text-muted-light dark:text-muted-dark hover:text-primary-light px-1"
-                                                onClick={(e) => { e.stopPropagation(); updateItemPortion(mealObj.slot, extra.id, 0.5); }}
-                                              >
-                                                +
-                                              </button>
-                                            </div>
-
-                                            <button onClick={() => { setEditingExtraId(extra.id); setEditExtraName(extra.name); setEditExtraCals(extra.calories.toString()); }} className="p-1.5 text-muted-light dark:text-muted-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors">
-                                              <Edit2 size={14} />
-                                            </button>
-                                            <button onClick={() => handleDeleteExtraItem(mealObj.slot, extra.id)} className="p-1.5 text-red-500/70 hover:text-red-500 transition-colors">
-                                              <Trash2 size={14} />
-                                            </button>
-                                          </div>
-                                        </div>
-                                        <div className="text-[10px] text-muted-light dark:text-muted-dark mt-1 font-mono">
-                                          {extra.calories} kcal/portion • Total: {Math.round(extra.calories * extra.portion)} kcal
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Add Extra Item Input with AI calorie estimation */}
-                            <div className="mt-4 pt-3 border-t border-dashed border-border-light dark:border-border-dark">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Sparkles size={14} className="text-purple-500" />
-                                <span className="text-xs font-medium text-secondary-light dark:text-secondary-dark">
-                                  Ate something else? (AI estimates cals)
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="e.g. 2 slices of pizza, 1 apple"
-                                  value={extraTexts[mealObj.slot] || ''}
-                                  onChange={(e) => setExtraTexts(prev => ({ ...prev, [mealObj.slot]: e.target.value }))}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleAddExtraItem(mealObj.slot)}
-                                  className="input-field flex-1 min-w-0 text-sm py-2 px-3"
-                                  disabled={estimatingSlot === mealObj.slot}
-                                />
-                                <button
-                                  onClick={() => handleAddExtraItem(mealObj.slot)}
-                                  disabled={estimatingSlot === mealObj.slot || !(extraTexts[mealObj.slot]?.trim())}
-                                  className="w-11 h-11 min-h-[44px] min-w-[44px] flex-shrink-0 flex items-center justify-center bg-[var(--md-primary)] text-[var(--md-on-primary)] rounded-xl disabled:opacity-50"
-                                >
-                                  {estimatingSlot === mealObj.slot ? <Loader2 size={16} className="animate-spin" /> : <Plus size={18} />}
-                                </button>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
-        </motion.div>
-      )}
+        </div>
+      </div>
 
-      {/* Save Button & Locked Protection */}
-      <motion.div variants={item} className="pt-4">
-        {draftLog.isSaved && isLocked ? (
-          <div className="card p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center space-y-2.5">
-            <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
-              <Check size={18} className="stroke-[3]" />
-              <p className="font-bold text-sm">Day's Nutrition Saved & Protected!</p>
-            </div>
-            <p className="text-xs text-secondary-light dark:text-secondary-dark">
-              Total: {Math.round(draftLog.dailyTotal)} kcal. Locked against accidental overwriting.
-            </p>
-            <div className="pt-0.5 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic(10);
-                  setIsLocked(false);
-                }}
-                className="btn-ghost-pill flex-1 py-2 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
-              >
-                <Unlock size={13} /> Unlock to Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('lifeos-show-nav'));
-                  handleAppBack(navigate);
-                }}
-                className="btn-pill flex-1 py-2 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
-              >
-                Back
-              </button>
-            </div>
+      {/* Add Custom Food Modal Sheet */}
+      <Sheet
+        isOpen={isAddCustomOpen}
+        onClose={() => setIsAddCustomOpen(false)}
+        detent="half"
+        title={`Add to ${customSlot.charAt(0).toUpperCase() + customSlot.slice(1)}`}
+      >
+        <div className="flex flex-col gap-4 py-2">
+          <TextField
+            label="Food / Item Name"
+            placeholder="Salad, Paneer bowl, Protein shake..."
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            autoFocus
+          />
+
+          <TextField
+            label="Estimated Calories (kcal)"
+            type="number"
+            placeholder="250"
+            value={customCalories}
+            onChange={(e) => setCustomCalories(e.target.value)}
+          />
+
+          <div className="pt-3">
+            <Button
+              variant="prominent"
+              tint="#FF9F0A"
+              className="w-full"
+              disabled={!customName.trim()}
+              onClick={handleLogCustomFood}
+            >
+              Add Custom Food
+            </Button>
           </div>
-        ) : (
-          <button
-            onPointerDown={() => triggerHaptic('save')}
-            onClick={handleSaveDay}
-            className={`relative overflow-hidden w-full h-14 rounded-2xl flex items-center justify-center font-bold transition-all duration-500 shadow-md active:scale-95 ${showSavedFeedback ? 'bg-emerald-500 text-white' : 'btn-primary'}`}
-          >
-            <AnimatePresence mode="wait">
-              {showSavedFeedback ? (
-                <motion.div key="saved" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                  <Check size={20} /> Saved for {format(new Date(draftLog.date), 'MMM d')}
-                </motion.div>
-              ) : (
-                <motion.div key="save" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.4 }} className="flex items-center gap-2">
-                  <Save size={20} /> Save Day's Nutrition
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-        )}
-      </motion.div>
-
-
-
-    </motion.div>
+        </div>
+      </Sheet>
+    </div>
   );
 }
-

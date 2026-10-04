@@ -23,26 +23,33 @@
     --more-icon: #1B1C22;
   }
 
-  /* ── Material 3 Expressive Flat Tonal Surface Aliases (Zero Blur Overhead) ── */
+  /* ── Fluid Liquid Glass Surfaces ── */
   .liquid-glass,
-  .glass-surface,
+  .glass-surface {
+    background: rgba(30, 30, 34, 0.70) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.18) !important;
+  }
+
   .glow-card,
   .card-tonal {
-    background-color: var(--md-sys-color-surface-container-low) !important;
-    color: var(--md-sys-color-on-surface) !important;
-    border: 1px solid var(--md-sys-color-outline-variant) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    background-color: #1C1C1E !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.5) !important;
   }
 
   .glass-sheet,
   .floating-shell {
-    background-color: var(--md-sys-color-surface-container-high) !important;
-    color: var(--md-sys-color-on-surface) !important;
-    border: 1px solid var(--md-sys-color-outline-variant) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: rgba(28, 28, 30, 0.88) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.8) !important;
   }
 
   /* Custom smooth horizontal table scrollbar */
@@ -79,15 +86,18 @@
     min-height: 100dvh;
     overflow-x: hidden;
     overflow-y: auto;
+    background-color: #000000 !important;
+    color: #FFFFFF !important;
   }
 
   body {
-    font-family: var(--font-family-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
-    letter-spacing: 0;
-    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    color: #FFFFFF;
+    background-color: #000000 !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-user-select: none;
@@ -110,6 +120,8 @@
     flex-direction: column;
     overflow: visible;
     width: 100%;
+    background-color: #000000 !important;
+    color: #FFFFFF !important;
   }
 
   /* Text selection only inside editable form elements and explicit allow-select */

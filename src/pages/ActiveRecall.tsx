@@ -1,30 +1,27 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Brain,
-  Plus,
-  RotateCw,
-  CheckCircle2,
-  ChevronLeft,
-  Sparkles,
-  BookOpen,
-  ArrowRight,
-  Layers,
-  Trash2,
-  ThumbsUp,
-  Flame,
-  Award
-} from 'lucide-react';
-import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
-import { haptics } from '../utils/haptics';
-import { handleAppBack, registerDismissible } from '../utils/backNavigation';
+import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
-import { AppData } from '../types';
+import type { AppData } from '../types';
+import {
+  LargeTitleHeader,
+  Button,
+  Segmented,
+  Sheet,
+  TextField,
+  EmptyState,
+  Badge,
+  Cards,
+  Plus,
+  ArrowClockwise,
+  Check,
+  CaretLeft,
+} from '../ui';
 
 interface ActiveRecallProps {
   data: AppData;
-  updateData: (partial: Partial<AppData>) => Promise<any>;
+  updateData?: (partial: Partial<AppData>) => Promise<any>;
 }
 
 export interface Flashcard {
@@ -38,14 +35,36 @@ export interface Flashcard {
   reps: number;
 }
 
-export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateData: _updateData }) => {
+export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
   const navigate = useNavigate();
 
-  // Load flashcards from local storage
   const [cards, setCards] = useState<Flashcard[]>(() => {
     try {
       const saved = localStorage.getItem('lifeos_recall_cards');
-      return saved ? JSON.parse(saved) : [];
+      return saved
+        ? JSON.parse(saved)
+        : [
+            {
+              id: '1',
+              deck: 'Computer Science',
+              front: 'What is ACID in Database Management?',
+              back: 'Atomicity, Consistency, Isolation, and Durability.',
+              intervalDays: 1,
+              lastReviewed: '',
+              nextReview: '',
+              reps: 0,
+            },
+            {
+              id: '2',
+              deck: 'Computer Science',
+              front: 'What is the time complexity of QuickSort average vs worst case?',
+              back: 'Average: O(n log n), Worst: O(n^2).',
+              intervalDays: 3,
+              lastReviewed: '',
+              nextReview: '',
+              reps: 1,
+            },
+          ];
     } catch {
       return [];
     }
@@ -54,390 +73,282 @@ export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateD
   const [selectedDeck, setSelectedDeck] = useState<string>('All');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // Register dismissible so hardware/system back cleanly closes popup
-  useEffect(() => {
-    if (!showAddModal) return;
-    return registerDismissible('active-recall-add-modal', () => {
-      setShowAddModal(false);
-      return true;
-    });
-  }, [showAddModal]);
-
-  // New Card Form
-  const [newFront, setNewFront] = useState('');
-  const [newBack, setNewBack] = useState('');
-  const [newDeck, setNewDeck] = useState('General');
-
-  // Filter cards by deck
-  const filteredCards = useMemo(() => {
-    if (selectedDeck === 'All') return cards;
-    return cards.filter(c => c.deck === selectedDeck);
-  }, [cards, selectedDeck]);
+  // Add Card Form
+  const [front, setFront] = useState('');
+  const [back, setBack] = useState('');
+  const [deck, setDeck] = useState('Computer Science');
 
   const uniqueDecks = useMemo(() => {
-    const set = new Set(cards.map(c => c.deck));
+    const set = new Set(cards.map((c) => c.deck));
     return ['All', ...Array.from(set)];
   }, [cards]);
+
+  const filteredCards = useMemo(() => {
+    if (selectedDeck === 'All') return cards;
+    return cards.filter((c) => c.deck === selectedDeck);
+  }, [cards, selectedDeck]);
 
   const currentCard = filteredCards[currentIndex];
 
   const handleFlip = () => {
-    haptics.tap();
+    triggerHaptic('light');
     setIsFlipped(!isFlipped);
   };
 
-  const handleRate = (rating: 'hard' | 'good' | 'easy') => {
+  const handleRate = (rating: 'again' | 'hard' | 'good' | 'easy') => {
     if (!currentCard) return;
-    haptics.tap();
+    triggerHaptic(rating === 'again' ? 'error' : 'success');
 
     let nextInterval = currentCard.intervalDays;
-    if (rating === 'hard') nextInterval = 1;
+    if (rating === 'again') nextInterval = 1;
+    else if (rating === 'hard') nextInterval = Math.max(1, Math.round(currentCard.intervalDays * 1.2));
     else if (rating === 'good') nextInterval = Math.max(3, currentCard.intervalDays * 2);
     else if (rating === 'easy') nextInterval = Math.max(7, currentCard.intervalDays * 3);
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + nextInterval);
+    const updated = cards.map((c) =>
+      c.id === currentCard.id
+        ? {
+            ...c,
+            intervalDays: nextInterval,
+            reps: c.reps + 1,
+            lastReviewed: new Date().toISOString(),
+          }
+        : c
+    );
 
-    const updatedCard: Flashcard = {
-      ...currentCard,
-      intervalDays: nextInterval,
-      lastReviewed: todayStr,
-      nextReview: nextDate.toISOString().split('T')[0],
-      reps: currentCard.reps + 1,
-    };
-
-    const updatedCards = cards.map(c => (c.id === currentCard.id ? updatedCard : c));
-    setCards(updatedCards);
-    localStorage.setItem('lifeos_recall_cards', JSON.stringify(updatedCards));
+    setCards(updated);
+    try {
+      localStorage.setItem('lifeos_recall_cards', JSON.stringify(updated));
+    } catch {}
 
     setIsFlipped(false);
     if (currentIndex + 1 < filteredCards.length) {
-      setCurrentIndex(prev => prev + 1);
+      setCurrentIndex(currentIndex + 1);
     } else {
-      setSessionCompleted(true);
-      haptics.milestone();
       triggerConfettiBurst();
+      setCurrentIndex(0);
     }
   };
 
-  const handleAddCard = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFront.trim() || !newBack.trim()) return;
-
-    haptics.save();
+  const handleCreateCard = () => {
+    if (!front.trim() || !back.trim()) return;
+    triggerHaptic('success');
     const newCard: Flashcard = {
-      id: `card-${Date.now()}`,
-      deck: newDeck.trim() || 'General',
-      front: newFront.trim(),
-      back: newBack.trim(),
+      id: `card_${Date.now()}`,
+      deck: deck.trim() || 'General',
+      front: front.trim(),
+      back: back.trim(),
       intervalDays: 1,
-      lastReviewed: new Date().toISOString().split('T')[0],
-      nextReview: new Date().toISOString().split('T')[0],
+      lastReviewed: '',
+      nextReview: '',
       reps: 0,
     };
 
     const updated = [newCard, ...cards];
     setCards(updated);
-    localStorage.setItem('lifeos_recall_cards', JSON.stringify(updated));
+    try {
+      localStorage.setItem('lifeos_recall_cards', JSON.stringify(updated));
+    } catch {}
 
-    setNewFront('');
-    setNewBack('');
-    setShowAddModal(false);
-  };
-
-  const handleDeleteCard = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    haptics.warning();
-    const updated = cards.filter(c => c.id !== id);
-    setCards(updated);
-    localStorage.setItem('lifeos_recall_cards', JSON.stringify(updated));
-    if (currentIndex >= updated.length) {
-      setCurrentIndex(Math.max(0, updated.length - 1));
-    }
-  };
-
-  const handleRestart = () => {
-    haptics.tap();
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setSessionCompleted(false);
+    setFront('');
+    setBack('');
+    setIsAddOpen(false);
   };
 
   return (
-    <div className="w-full space-y-4 max-w-lg mx-auto flex flex-col">
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleAppBack(navigate)}
-            className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors active:scale-95"
-            aria-label="Back"
+    <div className="w-full text-white selection:bg-[#BF5AF2]/30">
+      <LargeTitleHeader
+        title="Active Recall"
+        subtitle={`${filteredCards.length} cards in deck`}
+        tint="#BF5AF2"
+        onBack={() => navigate('/study')}
+        actions={
+          <Button
+            variant="glass"
+            tint="#BF5AF2"
+            size="sm"
+            onClick={() => setIsAddOpen(true)}
+            icon={<Plus size={16} weight="bold" />}
           >
-            <ChevronLeft size={22} />
-          </button>
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--md-primary)] uppercase tracking-wider">
-              <Brain size={14} />
-              <span>Spaced Repetition Engine</span>
-            </div>
-            <h1 className="text-2xl font-black text-[var(--md-on-surface)] tracking-tight">
-              Active Recall
-            </h1>
-          </div>
-        </div>
+            Add Card
+          </Button>
+        }
+      />
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="p-2.5 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-sm active:scale-95 transition-transform"
-          aria-label="Create Flashcard"
-        >
-          <Plus size={18} />
-        </button>
-      </div>
-
-      {/* Deck Selector Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 w-full min-w-0">
-        {uniqueDecks.map(deck => (
-          <button
-            key={deck}
-            onClick={() => {
-              setSelectedDeck(deck);
-              setCurrentIndex(0);
-              setIsFlipped(false);
-              setSessionCompleted(false);
-              haptics.tap();
-            }}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-              selectedDeck === deck
-                ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-xs'
-                : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)] hover:bg-[var(--md-surface-container-high)]'
-            }`}
-          >
-            {deck}
-          </button>
-        ))}
-      </div>
-
-      {/* Flashcard Area */}
-      {filteredCards.length === 0 ? (
-        <div className="p-8 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] text-center flex flex-col items-center gap-3 my-auto">
-          <OrbiCompanion variant="notes-spark" size={80} />
-          <h3 className="text-base font-bold text-[var(--md-on-surface)]">No cards in this deck</h3>
-          <p className="text-xs text-[var(--md-on-surface-variant)] max-w-xs">
-            Add your first flashcard to start building permanent memory mastery.
-          </p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold"
-          >
-            Create Flashcard
-          </button>
-        </div>
-      ) : sessionCompleted ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="p-6 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] text-center flex flex-col items-center gap-4 my-auto shadow-sm"
-        >
-          <OrbiCompanion variant="tasks-done" size={90} />
-          <div>
-            <span className="text-xs font-bold text-[var(--md-primary)] uppercase tracking-wider block">Session Finished</span>
-            <h2 className="text-xl font-black text-[var(--md-on-surface)] mt-1">Great Recall Mastery!</h2>
-            <p className="text-xs text-[var(--md-on-surface-variant)] mt-1">
-              You reviewed all {filteredCards.length} cards in this deck.
-            </p>
-          </div>
-          <button
-            onClick={handleRestart}
-            className="px-6 py-3 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-sm flex items-center gap-2 shadow-sm"
-          >
-            <RotateCw size={16} />
-            <span>Review Deck Again</span>
-          </button>
-        </motion.div>
-      ) : (
-        <div className="flex flex-col gap-4 flex-1 justify-between">
-          {/* Progress Indicator */}
-          <div className="flex items-center justify-between text-xs font-bold text-[var(--md-on-surface-variant)] px-1">
-            <span>Card {currentIndex + 1} of {filteredCards.length}</span>
-            <span className="text-[var(--md-primary)]">{currentCard?.deck}</span>
-          </div>
-
-          {/* Flip Card Container */}
-          <div
-            onClick={handleFlip}
-            className="relative w-full min-h-[280px] sm:min-h-[320px] rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] p-6 flex flex-col justify-between cursor-pointer shadow-sm active:scale-[0.99] transition-transform select-none"
-            style={{ perspective: 1000 }}
-          >
-            <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)]">
-              <span className="flex items-center gap-1">
-                <BookOpen size={13} className="text-[var(--md-primary)]" />
-                <span>{isFlipped ? 'Answer' : 'Question (Tap to flip)'}</span>
-              </span>
+      <div className="flex flex-col gap-3 pb-2">
+        {/* Deck Filters */}
+        {uniqueDecks.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {uniqueDecks.map((d) => (
               <button
-                onClick={(e) => handleDeleteCard(currentCard.id, e)}
-                className="text-[var(--md-on-surface-variant)] hover:text-red-500 p-1"
-                aria-label="Delete card"
+                key={d}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setSelectedDeck(d);
+                  setCurrentIndex(0);
+                  setIsFlipped(false);
+                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  selectedDeck === d
+                    ? 'bg-[#BF5AF2] text-white'
+                    : 'bg-[#1C1C1E] text-[rgba(235,235,245,0.60)] hover:text-white'
+                }`}
               >
-                <Trash2 size={15} />
+                {d}
               </button>
-            </div>
-
-            <div className="my-auto text-center py-4">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={isFlipped ? 'back' : 'front'}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  className={`font-semibold text-[var(--md-on-surface)] leading-relaxed ${
-                    isFlipped ? 'text-sm sm:text-base text-left' : 'text-base sm:text-lg text-center font-bold'
-                  }`}
-                >
-                  {isFlipped ? currentCard.back : currentCard.front}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-
-            <div className="flex items-center justify-center text-xs text-[var(--md-on-surface-variant)] font-medium">
-              <span className="flex items-center gap-1 text-[var(--md-primary)]">
-                <RotateCw size={13} />
-                <span>Tap card to {isFlipped ? 'show question' : 'reveal answer'}</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Recall Rating Buttons (Only shown when flipped) */}
-          <div className="min-h-[64px] flex items-center justify-center">
-            {isFlipped ? (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-3 gap-2 w-full"
-              >
-                <button
-                  onClick={() => handleRate('hard')}
-                  className="py-3 px-2 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 font-bold text-xs flex flex-col items-center gap-0.5 active:scale-95 transition-transform"
-                >
-                  <span>Hard</span>
-                  <span className="text-[10px] font-normal opacity-80">1 day</span>
-                </button>
-
-                <button
-                  onClick={() => handleRate('good')}
-                  className="py-3 px-2 rounded-2xl bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-[var(--md-on-secondary-container)] font-bold text-xs flex flex-col items-center gap-0.5 active:scale-95 transition-transform"
-                >
-                  <span>Good</span>
-                  <span className="text-[10px] font-normal opacity-80">3-7 days</span>
-                </button>
-
-                <button
-                  onClick={() => handleRate('easy')}
-                  className="py-3 px-2 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex flex-col items-center gap-0.5 active:scale-95 transition-transform"
-                >
-                  <span>Easy</span>
-                  <span className="text-[10px] font-normal opacity-80">14+ days</span>
-                </button>
-              </motion.div>
-            ) : (
-              <button
-                onClick={handleFlip}
-                className="w-full py-3.5 rounded-2xl bg-[var(--md-surface-container-high)] text-[var(--md-primary)] font-bold text-sm border border-[var(--md-outline-variant)] flex items-center justify-center gap-2"
-              >
-                <Sparkles size={16} />
-                <span>Show Answer</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Add Flashcard Modal */}
-      <AnimatePresence>
-        {showAddModal && (
-          <div
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setShowAddModal(false);
-            }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-transparent p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md p-5 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] shadow-xl flex flex-col gap-4 text-[var(--md-on-surface)]"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold">Add New Flashcard</h3>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="p-1 rounded-full text-[var(--md-on-surface-variant)] hover:bg-[var(--md-surface-container-high)]"
-                  aria-label="Close"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleAddCard} className="flex flex-col gap-3">
-                <div>
-                  <label className="text-xs font-bold text-[var(--md-on-surface-variant)] uppercase block mb-1">Deck / Subject</label>
-                  <input
-                    type="text"
-                    value={newDeck}
-                    onChange={e => setNewDeck(e.target.value)}
-                    placeholder="e.g. Biology, System Design"
-                    className="w-full p-2.5 rounded-xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--md-primary)]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-[var(--md-on-surface-variant)] uppercase block mb-1">Front (Question)</label>
-                  <textarea
-                    value={newFront}
-                    onChange={e => setNewFront(e.target.value)}
-                    placeholder="Type question or prompt..."
-                    rows={2}
-                    className="w-full p-2.5 rounded-xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--md-primary)] resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-[var(--md-on-surface-variant)] uppercase block mb-1">Back (Answer)</label>
-                  <textarea
-                    value={newBack}
-                    onChange={e => setNewBack(e.target.value)}
-                    placeholder="Type clear, concise answer..."
-                    rows={3}
-                    className="w-full p-2.5 rounded-xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface)] focus:outline-none focus:ring-1 focus:ring-[var(--md-primary)] resize-none"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--md-on-surface-variant)]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-xs shadow-sm"
-                  >
-                    Save Flashcard
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+            ))}
           </div>
         )}
-      </AnimatePresence>
+
+        {/* ── Immersive 3D Flip Review Card ── */}
+        {!currentCard ? (
+          <EmptyState
+            icon={<Cards weight="bold" />}
+            title="No Flashcards Found"
+            description="Create your first spaced-repetition card to start testing active recall."
+            actionLabel="Create Flashcard"
+            onAction={() => setIsAddOpen(true)}
+            tint="#BF5AF2"
+          />
+        ) : (
+          <div className="flex flex-col gap-5 items-center py-2 select-none">
+            <div className="w-full flex justify-between items-center text-xs font-semibold text-[rgba(235,235,245,0.60)] px-2">
+              <span>
+                Card {currentIndex + 1} of {filteredCards.length}
+              </span>
+              <span className="text-[#BF5AF2] font-bold">{currentCard.deck}</span>
+            </div>
+
+            {/* 3D Flippable Card Container */}
+            <div
+              className="w-full h-[320px] cursor-pointer"
+              style={{ perspective: 1200 }}
+              onClick={handleFlip}
+            >
+              <motion.div
+                animate={{ rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                style={{ transformStyle: 'preserve-3d' }}
+                className="w-full h-full relative"
+              >
+                {/* Front Side */}
+                <div
+                  style={{ backfaceVisibility: 'hidden' }}
+                  className="absolute inset-0 bg-[#1C1C1E] rounded-[32px] p-6 border border-white/[0.08] shadow-2xl flex flex-col justify-between"
+                >
+                  <span className="text-xs font-bold uppercase tracking-wider text-[rgba(235,235,245,0.40)]">
+                    QUESTION
+                  </span>
+                  <div className="text-xl font-bold text-white text-center leading-relaxed">
+                    {currentCard.front}
+                  </div>
+                  <span className="text-xs text-center text-[#BF5AF2] font-semibold">
+                    Tap to reveal answer
+                  </span>
+                </div>
+
+                {/* Back Side */}
+                <div
+                  style={{
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg)',
+                  }}
+                  className="absolute inset-0 bg-[#2C2C2E] rounded-[32px] p-6 border border-[#BF5AF2]/30 shadow-2xl flex flex-col justify-between"
+                >
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#BF5AF2]">
+                    ANSWER
+                  </span>
+                  <div className="text-xl font-bold text-white text-center leading-relaxed">
+                    {currentCard.back}
+                  </div>
+                  <span className="text-xs text-center text-[rgba(235,235,245,0.40)] font-medium">
+                    Rate below to schedule next review
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Rating Buttons Row (Again, Hard, Good, Easy) */}
+            <div className="grid grid-cols-4 gap-2 w-full pt-2">
+              <button
+                type="button"
+                onClick={() => handleRate('again')}
+                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#FF453A]/30 text-[#FF453A] font-bold text-xs active:scale-95 transition-transform"
+              >
+                Again
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRate('hard')}
+                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#FF9F0A]/30 text-[#FF9F0A] font-bold text-xs active:scale-95 transition-transform"
+              >
+                Hard
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRate('good')}
+                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#30D158]/30 text-[#30D158] font-bold text-xs active:scale-95 transition-transform"
+              >
+                Good
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRate('easy')}
+                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#0A84FF]/30 text-[#0A84FF] font-bold text-xs active:scale-95 transition-transform"
+              >
+                Easy
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add Card Sheet */}
+      <Sheet
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        detent="half"
+        title="New Recall Card"
+      >
+        <div className="flex flex-col gap-4 py-2">
+          <TextField
+            label="Deck / Subject"
+            placeholder="Computer Science, Anatomy..."
+            value={deck}
+            onChange={(e) => setDeck(e.target.value)}
+          />
+
+          <TextField
+            label="Front (Question / Prompt)"
+            placeholder="e.g. What is the Big-O of binary search?"
+            value={front}
+            onChange={(e) => setFront(e.target.value)}
+            autoFocus
+          />
+
+          <TextField
+            label="Back (Answer / Explanation)"
+            placeholder="e.g. O(log n)"
+            value={back}
+            onChange={(e) => setBack(e.target.value)}
+          />
+
+          <div className="pt-3">
+            <Button
+              variant="prominent"
+              tint="#BF5AF2"
+              className="w-full"
+              disabled={!front.trim() || !back.trim()}
+              onClick={handleCreateCard}
+            >
+              Save Flashcard
+            </Button>
+          </div>
+        </div>
+      </Sheet>
     </div>
   );
-};
-
-export default ActiveRecall;
+}

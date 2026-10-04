@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Play, Pause, Square, RotateCcw, ChevronLeft, Check, Sparkles, Clock } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  ArrowClockwise,
+  CaretLeft,
+  Check,
+  BookOpen,
+  NotePencil,
+  Clock,
+} from '../ui/tokens/icons';
+import { Toolbar } from '../ui/navigation/Toolbar';
+import { Button } from '../ui/controls/Button';
+import { TextField } from '../ui/controls/TextField';
+import { GroupedList } from '../ui/grouped/GroupedList';
+import { ListRow } from '../ui/grouped/ListRow';
+import { GlassSurface } from '../ui/glass/GlassSurface';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
-import { Capacitor } from '@capacitor/core';
-import { TimerNotification } from '../plugins/timerNotification';
 import type { AppData, StudySession } from '../types';
-
-const isNative = Capacitor.isNativePlatform();
 
 interface StudyTimerProps {
   data: AppData;
@@ -17,7 +26,6 @@ interface StudyTimerProps {
 }
 
 type TimerState = 'idle' | 'running' | 'paused';
-
 const STORAGE_KEY = 'lifeos_active_study_timer_v2';
 
 interface PersistedTimer {
@@ -29,457 +37,258 @@ interface PersistedTimer {
   startTimeStr: string;
 }
 
-// Sub-component that isolates high-frequency (1 Hz / 500ms) timer ticks
-// so the parent StudyTimer and surrounding UI do not re-render.
-interface RunningTimerDisplayProps {
-  isRunning: boolean;
-  lastStartTimestamp: number | null;
-  accumulatedSeconds: number;
-}
-
-const RunningTimerDisplay = React.memo(function RunningTimerDisplay({
-  isRunning,
-  lastStartTimestamp,
-  accumulatedSeconds,
-}: RunningTimerDisplayProps) {
-  const [seconds, setSeconds] = useState(() => {
-    if (isRunning && lastStartTimestamp) {
-      const elapsed = Math.floor((Date.now() - lastStartTimestamp) / 1000);
-      return accumulatedSeconds + Math.max(0, elapsed);
-    }
-    return accumulatedSeconds;
-  });
-
-  useEffect(() => {
-    if (!isRunning) {
-      setSeconds(accumulatedSeconds);
-      return;
-    }
-
-    const sync = () => {
-      if (lastStartTimestamp) {
-        const elapsed = Math.floor((Date.now() - lastStartTimestamp) / 1000);
-        setSeconds(accumulatedSeconds + Math.max(0, elapsed));
-      }
-    };
-
-    sync();
-    const interval = setInterval(sync, 500);
-
-    const handleWake = () => sync();
-    document.addEventListener('visibilitychange', handleWake);
-    window.addEventListener('focus', handleWake);
-    window.addEventListener('pageshow', handleWake);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleWake);
-      window.removeEventListener('focus', handleWake);
-      window.removeEventListener('pageshow', handleWake);
-    };
-  }, [isRunning, lastStartTimestamp, accumulatedSeconds]);
-
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  const formatted = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-
-  return (
-    <div className="text-6xl sm:text-7xl font-black tracking-tight font-mono py-4 text-primary-light dark:text-primary-dark relative z-10">
-      {formatted}
-    </div>
-  );
-});
-
 export default function StudyTimer({ data, updateData }: StudyTimerProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const prefillSubject = searchParams.get('subject') || '';
 
-  // Initialize from persisted storage if an active timer was running
   const [persisted] = useState<PersistedTimer | null>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
+      return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
     }
   });
 
-  const [subject, setSubject] = useState(() => persisted?.subject || prefillSubject);
-  const [topic, setTopic] = useState(() => persisted?.topic || '');
-  const [timerState, setTimerState] = useState<TimerState>(() => persisted?.timerState || 'idle');
+  const availableSubjects = Array.from(
+    new Set((data.timetable || []).map((item) => item.subject).filter(Boolean))
+  );
 
-  // Parent only tracks accumulated seconds and last start timestamp;
-  // It does NOT tick every second.
+  const [timerState, setTimerState] = useState<TimerState>(persisted?.timerState || 'idle');
+  const [subject, setSubject] = useState<string>(persisted?.subject || prefillSubject || (availableSubjects[0] || 'Deep Work'));
+  const [topic, setTopic] = useState<string>(persisted?.topic || '');
   const [accumulatedSeconds, setAccumulatedSeconds] = useState<number>(persisted?.accumulatedSeconds || 0);
   const [lastStartTimestamp, setLastStartTimestamp] = useState<number | null>(persisted?.lastStartTimestamp || null);
-  const [summarySeconds, setSummarySeconds] = useState<number>(() => {
-    if (persisted?.timerState === 'running' && persisted?.lastStartTimestamp) {
-      const elapsed = Math.floor((Date.now() - persisted.lastStartTimestamp) / 1000);
-      return Math.max(0, (persisted.accumulatedSeconds || 0) + elapsed);
-    }
-    return persisted?.accumulatedSeconds || 0;
-  });
+  const [startTimeStr, setStartTimeStr] = useState<string>(persisted?.startTimeStr || format(new Date(), 'HH:mm'));
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
-  const [showSummary, setShowSummary] = useState(false);
-  const startTimeRef = useRef<string>(persisted?.startTimeStr || '');
-  const accumulatedRef = useRef<number>(persisted?.accumulatedSeconds || 0);
-  const lastStartRef = useRef<number | null>(persisted?.lastStartTimestamp || null);
-
-  // on mount, once — Android 13+ needs explicit permission
+  // Sync elapsed seconds
   useEffect(() => {
-    if (isNative) TimerNotification.requestPermission();
-  }, []);
+    if (timerState === 'running' && lastStartTimestamp) {
+      const interval = setInterval(() => {
+        const currentElapsed = Math.floor((Date.now() - lastStartTimestamp) / 1000);
+        setElapsedSeconds(accumulatedSeconds + Math.max(0, currentElapsed));
+      }, 500);
+      return () => clearInterval(interval);
+    } else {
+      setElapsedSeconds(accumulatedSeconds);
+    }
+  }, [timerState, lastStartTimestamp, accumulatedSeconds]);
 
-  // Sync state to localStorage
-  const saveTimerState = useCallback((state: TimerState, acc: number, startTs: number | null, subj: string, top: string, startStr: string) => {
+  // Save active timer state
+  useEffect(() => {
+    if (timerState === 'idle' && accumulatedSeconds === 0) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    const snapshot: PersistedTimer = {
+      timerState,
+      subject,
+      topic,
+      accumulatedSeconds,
+      lastStartTimestamp,
+      startTimeStr,
+    };
     try {
-      if (state === 'idle') {
-        localStorage.removeItem(STORAGE_KEY);
-      } else {
-        const payload: PersistedTimer = {
-          timerState: state,
-          subject: subj,
-          topic: top,
-          accumulatedSeconds: acc,
-          lastStartTimestamp: startTs,
-          startTimeStr: startStr,
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     } catch {}
-  }, []);
-
-  const formatTime = (s: number) => {
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  };
+  }, [timerState, subject, topic, accumulatedSeconds, lastStartTimestamp, startTimeStr]);
 
   const handleStart = () => {
-    if (!subject.trim()) return;
-    triggerHaptic('light');
-    const now = Date.now();
-    const startStr = format(new Date(), 'HH:mm');
-    startTimeRef.current = startStr;
-    accumulatedRef.current = 0;
-    lastStartRef.current = now;
-    setAccumulatedSeconds(0);
-    setLastStartTimestamp(now);
-    setTimerState('running');
-    saveTimerState('running', 0, now, subject.trim(), topic.trim(), startStr);
-    
-    if (isNative) {
-      const sessionLabel = topic.trim() ? `${subject.trim()}: ${topic.trim()}` : subject.trim();
-      TimerNotification.start({ label: sessionLabel || 'Deep Work', elapsedBaseMs: 0 });
+    triggerHaptic('medium');
+    setLastStartTimestamp(Date.now());
+    if (timerState === 'idle') {
+      setStartTimeStr(format(new Date(), 'HH:mm'));
     }
+    setTimerState('running');
   };
 
   const handlePause = () => {
     triggerHaptic('light');
-    if (lastStartRef.current) {
-      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
-      accumulatedRef.current += Math.max(0, elapsed);
-      lastStartRef.current = null;
+    if (lastStartTimestamp) {
+      const currentRun = Math.floor((Date.now() - lastStartTimestamp) / 1000);
+      setAccumulatedSeconds((prev) => prev + Math.max(0, currentRun));
     }
-    setAccumulatedSeconds(accumulatedRef.current);
     setLastStartTimestamp(null);
     setTimerState('paused');
-    saveTimerState('paused', accumulatedRef.current, null, subject, topic, startTimeRef.current);
-    
-    if (isNative) {
-      const sessionLabel = topic.trim() ? `${subject.trim()}: ${topic.trim()}` : subject.trim();
-      TimerNotification.pause({ label: sessionLabel || 'Deep Work', elapsedBaseMs: accumulatedRef.current * 1000 });
-    }
   };
 
-  const handleResume = () => {
-    triggerHaptic('light');
-    const now = Date.now();
-    lastStartRef.current = now;
-    setLastStartTimestamp(now);
-    setTimerState('running');
-    saveTimerState('running', accumulatedRef.current, now, subject, topic, startTimeRef.current);
-    
-    if (isNative) {
-      const sessionLabel = topic.trim() ? `${subject.trim()}: ${topic.trim()}` : subject.trim();
-      TimerNotification.resume({ label: sessionLabel || 'Deep Work', elapsedBaseMs: accumulatedRef.current * 1000 });
-    }
+  const handleReset = () => {
+    triggerHaptic('error');
+    setTimerState('idle');
+    setAccumulatedSeconds(0);
+    setLastStartTimestamp(null);
+    setElapsedSeconds(0);
+    localStorage.removeItem(STORAGE_KEY);
   };
 
-  const handleStop = async () => {
+  const handleFinish = async () => {
     triggerHaptic('medium');
-    if (lastStartRef.current) {
-      const elapsed = Math.floor((Date.now() - lastStartRef.current) / 1000);
-      accumulatedRef.current += Math.max(0, elapsed);
-      lastStartRef.current = null;
+    let totalSec = accumulatedSeconds;
+    if (timerState === 'running' && lastStartTimestamp) {
+      const currentRun = Math.floor((Date.now() - lastStartTimestamp) / 1000);
+      totalSec += Math.max(0, currentRun);
     }
-    const finalSec = accumulatedRef.current;
-    setAccumulatedSeconds(finalSec);
-    setLastStartTimestamp(null);
-    setSummarySeconds(finalSec);
-    setTimerState('idle');
-    saveTimerState('idle', 0, null, '', '', '');
-    if (isNative) TimerNotification.stop();
-    setShowSummary(true);
-  };
 
-  const handleSave = () => {
-    triggerHaptic('save');
-    const finalMinutes = Math.max(1, Math.round(summarySeconds / 60));
-    const session: StudySession = {
-      id: crypto.randomUUID(),
-      subject: subject.trim(),
+    const durationMinutes = Math.max(1, Math.round(totalSec / 60));
+    const newSession: StudySession = {
+      id: `session_${Date.now()}`,
+      subject: subject.trim() || 'General Study',
       topic: topic.trim() || undefined,
+      duration: durationMinutes,
       date: format(new Date(), 'yyyy-MM-dd'),
-      startTime: startTimeRef.current || format(new Date(), 'HH:mm'),
-      duration: finalMinutes,
+      startTime: startTimeStr,
     };
-    triggerHaptic('success');
-    setShowSummary(false);
-    setAccumulatedSeconds(0);
-    setLastStartTimestamp(null);
-    setSummarySeconds(0);
-    accumulatedRef.current = 0;
-    lastStartRef.current = null;
-    setSubject('');
-    setTopic('');
-    if (isNative) TimerNotification.stop();
-    localStorage.removeItem(STORAGE_KEY);
-    navigate('/study');
 
-    // Save and schedule widget sync non-blocking in background
-    updateData({ studySessions: [...data.studySessions, session] });
+    const existingSessions = data.studySessions || [];
+    await updateData({
+      studySessions: [newSession, ...existingSessions],
+    });
+
+    handleReset();
+    setFeedback(`Logged ${durationMinutes}m study session!`);
+    setTimeout(() => {
+      navigate('/study');
+    }, 1200);
   };
 
-  const handleCancel = () => {
-    triggerHaptic('light');
-    if (isNative) TimerNotification.stop();
-    setTimerState('idle');
-    setAccumulatedSeconds(0);
-    setLastStartTimestamp(null);
-    setSummarySeconds(0);
-    accumulatedRef.current = 0;
-    lastStartRef.current = null;
-    setShowSummary(false);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
-  const subjects = [...new Set(data.studySessions.map(s => s.subject))];
-
-  if (showSummary) {
-    return (
-      <div className="max-w-md mx-auto space-y-6 pt-4">
-        <button
-          onClick={() => handleAppBack(navigate)}
-          className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95"
-        >
-          <ChevronLeft size={16} /> Back
-        </button>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="rounded-[32px] p-8 text-center bg-m3-lavender-container dark:bg-m3-lavender-darkContainer text-m3-lavender-text dark:text-m3-lavender-darkText border border-m3-lavender-badge/50 dark:border-m3-lavender-darkBadge/50 shadow-m3-subtle"
-        >
-          <div className="w-16 h-16 rounded-[20px] bg-white/90 dark:bg-black/30 flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <Check size={32} className="text-emerald-600 dark:text-emerald-400 stroke-[3]" />
-          </div>
-
-          <h2 className="text-2xl font-black mb-1 font-sans">Session Completed</h2>
-          <p className="text-sm font-semibold opacity-85 mb-6">
-            {subject} {topic ? `· ${topic}` : ''}
-          </p>
-
-          <div className="text-5xl sm:text-6xl font-black tracking-tight mb-2 font-mono">
-            {formatTime(summarySeconds)}
-          </div>
-          <p className="text-xs font-bold tracking-wider uppercase opacity-75 mb-8 font-mono">
-            {Math.max(1, Math.round(summarySeconds / 60))} total minutes logged
-          </p>
-
-          <div className="flex gap-3">
-            <button
-              onClick={handleSave}
-              className="flex-1 py-3.5 rounded-full btn-primary font-bold text-sm shadow-md active:scale-[0.97] transition-all"
-            >
-              Save Session
-            </button>
-            <button
-              onClick={handleCancel}
-              className="flex-1 py-3.5 rounded-full bg-white/80 dark:bg-black/25 text-primary-light dark:text-primary-dark font-bold text-sm hover:opacity-90 active:scale-[0.97] transition-all"
-            >
-              Discard
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
+  const h = Math.floor(elapsedSeconds / 3600);
+  const m = Math.floor((elapsedSeconds % 3600) / 60);
+  const s = elapsedSeconds % 60;
+  const formattedTime = `${h.toString().padStart(2, '0')}:${m
+    .toString()
+    .padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
   return (
-    <div className="max-w-md mx-auto space-y-6 pt-2">
-      <button
-        onClick={() => handleAppBack(navigate)}
-        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95"
-      >
-        <ChevronLeft size={16} /> Back
-      </button>
+    <div className="w-full flex flex-col pb-32">
+      <Toolbar
+        leading={
+          <button
+            type="button"
+            onClick={() => navigate('/study')}
+            className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
+          >
+            <CaretLeft size={20} weight="bold" />
+            <span>Study</span>
+          </button>
+        }
+        center={<span className="font-bold text-white text-base">Study Stopwatch</span>}
+      />
 
-      {timerState === 'idle' ? (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-[32px] p-6 sm:p-7 liquid-glass border border-[var(--card-border)] shadow-sm space-y-5"
-        >
-          <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-[14px] bg-accent/15 border border-accent/25 text-[var(--accent-text)] flex items-center justify-center shadow-xs">
-              <Clock size={19} strokeWidth={2.2} />
-            </span>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-                Focus Session
-              </p>
-              <h2 className="text-xl font-black text-primary-light dark:text-primary-dark font-sans">Start Timer</h2>
-            </div>
-          </div>
+      {/* Big Stopwatch Display */}
+      <div className="my-6 p-8 rounded-[36px] bg-[#1C1C1E] border border-white/8 text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#64D2FF]/40 to-transparent" />
+        <span className="text-xs font-bold uppercase tracking-wider text-[#64D2FF] mb-2">
+          {timerState === 'running' ? 'Focus Mode Active' : timerState === 'paused' ? 'Session Paused' : 'Ready to Focus'}
+        </span>
 
-          <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
-              Subject
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. DSA, Operating Systems, Math"
-              list="subjects"
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-            />
-            <datalist id="subjects">
-              {subjects.map(s => <option key={s} value={s} />)}
-            </datalist>
-          </div>
+        <div className="text-6xl sm:text-7xl font-mono font-black text-white tracking-tight my-2">
+          {formattedTime}
+        </div>
 
-          {subjects.length > 0 && (
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-light dark:text-muted-dark mb-2 font-mono">
-                Quick Select
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {subjects.slice(0, 5).map(s => (
-                  <motion.button
-                    key={s}
-                    type="button"
-                    whileTap={{ scale: 0.92 }}
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setSubject(s);
-                    }}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                      subject === s
-                        ? 'bg-accent text-white shadow-xs'
-                        : 'bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark'
-                    }`}
-                  >
-                    {s}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
+        <p className="text-xs text-white/50 font-medium mt-1">
+          {subject} {topic ? `• ${topic}` : ''}
+        </p>
+
+        {/* Primary Controls */}
+        <div className="flex items-center gap-4 mt-6">
+          {timerState === 'running' ? (
+            <button
+              type="button"
+              onClick={handlePause}
+              className="w-16 h-16 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg active:scale-95 transition-transform cursor-pointer"
+              title="Pause"
+            >
+              <Pause size={28} weight="fill" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleStart}
+              className="w-16 h-16 rounded-full bg-[#64D2FF] text-black flex items-center justify-center shadow-lg active:scale-95 transition-transform cursor-pointer"
+              title="Start"
+            >
+              <Play size={28} weight="fill" className="ml-1" />
+            </button>
           )}
 
-          <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2 font-mono">
-              Topic / Chapter (Optional)
-            </label>
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g. Binary Search Trees, Chapter 4"
-              className="w-full bg-black/[0.03] dark:bg-white/[0.04] border border-border-light dark:border-border-dark rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 text-primary-light dark:text-primary-dark"
-            />
-          </div>
+          {elapsedSeconds > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="w-12 h-12 rounded-full bg-white/10 text-white/80 hover:text-white flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
+                title="Reset"
+              >
+                <ArrowClockwise size={20} weight="bold" />
+              </button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleStart}
-            disabled={!subject.trim()}
-            className="w-full py-4 rounded-full bg-accent text-[var(--on-accent)] font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-accent/25 flex items-center justify-center gap-2"
-          >
-            <Play size={16} fill="currentColor" /> Start Focus Session
-          </motion.button>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="rounded-[36px] p-8 text-center liquid-glass border border-[var(--card-border)] text-[var(--text-primary)] shadow-sm space-y-6 relative overflow-hidden"
-        >
-          <div className="space-y-1 relative z-10">
-            <span className="rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold inline-block shadow-xs text-[var(--accent-text)]">
-              {subject} {topic ? `· ${topic}` : ''}
+              <button
+                type="button"
+                onClick={handleFinish}
+                className="px-5 h-12 rounded-full bg-emerald-500 text-black font-bold text-sm flex items-center gap-1.5 shadow-lg active:scale-95 transition-transform cursor-pointer"
+              >
+                <Check size={18} weight="bold" />
+                <span>Save Session</span>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Subject & Topic Details Inset */}
+      <GroupedList header="SESSION DETAILS">
+        {availableSubjects.length > 0 && (
+          <div className="p-3 border-b border-white/8">
+            <span className="text-[11px] font-bold text-white/50 block mb-2 uppercase tracking-wider">
+              Select Subject
             </span>
-            <p className="text-[11px] font-bold uppercase tracking-wider opacity-75 font-mono pt-2">
-              {timerState === 'running' ? 'Focus Session Active' : 'Session Paused'}
-            </p>
+            <div className="flex flex-wrap gap-2">
+              {availableSubjects.map((sub) => (
+                <button
+                  key={sub}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setSubject(sub);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    subject === sub
+                      ? 'bg-[#64D2FF] text-black font-bold shadow-md'
+                      : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                  }`}
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
           </div>
+        )}
 
-          <RunningTimerDisplay
-            isRunning={timerState === 'running'}
-            lastStartTimestamp={lastStartTimestamp}
-            accumulatedSeconds={accumulatedSeconds}
+        <div className="p-3 space-y-3">
+          <TextField
+            label="Subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="e.g. Mathematics"
           />
+          <TextField
+            label="Topic / Chapter"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="e.g. Differential Equations"
+          />
+        </div>
+      </GroupedList>
 
-          <div className="flex items-center justify-center gap-4 pt-2 relative z-10">
-            {timerState === 'running' ? (
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={handlePause}
-                className="w-16 h-16 rounded-[24px] bg-white dark:bg-white/10 border border-[var(--card-border)] text-[var(--accent-text)] flex items-center justify-center transition-colors shadow-sm"
-                title="Pause"
-              >
-                <Pause size={24} fill="currentColor" />
-              </motion.button>
-            ) : (
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={handleResume}
-                className="w-16 h-16 rounded-[24px] bg-accent text-[var(--on-accent)] flex items-center justify-center transition-colors shadow-md shadow-accent/25"
-                title="Resume"
-              >
-                <Play size={24} fill="currentColor" />
-              </motion.button>
-            )}
-
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={handleStop}
-              className="w-16 h-16 rounded-[24px] bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-md shadow-rose-500/25"
-              title="Stop & Save"
-            >
-              <Square size={22} fill="currentColor" />
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={handleCancel}
-              className="w-12 h-12 rounded-[20px] bg-white/60 dark:bg-white/5 border border-black/5 dark:border-white/10 text-secondary-light dark:text-secondary-dark flex items-center justify-center transition-colors"
-              title="Reset"
-            >
-              <RotateCcw size={18} />
-            </motion.button>
-          </div>
-        </motion.div>
+      {/* Toast Feedback */}
+      {feedback && (
+        <div className="fixed bottom-20 inset-x-4 max-w-xs mx-auto p-3 rounded-2xl bg-white text-black font-semibold text-xs shadow-2xl flex items-center justify-center gap-2 z-50 animate-bounce">
+          <Check size={16} weight="bold" />
+          <span>{feedback}</span>
+        </div>
       )}
     </div>
   );

@@ -19,16 +19,16 @@ import {
 import type { OutingExpense, OutingSettlement, OutingPerson } from '../types.ts';
 
 function runTests() {
-  console.log('🧪 Starting Outing Expenses Mathematical Invariant Tests...\n');
+  console.log('[Test] Starting Outing Expenses Mathematical Invariant Tests...\n');
   let passed = 0;
   let failed = 0;
 
   function assert(condition: boolean, testName: string) {
     if (condition) {
-      console.log(`✅ PASS: ${testName}`);
+      console.log(`[PASS] ${testName}`);
       passed++;
     } else {
-      console.error(`❌ FAIL: ${testName}`);
+      console.error(`[FAIL] ${testName}`);
       failed++;
     }
   }

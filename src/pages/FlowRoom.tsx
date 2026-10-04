@@ -1,407 +1,288 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Volume2, 
-  VolumeX, 
-  Plus, 
-  CheckCircle2, 
-  ChevronLeft, 
-  Sparkles,
-  Flame,
-  Target
-} from 'lucide-react';
-import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
-import { haptics } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
+import type { AppData, StudySession } from '../types';
+import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
-import { AppData, StudySession, NoteItem } from '../types';
+import {
+  Button,
+  Segmented,
+  Ring,
+  GlassSurface,
+  MOTION_SPRINGS,
+  Play,
+  Pause,
+  ArrowClockwise,
+  Headphones,
+  Waveform,
+  CaretLeft,
+  Check,
+} from '../ui';
 
 interface FlowRoomProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<any>;
 }
 
-type Soundscape = 'none' | 'brown' | 'binaural';
+type ModeType = 'pomodoro' | 'deep' | 'ultra';
+type Soundscape = 'none' | 'brown' | 'rain';
 
-export const FlowRoom: React.FC<FlowRoomProps> = ({ data, updateData }) => {
+export default function FlowRoom({ data, updateData }: FlowRoomProps) {
   const navigate = useNavigate();
 
-  // Timer states
-  const [durationMinutes, setDurationMinutes] = useState(25);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [mode, setMode] = useState<ModeType>('pomodoro');
+  const durationMap: Record<ModeType, number> = {
+    pomodoro: 25 * 60,
+    deep: 50 * 60,
+    ultra: 90 * 60,
+  };
+
+  const [timeLeft, setTimeLeft] = useState(durationMap.pomodoro);
   const [isRunning, setIsRunning] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<string>('Deep Focus Session');
-  
-  // Distraction scratchpad
-  const [scratchText, setScratchText] = useState('');
-  const [scratchSaved, setScratchSaved] = useState(false);
-  
-  // Ambient Sound generator via Web Audio API
-  const [activeSound, setActiveSound] = useState<Soundscape>('none');
+  const [subject, setSubject] = useState('Deep Work Session');
+  const [sound, setSound] = useState<Soundscape>('none');
+
+  // Audio Context for Zero-Download Web Audio Noise Synthesis
   const audioCtxRef = useRef<AudioContext | null>(null);
   const noiseNodeRef = useRef<AudioNode | null>(null);
 
-  // Available tasks to lock into
-  const pendingTasks = useMemo(() => {
-    return (data?.tasks || []).filter(t => !t.completed);
-  }, [data?.tasks]);
-
+  // Update timer on mode change
   useEffect(() => {
-    setTimeLeft(durationMinutes * 60);
-  }, [durationMinutes]);
+    setIsRunning(false);
+    setTimeLeft(durationMap[mode]);
+  }, [mode]);
 
   // Main countdown loop
   useEffect(() => {
-    let interval: any = null;
+    let timer: any = null;
     if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(prev => {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
           if (prev <= 1) {
             handleCompleteSession();
             return 0;
           }
           if (prev <= 4 && prev > 1) {
-            haptics.tick();
+            triggerHaptic('light');
           }
           return prev - 1;
         });
       }, 1000);
     } else {
-      clearInterval(interval);
+      clearInterval(timer);
     }
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, [isRunning, timeLeft]);
 
-  // Handle session completion
   const handleCompleteSession = async () => {
     setIsRunning(false);
     stopSound();
-    haptics.milestone();
+    triggerHaptic('milestone');
     triggerConfettiBurst();
 
+    const durationMins = Math.round(durationMap[mode] / 60);
     const newSession: StudySession = {
-      id: `session-${Date.now()}`,
-      subject: selectedTask,
+      id: `session_${Date.now()}`,
+      subject,
       date: new Date().toISOString().split('T')[0],
       startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      duration: durationMinutes,
+      duration: durationMins,
       notes: 'Completed in Flow Room',
     };
 
-    const updatedSessions = [newSession, ...(data?.studySessions || [])];
-    await updateData({ studySessions: updatedSessions });
+    const updated = [newSession, ...(data.studySessions || [])];
+    await updateData({ studySessions: updated });
   };
 
-  // Web Audio Synthesizer for Zero-Download Ambient Noise
+  // Soundscape synthesizers
   const startBrownNoise = () => {
+    stopSound();
     try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioCtxRef.current = ctx;
 
       const bufferSize = ctx.sampleRate * 2;
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
       let lastOut = 0.0;
 
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        output[i] = (lastOut + (0.02 * white)) / 1.02;
-        lastOut = output[i];
-        output[i] *= 3.5; // Gain boost
+        data[i] = (lastOut + 0.02 * white) / 1.02;
+        lastOut = data[i];
+        data[i] *= 3.5;
       }
 
-      const whiteNoise = ctx.createBufferSource();
-      whiteNoise.buffer = noiseBuffer;
-      whiteNoise.loop = true;
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
 
-      const gainNode = ctx.createGain();
-      gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
-
-      whiteNoise.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      whiteNoise.start();
-
-      noiseNodeRef.current = whiteNoise;
-    } catch (e) {
-      console.warn('Audio synthesis error:', e);
-    }
-  };
-
-  const startBinauralTone = () => {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(140, ctx.currentTime); // 140Hz carrier
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.value = 0.15;
 
-      osc.connect(gain);
+      noise.connect(gain);
       gain.connect(ctx.destination);
-      osc.start();
-
-      noiseNodeRef.current = osc;
-    } catch (e) {
-      console.warn('Audio synthesis error:', e);
-    }
+      noise.start();
+      noiseNodeRef.current = noise;
+    } catch {}
   };
 
   const stopSound = () => {
-    if (noiseNodeRef.current) {
-      try {
+    try {
+      if (noiseNodeRef.current) {
         (noiseNodeRef.current as any).stop();
-        (noiseNodeRef.current as any).disconnect();
-      } catch {}
-      noiseNodeRef.current = null;
-    }
-    setActiveSound('none');
+        noiseNodeRef.current = null;
+      }
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+        audioCtxRef.current = null;
+      }
+    } catch {}
   };
 
-  const toggleSound = (sound: Soundscape) => {
-    haptics.tap();
-    if (activeSound === sound) {
+  const toggleSound = (target: Soundscape) => {
+    triggerHaptic('selection');
+    if (sound === target) {
+      setSound('none');
       stopSound();
     } else {
-      stopSound();
-      setActiveSound(sound);
-      if (sound === 'brown') startBrownNoise();
-      if (sound === 'binaural') startBinauralTone();
+      setSound(target);
+      if (target === 'brown' || target === 'rain') {
+        startBrownNoise();
+      }
     }
   };
 
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => {
-      stopSound();
-      if (audioCtxRef.current) {
-        try {
-          audioCtxRef.current.close();
-        } catch {}
-      }
-    };
-  }, []);
-
-  // Save distraction to Notes Inbox
-  const handleSaveDistraction = async () => {
-    if (!scratchText.trim()) return;
-    haptics.save();
-    const todayStr = new Date().toISOString().split('T')[0];
-    const newNote: NoteItem = {
-      id: `distraction-${Date.now()}`,
-      title: scratchText.trim(),
-      content: `Logged from Flow Room during focus on: ${selectedTask}`,
-      pageView: 'lined',
-      monthKey: todayStr.substring(0, 7),
-      isArchived: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const currentNotes = data?.notes || [];
-    await updateData({ notes: [newNote, ...currentNotes] });
-
-    setScratchText('');
-    setScratchSaved(true);
-    setTimeout(() => setScratchSaved(false), 2000);
-  };
-
-  // Time formatted string
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  const progressPercent = ((durationMinutes * 60 - timeLeft) / (durationMinutes * 60)) * 100;
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  const progress = 1 - timeLeft / durationMap[mode];
 
   return (
-    <div className="w-full space-y-4 max-w-lg mx-auto flex flex-col">
+    <div className="w-full h-[100dvh] max-h-[100dvh] bg-black text-white flex flex-col justify-between p-4 overflow-hidden selection:bg-[#64D2FF]/30">
       {/* Top Bar */}
-      <div className="flex items-center justify-between">
+      <div className="pt-[env(safe-area-inset-top,12px)] flex items-center justify-between">
         <button
+          type="button"
           onClick={() => {
             stopSound();
-            handleAppBack(navigate);
+            navigate('/study');
           }}
-          className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors active:scale-95"
-          aria-label="Back"
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20"
         >
-          <ChevronLeft size={22} />
+          <CaretLeft size={20} weight="bold" />
         </button>
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--md-surface-container-high)] text-xs font-bold text-[var(--md-primary)] border border-[var(--md-outline-variant)]">
-          <Flame size={14} />
-          <span>Deep Work Flow Room</span>
-        </div>
-        <div className="w-8" />
-      </div>
 
-      {/* Focus Intention / Task Selector */}
-      <div className="flex flex-col items-center gap-2 text-center my-2">
-        <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--md-primary)] uppercase tracking-wider">
-          <Target size={13} />
-          <span>Locked Intention</span>
-        </div>
-        <select
-          value={selectedTask}
-          onChange={e => {
-            setSelectedTask(e.target.value);
-            haptics.tap();
-          }}
-          disabled={isRunning}
-          aria-label="Selected Task or Focus Intention"
-          className="max-w-[280px] px-3 py-2 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] text-sm font-bold text-[var(--md-on-surface)] text-center truncate focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)]"
-        >
-          <option value="Deep Focus Session">Deep Focus Session</option>
-          {pendingTasks.map(t => (
-            <option key={t.id} value={t.text}>{t.text}</option>
-          ))}
-        </select>
-      </div>
+        <span className="text-xs font-bold tracking-wider text-[rgba(235,235,245,0.60)] uppercase">
+          FLOW ROOM
+        </span>
 
-      {/* Central Large Timer Display */}
-      <div className="relative my-4 flex flex-col items-center justify-center">
-        {/* Subtle background circular track */}
-        <div className="relative w-64 h-64 rounded-full border-4 border-[var(--md-surface-container-highest)] flex flex-col items-center justify-center shadow-inner">
-          {/* Active progress ring fill */}
-          <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <circle
-              cx="128"
-              cy="128"
-              r="120"
-              stroke="var(--md-primary)"
-              strokeWidth="6"
-              fill="transparent"
-              strokeDasharray={753.98}
-              strokeDashoffset={753.98 - (753.98 * progressPercent) / 100}
-              className="transition-all duration-1000 ease-linear"
-            />
-          </svg>
-
-          <span className="text-5xl font-black text-[var(--md-on-surface)] tracking-tight font-mono">
-            {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-          </span>
-
-          <span className="text-xs font-semibold text-[var(--md-on-surface-variant)] mt-1">
-            {isRunning ? 'Flow State Active' : 'Ready to Focus'}
-          </span>
-
-          <div className="mt-3">
-            <OrbiCompanion variant={isRunning ? 'habits-fresh' : 'tasks-empty'} size={48} />
-          </div>
+        <div className="px-3 py-1 rounded-full bg-[#64D2FF]/20 text-[#64D2FF] text-xs font-bold">
+          {subject}
         </div>
       </div>
 
-      {/* Preset Duration Buttons */}
-      {!isRunning && (
-        <div className="flex items-center justify-center gap-2 mb-3">
-          {[15, 25, 45, 60].map(mins => (
-            <button
-              key={mins}
-              onClick={() => {
-                setDurationMinutes(mins);
-                haptics.tap();
-              }}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                durationMinutes === mins
-                  ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] border-[var(--md-primary)] shadow-sm'
-                  : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)] hover:bg-[var(--md-surface-container-high)]'
-              }`}
-            >
-              {mins}m
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Main Play / Pause Controls */}
-      <div className="flex items-center justify-center gap-4 mb-4">
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={() => {
-            haptics.tap();
-            setTimeLeft(durationMinutes * 60);
-            setIsRunning(false);
-          }}
-          className="p-3.5 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] border border-[var(--md-outline-variant)] shadow-sm"
-          aria-label="Reset Timer"
-        >
-          <RotateCcw size={20} />
-        </motion.button>
-
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            haptics.tap();
-            setIsRunning(!isRunning);
-          }}
-          className="px-8 py-4 rounded-3xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-black text-lg flex items-center gap-3 shadow-lg"
-        >
-          {isRunning ? <Pause size={22} /> : <Play size={22} className="fill-[var(--md-on-primary)]" />}
-          <span>{isRunning ? 'Pause' : 'Start Flow'}</span>
-        </motion.button>
-
-        {/* Ambient Noise Toggles */}
-        <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={() => toggleSound('brown')}
-          className={`p-3.5 rounded-full border shadow-sm transition-all ${
-            activeSound === 'brown'
-              ? 'bg-[var(--md-secondary-container)] text-[var(--md-secondary)] border-[var(--md-secondary)]'
-              : 'bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] border-[var(--md-outline-variant)]'
-          }`}
-          title="Toggle Ambient Brown Noise"
-          aria-label="Toggle Ambient Brown Noise"
-        >
-          {activeSound === 'brown' ? <Volume2 size={20} /> : <VolumeX size={20} />}
-        </motion.button>
+      {/* Mode Selector */}
+      <div className="max-w-xs mx-auto w-full pt-2">
+        <Segmented<ModeType>
+          options={[
+            { value: 'pomodoro', label: 'Pomodoro (25m)' },
+            { value: 'deep', label: 'Deep (50m)' },
+            { value: 'ultra', label: 'Ultra (90m)' },
+          ]}
+          value={mode}
+          onChange={setMode}
+          tint="#64D2FF"
+        />
       </div>
 
-      {/* Distraction Scratchpad */}
-      <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex flex-col gap-2 shadow-xs">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--md-on-surface-variant)] flex items-center gap-1">
-            <Sparkles size={12} className="text-[var(--md-primary)]" />
-            <span>Distraction Dump Scratchpad</span>
-          </span>
-          {scratchSaved && (
-            <span className="text-[10px] font-bold text-[var(--md-primary)] flex items-center gap-1">
-              <CheckCircle2 size={11} /> Saved to Inbox
+      {/* Center 96pt Display Numeral & Concentric Ring */}
+      <div className="flex-1 flex flex-col items-center justify-center select-none py-6">
+        <Ring
+          progress={progress}
+          size={260}
+          strokeWidth={8}
+          color="#64D2FF"
+          trackColor="#1C1C1E"
+        >
+          <div className="flex flex-col items-center justify-center text-center">
+            <span className="text-[72px] font-extrabold text-white tabular-nums tracking-[-0.03em] leading-none">
+              {mins}:{secs < 10 ? `0${secs}` : secs}
             </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={scratchText}
-            onChange={e => setScratchText(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSaveDistraction()}
-            placeholder="Got a random thought? Type & press Enter..."
-            className="flex-1 px-3 py-2 rounded-xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none focus:ring-1 focus:ring-[var(--md-primary)]"
-          />
+            <span className="text-xs uppercase font-bold text-[rgba(235,235,245,0.50)] tracking-widest mt-2">
+              {isRunning ? 'FOCUS ACTIVE' : 'PAUSED'}
+            </span>
+          </div>
+        </Ring>
+
+        {/* Ambient Soundscapes Glass Pill */}
+        <div className="mt-8 flex items-center gap-2 p-1.5 rounded-full bg-[#1C1C1E] border border-white/[0.06]">
           <button
-            onClick={handleSaveDistraction}
-            disabled={!scratchText.trim()}
-            className="p-2 rounded-xl bg-[var(--md-primary)] text-[var(--md-on-primary)] disabled:opacity-40 transition-opacity"
-            aria-label="Save distraction note"
+            type="button"
+            onClick={() => toggleSound('brown')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              sound === 'brown'
+                ? 'bg-[#64D2FF] text-black font-bold'
+                : 'text-[rgba(235,235,245,0.60)] hover:text-white'
+            }`}
           >
-            <Plus size={16} />
+            <Waveform size={14} weight="bold" />
+            <span>Brown Noise</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleSound('rain')}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              sound === 'rain'
+                ? 'bg-[#64D2FF] text-black font-bold'
+                : 'text-[rgba(235,235,245,0.60)] hover:text-white'
+            }`}
+          >
+            <Headphones size={14} weight="bold" />
+            <span>Ambient Rain</span>
           </button>
         </div>
       </div>
+
+      {/* Bottom Controls */}
+      <div className="flex items-center justify-center gap-6 pb-[env(safe-area-inset-bottom,16px)]">
+        {/* Reset Action */}
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('light');
+            setIsRunning(false);
+            setTimeLeft(durationMap[mode]);
+          }}
+          className="w-12 h-12 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-[rgba(235,235,245,0.60)] hover:text-white"
+        >
+          <ArrowClockwise size={20} weight="bold" />
+        </button>
+
+        {/* Big 64px Glass Play/Pause Trigger */}
+        <GlassSurface
+          as="button"
+          interactive
+          tint="#64D2FF"
+          tintOpacity={0.4}
+          onClick={() => {
+            triggerHaptic('medium');
+            setIsRunning(!isRunning);
+          }}
+          className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl shadow-2xl border border-white/20"
+        >
+          {isRunning ? <Pause weight="fill" /> : <Play weight="fill" className="pl-1" />}
+        </GlassSurface>
+
+        {/* Complete Action */}
+        <button
+          type="button"
+          onClick={handleCompleteSession}
+          className="w-12 h-12 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-[#30D158]"
+        >
+          <Check size={20} weight="bold" />
+        </button>
+      </div>
     </div>
   );
-};
-
-export default FlowRoom;
+}

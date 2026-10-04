@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Fingerprint, Lock, ShieldAlert } from 'lucide-react';
+import { Fingerprint, LockKey, WarningCircle, ShieldCheck } from '@phosphor-icons/react';
 import {
   getSecurityConfig,
   isAppLocked,
@@ -68,42 +68,42 @@ export default function AppLockOverlay() {
   }
 
   return (
-    <div className="fixed inset-0 z-[99999] bg-[#F8F9FA]/98 dark:bg-[#090A0D]/98 flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden">
-      {/* Ambient Theme Radial Glows (Zero-cost radial gradients) */}
+    <div className="fixed inset-0 z-[99999] bg-[#000000]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden font-sans">
+      {/* Ambient iOS 26 Glow */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, var(--accent) 0%, transparent 70%)', opacity: 0.15 }}
+        style={{ background: 'radial-gradient(circle, #0A84FF 0%, transparent 70%)', opacity: 0.18 }}
       />
       <div
         className="absolute bottom-12 right-12 w-64 h-64 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #A855F7 0%, transparent 70%)', opacity: 0.12 }}
+        style={{ background: 'radial-gradient(circle, #BF5AF2 0%, transparent 70%)', opacity: 0.14 }}
       />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.94, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative z-10 max-w-sm w-full flex flex-col items-center text-center space-y-5"
+        className="relative z-10 max-w-sm w-full flex flex-col items-center text-center space-y-6"
       >
         {/* Pulsing Fingerprint Icon */}
         <motion.div
-          animate={{ scale: [1, 1.04, 1] }}
+          animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-          className="relative w-24 h-24 rounded-[32px] bg-accent/15 text-accent border border-accent/25 flex items-center justify-center shadow-xl cursor-pointer"
+          className="relative w-24 h-24 rounded-[30px] bg-[#0A84FF]/15 text-[#0A84FF] border border-[#0A84FF]/30 flex items-center justify-center shadow-2xl cursor-pointer active:scale-95 transition-transform"
           onClick={triggerAuth}
         >
-          <Fingerprint size={48} strokeWidth={2} />
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-surface-light dark:bg-[#1A1B1F] border border-border-light dark:border-border-dark flex items-center justify-center text-primary-light dark:text-primary-dark shadow-sm">
-            <Lock size={14} strokeWidth={2.4} />
+          <Fingerprint size={48} weight="duotone" />
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-white shadow-md">
+            <LockKey size={14} weight="bold" />
           </div>
         </motion.div>
 
         {/* Title and Descriptions */}
         <div className="space-y-1.5">
-          <h2 className="text-2xl font-black text-primary-light dark:text-primary-dark font-sans tracking-tight">
+          <h2 className="text-2xl font-bold text-white tracking-tight">
             LifeOS Protected
           </h2>
-          <p className="text-xs sm:text-sm text-secondary-light dark:text-secondary-dark font-medium max-w-xs mx-auto leading-relaxed">
-            Touch the fingerprint sensor or unlock using your phone's screen lock
+          <p className="text-xs sm:text-sm text-[#8E8E93] font-medium max-w-xs mx-auto leading-relaxed">
+            Touch fingerprint sensor or authenticate with your device screen lock
           </p>
         </div>
 
@@ -112,9 +112,9 @@ export default function AppLockOverlay() {
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full py-2.5 px-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-semibold flex items-center justify-center gap-1.5 leading-tight"
+            className="w-full py-2.5 px-3.5 rounded-2xl bg-[#FF453A]/15 border border-[#FF453A]/30 text-[#FF453A] text-xs font-semibold flex items-center justify-center gap-2 leading-tight"
           >
-            <ShieldAlert size={15} className="shrink-0" />
+            <WarningCircle size={16} weight="fill" className="shrink-0" />
             <span>{errorMessage}</span>
           </motion.div>
         )}
@@ -124,18 +124,17 @@ export default function AppLockOverlay() {
           whileTap={{ scale: 0.96 }}
           onClick={triggerAuth}
           disabled={isAuthenticating}
-          className="w-full py-3.5 px-6 rounded-2xl bg-accent text-white font-bold text-sm shadow-lg shadow-accent/25 hover:shadow-accent/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5"
+          className="w-full py-3.5 px-6 rounded-2xl bg-[#0A84FF] text-white font-semibold text-sm shadow-lg shadow-[#0A84FF]/25 hover:bg-[#0A84FF]/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
         >
-          <Fingerprint size={18} />
-          <span>{isAuthenticating ? 'Waiting for phone lock...' : 'Unlock with Phone Lock'}</span>
+          <Fingerprint size={18} weight="bold" />
+          <span>{isAuthenticating ? 'Authenticating...' : 'Unlock with Device'}</span>
         </motion.button>
       </motion.div>
 
       {/* Footer Branding */}
-      <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
-        <p className="text-[11px] font-semibold tracking-wider uppercase text-muted-light dark:text-muted-dark opacity-60">
-          Hardware Protected
-        </p>
+      <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none flex items-center justify-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase text-[#8E8E93]/60">
+        <ShieldCheck size={14} weight="bold" />
+        <span>Hardware Protected</span>
       </div>
     </div>
   );

@@ -824,7 +824,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             {/* Try Interactive Action in Mockup */}
             <div className="pt-2 text-xs font-bold text-zinc-400 flex items-center gap-1.5">
               <Sparkles size={14} style={{ color: currentMod.accent }} />
-              <span>Try the live interactive controls on the right phone frame 👉</span>
+              <span>Try the live interactive controls on the right phone frame</span>
             </div>
           </div>
 
@@ -948,7 +948,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                         </div>
                       </div>
                       <div className="text-[10px] text-blue-400 font-semibold flex items-center justify-center gap-1">
-                        <span>💧 Water: 2.8L / 3.5L Target</span>
+                        <span>Water: 2.8L / 3.5L Target</span>
                       </div>
                     </div>
                   )}

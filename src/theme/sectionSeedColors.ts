@@ -140,40 +140,22 @@ export function getM3ThemeForSection(
   const sourceArgb = argbFromHex(seedHex);
   const theme = themeFromSourceColor(sourceArgb);
 
-  const rawScheme = isDark ? theme.schemes.dark : theme.schemes.light;
+  const rawScheme = theme.schemes.dark;
   const neutral = theme.palettes.neutral;
 
-  const baseLight = '#FAF8F8';
-  const baseDark = '#111318';
-  const sceneBg = isDark ? blendHex(baseDark, seedHex, 0.04) : blendHex(baseLight, seedHex, 0.03);
-  const onSceneBg = isDark ? '#F2F3F5' : '#1E2024';
+  const sceneBg = '#000000';
+  const onSceneBg = '#FFFFFF';
 
-  let surfaceContainerLowest: string;
-  let surfaceContainerLow: string;
-  let surfaceContainer: string;
-  let surfaceContainerHigh: string;
-  let surfaceContainerHighest: string;
-  let surface: string;
-  let onSurface = isDark ? '#F2F3F5' : '#1E2024';
+  const surface = '#1C1C1E';
+  const surfaceContainerLowest = '#000000';
+  const surfaceContainerLow = '#1C1C1E';
+  const surfaceContainer = '#2C2C2E';
+  const surfaceContainerHigh = '#3A3A3C';
+  const surfaceContainerHighest = '#48484A';
+  const onSurface = '#FFFFFF';
 
-  if (isDark) {
-    surface = hexFromArgb(neutral.tone(14));
-    surfaceContainerLowest = hexFromArgb(neutral.tone(10));
-    surfaceContainerLow = hexFromArgb(neutral.tone(14));
-    surfaceContainer = hexFromArgb(neutral.tone(16));
-    surfaceContainerHigh = hexFromArgb(neutral.tone(18));
-    surfaceContainerHighest = hexFromArgb(neutral.tone(20));
-  } else {
-    surface = hexFromArgb(neutral.tone(98));
-    surfaceContainerLowest = '#FFFFFF';
-    surfaceContainerLow = hexFromArgb(neutral.tone(97));
-    surfaceContainer = hexFromArgb(neutral.tone(96));
-    surfaceContainerHigh = hexFromArgb(neutral.tone(94));
-    surfaceContainerHighest = hexFromArgb(neutral.tone(92));
-  }
-
-  const surfaceDim = hexFromArgb(isDark ? neutral.tone(10) : neutral.tone(87));
-  const surfaceBright = hexFromArgb(isDark ? neutral.tone(22) : neutral.tone(98));
+  const surfaceDim = '#121214';
+  const surfaceBright = '#2C2C2E';
 
   const scheme: M3ColorScheme = {
     primary: hexFromArgb(rawScheme.primary),
@@ -194,8 +176,8 @@ export function getM3ThemeForSection(
     onErrorContainer: hexFromArgb(rawScheme.onErrorContainer),
     surface,
     onSurface,
-    surfaceVariant: hexFromArgb(rawScheme.surfaceVariant),
-    onSurfaceVariant: isDark ? '#B8BBC3' : '#575B66',
+    surfaceVariant: '#2C2C2E',
+    onSurfaceVariant: '#8E8E93',
     surfaceDim,
     surfaceBright,
     surfaceContainerLowest,
@@ -203,13 +185,13 @@ export function getM3ThemeForSection(
     surfaceContainer,
     surfaceContainerHigh,
     surfaceContainerHighest,
-    outline: isDark ? '#858994' : '#808593',
-    outlineVariant: hexFromArgb(rawScheme.outlineVariant),
-    inverseSurface: hexFromArgb(rawScheme.inverseSurface),
-    inverseOnSurface: hexFromArgb(rawScheme.inverseOnSurface),
+    outline: '#38383A',
+    outlineVariant: '#2C2C2E',
+    inverseSurface: '#FFFFFF',
+    inverseOnSurface: '#000000',
     inversePrimary: hexFromArgb(rawScheme.inversePrimary),
-    shadow: hexFromArgb(rawScheme.shadow),
-    scrim: hexFromArgb(rawScheme.scrim),
+    shadow: '#000000',
+    scrim: '#000000',
     sceneBg,
     onSceneBg,
     accentBlob: seedHex,
@@ -219,7 +201,7 @@ export function getM3ThemeForSection(
   return {
     section,
     seedHex,
-    isDark,
+    isDark: true,
     scheme,
   };
 }

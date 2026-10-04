@@ -1,31 +1,38 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+/**
+ * LifeOS — ShoppingListDetail Component (iOS 26 Liquid Glass)
+ */
+
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
+  CaretLeft,
   Plus,
-  Trash2,
-  Bookmark,
-  RotateCcw,
-  CheckCircle2,
-  Pencil,
+  Trash,
+  BookmarkSimple,
+  ArrowCounterClockwise,
+  PencilSimple,
   Check,
   X,
-  Sparkles,
-  ChevronDown,
-  ChevronUp
-} from 'lucide-react';
-import { format } from 'date-fns';
+  CaretDown,
+  CaretUp,
+  Circle,
+  CheckCircle,
+} from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { handleAppBack } from '../utils/backNavigation';
-import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { Modal } from '../components/BottomSheet';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import {
   generateShoppingId,
   duplicateAsTemplate,
   calculateListProgress,
 } from '../utils/shoppingStorage';
+import { Toolbar } from '../ui/navigation/Toolbar';
+import { Button } from '../ui/controls/Button';
+import { TextField } from '../ui/controls/TextField';
+import { ProgressBar } from '../ui/visualization/ProgressBar';
+import { Sheet } from '../ui/feedback/Sheet';
+import { Badge } from '../ui/controls/Badge';
 import type { AppData, ShoppingList, ShoppingItem } from '../types';
 
 interface ShoppingListDetailProps {
@@ -52,7 +59,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
 
   const ITEM_DRAFT_KEY = `lifeos_shopping_item_draft_${listId}`;
 
-  // Restore drafted item if user switched interfaces
+  // Restore drafted item
   useEffect(() => {
     try {
       const saved = localStorage.getItem(ITEM_DRAFT_KEY);
@@ -77,24 +84,17 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
   const [templateName, setTemplateName] = useState('');
 
-  // Delete Item Confirmation Modal
-  const [itemToDelete, setItemToDelete] = useState<ShoppingItem | null>(null);
-
   // Completed items collapsible
   const [showCompletedSection, setShowCompletedSection] = useState(true);
 
-  // If list not found, show not found screen
   if (!currentList) {
     return (
-      <div className="w-full max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-        <h2 className="text-xl font-heading font-bold text-[var(--text-primary)]">List Not Found</h2>
-        <p className="text-sm text-[var(--text-secondary)]">This shopping list may have been removed.</p>
-        <button
-          onClick={() => navigate('/shopping')}
-          className="px-5 py-2.5 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold"
-        >
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <h2 className="text-lg font-bold text-white">List Not Found</h2>
+        <p className="text-xs text-[#8E8E93]">This shopping list may have been removed.</p>
+        <Button variant="glass" onClick={() => navigate('/shopping')}>
           Back to Shopping Lists
-        </button>
+        </Button>
       </div>
     );
   }
@@ -138,7 +138,6 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
     const nextItems = [...currentList.items, newItem];
     await updateCurrentList({ items: nextItems });
 
-    // Clear inputs and keep focus on item name for rapid entry
     try {
       localStorage.removeItem(ITEM_DRAFT_KEY);
     } catch {}
@@ -160,7 +159,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
     await updateCurrentList({ items: nextItems });
   };
 
-  // Delete item with M3 confirmation & delete symbol animation
+  // Delete item with confirmation
   const handleDeleteItem = (itemId: string, name?: string) => {
     const itemTarget = currentList.items.find(it => it.id === itemId);
     const displayName = name || itemTarget?.name || 'Item';
@@ -173,12 +172,11 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
       onConfirm: async () => {
         const nextItems = currentList.items.filter(it => it.id !== itemId);
         await updateCurrentList({ items: nextItems });
-        setItemToDelete(null);
       },
     });
   };
 
-  // Clear all checked items with M3 confirmation
+  // Clear all checked items
   const handleClearChecked = () => {
     if (completedItems.length === 0) return;
 
@@ -220,339 +218,316 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-5 pb-6 space-y-5 animate-fade-in">
+    <div className="min-h-screen bg-black text-white pb-32">
       {/* ── Top Navigation Bar ── */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={() => {
-            handleAppBack(navigate);
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-all active:scale-95"
-        >
-          <ArrowLeft size={16} />
-          <span>Back</span>
-        </button>
+      <Toolbar
+        leading={
+          <button
+            onClick={() => handleAppBack(navigate)}
+            className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+          >
+            <CaretLeft size={22} weight="bold" />
+          </button>
+        }
+        center={
+          <span className="text-sm font-semibold text-white truncate max-w-[180px]">
+            {currentList.name}
+          </span>
+        }
+        trailing={
+          <div className="flex items-center gap-1">
+            {!currentList.isTemplate && (
+              <button
+                onClick={() => {
+                  triggerHaptic('light');
+                  setTemplateName(`${currentList.name} (Template)`);
+                  setShowSaveTemplateModal(true);
+                }}
+                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+                title="Save Template"
+              >
+                <BookmarkSimple size={20} />
+              </button>
+            )}
+            {completedItems.length > 0 && (
+              <button
+                onClick={handleClearChecked}
+                className="p-2 rounded-lg text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                title="Clear Done"
+              >
+                <ArrowCounterClockwise size={20} />
+              </button>
+            )}
+          </div>
+        }
+      />
 
-        <div className="flex items-center gap-2">
-          {!currentList.isTemplate && (
+      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
+        {/* ── Title & Progress Card ── */}
+        <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              {currentList.isTemplate && (
+                <div className="mb-1.5">
+                  <Badge label="TEMPLATE" color="#BF5AF2" />
+                </div>
+              )}
+
+              {isRenaming ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveRename();
+                      if (e.key === 'Escape') setIsRenaming(false);
+                    }}
+                    className="w-full text-xl font-bold text-white bg-transparent border-b border-[#FF375F] focus:outline-none pb-0.5"
+                  />
+                  <button
+                    onClick={handleSaveRename}
+                    className="p-1.5 rounded-lg bg-[#FF375F] text-white"
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    onClick={() => setIsRenaming(false)}
+                    className="p-1.5 rounded-lg text-[#8E8E93] hover:bg-white/10"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="flex items-center gap-2 group cursor-pointer"
+                  onClick={() => {
+                    setEditedTitle(currentList.name);
+                    setIsRenaming(true);
+                  }}
+                >
+                  <h1 className="text-xl font-bold tracking-tight text-white truncate">
+                    {currentList.name}
+                  </h1>
+                  <PencilSimple size={14} className="text-[#8E8E93] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
+
+            <div className="text-right shrink-0">
+              <span className="text-base font-bold text-white">
+                {checkedCount}/{totalCount}
+              </span>
+              <span className="text-xs text-[#8E8E93] block">
+                checked
+              </span>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <ProgressBar
+            progress={percent / 100}
+            color={percent === 100 ? '#30D158' : '#FF375F'}
+            height={6}
+          />
+        </div>
+
+        {/* ── Quick-Add Bar ── */}
+        <div className="p-2 rounded-2xl bg-[#1C1C1E] border border-white/[0.08]">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleAddItem();
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              ref={itemInputRef}
+              type="text"
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+              placeholder="Add item (e.g. Milk, Apples)..."
+              className="flex-1 min-w-0 px-3 py-2 bg-transparent text-sm text-white placeholder:text-[#636366] focus:outline-none"
+            />
+
+            <input
+              type="text"
+              value={itemQuantity}
+              onChange={(e) => setItemQuantity(e.target.value)}
+              placeholder="Qty"
+              className="w-20 px-2 py-1.5 bg-[#2C2C2E] rounded-xl text-xs text-white placeholder:text-[#636366] focus:outline-none text-center"
+            />
+
+            <Button
+              type="submit"
+              size="sm"
+              variant="prominent"
+              tint="#FF375F"
+              disabled={!itemName.trim()}
+              icon={<Plus size={16} weight="bold" />}
+            >
+              Add
+            </Button>
+          </form>
+        </div>
+
+        {/* ── Active Items List ── */}
+        <div className="space-y-2">
+          {totalCount === 0 && (
+            <div className="p-8 text-center rounded-2xl border border-dashed border-white/[0.1] text-[#8E8E93] text-xs space-y-1">
+              <p className="font-semibold text-sm text-white">List is empty</p>
+              <p>Type above to rapidly add items. Press Enter to add without losing focus.</p>
+            </div>
+          )}
+
+          <AnimatePresence initial={false}>
+            {activeItems.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.18 }}
+                className="p-3.5 rounded-2xl border border-white/[0.08] bg-[#1C1C1E] flex items-center justify-between gap-3 select-none"
+              >
+                <div
+                  className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                  onClick={() => handleToggleItem(item.id)}
+                >
+                  <Circle size={22} weight="bold" className="text-[#8E8E93] shrink-0 hover:text-[#FF375F] transition-colors" />
+
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-white block truncate">
+                      {item.name}
+                    </span>
+                    {item.notes && (
+                      <span className="text-xs text-[#8E8E93] block truncate">
+                        {item.notes}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {item.quantity && (
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#2C2C2E] text-[#8E8E93] font-medium border border-white/[0.04]">
+                      {item.quantity}
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteItem(item.id)}
+                    className="p-1.5 rounded-lg text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                    title="Remove Item"
+                  >
+                    <Trash size={15} />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Completed Items Section ── */}
+        {completedItems.length > 0 && (
+          <div className="pt-2 space-y-2">
             <button
               onClick={() => {
                 triggerHaptic('light');
-                setTemplateName(`${currentList.name} (Template)`);
-                setShowSaveTemplateModal(true);
+                setShowCompletedSection((v) => !v);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)] hover:opacity-90 active:scale-95 transition-all"
-              title="Save as Template"
+              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#8E8E93] hover:text-white transition-colors px-1 select-none"
             >
-              <Bookmark size={13} />
-              <span>Save as Template</span>
+              <span>Completed ({completedItems.length})</span>
+              {showCompletedSection ? <CaretUp size={14} /> : <CaretDown size={14} />}
             </button>
-          )}
 
-          {completedItems.length > 0 && (
-            <button
-              onClick={handleClearChecked}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all active:scale-95"
-              title="Clear all checked items"
-            >
-              <RotateCcw size={13} />
-              <span>Clear Done</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Title & Progress Card ── */}
-      <div className="card p-5 sm:p-6 rounded-[28px] liquid-glass border border-[var(--card-border)] shadow-xs space-y-4">
-        {/* Title row */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            {currentList.isTemplate && (
-              <span className="inline-block px-2 py-0.5 mb-2 rounded-full text-[9px] font-tag font-bold tracking-wider uppercase bg-[var(--pill-active-bg)] text-[var(--pill-active-text)] border border-[var(--card-border)]">
-                TEMPLATE
-              </span>
-            )}
-
-            {isRenaming ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  autoFocus
-                  value={editedTitle}
-                  onChange={e => setEditedTitle(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleSaveRename();
-                    if (e.key === 'Escape') setIsRenaming(false);
-                  }}
-                  className="w-full text-xl sm:text-2xl font-heading font-bold text-[var(--text-primary)] bg-transparent border-b-2 border-[var(--accent-primary)] focus:outline-none pb-0.5"
-                />
-                <button
-                  onClick={handleSaveRename}
-                  className="p-1.5 rounded-xl bg-[var(--accent-primary)] text-white hover:opacity-90"
+            <AnimatePresence initial={false}>
+              {showCompletedSection && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2 overflow-hidden"
                 >
-                  <Check size={16} />
-                </button>
-                <button
-                  onClick={() => setIsRenaming(false)}
-                  className="p-1.5 rounded-xl text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 group cursor-pointer" onClick={() => {
-                setEditedTitle(currentList.name);
-                setIsRenaming(true);
-              }}>
-                <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-[var(--text-primary)] truncate">
-                  {currentList.name}
-                </h1>
-                <Pencil size={14} className="text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
-          </div>
-
-          <div className="text-right flex-shrink-0">
-            <span className="text-lg sm:text-xl font-stat font-bold text-[var(--text-primary)]">
-              {checkedCount}/{totalCount}
-            </span>
-            <span className="text-xs text-[var(--text-muted)] block font-stat">
-              checked
-            </span>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-2 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
-          <div
-            className="h-full rounded-full bg-[var(--accent-primary)] transition-all duration-300"
-            style={{ width: `${percent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* ── Quick-Add Bar (Focus Retaining for Rapid Entry) ── */}
-      <div className="card p-2 sm:p-2.5 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-xs">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleAddItem();
-          }}
-          className="flex items-center gap-2"
-        >
-          {/* Item Name Input */}
-          <input
-            ref={itemInputRef}
-            type="text"
-            value={itemName}
-            onChange={e => setItemName(e.target.value)}
-            placeholder="Add item (e.g. Milk, Bananas)..."
-            className="flex-1 min-w-0 px-3.5 py-2.5 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-          />
-
-          {/* Quantity Input (Optional compact) */}
-          <input
-            type="text"
-            value={itemQuantity}
-            onChange={e => setItemQuantity(e.target.value)}
-            placeholder="Qty (optional)"
-            className="w-24 sm:w-28 px-2.5 py-2 bg-black/5 dark:bg-white/5 rounded-xl text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] text-center"
-          />
-
-          {/* Add Button */}
-          <button
-            type="submit"
-            disabled={!itemName.trim()}
-            className="px-4 py-2.5 rounded-2xl bg-[var(--accent-primary)] text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-95 active:scale-95 transition-all flex items-center gap-1 shrink-0"
-          >
-            <Plus size={15} strokeWidth={3} />
-            <span className="hidden sm:inline">Add</span>
-          </button>
-        </form>
-      </div>
-
-      {/* ── Active Items List ── */}
-      <div className="space-y-2">
-        {totalCount === 0 && (
-          <div className="p-8 text-center rounded-[24px] border border-dashed border-[var(--card-border)] text-[var(--text-muted)] text-xs space-y-1">
-            <p className="font-semibold text-sm text-[var(--text-secondary)]">List is empty</p>
-            <p>Type above to rapidly add items. Press Enter to add without losing focus.</p>
-          </div>
-        )}
-
-        <AnimatePresence initial={false}>
-          {activeItems.map(item => (
-            <motion.div
-              key={item.id}
-              layout
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.18 }}
-              className="card p-3.5 rounded-[22px] border border-[var(--card-border)] bg-[var(--card-surface)]/90 flex items-center justify-between gap-3 shadow-xs select-none"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <InteractiveCheckbox
-                  checked={item.checked}
-                  onChange={() => handleToggleItem(item.id)}
-                  size={24}
-                />
-
-                <div
-                  className="flex-1 min-w-0 cursor-pointer"
-                  onClick={() => handleToggleItem(item.id)}
-                >
-                  <span className="text-sm font-semibold text-[var(--text-primary)] block truncate font-sans">
-                    {item.name}
-                  </span>
-                  {item.notes && (
-                    <span className="text-[11px] text-[var(--text-muted)] block truncate font-sans">
-                      {item.notes}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {item.quantity && (
-                  <span className="font-tag text-[10.5px] px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-[var(--text-secondary)] font-medium border border-[var(--card-border)]/60">
-                    {item.quantity}
-                  </span>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => handleDeleteItem(item.id)}
-                  className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                  title="Remove Item"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
-      {/* ── Completed Items Section ── */}
-      {completedItems.length > 0 && (
-        <div className="pt-3 space-y-2">
-          <button
-            onClick={() => {
-              triggerHaptic('light');
-              setShowCompletedSection(v => !v);
-            }}
-            className="flex items-center gap-1.5 text-xs font-bold font-tag uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors px-1 select-none"
-          >
-            <span>Completed ({completedItems.length})</span>
-            {showCompletedSection ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-
-          <AnimatePresence initial={false}>
-            {showCompletedSection && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-2 overflow-hidden"
-              >
-                {completedItems.map(item => (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="card p-3.5 rounded-[22px] border border-[var(--card-border)]/60 bg-[var(--card-surface)]/50 flex items-center justify-between gap-3 select-none"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <InteractiveCheckbox
-                        checked={item.checked}
-                        onChange={() => handleToggleItem(item.id)}
-                        size={24}
-                      />
-
+                  {completedItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="p-3.5 rounded-2xl border border-white/[0.04] bg-[#1C1C1E]/60 flex items-center justify-between gap-3 select-none"
+                    >
                       <div
-                        className="flex-1 min-w-0 cursor-pointer"
+                        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                         onClick={() => handleToggleItem(item.id)}
                       >
-                        <span className="text-sm font-medium line-through text-[var(--text-secondary)] opacity-70 block truncate font-sans">
-                          {item.name}
-                        </span>
+                        <CheckCircle size={22} weight="fill" className="text-[#30D158] shrink-0" />
+
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-medium line-through text-[#8E8E93] block truncate">
+                            {item.name}
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      {item.quantity && (
-                        <span className="font-tag text-[10.5px] px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-[var(--text-muted)] line-through">
-                          {item.quantity}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {item.quantity && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-[#2C2C2E] text-[#636366] line-through">
+                            {item.quantity}
+                          </span>
+                        )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                        title="Remove Item"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
-      {/* ── Save as Template Modal ── */}
-      <Modal isOpen={showSaveTemplateModal} onClose={() => setShowSaveTemplateModal(false)}>
-        <div className="space-y-4 pt-1 text-left">
-          <div className="flex items-center justify-between">
-            <h3 className="font-heading text-lg font-bold text-[var(--text-primary)]">
-              Save as Template
-            </h3>
-            <button
-              onClick={() => setShowSaveTemplateModal(false)}
-              className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteItem(item.id)}
+                          className="p-1.5 rounded-lg text-[#636366] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                          title="Remove Item"
+                        >
+                          <Trash size={15} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+        )}
+      </div>
+
+      {/* ── Save as Template Sheet ── */}
+      <Sheet
+        isOpen={showSaveTemplateModal}
+        onClose={() => setShowSaveTemplateModal(false)}
+        title="Save as Template"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-[#8E8E93] leading-relaxed">
             This saves all item names and quantities as a reusable template. Items will be unchecked in the template.
           </p>
 
-          <div>
-            <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">
-              Template Name
-            </label>
-            <input
-              type="text"
-              value={templateName}
-              onChange={e => setTemplateName(e.target.value)}
-              placeholder="e.g. Weekly Groceries, Outing Essentials..."
-              className="w-full px-4 py-2.5 rounded-2xl bg-[var(--card-surface)] border border-[var(--card-border)] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
-            />
-          </div>
+          <TextField
+            label="Template Name"
+            value={templateName}
+            onChange={(e) => setTemplateName(e.target.value)}
+            placeholder="e.g. Weekly Groceries, Outing Essentials..."
+          />
 
           <div className="flex items-center justify-end gap-2 pt-2">
-            <button
-              onClick={() => setShowSaveTemplateModal(false)}
-              className="px-4 py-2 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-            >
+            <Button variant="glass" onClick={() => setShowSaveTemplateModal(false)}>
               Cancel
-            </button>
-            <button
-              onClick={handleSaveAsTemplate}
-              className="px-5 py-2 rounded-full bg-[var(--accent-primary)] text-white text-xs font-bold shadow-md hover:opacity-95 active:scale-95 transition-all"
-            >
+            </Button>
+            <Button variant="prominent" tint="#FF375F" onClick={handleSaveAsTemplate}>
               Save Template
-            </button>
+            </Button>
           </div>
         </div>
-      </Modal>
+      </Sheet>
     </div>
   );
 }

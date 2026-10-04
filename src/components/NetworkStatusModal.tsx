@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WifiOff, Wifi, CloudOff, CheckCircle2, X } from 'lucide-react';
+import { WifiSlash, CloudSlash, CheckCircle, X } from '../ui/tokens/icons';
+import { GlassSurface } from '../ui/glass/GlassSurface';
 import { triggerHaptic } from '../utils/haptics';
 import { registerDismissible } from '../utils/backNavigation';
 
@@ -19,7 +20,6 @@ export default function NetworkStatusModal() {
   }, [showModal]);
 
   useEffect(() => {
-    // Check initial state on mount
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setIsOffline(true);
       setShowModal(true);
@@ -36,7 +36,7 @@ export default function NetworkStatusModal() {
       setIsOffline(false);
       setShowModal(false);
       setShowReconnectedToast(true);
-      triggerHaptic('success');
+      triggerHaptic('selection');
       const timer = setTimeout(() => {
         setShowReconnectedToast(false);
       }, 3500);
@@ -54,37 +54,37 @@ export default function NetworkStatusModal() {
 
   return (
     <>
-      {/* ── Offline Pop-up Modal on Entering App without Internet ── */}
+      {/* ── Offline Pop-up Modal ── */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-transparent pointer-events-auto">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="w-full max-w-sm rounded-3xl bg-[var(--card-surface)] border border-amber-500/30 p-6 shadow-2xl text-center space-y-4"
+              className="w-full max-w-sm rounded-[32px] bg-[#1C1C1E] border border-amber-500/30 p-6 shadow-2xl text-center space-y-4"
             >
               {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 mx-auto flex items-center justify-center shadow-inner">
-                <WifiOff size={28} className="animate-pulse" />
+              <div className="w-14 h-14 rounded-[18px] bg-amber-500/15 text-amber-400 mx-auto flex items-center justify-center shadow-inner">
+                <WifiSlash size={28} weight="bold" className="animate-pulse" />
               </div>
 
               {/* Title & Description */}
               <div className="space-y-2">
-                <h3 className="text-lg font-extrabold text-primary-light dark:text-primary-dark">
+                <h3 className="text-lg font-bold text-white tracking-tight">
                   No Internet Connection
                 </h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  You are currently offline. LifeOS is running smoothly from your device’s local storage.
+                <p className="text-xs text-white/60 leading-relaxed">
+                  You are currently offline. LifeOS is running smoothly from your device's local storage.
                 </p>
-                <div className="p-3 rounded-2xl bg-amber-500/5 border border-amber-500/15 text-[11px] text-amber-700 dark:text-amber-300 font-medium text-left space-y-1">
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 font-medium text-left space-y-1">
                   <div className="flex items-center gap-1.5 font-bold">
-                    <CloudOff size={13} className="flex-shrink-0" />
-                    <span>Offline Mode Active</span>
+                    <CloudSlash size={14} weight="bold" className="shrink-0" />
+                    <span>Offline Storage Active</span>
                   </div>
-                  <p className="text-secondary-light/80 dark:text-secondary-dark/80 text-[10.5px]">
-                    You can continue reading and updating your timetable, notes, tasks, and workouts. Changes will automatically sync to Cloud Firestore when you're back online.
+                  <p className="text-white/60 text-[10.5px] leading-relaxed">
+                    You can continue logging workouts, checking timetable, and updating tasks. Changes will automatically sync to Cloud Firestore once you are back online.
                   </p>
                 </div>
               </div>
@@ -97,7 +97,7 @@ export default function NetworkStatusModal() {
                     triggerHaptic('light');
                     setShowModal(false);
                   }}
-                  className="w-full py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg shadow-amber-500/25 transition-all transform active:scale-95"
+                  className="w-full py-3.5 px-4 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-lg active:scale-95 transition-transform cursor-pointer"
                 >
                   Continue in Offline Mode
                 </button>
@@ -107,12 +107,12 @@ export default function NetworkStatusModal() {
         )}
       </AnimatePresence>
 
-      {/* ── Reconnected Toast When Internet Comes Back ── */}
+      {/* ── Reconnected Toast ── */}
       <AnimatePresence>
         {showReconnectedToast && (
           <div
             style={{
-              top: 'calc(max(var(--sat, env(safe-area-inset-top, 0px)), 12px) + 48px)',
+              top: 'calc(max(env(safe-area-inset-top, 0px), 12px) + 48px)',
             }}
             className="fixed inset-x-4 z-[100] flex justify-center pointer-events-none"
           >
@@ -120,9 +120,9 @@ export default function NetworkStatusModal() {
               initial={{ opacity: 0, y: -16, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.95 }}
-              className="pointer-events-auto px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-xl shadow-emerald-600/30 flex items-center gap-2 border border-emerald-400/30 max-w-full select-none"
+              className="pointer-events-auto px-4 py-2.5 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-2xl flex items-center gap-2 border border-emerald-400/30 max-w-full select-none"
             >
-              <CheckCircle2 size={15} className="shrink-0 text-white" />
+              <CheckCircle size={16} weight="fill" className="shrink-0 text-white" />
               <span className="truncate">Back Online — Connected to Cloud</span>
               <button
                 type="button"
@@ -130,7 +130,7 @@ export default function NetworkStatusModal() {
                 className="ml-1 p-0.5 hover:bg-white/20 rounded-full shrink-0 cursor-pointer"
                 aria-label="Dismiss notification"
               >
-                <X size={12} />
+                <X size={13} weight="bold" />
               </button>
             </motion.div>
           </div>

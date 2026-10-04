@@ -1,737 +1,354 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Minus, Check, Save, Brain, TrendingUp, Activity, Award, Loader2, ChevronDown, ChevronUp, Lock, Unlock } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
-import {
-  WORKOUT_MUSCLES,
-  getPreWorkoutTip,
-  getProgressionAdvice,
-  getRecoveryCheck,
-  getPostWorkoutSummary,
-  getSplitTweakAdvice,
-  GEMINI_API_KEY,
-} from '../utils/geminiCoach';
-import VictoryModal from '../components/rive/VictoryModal';
-import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
-import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import type { AppData, WorkoutLog } from '../types';
-
-
-interface ExerciseSet {
-  reps: number;
-  weight: number;
-  completed: boolean;
-}
-
-interface WorkoutExerciseItem {
-  name: string;
-  howTo?: string;
-  rest?: string;
-  sets: ExerciseSet[];
-}
+import { triggerHaptic } from '../utils/haptics';
+import { triggerConfettiBurst } from '../utils/confetti';
+import {
+  LargeTitleHeader,
+  Button,
+  Stepper,
+  Ring,
+  Badge,
+  Sheet,
+  GroupedList,
+  ListRow,
+  MOTION_SPRINGS,
+  Barbell,
+  Check,
+  Play,
+  Pause,
+  ArrowClockwise,
+  CaretLeft,
+} from '../ui';
 
 interface GymWorkoutProps {
   data: AppData;
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-// ── Animated category dot ──────────────────────────────────────────────────
-function PulseDot({ color }: { color: string }) {
-  return (
-    <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 ${color}`} />
-      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${color}`} />
-    </span>
-  );
-}
-
-// ── AI insight panel ───────────────────────────────────────────────────────
-interface InsightCardProps {
-  icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  content: string;
-  loading: boolean;
-  error: string;
-  accentClass: string;
-  onRefresh?: () => void;
-}
-
-function InsightCard({ icon, title, subtitle, content, loading, error, accentClass, onRefresh }: InsightCardProps) {
-  const [open, setOpen] = useState(true);
-  return (
-    <div className="card overflow-hidden">
-      <button
-        className="w-full flex items-center gap-3 p-4 text-left active:bg-bg-light dark:active:bg-bg-dark transition-all"
-        onClick={() => { triggerHaptic('light'); setOpen(v => !v); }}
-      >
-        <div className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 ${accentClass}`}>
-          {icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-primary-light dark:text-primary-dark">{title}</p>
-          <p className="label-mono text-muted-light dark:text-muted-dark truncate">{subtitle}</p>
-        </div>
-        {loading && <Loader2 size={14} className="animate-spin text-muted-light dark:text-muted-dark flex-shrink-0" />}
-        {!loading && (open
-          ? <ChevronUp size={14} className="text-muted-light dark:text-muted-dark flex-shrink-0" />
-          : <ChevronDown size={14} className="text-muted-light dark:text-muted-dark flex-shrink-0" />
-        )}
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4">
-              <div className="border-t border-border-light dark:border-border-dark mb-3" />
-              {loading && (
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 bg-bg-light dark:bg-bg-dark rounded-full overflow-hidden">
-                    <motion.div
-                      className={`h-full rounded-full ${accentClass.includes('purple') ? 'bg-purple-500' : accentClass.includes('emerald') ? 'bg-emerald-500' : accentClass.includes('amber') ? 'bg-amber-500' : 'bg-blue-500'}`}
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                    />
-                  </div>
-                  <span className="label-mono text-muted-light dark:text-muted-dark">Thinking...</span>
-                </div>
-              )}
-              {!loading && error && <p className="text-xs text-red-500">{error}</p>}
-              {!loading && !error && content && (
-                <p className="text-sm text-secondary-light dark:text-secondary-dark leading-relaxed">{content}</p>
-              )}
-              {onRefresh && !loading && (
-                <button
-                  onClick={onRefresh}
-                  className={`mt-3 label-mono text-[10px] px-3 py-1.5 rounded-full border transition-all active:scale-95 ${accentClass.includes('purple') ? 'text-purple-500 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/30' : accentClass.includes('emerald') ? 'text-emerald-600 border-emerald-200 dark:border-emerald-800' : accentClass.includes('amber') ? 'text-amber-600 border-amber-200 dark:border-amber-800' : 'text-blue-500 border-blue-200 dark:border-blue-800'}`}
-                >
-                  Refresh
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   const navigate = useNavigate();
-  const { showSavedFeedback } = useM3Feedback();
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const shortDay = { 'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed', 'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat', 'Sunday': 'Sun' }[format(new Date(), 'EEEE')] || '';
-  const todayPlan = data.workoutPlans.find(p => p.day === shortDay);
-  const existingLog = data.workoutLogs.find(w => w.date === today);
-  const workoutType = todayPlan?.type || 'CUSTOM';
-  const isRest = workoutType === 'REST';
-  const currentApiKey = data.geminiApiKey || GEMINI_API_KEY;
-  const hasAi = !!currentApiKey && currentApiKey !== 'PASTE_YOUR_KEY_HERE';
+  const todayDay = format(new Date(), 'EEEE');
+  const todayDate = format(new Date(), 'yyyy-MM-dd');
 
-  const WORKOUT_DRAFT_KEY = `lifeos_workout_draft_${today}`;
-
-  const [exercises, setExercises] = useState<WorkoutExerciseItem[]>(() => {
-    // 1. Recover active in-progress workout draft if user switched interfaces or lost connection
-    try {
-      const savedDraft = localStorage.getItem(`lifeos_workout_draft_${today}`);
-      if (savedDraft) {
-        const parsed = JSON.parse(savedDraft);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((ex: any) => ({
-            name: String(ex.name || 'Exercise'),
-            howTo: String(ex.howTo || ''),
-            rest: String(ex.rest || ''),
-            sets: Array.isArray(ex.sets)
-              ? ex.sets.map((s: any) => ({
-                  reps: Number(s?.reps) || 10,
-                  weight: Number(s?.weight) || 0,
-                  completed: Boolean(s?.completed),
-                }))
-              : [],
-          }));
-        }
-      }
-    } catch {}
-
-    if (existingLog && Array.isArray(existingLog.exercises)) {
-      return existingLog.exercises.map(ex => ({
-        name: ex.name || 'Exercise',
-        howTo: ex.howTo || '',
-        rest: ex.rest || '',
-        sets: Array.isArray(ex.sets)
-          ? ex.sets.map(s => ({ reps: Number(s?.reps) || 10, weight: Number(s?.weight) || 0, completed: Boolean(s?.completed) }))
-          : []
-      }));
-    }
-    if (todayPlan && todayPlan.type !== 'REST' && Array.isArray(todayPlan.exercises)) {
-      return todayPlan.exercises.map(ex => ({
-        name: ex.name,
-        howTo: ex.howTo || '',
-        rest: ex.rest || '',
-        sets: Array.from({ length: Number(ex.sets) || 3 }, () => ({ reps: Number(ex.reps) || 10, weight: Number(ex.weight) || 0, completed: false }))
-      }));
-    }
-    return [] as WorkoutExerciseItem[];
-  });
-
-  // Automatically save in-progress session draft to phone storage whenever any set checkbox or rep changes
-  useEffect(() => {
-    if (exercises && exercises.length > 0) {
-      try {
-        localStorage.setItem(`lifeos_workout_draft_${today}`, JSON.stringify(exercises));
-      } catch {}
-    }
-  }, [exercises, today]);
-
-  const [newExName, setNewExName] = useState('');
-  const [saved, setSaved] = useState(false);
-  const [isLocked, setIsLocked] = useState(!!existingLog?.isSaved);
-  const [isSavedDay, setIsSavedDay] = useState(!!existingLog?.isSaved);
-  const [showVictoryModal, setShowVictoryModal] = useState(false);
-
-  // AI state
-  const [preTip, setPreTip] = useState('');
-  const [preLoading, setPreLoading] = useState(false);
-  const [preError, setPreError] = useState('');
-
-  const [progressTip, setProgressTip] = useState('');
-  const [progressLoading, setProgressLoading] = useState(false);
-  const [progressError, setProgressError] = useState('');
-
-  const [recoveryTip, setRecoveryTip] = useState('');
-  const [recoveryLoading, setRecoveryLoading] = useState(false);
-  const [recoveryError, setRecoveryError] = useState('');
-
-  const [postTip, setPostTip] = useState('');
-  const [postLoading, setPostLoading] = useState(false);
-  const [postError, setPostError] = useState('');
-
-  const [tweakTip, setTweakTip] = useState('');
-  const [tweakLoading, setTweakLoading] = useState(false);
-  const [tweakError, setTweakError] = useState('');
-
-  // ── Auto-fetch AI tips on mount ─────────────────────────────────────────
-  useEffect(() => {
-    if (!hasAi || isRest) return;
-    fetchPreTip();
-    fetchProgressTip();
-    fetchRecoveryTip();
-    fetchTweakTip();
-  }, [workoutType, hasAi, isRest]);
-
-  async function fetchPreTip() {
-    setPreLoading(true); setPreError('');
-    try {
-      const exNames = todayPlan?.exercises.map(e => e.name) ?? [];
-      setPreTip(await getPreWorkoutTip(workoutType, exNames, currentApiKey));
-    } catch (e: unknown) { setPreError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setPreLoading(false); }
-  }
-
-  async function fetchProgressTip() {
-    // Find last log of same workout type
-    const sorted = [...data.workoutLogs]
-      .filter(l => l.type === workoutType && l.date !== today)
-      .sort((a, b) => b.date.localeCompare(a.date));
-    const last = sorted[0];
-    if (!last) { setProgressTip('No previous session found. Start logging to unlock progression tracking.'); return; }
-    setProgressLoading(true); setProgressError('');
-    try {
-      const exData = last.exercises.map(e => ({
-        name: e.name,
-        topWeight: Math.max(...e.sets.map(s => s.weight), 0),
-        topReps: Math.max(...e.sets.map(s => s.reps), 0),
-      }));
-      setProgressTip(await getProgressionAdvice({ workoutType, lastSessionExercises: exData }, currentApiKey));
-    } catch (e: unknown) { setProgressError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setProgressLoading(false); }
-  }
-
-  async function fetchRecoveryTip() {
-    const recent = [...data.workoutLogs]
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5)
-      .map(l => l.type);
-    if (recent.length === 0) { setRecoveryTip('No workout history yet. Start logging to unlock recovery analysis.'); return; }
-    setRecoveryLoading(true); setRecoveryError('');
-    try { setRecoveryTip(await getRecoveryCheck(recent, currentApiKey)); }
-    catch (e: unknown) { setRecoveryError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setRecoveryLoading(false); }
-  }
-
-  async function fetchTweakTip() {
-    const recentLogs = [...data.workoutLogs]
-      .filter(l => l.type === workoutType && l.date !== today)
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, 5)
-      .map(l => ({
-        date: l.date,
-        exercises: l.exercises.map(e => ({
-          name: e.name,
-          topWeight: Math.max(...e.sets.map(s => s.weight), 0)
-        }))
-      }));
-
-    if (recentLogs.length < 3) {
-      setTweakTip('Need at least 3 previous sessions of this type to analyze plateaus.');
-      return;
-    }
-    setTweakLoading(true); setTweakError('');
-    try { setTweakTip(await getSplitTweakAdvice(workoutType, recentLogs, currentApiKey)); }
-    catch (e: unknown) { setTweakError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setTweakLoading(false); }
-  }
-
-  async function fetchPostSummary() {
-    if (!hasAi) return;
-    setPostLoading(true); setPostError('');
-    try {
-      const exData = (exercises || []).map(e => ({
-        name: e.name,
-        topWeight: Math.max(...(e.sets || []).map(s => Number(s?.weight) || 0), 0),
-        completedReps: (e.sets || []).filter(s => s?.completed).reduce((sum, s) => sum + (Number(s?.reps) || 0), 0),
-      }));
-      setPostTip(await getPostWorkoutSummary({ workoutType, completedSets, totalSets, exercises: exData }, currentApiKey));
-    } catch (e: unknown) { setPostError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setPostLoading(false); }
-  }
-
-  // ── Exercise log helpers ────────────────────────────────────────────────
-  const toggleSet = (ei: number, si: number) => {
-    triggerHaptic('light');
-    const u = [...exercises]; u[ei].sets[si].completed = !u[ei].sets[si].completed; setExercises(u);
-  };
-  const updateSet = (ei: number, si: number, field: 'reps' | 'weight', val: number) => {
-    const u = [...exercises]; u[ei].sets[si][field] = val; setExercises(u);
-  };
-  const addSet = (ei: number) => {
-    triggerHaptic('light');
-    const u = [...exercises];
-    const last = u[ei].sets[u[ei].sets.length - 1];
-    u[ei].sets.push({ reps: last?.reps || 10, weight: last?.weight || 0, completed: false });
-    setExercises(u);
-  };
-  const removeSet = (ei: number, si: number) => {
-    const u = [...exercises]; u[ei].sets.splice(si, 1);
-    if (u[ei].sets.length === 0) u.splice(ei, 1);
-    setExercises(u);
-  };
-  const addExercise = () => {
-    if (!newExName.trim()) return;
-    triggerHaptic('light');
-    setExercises([...exercises, { name: newExName.trim(), sets: [{ reps: 10, weight: 0, completed: false }] }]);
-    setNewExName('');
-  };
-
-  const handleSave = async (isComplete = false) => {
-    triggerHaptic('save');
-    const cleanExercises = (exercises || [])
-      .filter(e => e && e.name)
-      .map(e => ({
-        name: e.name.trim(),
-        howTo: e.howTo || '',
-        rest: e.rest || '',
-        sets: Array.isArray(e.sets)
-          ? e.sets.map(s => ({
-              reps: Number(s?.reps) || 0,
-              weight: Number(s?.weight) || 0,
-              completed: Boolean(s?.completed),
-            }))
-          : []
-      }))
-      .filter(e => e.sets.length > 0);
-
-    const log: WorkoutLog = {
-      id: existingLog?.id || crypto.randomUUID(),
-      date: today,
-      day: shortDay,
-      type: workoutType,
-      exercises: cleanExercises,
-      isSaved: true,
+  // Active workout plan
+  const activePlan = useMemo(() => {
+    const dayMap: Record<string, string> = {
+      Monday: 'Mon',
+      Tuesday: 'Tue',
+      Wednesday: 'Wed',
+      Thursday: 'Thu',
+      Friday: 'Fri',
+      Saturday: 'Sat',
+      Sunday: 'Sun',
     };
-    const updatedLogs = existingLog
-      ? (data.workoutLogs || []).map(w => w.id === existingLog.id ? log : w)
-      : [...(data.workoutLogs || []), log];
-    await updateData({ workoutLogs: updatedLogs });
-    try {
-      localStorage.removeItem(WORKOUT_DRAFT_KEY);
-    } catch {}
-    triggerHaptic(isComplete ? 'milestone' : 'success');
-    setSaved(true);
-    setIsSavedDay(true);
-    setIsLocked(true);
-    showSavedFeedback({
-      title: isComplete ? 'Workout Completed!' : 'Workout Saved',
-      message: isComplete ? `${workoutType} session logged to gym history.` : 'Workout progress saved.',
-      section: 'gym',
-    });
-    setTimeout(() => setSaved(false), 3000);
-    if (isComplete) {
-      fetchPostSummary(); // auto-trigger post-workout analysis
-      setShowVictoryModal(true);
+    const short = dayMap[todayDay] || 'Mon';
+    return (
+      (data.workoutPlans || []).find((p) => p.day === short) || {
+        day: short,
+        type: 'Chest & Triceps',
+        exercises: [
+          { id: '1', name: 'Bench Press', sets: 4, reps: 8, weight: 60 },
+          { id: '2', name: 'Incline Dumbbell Press', sets: 3, reps: 10, weight: 24 },
+          { id: '3', name: 'Cable Fly', sets: 3, reps: 12, weight: 22.5 },
+        ],
+      }
+    );
+  }, [data.workoutPlans, todayDay]);
+
+  const [currentExIndex, setCurrentExIndex] = useState(0);
+  const [currentSetIndex, setCurrentSetIndex] = useState(0);
+
+  const currentExercise = activePlan.exercises[currentExIndex] || {
+    name: 'Bench Press',
+    sets: 4,
+    reps: 8,
+    weight: 60,
+  };
+
+  const [weight, setWeight] = useState(currentExercise.weight || 60);
+  const [reps, setReps] = useState(currentExercise.reps || 8);
+
+  // Sync state when exercise changes
+  useEffect(() => {
+    setWeight(currentExercise.weight || 60);
+    setReps(currentExercise.reps || 8);
+  }, [currentExIndex, currentExercise]);
+
+  // Rest Timer State
+  const [isResting, setIsResting] = useState(false);
+  const [restSeconds, setRestSeconds] = useState(60);
+  const [restDuration, setRestDuration] = useState(60);
+
+  // Completed sets tracker
+  const [completedSets, setCompletedSets] = useState<
+    Record<string, Array<{ reps: number; weight: number }>>
+  >({});
+
+  const [isListSheetOpen, setIsListSheetOpen] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+
+  // Rest timer interval with haptic cues at 10s, 3s, 0s
+  useEffect(() => {
+    if (!isResting) return;
+    const interval = setInterval(() => {
+      setRestSeconds((prev) => {
+        if (prev <= 1) {
+          triggerHaptic('milestone');
+          setIsResting(false);
+          return 0;
+        }
+        if (prev === 10 || prev === 3 || prev === 2) {
+          triggerHaptic('light');
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isResting]);
+
+  const handleCompleteSet = () => {
+    triggerHaptic('success');
+    const exName = currentExercise.name;
+    const newSets = [...(completedSets[exName] || []), { reps, weight }];
+    setCompletedSets((prev) => ({ ...prev, [exName]: newSets }));
+
+    // Start rest timer (60s)
+    setRestDuration(60);
+    setRestSeconds(60);
+    setIsResting(true);
+
+    if (currentSetIndex + 1 < currentExercise.sets) {
+      setCurrentSetIndex(currentSetIndex + 1);
+    } else if (currentExIndex + 1 < activePlan.exercises.length) {
+      setCurrentExIndex(currentExIndex + 1);
+      setCurrentSetIndex(0);
+    } else {
+      // Finished all exercises
+      handleFinishWorkout();
     }
   };
 
-  const completedSets = (exercises || []).reduce((s, e) => {
-    const setsArr = Array.isArray(e?.sets) ? e.sets : [];
-    return s + setsArr.filter(x => x?.completed).length;
-  }, 0);
-  const totalSets = (exercises || []).reduce((s, e) => {
-    const setsArr = Array.isArray(e?.sets) ? e.sets : [];
-    return s + setsArr.length;
-  }, 0);
-  const pct = totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
-  const muscles = WORKOUT_MUSCLES[workoutType.toUpperCase()];
+  const handleFinishWorkout = async () => {
+    triggerHaptic('milestone');
+    triggerConfettiBurst();
+
+    // Create WorkoutLog entry
+    const newLog: WorkoutLog = {
+      id: `log_${Date.now()}`,
+      date: todayDate,
+      day: todayDay,
+      type: activePlan.type,
+      isSaved: true,
+      exercises: activePlan.exercises.map((ex) => ({
+        name: ex.name,
+        sets: (completedSets[ex.name] || []).map((s) => ({
+          reps: s.reps,
+          weight: s.weight,
+          completed: true,
+        })),
+      })),
+    };
+
+    const updatedLogs = [
+      newLog,
+      ...(data.workoutLogs || []).filter((w) => w.date !== todayDate),
+    ];
+    await updateData({ workoutLogs: updatedLogs });
+    setIsSummaryOpen(true);
+  };
 
   return (
-    <div className="space-y-4 max-w-2xl mx-auto">
-
-      {/* Header */}
-      <div className="flex items-center justify-between pt-1">
-        <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans active:scale-95">
-          <ChevronLeft size={16} /> Back
-        </button>
-        <div className="label-mono font-bold text-xs text-secondary-light dark:text-secondary-dark bg-black/[0.03] dark:bg-white/[0.05] px-3 py-1 rounded-full border border-border-light dark:border-border-dark flex items-center gap-1.5">
-          {!isRest && pct === 100 && <Check size={12} className="text-emerald-500 stroke-[3]" />}
-          {completedSets}/{totalSets} sets
-        </div>
-      </div>
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-              {today} · Live Session
-            </p>
-            {!isRest && pct === 100 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono">
-                <Check size={11} className="stroke-[3]" /> ALL DONE
-              </span>
-            )}
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight text-primary-light dark:text-primary-dark font-sans break-words">
-            {workoutType}
-          </h1>
-          {muscles && <p className="text-xs text-muted-light dark:text-muted-dark mt-1.5 capitalize font-medium">{muscles}</p>}
-        </div>
-        <button 
-          onClick={() => {
-            if (isLocked) {
-              triggerHaptic('light');
-              setIsLocked(false);
-            } else {
-              handleSave(false);
-            }
-          }} 
-          className={`btn-pill flex items-center gap-2 px-5 py-2.5 text-sm transition-all ${
-            isLocked ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : ''
-          }`}
+    <div className="w-full min-h-screen bg-black text-white flex flex-col justify-between p-4 selection:bg-[#FF453A]/30">
+      {/* Top Header */}
+      <div className="pt-[env(safe-area-inset-top,12px)] flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate('/gym')}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20"
         >
-          {isLocked ? (
-            <>
-              <Lock size={14} /> Saved & Locked
-            </>
-          ) : (
-            <>
-              <Save size={14} /> {saved ? 'Saved to History!' : 'Save Workout'}
-            </>
-          )}
+          <CaretLeft size={20} weight="bold" />
+        </button>
+
+        <span className="text-sm font-bold text-[rgba(235,235,245,0.60)]">
+          LIVE WORKOUT HUD
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setIsListSheetOpen(true)}
+          className="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-white active:bg-white/20"
+        >
+          Exercises ({currentExIndex + 1}/{activePlan.exercises.length || 1})
         </button>
       </div>
 
-      {/* Progress bar */}
-      {!isRest && (
-        <div className="space-y-1.5">
-          <div className="h-1.5 bg-bg-light dark:bg-bg-dark rounded-full overflow-hidden border border-border-light dark:border-border-dark">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ background: pct === 100 ? '#10b981' : 'linear-gradient(90deg, #8b5cf6, #6366f1)' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${pct}%` }}
-              transition={{ duration: 0.4 }}
+      {/* Center Immersive HUD Display */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 py-6 select-none max-w-sm mx-auto w-full">
+        {/* Exercise Title & Set Status */}
+        <div className="text-center flex flex-col gap-1">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            {currentExercise.name}
+          </h1>
+          <p className="text-sm font-semibold text-[rgba(235,235,245,0.60)]">
+            Set {currentSetIndex + 1} of {currentExercise.sets}
+          </p>
+        </div>
+
+        {/* Two Large Display Steppers */}
+        <div className="grid grid-cols-2 gap-4 w-full">
+          {/* Weight Stepper */}
+          <div className="bg-[#1C1C1E] rounded-[28px] p-4 flex flex-col items-center gap-3 border border-white/[0.06]">
+            <span className="text-xs font-bold text-[rgba(235,235,245,0.50)]">
+              WEIGHT (KG)
+            </span>
+            <Stepper
+              value={weight}
+              onChange={setWeight}
+              step={2.5}
+              tint="#FF453A"
+              size="lg"
+            />
+          </div>
+
+          {/* Reps Stepper */}
+          <div className="bg-[#1C1C1E] rounded-[28px] p-4 flex flex-col items-center gap-3 border border-white/[0.06]">
+            <span className="text-xs font-bold text-[rgba(235,235,245,0.50)]">
+              REPS
+            </span>
+            <Stepper
+              value={reps}
+              onChange={setReps}
+              step={1}
+              tint="#FF453A"
+              size="lg"
             />
           </div>
         </div>
-      )}
 
-      {/* ── AI Insights ─────────────────────────────────────────────────── */}
-      {!isRest && hasAi && (
-        <div className="space-y-3">
-          <p className="label-mono text-secondary-light dark:text-secondary-dark">AI Insights</p>
-
-          {/* 1. Pre-workout focus */}
-          <InsightCard
-            icon={<Brain size={15} className="text-purple-500" />}
-            title="Today's Focus"
-            subtitle={`${workoutType} — what to prioritize`}
-            content={preTip}
-            loading={preLoading}
-            error={preError}
-            accentClass="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800"
-            onRefresh={fetchPreTip}
-          />
-
-          {/* 2. Progressive overload */}
-          <InsightCard
-            icon={<TrendingUp size={15} className="text-emerald-600" />}
-            title="Progressive Overload"
-            subtitle="vs your last session"
-            content={progressTip}
-            loading={progressLoading}
-            error={progressError}
-            accentClass="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800"
-            onRefresh={fetchProgressTip}
-          />
-
-          {/* 3. Recovery check */}
-          <InsightCard
-            icon={<Activity size={15} className="text-amber-600" />}
-            title="Recovery Check"
-            subtitle="based on recent training load"
-            content={recoveryTip}
-            loading={recoveryLoading}
-            error={recoveryError}
-            accentClass="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800"
-            onRefresh={fetchRecoveryTip}
-          />
-
-          {/* 4. Split Tweaks (Plateau Detection) */}
-          <InsightCard
-            icon={<Brain size={15} className="text-blue-500" />}
-            title="Split Tweaks"
-            subtitle="plateau analysis over last few weeks"
-            content={tweakTip}
-            loading={tweakLoading}
-            error={tweakError}
-            accentClass="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800"
-            onRefresh={fetchTweakTip}
-          />
-
-          {/* 5. Post-workout summary (only after save) */}
-          {saved && (
-            <InsightCard
-              icon={<Award size={15} className="text-blue-500" />}
-              title="Session Summary"
-              subtitle="AI feedback on your workout"
-              content={postTip}
-              loading={postLoading}
-              error={postError}
-              accentClass="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800"
-              onRefresh={fetchPostSummary}
-            />
-          )}
+        {/* Ghost text for previous set */}
+        <div className="text-xs text-[rgba(235,235,245,0.40)] font-medium text-center">
+          Last set: {weight} kg × {reps} reps
         </div>
-      )}
 
-      {/* ── Exercise Log ─────────────────────────────────────────────────── */}
-      {!isRest && (
-        <div className="space-y-4">
-          {exercises.length > 0 && <p className="label-mono text-secondary-light dark:text-secondary-dark">Your Workout</p>}
+        {/* Circular Rest Timer Overlay (when active) */}
+        {isResting && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex flex-col items-center gap-2 p-4 rounded-[28px] bg-[#1C1C1E] border border-[#FF453A]/30 w-full"
+          >
+            <div className="text-xs font-bold text-[#FF453A] tracking-wider uppercase">
+              Rest Timer
+            </div>
+            <Ring
+              progress={restSeconds / restDuration}
+              size={84}
+              strokeWidth={7}
+              color="#FF453A"
+            >
+              <span className="text-2xl font-bold tabular-nums text-white">
+                {restSeconds}s
+              </span>
+            </Ring>
+            <button
+              type="button"
+              onClick={() => setIsResting(false)}
+              className="text-xs text-[rgba(235,235,245,0.60)] underline hover:text-white pt-1"
+            >
+              Skip rest
+            </button>
+          </motion.div>
+        )}
+      </div>
 
-          {exercises.map((ex, ei) => {
-            const setsList = Array.isArray(ex?.sets) ? ex.sets : [];
-            const allDone = setsList.length > 0 && setsList.every(s => s?.completed);
+      {/* Bottom Action Controls */}
+      <div className="flex flex-col gap-2 pb-[env(safe-area-inset-bottom,16px)] max-w-sm mx-auto w-full">
+        <Button
+          variant="prominent"
+          tint="#FF453A"
+          size="lg"
+          onClick={handleCompleteSet}
+          icon={<Check size={20} weight="bold" />}
+        >
+          Complete Set {currentSetIndex + 1}
+        </Button>
+
+        <Button
+          variant="plain"
+          tint="rgba(235,235,245,0.60)"
+          size="md"
+          onClick={handleFinishWorkout}
+        >
+          Finish Workout Early
+        </Button>
+      </div>
+
+      {/* Exercise List Sheet */}
+      <Sheet
+        isOpen={isListSheetOpen}
+        onClose={() => setIsListSheetOpen(false)}
+        detent="half"
+        title="Workout Routine"
+      >
+        <GroupedList>
+          {activePlan.exercises.map((ex, idx) => {
+            const isCur = idx === currentExIndex;
+            const completedCount = (completedSets[ex.name] || []).length;
+
             return (
-              <motion.div
-                key={ei}
-                layout
-                className={`card p-4 transition-all duration-300 ${allDone ? 'border-emerald-200 dark:border-emerald-800' : ''}`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <PulseDot color={allDone ? 'bg-emerald-500' : 'bg-purple-500'} />
-                  <span className="font-bold text-sm text-primary-light dark:text-primary-dark">{ex.name}</span>
-                </div>
-                
-                {(ex.howTo || ex.rest) && (
-                  <div className="mb-4 bg-purple-500/5 dark:bg-purple-500/10 rounded-xl p-3 border border-purple-500/10 flex flex-col gap-1.5">
-                    {ex.howTo && <p className="text-xs text-purple-700 dark:text-purple-300 leading-snug"><span className="font-semibold">Tip:</span> {ex.howTo}</p>}
-                    {ex.rest && <p className="text-xs text-purple-700 dark:text-purple-300"><span className="font-semibold">Rest:</span> {ex.rest}</p>}
-                  </div>
-                )}
-
-                {/* Set headers */}
-                <div className="grid grid-cols-[32px_1fr] gap-3 mb-1.5">
-                  <span />
-                  <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-2 items-center">
-                    <span className="label-mono text-muted-light dark:text-muted-dark text-center">reps</span>
-                    <span />
-                    <span className="label-mono text-muted-light dark:text-muted-dark text-center">kg</span>
-                    <span />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {setsList.map((set, si) => (
-                    <motion.div key={si} layout className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark">
-                        {si + 1}
-                      </div>
-                      <div className="flex items-center gap-2 flex-1">
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          value={set.reps === 0 ? '' : set.reps}
-                          placeholder="0"
-                          onFocus={e => e.target.select()}
-                          onChange={e => {
-                            const val = e.target.value;
-                            updateSet(ei, si, 'reps', val === '' ? 0 : Math.max(0, parseInt(val) || 0));
-                          }}
-                          className="w-16 bg-transparent border border-border-light dark:border-border-dark rounded-xl px-2 py-1.5 text-base text-center focus:outline-none focus:border-purple-400 dark:focus:border-purple-600 transition-colors"
-                        />
-                        <span className="text-muted-light dark:text-muted-dark text-xs">@</span>
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          step="any"
-                          value={set.weight === 0 ? '' : set.weight}
-                          placeholder="0"
-                          onFocus={e => e.target.select()}
-                          onChange={e => {
-                            const val = e.target.value;
-                            updateSet(ei, si, 'weight', val === '' ? 0 : Math.max(0, parseFloat(val) || 0));
-                          }}
-                          className="w-16 bg-transparent border border-border-light dark:border-border-dark rounded-xl px-2 py-1.5 text-base text-center focus:outline-none focus:border-purple-400 dark:focus:border-purple-600 transition-colors"
-                        />
-                        <span className="text-muted-light dark:text-muted-dark text-xs">kg</span>
-                      </div>
-                      <InteractiveCheckbox
-                        checked={set.completed}
-                        onChange={() => toggleSet(ei, si)}
-                        size={30}
-                      />
-                      <button onClick={() => removeSet(ei, si)} className="p-1.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-400 transition-all active:scale-90">
-                        <Minus size={13} />
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <button onClick={() => addSet(ei)} className="mt-3 flex items-center gap-1.5 text-xs text-purple-500 font-semibold hover:opacity-80 transition-all">
-                  <Plus size={12} /> Add Set
-                </button>
-              </motion.div>
+              <ListRow
+                key={ex.id}
+                icon={<Barbell weight="bold" />}
+                iconTint={isCur ? '#FF453A' : '#30D158'}
+                title={ex.name}
+                subtitle={`${ex.sets} sets • ${ex.weight} kg`}
+                trailing={
+                  completedCount >= ex.sets ? (
+                    <span className="text-[#30D158] font-bold text-xs">DONE</span>
+                  ) : (
+                    `${completedCount}/${ex.sets}`
+                  )
+                }
+                onClick={() => {
+                  setCurrentExIndex(idx);
+                  setCurrentSetIndex(0);
+                  setIsListSheetOpen(false);
+                }}
+              />
             );
           })}
+        </GroupedList>
+      </Sheet>
 
-          {/* Add exercise */}
-          <div className="card p-4">
-            <p className="label-mono text-secondary-light dark:text-secondary-dark mb-3">Add Exercise</p>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newExName}
-                onChange={e => setNewExName(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addExercise()}
-                placeholder="e.g. Bench Press, Overhead Press..."
-                className="flex-1 bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark rounded-xl px-3 py-2.5 text-base focus:outline-none focus:border-purple-400 dark:focus:border-purple-600 transition-colors"
-              />
-              <button onClick={addExercise} className="btn-pill px-4 py-2.5 text-sm">
-                <Plus size={15} />
-              </button>
-            </div>
-          </div>
-          
-          <div className="pt-4">
-            {isSavedDay ? (
-              <div className="card p-5 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-center space-y-3">
-                <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <Check size={20} className="stroke-[3]" />
-                  <p className="font-bold text-base">Workout Complete & Saved to Gym History!</p>
-                </div>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark">
-                  {isLocked 
-                    ? 'Protected from accidental overwrite. Click unlock to make edits.' 
-                    : 'Workout is unlocked for editing.'}
-                </p>
-                <div className="pt-1 flex gap-2">
-                  <button 
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setIsLocked(!isLocked);
-                    }}
-                    className="btn-ghost-pill flex-1 py-2.5 text-xs text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 flex items-center justify-center gap-1.5"
-                  >
-                    {isLocked ? (
-                      <>
-                        <Unlock size={14} /> Unlock to Edit
-                      </>
-                    ) : (
-                      <>
-                        <Lock size={14} /> Lock Workout
-                      </>
-                    )}
-                  </button>
-                  <button 
-                    onClick={() => navigate('/gym')}
-                    className="btn-pill flex-1 py-2.5 text-xs bg-emerald-500 hover:bg-emerald-600 text-white"
-                  >
-                    Back to Gym
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button 
-                onPointerDown={() => triggerHaptic('save')}
-                onClick={() => handleSave(true)}
-                className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold active:scale-[0.98] transition-all shadow-md shadow-emerald-500/20"
-              >
-                <Check size={18} /> Complete & Save to Gym History
-              </button>
-            )}
+      {/* Workout Complete Summary Sheet */}
+      <Sheet
+        isOpen={isSummaryOpen}
+        onClose={() => navigate('/gym')}
+        detent="half"
+        title="Workout Complete!"
+      >
+        <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <Badge count="PR" label="Workout Finished" points={12} color="#FF7A45" />
+          <h2 className="text-2xl font-bold text-white">{activePlan.type}</h2>
+          <p className="text-sm text-[rgba(235,235,245,0.60)]">
+            Great job! Your sets, reps, and weights have been logged to History.
+          </p>
+          <div className="w-full pt-4">
+            <Button
+              variant="prominent"
+              tint="#FF453A"
+              className="w-full"
+              onClick={() => navigate('/gym')}
+            >
+              Return to Gym Hub
+            </Button>
           </div>
         </div>
-      )}
-
-      {/* Save Button for Rest Days */}
-
-      {/* REST day */}
-      {isRest && (
-        <div className="card p-8 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-3xl bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark flex items-center justify-center">
-            <Activity size={28} className="text-muted-light dark:text-muted-dark" />
-          </div>
-          <div>
-            <p className="font-bold text-primary-light dark:text-primary-dark">Rest Day</p>
-            <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Recovery is where the gains happen.<br />Eat well, sleep well.</p>
-          </div>
-          {hasAi && (
-            <InsightCard
-              icon={<Activity size={15} className="text-amber-600" />}
-              title="Recovery Check"
-              subtitle="based on recent training load"
-              content={recoveryTip}
-              loading={recoveryLoading}
-              error={recoveryError}
-              accentClass="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800"
-              onRefresh={fetchRecoveryTip}
-            />
-          )}
-        </div>
-      )}
-
-      <VictoryModal
-        isOpen={showVictoryModal}
-        onClose={() => {
-          setShowVictoryModal(false);
-          navigate('/gym');
-        }}
-        title="Workout Complete"
-        subtitle="Outstanding effort! Your sets, reps, and progressive overload have been recorded."
-        stats={[
-          { label: 'Completed Sets', value: `${completedSets}/${totalSets}` },
-          { label: 'Completion', value: `${Math.round(pct)}%` },
-        ]}
-      />
+      </Sheet>
     </div>
   );
 }

@@ -41,6 +41,7 @@ const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListP
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
 const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
 const Notes = lazy(() => import('./pages/Notes'));
+const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
 import { detectSquircleSupport } from './utils/squircleDetect';
@@ -128,6 +129,7 @@ function MainContent({
     { path: '/flow', element: <RouteErrorBoundary routeName="Flow Room"><FlowRoom data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/recall', element: <RouteErrorBoundary routeName="Active Recall"><ActiveRecall data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/transcribe', element: <RouteErrorBoundary routeName="Voice Transcriber"><VoiceTranscribe data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/kit', element: <RouteErrorBoundary routeName="UI Kit Preview"><Suspense fallback={<PageLoadingFallback />}><KitPreview /></Suspense></RouteErrorBoundary> },
     { path: '/dev/shapes', element: <RouteErrorBoundary routeName="Squircle Shapes Board"><DevShapes /></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
@@ -461,7 +463,7 @@ function App() {
           <AppLockOverlay />
           <InAppUpdateModal />
           <div
-            className="w-full min-h-screen transition-[filter,opacity] duration-200 ease-out"
+            className="w-full min-h-screen bg-black transition-[filter,opacity] duration-200 ease-out"
             style={{
               filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
               opacity: isLocked ? 0.2 : 1,

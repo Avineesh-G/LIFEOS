@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sparkles, 
-  CheckCircle2, 
-  ListTodo, 
-  Wallet, 
-  FileText, 
-  Trash2, 
-  ChevronLeft,
-  Layers,
-  Wand2
-} from 'lucide-react';
-import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
-import { haptics } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
+import { motion } from 'framer-motion';
+import type { AppData, Task, Expense } from '../types';
+import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
-import { AppData, Task, Expense, NoteItem } from '../types';
+import {
+  LargeTitleHeader,
+  GroupedList,
+  ListRow,
+  Button,
+  Sparkle,
+  CheckCircle,
+  Wallet,
+  NotePencil,
+  Plus,
+  Trash,
+  Check,
+} from '../ui';
 
 interface BrainDumpProps {
   data: AppData;
@@ -27,285 +27,190 @@ interface ParsedItem {
   id: string;
   type: 'task' | 'expense' | 'note';
   title: string;
-  detail?: string;
   amount?: number;
-  category?: string;
-  dueDate?: string;
+  selected: boolean;
 }
 
-const SAMPLE_PROMPTS = [
-  'Coffee $4.50, Math homework due tomorrow 5pm',
-  'Buy gym straps $18.00, Read 20 pages of clean code',
-  'Submit lab report by Friday, Lunch with team $15.50',
-];
-
-export const BrainDump: React.FC<BrainDumpProps> = ({ data, updateData }) => {
+export default function BrainDump({ data, updateData }: BrainDumpProps) {
   const navigate = useNavigate();
   const [inputText, setInputText] = useState('');
   const [parsedItems, setParsedItems] = useState<ParsedItem[]>([]);
-  const [isParsing, setIsParsing] = useState(false);
-  const [committed, setCommitted] = useState(false);
+  const [isSorting, setIsSorting] = useState(false);
 
-  // Deterministic local parsing logic
-  const handleParse = () => {
+  const handleSortWithLuna = () => {
     if (!inputText.trim()) return;
-    haptics.tap();
-    setIsParsing(true);
+    triggerHaptic('ai');
+    setIsSorting(true);
 
     setTimeout(() => {
       const lines = inputText
         .split(/[,;\n]+/)
-        .map(l => l.trim())
+        .map((l) => l.trim())
         .filter(Boolean);
 
       const items: ParsedItem[] = [];
-      const todayStr = new Date().toISOString().split('T')[0];
 
       lines.forEach((line, idx) => {
-        // Check for expense pattern: $xx or xx dollars / rs
-        const moneyMatch = line.match(/\$?(\d+(?:\.\d{1,2})?)\s*(?:dollars|bucks|rs|\$)?/i);
-        const hasDueMatch = line.match(/(?:due|by|before)\s+([a-zA-Z0-9\s:]+)/i);
-
-        if (moneyMatch && (line.toLowerCase().includes('spent') || line.toLowerCase().includes('bought') || line.toLowerCase().includes('paid') || line.includes('$') || line.toLowerCase().includes('lunch') || line.toLowerCase().includes('coffee') || line.toLowerCase().includes('food'))) {
+        const moneyMatch = line.match(/(?:rs\.?|₹|\$)?\s*(\d+(?:\.\d{1,2})?)/i);
+        if (
+          moneyMatch &&
+          (line.toLowerCase().includes('spent') ||
+            line.toLowerCase().includes('bought') ||
+            line.toLowerCase().includes('paid') ||
+            line.toLowerCase().includes('lunch') ||
+            line.toLowerCase().includes('coffee') ||
+            line.toLowerCase().includes('food'))
+        ) {
           const amount = parseFloat(moneyMatch[1]);
           const desc = line.replace(moneyMatch[0], '').replace(/(?:spent|bought|paid|for)/gi, '').trim();
           items.push({
-            id: `item-${Date.now()}-${idx}`,
+            id: `dump_${Date.now()}_${idx}`,
             type: 'expense',
             title: desc || 'Expense',
-            amount: isNaN(amount) ? 10 : amount,
-            category: 'General',
+            amount: isNaN(amount) ? 100 : amount,
+            selected: true,
           });
-        } else if (hasDueMatch || line.toLowerCase().includes('task') || line.toLowerCase().includes('submit') || line.toLowerCase().includes('finish') || line.toLowerCase().includes('do') || line.toLowerCase().includes('assignment')) {
+        } else if (
+          line.toLowerCase().includes('task') ||
+          line.toLowerCase().includes('submit') ||
+          line.toLowerCase().includes('finish') ||
+          line.toLowerCase().includes('assignment') ||
+          line.toLowerCase().includes('due')
+        ) {
           items.push({
-            id: `item-${Date.now()}-${idx}`,
+            id: `dump_${Date.now()}_${idx}`,
             type: 'task',
             title: line,
-            dueDate: todayStr,
+            selected: true,
           });
         } else {
-          // Default to quick note
           items.push({
-            id: `item-${Date.now()}-${idx}`,
+            id: `dump_${Date.now()}_${idx}`,
             type: 'note',
             title: line,
-            detail: `Captured via Brain Dump on ${new Date().toLocaleTimeString()}`,
+            selected: true,
           });
         }
       });
 
       setParsedItems(items);
-      setIsParsing(false);
-      haptics.save();
+      setIsSorting(false);
+      triggerHaptic('success');
     }, 400);
   };
 
-  const removeItem = (id: string) => {
-    haptics.warning();
-    setParsedItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const handleCommit = async () => {
-    if (parsedItems.length === 0) return;
-    haptics.milestone();
+  const handleCommitAll = async () => {
+    triggerHaptic('milestone');
     triggerConfettiBurst();
-    setCommitted(true);
 
-    const newTasks: Task[] = [...(data?.tasks || [])];
-    const newExpenses: Expense[] = [...(data?.expenses || [])];
-    const newNotes: NoteItem[] = [...(data?.notes || [])];
     const todayStr = new Date().toISOString().split('T')[0];
-    const monthKey = todayStr.substring(0, 7);
+    const newTasks: Task[] = [];
+    const newExpenses: Expense[] = [];
 
-    parsedItems.forEach(item => {
-      if (item.type === 'task') {
-        newTasks.unshift({
-          id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          text: item.title,
-          completed: false,
-          date: todayStr,
-          dueDate: item.dueDate || todayStr,
-        });
-      } else if (item.type === 'expense') {
-        newExpenses.unshift({
-          id: `expense-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          amount: item.amount || 0,
-          category: item.category || 'General',
-          note: item.title,
-          date: todayStr,
-        });
-      } else if (item.type === 'note') {
-        newNotes.unshift({
-          id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          title: item.title,
-          content: item.detail || item.title,
-          pageView: 'lined',
-          monthKey,
-          isArchived: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
-    });
+    parsedItems
+      .filter((i) => i.selected)
+      .forEach((i) => {
+        if (i.type === 'task') {
+          newTasks.push({
+            id: `task_${Date.now()}_${Math.random()}`,
+            text: i.title,
+            completed: false,
+            date: todayStr,
+          });
+        } else if (i.type === 'expense') {
+          newExpenses.push({
+            id: `exp_${Date.now()}_${Math.random()}`,
+            amount: i.amount || 100,
+            category: 'General',
+            note: i.title,
+            date: todayStr,
+          });
+        }
+      });
 
-    await updateData({
-      tasks: newTasks,
-      expenses: newExpenses,
-      notes: newNotes,
-    });
+    const updatedTasks = [...newTasks, ...(data.tasks || [])];
+    const updatedExpenses = [...newExpenses, ...(data.expenses || [])];
 
-    setTimeout(() => {
-      handleAppBack(navigate);
-    }, 1500);
+    await updateData({ tasks: updatedTasks, expenses: updatedExpenses });
+    setParsedItems([]);
+    setInputText('');
+    navigate('/');
   };
 
   return (
-    <div className="w-full space-y-4 max-w-lg mx-auto flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => handleAppBack(navigate)}
-            className="p-2 -ml-2 rounded-full hover:bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] transition-colors active:scale-95"
-            aria-label="Back"
-          >
-            <ChevronLeft size={22} />
-          </button>
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--md-primary)] uppercase tracking-wider">
-              <Wand2 size={14} />
-              <span>AI Multi-Intent Ingestion</span>
-            </div>
-            <h1 className="text-2xl font-black text-[var(--md-on-surface)] tracking-tight">
-              Brain Dump HUD
-            </h1>
+    <div className="w-full text-white selection:bg-[#BF5AF2]/30">
+      <LargeTitleHeader
+        title="Brain Dump"
+        subtitle="Unload thoughts, tasks & expenses"
+        tint="#BF5AF2"
+        onBack={() => navigate('/')}
+      />
+
+      <div className="flex flex-col gap-3 pb-2">
+        {/* Distraction-Free Input Field */}
+        <div className="w-full bg-[#1C1C1E] rounded-[28px] p-5 border border-white/[0.06] shadow-xl flex flex-col gap-3">
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Type anything freely: 'Coffee Rs 120, submit DBMS assignment tomorrow, study OS for 2 hours'..."
+            className="w-full h-36 bg-transparent text-white text-[16px] placeholder-[rgba(235,235,245,0.30)] focus:outline-none resize-none leading-relaxed"
+          />
+
+          <div className="flex justify-end pt-2 border-t border-white/[0.06]">
+            <Button
+              variant="prominent"
+              tint="#BF5AF2"
+              size="md"
+              disabled={!inputText.trim() || isSorting}
+              onClick={handleSortWithLuna}
+              icon={<Sparkle weight="fill" />}
+            >
+              {isSorting ? 'Analyzing...' : 'Sort with Luna'}
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Input Card */}
-      <div className="p-4 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex flex-col gap-3">
-        <label className="text-xs font-bold text-[var(--md-on-surface-variant)] uppercase tracking-wider flex items-center gap-1.5">
-          <Layers size={14} />
-          <span>Dump Your Thoughts Here</span>
-        </label>
-        <textarea
-          value={inputText}
-          onChange={e => setInputText(e.target.value)}
-          placeholder="Paste or write anything: expenses, tasks, workout notes, or quick ideas..."
-          rows={4}
-          className="w-full p-3 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-sm text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none focus:ring-2 focus:ring-[var(--md-primary)] resize-none"
-        />
-
-        {/* Quick Sample Chips */}
-        <div className="flex flex-wrap gap-1.5">
-          {SAMPLE_PROMPTS.map((prompt, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => {
-                setInputText(prompt);
-                haptics.tap();
-              }}
-              className="px-2.5 py-1 rounded-full bg-[var(--md-surface-container-high)] text-[11px] font-medium text-[var(--md-on-surface-variant)] hover:text-[var(--md-primary)] border border-[var(--md-outline-variant)] truncate max-w-full"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={handleParse}
-          disabled={!inputText.trim() || isParsing}
-          className="w-full py-3 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-1"
-        >
-          <Sparkles size={16} />
-          <span>{isParsing ? 'Parsing with AI...' : 'Parse & Categorize'}</span>
-        </motion.button>
-      </div>
-
-      {/* Ingestion Preview List */}
-      <AnimatePresence>
+        {/* Parsed Items Breakdown */}
         {parsedItems.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 15 }}
-            className="flex flex-col gap-3"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[var(--md-on-surface)] uppercase tracking-wider">
-                Recognized Items ({parsedItems.length})
-              </span>
-              <span className="text-xs text-[var(--md-primary)] font-semibold">
-                Tap check below to sync
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {parsedItems.map(item => (
-                <div
+          <div className="flex flex-col gap-3">
+            <GroupedList header="Detected Items">
+              {parsedItems.map((item) => (
+                <ListRow
                   key={item.id}
-                  className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center justify-between gap-3 shadow-xs"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      item.type === 'task'
-                        ? 'bg-[var(--md-primary-container)] text-[var(--md-primary)]'
-                        : item.type === 'expense'
-                        ? 'bg-[var(--md-secondary-container)] text-[var(--md-secondary)]'
-                        : 'bg-[var(--md-tertiary-container)] text-[var(--md-tertiary)]'
-                    }`}>
-                      {item.type === 'task' ? <ListTodo size={18} /> : item.type === 'expense' ? <Wallet size={18} /> : <FileText size={18} />}
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--md-primary)] block">
-                        {item.type} {item.amount ? `• $${item.amount}` : ''}
-                      </span>
-                      <p className="text-sm font-medium text-[var(--md-on-surface)] truncate">
-                        {item.title}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="p-2 text-[var(--md-on-surface-variant)] hover:text-red-500 transition-colors flex-shrink-0"
-                    aria-label="Remove item"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                  icon={
+                    item.type === 'task' ? (
+                      <CheckCircle weight="bold" />
+                    ) : item.type === 'expense' ? (
+                      <Wallet weight="bold" />
+                    ) : (
+                      <NotePencil weight="bold" />
+                    )
+                  }
+                  iconTint={
+                    item.type === 'task'
+                      ? '#0A84FF'
+                      : item.type === 'expense'
+                      ? '#30D158'
+                      : '#FFD60A'
+                  }
+                  title={item.title}
+                  subtitle={item.type.toUpperCase()}
+                  trailing={item.amount ? `Rs ${item.amount}` : undefined}
+                />
               ))}
-            </div>
+            </GroupedList>
 
-            {/* Commit Button */}
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={handleCommit}
-              disabled={committed}
-              className="w-full py-4 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] font-bold text-base flex items-center justify-center gap-2 shadow-lg transition-all mt-2"
+            <Button
+              variant="prominent"
+              tint="#0A84FF"
+              className="w-full"
+              onClick={handleCommitAll}
             >
-              <CheckCircle2 size={18} />
-              <span>{committed ? 'Synced to LifeOS!' : `Sync All ${parsedItems.length} Items to LifeOS`}</span>
-            </motion.button>
-          </motion.div>
+              Add All to LifeOS
+            </Button>
+          </div>
         )}
-      </AnimatePresence>
-
-      {/* Luna Companion Section */}
-      <div className="mt-auto p-4 rounded-3xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] flex items-center gap-3">
-        <OrbiCompanion variant={committed ? 'tasks-done' : 'notes-spark'} size={56} />
-        <div>
-          <span className="text-xs font-bold text-[var(--md-primary)] block">Luna Smart Ingestion</span>
-          <p className="text-xs text-[var(--md-on-surface-variant)]">
-            One text dump cleanly routes your tasks, expenses, and notes with zero manual tab switching.
-          </p>
-        </div>
       </div>
     </div>
   );
-};
-
-export default BrainDump;
+}

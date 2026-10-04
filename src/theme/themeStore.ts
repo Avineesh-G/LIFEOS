@@ -77,18 +77,18 @@ export function isDarkModeActive(mode: ThemeMode): boolean {
  * Writes CSS variables to documentElement
  */
 export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; isDark: boolean } {
-  const isDark = isDarkModeActive(config.mode);
-  const scheme = getSchemeForPalette(config.paletteId, isDark);
+  const isDark = true;
+  const scheme = getSchemeForPalette(config.paletteId, true);
   const vars = schemeToCssVariables(scheme);
 
   if (typeof document !== 'undefined') {
     const root = document.documentElement;
 
-    // Toggle .dark class on html
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    // Always keep .dark class on html for iOS 26 dark canvas
+    root.classList.add('dark');
+    root.style.backgroundColor = '#000000';
+    if (document.body) {
+      document.body.style.backgroundColor = '#000000';
     }
 
     // Write CSS variables
@@ -98,7 +98,7 @@ export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; i
 
     // Set dataset
     root.setAttribute('data-palette', config.paletteId);
-    root.setAttribute('data-theme-mode', config.mode);
+    root.setAttribute('data-theme-mode', 'dark');
 
     // Update <meta name="theme-color">
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -107,10 +107,10 @@ export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; i
       metaThemeColor.setAttribute('name', 'theme-color');
       document.head.appendChild(metaThemeColor);
     }
-    metaThemeColor.setAttribute('content', scheme.surface);
+    metaThemeColor.setAttribute('content', '#000000');
   }
 
-  return { scheme, isDark };
+  return { scheme, isDark: true };
 }
 
 /**

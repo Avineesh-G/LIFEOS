@@ -1,6 +1,7 @@
 import type { AppData, NoteItem } from '../types.ts';
 import { getLetAiReadData, getSectionPermissions, isNoteExcludedFromAi, redactSensitiveInformation } from '../utils/aiSecurity.ts';
 import { getAggregatedUsageSummary } from './aiUsageTracker.ts';
+import { getStoredLocation } from '../utils/geolocation.ts';
 import { format } from 'date-fns';
 
 /**
@@ -92,11 +93,17 @@ export function buildTargetedAiContext(query: string, data: AppData): string {
     }
   }
 
-  // 8. Outings & Trip Plans (if permitted & relevant)
-  if (perms.outings && (lowerQuery.includes('outing') || lowerQuery.includes('trip') || lowerQuery.includes('plan') || lowerQuery.includes('travel') || lowerQuery.includes('vacation'))) {
+  // 8. Outings & Location Context (if permitted & relevant)
+  if (perms.outings && (isGeneralQuery || lowerQuery.includes('outing') || lowerQuery.includes('trip') || lowerQuery.includes('plan') || lowerQuery.includes('travel') || lowerQuery.includes('weekend') || lowerQuery.includes('saturday') || lowerQuery.includes('sunday') || lowerQuery.includes('place') || lowerQuery.includes('visit') || lowerQuery.includes('food') || lowerQuery.includes('spot') || lowerQuery.includes('cafe'))) {
+    const loc = getStoredLocation();
+    const locStr = loc.city
+      ? `${loc.city}${loc.region ? `, ${loc.region}` : ''}${loc.country ? `, ${loc.country}` : ''}`
+      : 'Current Local City';
+    contextBlocks.push(`User Location Context: Base city is ${locStr}. Ground all travel times, transit (metro/bus/cabs), and outing places in and around this location.`);
+
     const outingsList = (data as any).outings || [];
     if (outingsList.length === 0) {
-      contextBlocks.push('Outings: No outing plans logged.');
+      contextBlocks.push('Outings: No upcoming outing plans logged.');
     } else {
       const summaryList = outingsList.slice(0, 3).map((o: any) => {
         const title = o.title || o.name || 'Outing Plan';
@@ -111,7 +118,7 @@ export function buildTargetedAiContext(query: string, data: AppData): string {
   }
 
   // 9. Shopping Lists (if permitted & relevant)
-  if (perms.shopping && (lowerQuery.includes('shop') || lowerQuery.includes('buy') || lowerQuery.includes('cart') || lowerQuery.includes('item'))) {
+  if (perms.shopping && (lowerQuery.includes('shop') || lowerQuery.includes('buy') || lowerQuery.includes('cart') || lowerQuery.includes('item') || lowerQuery.includes('gear') || lowerQuery.includes('checklist'))) {
     const lists = data.shoppingLists || [];
     const allItems = lists.flatMap(l => l.items || []);
     const pendingItems = allItems.filter(i => !i.checked);

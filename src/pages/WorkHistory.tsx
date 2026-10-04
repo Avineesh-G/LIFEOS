@@ -1,24 +1,29 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+/**
+ * LifeOS — WorkHistory Component (`/history`) - iOS 26 Liquid Glass
+ */
+
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft,
-  Sparkles, Loader2, Calendar, Check, AlertTriangle, TrendingUp,
-  Clock, Award, ChevronLeft, ChevronRight, PieChart, ShieldCheck,
-  NotebookPen
-} from 'lucide-react';
-import {
-  FlatwareIcon,
-  ExerciseIcon,
-  ListAltCheckIcon,
-  WalletIcon,
-} from '../components/icons/MaterialSymbols';
-import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+  CaretLeft,
+  CaretRight,
+  Sparkle,
+  ForkKnife,
+  Barbell,
+  CheckSquare,
+  Wallet,
+  Notebook,
+} from '@phosphor-icons/react';
+import { format, parseISO } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { handleAppBack } from '../utils/backNavigation';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
-import { SkeletonGate, SkeletonCard } from '../components/Skeleton';
-import type { AppData, NutritionLog, WorkoutLog, Task, Expense } from '../types';
+import { Toolbar } from '../ui/navigation/Toolbar';
+import { Segmented } from '../ui/controls/Segmented';
+import { Button } from '../ui/controls/Button';
+import { Badge } from '../ui/controls/Badge';
+import { EmptyState } from '../ui/feedback/EmptyState';
+import type { AppData } from '../types';
 
 interface WorkHistoryProps {
   data: AppData;
@@ -27,16 +32,13 @@ interface WorkHistoryProps {
 
 type HistoryTab = 'nutrition' | 'gym' | 'todo' | 'spending' | 'notes';
 
-const TABS: { id: HistoryTab; icon: any; title: string; color: string }[] = [
-  { id: 'nutrition', icon: FlatwareIcon,    title: 'Nutrition History', color: 'text-accent' },
-  { id: 'gym',       icon: ExerciseIcon,    title: 'Gym History',       color: 'text-accent' },
-  { id: 'todo',      icon: ListAltCheckIcon, title: 'Tasks History',     color: 'text-accent' },
-  { id: 'spending',  icon: WalletIcon,      title: 'Spending History',  color: 'text-accent' },
-  { id: 'notes',     icon: NotebookPen,     title: 'Notes & Ideas History', color: 'text-accent' },
+const TABS: { value: HistoryTab; label: string }[] = [
+  { value: 'nutrition', label: 'Nutrition' },
+  { value: 'gym', label: 'Gym' },
+  { value: 'todo', label: 'Tasks' },
+  { value: 'spending', label: 'Spending' },
+  { value: 'notes', label: 'Notes' },
 ];
-
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } };
 
 export default function WorkHistory({ data }: WorkHistoryProps) {
   const navigate = useNavigate();
@@ -105,7 +107,6 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       triggerHaptic('success');
     } catch (err) {
       console.error(err);
-      alert('Failed to generate nutrition insights. Check your Groq API key in Settings.');
     } finally {
       setNutritionAiLoading(false);
     }
@@ -152,7 +153,6 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       triggerHaptic('success');
     } catch (err) {
       console.error(err);
-      alert('Failed to generate gym insights. Check your Groq API key in Settings.');
     } finally {
       setGymAiLoading(false);
     }
@@ -202,13 +202,6 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     return { total, dailyAvg, topCategory, catTotals };
   }, [monthlyExpenses]);
 
-  // ── 5. NOTES FILTER & STATS ──
-  const monthlyNotes = useMemo(() => {
-    return (data.notes || [])
-      .filter(n => n.monthKey === selectedMonth || (n.createdAt && n.createdAt.startsWith(selectedMonth)))
-      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
-  }, [data.notes, selectedMonth]);
-
   const handleRunSpendingAi = async () => {
     if (monthlyExpenses.length === 0) return;
     triggerHaptic('ai');
@@ -219,15 +212,19 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
       triggerHaptic('success');
     } catch (err) {
       console.error(err);
-      alert('Failed to generate spending insights. Check your Groq API key in Settings.');
     } finally {
       setSpendingAiLoading(false);
     }
   };
 
-  const currentTabMeta = TABS.find(t => t.id === activeTab)!;
+  // ── 5. NOTES FILTER & STATS ──
+  const monthlyNotes = useMemo(() => {
+    return (data.notes || [])
+      .filter(n => n.monthKey === selectedMonth || (n.createdAt && n.createdAt.startsWith(selectedMonth)))
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+  }, [data.notes, selectedMonth]);
 
-  // ── Windowed list virtualization ──
+  // Virtualization
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   useEffect(() => {
@@ -248,632 +245,370 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [activeTab, selectedMonth, monthlyNutritionLogs.length, monthlyGymLogs.length, monthlyTasks.length, monthlyExpenses.length]);
+  }, []);
 
   return (
-    <SkeletonGate
-      ready={!!data}
-      skeleton={
-        <div className="space-y-4 max-w-xl mx-auto">
-          <SkeletonCard height="h-16" />
-          <SkeletonCard height="h-14" />
-          <div className="grid grid-cols-2 gap-2.5">
-            <SkeletonCard height="h-20" />
-            <SkeletonCard height="h-20" />
-            <SkeletonCard height="h-20" />
-            <SkeletonCard height="h-20" />
-          </div>
-          <SkeletonCard height="h-32" />
-          <SkeletonCard height="h-32" />
-        </div>
-      }
-    >
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 max-w-xl mx-auto">
-      {/* ── Header Card ── */}
-      <motion.div
-        variants={item}
-        className="rounded-[28px] p-4 liquid-glass border border-[var(--card-border)] shadow-sm flex items-center justify-between gap-3"
-      >
-        <button
-          onClick={() => { handleAppBack(navigate); }}
-          className="w-10 h-10 rounded-full bg-[var(--card-surface)] border border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark flex items-center justify-center active:scale-95 transition-all shadow-xs shrink-0"
-          aria-label="Go Back"
-        >
-          <ArrowLeft size={18} strokeWidth={2.2} />
-        </button>
-        <div className="text-center min-w-0 flex-1">
-          <p className="text-[10px] sm:text-[11px] font-tag font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-0.5 truncate">
-            Logs & Analytics
-          </p>
-          <h1 className="text-lg sm:text-xl font-heading font-bold text-primary-light dark:text-primary-dark tracking-tight truncate">
-            Activity History
-          </h1>
-        </div>
-        <div className="w-10 flex justify-end shrink-0">
-          <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent-primary)]/80 mr-3" />
-        </div>
-      </motion.div>
+    <div className="min-h-screen bg-black text-white pb-32">
+      {/* ── Toolbar ── */}
+      <Toolbar
+        leading={
+          <button
+            onClick={() => handleAppBack(navigate)}
+            className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+          >
+            <CaretLeft size={22} weight="bold" />
+          </button>
+        }
+        center={
+          <span className="text-sm font-semibold text-white">
+            History Timeline
+          </span>
+        }
+      />
 
-      {/* ── Month Selector Bar ── */}
-      <motion.div variants={item} className="rounded-[24px] p-2.5 liquid-glass border border-[var(--card-border)] flex items-center justify-between gap-2 shadow-xs">
-        <button
-          onClick={handlePrevMonth}
-          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
-          title="Previous Month"
-        >
-          <ChevronLeft size={18} />
-        </button>
+      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
+        {/* ── Month Selector ── */}
+        <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between">
+          <button
+            onClick={handlePrevMonth}
+            className="p-2 rounded-xl text-[#8E8E93] hover:text-white hover:bg-[#2C2C2E] transition-colors"
+            title="Previous Month"
+          >
+            <CaretLeft size={18} weight="bold" />
+          </button>
 
-        <div className="flex items-center gap-2 py-1.5 px-4 rounded-[16px] bg-[var(--card-surface)] border border-[var(--card-border)] font-heading font-bold text-xs sm:text-sm text-primary-light dark:text-primary-dark">
-          <Calendar size={15} className="text-accent" />
-          <span>{format(monthDate, 'MMMM yyyy')}</span>
-        </div>
-
-        <button
-          onClick={handleNextMonth}
-          className="w-9 h-9 rounded-[14px] flex items-center justify-center bg-[var(--card-surface)] border border-[var(--card-border)] hover:border-accent/50 active:scale-95 transition-all text-secondary-light dark:text-secondary-dark"
-          title="Next Month"
-        >
-          <ChevronRight size={18} />
-        </button>
-      </motion.div>
-
-      {/* ── 5 Symbols Only Switcher ── */}
-      <motion.div variants={item} className="w-full">
-        <div className="grid grid-cols-5 gap-2 w-full p-2 rounded-[24px] liquid-glass border border-[var(--card-border)] shadow-xs">
-          {TABS.map(tab => {
-            const isActive = activeTab === tab.id;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  triggerHaptic('light');
-                  setActiveTab(tab.id);
-                }}
-                className={`relative flex items-center justify-center py-3 rounded-xl border transition-all active:scale-95 ${
-                  isActive
-                    ? 'bg-accent/15 dark:bg-accent/25 border-accent/50 text-accent shadow-sm shadow-accent/20 scale-[1.03]'
-                    : 'bg-transparent border-transparent text-secondary-light dark:text-secondary-dark hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
-                }`}
-                title={tab.title}
-                aria-label={tab.title}
-              >
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-accent' : tab.color} />
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent absolute bottom-1 shadow-sm" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* ── Section Title Header ── */}
-      <div className="flex items-center justify-between px-1 pt-1 pb-0.5">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-accent" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-            {currentTabMeta.title}
-          </h2>
-        </div>
-        <span className="text-[11px] font-medium text-muted-light dark:text-muted-dark font-mono">
-          {format(monthDate, 'MMM yyyy')}
-        </span>
-      </div>
-
-      {/* ── TAB 1: NUTRITION HISTORY (AI ANALYSIS) ── */}
-      {activeTab === 'nutrition' && (
-        <motion.div key="nutrition" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
-          {/* Nutrition Cards Arrangement: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Avg / Day</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{nutritionStats.avgCals} <span className="text-xs font-mono font-normal">kcal</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Days Logged</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{nutritionStats.daysLogged} <span className="text-xs font-mono font-normal">days</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Target Hit Rate</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 break-words leading-tight">{nutritionStats.targetHitPct}%</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Consumed</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{Math.round(nutritionStats.totalCals).toLocaleString('en-IN')} <span className="text-xs font-mono font-normal">kcal</span></p>
-            </div>
+          <div className="text-center">
+            <span className="text-sm font-semibold text-white block">
+              {format(monthDate, 'MMMM yyyy')}
+            </span>
+            <span className="text-[11px] text-[#8E8E93]">Monthly Archive</span>
           </div>
 
-          {/* AI Nutrition Analysis Card */}
-          <div className="card p-4 space-y-3 border border-emerald-500/30 bg-emerald-500/5">
-            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <Sparkles size={18} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Nutrition Analysis</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Dietary trends & smart advice</p>
-                </div>
+          <button
+            onClick={handleNextMonth}
+            className="p-2 rounded-xl text-[#8E8E93] hover:text-white hover:bg-[#2C2C2E] transition-colors"
+            title="Next Month"
+          >
+            <CaretRight size={18} weight="bold" />
+          </button>
+        </div>
+
+        {/* ── Tab Selector ── */}
+        <Segmented
+          options={TABS}
+          value={activeTab}
+          onChange={(val) => {
+            triggerHaptic('selection');
+            setActiveTab(val as HistoryTab);
+          }}
+          tint="#AC8E68"
+        />
+
+        {/* ── 1. NUTRITION TAB ── */}
+        {activeTab === 'nutrition' && (
+          <div className="space-y-4">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Days Logged</span>
+                <span className="text-xl font-bold text-white">{nutritionStats.daysLogged}</span>
               </div>
-              <button
-                onClick={handleRunNutritionAi}
-                disabled={nutritionAiLoading || monthlyNutritionLogs.length === 0}
-                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
-              >
-                {nutritionAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                {nutritionAiResult ? 'Refresh' : 'Analyze'}
-              </button>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Avg / Day</span>
+                <span className="text-xl font-bold text-[#FF9F0A]">{nutritionStats.avgCals} kcal</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Target Hit</span>
+                <span className="text-xl font-bold text-[#30D158]">{nutritionStats.targetHitPct}%</span>
+              </div>
             </div>
 
-            {nutritionAiResult && (
-              <div className="space-y-2 pt-2 border-t border-emerald-500/20">
-                <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
-                  "{nutritionAiResult.summary}"
-                </p>
-                {nutritionAiResult.tips && nutritionAiResult.tips.length > 0 && (
-                  <ul className="space-y-1 pt-1">
-                    {nutritionAiResult.tips.map((tip: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Nutrition Daily Log Cards */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-              Daily Nutrition Cards ({monthlyNutritionLogs.length})
-            </h3>
-            {monthlyNutritionLogs.length === 0 ? (
-              <div className="card p-6 text-center text-muted-light dark:text-muted-dark text-xs">
-                No nutrition logs found for this month.
-              </div>
-            ) : (
-              <>
-                {monthlyNutritionLogs.slice(0, visibleCount).map(log => {
-                const targetCals = data.profile?.currentCalorieTarget || 2000;
-                const pct = Math.min((log.dailyTotal / targetCals) * 100, 100);
-                const isOver = log.dailyTotal > targetCals * 1.1;
-                const isUnder = log.dailyTotal < targetCals * 0.85;
-
-                return (
-                  <div key={log.id} className="card p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
-                          {format(parseISO(log.date), 'EEE, d MMM yyyy')}
-                        </span>
-                        {log.isSaved && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-                            Saved
-                          </span>
-                        )}
-                      </div>
-                      <span className={`text-xs font-mono font-bold ${isOver ? 'text-red-500' : isUnder ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {Math.round(log.dailyTotal)} / {targetCals} kcal
-                      </span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full h-2 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${isOver ? 'bg-red-500' : isUnder ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-
-                    {/* Meals breakdown chips */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {log.mealsEaten.map(m => {
-                        const isSkipped = m.items.some(i => i.id === 'skipped');
-                        const mealCals = m.items.reduce((sum, i) => sum + (i.calories * i.portion), 0);
-                        const slotName = m.slot || 'meal';
-                        const label = slotName === 'nightCanteen' ? 'Night Canteen' : slotName.charAt(0).toUpperCase() + slotName.slice(1);
-                        return (
-                          <div
-                            key={m.slot}
-                            className="text-[11px] px-2 py-1 rounded-lg bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark flex items-center gap-1.5"
-                          >
-                            <span className="font-medium text-secondary-light dark:text-secondary-dark">{label}:</span>
-                            <span className="font-bold font-mono text-primary-light dark:text-primary-dark">
-                              {isSkipped ? 'Skipped' : `${Math.round(mealCals)} kcal`}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+            {/* AI Coach Action */}
+            {monthlyNutritionLogs.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#FF9F0A]/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkle size={18} weight="fill" className="text-[#FF9F0A]" />
+                    <span className="text-sm font-semibold text-white">Monthly Nutrition Coach</span>
                   </div>
-                );
-              })}
-              {visibleCount < monthlyNutritionLogs.length && (
-                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-                </div>
-              )}
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── TAB 2: GYM HISTORY ── */}
-      {activeTab === 'gym' && (
-        <motion.div key="gym" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
-          {/* Gym Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Workouts</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{gymStats.totalWorkouts} <span className="text-xs font-mono font-normal">sessions</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Sets Done</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-rose-600 dark:text-rose-400 break-words leading-tight">{gymStats.totalSets} <span className="text-xs font-mono font-normal">sets</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Top Split</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{gymStats.topSplit}</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Avg Sets / Day</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">
-                {gymStats.totalWorkouts > 0 ? Math.round(gymStats.totalSets / gymStats.totalWorkouts) : 0} <span className="text-xs font-mono font-normal">sets</span>
-              </p>
-            </div>
-          </div>
-
-          {/* AI Gym Insights */}
-          <div className="card p-4 space-y-3 border border-rose-500/30 bg-rose-500/5">
-            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                  <Sparkles size={18} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Gym Progression</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Training consistency analysis</p>
-                </div>
-              </div>
-              <button
-                onClick={handleRunGymAi}
-                disabled={gymAiLoading || monthlyGymLogs.length === 0}
-                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
-              >
-                {gymAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                {gymAiResult ? 'Refresh' : 'Analyze'}
-              </button>
-            </div>
-
-            {gymAiResult && (
-              <div className="space-y-2 pt-2 border-t border-rose-500/20">
-                <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
-                  "{gymAiResult.summary}"
-                </p>
-                {gymAiResult.tips && gymAiResult.tips.length > 0 && (
-                  <ul className="space-y-1 pt-1">
-                    {gymAiResult.tips.map((tip: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-rose-500 flex-shrink-0 mt-0.5" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Workout Cards */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-              Workout Sessions ({monthlyGymLogs.length})
-            </h3>
-            {monthlyGymLogs.length === 0 ? (
-              <div className="card p-6 text-center text-muted-light dark:text-muted-dark text-xs">
-                No gym workout logs found for this month.
-              </div>
-            ) : (
-              <>
-                {monthlyGymLogs.slice(0, visibleCount).map(log => {
-                const totalSets = (log.exercises || []).reduce((s, e) => s + (e.sets?.filter(st => st.completed)?.length || 0), 0);
-                const duration = log.startTime && log.endTime ? Math.round((log.endTime - log.startTime) / 60000) : null;
-
-                return (
-                  <div key={log.id} className="card p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-sm text-primary-light dark:text-primary-dark">
-                          {format(parseISO(log.date), 'EEE, d MMM yyyy')}
-                        </span>
-                        <p className="text-xs font-bold text-accent font-sans">{log.type}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-mono font-bold text-secondary-light dark:text-secondary-dark">
-                          {totalSets} sets
-                        </span>
-                        {duration && (
-                          <p className="text-[10px] text-muted-light dark:text-muted-dark font-mono">{duration} mins</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Exercises list */}
-                    <div className="space-y-1.5 pt-1 border-t border-white/[0.05]">
-                      {(log.exercises || []).map((ex, idx) => {
-                        const completedCount = (ex.sets || []).filter(s => s.completed).length;
-                        const topWeight = Math.max(...(ex.sets || []).map(s => s.weight || 0), 0);
-                        return (
-                          <div key={idx} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-black/[0.02] dark:bg-white/[0.03]">
-                            <span className="font-medium text-primary-light dark:text-primary-dark">{ex.name}</span>
-                            <span className="font-mono text-[11px] text-secondary-light dark:text-secondary-dark">
-                              {completedCount} sets {topWeight > 0 ? `· max ${topWeight}kg` : ''}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-              {visibleCount < monthlyGymLogs.length && (
-                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-                </div>
-              )}
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── TAB 3: TO-DO TASKS HISTORY ── */}
-      {activeTab === 'todo' && (
-        <motion.div key="todo" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
-          {/* Tasks Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Completed</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-emerald-600 dark:text-emerald-400 break-words leading-tight">{todoStats.completed} <span className="text-xs font-mono font-normal">done</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Tasks</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{todoStats.total} <span className="text-xs font-mono font-normal">tasks</span></p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Completion Rate</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{todoStats.rate}%</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Pending Tasks</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-amber-600 dark:text-amber-400 break-words leading-tight">{Math.max(0, todoStats.total - todoStats.completed)} <span className="text-xs font-mono font-normal">left</span></p>
-            </div>
-          </div>
-
-          {/* Tasks List */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-              Tasks Completed / Logged ({monthlyTasks.length})
-            </h3>
-            {monthlyTasks.length === 0 ? (
-              <div className="card p-6 text-center text-muted-light dark:text-muted-dark text-xs">
-                No tasks found for this month.
-              </div>
-            ) : (
-              <>
-                {monthlyTasks.slice(0, visibleCount).map(task => (
-                <div key={task.id} className="card p-3.5 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${task.completed ? 'bg-emerald-500 text-white' : 'border border-border-light dark:border-border-dark text-transparent'}`}>
-                      <Check size={14} strokeWidth={3} />
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${task.completed ? 'line-through text-muted-light dark:text-muted-dark' : 'text-primary-light dark:text-primary-dark'}`}>
-                        {task.text}
-                      </p>
-                      {task.subtask && (
-                        <p className="text-xs text-secondary-light dark:text-secondary-dark">{task.subtask}</p>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono text-muted-light dark:text-muted-dark whitespace-nowrap">
-                    {task.date}
-                  </span>
-                </div>
-              ))}
-              {visibleCount < monthlyTasks.length && (
-                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-                </div>
-              )}
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── TAB 4: SPENDING HISTORY (AI ANALYSIS) ── */}
-      {activeTab === 'spending' && (
-        <motion.div key="spending" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
-          {/* Spending Stat Cards: 2x2 balanced grid */}
-          <div className="grid grid-cols-2 gap-2 compact:gap-2.5 w-full">
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Total Spent</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-accent break-words leading-tight">₹{Math.round(spendingStats.total).toLocaleString('en-IN')}</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Daily Avg</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">₹{Math.round(spendingStats.dailyAvg).toLocaleString('en-IN')}</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Top Category</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{spendingStats.topCategory}</p>
-            </div>
-            <div className="card p-2.5 compact:p-3.5 rounded-[20px] space-y-1 min-w-0 overflow-hidden">
-              <span className="label-mono text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block break-words">Expenses Logged</span>
-              <p className="text-base compact:text-lg sm:text-xl font-black font-sans text-primary-light dark:text-primary-dark break-words leading-tight">{monthlyExpenses.length} <span className="text-xs font-mono font-normal">records</span></p>
-            </div>
-          </div>
-
-          {/* AI Spending Analysis Card */}
-          <div className="card p-4 space-y-3 border border-accent/30 bg-accent/5">
-            <div className="flex flex-col compact:flex-row compact:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-accent/20 text-accent flex items-center justify-center shrink-0">
-                  <Sparkles size={18} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-sm text-primary-light dark:text-primary-dark break-words">AI Spending Audit</h3>
-                  <p className="text-[11px] text-muted-light dark:text-muted-dark font-mono line-clamp-1 break-words">Waste reduction & budget tips</p>
-                </div>
-              </div>
-              <button
-                onClick={handleRunSpendingAi}
-                disabled={spendingAiLoading || monthlyExpenses.length === 0}
-                className="w-full compact:w-auto btn-primary py-2 px-3.5 min-h-[44px] text-xs flex items-center justify-center gap-1.5 rounded-xl disabled:opacity-50 shrink-0"
-              >
-                {spendingAiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                {spendingAiResult ? 'Refresh' : 'Analyze'}
-              </button>
-            </div>
-
-            {spendingAiResult && (
-              <div className="space-y-2 pt-2 border-t border-accent/20">
-                <p className="text-xs text-primary-light dark:text-primary-dark italic leading-relaxed">
-                  "{spendingAiResult.summary}"
-                </p>
-                {spendingAiResult.tips && spendingAiResult.tips.length > 0 && (
-                  <ul className="space-y-1 pt-1">
-                    {spendingAiResult.tips.map((tip: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-secondary-light dark:text-secondary-dark">
-                        <Check size={13} className="text-accent flex-shrink-0 mt-0.5" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Expenses List */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-              Expenses ({monthlyExpenses.length})
-            </h3>
-            {monthlyExpenses.length === 0 ? (
-              <div className="card p-6 text-center text-muted-light dark:text-muted-dark text-xs">
-                No expenses logged for this month.
-              </div>
-            ) : (
-              <>
-                {monthlyExpenses.slice(0, visibleCount).map(expense => (
-                <div key={expense.id} className="card p-3.5 flex items-center justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-accent/10 text-accent">
-                        {expense.category}
-                      </span>
-                      <span className="text-[11px] font-mono text-muted-light dark:text-muted-dark">
-                        {expense.date}
-                      </span>
-                    </div>
-                    {expense.note && (
-                      <p className="text-xs text-primary-light dark:text-primary-dark">{expense.note}</p>
-                    )}
-                  </div>
-                  <span className="text-sm font-black font-mono text-primary-light dark:text-primary-dark">
-                    ₹{expense.amount}
-                  </span>
-                </div>
-              ))}
-              {visibleCount < monthlyExpenses.length && (
-                <div ref={sentinelRef} className="h-10 flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-                </div>
-              )}
-              </>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── TAB 5: NOTES & IDEAS HISTORY ── */}
-      {activeTab === 'notes' && (
-        <motion.div key="notes" variants={container} initial="hidden" animate="show" className="space-y-4 w-full min-w-0">
-          <div className="grid grid-cols-3 gap-2 w-full">
-            <div className="card p-3 rounded-[20px] space-y-1 text-center">
-              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Total Notes</span>
-              <p className="text-lg font-black text-accent">{monthlyNotes.length}</p>
-            </div>
-            <div className="card p-3 rounded-[20px] space-y-1 text-center">
-              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">Lined Pages</span>
-              <p className="text-lg font-black text-primary-light dark:text-primary-dark">
-                {monthlyNotes.filter(n => n.pageView === 'lined').length}
-              </p>
-            </div>
-            <div className="card p-3 rounded-[20px] space-y-1 text-center">
-              <span className="text-[10px] text-muted-light dark:text-muted-dark uppercase tracking-wider block">White / Grid</span>
-              <p className="text-lg font-black text-primary-light dark:text-primary-dark">
-                {monthlyNotes.filter(n => n.pageView !== 'lined').length}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono">
-                Saved Notes & Brainstorms ({monthlyNotes.length})
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigate('/notes')}
-                className="text-xs font-bold text-accent hover:underline"
-              >
-                Open Notes Interface →
-              </button>
-            </div>
-
-            {monthlyNotes.length === 0 ? (
-              <div className="card p-8 text-center text-muted-light dark:text-muted-dark text-xs space-y-2">
-                <NotebookPen size={28} className="mx-auto text-accent/40" />
-                <p>No notes or ideas found for this month.</p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {monthlyNotes.map(note => (
-                  <div
-                    key={note.id}
-                    onClick={() => navigate('/notes')}
-                    className="card p-4 rounded-2xl cursor-pointer hover:border-accent/40 transition-all space-y-1.5"
+                  <Button
+                    size="sm"
+                    variant="prominent"
+                    tint="#FF9F0A"
+                    onClick={handleRunNutritionAi}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-bold text-primary-light dark:text-primary-dark line-clamp-1">
-                        {note.title || 'Untitled Thought'}
-                      </h4>
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-accent/10 text-accent">
-                        {note.pageView || 'white'}
+                    {nutritionAiLoading ? 'Analyzing...' : 'Analyze'}
+                  </Button>
+                </div>
+
+                {nutritionAiResult && (
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06] space-y-1">
+                    <p className="text-white font-medium">{nutritionAiResult.summary || nutritionAiResult.feedback}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Logs List */}
+            {monthlyNutritionLogs.length > 0 ? (
+              <div className="space-y-2">
+                {monthlyNutritionLogs.slice(0, visibleCount).map((log) => (
+                  <div
+                    key={log.date}
+                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-white block">
+                        {format(parseISO(log.date), 'EEEE, MMM d')}
+                      </span>
+                      <span className="text-xs text-[#8E8E93]">
+                        {log.mealsEaten?.length || 0} meals logged
                       </span>
                     </div>
-                    <p className="text-xs text-secondary-light dark:text-secondary-dark line-clamp-2">
-                      {note.content || '(Empty page)'}
-                    </p>
-                    <span className="text-[10px] text-muted-light dark:text-muted-dark block">
-                      {format(new Date(note.updatedAt || note.createdAt), 'MMM d, yyyy • h:mm a')}
+                    <span className="text-base font-bold text-[#FF9F0A]">
+                      {log.dailyTotal} kcal
                     </span>
                   </div>
                 ))}
               </div>
+            ) : (
+              <EmptyState
+                icon={<ForkKnife size={36} weight="light" className="text-[#FF9F0A]" />}
+                title="No nutrition logs this month"
+                description="Logs will appear here once meals are recorded."
+              />
             )}
           </div>
-        </motion.div>
-      )}
-      </motion.div>
-    </SkeletonGate>
+        )}
+
+        {/* ── 2. GYM TAB ── */}
+        {activeTab === 'gym' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Workouts</span>
+                <span className="text-xl font-bold text-white">{gymStats.totalWorkouts}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Sets</span>
+                <span className="text-xl font-bold text-[#FF453A]">{gymStats.totalSets}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Split</span>
+                <span className="text-sm font-bold text-white truncate block">{gymStats.topSplit}</span>
+              </div>
+            </div>
+
+            {monthlyGymLogs.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#FF453A]/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkle size={18} weight="fill" className="text-[#FF453A]" />
+                    <span className="text-sm font-semibold text-white">Monthly Workout Coach</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="prominent"
+                    tint="#FF453A"
+                    onClick={handleRunGymAi}
+                  >
+                    {gymAiLoading ? 'Analyzing...' : 'Analyze'}
+                  </Button>
+                </div>
+
+                {gymAiResult && (
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06]">
+                    <p className="text-white font-medium">{gymAiResult.summary || gymAiResult.feedback}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {monthlyGymLogs.length > 0 ? (
+              <div className="space-y-2">
+                {monthlyGymLogs.slice(0, visibleCount).map((log) => (
+                  <div
+                    key={log.id}
+                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-white block">
+                        {log.type}
+                      </span>
+                      <span className="text-xs text-[#8E8E93]">
+                        {format(parseISO(log.date), 'MMM d')} · {log.exercises?.length || 0} exercises
+                      </span>
+                    </div>
+                    <Badge label={log.type} color="#8E8E93" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Barbell size={36} weight="light" className="text-[#FF453A]" />}
+                title="No workouts this month"
+                description="Completed workout routines will be saved here."
+              />
+            )}
+          </div>
+        )}
+
+        {/* ── 3. TASKS TAB ── */}
+        {activeTab === 'todo' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Tasks</span>
+                <span className="text-xl font-bold text-white">{todoStats.total}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Done</span>
+                <span className="text-xl font-bold text-[#30D158]">{todoStats.completed}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Success Rate</span>
+                <span className="text-xl font-bold text-[#0A84FF]">{todoStats.rate}%</span>
+              </div>
+            </div>
+
+            {monthlyTasks.length > 0 ? (
+              <div className="space-y-2">
+                {monthlyTasks.slice(0, visibleCount).map((task) => (
+                  <div
+                    key={task.id}
+                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <span className={`text-sm font-medium block truncate ${task.completed ? 'line-through text-[#8E8E93]' : 'text-white'}`}>
+                        {task.text}
+                      </span>
+                      <span className="text-xs text-[#8E8E93]">
+                        {format(parseISO(task.date), 'MMM d')} {task.subtask && `· ${task.subtask}`}
+                      </span>
+                    </div>
+                    <Badge
+                      label={task.completed ? 'Completed' : 'Pending'}
+                      color={task.completed ? '#30D158' : '#8E8E93'}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<CheckSquare size={36} weight="light" className="text-[#0A84FF]" />}
+                title="No tasks recorded this month"
+                description="Tasks for this month will appear here."
+              />
+            )}
+          </div>
+        )}
+
+        {/* ── 4. SPENDING TAB ── */}
+        {activeTab === 'spending' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Spent</span>
+                <span className="text-lg font-bold text-[#30D158]">₹{spendingStats.total}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Daily Avg</span>
+                <span className="text-lg font-bold text-white">₹{spendingStats.dailyAvg}</span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Cat</span>
+                <span className="text-xs font-bold text-white truncate block">{spendingStats.topCategory}</span>
+              </div>
+            </div>
+
+            {monthlyExpenses.length > 0 && (
+              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#30D158]/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkle size={18} weight="fill" className="text-[#30D158]" />
+                    <span className="text-sm font-semibold text-white">Monthly Spending Coach</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="prominent"
+                    tint="#30D158"
+                    onClick={handleRunSpendingAi}
+                  >
+                    {spendingAiLoading ? 'Analyzing...' : 'Analyze'}
+                  </Button>
+                </div>
+
+                {spendingAiResult && (
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06]">
+                    <p className="text-white font-medium">{spendingAiResult.summary || spendingAiResult.feedback}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {monthlyExpenses.length > 0 ? (
+              <div className="space-y-2">
+                {monthlyExpenses.slice(0, visibleCount).map((exp) => (
+                  <div
+                    key={exp.id}
+                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-white block">{exp.note || exp.category}</span>
+                      <span className="text-xs text-[#8E8E93]">
+                        {format(parseISO(exp.date), 'MMM d')} · {exp.category}
+                      </span>
+                    </div>
+                    <span className="text-base font-bold text-white">
+                      ₹{exp.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Wallet size={36} weight="light" className="text-[#30D158]" />}
+                title="No expenses logged this month"
+                description="Recorded expenses will be archived here."
+              />
+            )}
+          </div>
+        )}
+
+        {/* ── 5. NOTES TAB ── */}
+        {activeTab === 'notes' && (
+          <div className="space-y-4">
+            <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between">
+              <span className="text-xs text-[#8E8E93]">Total Notes & Ideas</span>
+              <span className="text-base font-bold text-white">{monthlyNotes.length}</span>
+            </div>
+
+            {monthlyNotes.length > 0 ? (
+              <div className="space-y-2">
+                {monthlyNotes.slice(0, visibleCount).map((note) => (
+                  <div
+                    key={note.id}
+                    onClick={() => navigate('/notes')}
+                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] hover:border-white/[0.2] transition-colors cursor-pointer"
+                  >
+                    <span className="text-sm font-semibold text-white block truncate">{note.title || 'Untitled Note'}</span>
+                    <p className="text-xs text-[#8E8E93] line-clamp-2 mt-1">{note.content}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Notebook size={36} weight="light" className="text-[#BF5AF2]" />}
+                title="No notes written this month"
+                description="Notes and Brain Dumps created in this month will appear here."
+              />
+            )}
+          </div>
+        )}
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="h-4" />
+      </div>
+    </div>
   );
 }

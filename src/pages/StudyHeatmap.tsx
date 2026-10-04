@@ -1,8 +1,9 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
-import { format, subDays, parseISO, startOfDay, isSameDay } from 'date-fns';
-import { handleAppBack } from '../utils/backNavigation';
-import { SkeletonGate, SkeletonStatRow, SkeletonCard } from '../components/Skeleton';
+import { CaretLeft, CalendarDots, Flame } from '../ui/tokens/icons';
+import { Toolbar } from '../ui/navigation/Toolbar';
+import { GroupedList } from '../ui/grouped/GroupedList';
+import { format, subDays } from 'date-fns';
 import type { AppData } from '../types';
 
 interface StudyHeatmapProps {
@@ -15,17 +16,24 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
   const days = Array.from({ length: 112 }, (_, i) => subDays(today, 111 - i));
 
   const dayMap: Record<string, number> = {};
-  data.studySessions.forEach(s => {
+  (data.studySessions || []).forEach((s) => {
     dayMap[s.date] = (dayMap[s.date] || 0) + s.duration;
   });
 
-  const maxMinutes = Math.max(...Object.values(dayMap), 1);
-  const totalHours = Math.round(data.studySessions.reduce((sum, s) => sum + s.duration, 0) / 60);
-  const avgMinutes = data.studySessions.length > 0 
-    ? Math.round(data.studySessions.reduce((sum, s) => sum + s.duration, 0) / [...new Set(data.studySessions.map(s => s.date))].length)
-    : 0;
+  const totalHours = Math.round(
+    (data.studySessions || []).reduce((sum, s) => sum + s.duration, 0) / 60
+  );
+  const activeDaysCount = [...new Set((data.studySessions || []).map((s) => s.date))].length;
+  const avgMinutes =
+    activeDaysCount > 0
+      ? Math.round(
+          (data.studySessions || []).reduce((sum, s) => sum + s.duration, 0) /
+            activeDaysCount
+        )
+      : 0;
 
-  const bestDay = Object.entries(dayMap).sort((a, b) => b[1] - a[1])[0];
+  const bestDayEntry = Object.entries(dayMap).sort((a, b) => b[1] - a[1])[0];
+  const bestDayHours = bestDayEntry ? (bestDayEntry[1] / 60).toFixed(1) : '0';
 
   const getIntensity = (date: Date) => {
     const key = format(date, 'yyyy-MM-dd');
@@ -38,11 +46,11 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
   };
 
   const intensityColors = [
-    'bg-black/5 dark:bg-white/5',
-    'bg-cyan-200 dark:bg-cyan-950',
-    'bg-cyan-400 dark:bg-cyan-800',
-    'bg-cyan-600 dark:bg-cyan-600',
-    'bg-cyan-800 dark:bg-cyan-400',
+    'bg-white/5',
+    'bg-[#64D2FF]/25',
+    'bg-[#64D2FF]/50',
+    'bg-[#64D2FF]/75',
+    'bg-[#64D2FF]',
   ];
 
   const weeks = [];
@@ -50,68 +58,70 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
     weeks.push(days.slice(i, i + 7));
   }
 
-  const isReady = data.studySessions.length > 0;
-
   return (
-    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
-      <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1 active:scale-95">
-        <ChevronLeft size={16} /> Back
-      </button>
+    <div className="w-full flex flex-col pb-32">
+      <Toolbar
+        leading={
+          <button
+            type="button"
+            onClick={() => navigate('/study')}
+            className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
+          >
+            <CaretLeft size={20} weight="bold" />
+            <span>Study</span>
+          </button>
+        }
+        center={<span className="font-bold text-white text-base">Study Consistency</span>}
+      />
 
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-sans mb-1.5">Academics &amp; Consistency</p>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">Heatmap</h1>
+      {/* 3 Metric Cards */}
+      <div className="grid grid-cols-3 gap-2 my-4">
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-[#64D2FF] font-mono">{totalHours}h</div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Total Hours</div>
+        </div>
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-white font-mono">{avgMinutes}m</div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Daily Average</div>
+        </div>
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-white font-mono">{bestDayHours}h</div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Peak Day</div>
+        </div>
       </div>
 
-      <SkeletonGate
-        ready={isReady}
-        skeleton={
-          <>
-            <SkeletonStatRow />
-            <SkeletonCard height="h-40" />
-          </>
-        }
-      >
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
-            <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{totalHours}h</div>
-            <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Total</div>
-          </div>
-          <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
-            <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{avgMinutes}m</div>
-            <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Daily Avg</div>
-          </div>
-          <div className="liquid-glass border border-[var(--card-border)] rounded-[26px] p-4 sm:p-5 text-center shadow-[var(--shadow-card)]">
-            <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestDay ? Math.round(bestDay[1] / 60 * 10) / 10 : 0}h</div>
-            <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-sans">Best Day</div>
-          </div>
-        </div>
-
-        {/* Heatmap Grid */}
-        <div className="liquid-glass border border-[var(--card-border)] rounded-[28px] p-6 sm:p-7 shadow-[var(--shadow-card)] overflow-x-auto">
-          <div className="flex gap-1 min-w-max">
+      {/* Heatmap Grid Card */}
+      <GroupedList header="16-WEEK CONSISTENCY GRID">
+        <div className="p-5 overflow-x-auto space-y-4">
+          <div className="flex gap-1.5 min-w-max justify-center">
             {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-1">
+              <div key={wi} className="flex flex-col gap-1.5">
                 {week.map((day, di) => (
                   <div
                     key={di}
-                    title={`${format(day, 'MMM d')}: ${dayMap[format(day, 'yyyy-MM-dd')] || 0} min`}
-                    className={`w-3 h-3 rounded-sm ${intensityColors[getIntensity(day)]} transition-all hover:ring-2 hover:ring-accent/30`}
+                    title={`${format(day, 'MMM d, yyyy')}: ${
+                      dayMap[format(day, 'yyyy-MM-dd')] || 0
+                    } min`}
+                    className={`w-3.5 h-3.5 rounded-[4px] ${
+                      intensityColors[getIntensity(day)]
+                    } transition-transform hover:scale-125`}
                   />
                 ))}
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-2 mt-4 text-xs text-secondary-light dark:text-secondary-dark">
-            <span>Less</span>
-            {intensityColors.map((c, i) => (
-              <div key={i} className={`w-3 h-3 rounded-sm ${c}`} />
-            ))}
-            <span>More</span>
+
+          <div className="flex items-center justify-between text-xs text-white/40 pt-2 border-t border-white/8">
+            <span>Less focus</span>
+            <div className="flex items-center gap-1.5">
+              {intensityColors.map((c, i) => (
+                <div key={i} className={`w-3.5 h-3.5 rounded-[4px] ${c}`} />
+              ))}
+            </div>
+            <span>High focus (2h+)</span>
           </div>
         </div>
-      </SkeletonGate>
+      </GroupedList>
     </div>
   );
 }

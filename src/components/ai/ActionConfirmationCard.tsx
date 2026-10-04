@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Check, X, Sparkles, Loader2, CheckSquare, ShoppingCart, MapPin, Utensils, Dumbbell, Wallet } from 'lucide-react';
+import {
+  Check,
+  X,
+  Sparkle,
+  SpinnerGap,
+  CheckSquare,
+  ShoppingCart,
+  MapPin,
+  ForkKnife,
+  Barbell,
+  Wallet,
+} from '../../ui/tokens/icons';
 import { AiActionProposal, executeConfirmedAiAction } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -24,20 +35,20 @@ export default function ActionConfirmationCard({
   const getActionIcon = () => {
     switch (proposal.type) {
       case 'ADD_TASK':
-        return <CheckSquare size={14} className="text-[var(--md-primary)]" />;
+        return <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />;
       case 'ADD_EXPENSE':
-        return <Wallet size={14} className="text-emerald-500" />;
+        return <Wallet size={16} weight="duotone" className="text-[#30D158]" />;
       case 'ADD_SHOPPING_ITEM':
       case 'ADD_MULTIPLE_SHOPPING_ITEMS':
-        return <ShoppingCart size={14} className="text-emerald-500" />;
+        return <ShoppingCart size={16} weight="duotone" className="text-[#FF375F]" />;
       case 'CREATE_OUTING':
-        return <MapPin size={14} className="text-amber-500" />;
+        return <MapPin size={16} weight="duotone" className="text-[#40C8E0]" />;
       case 'LOG_MEAL':
-        return <Utensils size={14} className="text-orange-500" />;
+        return <ForkKnife size={16} weight="duotone" className="text-[#FF9F0A]" />;
       case 'LOG_WORKOUT':
-        return <Dumbbell size={14} className="text-cyan-500" />;
+        return <Barbell size={16} weight="duotone" className="text-[#FF453A]" />;
       default:
-        return <Sparkles size={14} className="text-[var(--md-primary)]" />;
+        return <Sparkle size={16} weight="fill" className="text-[#BF5AF2]" />;
     }
   };
 
@@ -68,7 +79,7 @@ export default function ActionConfirmationCard({
 
   if (status === 'cancelled') {
     return (
-      <div className="p-3 rounded-2xl bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs text-[var(--md-on-surface-variant)] italic">
+      <div className="p-3 rounded-2xl bg-[#1C1C1E] border border-white/10 text-xs text-white/50 italic">
         Action cancelled.
       </div>
     );
@@ -76,31 +87,31 @@ export default function ActionConfirmationCard({
 
   if (status === 'confirmed') {
     return (
-      <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-2">
-        <Check size={15} className="text-emerald-500 shrink-0" />
-        <span>Confirmed & Executed: {proposal.title}</span>
+      <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-300 font-semibold flex items-center gap-2">
+        <Check size={16} weight="bold" className="text-emerald-400 shrink-0" />
+        <span>Confirmed: {proposal.title}</span>
       </div>
     );
   }
 
   return (
-    <div className="p-3.5 rounded-2xl bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] hover:border-[var(--md-primary)]/40 shadow-xs space-y-2.5 my-2.5 transition-all">
+    <div className="p-3.5 rounded-[22px] bg-[#1C1C1E] border border-white/12 shadow-lg space-y-2.5 my-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-bold text-[var(--md-primary)]">
+        <div className="flex items-center gap-2 text-xs font-bold text-white">
           {getActionIcon()}
           <span>Proposed AI Action</span>
         </div>
-        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)]">
+        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#BF5AF2]/20 text-[#BF5AF2]">
           1-Tap Save
         </span>
       </div>
 
       <div>
-        <h4 className="text-xs font-bold text-[var(--md-on-surface)] leading-snug">
+        <h4 className="text-xs font-bold text-white leading-snug">
           {proposal.title}
         </h4>
         {proposal.description && (
-          <p className="text-[11px] text-[var(--md-on-surface-variant)] font-mono mt-0.5 leading-relaxed">
+          <p className="text-[11px] text-white/60 mt-0.5 leading-relaxed font-sans">
             {proposal.description}
           </p>
         )}
@@ -111,7 +122,7 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className="py-1.5 px-3 rounded-xl border border-[var(--md-outline-variant)] text-[11px] font-bold text-[var(--md-on-surface-variant)] hover:bg-[var(--md-surface-container-highest)] transition-all"
+          className="py-2 px-3 rounded-xl border border-white/15 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all active:scale-95"
         >
           Cancel
         </button>
@@ -119,9 +130,9 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="py-1.5 px-3 rounded-xl bg-[var(--md-primary)] text-[var(--md-on-primary)] hover:opacity-90 active:scale-95 text-[11px] font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all"
+          className="py-2 px-3 rounded-xl bg-gradient-to-r from-[#0A84FF] to-[#BF5AF2] text-white text-xs font-bold shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95"
         >
-          {loading ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+          {loading ? <SpinnerGap size={14} className="animate-spin" /> : <Check size={14} weight="bold" />}
           <span>Confirm & Add</span>
         </button>
       </div>

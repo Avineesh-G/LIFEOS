@@ -68,34 +68,34 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
   const generateRecapText = (): string => {
     if (!summary) return '';
     const lines: string[] = [];
-    lines.push(`📍 ${outing.name} — Expense Recap`);
+    lines.push(`${outing.name} — Expense Recap`);
     if (outing.place) lines.push(`Place: ${outing.place}`);
     lines.push(`Total Spent: ${formatPaiseToRupees(summary.totalCost)}`);
     lines.push('');
-    lines.push('⚖️ Net Balances:');
+    lines.push('Net Balances:');
 
     for (const [pId, bal] of summary.balances.entries()) {
       const name = getPersonName(pId);
       if (bal > 0) {
-        lines.push(`• ${name}: gets back ${formatPaiseToRupees(bal)}`);
+        lines.push(`- ${name}: gets back ${formatPaiseToRupees(bal)}`);
       } else if (bal < 0) {
-        lines.push(`• ${name}: owes ${formatPaiseToRupees(Math.abs(bal))}`);
+        lines.push(`- ${name}: owes ${formatPaiseToRupees(Math.abs(bal))}`);
       } else {
-        lines.push(`• ${name}: Settled (₹0)`);
+        lines.push(`- ${name}: Settled (Rs 0)`);
       }
     }
 
     if (summary.suggestedPayments.length > 0) {
       lines.push('');
-      lines.push('🤝 Suggested Payments:');
+      lines.push('Suggested Payments:');
       for (const p of summary.suggestedPayments) {
         lines.push(
-          `• ${getPersonName(p.fromPersonId)} pays ${getPersonName(p.toPersonId)} ${formatPaiseToRupees(p.amount)}`
+          `- ${getPersonName(p.fromPersonId)} pays ${getPersonName(p.toPersonId)} ${formatPaiseToRupees(p.amount)}`
         );
       }
     } else {
       lines.push('');
-      lines.push('🎉 All balances are settled!');
+      lines.push('All balances are settled.');
     }
 
     return lines.join('\n');

@@ -1,12 +1,10 @@
 {
   "versionCode": 61,
-  "versionName": "3.2.3",
+  "versionName": "3.2.5",
   "releaseDate": "2026-10-04",
-  "apkSize": "13.84 MB",
-  "apkSizeBytes": 14515399,
-  "releaseNotes": "LifeOS v3.2.3 (Build 61):\n• Path Memory Navigation: Sequential back navigation across all interfaces so pressing back retraces your exact steps\n• Unified Hardware & Gesture Back: Closes active overlays/sheets first, then traverses path history step-by-step to root exit guard\n• Universal In-App Back Polish: All screen header back buttons and chevrons now seamlessly follow path memory",
+  "apkSize": "13.81 MB",
+  "apkSizeBytes": 14482685,
+  "releaseNotes": "LifeOS v3.2.5 (Build 61):\n• Liquid Metaball Navigation: Organic diving waist with soft liquid refraction aura and pure icon navigation\n• Exact Route Memory Backtracking: Universal sequential back navigation across all interfaces to Home\n• Apple SF Symbols Iconography: Unified optical weighting across all screens and sheets\n• Refined Dashboard Metrics: Seamless embedded rings and harmonized card spacing",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "e0d47bc2bbf244db88597a5931e2634469f6a7b5afa5ce874f6e9d7ea8d29fc7"
+  "sha256": "bb4a6ae8dc3e7305d582bfff1c7e75be7358cf857118a68e6ff98fb8c5ad59fb"
 }
-
-

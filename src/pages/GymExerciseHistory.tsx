@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, TrendingUp } from 'lucide-react';
+import { CaretLeft, Barbell, TrendUp } from '../ui/tokens/icons';
+import { Toolbar } from '../ui/navigation/Toolbar';
+import { GroupedList } from '../ui/grouped/GroupedList';
+import { ListRow } from '../ui/grouped/ListRow';
 import { format } from 'date-fns';
-import { handleAppBack } from '../utils/backNavigation';
 import type { AppData } from '../types';
 
 interface GymExerciseHistoryProps {
@@ -17,13 +19,16 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const decodedName = decodeURIComponent(exerciseName || '');
 
   const logs = (data.workoutLogs || [])
-    .filter(w => (w.exercises || []).some(e => e.name === decodedName))
+    .filter((w) => (w.exercises || []).some((e) => e.name === decodedName))
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  const sessions = logs.map(w => {
-    const ex = (w.exercises || []).find(e => e.name === decodedName);
+  const sessions = logs.map((w) => {
+    const ex = (w.exercises || []).find((e) => e.name === decodedName);
     const sets = Array.isArray(ex?.sets) ? ex.sets : [];
-    const bestSet = sets.reduce((best, s) => s.weight > best.weight ? s : best, sets[0] || { weight: 0, reps: 0 });
+    const bestSet = sets.reduce(
+      (best, s) => (s.weight > best.weight ? s : best),
+      sets[0] || { weight: 0, reps: 0 }
+    );
     const totalVolume = sets.reduce((sum, s) => sum + s.weight * s.reps, 0);
     return { date: w.date, sets, bestSet, totalVolume };
   });
@@ -38,89 +43,103 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setVisibleCount(prev => prev + PAGE_SIZE);
-      }
-    }, { rootMargin: '160px' });
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((prev) => prev + PAGE_SIZE);
+        }
+      },
+      { rootMargin: '160px' }
+    );
     obs.observe(el);
     return () => obs.disconnect();
   }, [sessions.length]);
 
-  const bestWeight = Math.max(...sessions.map(s => s.bestSet?.weight || 0), 0);
-  const bestReps = Math.max(...sessions.map(s => s.bestSet?.reps || 0), 0);
+  const bestWeight = Math.max(...sessions.map((s) => s.bestSet?.weight || 0), 0);
+  const bestReps = Math.max(...sessions.map((s) => s.bestSet?.reps || 0), 0);
 
   return (
-    <div className="space-y-6 sm:space-y-7 max-w-2xl mx-auto">
-      <button onClick={() => handleAppBack(navigate)} className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark hover:text-primary-light dark:hover:text-primary-dark transition-colors font-sans pt-1 active:scale-95">
-        <ChevronLeft size={16} /> Back
-      </button>
+    <div className="w-full flex flex-col pb-32">
+      <Toolbar
+        leading={
+          <button
+            type="button"
+            onClick={() => navigate('/gym')}
+            className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
+          >
+            <CaretLeft size={20} weight="bold" />
+            <span>Gym</span>
+          </button>
+        }
+        center={<span className="font-bold text-white text-base truncate max-w-[200px]">{decodedName}</span>}
+      />
 
-      <div>
-        <p className="text-[11px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-mono mb-1.5">Strength Analytics</p>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-primary-light dark:text-primary-dark font-sans">{decodedName || 'Exercise History'}</h1>
+      {/* 3 Metric Cards */}
+      <div className="grid grid-cols-3 gap-2 my-4">
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-white font-mono">{sessions.length}</div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Sessions</div>
+        </div>
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-[#FF453A] font-mono">
+            {bestWeight}
+            <span className="text-xs ml-0.5 text-white/60">kg</span>
+          </div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Best Weight</div>
+        </div>
+        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+          <div className="text-2xl font-black text-white font-mono">{bestReps}</div>
+          <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Best Reps</div>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
-          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{sessions.length}</div>
-          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Sessions</div>
-        </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
-          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestWeight}<span className="text-xs ml-0.5">kg</span></div>
-          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Best Weight</div>
-        </div>
-        <div className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[26px] p-4 sm:p-5 text-center shadow-sm">
-          <div className="text-2xl sm:text-3xl font-black text-primary-light dark:text-primary-dark font-mono">{bestReps}</div>
-          <div className="text-[11px] font-bold text-secondary-light dark:text-secondary-dark mt-1 uppercase tracking-wider font-mono">Best Reps</div>
-        </div>
+      {/* Session Log Insets */}
+      <div className="text-xs font-bold uppercase tracking-wider text-white/50 px-2 mb-2">
+        Recorded Sets ({sessions.length})
       </div>
 
-      {/* Sessions */}
-      <div className="space-y-3.5">
-        {sessions.slice(0, visibleCount).map((s, i) => (
-          <div key={i} className="bg-surface-light dark:bg-surface-dark border border-border-light/70 dark:border-border-dark/70 rounded-[28px] p-5 sm:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-medium">
-                {(() => {
-                  try {
-                    const d = new Date(s.date);
-                    return isNaN(d.getTime()) ? s.date : format(d, 'EEEE, MMM d');
-                  } catch {
-                    return s.date;
-                  }
-                })()}
-              </div>
-              <div className="text-xs text-secondary-light dark:text-secondary-dark">{s.sets.length} sets</div>
-            </div>
-            <div className="space-y-1.5">
-              {s.sets.map((set, si) => (
-                <div key={si} className="flex items-center justify-between text-sm">
-                  <span className="text-secondary-light dark:text-secondary-dark">Set {si + 1}</span>
-                  <span className="font-medium">{set.reps} reps @ {set.weight}kg</span>
+      {sessions.length === 0 ? (
+        <div className="p-8 rounded-[28px] bg-[#1C1C1E] border border-white/8 text-center text-white/50 text-sm">
+          No recorded sets for {decodedName} yet.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sessions.slice(0, visibleCount).map((s, i) => (
+            <GroupedList
+              key={i}
+              header={
+                <div className="flex items-center justify-between text-white/70">
+                  <span>
+                    {(() => {
+                      try {
+                        const d = new Date(s.date);
+                        return isNaN(d.getTime()) ? s.date : format(d, 'EEEE, MMM d');
+                      } catch {
+                        return s.date;
+                      }
+                    })()}
+                  </span>
+                  <span className="text-[11px] font-mono text-white/40">{s.totalVolume} kg volume</span>
                 </div>
+              }
+            >
+              {s.sets.map((set, si) => (
+                <ListRow
+                  key={si}
+                  icon={<Barbell size={16} weight="duotone" />}
+                  iconTint="#FF453A"
+                  title={`Set ${si + 1}`}
+                  trailing={
+                    <span className="font-mono font-bold text-white text-sm">
+                      {set.weight} kg × {set.reps} reps
+                    </span>
+                  }
+                  showSeparator={si < s.sets.length - 1}
+                />
               ))}
-            </div>
-            {s.totalVolume > 0 && (
-              <div className="mt-3 pt-3 border-t border-border-light dark:border-border-dark text-xs text-secondary-light dark:text-secondary-dark">
-                Total volume: <span className="font-medium text-primary-light dark:text-primary-dark">{s.totalVolume}kg</span>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {visibleCount < sessions.length && (
-          <div ref={sentinelRef} className="h-6 flex items-center justify-center py-2 text-xs text-secondary-light dark:text-secondary-dark opacity-60">
-            Loading more sessions...
-          </div>
-        )}
-      </div>
-
-      {sessions.length === 0 && (
-        <div className="text-center py-16 text-secondary-light dark:text-secondary-dark">
-          <TrendingUp size={32} className="mx-auto mb-3 opacity-40" />
-          <p>No history for this exercise</p>
+            </GroupedList>
+          ))}
+          <div ref={sentinelRef} className="h-4" />
         </div>
       )}
     </div>

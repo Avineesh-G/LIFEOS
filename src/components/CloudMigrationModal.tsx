@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CloudUpload, CheckCircle2, X, Sparkles, HardDrive, Dumbbell, FileText, CheckSquare, DollarSign, ShoppingBag } from 'lucide-react';
+import { 
+  CloudArrowUp, 
+  CheckCircle, 
+  Sparkle, 
+  Barbell, 
+  Note, 
+  CheckSquare, 
+  CurrencyDollar, 
+  Bag 
+} from '@phosphor-icons/react';
 import { User } from 'firebase/auth';
 import { triggerHaptic } from '../utils/haptics';
-import { saveData, cleanForFirestore } from '../db';
+import { saveData } from '../db';
 import type { AppData } from '../types';
 
 import { registerDismissible } from '../utils/backNavigation';
@@ -134,68 +143,68 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
       {/* ── One-Time Migration Dialog ── */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-transparent pointer-events-auto">
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md pointer-events-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 24 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 24 }}
               transition={{ type: 'spring', damping: 26, stiffness: 340 }}
-              className="w-full max-w-sm rounded-3xl bg-[var(--card-surface)] border border-blue-500/30 p-6 shadow-2xl space-y-4"
+              className="w-full max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 p-6 shadow-2xl space-y-4 font-sans text-left"
             >
               {/* Header Icon */}
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner">
-                  <CloudUpload size={24} className="animate-pulse" />
+                <div className="w-12 h-12 rounded-2xl bg-[#0A84FF]/15 text-[#0A84FF] flex items-center justify-center border border-[#0A84FF]/25">
+                  <CloudArrowUp size={26} weight="duotone" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                  One-Time Sync
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#0A84FF]/15 text-[#0A84FF] border border-[#0A84FF]/20">
+                  Cloud Sync
                 </span>
               </div>
 
               {/* Title & Explanation */}
               <div className="space-y-1.5 text-left">
-                <h3 className="text-base font-heading font-extrabold text-primary-light dark:text-primary-dark">
+                <h3 className="text-base font-bold text-white tracking-tight">
                   Move Existing Data to Cloud?
                 </h3>
-                <p className="text-xs text-secondary-light dark:text-secondary-dark leading-relaxed">
-                  We found existing workouts, notes, and tasks on this device. Would you like to move all of your progress to your Cloud Database account ({user?.email || 'your user account'})?
+                <p className="text-xs text-[#8E8E93] leading-relaxed">
+                  We found existing workouts, notes, and tasks on this device. Would you like to sync all of your progress to your Cloud account ({user?.email || 'your account'})?
                 </p>
               </div>
 
               {/* Detected Items Grid */}
-              <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-border-light dark:border-border-dark text-xs">
+              <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-[#2C2C2E] border border-white/5 text-xs">
                 {stats.workouts > 0 && (
-                  <div className="flex items-center gap-1.5 text-secondary-light dark:text-secondary-dark">
-                    <Dumbbell size={13} className="text-purple-500 shrink-0" />
-                    <span className="font-semibold text-primary-light dark:text-primary-dark">{stats.workouts}</span>
+                  <div className="flex items-center gap-2 text-[#8E8E93]">
+                    <Barbell size={15} weight="duotone" className="text-[#FF453A] shrink-0" />
+                    <span className="font-semibold text-white">{stats.workouts}</span>
                     <span className="text-[11px]">Workouts</span>
                   </div>
                 )}
                 {stats.notes > 0 && (
-                  <div className="flex items-center gap-1.5 text-secondary-light dark:text-secondary-dark">
-                    <FileText size={13} className="text-amber-500 shrink-0" />
-                    <span className="font-semibold text-primary-light dark:text-primary-dark">{stats.notes}</span>
+                  <div className="flex items-center gap-2 text-[#8E8E93]">
+                    <Note size={15} weight="duotone" className="text-[#FFD60A] shrink-0" />
+                    <span className="font-semibold text-white">{stats.notes}</span>
                     <span className="text-[11px]">Notes</span>
                   </div>
                 )}
                 {stats.tasks > 0 && (
-                  <div className="flex items-center gap-1.5 text-secondary-light dark:text-secondary-dark">
-                    <CheckSquare size={13} className="text-emerald-500 shrink-0" />
-                    <span className="font-semibold text-primary-light dark:text-primary-dark">{stats.tasks}</span>
+                  <div className="flex items-center gap-2 text-[#8E8E93]">
+                    <CheckSquare size={15} weight="duotone" className="text-[#30D158] shrink-0" />
+                    <span className="font-semibold text-white">{stats.tasks}</span>
                     <span className="text-[11px]">Tasks</span>
                   </div>
                 )}
                 {stats.expenses > 0 && (
-                  <div className="flex items-center gap-1.5 text-secondary-light dark:text-secondary-dark">
-                    <DollarSign size={13} className="text-rose-500 shrink-0" />
-                    <span className="font-semibold text-primary-light dark:text-primary-dark">{stats.expenses}</span>
+                  <div className="flex items-center gap-2 text-[#8E8E93]">
+                    <CurrencyDollar size={15} weight="duotone" className="text-[#FF375F] shrink-0" />
+                    <span className="font-semibold text-white">{stats.expenses}</span>
                     <span className="text-[11px]">Expenses</span>
                   </div>
                 )}
                 {stats.shopping > 0 && (
-                  <div className="flex items-center gap-1.5 text-secondary-light dark:text-secondary-dark">
-                    <ShoppingBag size={13} className="text-blue-500 shrink-0" />
-                    <span className="font-semibold text-primary-light dark:text-primary-dark">{stats.shopping}</span>
+                  <div className="flex items-center gap-2 text-[#8E8E93]">
+                    <Bag size={15} weight="duotone" className="text-[#0A84FF] shrink-0" />
+                    <span className="font-semibold text-white">{stats.shopping}</span>
                     <span className="text-[11px]">Lists</span>
                   </div>
                 )}
@@ -207,13 +216,13 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
                   type="button"
                   disabled={isMigrating}
                   onClick={handleMoveToCloud}
-                  className="w-full py-3 px-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-500/25 transition-all transform active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-xs shadow-lg shadow-[#0A84FF]/25 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isMigrating ? (
                     <span>Moving Data to Cloud...</span>
                   ) : (
                     <>
-                      <Sparkles size={14} />
+                      <Sparkle size={15} weight="fill" />
                       <span>Move to Cloud Database</span>
                     </>
                   )}
@@ -223,7 +232,7 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
                   type="button"
                   disabled={isMigrating}
                   onClick={handleDismiss}
-                  className="w-full py-2.5 px-4 rounded-2xl bg-transparent hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-secondary-light dark:text-secondary-dark font-medium text-xs transition-all text-center"
+                  className="w-full py-2.5 px-4 rounded-2xl bg-transparent hover:bg-white/5 text-[#8E8E93] font-medium text-xs transition-all text-center cursor-pointer"
                 >
                   Start Fresh / Don't Move
                 </button>
@@ -244,9 +253,9 @@ export default function CloudMigrationModal({ user, data, updateData }: CloudMig
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="p-3.5 rounded-2xl bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-2.5 text-xs font-semibold"
+              className="p-3.5 rounded-2xl bg-[#30D158] text-black shadow-xl flex items-center gap-2.5 text-xs font-semibold"
             >
-              <CheckCircle2 size={16} className="shrink-0" />
+              <CheckCircle size={18} weight="fill" className="shrink-0 text-black" />
               <span className="flex-1 leading-snug">{toastMessage}</span>
             </motion.div>
           </div>
