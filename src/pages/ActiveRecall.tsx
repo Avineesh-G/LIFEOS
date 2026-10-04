@@ -37,49 +37,16 @@ export interface Flashcard {
   reps: number;
 }
 
-const DEFAULT_DECKS: Flashcard[] = [
-  {
-    id: 'c1',
-    deck: 'Computer Science',
-    front: 'What is the time complexity of QuickSort in the average case?',
-    back: 'O(n log n) average time complexity. Worst case is O(n²) when the pivot chosen is the smallest or largest element.',
-    intervalDays: 1,
-    lastReviewed: new Date().toISOString().split('T')[0],
-    nextReview: new Date().toISOString().split('T')[0],
-    reps: 0,
-  },
-  {
-    id: 'c2',
-    deck: 'Computer Science',
-    front: 'What is the difference between a Process and a Thread?',
-    back: 'A Process has its own independent virtual memory space. Threads share the memory space and resources of their parent process.',
-    intervalDays: 1,
-    lastReviewed: new Date().toISOString().split('T')[0],
-    nextReview: new Date().toISOString().split('T')[0],
-    reps: 0,
-  },
-  {
-    id: 'c3',
-    deck: 'General Science',
-    front: 'What is the powerhouse of the cell and its main molecule?',
-    back: 'Mitochondria. It generates ATP (Adenosine Triphosphate) through cellular respiration.',
-    intervalDays: 3,
-    lastReviewed: new Date().toISOString().split('T')[0],
-    nextReview: new Date().toISOString().split('T')[0],
-    reps: 1,
-  },
-];
-
 export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateData: _updateData }) => {
   const navigate = useNavigate();
 
-  // Load flashcards from local storage or default
+  // Load flashcards from local storage
   const [cards, setCards] = useState<Flashcard[]>(() => {
     try {
       const saved = localStorage.getItem('lifeos_recall_cards');
-      return saved ? JSON.parse(saved) : DEFAULT_DECKS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return DEFAULT_DECKS;
+      return [];
     }
   });
 
@@ -92,7 +59,7 @@ export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateD
   // New Card Form
   const [newFront, setNewFront] = useState('');
   const [newBack, setNewBack] = useState('');
-  const [newDeck, setNewDeck] = useState('Computer Science');
+  const [newDeck, setNewDeck] = useState('General');
 
   // Filter cards by deck
   const filteredCards = useMemo(() => {

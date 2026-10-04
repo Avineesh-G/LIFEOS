@@ -42,6 +42,8 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
   const [speaking, setSpeaking] = useState(false);
   const [savedTasks, setSavedTasks] = useState<Record<number, boolean>>({});
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<any>(null);
@@ -61,6 +63,7 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
 
   const startRecording = async () => {
     haptics.tap();
+    setErrorMessage(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
@@ -85,13 +88,12 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
             setTranscript(text);
             generateSmartSummary(text);
             haptics.save();
+          } else {
+            setErrorMessage('No speech detected in recording.');
           }
         } catch (err: any) {
           console.warn('Transcription error:', err);
-          // Fallback simulation for offline/test
-          const sample = "Today we covered operating system kernel scheduling algorithms. Round Robin ensures fair CPU allocation while Priority Scheduling can lead to starvation. Need to finish homework questions 1 to 4 before next Tuesday.";
-          setTranscript(sample);
-          generateSmartSummary(sample);
+          setErrorMessage(err?.message || 'Voice transcription failed. Please verify API key and network.');
         } finally {
           setTranscribing(false);
         }
@@ -99,12 +101,9 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
 
       mediaRecorder.start();
       setIsRecording(true);
-    } catch (e) {
+    } catch (e: any) {
       console.warn('Mic access error:', e);
-      // Fallback
-      const sample = "Lecture summary on distributed databases: CAP theorem states consistency, availability, and partition tolerance cannot be achieved simultaneously. Homework: review assignment 3.";
-      setTranscript(sample);
-      generateSmartSummary(sample);
+      setErrorMessage('Microphone access denied or not available. Please grant audio permission.');
     }
   };
 
@@ -131,7 +130,7 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
       s.toLowerCase().includes('submit') ||
       s.toLowerCase().includes('review')
     );
-    setExtractedTasks(tasks.length ? tasks : ['Review lecture key concepts']);
+    setExtractedTasks(tasks);
 
     // Identify key takeaways
     setExtractedNotes(sentences.filter(s => !tasks.includes(s)).slice(0, 2));
@@ -255,6 +254,19 @@ export const VoiceTranscribe: React.FC<VoiceTranscribeProps> = ({ data, updateDa
           </p>
         </div>
       </div>
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 font-medium flex items-center justify-between">
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="text-[11px] font-bold underline text-red-300 hover:text-white ml-2 shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Transcript & Summary Content */}
       <AnimatePresence>

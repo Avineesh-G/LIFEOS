@@ -718,36 +718,40 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             <>
               <div ref={chatContainerRef} className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden pt-1.5 pb-2 px-0.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
                 {messages.length === 0 ? (
-                  <div className="flex-1 flex flex-col justify-between py-2 px-1 min-h-[360px]">
+                  <div className="flex-1 flex flex-col justify-between py-1 px-1 min-h-[340px]">
                     {/* Top / Center: Prominent Luna AI Mascot */}
-                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 my-auto pt-2">
-                      <div className="flex flex-col items-center justify-center p-1">
-                        <OrbiCompanion variant="notes-spark" size={110} interactive={true} />
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3.5 my-auto py-2">
+                      <div className="relative flex flex-col items-center justify-center p-2">
+                        {/* Ambient Aura Glow */}
+                        <div className="absolute inset-0 m-auto w-36 h-36 rounded-full bg-[var(--md-primary)]/10 blur-2xl pointer-events-none" />
+                        <div className="relative z-10 transition-transform hover:scale-105 active:scale-95 duration-200">
+                          <OrbiCompanion variant="notes-spark" size={150} interactive={true} />
+                        </div>
                       </div>
-                      <div className="space-y-1 max-w-xs mx-auto">
-                        <h3 className="text-base sm:text-lg font-black text-[var(--md-on-surface)] tracking-tight">
+                      <div className="space-y-1.5 max-w-xs mx-auto">
+                        <h3 className="text-lg sm:text-xl font-black text-[var(--md-on-surface)] tracking-tight">
                           Hi! I am Luna AI
                         </h3>
-                        <p className="text-[11.5px] text-[var(--md-on-surface-variant)] leading-relaxed">
+                        <p className="text-[12px] text-[var(--md-on-surface-variant)] leading-relaxed font-medium">
                           I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
                         </p>
                       </div>
                     </div>
 
                     {/* Bottom: Compact Quick Question Cards near Chat Input */}
-                    <div className="w-full pt-4 pb-1">
-                      <div className="grid grid-cols-2 gap-1.5 w-full">
+                    <div className="w-full pt-2 pb-1">
+                      <div className="grid grid-cols-2 gap-2 w-full">
                         {SPEC_STARTER_CHIPS.map((chip) => (
                           <button
                             key={chip.id}
                             type="button"
                             onClick={() => handleSendQuery(chip.label)}
-                            className="flex items-center gap-2 p-2 rounded-xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-left transition-all active:scale-97 group cursor-pointer shadow-2xs"
+                            className="flex items-center gap-2 p-2.5 rounded-2xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)]/60 text-left transition-all active:scale-97 group cursor-pointer shadow-xs hover:shadow-sm"
                           >
-                            <div className="w-6 h-6 rounded-lg bg-[var(--md-primary-container)] text-[var(--md-primary)] flex items-center justify-center shrink-0">
+                            <div className="w-7 h-7 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-primary)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                               {getChipIcon(chip.icon)}
                             </div>
-                            <span className="text-[10.5px] sm:text-[11px] font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-tight line-clamp-2">
+                            <span className="text-[11px] font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-tight line-clamp-2">
                               {chip.label}
                             </span>
                           </button>
@@ -997,7 +1001,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           ? 'Transcribing voice...'
                           : isRecording
                           ? 'Listening in real-time...'
-                          : 'Ask LifeOS or say "Add to-do task..."'
+                          : 'Ask Luna AI or say "Add to-do task..."'
                       }
                       className="w-full bg-transparent px-1 py-1 text-xs sm:text-sm font-medium text-[var(--md-on-surface)] placeholder-[var(--md-on-surface-variant)] focus:outline-none allow-select select-text cursor-text min-w-0"
                       style={{ pointerEvents: 'auto', touchAction: 'auto', userSelect: 'text' }}

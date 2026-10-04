@@ -45,6 +45,13 @@ public class MainActivity extends BridgeActivity {
         // Schedule background update checks so users get update alerts without opening the app
         UpdateCheckWorker.schedulePeriodicCheck(this);
 
+        // Ensure microphone recording permission is requested for Voice Transcription & Luna AI voice features
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, 1001);
+            }
+        }
+
         // 3. Native auto-healing: intercept any network or loading error and immediately fall back to local assets
         if (getBridge() != null) {
             getBridge().addWebViewListener(new WebViewListener() {

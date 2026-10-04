@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 58,
-  versionName: '3.2.0',
+  versionCode: 59,
+  versionName: '3.2.1',
   releaseDate: '2026-10-04',
-  apkSize: '13.82 MB',
-  apkSizeBytes: 14490000,
-  releaseNotes: 'LifeOS v3.2.0 (Build 58):\n• Spaced Repetition Active Recall Deck: Interactive 3D flip flashcards, Leitner review intervals (Again, Hard, Good, Easy), and deck creator\n• Voice Lecture & Meeting Smart Transcriber: Real-time waveform audio recorder, Groq Whisper transcription, Luna 3-bullet executive summary, and 1-tap task extraction into To-Do & Notes\n• Luna AI Conversational Assistant Revamp: Scaled companion mascot doll, compact quick-action suggestion chips, and high-speed Groq API integration\n• Study Suite Ecosystem: Integrated Active Recall & Voice Transcriber into the Study Hub\n• App-Wide Mobile Layout Optimization: Zero empty gaps, refined card padding, and optimized responsive layouts across all interfaces',
+  apkSize: '13.84 MB',
+  apkSizeBytes: 14515371,
+  releaseNotes: 'LifeOS v3.2.1 (Build 59):\n• Luna AI Mascot & Chat Refinement: Scaled interactive mascot doll, enlarged ambient aura, refined quick prompt chips, and placeholder polish\n• Android Microphone Audio Fix: Added RECORD_AUDIO permissions and runtime permission prompt to prevent access denial on voice recording\n• Clean Slate Engine: Removed mock flashcards and test speech fallbacks for 100% genuine user data\n• Mobile Responsive UI: Streamlined card geometry and spacing across all mobile aspect ratios',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;
