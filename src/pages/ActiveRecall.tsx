@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { OrbiCompanion } from '../components/illustrations/OrbiCompanion';
 import { haptics } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
+import { handleAppBack, registerDismissible } from '../utils/backNavigation';
 import { triggerConfettiBurst } from '../utils/confetti';
 import { AppData } from '../types';
 
@@ -56,6 +56,15 @@ export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateD
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Register dismissible so hardware/system back cleanly closes popup
+  useEffect(() => {
+    if (!showAddModal) return;
+    return registerDismissible('active-recall-add-modal', () => {
+      setShowAddModal(false);
+      return true;
+    });
+  }, [showAddModal]);
 
   // New Card Form
   const [newFront, setNewFront] = useState('');
@@ -350,7 +359,12 @@ export const ActiveRecall: React.FC<ActiveRecallProps> = ({ data: _data, updateD
       {/* Add Flashcard Modal */}
       <AnimatePresence>
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowAddModal(false);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-transparent p-4"
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
