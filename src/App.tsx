@@ -1,3 +1,4 @@
+import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion, getPageMotionProps } from './utils/motionConfig';
@@ -6,36 +7,43 @@ import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import Study from './pages/Study';
-import StudyTimer from './pages/StudyTimer';
-import StudyHistory from './pages/StudyHistory';
-import StudyHeatmap from './pages/StudyHeatmap';
-import Gym from './pages/Gym';
-import GymWorkout from './pages/GymWorkout';
-import GymSplit from './pages/GymSplit';
-import GymExerciseHistory from './pages/GymExerciseHistory';
-import GymOnboarding from './pages/GymOnboarding';
-import Nutrition from './pages/Nutrition';
-import Spending from './pages/Spending';
-import ShoppingLists from './pages/ShoppingLists';
-import ShoppingListDetail from './pages/ShoppingListDetail';
-import Timetable from './pages/Timetable';
-import Tasks from './pages/Tasks';
-import Laundry from './pages/Laundry';
-import WorkHistory from './pages/WorkHistory';
-import SettingsPage from './pages/Settings';
-import Vault from './pages/Vault';
-import DownloadPage from './pages/DownloadPage';
-import Auth from './pages/Auth';
-import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
-import { OutingsProvider } from './features/outings/context/OutingsContext';
-import DevShapes from './pages/DevShapes';
-import { detectSquircleSupport } from './utils/squircleDetect';
+import PageLoadingFallback from './components/common/PageLoadingFallback';
 
+// Dynamic lazy imports for instant cold start & efficient chunking
+const Study = lazy(() => import('./pages/Study'));
+const StudyTimer = lazy(() => import('./pages/StudyTimer'));
+const StudyHistory = lazy(() => import('./pages/StudyHistory'));
+const StudyHeatmap = lazy(() => import('./pages/StudyHeatmap'));
+const Gym = lazy(() => import('./pages/Gym'));
+const GymWorkout = lazy(() => import('./pages/GymWorkout'));
+const GymSplit = lazy(() => import('./pages/GymSplit'));
+const GymExerciseHistory = lazy(() => import('./pages/GymExerciseHistory'));
+const GymOnboarding = lazy(() => import('./pages/GymOnboarding'));
+const Nutrition = lazy(() => import('./pages/Nutrition'));
+const Spending = lazy(() => import('./pages/Spending'));
+const ShoppingLists = lazy(() => import('./pages/ShoppingLists'));
+const ShoppingListDetail = lazy(() => import('./pages/ShoppingListDetail'));
+const Timetable = lazy(() => import('./pages/Timetable'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const Laundry = lazy(() => import('./pages/Laundry'));
+const WorkHistory = lazy(() => import('./pages/WorkHistory'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const Vault = lazy(() => import('./pages/Vault'));
+const DownloadPage = lazy(() => import('./pages/DownloadPage'));
+const Auth = lazy(() => import('./pages/Auth'));
+const DevShapes = lazy(() => import('./pages/DevShapes'));
+const MorningBriefing = lazy(() => import('./pages/MorningBriefing'));
+const BrainDump = lazy(() => import('./pages/BrainDump'));
+const FlowRoom = lazy(() => import('./pages/FlowRoom'));
+const ActiveRecall = lazy(() => import('./pages/ActiveRecall'));
+const VoiceTranscribe = lazy(() => import('./pages/VoiceTranscribe'));
 const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
 const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
 const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
 const Notes = lazy(() => import('./pages/Notes'));
+
+import { OutingsProvider } from './features/outings/context/OutingsContext';
+import { detectSquircleSupport } from './utils/squircleDetect';
 import { auth } from './firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
@@ -115,6 +123,11 @@ function MainContent({
     { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/morning', element: <RouteErrorBoundary routeName="Morning Battle Plan"><MorningBriefing data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/brain-dump', element: <RouteErrorBoundary routeName="Brain Dump HUD"><BrainDump data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/flow', element: <RouteErrorBoundary routeName="Flow Room"><FlowRoom data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/recall', element: <RouteErrorBoundary routeName="Active Recall"><ActiveRecall data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/transcribe', element: <RouteErrorBoundary routeName="Voice Transcriber"><VoiceTranscribe data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/dev/shapes', element: <RouteErrorBoundary routeName="Squircle Shapes Board"><DevShapes /></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
       path: '/dev/palette',
@@ -161,7 +174,9 @@ function MainContent({
         style={{ minHeight: '100%' }}
         {...motionProps}
       >
-        {routeElements}
+        <Suspense fallback={<PageLoadingFallback />}>
+          {routeElements}
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );
@@ -437,7 +452,9 @@ function App() {
     return (
       <ThemeProvider>
         <DayThemeProvider>
-          <DownloadPage />
+          <Suspense fallback={<PageLoadingFallback />}>
+            <DownloadPage />
+          </Suspense>
         </DayThemeProvider>
       </ThemeProvider>
     );
@@ -447,9 +464,7 @@ function App() {
     return (
       <ThemeProvider>
         <DayThemeProvider>
-          <div className="min-h-screen flex items-center justify-center bg-transparent">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          </div>
+          <PageLoadingFallback />
         </DayThemeProvider>
       </ThemeProvider>
     );
@@ -460,7 +475,9 @@ function App() {
       <ThemeProvider>
         <DayThemeProvider>
           <NetworkStatusModal />
-          <Auth />
+          <Suspense fallback={<PageLoadingFallback />}>
+            <Auth />
+          </Suspense>
         </DayThemeProvider>
       </ThemeProvider>
     );

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, History, Grid3X3, ChevronRight, Play, BookOpen, Flame } from 'lucide-react';
+import { Clock, History, Grid3X3, ChevronRight, Play, BookOpen, Flame, Brain, Mic } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
@@ -64,6 +64,20 @@ export default function Study({ data }: StudyProps) {
       sub: 'Pomodoro & stopwatch',
       path: '/study/timer',
       badge: 'bg-m3-lavender-badge/70 dark:bg-m3-lavender-darkBadge/70 text-m3-lavender-text dark:text-m3-lavender-darkText',
+    },
+    {
+      icon: Brain,
+      label: 'Active Recall Decks',
+      sub: 'Spaced repetition Leitner flashcards',
+      path: '/recall',
+      badge: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400',
+    },
+    {
+      icon: Mic,
+      label: 'Voice Transcriber',
+      sub: 'Audio lecture summaries & action items',
+      path: '/transcribe',
+      badge: 'bg-rose-500/15 text-rose-600 dark:text-rose-400',
     },
     {
       icon: History,
@@ -241,10 +255,10 @@ export default function Study({ data }: StudyProps) {
       <motion.div variants={item} className="rounded-[30px] p-4 sm:p-5 liquid-glass border border-[var(--card-border)] shadow-[var(--shadow-card)] space-y-3">
         <div className="flex items-center justify-between px-1">
           <p className="text-[10.5px] font-bold uppercase tracking-wider text-[var(--text-muted)] font-mono">
-            Study Tools
+            Study Suite & Focus Tools
           </p>
           <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
-            3 utilities
+            {navLinks.length} utilities
           </span>
         </div>
 

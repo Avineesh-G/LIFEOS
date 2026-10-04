@@ -4,10 +4,11 @@ import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'da
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedWallet } from '../components/AnimatedIcons';
 import { BottomSheet } from '../components/BottomSheet';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, haptics } from '../utils/haptics';
 import { SkeletonGate, SkeletonCard } from '../components/Skeleton';
 import SegmentedTogglePill from '../components/SegmentedTogglePill';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
+import { EmptyState } from '../components/common/EmptyState';
 import type { AppData, Expense, MoneyLentItem } from '../types';
 
 interface SpendingProps {
@@ -471,10 +472,24 @@ export default function Spending({ data, updateData }: SpendingProps) {
               />
 
               {allRecentExpenses.filter(e => filterCategory === 'All' ? true : (filterCategory === 'Transport' ? e.category === 'Transport' : filterCategory === 'Shopping' ? e.category === 'Shopping' : filterCategory === 'Food' ? e.category === 'Food' : e.category !== 'Food' && e.category !== 'Transport' && e.category !== 'Shopping')).length === 0 ? (
-                <div className="py-10 text-center">
-                  <div className="flex justify-center text-3xl mb-2"><AnimatedWallet size={36} /></div>
-                  <p className="text-sm font-semibold text-[var(--md-on-surface)]">No expenses found for {filterCategory}</p>
-                  <p className="text-xs text-[var(--md-on-surface-variant)] mt-1">Tap "+ Add Expense" to track your purchases</p>
+                <div className="py-6">
+                  <EmptyState
+                    variant={filterCategory === 'All' ? 'finance-calm' : 'search-empty'}
+                    title={filterCategory === 'All' ? 'Your Wallet is Resting Easy' : `No ${filterCategory} Expenses`}
+                    description={
+                      filterCategory === 'All'
+                        ? 'No expenses recorded yet. Tap below to quickly log your first purchase.'
+                        : `No transactions tagged under ${filterCategory}.`
+                    }
+                    action={{
+                      label: 'Add Expense',
+                      icon: <Plus size={16} strokeWidth={2.5} />,
+                      onClick: () => {
+                        triggerHaptic('selection');
+                        setShowAdd(true);
+                      },
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="space-y-2.5">

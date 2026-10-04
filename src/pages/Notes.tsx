@@ -34,7 +34,7 @@ import {
 } from '../components/icons/MaterialSymbols';
 import type { MaterialSymbolIcon } from '../components/icons/MaterialSymbols';
 import { format, parseISO } from 'date-fns';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, haptics } from '../utils/haptics';
 import { registerDismissible } from '../utils/backNavigation';
 import {
   putNoteInIdb,
@@ -44,6 +44,7 @@ import {
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import { M3ProgressIndicator } from '../components/m3/M3Shapes';
 import { BottomSheet } from '../components/BottomSheet';
+import { EmptyState } from '../components/common/EmptyState';
 import type { AppData, NoteItem } from '../types';
 
 interface NotesProps {
@@ -647,29 +648,25 @@ export default function Notes({ data, updateData }: NotesProps) {
 
       {/* Notes Grid */}
       {displayedNotes.length === 0 ? (
-        <div className="text-center py-16 px-4 rounded-3xl border border-dashed border-accent/20 dark:border-accent/30 bg-accent/04 dark:bg-accent/08 space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-accent/10 dark:bg-accent/15 flex items-center justify-center text-accent">
-            <NotebookPen size={28} />
-          </div>
-          <div className="space-y-1 max-w-sm mx-auto">
-            <h3 className="text-base font-bold text-primary-light dark:text-primary-dark">
-              {searchQuery ? 'No matching notes found' : 'No notes recorded for this period'}
-            </h3>
-            <p className="text-xs text-secondary-light dark:text-secondary-dark">
-              {searchQuery
+        <div className="py-8 px-4 rounded-3xl border border-dashed border-accent/20 dark:border-accent/30 bg-accent/04 dark:bg-accent/08">
+          <EmptyState
+            variant={searchQuery ? 'search-empty' : 'notes-spark'}
+            title={searchQuery ? 'No Matching Notes Found' : 'Capture Your First Idea'}
+            description={
+              searchQuery
                 ? 'Try another keyword or search query.'
-                : 'Capture your first thought or brainstorm. It will stay safely preserved forever.'}
-            </p>
-          </div>
-          {!searchQuery && (
-            <button
-              type="button"
-              onClick={handleOpenNewNote}
-              className="px-4 py-2 rounded-xl btn-primary text-xs font-bold inline-flex items-center gap-1.5 shadow-sm"
-            >
-              <Plus size={14} /> Add First Note
-            </button>
-          )}
+                : 'Write down thoughts, brainstorms, concepts, or reminders. Preserved safely forever.'
+            }
+            action={
+              !searchQuery
+                ? {
+                    label: 'Add First Note',
+                    icon: <Plus size={16} strokeWidth={2.5} />,
+                    onClick: handleOpenNewNote,
+                  }
+                : undefined
+            }
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">

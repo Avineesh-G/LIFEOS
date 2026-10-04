@@ -6,6 +6,11 @@ import {
   MapPin,
   LucideIcon,
   NotebookPen,
+  Sun,
+  Wand2,
+  Flame,
+  Brain,
+  Mic,
 } from 'lucide-react';
 import {
   HomeAppLogoIcon,
@@ -22,6 +27,11 @@ import { AppSection } from '../theme/sectionSeedColors';
 export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
 
 export type DestinationId =
+  | 'morning'
+  | 'brainDump'
+  | 'flow'
+  | 'recall'
+  | 'transcribe'
   | 'gym'
   | 'nutrition'
   | 'study'
@@ -60,33 +70,38 @@ export const HOME_DESTINATION: HomeDestination = {
   route: '/',
   icon: HomeAppLogoIcon,
   family: 'home',
-  matchRoutes: ['/', '/tasks', '/laundry'],
+  matchRoutes: ['/', '/tasks', '/laundry', '/morning', '/brain-dump'],
 };
 
 /**
- * Static typed array of all 12 editable-pool destinations.
- * In the hub, exactly 10 of these are rendered (the 2 pinned destinations are excluded).
+ * Static typed array of all editable-pool destinations sorted cleanly by domain.
  */
 export const DESTINATIONS: HubDestination[] = [
-  // Health & Body
+  // ── 1. Focus & Deep Work (Study Suite) ──
   {
-    id: 'gym',
-    label: 'Gym',
-    route: '/gym',
-    icon: ExerciseIcon,
-    family: 'gym',
-    matchRoutes: ['/gym'],
+    id: 'flow',
+    label: 'Flow Room',
+    route: '/flow',
+    icon: Flame,
+    family: 'study',
+    matchRoutes: ['/flow'],
   },
   {
-    id: 'nutrition',
-    label: 'Nutrition',
-    route: '/nutrition',
-    icon: FlatwareIcon,
-    family: 'nutrition',
-    matchRoutes: ['/nutrition'],
+    id: 'recall',
+    label: 'Active Recall',
+    route: '/recall',
+    icon: Brain,
+    family: 'study',
+    matchRoutes: ['/recall'],
   },
-
-  // Focus, Planning & Mind
+  {
+    id: 'transcribe',
+    label: 'Transcriber',
+    route: '/transcribe',
+    icon: Mic,
+    family: 'study',
+    matchRoutes: ['/transcribe'],
+  },
   {
     id: 'study',
     label: 'Study',
@@ -104,14 +119,6 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/timetable'],
   },
   {
-    id: 'tasks',
-    label: 'To-Do Tasks',
-    route: '/tasks',
-    icon: ListAltCheckIcon,
-    family: 'home',
-    matchRoutes: ['/tasks'],
-  },
-  {
     id: 'notes',
     label: 'Notes & Ideas',
     route: '/notes',
@@ -120,7 +127,59 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/notes'],
   },
 
-  // Finance & Commerce
+  // ── 2. Daily Operations & Planning ──
+  {
+    id: 'morning',
+    label: 'Morning Plan',
+    route: '/morning',
+    icon: Sun,
+    family: 'home',
+    matchRoutes: ['/morning'],
+  },
+  {
+    id: 'brainDump',
+    label: 'Brain Dump',
+    route: '/brain-dump',
+    icon: Wand2,
+    family: 'notes',
+    matchRoutes: ['/brain-dump'],
+  },
+  {
+    id: 'tasks',
+    label: 'To-Do Tasks',
+    route: '/tasks',
+    icon: ListAltCheckIcon,
+    family: 'home',
+    matchRoutes: ['/tasks'],
+  },
+  {
+    id: 'laundry',
+    label: 'Laundry',
+    route: '/laundry',
+    icon: LaundryIcon,
+    family: 'home',
+    matchRoutes: ['/laundry'],
+  },
+
+  // ── 3. Health & Fitness ──
+  {
+    id: 'gym',
+    label: 'Gym',
+    route: '/gym',
+    icon: ExerciseIcon,
+    family: 'gym',
+    matchRoutes: ['/gym'],
+  },
+  {
+    id: 'nutrition',
+    label: 'Nutrition',
+    route: '/nutrition',
+    icon: FlatwareIcon,
+    family: 'nutrition',
+    matchRoutes: ['/nutrition'],
+  },
+
+  // ── 4. Finance & Commerce ──
   {
     id: 'spending',
     label: 'Spending',
@@ -146,15 +205,7 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/outings'],
   },
 
-  // Chores & Life History
-  {
-    id: 'laundry',
-    label: 'Laundry',
-    route: '/laundry',
-    icon: LaundryIcon,
-    family: 'home',
-    matchRoutes: ['/laundry'],
-  },
+  // ── 5. Security & System ──
   {
     id: 'history',
     label: 'History',
@@ -163,8 +214,6 @@ export const DESTINATIONS: HubDestination[] = [
     family: 'history',
     matchRoutes: ['/history'],
   },
-
-  // Security & Settings
   {
     id: 'vault',
     label: 'Vault',

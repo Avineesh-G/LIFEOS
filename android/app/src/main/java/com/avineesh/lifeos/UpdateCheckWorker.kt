@@ -48,6 +48,7 @@ class UpdateCheckWorker(
             try {
                 val constraints = Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
                     .build()
 
                 // Check every 2 hours with a 15-minute flex interval

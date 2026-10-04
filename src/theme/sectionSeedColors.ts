@@ -37,6 +37,11 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/shopping')) return 'shopping';
   if (p.startsWith('/vault')) return 'vault';
   if (p.startsWith('/notes')) return 'notes';
+  if (p.startsWith('/flow')) return 'study';
+  if (p.startsWith('/recall')) return 'study';
+  if (p.startsWith('/transcribe')) return 'study';
+  if (p.startsWith('/morning')) return 'home';
+  if (p.startsWith('/brain-dump')) return 'notes';
   return 'home';
 }
 

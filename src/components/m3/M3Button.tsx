@@ -2,12 +2,14 @@ import React from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 import { M3_SHAPE_TRANSITION } from '../../utils/motionConfig';
+import { M3ProgressIndicator } from './M3Shapes';
 
 export interface M3ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children: React.ReactNode;
   variant?: 'primary' | 'tonal' | 'secondary' | 'outlined' | 'text';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
+  loading?: boolean;
   className?: string;
 }
 
@@ -23,6 +25,7 @@ export const M3Button = React.forwardRef<HTMLButtonElement, M3ButtonProps>(funct
     variant = 'primary',
     size = 'md',
     icon,
+    loading = false,
     className = '',
     onClick,
     disabled = false,
@@ -30,8 +33,10 @@ export const M3Button = React.forwardRef<HTMLButtonElement, M3ButtonProps>(funct
   },
   ref
 ) {
+  const isDisabled = disabled || loading;
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     triggerHaptic('light');
     onClick?.(e);
   };
@@ -74,23 +79,40 @@ export const M3Button = React.forwardRef<HTMLButtonElement, M3ButtonProps>(funct
   return (
     <motion.button
       ref={ref}
-      disabled={disabled}
+      disabled={isDisabled}
       onClick={handleClick}
       initial={{ borderRadius: restingRadius }}
-      whileHover={{
-        borderRadius: 9999,
-        scale: 1.02,
-      }}
-      whileTap={{
-        borderRadius: 9999,
-        scale: 0.96,
-      }}
+      whileHover={
+        !isDisabled
+          ? {
+              borderRadius: 9999,
+              scale: 1.02,
+            }
+          : undefined
+      }
+      whileTap={
+        !isDisabled
+          ? {
+              borderRadius: 9999,
+              scale: 0.96,
+            }
+          : undefined
+      }
       transition={M3_SHAPE_TRANSITION}
       className={`relative inline-flex items-center justify-center gap-2 select-none overflow-hidden active:outline-none focus:outline-none transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${variantClasses} ${sizeClasses} ${className}`}
       {...props}
     >
-      {icon && <span className="shrink-0">{icon}</span>}
-      <span>{children}</span>
+      {loading ? (
+        <span className="inline-flex items-center gap-2">
+          <M3ProgressIndicator size={size === 'sm' ? 14 : size === 'lg' ? 20 : 16} color="currentColor" />
+          <span>{children}</span>
+        </span>
+      ) : (
+        <>
+          {icon && <span className="shrink-0">{icon}</span>}
+          <span>{children}</span>
+        </>
+      )}
     </motion.button>
   );
 });

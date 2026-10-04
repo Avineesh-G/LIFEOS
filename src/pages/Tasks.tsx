@@ -2,12 +2,14 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, X, Check, RotateCcw, Clock, ArrowRight, Calendar as CalendarIcon, Bell, ChevronLeft, ChevronRight, Sparkles, Pencil } from 'lucide-react';
 import { format, subDays, addDays, isSameDay, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, haptics } from '../utils/haptics';
+import { triggerConfettiBurst } from '../utils/confetti';
 import { syncTaskNotifications, checkNotificationPermission, requestAndSyncNotifications } from '../utils/notifications';
 import { BottomSheet, Modal } from '../components/BottomSheet';
 import InteractiveCheckbox from '../components/interactive/InteractiveCheckbox';
 import M3Button from '../components/m3/M3Button';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
+import { EmptyState } from '../components/common/EmptyState';
 import type { AppData, Task } from '../types';
 
 
@@ -172,10 +174,11 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   const toggleTask = (id: string) => {
-    triggerHaptic('medium');
+    let willComplete = false;
     const updatedTasks = (data?.tasks || []).map(t => {
       if (t.id === id) {
         const nextCompleted = !t.completed;
+        willComplete = nextCompleted;
         const currentTaskDate = t.dueDate || t.date;
         return {
           ...t,
@@ -186,6 +189,19 @@ export default function Tasks({ data, updateData }: TasksProps) {
       }
       return t;
     });
+
+    if (willComplete) {
+      const remaining = updatedTasks.filter(t => (t?.dueDate || t?.date) === selectedDate && !t.completed).length;
+      if (remaining === 0) {
+        haptics.milestone();
+        triggerConfettiBurst({ count: 56, spread: 85 });
+      } else {
+        haptics.success();
+      }
+    } else {
+      haptics.snap();
+    }
+
     updateData({ tasks: updatedTasks });
   };
 
@@ -614,12 +630,25 @@ export default function Tasks({ data, updateData }: TasksProps) {
         })}
 
         {filteredTasks.length === 0 && (
-          <div className="liquid-glass rounded-[32px] p-10 text-center border border-[var(--card-border)] flex flex-col items-center">
-            <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-3 shadow-sm shadow-accent/15">
-              <Sparkles size={22} className="animate-pulse" />
-            </div>
-            <p className="text-sm font-bold text-secondary-light dark:text-secondary-dark">No tasks for this day</p>
-            <p className="text-xs text-muted-light dark:text-muted-dark mt-1">Tap "+ Add Task" to schedule something</p>
+          <div className="liquid-glass rounded-[32px] p-6 sm:p-8 text-center border border-[var(--card-border)]">
+            <EmptyState
+              variant="tasks-empty"
+              title="A Clear Slate For Today"
+              description="No tasks scheduled yet. Tap below to capture what's on your mind."
+              action={{
+                label: 'Add Task',
+                icon: <Plus size={16} strokeWidth={2.5} />,
+                onClick: () => {
+                  setEditingTaskId(null);
+                  setNewTask('');
+                  setNewSubtask('');
+                  setNewDate(selectedDate);
+                  setNewStartTime('');
+                  setNewEndTime('');
+                  setShowAdd(true);
+                },
+              }}
+            />
           </div>
         )}
       </div>

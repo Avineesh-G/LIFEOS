@@ -190,3 +190,20 @@ export function triggerHaptic(pattern: HapticType = 'light') {
     playSyntheticHapticAudio(pattern, multiplier);
   }
 }
+
+/**
+ * Ergonomic 5-tier haptic helper object for tactile UI interactions across LifeOS.
+ */
+export const haptics = {
+  tick: () => triggerHaptic('selection'),
+  tap: () => triggerHaptic('light'),
+  snap: () => triggerHaptic('medium'),
+  heavy: () => triggerHaptic('heavy'),
+  success: () => triggerHaptic('success'),
+  warning: () => triggerHaptic('error'),
+  error: () => triggerHaptic('error'),
+  milestone: () => triggerHaptic('milestone'),
+  save: () => triggerHaptic('save'),
+  ai: () => triggerHaptic('ai'),
+};
+

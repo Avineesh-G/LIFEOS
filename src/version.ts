@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 57,
-  versionName: '3.1.2',
-  releaseDate: '2026-10-03',
-  apkSize: '13.78 MB',
-  apkSizeBytes: 14453581,
-  releaseNotes: 'LifeOS v3.1.2 (Build 57):\n• Floating Popups & Modals: React Portal rendering & gesture isolation (fluid 120fps, zero lag or touch freezing)\n• Top Space Fix: Optimized main layout padding across all pages\n• Theme Color Synchronization: Unified Material 3 dynamic tokens for Tasks, Navigation Hub, and sub-interfaces\n• Ask LifeOS Mobile Polish: Full responsiveness with zero horizontal cutoff\n• Interactive Checklists & Table Sliders',
+  versionCode: 58,
+  versionName: '3.2.0',
+  releaseDate: '2026-10-04',
+  apkSize: '13.82 MB',
+  apkSizeBytes: 14490000,
+  releaseNotes: 'LifeOS v3.2.0 (Build 58):\n• Spaced Repetition Active Recall Deck: Interactive 3D flip flashcards, Leitner review intervals (Again, Hard, Good, Easy), and deck creator\n• Voice Lecture & Meeting Smart Transcriber: Real-time waveform audio recorder, Groq Whisper transcription, Luna 3-bullet executive summary, and 1-tap task extraction into To-Do & Notes\n• Luna AI Conversational Assistant Revamp: Scaled companion mascot doll, compact quick-action suggestion chips, and high-speed Groq API integration\n• Study Suite Ecosystem: Integrated Active Recall & Voice Transcriber into the Study Hub\n• App-Wide Mobile Layout Optimization: Zero empty gaps, refined card padding, and optimized responsive layouts across all interfaces',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

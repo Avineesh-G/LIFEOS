@@ -464,8 +464,8 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
             </span>
           </button>
 
-          {/* Right Controls: Three 40px Tonal Circle Buttons [Chat, Cloud, Refresh] (8px gap) */}
-          <div className="pointer-events-auto flex items-center gap-2 shrink-0">
+          {/* Right Controls: Unified Rounded Card Frame for [Chat, Cloud, Refresh] */}
+          <div className="pointer-events-auto flex items-center gap-1.5 shrink-0">
             {!hasNotificationPermission && (
               <button
                 onPointerDown={() => triggerHaptic('light')}
@@ -482,62 +482,71 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               </button>
             )}
 
-            {/* 1. Header Chat Icon Button (Pulse Bubble) */}
-            <button
-              data-header-action="chat"
-              onPointerDown={() => triggerHaptic('light')}
-              onClick={() => {
-                triggerHaptic('medium');
-                setAiSheetOpen(prev => !prev);
-              }}
-              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center transition-all select-none cursor-pointer shrink-0 shadow-xs active:scale-95 ${
-                aiSheetOpen
-                  ? 'bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] border-2 border-[var(--md-primary)] ring-2 ring-[var(--md-primary)]/20'
-                  : 'bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)]'
-              }`}
-              title={aiSheetOpen ? 'Close Ask LifeOS' : 'Ask LifeOS AI Assistant'}
-              aria-label="Ask LifeOS"
-              aria-expanded={aiSheetOpen}
-            >
-              <PulseBubbleIcon size={20} filled={aiSheetOpen} />
-            </button>
+            {/* Unified Action Capsule / Rounded Card Frame */}
+            <div className="flex items-center gap-1 px-1.5 py-1 rounded-full bg-[var(--md-surface-container-high)]/90 backdrop-blur-md border border-[var(--md-outline-variant)] shadow-xs select-none">
+              {/* 1. Header Chat Icon Button (Pulse Bubble) */}
+              <button
+                data-header-action="chat"
+                onPointerDown={() => triggerHaptic('light')}
+                onClick={() => {
+                  triggerHaptic('medium');
+                  setAiSheetOpen(prev => !prev);
+                }}
+                className={`w-8.5 h-8.5 min-w-[34px] min-h-[34px] rounded-full flex items-center justify-center transition-all select-none cursor-pointer shrink-0 active:scale-90 ${
+                  aiSheetOpen
+                    ? 'bg-[var(--md-primary)] text-[var(--md-on-primary)] shadow-xs'
+                    : 'text-[var(--md-on-surface)] hover:bg-black/5 dark:hover:bg-white/10'
+                }`}
+                title={aiSheetOpen ? 'Close Ask LifeOS' : 'Ask LifeOS AI Assistant'}
+                aria-label="Ask LifeOS"
+                aria-expanded={aiSheetOpen}
+              >
+                <PulseBubbleIcon size={18} filled={aiSheetOpen} />
+              </button>
 
-            {/* 2. Cloud Sync Status Symbol */}
-            <div
-              data-header-action="cloud"
-              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center border transition-all shadow-xs shrink-0 select-none ${
-                isOnline
-                  ? 'bg-[var(--md-surface-container-high)] text-[var(--md-primary)] border-[var(--md-outline-variant)]'
-                  : 'bg-amber-500/20 text-amber-500 border-amber-500/40 animate-pulse'
-              }`}
-              title={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
-              aria-label={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
-            >
-              {isOnline ? (
-                <CloudDoneIcon size={18} />
-              ) : (
-                <CloudOffIcon size={18} />
-              )}
+              {/* Subtle Divider */}
+              <span className="w-[1px] h-3.5 bg-[var(--md-outline-variant)]/60 shrink-0" aria-hidden="true" />
+
+              {/* 2. Cloud Sync Status Symbol */}
+              <div
+                data-header-action="cloud"
+                className={`w-8.5 h-8.5 min-w-[34px] min-h-[34px] rounded-full flex items-center justify-center transition-all shrink-0 select-none ${
+                  isOnline
+                    ? 'text-[var(--md-primary)]'
+                    : 'text-amber-500 bg-amber-500/15 animate-pulse'
+                }`}
+                title={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
+                aria-label={isOnline ? 'Online — Connected to Cloud' : 'Offline — Operating from Local Storage'}
+              >
+                {isOnline ? (
+                  <CloudDoneIcon size={17} />
+                ) : (
+                  <CloudOffIcon size={17} />
+                )}
+              </div>
+
+              {/* Subtle Divider */}
+              <span className="w-[1px] h-3.5 bg-[var(--md-outline-variant)]/60 shrink-0" aria-hidden="true" />
+
+              {/* 3. Refresh and Sync Data Button */}
+              <button
+                data-header-action="refresh"
+                onPointerDown={() => triggerHaptic('light')}
+                onClick={handleReload}
+                disabled={isReloading}
+                className={`w-8.5 h-8.5 min-w-[34px] min-h-[34px] rounded-full flex items-center justify-center text-[var(--md-on-surface)] hover:bg-black/5 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer shrink-0 ${
+                  isReloading ? 'bg-[var(--md-primary-container)] text-[var(--md-primary)]' : ''
+                }`}
+                aria-label="Reload and sync data"
+                title="Reload and sync data"
+              >
+                {isReloading ? (
+                  <M3ProgressIndicator size={16} color="var(--md-primary)" />
+                ) : (
+                  <RotateCw size={15} strokeWidth={2.2} className="transition-transform duration-300" />
+                )}
+              </button>
             </div>
-
-            {/* 3. Refresh and Sync Data Button */}
-            <button
-              data-header-action="refresh"
-              onPointerDown={() => triggerHaptic('light')}
-              onClick={handleReload}
-              disabled={isReloading}
-              className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center bg-[var(--md-surface-container-high)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-[var(--md-on-surface)] active:scale-95 transition-all shadow-xs cursor-pointer shrink-0 ${
-                isReloading ? 'border-[var(--md-primary)] bg-[var(--md-primary-container)] text-[var(--md-primary)]' : ''
-              }`}
-              aria-label="Reload and sync data"
-              title="Reload and sync data"
-            >
-              {isReloading ? (
-                <M3ProgressIndicator size={18} color="var(--md-primary)" />
-              ) : (
-                <RotateCw size={16} strokeWidth={2.2} className="transition-transform duration-300" />
-              )}
-            </button>
           </div>
         </div>
       </header>

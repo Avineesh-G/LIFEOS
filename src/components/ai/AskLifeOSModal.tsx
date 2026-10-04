@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { OrbiCompanion } from '../illustrations/OrbiCompanion';
+import { haptics } from '../../utils/haptics';
 import {
   Sparkles,
   Send,
@@ -63,14 +65,15 @@ interface AskLifeOSModalProps {
 }
 
 export const SPEC_STARTER_CHIPS = [
-  { id: 'how_add_expense', label: 'How do I add an expense?', icon: 'Wallet' },
-  { id: 'where_change_color', label: 'Where do I change the app color?', icon: 'Palette' },
-  { id: 'how_use_screen', label: 'How do I use this screen?', icon: 'HelpCircle' },
-  { id: 'app_features', label: 'What features are in this app?', icon: 'Sparkles' },
+  { id: 'tasks_today', label: 'What are my top tasks today?', icon: 'CheckSquare' },
+  { id: 'study_focus', label: 'How is my study focus this week?', icon: 'HelpCircle' },
+  { id: 'gym_split', label: 'What workout is scheduled today?', icon: 'Dumbbell' },
+  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: 'Wallet' },
 ];
 
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Tab State: 'chat' | 'history'
   const [activeTab, setActiveTab] = useState<'chat' | 'history'>('chat');
@@ -506,20 +509,20 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           {/* ── Top Header with Mode Tabs ── */}
           <div className="flex items-center justify-between gap-1.5 py-1 mb-1 w-full min-w-0 shrink-0">
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-8 h-8 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-on-primary-container)] shrink-0 shadow-xs">
-                <PulseBubbleIcon size={18} />
+              <div className="w-8 h-8 rounded-full bg-[var(--md-primary-container)] flex items-center justify-center text-[var(--md-primary)] shrink-0 shadow-xs">
+                <Sparkles size={16} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <h2 className="text-xs sm:text-base font-bold text-gradient-dark tracking-tight leading-tight truncate">
-                    Ask LifeOS
+                    Luna AI
                   </h2>
                   <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-bold bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] tracking-wider uppercase shrink-0">
                     Groq AI
                   </span>
                 </div>
                 <p className="text-[9.5px] text-[var(--md-on-surface-variant)] font-medium truncate hidden xs:block">
-                  Offline-First System Intelligence
+                  Live LifeOS Assistant & Intelligence
                 </p>
               </div>
             </div>
@@ -715,33 +718,41 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             <>
               <div ref={chatContainerRef} className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden pt-1.5 pb-2 px-0.5 space-y-2.5 scrollbar-none flex flex-col min-h-0">
                 {messages.length === 0 ? (
-                  <div className="text-center py-2 px-2 space-y-3">
-                    <div className="space-y-1 max-w-sm mx-auto">
-                      <h3 className="text-sm sm:text-base font-bold text-[var(--md-on-surface)] tracking-tight">
-                        Ask me anything about LifeOS
-                      </h3>
-                      <p className="text-[11px] text-[var(--md-on-surface-variant)] leading-relaxed">
-                        Features, navigation, step-by-step guides, and settings locations.
-                      </p>
+                  <div className="flex-1 flex flex-col justify-between py-2 px-1 min-h-[360px]">
+                    {/* Top / Center: Prominent Luna AI Mascot */}
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 my-auto pt-2">
+                      <div className="flex flex-col items-center justify-center p-1">
+                        <OrbiCompanion variant="notes-spark" size={110} interactive={true} />
+                      </div>
+                      <div className="space-y-1 max-w-xs mx-auto">
+                        <h3 className="text-base sm:text-lg font-black text-[var(--md-on-surface)] tracking-tight">
+                          Hi! I am Luna AI
+                        </h3>
+                        <p className="text-[11.5px] text-[var(--md-on-surface-variant)] leading-relaxed">
+                          I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
+                        </p>
+                      </div>
                     </div>
 
-                    {/* 2-Column Responsive Starter Chips Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md mx-auto w-full pt-0.5">
-                      {SPEC_STARTER_CHIPS.map((chip) => (
-                        <button
-                          key={chip.id}
-                          type="button"
-                          onClick={() => handleSendQuery(chip.label)}
-                          className="flex items-center gap-3 p-3 rounded-2xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-left transition-all active:scale-98 group"
-                        >
-                          <div className="w-8 h-8 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0 transition-colors">
-                            {getChipIcon(chip.icon)}
-                          </div>
-                          <span className="text-xs font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-snug">
-                            {chip.label}
-                          </span>
-                        </button>
-                      ))}
+                    {/* Bottom: Compact Quick Question Cards near Chat Input */}
+                    <div className="w-full pt-4 pb-1">
+                      <div className="grid grid-cols-2 gap-1.5 w-full">
+                        {SPEC_STARTER_CHIPS.map((chip) => (
+                          <button
+                            key={chip.id}
+                            type="button"
+                            onClick={() => handleSendQuery(chip.label)}
+                            className="flex items-center gap-2 p-2 rounded-xl bg-[var(--md-surface-container)] hover:bg-[var(--md-secondary-container)] border border-[var(--md-outline-variant)] text-left transition-all active:scale-97 group cursor-pointer shadow-2xs"
+                          >
+                            <div className="w-6 h-6 rounded-lg bg-[var(--md-primary-container)] text-[var(--md-primary)] flex items-center justify-center shrink-0">
+                              {getChipIcon(chip.icon)}
+                            </div>
+                            <span className="text-[10.5px] sm:text-[11px] font-semibold text-[var(--md-on-surface)] group-hover:text-[var(--md-on-secondary-container)] leading-tight line-clamp-2">
+                              {chip.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -822,6 +833,81 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                                   <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
                                 </button>
                               </div>
+                            </div>
+                          )}
+
+                          {msg.content && (
+                            <div className="flex flex-wrap gap-1.5 pt-2">
+                              {(msg.content.toLowerCase().includes('workout') || msg.content.toLowerCase().includes('gym')) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap();
+                                    onClose();
+                                    navigate('/gym/workout');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
+                                >
+                                  <Dumbbell size={11} />
+                                  <span>Open Workout</span>
+                                </button>
+                              )}
+                              {(msg.content.toLowerCase().includes('focus') || msg.content.toLowerCase().includes('study') || msg.content.toLowerCase().includes('timer') || msg.content.toLowerCase().includes('flow')) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap();
+                                    onClose();
+                                    navigate('/flow');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-secondary-container)] text-[var(--md-on-secondary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
+                                >
+                                  <Sparkles size={11} />
+                                  <span>Open Flow Room</span>
+                                </button>
+                              )}
+                              {(msg.content.toLowerCase().includes('task') || msg.content.toLowerCase().includes('to-do')) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap();
+                                    onClose();
+                                    navigate('/tasks');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-tertiary-container)] text-[var(--md-on-tertiary-container)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all shadow-xs"
+                                >
+                                  <CheckSquare size={11} />
+                                  <span>View Tasks</span>
+                                </button>
+                              )}
+                              {(msg.content.toLowerCase().includes('morning') || msg.content.toLowerCase().includes('routine')) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap();
+                                    onClose();
+                                    navigate('/morning');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-surface-container-high)] text-[var(--md-primary)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all border border-[var(--md-outline-variant)] shadow-xs"
+                                >
+                                  <ArrowRight size={11} />
+                                  <span>Morning Plan</span>
+                                </button>
+                              )}
+                              {(msg.content.toLowerCase().includes('spending') || msg.content.toLowerCase().includes('budget') || msg.content.toLowerCase().includes('expense')) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    haptics.tap();
+                                    onClose();
+                                    navigate('/spending');
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] text-[10px] font-bold hover:opacity-90 active:scale-95 transition-all border border-[var(--md-outline-variant)] shadow-xs"
+                                >
+                                  <Wallet size={11} />
+                                  <span>View Spending</span>
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>

@@ -119,27 +119,26 @@ export const CollapseContentIcon = createSymbol(
   'CollapseContentIcon'
 );
 
-// 11. Cloud Done (Rounded cloud with checkmark)
+// 11. Cloud Done (Rounded cloud with checkmark - fully padded to prevent clipping)
 export const CloudDoneIcon = createSvgIcon(
   '0 0 24 24',
   () => (
-    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
-      <polyline points="9 13.5 11.5 16 15.5 11" strokeWidth="2.4" />
+    <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.5 19H6.5A4.5 4.5 0 0 1 5.4 10.14A6 6 0 0 1 16.8 8.4A4.5 4.5 0 0 1 17.5 19Z" />
+      <polyline points="9.5 14 11.5 16 15 11.5" strokeWidth="2.2" />
     </g>
   ),
   'CloudDoneIcon'
 );
 
-// 12. Cloud Off (Rounded cloud with diagonal slash)
+// 12. Cloud Off (Rounded cloud with diagonal slash - fully padded)
 export const CloudOffIcon = createSvgIcon(
   '0 0 24 24',
   () => (
-    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m2 2 20 20" strokeWidth="2.4" />
-      <path d="M5.782 5.782A7 7 0 0 0 5.35 8.04C2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h12.17" />
-      <path d="M21.53 15.82A5 5 0 0 0 19 11c-.44 0-.87.05-1.28.14" />
-      <path d="M18.8 8.11A7 7 0 0 0 12 4c-1.8 0-3.46.68-4.72 1.8" />
+    <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m2.5 2.5 19 19" strokeWidth="2.2" />
+      <path d="M5.4 10.14A4.5 4.5 0 0 0 6.5 19h10" />
+      <path d="M19.5 14.5A4.5 4.5 0 0 0 16.8 8.4 6 6 0 0 0 9.8 5.7" />
     </g>
   ),
   'CloudOffIcon'

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import { triggerHaptic } from '../utils/haptics';
+import { triggerHaptic, haptics } from '../utils/haptics';
 import { Modal } from '../components/BottomSheet';
 import M3Button from '../components/m3/M3Button';
 import {
@@ -25,6 +25,7 @@ import {
   STARTER_TEMPLATES,
 } from '../utils/shoppingStorage';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
+import { EmptyState } from '../components/common/EmptyState';
 import type { AppData, ShoppingList } from '../types';
 
 interface ShoppingListsProps {
@@ -153,19 +154,17 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
 
       {/* ── Empty State ── */}
       {allLists.length === 0 && (
-        <div className="rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] text-center space-y-5">
-          <div className="w-14 h-14 mx-auto rounded-[22px] bg-[var(--accent-primary)]/15 border border-[var(--accent-primary)]/30 flex items-center justify-center text-[var(--accent-primary)]">
-            <ShoppingBag size={28} strokeWidth={2.2} />
-          </div>
-
-          <div className="space-y-1.5 max-w-md mx-auto">
-            <h2 className="text-lg sm:text-xl font-heading font-bold text-[var(--text-primary)]">
-              No Shopping Lists Yet
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-              Create a checklist for your next store run or weekend outing, or tap a starter template to get going instantly.
-            </p>
-          </div>
+        <div className="rounded-[32px] p-6 sm:p-8 liquid-glass border border-[var(--card-border)] text-center space-y-4">
+          <EmptyState
+            variant="tasks-empty"
+            title="No Shopping Lists Yet"
+            description="Create a checklist for your next store run or weekend outing, or tap a starter template below."
+            action={{
+              label: 'Create List',
+              icon: <Plus size={16} strokeWidth={2.5} />,
+              onClick: () => setShowNewModal(true),
+            }}
+          />
 
           <div className="pt-2">
             <p className="label-mono text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3">
