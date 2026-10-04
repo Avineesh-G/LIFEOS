@@ -1,10 +1,10 @@
 {
-  "versionCode": 59,
-  "versionName": "3.2.1",
+  "versionCode": 60,
+  "versionName": "3.2.2",
   "releaseDate": "2026-10-04",
   "apkSize": "13.84 MB",
-  "apkSizeBytes": 14515207,
-  "releaseNotes": "LifeOS v3.2.1 (Build 59):\n• Luna AI Mascot & Chat Refinement: Scaled interactive mascot doll, enlarged ambient aura, refined quick prompt chips, and placeholder polish\n• Android Microphone Audio Fix: Added RECORD_AUDIO permissions and runtime permission prompt to prevent access denial on voice recording\n• Clean Slate Engine: Removed mock flashcards and test speech fallbacks for 100% genuine user data\n• Mobile Responsive UI: Streamlined card geometry and spacing across all mobile aspect ratios",
+  "apkSizeBytes": 14515337,
+  "releaseNotes": "LifeOS v3.2.2 (Build 60):\n• Navigation Hub Fix: Removed frozen background shift so More menu opens instantly without jumping the page\n• Hub Grid Polish: Fixed word cropping across 2-line destination titles (Active Recall, To-Do Tasks, Shopping Lists, etc.)\n• Google Sans Flex & Letter Depth: Enhanced global typography, optical depth, and crisp headers across all interfaces\n• AI Action Automation: Resolved AI action proposal execution so commands to add tasks/expenses/lists directly commit to their interfaces",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "7b400d2c94ccb3e5afa962925b3e2f4b1ee4acb67399347d08979337bb7c14c1"
+  "sha256": "91f13faf16087c688607432e81481db3d37468609103aedc022daeda030bbc3f"
 }

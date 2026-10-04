@@ -37,7 +37,7 @@ let cachedApiKey = '';
 let cachedProxyUrl = '';
 let cachedReadData = true;
 let cachedPermissions = { ...DEFAULT_SECTION_PERMISSIONS };
-let cachedAllowChanges = false;
+let cachedAllowChanges = true;
 let cachedConsentAgreed = false;
 let cachedTrackUsage = true;
 
@@ -71,7 +71,7 @@ export async function initAiSecurity(): Promise<void> {
     }
 
     const changesPref = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.ACTION_ALLOW_CHANGES);
-    cachedAllowChanges = changesPref === 'true';
+    cachedAllowChanges = changesPref !== null ? changesPref === 'true' : true;
 
     const consentPref = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.CONSENT_AGREED);
     cachedConsentAgreed = consentPref === 'true';
@@ -154,7 +154,11 @@ export function setSectionPermission(section: keyof AiSectionPermissions, val: b
 }
 
 export function getLetAiMakeChanges(): boolean {
-  return cachedAllowChanges;
+  if (typeof localStorage !== 'undefined') {
+    const pref = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.ACTION_ALLOW_CHANGES);
+    if (pref !== null) return pref === 'true';
+  }
+  return true;
 }
 
 export function setLetAiMakeChanges(val: boolean): void {

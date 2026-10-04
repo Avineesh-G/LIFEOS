@@ -24,31 +24,31 @@ export interface AiActionProposal {
   executed: boolean;
 }
 
-/**
- * Parses structured JSON block enclosed in ```json_action ... ``` from assistant text if AI changes are enabled.
- */
 export function extractAiActionProposals(text: string): { cleanText: string; proposals: AiActionProposal[] } {
   if (!getLetAiMakeChanges()) {
     return { cleanText: text, proposals: [] };
   }
 
   const proposals: AiActionProposal[] = [];
-  const actionRegex = /```json_action\s*([\s\S]*?)\s*```/g;
-  let match;
   let cleanText = text;
+
+  // 1. Match standard markdown fenced action blocks (```json_action, ```json, ```action)
+  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?\{[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT)"[\s\S]*?\})\s*```/gi;
+  let match;
 
   while ((match = actionRegex.exec(text)) !== null) {
     try {
       const rawJson = match[1];
       const parsed = JSON.parse(rawJson);
       
-      if (parsed && typeof parsed.type === 'string' && isAllowListedAction(parsed.type)) {
+      if (parsed && typeof parsed.type === 'string' && isAllowListedAction(parsed.type.toUpperCase())) {
+        const type = parsed.type.toUpperCase() as AiActionType;
         const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         proposals.push({
           id,
-          type: parsed.type as AiActionType,
-          title: buildActionTitle(parsed),
-          description: buildActionDescription(parsed),
+          type,
+          title: buildActionTitle({ ...parsed, type }),
+          description: buildActionDescription({ ...parsed, type }),
           payload: parsed.payload || {},
           confirmed: false,
           executed: false,
@@ -59,8 +59,34 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
     }
   }
 
-  // Strip action blocks from visual message text
   cleanText = cleanText.replace(actionRegex, '').trim();
+
+  // 2. Fallback: match un-fenced JSON at the end of the text
+  if (proposals.length === 0) {
+    const rawJsonRegex = /(\{\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT)"[\s\S]*?\})\s*$/i;
+    const rawMatch = rawJsonRegex.exec(cleanText);
+    if (rawMatch) {
+      try {
+        const parsed = JSON.parse(rawMatch[1]);
+        if (parsed && typeof parsed.type === 'string' && isAllowListedAction(parsed.type.toUpperCase())) {
+          const type = parsed.type.toUpperCase() as AiActionType;
+          const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          proposals.push({
+            id,
+            type,
+            title: buildActionTitle({ ...parsed, type }),
+            description: buildActionDescription({ ...parsed, type }),
+            payload: parsed.payload || {},
+            confirmed: false,
+            executed: false,
+          });
+          cleanText = cleanText.replace(rawJsonRegex, '').trim();
+        }
+      } catch (err) {
+        console.warn('Failed to parse fallback AI action JSON:', err);
+      }
+    }
+  }
 
   return { cleanText, proposals };
 }

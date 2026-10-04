@@ -139,7 +139,7 @@ const DestinationTile = React.memo(function DestinationTile({
         backgroundColor: tileBg,
         border: tileBorder,
       }}
-      className="group relative min-h-[80px] rounded-[20px] py-[10px] px-1 flex flex-col items-center justify-center gap-[6px] select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none transition-transform duration-100 active:scale-95"
+      className="group relative min-h-[86px] rounded-[18px] py-2 px-1 flex flex-col items-center justify-center gap-1 select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none transition-transform duration-100 active:scale-95 shadow-2xs"
       aria-label={
         isEditMode
           ? `Assign ${destination.label} to selected slot`
@@ -157,16 +157,16 @@ const DestinationTile = React.memo(function DestinationTile({
         </span>
       )}
 
-      {/* 36x36 squircle holding 20px icon */}
+      {/* 36x36 squircle holding 19px icon */}
       <div
         className="w-9 h-9 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-100 group-active:scale-95"
         style={{ backgroundColor: squircleBg }}
       >
-        <Icon size={20} strokeWidth={2.3} style={{ color: glyphColor }} />
+        <Icon size={19} strokeWidth={2.3} style={{ color: glyphColor }} />
       </div>
 
-      {/* Label */}
-      <span className="text-[12px] font-medium leading-[1.25] text-center line-clamp-2 px-1 text-[var(--md-on-surface)] select-none">
+      {/* Label - optimized with tight line height and small font to prevent any text clipping */}
+      <span className="text-[10px] sm:text-[10.5px] font-semibold leading-[1.16] tracking-tight text-center break-words line-clamp-2 px-0.5 text-[var(--md-on-surface)] select-none">
         {destination.label}
       </span>
     </button>
@@ -228,9 +228,6 @@ export function NavigationHubSheet({
       });
     }
   }, [isOpen, isEditMode, onExitEditMode, onClose]);
-
-  // Freeze background when sheet is open
-  useModalLayer(isOpen, { id: 'nav-hub-sheet' });
 
   const activeSeed = getActiveAccent().primary;
   const [aR, aG, aB] = hexToRgb(activeSeed);
@@ -694,11 +691,11 @@ export function NavigationHubSheet({
               )}
             </AnimatePresence>
 
-            {/* ── Destinations Grid (Always exactly 10 tiles, adaptive columns) ── */}
+            {/* ── Destinations Grid (Always exactly 10 tiles, clean 4 columns) ── */}
             <div
               ref={gridRef}
               onScroll={checkScroll}
-              className="relative z-10 grid grid-cols-[repeat(auto-fit,minmax(76px,1fr))] gap-2 overflow-y-auto no-scrollbar overscroll-contain pb-6"
+              className="relative z-10 grid grid-cols-4 gap-1.5 sm:gap-2 overflow-y-auto no-scrollbar overscroll-contain pb-6"
               style={{
                 WebkitOverflowScrolling: 'touch',
                 ...(canScrollMore

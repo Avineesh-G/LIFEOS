@@ -58,6 +58,18 @@
   --gradient-text-accent: linear-gradient(135deg, var(--md-on-surface, #1E2024) 0%, var(--md-primary, #8B1E3F) 100%);
 }
 
+/* ── Universal Google Sans Flex Reinforcement & Letter Depth ── */
+*, button, input, textarea, select {
+  font-family: var(--font-family-primary);
+  font-optical-sizing: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-primary);
+  letter-spacing: -0.02em;
+  text-rendering: optimizeLegibility;
+}
+
 /* Light mode tonal overrides: Soft off-dark neutrals */
 html:not(.dark) body,
 :root:not(.dark) {

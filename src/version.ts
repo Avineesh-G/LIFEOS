@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 59,
-  versionName: '3.2.1',
+  versionCode: 60,
+  versionName: '3.2.2',
   releaseDate: '2026-10-04',
-  apkSize: '13.84 MB',
-  apkSizeBytes: 14515371,
-  releaseNotes: 'LifeOS v3.2.1 (Build 59):\n• Luna AI Mascot & Chat Refinement: Scaled interactive mascot doll, enlarged ambient aura, refined quick prompt chips, and placeholder polish\n• Android Microphone Audio Fix: Added RECORD_AUDIO permissions and runtime permission prompt to prevent access denial on voice recording\n• Clean Slate Engine: Removed mock flashcards and test speech fallbacks for 100% genuine user data\n• Mobile Responsive UI: Streamlined card geometry and spacing across all mobile aspect ratios',
+  apkSize: '13.85 MB',
+  apkSizeBytes: 14520000,
+  releaseNotes: 'LifeOS v3.2.2 (Build 60):\n• Navigation Hub Fix: Removed frozen background shift so More menu opens instantly without jumping the page\n• Hub Grid Polish: Fixed word cropping across 2-line destination titles (Active Recall, To-Do Tasks, Shopping Lists, etc.)\n• Google Sans Flex & Letter Depth: Enhanced global typography, optical depth, and crisp headers across all interfaces\n• AI Action Automation: Resolved AI action proposal execution so commands to add tasks/expenses/lists directly commit to their interfaces',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;
