@@ -37,7 +37,7 @@ export function BottomCircle({
         height: isCompact ? 48 : 64,
       }}
       transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-      className="rounded-full flex items-center justify-center text-white shadow-2xl cursor-pointer pointer-events-auto shrink-0 border border-white/20"
+      className="rounded-full flex items-center justify-center text-white shadow-2xl cursor-pointer pointer-events-auto shrink-0 nav-rim-light"
     >
       <motion.div
         animate={{ scale: isCompact ? 0.85 : 1 }}

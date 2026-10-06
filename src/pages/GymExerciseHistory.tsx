@@ -5,6 +5,7 @@ import { Toolbar } from '../ui/navigation/Toolbar';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
 import { format } from 'date-fns';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData } from '../types';
 
 interface GymExerciseHistoryProps {
@@ -59,16 +60,16 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const bestReps = Math.max(...sessions.map((s) => s.bestSet?.reps || 0), 0);
 
   return (
-    <div className="w-full flex flex-col pb-32">
+    <div className="w-full flex flex-col pb-4">
       <Toolbar
         leading={
           <button
             type="button"
-            onClick={() => navigate('/gym')}
+            onClick={() => handleAppBack(navigate)}
             className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
           >
             <CaretLeft size={20} weight="bold" />
-            <span>Gym</span>
+            <span>Back</span>
           </button>
         }
         center={<span className="font-bold text-white text-base truncate max-w-[200px]">{decodedName}</span>}

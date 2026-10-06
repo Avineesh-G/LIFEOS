@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import type { AppData, NoteItem } from '../types';
 import {
@@ -15,9 +14,6 @@ import {
   EmptyState,
   NotePencil,
   Plus,
-  Trash,
-  Check,
-  CaretRight,
 } from '../ui';
 
 interface NotesProps {
@@ -106,9 +102,8 @@ export default function Notes({ data, updateData }: NotesProps) {
     <div className="w-full text-white selection:bg-[#FFD60A]/30">
       <LargeTitleHeader
         title="Notes & Ideas"
-        subtitle={`${notesList.length} notes stored`}
+        subtitle={`${notesList.length} notes stored · Fast search & markdown`}
         tint="#FFD60A"
-        onBack={() => navigate('/')}
         actions={
           <Button
             variant="glass"
@@ -205,7 +200,7 @@ export default function Notes({ data, updateData }: NotesProps) {
             onChange={(e) => setContent(e.target.value)}
             placeholder="Type your note in Markdown or plain text..."
             rows={12}
-            className="w-full min-h-[260px] bg-[#2C2C2E] text-white p-4 rounded-[20px] border border-white/[0.08] text-[16px] placeholder-[rgba(235,235,245,0.40)] focus:outline-none focus:border-[#FFD60A]/60 resize-none leading-relaxed"
+            className="w-full min-h-[260px] glass-flat text-white p-4 rounded-[20px] text-[16px] placeholder-[rgba(235,235,245,0.40)] focus:outline-none resize-none leading-relaxed"
           />
         </div>
       </Sheet>

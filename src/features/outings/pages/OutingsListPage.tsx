@@ -18,7 +18,7 @@ import { SearchPill } from '../../../ui/navigation/SearchPill';
 import { Segmented } from '../../../ui/controls/Segmented';
 import { Button } from '../../../ui/controls/Button';
 import { EmptyState } from '../../../ui/feedback/EmptyState';
-import type { Outing, OutingStatus } from '../types';
+import type { OutingStatus } from '../types';
 
 type FilterTab = 'all' | OutingStatus;
 
@@ -56,18 +56,18 @@ export default function OutingsListPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
+    <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#40C8E0]/30">
       <LargeTitleHeader
         title="Outings"
-        subtitle="Group trips, dinners, and balance splitter"
-        onBack={() => navigate('/')}
+        subtitle="Group trips, dinners · Expense balance splitter"
+        tint="#40C8E0"
         actions={
           <button
             onClick={() => {
               triggerHaptic('light');
               setIsCreateOpen(true);
             }}
-            className="p-2 rounded-full bg-[#40C8E0]/15 text-[#40C8E0] hover:bg-[#40C8E0]/25 transition-colors"
+            className="p-2 rounded-full glass-flat text-[#40C8E0] active:scale-95 transition-transform"
             title="New Outing"
           >
             <Plus size={20} weight="bold" />
@@ -96,7 +96,7 @@ export default function OutingsListPage() {
 
         {/* Undo Toast */}
         {undoAction && (
-          <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] text-white text-xs font-medium flex items-center justify-between gap-3 shadow-lg">
+          <div className="p-3.5 rounded-2xl glass-card text-white text-xs font-medium flex items-center justify-between gap-3 shadow-lg">
             <span className="truncate">
               Deleted {undoAction.type} "{undoAction.name}"
             </span>
@@ -150,7 +150,7 @@ export default function OutingsListPage() {
         )}
       </div>
 
-      {/* Create Outing Modal */}
+      {/* Create Outing Sheet */}
       <CreateOutingSheet
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}

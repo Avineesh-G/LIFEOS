@@ -20,7 +20,7 @@ export function SearchPill({
 }: SearchPillProps) {
   return (
     <GlassSurface
-      className={`w-full h-[48px] px-4 rounded-full flex items-center gap-3 shadow-xl border border-white/14 ${className}`}
+      className={`w-full h-[48px] px-4 rounded-full flex items-center gap-3 shadow-xl ${className}`}
     >
       <div className="text-[rgba(235,235,245,0.40)] text-lg shrink-0">
         <MagnifyingGlass weight="bold" />

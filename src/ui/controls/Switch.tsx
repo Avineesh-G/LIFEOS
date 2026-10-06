@@ -58,11 +58,11 @@ export function Switch({
           stiffness: 520,
           damping: 38,
         }}
-        className="rounded-full bg-white shadow-md border border-black/10"
+        className="rounded-full bg-white select-none"
         style={{
           boxShadow: isPressed
-            ? '0 4px 12px rgba(0,0,0,0.35), inset 0 0.5px 0.5px rgba(255,255,255,0.9)'
-            : '0 2px 4px rgba(0,0,0,0.25)',
+            ? '0 4px 14px rgba(0,0,0,0.5), inset 0 1.2px 1.5px rgba(255,255,255,1), inset 0 -1px 1px rgba(0,0,0,0.2)'
+            : '0 2px 6px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.95), inset 0 -1px 0.5px rgba(0,0,0,0.15)',
         }}
       />
     </div>

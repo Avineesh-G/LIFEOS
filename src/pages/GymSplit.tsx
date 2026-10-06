@@ -15,6 +15,7 @@ import { ListRow } from '../ui/grouped/ListRow';
 import { TextField } from '../ui/controls/TextField';
 import { Sheet } from '../ui/feedback/Sheet';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData, WorkoutPlan, Exercise } from '../types';
 
 interface GymSplitProps {
@@ -117,23 +118,23 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   return (
-    <div className="w-full flex flex-col pb-32">
+    <div className="w-full flex flex-col pb-4">
       <Toolbar
         leading={
           <button
             type="button"
-            onClick={() => navigate('/gym')}
+            onClick={() => handleAppBack(navigate)}
             className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all cursor-pointer"
           >
             <CaretLeft size={20} weight="bold" />
-            <span>Gym</span>
+            <span>Back</span>
           </button>
         }
         center={<span className="font-bold text-white text-base">Weekly Split</span>}
       />
 
       {/* Day Selector Pill Bar */}
-      <div className="grid grid-cols-7 gap-1 p-1 bg-[#1C1C1E] rounded-[22px] border border-white/8 my-3">
+      <div className="grid grid-cols-7 gap-1 p-1 glass-card rounded-[22px] my-3">
         {DAYS.map((day) => {
           const isSelected = day === selectedDay;
           const planItem = workoutPlans.find((p) => p.day === day);
@@ -149,14 +150,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
               }}
               className={`py-2 px-1 rounded-[18px] flex flex-col items-center gap-0.5 transition-all cursor-pointer ${
                 isSelected
-                  ? 'bg-[#FF453A] text-white shadow-md'
+                  ? 'glass-tile text-[#FF453A] font-bold shadow-sm'
                   : 'text-white/60 hover:text-white'
               }`}
             >
               <span className="text-[11px] font-bold uppercase">{day}</span>
               <span
                 className={`text-[9px] font-semibold truncate w-full text-center ${
-                  isSelected ? 'text-white/90' : 'text-white/40'
+                  isSelected ? 'text-[#FF453A]' : 'text-white/40'
                 }`}
               >
                 {type}
@@ -178,8 +179,8 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 onClick={() => handleUpdateSplitType(preset)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#FF453A] text-white shadow-md'
-                    : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                    ? 'glass-tile text-[#FF453A] shadow-sm'
+                    : 'glass-flat text-white/70 hover:text-white'
                 }`}
               >
                 {preset}
@@ -207,8 +208,8 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
       </div>
 
       {currentDaySplit === 'REST' ? (
-        <div className="my-6 p-8 rounded-[28px] bg-[#1C1C1E] border border-white/8 text-center space-y-2">
-          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white/50 mx-auto">
+        <div className="my-6 p-8 rounded-[28px] glass-card text-center space-y-2">
+          <div className="w-12 h-12 rounded-full glass-flat flex items-center justify-center text-white/50 mx-auto">
             <Flame size={24} weight="duotone" />
           </div>
           <h3 className="text-base font-bold text-white">Rest & Recovery Day</h3>
@@ -217,7 +218,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
           </p>
         </div>
       ) : currentExercises.length === 0 ? (
-        <div className="my-6 p-8 rounded-[28px] bg-[#1C1C1E] border border-white/8 text-center space-y-3">
+        <div className="my-6 p-8 rounded-[28px] glass-card text-center space-y-3">
           <Barbell size={32} weight="duotone" className="text-[#FF453A] mx-auto" />
           <h3 className="text-base font-bold text-white">No exercises planned for {currentDaySplit}</h3>
           <p className="text-xs text-white/50 max-w-xs mx-auto leading-relaxed">

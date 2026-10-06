@@ -4,3 +4,6 @@ export * from './Switch';
 export * from './Stepper';
 export * from './TextField';
 export * from './Badge';
+export * from './Chip';
+export * from './RatingButton';
+export * from './Slider';

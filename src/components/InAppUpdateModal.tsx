@@ -295,18 +295,16 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 12 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="relative w-full max-w-[400px] overflow-hidden rounded-[28px] bg-[#1C1C1E] border border-white/10 shadow-[0_24px_64px_rgba(0,0,0,0.8)] z-10"
+          className="relative w-full max-w-[400px] overflow-hidden rounded-[28px] bg-[#141416] shadow-[0_24px_64px_rgba(0,0,0,0.95)] z-10"
         >
           {/* Header */}
           <div className="p-6 pb-4 flex items-start justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center shrink-0 ${
-                hasUpdate ? 'bg-blue-500/15 text-blue-400' : 'bg-emerald-500/15 text-emerald-400'
-              }`}>
+              <div className="w-12 h-12 rounded-2xl glass-tile flex items-center justify-center shrink-0">
                 {hasUpdate ? (
-                  <Sparkle size={24} weight="fill" />
+                  <Sparkle size={24} weight="fill" className="text-[#0A84FF]" />
                 ) : (
-                  <CheckCircle size={24} weight="fill" />
+                  <CheckCircle size={24} weight="fill" className="text-[#30D158]" />
                 )}
               </div>
 
@@ -315,10 +313,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   <h3 className="text-lg font-bold text-white tracking-tight">
                     {hasUpdate ? 'LifeOS Update' : 'LifeOS Up to Date'}
                   </h3>
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full glass-flat ${
                     hasUpdate
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-emerald-500/20 text-emerald-400'
+                      ? 'text-[#0A84FF]'
+                      : 'text-[#30D158]'
                   }`}>
                     v{hasUpdate ? (remoteVersion?.versionName || 'New') : CURRENT_VERSION_NAME}
                   </span>
@@ -332,7 +330,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             {status !== 'downloading' && status !== 'installing' && (
               <button
                 onClick={handleDismiss}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white bg-white/5 hover:bg-white/10 active:scale-95 transition-all shrink-0"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white glass-flat active:scale-95 transition-all shrink-0 cursor-pointer"
                 aria-label="Close"
               >
                 <X size={16} weight="bold" />
@@ -344,7 +342,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           <div className="px-6 pb-6 pt-1 space-y-4">
             {/* Version Card */}
             {hasUpdate ? (
-              <div className="p-4 rounded-[20px] bg-[#2C2C2E] border border-white/5 space-y-3">
+              <div className="p-4 rounded-2xl glass-tile space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[11px] font-medium text-white/50 uppercase tracking-wider">
@@ -355,15 +353,15 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     </span>
                   </div>
 
-                  <div className="w-7 h-7 rounded-full bg-blue-500/15 flex items-center justify-center text-blue-400">
+                  <div className="w-7 h-7 rounded-full glass-flat flex items-center justify-center text-[#0A84FF]">
                     <ArrowRight size={14} weight="bold" />
                   </div>
 
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[11px] font-medium text-blue-400 uppercase tracking-wider">
+                    <span className="text-[11px] font-medium text-[#0A84FF] uppercase tracking-wider">
                       Latest
                     </span>
-                    <span className="text-sm font-bold text-blue-400">
+                    <span className="text-sm font-bold text-[#0A84FF]">
                       v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
                     </span>
                   </div>
@@ -371,7 +369,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-white/50">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <DownloadSimple size={14} className="text-blue-400 shrink-0" />
+                    <DownloadSimple size={14} className="text-[#0A84FF] shrink-0" />
                     Download Size
                   </span>
                   <span className="font-semibold text-white/80">
@@ -380,14 +378,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-[20px] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
-                <div className="flex items-center gap-2.5 text-emerald-400">
+              <div className="p-4 rounded-2xl glass-tile flex items-center justify-between">
+                <div className="flex items-center gap-2.5 text-[#30D158]">
                   <ShieldCheck size={20} weight="fill" className="shrink-0" />
-                  <span className="text-xs font-semibold">
+                  <span className="text-xs font-semibold text-white/90">
                     Version {CURRENT_VERSION_NAME} (Build {CURRENT_VERSION_CODE})
                   </span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full glass-flat text-[#30D158] uppercase tracking-wider">
                   Latest
                 </span>
               </div>
@@ -396,21 +394,21 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             {/* Status Views */}
             {status === 'checking' ? (
               <div className="py-6 text-center space-y-3">
-                <CircleNotch size={32} weight="bold" className="text-blue-400 animate-spin mx-auto" />
+                <CircleNotch size={32} weight="bold" className="text-[#0A84FF] animate-spin mx-auto" />
                 <div>
                   <h4 className="text-sm font-semibold text-white">Checking for Updates...</h4>
                   <p className="text-xs text-white/50 mt-0.5">Connecting to LifeOS release server</p>
                 </div>
               </div>
             ) : status === 'permission_needed' ? (
-              <div className="p-4 rounded-[20px] bg-amber-500/10 border border-amber-500/20 space-y-3">
+              <div className="p-4 rounded-2xl glass-tile space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-xl glass-flat text-[#FF9F0A] flex items-center justify-center shrink-0">
                     <DeviceMobile size={18} weight="bold" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-amber-300">Permission Required</h4>
-                    <p className="text-xs text-amber-200/80 mt-1 leading-relaxed">
+                    <h4 className="text-xs font-bold text-[#FF9F0A]">Permission Required</h4>
+                    <p className="text-xs text-white/70 mt-1 leading-relaxed">
                       LifeOS needs permission to install its own updates. You'll only need to grant this once.
                     </p>
                   </div>
@@ -418,7 +416,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <button
                   onClick={handleGrantPermission}
-                  className="w-full py-3 px-4 rounded-[16px] bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all"
+                  className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF9F0A] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
                 >
                   <ShieldCheck size={16} weight="bold" />
                   <span>Grant Permission</span>
@@ -427,7 +425,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             ) : status === 'downloading' ? (
               <div className="space-y-3 py-1">
                 {statusNotice && (
-                  <div className="p-2.5 rounded-[14px] bg-blue-500/10 text-xs text-blue-300 flex items-center gap-2">
+                  <div className="p-2.5 rounded-2xl glass-tile text-xs text-[#0A84FF] flex items-center gap-2">
                     <ArrowClockwise size={14} className="animate-spin shrink-0" />
                     <span>{statusNotice}</span>
                   </div>
@@ -435,10 +433,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <DownloadSimple size={16} className="text-blue-400 animate-bounce" />
+                    <DownloadSimple size={16} className="text-[#0A84FF] animate-bounce" />
                     <span className="text-xs font-medium text-white/90">Downloading LifeOS.apk</span>
                   </div>
-                  <span className="text-xs font-bold text-blue-400 tabular-nums">
+                  <span className="text-xs font-bold text-[#0A84FF] tabular-nums">
                     {progress >= 0 ? `${progress}%` : 'Connecting...'}
                   </span>
                 </div>
@@ -446,7 +444,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 {/* Glass Progress Bar */}
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                    className="h-full bg-[#0A84FF] rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
                   />
                 </div>
@@ -459,18 +457,18 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 </div>
               </div>
             ) : status === 'installing' ? (
-              <div className="p-5 rounded-[20px] bg-blue-500/10 border border-blue-500/20 text-center space-y-2 py-5">
-                <CircleNotch size={32} weight="bold" className="text-blue-400 animate-spin mx-auto" />
-                <h4 className="text-sm font-semibold text-blue-400">Launching Package Installer...</h4>
+              <div className="p-5 rounded-2xl glass-tile text-center space-y-2 py-5">
+                <CircleNotch size={32} weight="bold" className="text-[#0A84FF] animate-spin mx-auto" />
+                <h4 className="text-sm font-semibold text-[#0A84FF]">Launching Package Installer...</h4>
                 <p className="text-xs text-white/50">Tap "Update" on the system prompt appearing on your screen.</p>
               </div>
             ) : status === 'error' ? (
-              <div className="p-4 rounded-[20px] bg-rose-500/10 border border-rose-500/20 space-y-3">
-                <div className="flex items-start gap-2.5 text-rose-400">
+              <div className="p-4 rounded-2xl glass-tile space-y-3">
+                <div className="flex items-start gap-2.5 text-[#FF453A]">
                   <WarningCircle size={18} weight="bold" className="shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-rose-300">Update Interrupted</h4>
-                    <p className="text-xs text-rose-200/80 mt-0.5 leading-relaxed">
+                    <h4 className="text-xs font-bold text-[#FF453A]">Update Interrupted</h4>
+                    <p className="text-xs text-white/70 mt-0.5 leading-relaxed">
                       {errorMessage || 'Download failed. Please check connection and try again.'}
                     </p>
                   </div>
@@ -478,7 +476,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <button
                   onClick={handleStartUpdate}
-                  className="w-full py-2.5 rounded-[14px] bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold active:scale-98 transition-all flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF453A] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <ArrowClockwise size={14} weight="bold" />
                   <span>Retry Download</span>
@@ -488,7 +486,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               <div className="space-y-3">
                 <div className="text-xs text-white/70 leading-relaxed max-h-32 overflow-y-auto pr-1 space-y-1">
                   <div className="text-white font-semibold flex items-center gap-1.5">
-                    <CheckCircle size={14} weight="fill" className="text-emerald-400" />
+                    <CheckCircle size={14} weight="fill" className="text-[#30D158]" />
                     <span>What's New in this Build:</span>
                   </div>
                   <p className="text-[11px] text-white/50 leading-relaxed pl-5">
@@ -512,14 +510,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleDismiss}
-                      className="flex-1 py-3 px-4 rounded-[16px] bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-medium transition-all text-center active:scale-98"
+                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-all text-center active:scale-98 cursor-pointer"
                     >
                       Later
                     </button>
                     <button
                       type="button"
                       onClick={handleStartUpdate}
-                      className="flex-[2] py-3 px-4 rounded-[16px] bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold shadow-lg shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-[#0A84FF] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <DownloadSimple size={16} weight="bold" />
                       <span>Update Now</span>
@@ -530,7 +528,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleCheckAgain}
-                      className="flex-1 py-3 px-4 rounded-[16px] bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 active:scale-98"
+                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
                     >
                       <ArrowClockwise size={14} weight="bold" />
                       <span>Check Again</span>
@@ -538,7 +536,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleDismiss}
-                      className="flex-[2] py-3 px-4 rounded-[16px] bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-semibold shadow-lg shadow-emerald-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-[#30D158] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <CheckCircle size={16} weight="bold" />
                       <span>Got It</span>

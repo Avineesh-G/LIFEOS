@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   House,
   Barbell,
@@ -24,13 +24,17 @@ import {
   ClockCounterClockwise,
   ShieldCheck,
   Gear,
+  LockKey,
 } from '../ui/tokens/icons';
 import { TabBar, TabItem } from '../ui/navigation/TabBar';
 import { BottomCircle } from '../ui/navigation/BottomCircle';
 import { MoreHubSheet, HubItem } from '../ui/navigation/MoreHubSheet';
+import { SlotCustomizerSheet } from '../ui/navigation/SlotCustomizerSheet';
 import { ActionSheet, ActionSheetOption } from '../ui/feedback/ActionSheet';
+import { AmbientLight } from '../ui/feedback/AmbientLight';
 import { GlassSurface } from '../ui/glass/GlassSurface';
 import AskLifeOSModal from './ai/AskLifeOSModal';
+import { auth } from '../firebase';
 import { triggerHaptic } from '../utils/haptics';
 import {
   checkNotificationPermission,
@@ -40,6 +44,7 @@ import {
   syncNutritionNotifications,
 } from '../utils/notifications';
 import { MODULE_TINTS } from '../ui/tokens/colors';
+import { useEdgeSwipeBack } from '../hooks/useEdgeSwipeBack';
 import type { AppData, AppSettings } from '../types';
 
 interface LayoutProps {
@@ -78,7 +83,6 @@ export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   { id: 'outings', label: 'Outing Splitter', route: '/outings', icon: <Receipt size={24} weight="duotone" />, tintKey: 'outing' },
 
   // Security & System
-  { id: 'vault', label: 'Secure Vault', route: '/vault', icon: <ShieldCheck size={24} weight="duotone" />, tintKey: 'vault' },
   { id: 'history', label: 'Work History', route: '/history', icon: <ClockCounterClockwise size={24} weight="duotone" />, tintKey: 'history' },
   { id: 'settings', label: 'Settings', route: '/settings', icon: <Gear size={24} weight="duotone" />, tintKey: 'home' },
 ];
@@ -94,6 +98,10 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [homeLockedToast, setHomeLockedToast] = useState(false);
+
+  // Path Memory Edge-Swipe back gesture
+  useEdgeSwipeBack(!moreOpen && !quickAddOpen && !aiSheetOpen);
 
   useEffect(() => {
     const handleOpenAi = () => setAiSheetOpen(true);
@@ -178,9 +186,9 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     return '#0A84FF';
   }, [pathname]);
 
-  // Customizable Quick Navigation (Max 4 slots: Slot 1 is Home, Slot 4 is Ask AI, Slot 2 & 3 are user customizable)
+  // Customizable Quick Navigation: 4 slots (Home, Slot 2, Slot 3, Directory)
   const pinnedIds = useMemo(() => {
-    const defaultPinned = ['gym', 'study'];
+    const defaultPinned = ['gym', 'nutrition'];
     const custom = data?.settings?.navPinned;
     if (Array.isArray(custom) && custom.length === 2 && custom[0] && custom[1]) {
       return custom;
@@ -193,7 +201,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
   }, [pinnedIds]);
 
   const slot3Item = useMemo(() => {
-    return ALL_HUB_ITEMS.find((i) => i.id === pinnedIds[1]) || ALL_HUB_ITEMS.find((i) => i.id === 'study')!;
+    return ALL_HUB_ITEMS.find((i) => i.id === pinnedIds[1]) || ALL_HUB_ITEMS.find((i) => i.id === 'nutrition')!;
   }, [pinnedIds]);
 
   // Identify active tab key
@@ -204,13 +212,20 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     return '';
   }, [pathname, slot2Item, slot3Item]);
 
+  const [customizingSlotIndex, setCustomizingSlotIndex] = useState<number | null>(null);
+
   const navTabs: TabItem[] = [
     {
       key: 'home',
       label: 'Home',
-      icon: <House size={22} weight="regular" />,
-      activeIcon: <House size={22} weight="fill" />,
+      icon: <House size={20} weight="regular" />,
+      activeIcon: <House size={20} weight="fill" />,
       tint: '#0A84FF',
+      isCustomizable: false,
+      quickActions: [
+        { label: 'Add Task', action: () => navigate('/tasks') },
+        { label: 'Morning Plan', action: () => navigate('/morning') },
+      ],
     },
     {
       key: slot2Item.id,
@@ -218,13 +233,21 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
       icon: slot2Item.icon,
       activeIcon: slot2Item.icon,
       tint: MODULE_TINTS[slot2Item.tintKey] || '#FF453A',
+      isCustomizable: true,
+      quickActions: [
+        { label: 'Customize Quick Slot', action: () => setCustomizingSlotIndex(0) },
+      ],
     },
     {
       key: slot3Item.id,
       label: slot3Item.label.split(' ')[0],
       icon: slot3Item.icon,
       activeIcon: slot3Item.icon,
-      tint: MODULE_TINTS[slot3Item.tintKey] || '#64D2FF',
+      tint: MODULE_TINTS[slot3Item.tintKey] || '#FF9F0A',
+      isCustomizable: true,
+      quickActions: [
+        { label: 'Customize Quick Slot', action: () => setCustomizingSlotIndex(1) },
+      ],
     },
   ];
 
@@ -235,10 +258,56 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
     else if (key === slot3Item.id) navigate(slot3Item.route);
   };
 
+  const handleCustomizeSlot = (slotKey: string) => {
+    triggerHaptic('medium');
+    if (slotKey === 'home') {
+      setHomeLockedToast(true);
+      setTimeout(() => setHomeLockedToast(false), 2600);
+      return;
+    }
+    if (slotKey === slot2Item.id) {
+      setCustomizingSlotIndex(0);
+    } else if (slotKey === slot3Item.id) {
+      setCustomizingSlotIndex(1);
+    }
+  };
+
+  const handleSelectCustomSlotItem = (selectedId: string) => {
+    if (!updateData || customizingSlotIndex === null) return;
+    triggerHaptic('success');
+    const current = [...pinnedIds];
+    const otherIdx = customizingSlotIndex === 0 ? 1 : 0;
+    if (current[otherIdx] === selectedId) {
+      const temp = current[customizingSlotIndex];
+      current[customizingSlotIndex] = selectedId;
+      current[otherIdx] = temp;
+    } else {
+      current[customizingSlotIndex] = selectedId;
+    }
+    updateData({
+      settings: {
+        ...(data?.settings || ({} as any)),
+        navPinned: [current[0], current[1]] as [string, string],
+      },
+    });
+    setCustomizingSlotIndex(null);
+  };
+
+  const handleResetDefaults = () => {
+    if (!updateData) return;
+    triggerHaptic('success');
+    updateData({
+      settings: {
+        ...(data?.settings || ({} as any)),
+        navPinned: ['gym', 'nutrition'] as [string, string],
+      },
+    });
+    setCustomizingSlotIndex(null);
+  };
+
   const handlePinSlot = (item: HubItem) => {
     if (!updateData) return;
     const current = [...pinnedIds];
-    // Replace the least recently pinned slot
     current[1] = current[0];
     current[0] = item.id;
     updateData({
@@ -300,93 +369,117 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
 
   return (
     <div className="relative min-h-screen bg-black text-white selection:bg-[#0A84FF]/30 font-sans">
-      {/* ── Smooth Auto-Hiding Liquid Glass Top Header ── */}
-      <motion.header
-        animate={{
-          y: headerVisible ? 0 : -80,
-          opacity: headerVisible ? 1 : 0,
-        }}
-        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-        className="sticky top-0 left-0 right-0 z-30 pointer-events-none w-full"
-        style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
-          paddingBottom: '6px',
-          paddingLeft: 'max(env(safe-area-inset-left, 0px), 12px)',
-          paddingRight: 'max(env(safe-area-inset-right, 0px), 12px)',
-        }}
-      >
-        <div className="flex items-center justify-between h-11 w-full max-w-lg mx-auto min-w-0">
-          {/* 1. TOP-LEFT: 3-Bars Menu Button for App Directory */}
-          <GlassSurface
-            as="button"
-            interactive
-            onClick={() => {
-              triggerHaptic('light');
-              setMoreOpen(true);
-            }}
-            className="pointer-events-auto w-10 h-10 rounded-full flex items-center justify-center border border-white/12 select-none shadow-lg cursor-pointer text-white/90 hover:text-white"
-            title="Open App Directory"
-            aria-label="Open App Directory"
-          >
-            <List size={22} weight="bold" />
-          </GlassSurface>
+      {/* ── Ambient Light (Top 45vh Module Glow) ── */}
+      <AmbientLight />
 
-          {/* 2. TOP-RIGHT: Clean Free Action Capsule (Alerts, Sync/Refresh) */}
-          <GlassSurface
-            className="pointer-events-auto h-10 px-2 rounded-full flex items-center gap-1.5 border border-white/12 shadow-lg select-none"
-          >
-            {/* Clean Free Notification Button */}
+      {/* ── Top Scroll Edge Gradient ── */}
+      <div className="scroll-edge-top" />
+
+      {/* ── Smooth Auto-Hiding Liquid Glass Top Header (Home Screen Only) ── */}
+      {pathname === '/' && (
+        <motion.header
+          animate={{
+            y: headerVisible ? 0 : -80,
+            opacity: headerVisible ? 1 : 0,
+          }}
+          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+          className="sticky top-0 left-0 right-0 z-30 pointer-events-none w-full"
+          style={{
+            paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
+            paddingBottom: '6px',
+            paddingLeft: 'max(env(safe-area-inset-left, 0px), 12px)',
+            paddingRight: 'max(env(safe-area-inset-right, 0px), 12px)',
+          }}
+        >
+          <div className="flex items-center justify-between h-11 w-full max-w-lg mx-auto min-w-0">
+            {/* 1. TOP-LEFT: User Profile Picture opening App Directory & More Interfaces */}
             <button
               type="button"
-              onClick={async () => {
-                triggerHaptic('medium');
-                const granted = await requestAndSyncNotifications(data, updateData);
-                setHasNotificationPermission(granted);
+              onClick={() => {
+                triggerHaptic('light');
+                setMoreOpen(true);
               }}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer relative"
-              title="Alerts & Notifications"
-              aria-label="Alerts & Notifications"
+              className="pointer-events-auto w-10 h-10 rounded-full overflow-hidden flex items-center justify-center glass-nav text-white text-xs font-bold cursor-pointer select-none shadow-md active:scale-90 transition-transform shrink-0"
+              title="Open App Directory & More Interfaces"
+              aria-label="Open App Directory & More Interfaces"
             >
-              <Bell size={18} weight={hasNotificationPermission ? 'regular' : 'fill'} className={hasNotificationPermission ? '' : 'text-[#FFD60A]'} />
-              {!hasNotificationPermission && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FFD60A] ring-2 ring-black" />
+              {auth.currentUser?.photoURL ? (
+                <img
+                  src={auth.currentUser.photoURL}
+                  alt="Profile"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-[#0A84FF] to-[#5E5CE6] text-white font-bold text-sm">
+                  {auth.currentUser?.displayName ? auth.currentUser.displayName[0].toUpperCase() : 'U'}
+                </div>
               )}
             </button>
 
-            <span className="w-[1px] h-3.5 bg-white/15 shrink-0" />
-
-            {/* Sync & Refresh Button */}
-            <button
-              type="button"
-              onClick={handleReload}
-              disabled={isReloading}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer disabled:opacity-50"
-              title="Sync & Reload"
-              aria-label="Sync & Reload"
+            {/* 2. TOP-RIGHT: Clean Free Action Capsule (Alerts, Sync/Refresh, Settings) */}
+            <GlassSurface
+              className="pointer-events-auto h-10 px-2 rounded-full flex items-center gap-1.5 shadow-lg select-none"
             >
-              <ArrowClockwise
-                size={17}
-                weight="bold"
-                className={isReloading ? 'animate-spin text-[#0A84FF]' : ''}
-              />
-            </button>
-          </GlassSurface>
-        </div>
-      </motion.header>
+              {/* Clean Free Notification Button */}
+              <button
+                type="button"
+                onClick={async () => {
+                  triggerHaptic('medium');
+                  const granted = await requestAndSyncNotifications(data, updateData);
+                  setHasNotificationPermission(granted);
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer relative"
+                title="Alerts & Notifications"
+                aria-label="Alerts & Notifications"
+              >
+                <Bell size={18} weight={hasNotificationPermission ? 'regular' : 'fill'} className={hasNotificationPermission ? '' : 'text-[#FFD60A]'} />
+                {!hasNotificationPermission && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FFD60A] ring-2 ring-black" />
+                )}
+              </button>
+
+              <span className="w-[1px] h-3.5 bg-white/15 shrink-0" />
+
+              {/* Sync & Refresh Button */}
+              <button
+                type="button"
+                onClick={handleReload}
+                disabled={isReloading}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer disabled:opacity-50"
+                title="Sync & Reload"
+                aria-label="Sync & Reload"
+              >
+                <ArrowClockwise
+                  size={17}
+                  weight="bold"
+                  className={isReloading ? 'animate-spin text-[#0A84FF]' : ''}
+                />
+              </button>
+            </GlassSurface>
+          </div>
+        </motion.header>
+      )}
 
       {/* ── Main Content Area ── */}
       <main
         className="relative z-10 w-full"
-        style={{
-          paddingBottom: isSubRoute ? '24px' : 'calc(84px + env(safe-area-inset-bottom, 0px))',
-        }}
       >
         <div className="w-full max-w-lg mx-auto px-3.5 pt-0.5">
           {children}
+          {!isSubRoute && (
+            <div
+              className="w-full shrink-0 select-none pointer-events-none"
+              style={{
+                height: 'calc(56px + max(env(safe-area-inset-bottom, 0px), 12px) + 28px)',
+              }}
+              aria-hidden="true"
+            />
+          )}
         </div>
       </main>
 
-      {/* ── Floating Liquid Glass Navigation Bar (4 Slots Centered) ── */}
+      {/* ── Floating Liquid Glass Navigation Bar (Home + 2 Quick Slots + AI) ── */}
       {!isSubRoute && (
         <>
           {/* Natural edge fade gradient behind navigation bar */}
@@ -395,12 +488,12 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           <div
             className="fixed bottom-[max(env(safe-area-inset-bottom,0px),12px)] inset-x-0 z-40 px-4 flex items-center justify-center max-w-lg mx-auto pointer-events-none"
           >
-            {/* Connected Liquid Metaball TabBar with AI Pod */}
             <div className="w-full pointer-events-auto flex justify-center">
               <TabBar
                 items={navTabs}
                 activeKey={activeTabKey}
                 onChange={handleTabChange}
+                onCustomizeSlot={handleCustomizeSlot}
                 onAiClick={() => setAiSheetOpen(true)}
               />
             </div>
@@ -413,6 +506,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
         isOpen={moreOpen}
         onClose={() => setMoreOpen(false)}
         items={ALL_HUB_ITEMS}
+        data={data}
         onSelect={(item) => {
           const match = ALL_HUB_ITEMS.find((i) => i.id === item.id);
           if (match) {
@@ -420,6 +514,34 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
           }
         }}
         onPinSlot={handlePinSlot}
+      />
+
+      {/* ── Home Tab Locked Notice Toast ── */}
+      <AnimatePresence>
+        {homeLockedToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.95 }}
+            transition={{ duration: 0.18 }}
+            className="fixed bottom-20 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
+          >
+            <div className="px-4 py-2.5 rounded-2xl glass-nav nav-rim-light shadow-2xl flex items-center gap-2.5 bg-[#1C1C20]/95 text-white text-xs font-semibold">
+              <LockKey size={16} weight="fill" className="text-[#FFD60A]" />
+              <span>Home interface is locked as your primary dashboard</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Quick Slot Customizer Sheet (Triggered on Long-Press of Slot 2 or Slot 3) ── */}
+      <SlotCustomizerSheet
+        isOpen={customizingSlotIndex !== null}
+        onClose={() => setCustomizingSlotIndex(null)}
+        slotIndex={customizingSlotIndex}
+        currentPinned={[slot2Item.id, slot3Item.id]}
+        onSelectSlotModule={handleSelectCustomSlotItem}
+        onResetDefaults={handleResetDefaults}
       />
 
       {/* ── Quick Add Action Sheet ── */}

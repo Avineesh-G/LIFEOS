@@ -1,7 +1,7 @@
 {
   "name": "lifeos",
   "private": true,
-  "version": "3.2.5",
+  "version": "3.2.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,7 +23,9 @@
     "test:app-guide": "node --experimental-strip-types scripts/verify-app-guide.ts",
     "test:ai-privacy": "node --experimental-strip-types scripts/verify-ai-privacy.ts",
     "test:ai-models": "node --experimental-strip-types scripts/test-ai-models.ts",
-    "check:squircles": "node --experimental-strip-types scripts/check-squircle-tokens.ts"
+    "check:squircles": "node --experimental-strip-types scripts/check-squircle-tokens.ts",
+    "check:borders": "node --experimental-strip-types scripts/check-borders.ts",
+    "check:emojis": "node --experimental-strip-types scripts/check-no-emojis.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

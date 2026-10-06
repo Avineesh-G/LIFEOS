@@ -1,4 +1,4 @@
-import { getActiveAccent } from './themeColorManager';
+import { getActiveAccent } from './themeColorManager.ts';
 
 export interface PaletteEntry {
   id: string;

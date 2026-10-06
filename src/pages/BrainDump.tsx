@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import type { AppData, Task, Expense } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
@@ -13,9 +12,6 @@ import {
   CheckCircle,
   Wallet,
   NotePencil,
-  Plus,
-  Trash,
-  Check,
 } from '../ui';
 
 interface BrainDumpProps {
@@ -141,14 +137,13 @@ export default function BrainDump({ data, updateData }: BrainDumpProps) {
     <div className="w-full text-white selection:bg-[#BF5AF2]/30">
       <LargeTitleHeader
         title="Brain Dump"
-        subtitle="Unload thoughts, tasks & expenses"
+        subtitle="Unload thoughts, tasks & expenses · Luna Auto-Parser"
         tint="#BF5AF2"
-        onBack={() => navigate('/')}
       />
 
       <div className="flex flex-col gap-3 pb-2">
         {/* Distraction-Free Input Field */}
-        <div className="w-full bg-[#1C1C1E] rounded-[28px] p-5 border border-white/[0.06] shadow-xl flex flex-col gap-3">
+        <div className="w-full glass-card rounded-[28px] p-5 shadow-xl flex flex-col gap-3">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -156,7 +151,7 @@ export default function BrainDump({ data, updateData }: BrainDumpProps) {
             className="w-full h-36 bg-transparent text-white text-[16px] placeholder-[rgba(235,235,245,0.30)] focus:outline-none resize-none leading-relaxed"
           />
 
-          <div className="flex justify-end pt-2 border-t border-white/[0.06]">
+          <div className="flex justify-end pt-2 border-t border-white/[0.04]">
             <Button
               variant="prominent"
               tint="#BF5AF2"
@@ -173,7 +168,7 @@ export default function BrainDump({ data, updateData }: BrainDumpProps) {
         {/* Parsed Items Breakdown */}
         {parsedItems.length > 0 && (
           <div className="flex flex-col gap-3">
-            <GroupedList header="Detected Items">
+            <GroupedList header="Detected Items · Luna Intelligence">
               {parsedItems.map((item) => (
                 <ListRow
                   key={item.id}

@@ -221,14 +221,13 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       <LargeTitleHeader
         title="Laundry"
         subtitle="Clothes inventory & return tracking"
-        onBack={() => navigate('/')}
         actions={
           <button
             onClick={() => {
               triggerHaptic('light');
               setShowAddModal(true);
             }}
-            className="p-2 rounded-full bg-[#63E6E2]/15 text-[#63E6E2] hover:bg-[#63E6E2]/25 transition-colors"
+            className="p-2 rounded-full glass-flat text-[#63E6E2] active:scale-95 transition-all"
             title="Log Batch"
           >
             <Plus size={20} weight="bold" />
@@ -237,42 +236,42 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       />
 
       <div className="flex flex-col gap-3 pb-2">
-        {/* ── Status Overview Grid ── */}
+        {/* ── Status Overview Grid (2 Bento Glass Tiles) ── */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-2">
+          <div className="glass-tile p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
+              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] font-semibold">
                 At Laundry
               </span>
               <InteractiveLaundryDrum status={clothesAtLaundry > 0 ? 'laundry' : 'received'} size={24} />
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold text-white tracking-tight">
+              <span className="text-3xl font-bold text-white tracking-tight leading-none">
                 {clothesAtLaundry}
               </span>
-              <span className="text-xs text-[#8E8E93]">clothes</span>
+              <span className="text-xs text-[rgba(235,235,245,0.50)]">clothes</span>
             </div>
-            <p className="text-xs text-[#8E8E93]">
+            <p className="text-[11px] text-[rgba(235,235,245,0.55)]">
               {activeBatches.length} active batch{activeBatches.length === 1 ? '' : 'es'}
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-2">
+          <div className="glass-tile p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
+              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] font-semibold">
                 Total Batches
               </span>
-              <div className="w-6 h-6 rounded-lg bg-[#BF5AF2]/15 text-[#BF5AF2] flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg glass-flat text-[#BF5AF2] flex items-center justify-center">
                 <Package size={14} />
               </div>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold text-white tracking-tight">
+              <span className="text-3xl font-bold text-white tracking-tight leading-none">
                 {batches.length}
               </span>
-              <span className="text-xs text-[#8E8E93]">logged</span>
+              <span className="text-xs text-[rgba(235,235,245,0.50)]">logged</span>
             </div>
-            <p className="text-xs text-[#8E8E93]">
+            <p className="text-[11px] text-[rgba(235,235,245,0.55)]">
               {batches.filter(b => b.status === 'received').length} returned safely
             </p>
           </div>
@@ -281,7 +280,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
         {/* ── Batches List ── */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
+            <h2 className="text-section-header">
               Laundry Batches · {batches.length}
             </h2>
           </div>
@@ -297,7 +296,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             return (
               <div
                 key={batch.id}
-                className="rounded-2xl p-4 border border-white/[0.08] bg-[#1C1C1E] space-y-3"
+                className="glass-card p-4 space-y-3"
               >
                 {/* Top Row: Dates & Status */}
                 <div className="flex items-start justify-between gap-3">
@@ -317,7 +316,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       {!isReturned && (
                         <button
                           onClick={() => openEditModal(batch)}
-                          className="p-1 rounded-lg text-[#8E8E93] hover:text-[#63E6E2] hover:bg-[#63E6E2]/10 transition-colors"
+                          className="p-1 rounded-lg text-[rgba(235,235,245,0.50)] hover:text-[#63E6E2] hover:bg-white/10 transition-colors cursor-pointer"
                           title="Edit batch"
                         >
                           <PencilSimple size={14} />
@@ -325,7 +324,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-[#8E8E93] font-medium flex-wrap">
+                    <div className="flex items-center gap-3 text-xs text-[rgba(235,235,245,0.60)] font-medium flex-wrap">
                       <span className="inline-flex items-center gap-1">
                         <CalendarBlank size={12} className="text-[#63E6E2]" />
                         Submitted: <strong className="text-white font-medium">{batch.submitDate}</strong>
@@ -343,7 +342,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       triggerHaptic('light');
                       setExpandedBatchId(isExpanded ? null : batch.id);
                     }}
-                    className="p-1.5 rounded-lg bg-[#2C2C2E] text-[#8E8E93] hover:text-white"
+                    className="p-1.5 rounded-lg glass-flat text-[rgba(235,235,245,0.60)] hover:text-white cursor-pointer"
                   >
                     {isExpanded ? <CaretUp size={16} /> : <CaretDown size={16} />}
                   </button>
@@ -354,9 +353,9 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                   {(batch.items || []).map((item, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium bg-[#2C2C2E] text-white border border-white/[0.04]"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium glass-flat text-white"
                     >
-                      <span className="text-[#8E8E93]">{item.category}:</span>
+                      <span className="text-[rgba(235,235,245,0.60)]">{item.category}:</span>
                       <strong className="text-[#63E6E2]">{item.count}</strong>
                     </span>
                   ))}
@@ -372,19 +371,19 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       className="pt-3 border-t border-white/[0.08] space-y-3 overflow-hidden"
                     >
                       <div>
-                        <label className="text-[11px] uppercase tracking-wider text-[#8E8E93] block mb-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] block mb-1">
                           Update Return Date
                         </label>
                         <input
                           type="date"
                           value={batch.returnDate || ''}
                           onChange={(e) => updateBatchReturnDate(batch.id, e.target.value)}
-                          className="w-full bg-[#2C2C2E] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#63E6E2]"
+                          className="w-full glass-flat rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
                         />
                       </div>
 
                       {batch.notes && (
-                        <p className="text-xs text-[#8E8E93] italic bg-[#2C2C2E] p-2.5 rounded-xl">
+                        <p className="text-xs text-[rgba(235,235,245,0.70)] italic glass-flat p-2.5 rounded-xl">
                           "{batch.notes}"
                         </p>
                       )}
@@ -393,7 +392,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                         <button
                           type="button"
                           onClick={() => handleDeleteBatch(batch)}
-                          className="text-xs font-semibold text-[#FF453A] hover:underline"
+                          className="text-xs font-semibold text-[#FF453A] hover:underline cursor-pointer"
                         >
                           Delete Batch
                         </button>

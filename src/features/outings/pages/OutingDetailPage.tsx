@@ -156,13 +156,13 @@ export default function OutingDetailPage() {
   const budgetProgress = budgetPaise > 0 ? Math.min(1, (activeSummary?.totalCost || 0) / budgetPaise) : 0;
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
+    <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#40C8E0]/30">
       {/* ── Top Navigation Bar ── */}
       <Toolbar
         leading={
           <button
             onClick={() => handleAppBack(navigate)}
-            className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
           >
             <CaretLeft size={22} weight="bold" />
           </button>
@@ -259,10 +259,10 @@ export default function OutingDetailPage() {
           </div>
         </div>
 
-        {/* ── Summary Cards Grid ── */}
+        {/* ── Summary Cards Grid (2x2 glass-tile) ── */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* Total Cost Card */}
-          <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+          <div className="p-3.5 rounded-2xl glass-tile space-y-1">
             <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
               Total Cost
             </span>
@@ -272,7 +272,7 @@ export default function OutingDetailPage() {
           </div>
 
           {/* My Share Card */}
-          <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+          <div className="p-3.5 rounded-2xl glass-tile space-y-1">
             <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
               My Share
             </span>
@@ -282,7 +282,7 @@ export default function OutingDetailPage() {
           </div>
 
           {/* I Paid Card */}
-          <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+          <div className="p-3.5 rounded-2xl glass-tile space-y-1">
             <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
               I Paid
             </span>
@@ -292,7 +292,7 @@ export default function OutingDetailPage() {
           </div>
 
           {/* Net Balance Card */}
-          <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+          <div className="p-3.5 rounded-2xl glass-tile space-y-1">
             <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium">
               My Balance
             </span>
@@ -316,7 +316,7 @@ export default function OutingDetailPage() {
 
         {/* ── Budget Progress Card ── */}
         {activeOuting.budget && activeOuting.budget > 0 && (
-          <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-2">
+          <div className="p-4 rounded-2xl glass-card space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-[#8E8E93] font-medium">
                 Budget ({activeOuting.budgetBasis === 'totalCost' ? 'Total' : 'My Share'}):{' '}
@@ -432,7 +432,7 @@ export default function OutingDetailPage() {
                 return (
                   <div
                     key={p.id}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
                   >
                     <div className="min-w-0">
                       <h5 className="text-sm font-semibold text-white truncate">
@@ -477,7 +477,7 @@ export default function OutingDetailPage() {
 
           {/* Tab 4: Notes */}
           {activeTab === 'notes' && (
-            <div className="rounded-2xl bg-[#1C1C1E] border border-white/[0.08] p-4 space-y-2">
+            <div className="rounded-2xl glass-card p-4 space-y-2">
               <div className="flex items-center justify-between text-xs text-[#8E8E93] font-medium">
                 <span className="uppercase tracking-wider">Outing Notes</span>
                 {isSavingNotes && (

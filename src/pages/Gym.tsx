@@ -2,25 +2,21 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
-import type { AppData, Exercise } from '../types';
+import type { AppData } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import {
   LargeTitleHeader,
   GroupedList,
   ListRow,
   Button,
-  Segmented,
   EmptyState,
   ContextMenu,
   ProgressBar,
   MOTION_SPRINGS,
   Barbell,
   Play,
-  PencilSimple,
   Sparkle,
-  Plus,
   Check,
-  CaretRight,
   SlidersHorizontal,
 } from '../ui';
 
@@ -29,7 +25,16 @@ interface GymProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const SHORT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SHORT_DAYS = [
+  { short: 'Mon', initial: 'M' },
+  { short: 'Tue', initial: 'T' },
+  { short: 'Wed', initial: 'W' },
+  { short: 'Thu', initial: 'T' },
+  { short: 'Fri', initial: 'F' },
+  { short: 'Sat', initial: 'S' },
+  { short: 'Sun', initial: 'S' },
+];
+
 const DAY_MAP: Record<string, string> = {
   Monday: 'Mon',
   Tuesday: 'Tue',
@@ -72,57 +77,82 @@ export default function Gym({ data, updateData }: GymProps) {
         subtitle={
           isCompletedToday
             ? 'Workout completed today'
-            : `${activePlan.type || 'Workout'} • ${activePlan.exercises?.length || 0} exercises`
+            : `${todayName} · ${activePlan.exercises?.length || 0} exercises`
         }
         tint="#FF453A"
-        onBack={() => navigate('/')}
         actions={
           <Button
             variant="glass"
             tint="#FF453A"
             size="sm"
-            onClick={() => navigate('/gym/split')}
-            icon={<SlidersHorizontal size={16} weight="bold" />}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/gym/split');
+            }}
+            icon={<SlidersHorizontal size={15} weight="bold" />}
           >
             Split
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 pb-2">
-        {/* Week Strip Segmented Glass */}
-        <Segmented
-          options={SHORT_DAYS.map((d) => ({
-            value: d,
-            label: d,
-          }))}
-          value={selectedDay}
-          onChange={setSelectedDay}
-          tint="#FF453A"
-        />
+      <div className="flex flex-col gap-3.5 pb-2">
+        {/* ── 7-Day Strip with Workout Dots ── */}
+        <div className="glass-card p-1.5 flex items-center justify-between rounded-[20px] select-none">
+          {SHORT_DAYS.map((d) => {
+            const isSelected = selectedDay === d.short;
+            const isToday = todayShort === d.short;
 
-        {/* ── 1. Hero Summary Tile (r-hero 32, surface-1) ── */}
+            return (
+              <button
+                key={d.short}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('selection');
+                  setSelectedDay(d.short);
+                }}
+                className={`relative flex-1 py-2 flex flex-col items-center justify-center rounded-[14px] transition-all cursor-pointer ${
+                  isSelected
+                    ? 'glass-tile text-[#FF453A] shadow-sm'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+                }`}
+              >
+                <span className="text-[12px] font-bold tracking-tight">{d.short}</span>
+                {isToday && (
+                  <span
+                    className={`w-1 h-1 rounded-full mt-1 ${
+                      isSelected ? 'bg-[#FF453A]' : 'bg-[#FF453A]/50'
+                    }`}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── 1. Hero Summary Tile (glass-hero with Coral glow) ── */}
         <motion.div
-          whileTap={{ scale: 0.98 }}
+          whileTap={{ scale: 0.985 }}
           transition={MOTION_SPRINGS.default}
-          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.06] flex flex-col gap-4 shadow-xl select-none"
+          style={{ '--hero-accent': '#FF453A' } as React.CSSProperties}
+          className="glass-hero p-5 flex flex-col gap-4 select-none min-h-[140px]"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col">
-              <div className="text-xs font-semibold text-[rgba(235,235,245,0.60)] tracking-tight">
+              <div className="text-[11.5px] font-semibold text-[rgba(235,235,245,0.65)] uppercase tracking-wider">
                 {isTodayActive ? 'Scheduled for today' : `Planned for ${selectedDay}`}
               </div>
               {/* Two-tone headline */}
-              <div className="text-2xl font-bold tracking-tight text-white mt-1">
+              <div className="text-[22px] font-bold tracking-tight text-white mt-1">
                 <span>{activePlan.type || 'Rest Day'}</span>
-                <span className="text-[rgba(235,235,245,0.50)] font-normal text-lg">
+                <span className="text-[rgba(235,235,245,0.45)] font-normal text-[17px]">
                   {isTodayActive ? ' today' : ''}
                 </span>
               </div>
             </div>
 
             {isCompletedToday ? (
-              <div className="px-3 py-1.5 rounded-full bg-[#30D158]/20 border border-[#30D158]/40 text-[#30D158] font-bold text-xs flex items-center gap-1">
+              <div className="px-3 py-1.5 rounded-full glass-flat text-[#30D158] font-bold text-xs flex items-center gap-1">
                 <Check size={14} weight="bold" />
                 <span>Finished</span>
               </div>
@@ -132,22 +162,22 @@ export default function Gym({ data, updateData }: GymProps) {
                 tint="#FF453A"
                 size="md"
                 onClick={handleStartWorkout}
-                icon={<Play size={16} weight="fill" />}
+                icon={<Play size={15} weight="fill" />}
               >
                 Start workout
               </Button>
             )}
           </div>
 
-          {/* Muscle Chips & Estimated Duration */}
-          <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/[0.06]">
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#2C2C2E] text-white">
-              Chest & Triceps
+          {/* Muscle Chips & Estimated Duration (glass-flat) */}
+          <div className="flex items-center gap-2 flex-wrap pt-1">
+            <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-white">
+              {activePlan.type || 'Recovery'}
             </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#2C2C2E] text-white">
-              ~55 min
+            <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-white">
+              ~{Math.max(15, (activePlan.exercises?.length || 0) * 9)} min
             </span>
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#2C2C2E] text-[rgba(235,235,245,0.60)]">
+            <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-[rgba(235,235,245,0.65)]">
               {activePlan.exercises?.length || 0} Exercises
             </span>
           </div>
@@ -203,29 +233,29 @@ export default function Gym({ data, updateData }: GymProps) {
           </GroupedList>
         )}
 
-        {/* ── 3. Weekly Muscle Volume Tile ── */}
-        <div className="w-full bg-[#1C1C1E] rounded-[26px] p-4 border border-white/[0.06] flex flex-col gap-3 select-none">
-          <div className="text-xs font-bold text-[rgba(235,235,245,0.60)]">
+        {/* ── 3. Weekly Muscle Volume Tile (glass-card) ── */}
+        <div className="glass-card p-4 flex flex-col gap-3 select-none">
+          <div className="text-section-header">
             WEEKLY MUSCLE VOLUME (SETS)
           </div>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3 pt-1">
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span>Chest</span>
+                <span className="text-white">Chest</span>
                 <span className="text-[rgba(235,235,245,0.60)]">14 / 16 sets</span>
               </div>
               <ProgressBar progress={0.88} height={5} color="#FF453A" />
             </div>
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span>Back</span>
+                <span className="text-white">Back</span>
                 <span className="text-[rgba(235,235,245,0.60)]">12 / 16 sets</span>
               </div>
               <ProgressBar progress={0.75} height={5} color="#FF453A" />
             </div>
             <div>
               <div className="flex justify-between text-xs font-medium mb-1">
-                <span>Legs</span>
+                <span className="text-white">Legs</span>
                 <span className="text-[rgba(235,235,245,0.60)]">10 / 14 sets</span>
               </div>
               <ProgressBar progress={0.71} height={5} color="#FF453A" />
@@ -233,27 +263,30 @@ export default function Gym({ data, updateData }: GymProps) {
           </div>
         </div>
 
-        {/* ── 4. AI Split Suggestion ── */}
-        <div className="w-full p-4 rounded-[22px] bg-[#1C1C1E] border border-white/[0.06] flex items-center justify-between gap-3 select-none">
+        {/* ── 4. AI Split Suggestion (glass-card) ── */}
+        <div className="glass-card p-4 flex items-center justify-between gap-3 select-none">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-[10px] bg-[#BF5AF2]/20 flex items-center justify-center text-[#BF5AF2] shrink-0">
-              <Sparkle weight="fill" />
+            <div className="w-9 h-9 rounded-[12px] glass-flat flex items-center justify-center text-[#BF5AF2] shrink-0">
+              <Sparkle size={18} weight="fill" />
             </div>
             <div className="flex flex-col min-w-0">
-              <div className="text-sm font-bold text-white truncate">
+              <div className="text-[14px] font-bold text-white truncate">
                 AI Split Optimizer
               </div>
-              <div className="text-xs text-[rgba(235,235,245,0.60)] truncate">
+              <div className="text-[12px] text-[rgba(235,235,245,0.60)] truncate">
                 Progressive overload recommendation available
               </div>
             </div>
           </div>
 
           <Button
-            variant="plain"
+            variant="glass"
             tint="#BF5AF2"
             size="sm"
-            onClick={() => navigate('/gym/split')}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/gym/split');
+            }}
           >
             Review
           </Button>
@@ -262,3 +295,4 @@ export default function Gym({ data, updateData }: GymProps) {
     </div>
   );
 }
+

@@ -18,6 +18,7 @@ import { ListRow } from '../ui/grouped/ListRow';
 import { GlassSurface } from '../ui/glass/GlassSurface';
 import { format } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData, StudySession } from '../types';
 
 interface StudyTimerProps {
@@ -162,24 +163,26 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     .padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
   return (
-    <div className="w-full flex flex-col pb-32">
+    <div className="w-full text-white selection:bg-[#64D2FF]/30 pb-4">
       <Toolbar
         leading={
           <button
             type="button"
-            onClick={() => navigate('/study')}
-            className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
+            onClick={() => handleAppBack(navigate)}
+            className="flex items-center justify-center w-10 h-10 rounded-full glass-nav nav-rim-light text-white active:scale-95 transition-all cursor-pointer"
+            aria-label="Back"
           >
             <CaretLeft size={20} weight="bold" />
-            <span>Study</span>
           </button>
         }
-        center={<span className="font-bold text-white text-base">Study Stopwatch</span>}
+        center={<span className="font-semibold text-white text-[17px] tracking-tight">Study Timer</span>}
       />
 
-      {/* Big Stopwatch Display */}
-      <div className="my-6 p-8 rounded-[36px] bg-[#1C1C1E] border border-white/8 text-center flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#64D2FF]/40 to-transparent" />
+      {/* ── Big Stopwatch Display (glass-hero with Cyan accent) ── */}
+      <div
+        style={{ '--hero-accent': '#64D2FF' } as React.CSSProperties}
+        className="glass-hero my-4 p-8 text-center flex flex-col items-center justify-center select-none"
+      >
         <span className="text-xs font-bold uppercase tracking-wider text-[#64D2FF] mb-2">
           {timerState === 'running' ? 'Focus Mode Active' : timerState === 'paused' ? 'Session Paused' : 'Ready to Focus'}
         </span>
@@ -188,8 +191,8 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
           {formattedTime}
         </div>
 
-        <p className="text-xs text-white/50 font-medium mt-1">
-          {subject} {topic ? `• ${topic}` : ''}
+        <p className="text-xs text-[rgba(235,235,245,0.60)] font-medium mt-1">
+          {subject} {topic ? `· ${topic}` : ''}
         </p>
 
         {/* Primary Controls */}
@@ -219,7 +222,7 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-12 h-12 rounded-full bg-white/10 text-white/80 hover:text-white flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
+                className="w-12 h-12 rounded-full glass-flat text-white/80 hover:text-white flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
                 title="Reset"
               >
                 <ArrowClockwise size={20} weight="bold" />
@@ -239,10 +242,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
       </div>
 
       {/* Subject & Topic Details Inset */}
-      <GroupedList header="SESSION DETAILS">
+      <GroupedList header="Session Details">
         {availableSubjects.length > 0 && (
-          <div className="p-3 border-b border-white/8">
-            <span className="text-[11px] font-bold text-white/50 block mb-2 uppercase tracking-wider">
+          <div className="p-3">
+            <span className="text-[11px] font-bold text-[rgba(235,235,245,0.50)] block mb-2 uppercase tracking-wider">
               Select Subject
             </span>
             <div className="flex flex-wrap gap-2">
@@ -254,10 +257,10 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
                     triggerHaptic('selection');
                     setSubject(sub);
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     subject === sub
                       ? 'bg-[#64D2FF] text-black font-bold shadow-md'
-                      : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                      : 'glass-flat text-white/70 hover:text-white hover:bg-white/15'
                   }`}
                 >
                   {sub}
@@ -293,3 +296,4 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
     </div>
   );
 }
+

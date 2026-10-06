@@ -83,4 +83,15 @@ export {
   TrendUp,
   Clock,
   HardDrive,
+  EnvelopeSimple,
+  Paperclip,
+  Tag,
+  Folder,
+  Tray,
+  CaretUpDown,
+  DotsThree,
+  Lightning,
 } from '@phosphor-icons/react';
+
+export { KineticSparkIcon } from './KineticSparkIcon';
+export { NeuralInfinityIcon } from './NeuralInfinityIcon';

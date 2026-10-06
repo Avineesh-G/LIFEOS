@@ -1,8 +1,10 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Sparkle } from '../tokens/icons';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { NeuralInfinityIcon, SlidersHorizontal } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { MOTION_SPRINGS } from '../tokens/motion';
+
+export type LunaOrbState = 'idle' | 'listening' | 'thinking' | 'unread';
 
 export interface TabItem {
   key: string;
@@ -10,6 +12,8 @@ export interface TabItem {
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
   tint?: string;
+  quickActions?: { label: string; action: () => void }[];
+  isCustomizable?: boolean;
 }
 
 export interface TabBarProps {
@@ -17,98 +21,101 @@ export interface TabBarProps {
   activeKey: string;
   onChange: (key: string) => void;
   onAiClick?: () => void;
+  onCustomizeSlot?: (slotKey: string) => void;
+  lunaState?: LunaOrbState;
   className?: string;
 }
 
+/**
+ * Pure Apple Liquid Navigation Bar
+ * Continuous, sleek, borderless liquid glass capsule with seamlessly integrated Luna AI chat bot.
+ */
 export function TabBar({
   items,
   activeKey,
   onChange,
   onAiClick,
+  onCustomizeSlot,
+  lunaState = 'idle',
   className = '',
 }: TabBarProps) {
-  // Ultra-smooth continuous metaball contour
-  const metaballPath =
-    'M 27 3 L 195 3 C 210 3, 218 17, 228 17 C 238 17, 246 3, 256 3 A 25 25 0 0 1 256 53 C 246 53, 238 39, 228 39 C 218 39, 210 53, 195 53 L 27 53 A 25 25 0 0 1 27 3 Z';
+  const [activeMenuTab, setActiveMenuTab] = useState<string | null>(null);
+  const longPressTimerRef = useRef<any>(null);
+  const isLongPressRef = useRef(false);
+
+  const handlePressStart = (tab: TabItem) => {
+    isLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      triggerHaptic('medium');
+      if (tab.isCustomizable && onCustomizeSlot) {
+        onCustomizeSlot(tab.key);
+      } else if (tab.key === 'home' && onCustomizeSlot) {
+        onCustomizeSlot('home');
+      } else if (tab.quickActions && tab.quickActions.length > 0) {
+        setActiveMenuTab(tab.key);
+      }
+    }, 380);
+  };
+
+  const handlePressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTabClick = (tab: TabItem) => {
+    if (isLongPressRef.current) {
+      isLongPressRef.current = false;
+      return;
+    }
+    triggerHaptic('selection');
+    onChange(tab.key);
+  };
 
   return (
     <div className={`relative flex items-center justify-center pointer-events-auto select-none ${className}`}>
-      {/* ── Unified Minimal Liquid Glass Metaball Vessel ── */}
-      <div className="relative w-[286px] h-[56px] flex items-center">
-        {/* Continuous Fluid SVG Chassis */}
-        <svg
-          viewBox="0 0 286 56"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="absolute inset-0 w-full h-full pointer-events-none drop-shadow-[0_12px_32px_rgba(0,0,0,0.88)]"
-        >
-          <defs>
-            {/* Soft, Low-Contrast Liquid Refraction Gradient */}
-            <linearGradient id="softRefractionGlow" x1="150" y1="40" x2="282" y2="40" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#00A3FF" stopOpacity="0" />
-              <stop offset="25%" stopColor="#00A3FF" stopOpacity="0.55" />
-              <stop offset="55%" stopColor="#8B5CF6" stopOpacity="0.5" />
-              <stop offset="80%" stopColor="#C084FC" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#FB7185" stopOpacity="0.6" />
-            </linearGradient>
-
-            {/* Specular Top Rim Gradient */}
-            <linearGradient id="specularRim" x1="0" y1="0" x2="286" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.04)" />
-              <stop offset="15%" stopColor="rgba(255,255,255,0.35)" />
-              <stop offset="60%" stopColor="rgba(255,255,255,0.2)" />
-              <stop offset="78%" stopColor="rgba(255,255,255,0.55)" />
-              <stop offset="92%" stopColor="rgba(255,255,255,0.35)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
-            </linearGradient>
-
-            {/* Vessel Clip Path */}
-            <clipPath id="metaballClip">
-              <path d={metaballPath} />
-            </clipPath>
-          </defs>
-
-          {/* Unified Glass Background Fill */}
-          <path
-            d={metaballPath}
-            fill="rgba(26, 26, 28, 0.88)"
-            className="backdrop-blur-2xl"
-          />
-
-          {/* Refraction Wave: Soft, low-contrast diffuse ambient glow */}
-          <g clipPath="url(#metaballClip)">
-            <path
-              d="M 140 53 C 170 53, 188 44, 206 41 C 218 36, 238 36, 250 41 C 265 47, 278 40, 281 28 A 25 25 0 0 1 256 53 C 246 53, 238 39, 228 39 C 218 39, 210 53, 195 53 L 140 53 Z"
-              fill="url(#softRefractionGlow)"
-              opacity="0.75"
-              filter="blur(6px)"
+      {/* ── Context Menu on Tab Long-Press ── */}
+      <AnimatePresence>
+        {activeMenuTab && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-transparent"
+              onClick={() => setActiveMenuTab(null)}
             />
-            <path
-              d="M 150 53 C 175 53, 192 46, 208 43 C 219 38, 237 38, 248 43 C 262 48, 276 41, 281 28 A 25 25 0 0 1 256 53 C 246 53, 238 39, 228 39 C 218 39, 210 53, 195 53 L 150 53 Z"
-              fill="url(#softRefractionGlow)"
-              opacity="0.85"
-              filter="blur(2px)"
-            />
-          </g>
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-16 left-4 z-50 p-1.5 rounded-2xl glass-nav nav-rim-light shadow-2xl flex flex-col gap-1 min-w-[160px]"
+            >
+              {items
+                .find((t) => t.key === activeMenuTab)
+                ?.quickActions?.map((qa, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      qa.action();
+                      setActiveMenuTab(null);
+                    }}
+                    className="px-3.5 py-2 rounded-xl text-left text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors"
+                  >
+                    {qa.label}
+                  </button>
+                ))}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-          {/* Clean Single Seamless Outer Border */}
-          <path
-            d={metaballPath}
-            stroke="rgba(255, 255, 255, 0.14)"
-            strokeWidth="1.1"
-          />
-
-          {/* Top Specular Rim Reflection */}
-          <path
-            d="M 27 3 L 195 3 C 210 3, 218 17, 228 17 C 238 17, 246 3, 256 3 A 25 25 0 0 1 281 28"
-            stroke="url(#specularRim)"
-            strokeWidth="1.1"
-            strokeLinecap="round"
-          />
-        </svg>
-
-        {/* ── Left Region: Seamless Navigation Tabs ── */}
-        <div className="absolute left-1.5 top-1.5 w-[190px] h-[44px] flex items-center px-1 z-10">
+      {/* ── Continuous High-Intensity Liquid Glass Navigation Capsule ── */}
+      <div className="h-[52px] px-2 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center gap-1 min-w-[280px] max-w-[340px]">
+        {/* Navigation Slots (Home, Slot 2, Slot 3) */}
+        <div className="flex-1 flex items-center gap-0.5">
           {items.map((tab) => {
             const isSelected = tab.key === activeKey;
             const tint = tab.tint || '#0A84FF';
@@ -118,21 +125,38 @@ export function TabBar({
                 key={tab.key}
                 type="button"
                 aria-label={tab.label}
-                onClick={() => {
-                  triggerHaptic('selection');
-                  onChange(tab.key);
-                }}
-                className="relative flex-1 min-w-0 h-[38px] rounded-full flex items-center justify-center select-none cursor-pointer transition-colors z-10 px-1"
-                style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.65)' }}
+                onMouseDown={() => handlePressStart(tab)}
+                onMouseUp={handlePressEnd}
+                onMouseLeave={handlePressEnd}
+                onTouchStart={() => handlePressStart(tab)}
+                onTouchEnd={handlePressEnd}
+                onTouchCancel={handlePressEnd}
+                onClick={() => handleTabClick(tab)}
+                className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1"
+                style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.60)' }}
               >
-                <div className="flex items-center justify-center text-[22px] shrink-0">
+                {/* Icon */}
+                <div className="flex items-center justify-center text-[19px] shrink-0">
                   {isSelected ? tab.activeIcon : tab.icon}
                 </div>
 
+                {/* Semibold Label */}
+                <span className="text-[9.5px] font-semibold tracking-tight truncate leading-none">
+                  {tab.label}
+                </span>
+
+                {/* Liquid Active Droplet Thumb */}
                 {isSelected && (
                   <motion.div
-                    layoutId="tabbar-active-thumb"
-                    className="absolute inset-0 bg-white/[0.10] rounded-full -z-10 shadow-sm"
+                    layoutId="tabbar-glass-thumb"
+                    className="absolute inset-0 rounded-full -z-10"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14), 0 2px 8px rgba(0, 0, 0, 0.5)',
+                      backdropFilter: 'blur(8px)',
+                      WebkitBackdropFilter: 'blur(8px)',
+                    }}
                     transition={MOTION_SPRINGS.snappy}
                   />
                 )}
@@ -141,29 +165,60 @@ export function TabBar({
           })}
         </div>
 
-        {/* ── Right Region: Pure Sparkle AI Pod Icon ── */}
-        <div
-          className="absolute z-10 flex items-center justify-center pointer-events-auto"
-          style={{ left: '231px', top: '3px', width: '50px', height: '50px' }}
+        {/* Subtle Internal Divider */}
+        <div className="w-[1px] h-5 bg-white/10 mx-0.5 shrink-0" />
+
+        {/* ── Integrated Luna AI Chat Bot Slot ── */}
+        <motion.button
+          type="button"
+          aria-label="Ask Luna AI"
+          whileTap={{ scale: 0.92 }}
+          transition={MOTION_SPRINGS.bouncy}
+          onClick={() => {
+            triggerHaptic('medium');
+            onAiClick?.();
+          }}
+          className="relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer select-none shrink-0 bg-white/[0.08] hover:bg-white/[0.14] transition-colors"
         >
-          <motion.button
-            type="button"
-            aria-label="Ask AI"
-            whileTap={{ scale: 0.90 }}
-            transition={MOTION_SPRINGS.bouncy}
-            onClick={() => {
-              triggerHaptic('medium');
-              onAiClick?.();
-            }}
-            className="relative w-full h-full rounded-full flex items-center justify-center cursor-pointer group select-none"
-          >
-            {/* Sparkle Icon centered inside the circular glass pod */}
-            <div className="relative z-10 flex items-center justify-center pointer-events-none">
-              <Sparkle size={21} weight="fill" className="text-white drop-shadow-[0_2px_8px_rgba(192,132,252,0.6)]" />
+          {/* Thinking Rotating Ring */}
+          {lunaState === 'thinking' && (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-1 rounded-full border-2 border-transparent border-t-[#BF5AF2] border-r-[#0A84FF]"
+            />
+          )}
+
+          {/* Listening Waveform Bars */}
+          {lunaState === 'listening' ? (
+            <div className="flex items-center gap-0.5 h-3.5">
+              {[0.4, 0.9, 0.6, 1.0, 0.5].map((scale, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ scaleY: [0.3, scale, 0.3] }}
+                  transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                  className="w-0.5 bg-[#BF5AF2] rounded-full h-full"
+                />
+              ))}
             </div>
-          </motion.button>
-        </div>
+          ) : (
+            /* Idle Neural Infinity Loop Icon (Option 3) */
+            <div className="relative z-10 flex items-center justify-center">
+              <NeuralInfinityIcon
+                size={23}
+                glow
+              />
+            </div>
+          )}
+
+          {/* Unread Indicator Dot */}
+          {lunaState === 'unread' && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#BF5AF2] ring-2 ring-black" />
+          )}
+        </motion.button>
       </div>
     </div>
   );
 }
+
+export default TabBar;

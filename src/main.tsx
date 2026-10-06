@@ -3,14 +3,16 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { detectDeviceTier } from './utils/performanceEngine';
 import { applyPerformanceMode } from './utils/performanceMode';
 import { initAiSecurity } from './utils/aiSecurity';
 import { migrateAiSettings } from './services/aiModelResolver';
 import { loadSavedTheme, applyThemeToDom } from './theme/themeStore';
 import './index.css';
 
-// Apply M3 theme and performance mode immediately before first paint
+// Apply M3 theme and hardware performance tier immediately before first paint
 applyThemeToDom(loadSavedTheme());
+detectDeviceTier();
 applyPerformanceMode();
 initAiSecurity().catch(() => {});
 migrateAiSettings();

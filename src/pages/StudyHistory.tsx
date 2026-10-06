@@ -1,12 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CaretLeft, Clock, BookOpen, Check } from '../ui/tokens/icons';
+import { CaretLeft, BookOpen } from '../ui/tokens/icons';
 import { Toolbar } from '../ui/navigation/Toolbar';
 import { Segmented } from '../ui/controls/Segmented';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
 import { format, parseISO, isWithinInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData, StudySession } from '../types';
 
 interface StudyHistoryProps {
@@ -16,7 +17,7 @@ interface StudyHistoryProps {
 
 type FilterPeriod = 'all' | 'today' | 'week' | 'month';
 
-export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
+export default function StudyHistory({ data }: StudyHistoryProps) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<FilterPeriod>('all');
   const [subjectFilter, setSubjectFilter] = useState('');
@@ -55,16 +56,16 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
   const dates = Object.keys(grouped);
 
   return (
-    <div className="w-full flex flex-col pb-32">
+    <div className="w-full flex flex-col pb-4 selection:bg-[#64D2FF]/30">
       <Toolbar
         leading={
           <button
             type="button"
-            onClick={() => navigate('/study')}
+            onClick={() => handleAppBack(navigate)}
             className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
           >
             <CaretLeft size={20} weight="bold" />
-            <span>Study</span>
+            <span>Back</span>
           </button>
         }
         center={<span className="font-bold text-white text-base">Study History</span>}
@@ -72,11 +73,11 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
 
       {/* Overview Stat Card */}
       <div className="grid grid-cols-2 gap-2 my-4">
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-[#64D2FF] font-mono">{totalHours}h</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Total Study Time</div>
         </div>
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-white font-mono">{filtered.length}</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Sessions Logged</div>
         </div>
@@ -90,6 +91,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
             triggerHaptic('selection');
             setFilter(val);
           }}
+          tint="#64D2FF"
           options={[
             { value: 'all', label: 'All' },
             { value: 'today', label: 'Today' },
@@ -106,7 +108,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
             type="button"
             onClick={() => setSubjectFilter('')}
             className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all ${
-              !subjectFilter ? 'bg-white text-black' : 'bg-white/10 text-white/60 hover:text-white'
+              !subjectFilter ? 'bg-[#64D2FF] text-black font-bold shadow-sm' : 'glass-flat text-white/60 hover:text-white'
             }`}
           >
             All Subjects
@@ -118,8 +120,8 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
               onClick={() => setSubjectFilter(sub)}
               className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all ${
                 subjectFilter === sub
-                  ? 'bg-[#64D2FF] text-black font-bold'
-                  : 'bg-white/10 text-white/60 hover:text-white'
+                  ? 'bg-[#64D2FF] text-black font-bold shadow-sm'
+                  : 'glass-flat text-white/60 hover:text-white'
               }`}
             >
               {sub}
@@ -130,7 +132,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
 
       {/* History Insets */}
       {dates.length === 0 ? (
-        <div className="p-8 rounded-[28px] bg-[#1C1C1E] border border-white/8 text-center text-white/50 text-sm my-4">
+        <div className="p-8 rounded-[28px] glass-card text-center text-white/50 text-sm my-4">
           No study sessions found for this period.
         </div>
       ) : (
@@ -152,7 +154,7 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
                     title={session.subject}
                     subtitle={
                       session.topic
-                        ? `${session.topic} • ${session.startTime || ''}`
+                        ? `${session.topic} · ${session.startTime || ''}`
                         : session.startTime || undefined
                     }
                     trailing={
@@ -160,7 +162,6 @@ export default function StudyHistory({ data, updateData }: StudyHistoryProps) {
                         {session.duration}m
                       </span>
                     }
-                    showSeparator={sIdx < sessionsOnDate.length - 1}
                   />
                 ))}
               </GroupedList>

@@ -3,8 +3,6 @@ import { auth } from '../firebase';
 import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-import { GlassSurface } from '../ui/glass/GlassSurface';
-import { Button } from '../ui/controls/Button';
 import { SpinnerGap, ShieldCheck } from '../ui/tokens/icons';
 
 export default function Auth() {
@@ -65,7 +63,7 @@ export default function Auth() {
 
       {/* Top Branding */}
       <div className="relative z-10 flex flex-col items-center text-center mb-8 w-full max-w-sm">
-        <div className="w-20 h-20 rounded-[24px] bg-[#1C1C1E] border border-white/12 flex items-center justify-center shadow-2xl mb-4 p-3.5">
+        <div className="w-20 h-20 rounded-[24px] glass-card flex items-center justify-center shadow-2xl mb-4 p-3.5">
           <img
             src="/icon-monochrome.svg"
             alt="LifeOS Logo"
@@ -76,20 +74,20 @@ export default function Auth() {
           LifeOS
         </h1>
         <p className="text-white/60 font-medium text-xs mt-1">
-          Your personal life operating system
+          Your personal life operating system · Private & Synchronized
         </p>
       </div>
 
       {/* Sign In Glass Card */}
       <div className="w-full max-w-sm relative z-10">
-        <GlassSurface className="p-7 rounded-[32px] border border-white/12 shadow-2xl flex flex-col items-center text-center">
+        <div className="p-7 rounded-[32px] glass-card shadow-2xl flex flex-col items-center text-center">
           <h2 className="text-xl font-bold text-white mb-2">Welcome</h2>
           <p className="text-white/60 text-xs leading-relaxed mb-6">
             Sign in with Google to securely sync your routines, tasks, and history across all your devices.
           </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/15 border border-red-500/30 rounded-2xl text-red-300 text-xs w-full text-center">
+            <div className="mb-4 p-3 bg-red-500/15 rounded-2xl text-red-300 text-xs w-full text-center">
               {error}
             </div>
           )}
@@ -129,7 +127,7 @@ export default function Auth() {
             <ShieldCheck size={14} weight="bold" className="text-emerald-400" />
             <span>End-to-end encrypted partition</span>
           </div>
-        </GlassSurface>
+        </div>
       </div>
     </div>
   );

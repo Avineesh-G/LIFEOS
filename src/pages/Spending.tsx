@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { AppData, Expense, MoneyLentItem } from '../types';
+import type { AppData, Expense } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import {
   LargeTitleHeader,
@@ -18,7 +17,6 @@ import {
   Wallet,
   Plus,
   Trash,
-  Check,
 } from '../ui';
 
 interface SpendingProps {
@@ -107,9 +105,8 @@ export default function Spending({ data, updateData }: SpendingProps) {
     <div className="w-full text-white selection:bg-[#30D158]/30">
       <LargeTitleHeader
         title="Spending"
-        subtitle={`Rs ${monthTotal} spent this month`}
+        subtitle={`Rs ${monthTotal} spent this month · Budget Rs ${monthlyBudget}`}
         tint="#30D158"
-        onBack={() => navigate('/')}
         actions={
           <Button
             variant="glass"
@@ -137,14 +134,21 @@ export default function Spending({ data, updateData }: SpendingProps) {
 
         {tab === 'expenses' ? (
           <>
-            {/* ── 1. Hero Monthly Ledger Card (r-hero 32, surface-1) ── */}
-            <div className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.06] flex flex-col gap-4 shadow-xl select-none">
-              <div className="flex items-start justify-between">
+            {/* ── 1. Hero Monthly Ledger Card (glass-hero green) ── */}
+            <div className="w-full glass-hero p-5 rounded-[32px] flex flex-col gap-4 shadow-xl select-none relative overflow-hidden">
+              <div
+                className="absolute inset-0 pointer-events-none opacity-20"
+                style={{
+                  background: 'radial-gradient(ellipse at top left, #30D158 0%, transparent 70%)',
+                }}
+              />
+
+              <div className="flex items-start justify-between relative z-10">
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold text-[rgba(235,235,245,0.60)]">
                     TOTAL MONTHLY SPEND
                   </span>
-                  <div className="text-4xl font-extrabold text-[#30D158] tabular-nums tracking-tight mt-1">
+                  <div className="text-4xl font-black text-[#30D158] tabular-nums tracking-tight mt-1">
                     Rs {monthTotal}{' '}
                     <span className="text-sm font-normal text-[rgba(235,235,245,0.40)]">
                       / Rs {monthlyBudget}
@@ -161,7 +165,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
               </div>
 
               {/* Budget Progress Bar */}
-              <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+              <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.04] relative z-10">
                 <div className="flex justify-between text-xs font-semibold">
                   <span className="text-[rgba(235,235,245,0.60)]">Budget Utilization</span>
                   <span className="text-white">{Math.round(budgetPercent * 100)}%</span>
@@ -172,9 +176,9 @@ export default function Spending({ data, updateData }: SpendingProps) {
 
             {/* ── 2. Category Breakdown ── */}
             {categoryBreakdown.length > 0 && (
-              <div className="w-full bg-[#1C1C1E] rounded-[26px] p-4 border border-white/[0.06] flex flex-col gap-3 select-none">
-                <span className="text-xs font-bold text-[rgba(235,235,245,0.60)]">
-                  CATEGORY BREAKDOWN
+              <div className="w-full glass-card rounded-[26px] p-4 flex flex-col gap-3 select-none">
+                <span className="text-xs font-bold text-[rgba(235,235,245,0.60)] uppercase tracking-wider">
+                  Category Breakdown
                 </span>
                 <div className="flex flex-col gap-2.5">
                   {categoryBreakdown.map(([cat, amt]) => (
@@ -225,7 +229,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                       icon={<Wallet weight="bold" />}
                       iconTint="#30D158"
                       title={exp.note || exp.category}
-                      subtitle={`${exp.category} • ${exp.date}`}
+                      subtitle={`${exp.category} · ${exp.date}`}
                       trailing={
                         <span className="text-white font-bold tabular-nums">
                           Rs {exp.amount}
@@ -297,8 +301,8 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   }}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     category === cat
-                      ? 'bg-[#30D158] text-black font-bold'
-                      : 'bg-[#2C2C2E] text-[rgba(235,235,245,0.60)] hover:text-white'
+                      ? 'glass-tile text-[#30D158] font-bold shadow-sm'
+                      : 'glass-flat text-[rgba(235,235,245,0.60)] hover:text-white'
                   }`}
                 >
                   {cat}

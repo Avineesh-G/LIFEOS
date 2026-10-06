@@ -5,3 +5,5 @@ export * from './TabBar';
 export * from './SearchPill';
 export * from './MoreHubSheet';
 export * from './AppShell';
+export * from './DockSpacer';
+

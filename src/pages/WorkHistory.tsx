@@ -17,13 +17,13 @@ import {
 import { format, parseISO } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
 import { handleAppBack } from '../utils/backNavigation';
-import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis, GEMINI_API_KEY } from '../utils/geminiCoach';
+import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis } from '../utils/geminiCoach';
 import { Toolbar } from '../ui/navigation/Toolbar';
 import { Segmented } from '../ui/controls/Segmented';
 import { Button } from '../ui/controls/Button';
 import { Badge } from '../ui/controls/Badge';
 import { EmptyState } from '../ui/feedback/EmptyState';
-import type { AppData } from '../types';
+import type { AppData, WorkoutLog } from '../types';
 
 interface WorkHistoryProps {
   data: AppData;
@@ -102,11 +102,11 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     triggerHaptic('ai');
     setNutritionAiLoading(true);
     try {
-      const res = await getHistoryAnalysis(monthlyNutritionLogs, data.profile, data.geminiApiKey || GEMINI_API_KEY);
+      const res = await getHistoryAnalysis(monthlyNutritionLogs, data.profile);
       setNutritionAiResult(res);
       triggerHaptic('success');
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.warn('Nutrition AI error:', e);
     } finally {
       setNutritionAiLoading(false);
     }
@@ -115,7 +115,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
   // ── 2. GYM FILTER & STATS ──
   const monthlyGymLogs = useMemo(() => {
     return (data.workoutLogs || [])
-      .filter(l => l.date && l.date.startsWith(selectedMonth))
+      .filter((w) => w.date && w.date.startsWith(selectedMonth))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [data.workoutLogs, selectedMonth]);
 
@@ -124,22 +124,14 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     let totalSets = 0;
     const splitCounts: Record<string, number> = {};
 
-    monthlyGymLogs.forEach(l => {
-      splitCounts[l.type] = (splitCounts[l.type] || 0) + 1;
-      (l.exercises || []).forEach(e => {
-        totalSets += (e.sets || []).filter(s => s.completed).length;
+    monthlyGymLogs.forEach((w) => {
+      splitCounts[w.type] = (splitCounts[w.type] || 0) + 1;
+      (w.exercises || []).forEach((e) => {
+        totalSets += e.sets?.length || 0;
       });
     });
 
-    let topSplit = 'None';
-    let maxCount = 0;
-    Object.entries(splitCounts).forEach(([type, count]) => {
-      if (count > maxCount) {
-        maxCount = count;
-        topSplit = type;
-      }
-    });
-
+    const topSplit = Object.entries(splitCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
     return { totalWorkouts, totalSets, topSplit };
   }, [monthlyGymLogs]);
 
@@ -148,17 +140,17 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     triggerHaptic('ai');
     setGymAiLoading(true);
     try {
-      const res = await getGymHistoryAnalysis(monthlyGymLogs, data.geminiApiKey || GEMINI_API_KEY);
+      const res = await getGymHistoryAnalysis(monthlyGymLogs);
       setGymAiResult(res);
       triggerHaptic('success');
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.warn('Gym AI error:', e);
     } finally {
       setGymAiLoading(false);
     }
   };
 
-  // ── 3. TODO TASKS FILTER & STATS ──
+  // ── 3. TASKS FILTER & STATS ──
   const monthlyTasks = useMemo(() => {
     return (data.tasks || [])
       .filter(t => t.date && t.date.startsWith(selectedMonth))
@@ -180,26 +172,17 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
   }, [data.expenses, selectedMonth]);
 
   const spendingStats = useMemo(() => {
-    const total = monthlyExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-    const count = monthlyExpenses.length;
-    const daysInMonth = 30;
-    const dailyAvg = count > 0 ? Math.round(total / daysInMonth) : 0;
+    const total = monthlyExpenses.reduce((s, e) => s + e.amount, 0);
+    const daysLogged = new Set(monthlyExpenses.map(e => e.date)).size;
+    const dailyAvg = daysLogged > 0 ? Math.round(total / daysLogged) : 0;
 
     const catTotals: Record<string, number> = {};
     monthlyExpenses.forEach(e => {
-      catTotals[e.category] = (catTotals[e.category] || 0) + (Number(e.amount) || 0);
+      catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
     });
+    const topCategory = Object.entries(catTotals).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
 
-    let topCategory = 'None';
-    let topCatAmount = 0;
-    Object.entries(catTotals).forEach(([cat, amt]) => {
-      if (amt > topCatAmount) {
-        topCatAmount = amt;
-        topCategory = cat;
-      }
-    });
-
-    return { total, dailyAvg, topCategory, catTotals };
+    return { total, dailyAvg, topCategory };
   }, [monthlyExpenses]);
 
   const handleRunSpendingAi = async () => {
@@ -207,54 +190,50 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
     triggerHaptic('ai');
     setSpendingAiLoading(true);
     try {
-      const res = await getSpendingHistoryAnalysis(monthlyExpenses, data.geminiApiKey || GEMINI_API_KEY);
+      const res = await getSpendingHistoryAnalysis(monthlyExpenses);
       setSpendingAiResult(res);
       triggerHaptic('success');
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.warn('Spending AI error:', e);
     } finally {
       setSpendingAiLoading(false);
     }
   };
 
-  // ── 5. NOTES FILTER & STATS ──
+  // ── 5. NOTES FILTER ──
   const monthlyNotes = useMemo(() => {
-    return (data.notes || [])
-      .filter(n => n.monthKey === selectedMonth || (n.createdAt && n.createdAt.startsWith(selectedMonth)))
-      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+    return (data.notes || []).filter(n => {
+      const dateStr = n.updatedAt || n.createdAt;
+      return dateStr && dateStr.startsWith(selectedMonth);
+    });
   }, [data.notes, selectedMonth]);
 
-  // Virtualization
-  const PAGE_SIZE = 12;
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // Pagination for heavy lists
+  const [visibleCount, setVisibleCount] = useState(25);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
+    setVisibleCount(25);
   }, [activeTab, selectedMonth]);
 
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisibleCount(prev => prev + PAGE_SIZE);
-        }
-      },
-      { rootMargin: '120px' }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((prev) => prev + 25);
+      }
+    });
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
-      {/* ── Toolbar ── */}
+    <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#AC8E68]/30">
+      {/* ── Top Navigation Bar ── */}
       <Toolbar
         leading={
           <button
             onClick={() => handleAppBack(navigate)}
-            className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
           >
             <CaretLeft size={22} weight="bold" />
           </button>
@@ -268,10 +247,10 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
       <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
         {/* ── Month Selector ── */}
-        <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl glass-card flex items-center justify-between">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-xl text-[#8E8E93] hover:text-white hover:bg-[#2C2C2E] transition-colors"
+            className="p-2 rounded-xl text-[#8E8E93] hover:text-white glass-flat active:scale-95 transition-transform"
             title="Previous Month"
           >
             <CaretLeft size={18} weight="bold" />
@@ -286,7 +265,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-xl text-[#8E8E93] hover:text-white hover:bg-[#2C2C2E] transition-colors"
+            className="p-2 rounded-xl text-[#8E8E93] hover:text-white glass-flat active:scale-95 transition-transform"
             title="Next Month"
           >
             <CaretRight size={18} weight="bold" />
@@ -309,15 +288,15 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="space-y-4">
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-2.5">
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Days Logged</span>
                 <span className="text-xl font-bold text-white">{nutritionStats.daysLogged}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Avg / Day</span>
                 <span className="text-xl font-bold text-[#FF9F0A]">{nutritionStats.avgCals} kcal</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Target Hit</span>
                 <span className="text-xl font-bold text-[#30D158]">{nutritionStats.targetHitPct}%</span>
               </div>
@@ -325,7 +304,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
             {/* AI Coach Action */}
             {monthlyNutritionLogs.length > 0 && (
-              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#FF9F0A]/20 space-y-3">
+              <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkle size={18} weight="fill" className="text-[#FF9F0A]" />
@@ -342,7 +321,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 </div>
 
                 {nutritionAiResult && (
-                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06] space-y-1">
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.04] space-y-1">
                     <p className="text-white font-medium">{nutritionAiResult.summary || nutritionAiResult.feedback}</p>
                   </div>
                 )}
@@ -355,7 +334,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyNutritionLogs.slice(0, visibleCount).map((log) => (
                   <div
                     key={log.date}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">
@@ -385,22 +364,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         {activeTab === 'gym' && (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Workouts</span>
                 <span className="text-xl font-bold text-white">{gymStats.totalWorkouts}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Sets</span>
                 <span className="text-xl font-bold text-[#FF453A]">{gymStats.totalSets}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Split</span>
                 <span className="text-sm font-bold text-white truncate block">{gymStats.topSplit}</span>
               </div>
             </div>
 
             {monthlyGymLogs.length > 0 && (
-              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#FF453A]/20 space-y-3">
+              <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkle size={18} weight="fill" className="text-[#FF453A]" />
@@ -417,7 +396,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 </div>
 
                 {gymAiResult && (
-                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06]">
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.04]">
                     <p className="text-white font-medium">{gymAiResult.summary || gymAiResult.feedback}</p>
                   </div>
                 )}
@@ -426,10 +405,10 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
             {monthlyGymLogs.length > 0 ? (
               <div className="space-y-2">
-                {monthlyGymLogs.slice(0, visibleCount).map((log) => (
+                {monthlyGymLogs.slice(0, visibleCount).map((log: WorkoutLog) => (
                   <div
                     key={log.id}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">
@@ -457,15 +436,15 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         {activeTab === 'todo' && (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Tasks</span>
                 <span className="text-xl font-bold text-white">{todoStats.total}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Done</span>
                 <span className="text-xl font-bold text-[#30D158]">{todoStats.completed}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Success Rate</span>
                 <span className="text-xl font-bold text-[#0A84FF]">{todoStats.rate}%</span>
               </div>
@@ -476,7 +455,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyTasks.slice(0, visibleCount).map((task) => (
                   <div
                     key={task.id}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0 flex-1">
                       <span className={`text-sm font-medium block truncate ${task.completed ? 'line-through text-[#8E8E93]' : 'text-white'}`}>
@@ -507,22 +486,22 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         {activeTab === 'spending' && (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Spent</span>
                 <span className="text-lg font-bold text-[#30D158]">₹{spendingStats.total}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Daily Avg</span>
                 <span className="text-lg font-bold text-white">₹{spendingStats.dailyAvg}</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-1">
+              <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Cat</span>
                 <span className="text-xs font-bold text-white truncate block">{spendingStats.topCategory}</span>
               </div>
             </div>
 
             {monthlyExpenses.length > 0 && (
-              <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-[#30D158]/20 space-y-3">
+              <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkle size={18} weight="fill" className="text-[#30D158]" />
@@ -539,7 +518,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 </div>
 
                 {spendingAiResult && (
-                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.06]">
+                  <div className="text-xs text-[#8E8E93] leading-relaxed pt-2 border-t border-white/[0.04]">
                     <p className="text-white font-medium">{spendingAiResult.summary || spendingAiResult.feedback}</p>
                   </div>
                 )}
@@ -551,7 +530,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyExpenses.slice(0, visibleCount).map((exp) => (
                   <div
                     key={exp.id}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">{exp.note || exp.category}</span>
@@ -578,7 +557,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         {/* ── 5. NOTES TAB ── */}
         {activeTab === 'notes' && (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl glass-card flex items-center justify-between">
               <span className="text-xs text-[#8E8E93]">Total Notes & Ideas</span>
               <span className="text-base font-bold text-white">{monthlyNotes.length}</span>
             </div>
@@ -589,7 +568,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                   <div
                     key={note.id}
                     onClick={() => navigate('/notes')}
-                    className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] hover:border-white/[0.2] transition-colors cursor-pointer"
+                    className="p-3.5 rounded-2xl glass-card hover:bg-white/[0.08] transition-colors cursor-pointer"
                   >
                     <span className="text-sm font-semibold text-white block truncate">{note.title || 'Untitled Note'}</span>
                     <p className="text-xs text-[#8E8E93] line-clamp-2 mt-1">{note.content}</p>

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  Palette,
   Bell,
   Fingerprint,
   Sparkle,
@@ -16,8 +14,10 @@ import {
   WarningCircle,
   SlidersHorizontal,
   User,
-  CaretRight,
+  Lightning,
+  NeuralInfinityIcon,
 } from '../ui/tokens/icons';
+import { useDeviceTier } from '../hooks/useDeviceTier';
 import { LargeTitleHeader } from '../ui/navigation/LargeTitleHeader';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
@@ -39,8 +39,6 @@ import {
   setGroqApiKey,
   getLetAiReadData,
   setLetAiReadData,
-  getSectionPermissions,
-  setSectionPermission,
 } from '../utils/aiSecurity';
 import { exportBackupFile, restoreBackupPackage } from '../utils/backupRestore';
 import { checkForAppUpdate, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
@@ -58,15 +56,16 @@ interface SettingsProps {
 export default function Settings({
   data,
   updateData,
-  refresh,
+  refresh: _refresh,
   resetAllData,
   onSignOut,
 }: SettingsProps) {
   const navigate = useNavigate();
+  const deviceTier = useDeviceTier();
 
   // Notifications
   const [hasNotifications, setHasNotifications] = useState(true);
-  const [leadMinutes, setLeadMinutes] = useState(data.settings?.notificationLeadMinutes || 10);
+  const [leadMinutes] = useState(data.settings?.notificationLeadMinutes || 10);
 
   useEffect(() => {
     checkNotificationPermission().then(setHasNotifications);
@@ -94,7 +93,6 @@ export default function Settings({
   // AI & Groq
   const [groqKey, setGroqKeyState] = useState(() => getGroqApiKey() || '');
   const [aiReadData, setAiReadDataState] = useState(() => getLetAiReadData());
-  const [aiPerms, setAiPerms] = useState(() => getSectionPermissions());
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
 
   const handleSaveAiKey = (key: string) => {
@@ -118,7 +116,7 @@ export default function Settings({
       const filename = await exportBackupFile(data, false);
       setBackupFeedback(`Backup saved: ${filename}`);
       setTimeout(() => setBackupFeedback(null), 3000);
-    } catch (err: any) {
+    } catch {
       setBackupFeedback('Backup export failed.');
       setTimeout(() => setBackupFeedback(null), 3000);
     }
@@ -171,18 +169,27 @@ export default function Settings({
   const currentUser = auth.currentUser;
 
   return (
-    <div className="w-full flex flex-col pb-2">
+    <div className="w-full flex flex-col pb-2 selection:bg-[#0A84FF]/30">
       <LargeTitleHeader
         title="Settings"
-        subtitle={`LifeOS v${CURRENT_VERSION_NAME} (${CURRENT_VERSION_CODE})`}
+        subtitle={`LifeOS v${CURRENT_VERSION_NAME} · Build ${CURRENT_VERSION_CODE}`}
+        tint="#0A84FF"
       />
 
-      {/* User Profile Card */}
-      <div className="px-1 mb-2">
-        <div className="w-full p-4 rounded-[26px] bg-[#1C1C1E] border border-white/8 flex items-center gap-3.5 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] flex items-center justify-center text-white text-lg font-bold shadow-md">
-            {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : <User size={22} weight="bold" />}
-          </div>
+      {/* User Profile Card (Google photo support) */}
+      <div className="px-1 mb-3">
+        <div className="w-full p-4 rounded-[26px] glass-card flex items-center gap-3.5 shadow-sm">
+          {currentUser?.photoURL ? (
+            <img
+              src={currentUser.photoURL}
+              alt={currentUser.displayName || 'User Profile'}
+              className="w-12 h-12 rounded-full object-cover shadow-md ring-2 ring-white/10"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] flex items-center justify-center text-white text-lg font-bold shadow-md">
+              {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : <User size={22} weight="bold" />}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-bold text-white truncate">
               {currentUser?.displayName || 'LifeOS User'}
@@ -193,6 +200,34 @@ export default function Settings({
           </div>
         </div>
       </div>
+
+      {/* ── Hardware Performance & Adaptive Tier ── */}
+      <GroupedList
+        header="HARDWARE PERFORMANCE & COMPATIBILITY"
+        footer={`Auto-detected: ${deviceTier.ramGb}GB RAM · ${deviceTier.cores} Cores · ${deviceTier.gpuRenderer.slice(0, 32)} · Running at ${deviceTier.tier === 3 ? 'Max Fluidity (Zero-Blur GPU)' : deviceTier.tier === 2 ? 'Balanced 4px Blur' : 'Full Liquid Glass'}`}
+      >
+        <ListRow
+          icon={<Lightning size={18} weight="duotone" />}
+          iconTint="#FFD60A"
+          title="Performance Engine"
+          subtitle={
+            deviceTier.tier === 3
+              ? 'Tier 3: Max Fluidity (Budget / Low RAM / Battery)'
+              : deviceTier.tier === 2
+              ? 'Tier 2: Balanced Standard (6GB RAM / Mid-range)'
+              : 'Tier 1: High Fidelity (Flagship / 8GB+ RAM)'
+          }
+          trailing={
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#30D158] animate-pulse" />
+              <span className="text-xs font-semibold text-[#30D158] glass-flat px-2.5 py-1 rounded-full">
+                Auto-Optimized
+              </span>
+            </div>
+          }
+          showSeparator={false}
+        />
+      </GroupedList>
 
       {/* ── System Preferences ── */}
       <GroupedList header="SYSTEM PREFERENCES">
@@ -207,10 +242,10 @@ export default function Settings({
                   key={lvl}
                   type="button"
                   onClick={() => handleHapticChange(lvl)}
-                  className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase transition-all ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-all ${
                     hapticLevel === lvl
-                      ? 'bg-[#BF5AF2] text-white'
-                      : 'bg-white/10 text-white/50 hover:text-white'
+                      ? 'glass-tile text-[#BF5AF2] shadow-sm'
+                      : 'glass-flat text-white/50 hover:text-white'
                   }`}
                 >
                   {lvl}
@@ -269,10 +304,10 @@ export default function Settings({
         />
       </GroupedList>
 
-      {/* ── Security & Vault ── */}
+      {/* ── Security & App Lock ── */}
       <GroupedList
         header="SECURITY & HARDWARE LOCK"
-        footer="Require biometric fingerprint or face authentication before unlocking the app and secure notes."
+        footer="Require biometric fingerprint or face authentication before unlocking the app."
       >
         <ListRow
           icon={<Fingerprint size={18} weight="duotone" />}
@@ -285,14 +320,6 @@ export default function Settings({
               onChange={handleToggleBiometric}
             />
           }
-        />
-        <ListRow
-          icon={<ShieldCheck size={18} weight="duotone" />}
-          iconTint="#8E7CFF"
-          title="Secure Vault Settings"
-          subtitle="AES-256-GCM encrypted notes"
-          showChevron
-          onClick={() => navigate('/vault')}
           showSeparator={false}
         />
       </GroupedList>
@@ -303,7 +330,7 @@ export default function Settings({
         footer="Luna AI analyzes your data locally and securely using your private Groq API key."
       >
         <ListRow
-          icon={<Sparkle size={18} weight="fill" />}
+          icon={<NeuralInfinityIcon size={18} />}
           iconTint="#BF5AF2"
           title="Groq AI Configuration"
           subtitle={groqKey ? 'API Key Configured' : 'Using default intelligence proxy'}
@@ -342,7 +369,7 @@ export default function Settings({
           title="Restore Backup"
           subtitle="Import from backup file"
           trailing={
-            <label className="px-3 py-1 rounded-full bg-[#0A84FF] text-white text-xs font-bold cursor-pointer active:scale-95 transition-transform">
+            <label className="px-3 py-1 rounded-full glass-flat text-white text-xs font-bold cursor-pointer active:scale-95 transition-transform">
               Choose
               <input
                 type="file"
@@ -394,8 +421,8 @@ export default function Settings({
 
       {/* Toast Feedback */}
       {backupFeedback && (
-        <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto p-3 rounded-2xl bg-white text-black font-semibold text-xs shadow-2xl flex items-center justify-center gap-2 z-50 animate-bounce">
-          <Check size={16} weight="bold" />
+        <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto p-3 rounded-2xl glass-card text-white font-semibold text-xs shadow-2xl flex items-center justify-center gap-2 z-50">
+          <Check size={16} weight="bold" className="text-[#30D158]" />
           <span>{backupFeedback}</span>
         </div>
       )}

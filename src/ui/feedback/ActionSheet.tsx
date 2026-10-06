@@ -65,9 +65,9 @@ export function ActionSheet({
             className="relative z-10 flex flex-col gap-2 w-full max-w-md mx-auto"
           >
             {/* Options Group */}
-            <GlassSurface className="rounded-[24px] overflow-hidden flex flex-col border border-white/14 shadow-2xl">
+            <GlassSurface className="rounded-[24px] overflow-hidden flex flex-col shadow-2xl">
               {(title || message) && (
-                <div className="px-4 py-3.5 text-center border-b border-white/10">
+                <div className="px-4 py-3.5 text-center">
                   {title && <div className="text-sm font-semibold text-white">{title}</div>}
                   {message && <div className="text-xs text-[rgba(235,235,245,0.60)] mt-0.5">{message}</div>}
                 </div>
@@ -83,7 +83,7 @@ export function ActionSheet({
                     opt.onClick();
                   }}
                   className={`w-full py-3.5 px-4 flex items-center justify-center gap-3 font-semibold text-[17px] active:bg-white/10 select-none cursor-pointer ${
-                    i > 0 || title || message ? 'border-t border-white/10' : ''
+                    i > 0 || title || message ? 'border-t border-white/[0.06]' : ''
                   } ${opt.destructive ? 'text-[#FF453A]' : 'text-[#0A84FF]'}`}
                 >
                   {opt.icon && <span className="flex items-center justify-center shrink-0">{opt.icon}</span>}
@@ -100,7 +100,7 @@ export function ActionSheet({
                 triggerHaptic('light');
                 onClose();
               }}
-              className="w-full py-3.5 px-4 rounded-[24px] text-center font-bold text-[17px] text-[#0A84FF] select-none cursor-pointer border border-white/14 shadow-xl"
+              className="w-full py-3.5 px-4 rounded-[24px] text-center font-bold text-[17px] text-[#0A84FF] select-none cursor-pointer shadow-xl"
             >
               {cancelLabel}
             </GlassSurface>

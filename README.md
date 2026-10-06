@@ -9,7 +9,7 @@
 
 <br />
 
-[![Version](https://img.shields.io/badge/Version-v3.2.5_(Build_61)-3B82F6?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v3.2.6_(Build_62)-3B82F6?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![UI/UX](https://img.shields.io/badge/Design-Material_3_Expressive-8B5CF6?style=for-the-badge&logo=materialdesign&logoColor=white)](https://m3.material.io/)
 [![Typography](https://img.shields.io/badge/Typography-Google_Sans_Flex-10B981?style=for-the-badge&logo=google&logoColor=white)](https://fonts.google.com/)
 [![AI Engine](https://img.shields.io/badge/AI_Core-Luna_Autonomous_Engine-F59E0B?style=for-the-badge&logo=google&logoColor=white)](https://deepmind.google/technologies/gemini/)
@@ -18,7 +18,7 @@
 
 <br />
 
-[📲 **Download Release APK (v3.2.5)**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
+[📲 **Download Release APK (v3.2.6)**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
 [🌐 **Live Showcase Website**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) &nbsp;•&nbsp; 
 [⚡ **Launch Web App**](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) &nbsp;•&nbsp; 
 [📋 **View Release Manifest**](public/version.json)

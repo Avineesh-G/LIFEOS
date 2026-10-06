@@ -218,13 +218,13 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-32">
+    <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#FF375F]/30">
       {/* ── Top Navigation Bar ── */}
       <Toolbar
         leading={
           <button
             onClick={() => handleAppBack(navigate)}
-            className="p-2 rounded-full text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
           >
             <CaretLeft size={22} weight="bold" />
           </button>
@@ -264,7 +264,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
 
       <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
         {/* ── Title & Progress Card ── */}
-        <div className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] space-y-3">
+        <div className="p-4 rounded-2xl glass-card space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {currentList.isTemplate && (
@@ -334,7 +334,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
         </div>
 
         {/* ── Quick-Add Bar ── */}
-        <div className="p-2 rounded-2xl bg-[#1C1C1E] border border-white/[0.08]">
+        <div className="p-2 rounded-2xl glass-card">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -356,7 +356,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
               value={itemQuantity}
               onChange={(e) => setItemQuantity(e.target.value)}
               placeholder="Qty"
-              className="w-20 px-2 py-1.5 bg-[#2C2C2E] rounded-xl text-xs text-white placeholder:text-[#636366] focus:outline-none text-center"
+              className="w-20 px-2 py-1.5 glass-flat rounded-xl text-xs text-white placeholder:text-[#636366] focus:outline-none text-center"
             />
 
             <Button
@@ -375,7 +375,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
         {/* ── Active Items List ── */}
         <div className="space-y-2">
           {totalCount === 0 && (
-            <div className="p-8 text-center rounded-2xl border border-dashed border-white/[0.1] text-[#8E8E93] text-xs space-y-1">
+            <div className="p-8 text-center rounded-2xl glass-card text-[#8E8E93] text-xs space-y-1">
               <p className="font-semibold text-sm text-white">List is empty</p>
               <p>Type above to rapidly add items. Press Enter to add without losing focus.</p>
             </div>
@@ -390,7 +390,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.18 }}
-                className="p-3.5 rounded-2xl border border-white/[0.08] bg-[#1C1C1E] flex items-center justify-between gap-3 select-none"
+                className="p-3.5 rounded-2xl glass-card flex items-center justify-between gap-3 select-none"
               >
                 <div
                   className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
@@ -412,7 +412,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
 
                 <div className="flex items-center gap-2 shrink-0">
                   {item.quantity && (
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#2C2C2E] text-[#8E8E93] font-medium border border-white/[0.04]">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full glass-flat text-[#8E8E93] font-medium">
                       {item.quantity}
                     </span>
                   )}
@@ -460,7 +460,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="p-3.5 rounded-2xl border border-white/[0.04] bg-[#1C1C1E]/60 flex items-center justify-between gap-3 select-none"
+                      className="p-3.5 rounded-2xl glass-flat opacity-60 flex items-center justify-between gap-3 select-none"
                     >
                       <div
                         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
@@ -477,7 +477,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
 
                       <div className="flex items-center gap-2 shrink-0">
                         {item.quantity && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-[#2C2C2E] text-[#636366] line-through">
+                          <span className="text-xs px-2 py-0.5 rounded-full glass-flat text-[#636366] line-through">
                             {item.quantity}
                           </span>
                         )}

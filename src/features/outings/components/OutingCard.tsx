@@ -50,7 +50,7 @@ export function OutingCard({ outing, summary }: OutingCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative rounded-2xl bg-[#1C1C1E] border border-white/[0.08] p-4 shadow-sm hover:border-[#40C8E0]/40 transition-all active:scale-[0.99] cursor-pointer overflow-hidden select-none"
+      className="group relative rounded-2xl glass-card p-4 shadow-sm hover:bg-white/[0.08] transition-all active:scale-[0.99] cursor-pointer overflow-hidden select-none"
     >
       {/* Top row: Name & Status Chip */}
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -86,7 +86,7 @@ export function OutingCard({ outing, summary }: OutingCardProps) {
       </div>
 
       {/* Financials Row: My Share & Total Cost */}
-      <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[#2C2C2E] border border-white/[0.04] mb-3">
+      <div className="grid grid-cols-2 gap-2 p-3 rounded-xl glass-flat mb-3">
         <div>
           <span className="text-[11px] uppercase tracking-wider text-[#8E8E93] font-medium block">
             My Share

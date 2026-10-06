@@ -1,22 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { transcribeAudio } from '../services/aiClient';
-import type { AppData, Task } from '../types';
+import type { AppData } from '../types';
 import {
   LargeTitleHeader,
-  Button,
   GroupedList,
   ListRow,
-  GlassSurface,
-  Badge,
   Microphone,
   Sparkle,
-  CheckCircle,
   Copy,
   Check,
-  Waveform,
 } from '../ui';
 
 interface VoiceTranscribeProps {
@@ -24,7 +19,7 @@ interface VoiceTranscribeProps {
   updateData: (partial: Partial<AppData>) => Promise<any>;
 }
 
-export default function VoiceTranscribe({ data, updateData }: VoiceTranscribeProps) {
+export default function VoiceTranscribe({ data: _data, updateData: _updateData }: VoiceTranscribeProps) {
   const navigate = useNavigate();
 
   const [isRecording, setIsRecording] = useState(false);
@@ -119,34 +114,32 @@ export default function VoiceTranscribe({ data, updateData }: VoiceTranscribePro
         title="Voice Notes"
         subtitle={
           isRecording
-            ? `Recording (${mins}:${secs < 10 ? `0${secs}` : secs})`
-            : 'Tap mic to record speech'
+            ? `Recording (${mins}:${secs < 10 ? `0${secs}` : secs}) · Luna AI Listening`
+            : 'Tap mic to record speech · Luna AI Transcription'
         }
         tint="#FF6B35"
-        onBack={() => navigate('/study')}
       />
 
       <div className="flex flex-col gap-4 pb-2 items-center">
         {/* Large 96px Record Glass Circle */}
         <div className="py-6 flex flex-col items-center gap-4">
-          <GlassSurface
-            as="button"
-            interactive
-            tint="#FF6B35"
-            tintOpacity={isRecording ? 0.5 : 0.25}
+          <button
+            type="button"
             onClick={isRecording ? stopRecording : startRecording}
-            className="w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl shadow-2xl border border-white/20"
+            className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl shadow-2xl active:scale-95 transition-transform ${
+              isRecording ? 'bg-[#FF453A] shadow-[#FF453A]/30 shadow-lg' : 'glass-nav nav-rim-light text-[#FF6B35]'
+            }`}
           >
             {isRecording ? (
               <div className="w-8 h-8 rounded-lg bg-white" />
             ) : (
               <Microphone weight="fill" />
             )}
-          </GlassSurface>
+          </button>
 
           {/* Waveform Animation */}
           {isRecording && (
-            <div className="flex items-center gap-1 h-6">
+            <div className="flex items-center gap-1.5 h-6">
               {[0.4, 0.8, 0.5, 1, 0.7, 0.9, 0.4, 0.6].map((scale, i) => (
                 <motion.div
                   key={i}
@@ -171,7 +164,7 @@ export default function VoiceTranscribe({ data, updateData }: VoiceTranscribePro
 
         {/* Real-Time Transcript Display */}
         {transcript && (
-          <div className="w-full bg-[#1C1C1E] rounded-[28px] p-5 border border-white/[0.06] shadow-xl flex flex-col gap-3">
+          <div className="w-full glass-card rounded-[28px] p-5 shadow-xl flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[rgba(235,235,245,0.50)] uppercase tracking-wider">
                 TRANSCRIPT
@@ -179,7 +172,7 @@ export default function VoiceTranscribe({ data, updateData }: VoiceTranscribePro
               <button
                 type="button"
                 onClick={handleCopy}
-                className="p-1.5 rounded-full bg-white/10 text-xs font-medium text-white flex items-center gap-1 hover:bg-white/20"
+                className="p-1.5 px-3 rounded-full glass-flat text-xs font-medium text-white flex items-center gap-1.5 active:scale-95 transition-transform"
               >
                 {copied ? <Check size={14} weight="bold" /> : <Copy size={14} weight="bold" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -193,7 +186,7 @@ export default function VoiceTranscribe({ data, updateData }: VoiceTranscribePro
         {/* AI Key Summary Bullets */}
         {summaryBullets.length > 0 && (
           <div className="w-full">
-            <GroupedList header="Key Points (AI Generated)">
+            <GroupedList header="Key Points · Luna Summary">
               {summaryBullets.map((bullet, i) => (
                 <ListRow
                   key={i}

@@ -51,12 +51,14 @@ export function ListRow({
           isClickable ? 'cursor-pointer active:bg-[#2C2C2E]' : ''
         } ${className}`}
       >
-        {/* Leading Icon Tile: 32x32 squircle (r=10) with 18% tint fill */}
+        {/* Leading Icon Tile: 32x32 squircle (r=10) with pure droplet chassis */}
         {icon && (
           <div
             className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
             style={{
-              backgroundColor: `color-mix(in srgb, ${iconTint} 18%, #2C2C2E)`,
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14)',
               color: iconTint,
             }}
           >

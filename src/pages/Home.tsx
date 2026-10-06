@@ -1,32 +1,33 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, isToday, startOfDay } from 'date-fns';
+import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import type { AppData } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import {
-  LargeTitleHeader,
   GroupedList,
   ListRow,
   Button,
   Ring,
   ProgressBar,
   Badge,
-  Skeleton,
   MOTION_SPRINGS,
   House,
   Barbell,
   ForkKnife,
   Drop,
-  Timer,
   Wallet,
   CheckCircle,
   Sun,
   CalendarDots,
-  Sparkle,
+  CalendarCheck,
   Plus,
-  CaretRight,
+  Flame,
+  Brain,
+  Microphone,
 } from '../ui';
+
+import { HomeCalendarSync } from '../components/home/HomeCalendarSync';
 
 interface HomeProps {
   data: AppData;
@@ -46,30 +47,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
   }, []);
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
-  const todayDisplay = useMemo(() => format(new Date(), 'EEEE, d MMM'), []);
+  const todayDisplay = useMemo(() => format(new Date(), 'EEE, d MMM'), []);
   const dayOfWeek = useMemo(() => format(new Date(), 'EEEE'), []);
-
-  // Next class from Timetable
-  const nextClass = useMemo(() => {
-    const blocks = (data.timetable || [])
-      .filter((b) => b.day === dayOfWeek)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-    const nowTimeStr = format(new Date(), 'HH:mm');
-    return blocks.find((b) => b.startTime > nowTimeStr) || blocks[0] || null;
-  }, [data.timetable, dayOfWeek]);
-
-  // Study hours today
-  const { studyMinutes, studyHours, studyMins, studyPercent } = useMemo(() => {
-    const sessions = (data.studySessions || []).filter((s) => s.date === todayStr);
-    const mins = sessions.reduce((sum, s) => sum + s.duration, 0);
-    const target = 180;
-    return {
-      studyMinutes: mins,
-      studyHours: Math.floor(mins / 60),
-      studyMins: mins % 60,
-      studyPercent: Math.min(1, mins / target),
-    };
-  }, [data.studySessions, todayStr]);
 
   // Spending today
   const totalSpentToday = useMemo(() => {
@@ -97,13 +76,29 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     const log = (data.nutritionLogs || []).find((n) => n.date === todayStr);
     const cals = log?.dailyTotal || 0;
     const target = data.profile?.currentCalorieTarget || 2200;
+    let water = 1.5;
+    try {
+      const saved = localStorage.getItem(`lifeos_water_${todayStr}`);
+      if (saved) water = parseFloat(saved);
+    } catch {}
     return {
       calories: cals,
       target,
       percent: Math.min(1, cals / target),
-      waterLiters: '2.5',
+      waterLiters: water.toFixed(1),
     };
   }, [data.nutritionLogs, data.profile, todayStr]);
+
+  // Quick add water
+  const handleQuickAddWater = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    triggerHaptic('light');
+    const current = parseFloat(nutritionToday.waterLiters);
+    const next = Math.round((current + 0.25) * 100) / 100;
+    try {
+      localStorage.setItem(`lifeos_water_${todayStr}`, next.toString());
+    } catch {}
+  };
 
   // Tasks top 3
   const topTasks = useMemo(() => {
@@ -127,77 +122,21 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
   return (
     <div className="w-full text-white selection:bg-[#0A84FF]/30">
-      {/* Fluid Page Title & Greeting Header */}
-      <div className="pt-1 pb-2.5 px-0.5 select-none">
-        <p className="text-[12.5px] font-semibold text-[rgba(235,235,245,0.65)] tracking-tight">
-          {greeting} • {todayDisplay}
+      {/* ── Two-tone Page Greeting Header ── */}
+      <div className="pt-1 pb-3 px-0.5 select-none">
+        <p className="text-[13px] font-semibold text-[rgba(235,235,245,0.60)] tracking-tight">
+          {greeting} · {todayDisplay}
         </p>
-        <h1 className="text-[32px] leading-[38px] font-bold text-white tracking-[-0.02em] mt-0.5">
+        <h1 className="text-[34px] leading-[41px] font-bold text-white tracking-tight mt-0.5">
           Today
         </h1>
       </div>
 
-      <div className="flex flex-col gap-3 pb-2">
-        {/* ── 1. Hero Tile (r-hero 32, surface-1) ── */}
-        <motion.div
-          whileTap={{ scale: 0.98 }}
-          transition={MOTION_SPRINGS.default}
-          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.06] flex flex-col gap-4 shadow-xl select-none"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col">
-              <div className="text-xs font-semibold text-[rgba(235,235,245,0.60)] tracking-tight flex items-center gap-1.5">
-                <CalendarDots size={14} className="text-[#5E5CE6]" weight="bold" />
-                <span>Next Scheduled Event</span>
-              </div>
-              {/* Two-tone headline */}
-              <div className="text-xl font-bold tracking-tight mt-1 text-white">
-                {nextClass ? (
-                  <>
-                    <span>{nextClass.subject}</span>
-                    <span className="text-[rgba(235,235,245,0.50)] font-normal">
-                      {' '}at {nextClass.startTime}
-                    </span>
-                  </>
-                ) : (
-                  <span>Focus Block</span>
-                )}
-              </div>
-            </div>
+      <div className="flex flex-col gap-3.5 pb-2">
+        {/* ── 1. Synced Calendar & Schedule (Replaces Focus Block) ── */}
+        <HomeCalendarSync data={data} updateData={updateData} />
 
-            <Button
-              variant="prominent"
-              size="sm"
-              tint="#0A84FF"
-              onClick={() => {
-                navigate('/study/timer');
-              }}
-            >
-              Start timer
-            </Button>
-          </div>
-
-          {/* Study Numeral & Progress Bar */}
-          <div className="pt-2 border-t border-white/[0.06] flex flex-col gap-2">
-            <div className="flex items-baseline justify-between">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xs font-medium text-[rgba(235,235,245,0.60)]">
-                  Study today:
-                </span>
-                <span className="text-3xl font-bold text-[#64D2FF] tabular-nums tracking-tight">
-                  {studyHours}:{studyMins < 10 ? `0${studyMins}` : studyMins}
-                </span>
-                <span className="text-xs text-[rgba(235,235,245,0.40)]">hrs</span>
-              </div>
-              <span className="text-xs text-[rgba(235,235,245,0.60)] font-medium">
-                {Math.round(studyPercent * 100)}% of goal
-              </span>
-            </div>
-            <ProgressBar progress={studyPercent} height={6} color="#64D2FF" />
-          </div>
-        </motion.div>
-
-        {/* ── 2. 2-Column Metric Tiles (r-tile 24, surface-1) ── */}
+        {/* ── 2. 2x2 Bento Tiles (glass-tile) ── */}
         <div className="grid grid-cols-2 gap-3 select-none">
           {/* Tile A: Calories */}
           <motion.div
@@ -206,20 +145,20 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               triggerHaptic('nav');
               navigate('/nutrition');
             }}
-            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-white tabular-nums tracking-tight leading-none">
+              <span className="text-[20px] font-bold text-white tabular-nums tracking-tight leading-none">
                 {nutritionToday.calories}{' '}
-                <span className="text-xs text-[rgba(235,235,245,0.40)] font-normal">kcal</span>
+                <span className="text-[12px] text-[rgba(235,235,245,0.45)] font-normal">kcal</span>
               </span>
-              <Ring progress={nutritionToday.percent} size={36} strokeWidth={3.8} color="#FF9F0A">
-                <ForkKnife size={16} className="text-[#FF9F0A]" weight="bold" />
+              <Ring progress={nutritionToday.percent} size={34} strokeWidth={3.5} color="#FF9F0A">
+                <ForkKnife size={15} className="text-[#FF9F0A]" weight="bold" />
               </Ring>
             </div>
             <div>
-              <div className="text-xs font-semibold text-white">Daily Fuel</div>
-              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Calories today</div>
+              <div className="text-[13px] font-semibold text-white">Daily Fuel</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Calories today</div>
             </div>
           </motion.div>
 
@@ -230,17 +169,19 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               triggerHaptic('nav');
               navigate('/spending');
             }}
-            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xl font-bold text-[#30D158] tabular-nums">
+              <span className="text-[20px] font-bold text-[#30D158] tabular-nums tracking-tight leading-none">
                 Rs {totalSpentToday}
               </span>
-              <Wallet size={18} className="text-[#30D158]" weight="bold" />
+              <div className="w-[34px] h-[34px] rounded-[11px] glass-flat text-[#30D158] flex items-center justify-center">
+                <Wallet size={17} weight="bold" />
+              </div>
             </div>
             <div>
-              <div className="text-xs font-semibold text-white">Daily Ledger</div>
-              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Spent today</div>
+              <div className="text-[13px] font-semibold text-white">Daily Ledger</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Spent today</div>
             </div>
           </motion.div>
 
@@ -251,23 +192,25 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               triggerHaptic('nav');
               navigate('/gym');
             }}
-            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <span
-                className={`text-sm font-bold truncate pr-1 ${
+                className={`text-[14px] font-bold truncate pr-1 leading-none ${
                   workoutToday.done ? 'text-[#30D158]' : 'text-[#FF453A]'
                 }`}
               >
                 {workoutToday.name}
               </span>
-              <Barbell size={18} className="text-[#FF453A] shrink-0" weight="bold" />
+              <div className="w-[34px] h-[34px] rounded-[11px] glass-flat text-[#FF453A] flex items-center justify-center shrink-0">
+                <Barbell size={17} weight="bold" />
+              </div>
             </div>
             <div>
-              <div className="text-xs font-semibold text-white">
-                {workoutToday.done ? 'Completed' : 'Workout today'}
+              <div className="text-[13px] font-semibold text-white">
+                {workoutToday.done ? 'Completed' : "Today's Split"}
               </div>
-              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Gym Split</div>
+              <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Gym routine</div>
             </div>
           </motion.div>
 
@@ -278,27 +221,38 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               triggerHaptic('nav');
               navigate('/nutrition');
             }}
-            className="bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.06] flex flex-col justify-between h-[120px] cursor-pointer shadow-md"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer group"
           >
             <div className="flex items-center justify-between">
-              <span className="text-lg font-bold text-[#64D2FF] tabular-nums">
-                {nutritionToday.waterLiters} L
+              <span className="text-[20px] font-bold text-[#64D2FF] tabular-nums tracking-tight leading-none">
+                {nutritionToday.waterLiters}{' '}
+                <span className="text-[12px] text-[rgba(235,235,245,0.45)] font-normal">L</span>
               </span>
-              <Drop size={18} className="text-[#64D2FF]" weight="fill" />
+              <div className="w-[34px] h-[34px] rounded-[11px] glass-flat text-[#64D2FF] flex items-center justify-center">
+                <Drop size={17} weight="fill" />
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-semibold text-white">Hydration</div>
-              <div className="text-[11px] text-[rgba(235,235,245,0.60)] mt-0.5">Water logged</div>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-[13px] font-semibold text-white">Hydration</div>
+                <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Water logged</div>
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickAddWater}
+                className="px-2.5 py-1 rounded-full glass-flat text-[#64D2FF] text-[10.5px] font-bold active:scale-95 transition-all"
+                title="Add 250ml"
+              >
+                +250ml
+              </button>
             </div>
           </motion.div>
         </div>
 
-        {/* ── 3. Tasks Grouped List ── */}
+        {/* ── 2. Tasks Grouped List ── */}
         <GroupedList
           header="Priority Tasks"
-          footer={
-            topTasks.length === 0 ? 'No pending tasks for today.' : undefined
-          }
+          footer={topTasks.length === 0 ? 'No pending tasks for today.' : undefined}
         >
           {topTasks.map((t) => (
             <ListRow
@@ -334,7 +288,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <ListRow
             icon={<Sun weight="bold" />}
             iconTint="#FF9F0A"
-            title="Morning Battle Plan"
+            title="Morning Plan"
             subtitle="Schedule, macros, split and daily targets"
             showChevron
             onClick={() => navigate('/morning')}
@@ -342,14 +296,79 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           />
         </GroupedList>
 
-        {/* ── 5. Streak & Quote Row ── */}
-        <div className="flex items-center justify-between px-2 py-2 select-none">
+        {/* ── 5. Streak & Daily Intent (glass-card) ── */}
+        <div className="glass-card p-4 flex items-center justify-between select-none">
           <Badge count={streakDays} label="Day Streak" points={12} color="#FF7A45" />
-          <span className="text-[13px] text-[rgba(235,235,245,0.50)] italic font-medium truncate max-w-[200px]">
+          <span className="text-[13px] text-[rgba(235,235,245,0.65)] italic font-medium truncate max-w-[210px] text-right">
             "Focus and execute."
           </span>
+        </div>
+
+        {/* ── 6. Quick Hub Power Tools ── */}
+        <div className="flex flex-col gap-2 select-none pt-1">
+          <div className="text-section-header px-1">
+            Quick Hub
+          </div>
+          <div className="grid grid-cols-4 gap-2.5">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/flow');
+              }}
+              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#FF9F0A] flex items-center justify-center">
+                <Flame size={18} weight="duotone" />
+              </div>
+              <span className="text-[11.5px] font-semibold text-white/90">Flow</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/timetable');
+              }}
+              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#5E5CE6] flex items-center justify-center">
+                <CalendarCheck size={18} weight="duotone" />
+              </div>
+              <span className="text-[11.5px] font-semibold text-white/90">Classes</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/recall');
+              }}
+              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#BF5AF2] flex items-center justify-center">
+                <Brain size={18} weight="duotone" />
+              </div>
+              <span className="text-[11.5px] font-semibold text-white/90">Recall</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/transcribe');
+              }}
+              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#64D2FF] flex items-center justify-center">
+                <Microphone size={18} weight="duotone" />
+              </div>
+              <span className="text-[11.5px] font-semibold text-white/90">Voice</span>
+            </motion.button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

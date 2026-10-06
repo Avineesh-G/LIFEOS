@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   CaretLeft,
   ShieldCheck,
@@ -21,7 +21,6 @@ import {
   PencilSimple,
   ArrowClockwise,
   Sparkle,
-  Globe,
   User,
   WarningCircle,
   GraduationCap,
@@ -59,12 +58,12 @@ interface VaultProps {
 }
 
 const CATEGORY_CONFIG: Record<VaultCategory, { label: string; shortLabel: string; icon: any; color: string; bg: string }> = {
-  study: { label: 'Study & College', shortLabel: 'Study', icon: GraduationCap, color: 'text-[#0A84FF]', bg: 'bg-[#0A84FF]/15 border-[#0A84FF]/30' },
-  social: { label: 'Social & Media', shortLabel: 'Social', icon: ShareNetwork, color: 'text-[#FF375F]', bg: 'bg-[#FF375F]/15 border-[#FF375F]/30' },
-  work: { label: 'Work & Projects', shortLabel: 'Work', icon: Briefcase, color: 'text-[#FF9F0A]', bg: 'bg-[#FF9F0A]/15 border-[#FF9F0A]/30' },
-  finance: { label: 'Banking & Pay', shortLabel: 'Finance', icon: CurrencyInr, color: 'text-[#30D158]', bg: 'bg-[#30D158]/15 border-[#30D158]/30' },
-  personal: { label: 'Personal & Health', shortLabel: 'Personal', icon: Heart, color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/15 border-[#FF453A]/30' },
-  other: { label: 'Other Accounts', shortLabel: 'Other', icon: Folder, color: 'text-[#40C8E0]', bg: 'bg-[#40C8E0]/15 border-[#40C8E0]/30' },
+  study: { label: 'Study & College', shortLabel: 'Study', icon: GraduationCap, color: 'text-[#0A84FF]', bg: 'bg-[#0A84FF]/15' },
+  social: { label: 'Social & Media', shortLabel: 'Social', icon: ShareNetwork, color: 'text-[#FF375F]', bg: 'bg-[#FF375F]/15' },
+  work: { label: 'Work & Projects', shortLabel: 'Work', icon: Briefcase, color: 'text-[#FF9F0A]', bg: 'bg-[#FF9F0A]/15' },
+  finance: { label: 'Banking & Pay', shortLabel: 'Finance', icon: CurrencyInr, color: 'text-[#30D158]', bg: 'bg-[#30D158]/15' },
+  personal: { label: 'Personal & Health', shortLabel: 'Personal', icon: Heart, color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/15' },
+  other: { label: 'Other Accounts', shortLabel: 'Other', icon: Folder, color: 'text-[#40C8E0]', bg: 'bg-[#40C8E0]/15' },
 };
 
 const AUTO_LOCK_SECONDS = 90;
@@ -151,117 +150,123 @@ export default function Vault({ data, updateData }: VaultProps) {
         const key = await getOrDeriveVaultKey();
         setVaultKey(key);
         setIsUnlocked(true);
+        lastActiveRef.current = Date.now();
+        setLockCountdown(AUTO_LOCK_SECONDS);
         triggerHaptic('success');
-      } else if (result.error && !result.error.toLowerCase().includes('cancel')) {
-        setAuthError(result.error);
-        triggerHaptic('heavy');
+      } else {
+        setAuthError(result.error || 'Authentication canceled');
+        triggerHaptic('error');
       }
     } catch (err: any) {
-      setAuthError(err?.message || 'Authentication failed');
-      triggerHaptic('heavy');
+      console.warn('Unlock error:', err);
+      setAuthError('Authentication failed. Please verify your device lock.');
+      triggerHaptic('error');
     } finally {
       setIsAuthenticating(false);
     }
   };
 
+  // Auto-prompt biometric on first render
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isUnlocked && !isAuthenticating) {
-        handleDeviceUnlock(true);
-      }
-    }, 450);
+    let timer = setTimeout(() => {
+      handleDeviceUnlock(true);
+    }, 250);
     return () => clearTimeout(timer);
   }, []);
 
-  // ── Lock & Auto-Lock Listeners ───────────────────────────────────────────
-  const handleLock = () => {
-    triggerHaptic('medium');
-    setIsUnlocked(false);
-    setVaultKey(null);
-    setRevealedPasswords({});
-    setAuthError(null);
-  };
-
+  // ── Auto-Lock Countdown Timer ─────────────────────────────────────────────
   useEffect(() => {
     if (!isUnlocked) return;
-
-    const resetTimer = () => {
-      lastActiveRef.current = Date.now();
-      setLockCountdown(AUTO_LOCK_SECONDS);
-    };
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        handleLock();
-      }
-    };
 
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - lastActiveRef.current) / 1000);
       const remaining = Math.max(0, AUTO_LOCK_SECONDS - elapsed);
       setLockCountdown(remaining);
-      if (remaining <= 0) {
-        handleLock();
+
+      if (remaining === 0) {
+        handleLockVault('Auto-locked due to 90s inactivity');
       }
     }, 1000);
 
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('touchstart', resetTimer);
-    window.addEventListener('keydown', resetTimer);
-    document.addEventListener('visibilitychange', handleVisibility);
+    const handleUserActivity = () => {
+      lastActiveRef.current = Date.now();
+      setLockCountdown(AUTO_LOCK_SECONDS);
+    };
+
+    window.addEventListener('pointerdown', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('touchstart', resetTimer);
-      window.removeEventListener('keydown', resetTimer);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pointerdown', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
     };
   }, [isUnlocked]);
 
-  // Peek Countdown: Auto re-mask after 10s
+  // Periodic expiration cleanup for peeked passwords (10s window)
   useEffect(() => {
-    if (Object.keys(revealedPasswords).length === 0) return;
-
+    if (!isUnlocked) return;
     const interval = setInterval(() => {
       const now = Date.now();
       setRevealedPasswords((prev) => {
-        let hasExpired = false;
+        let changed = false;
         const next: Record<string, { plain: string; expiresAt: number }> = {};
         for (const [id, item] of Object.entries(prev)) {
           if (item.expiresAt > now) {
             next[id] = item;
           } else {
-            hasExpired = true;
+            changed = true;
           }
         }
-        return hasExpired ? next : prev;
+        return changed ? next : prev;
       });
-    }, 500);
-
+    }, 1000);
     return () => clearInterval(interval);
-  }, [revealedPasswords]);
+  }, [isUnlocked]);
 
-  useEffect(() => {
-    if (!toastMessage) return;
-    const t = setTimeout(() => setToastMessage(null), 3000);
-    return () => clearTimeout(t);
-  }, [toastMessage]);
+  const handleLockVault = (reason?: string) => {
+    triggerHaptic('selection');
+    setIsUnlocked(false);
+    setVaultKey(null);
+    setRevealedPasswords({});
+    if (reason) {
+      setToastMessage(reason);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
 
-  // ── Password Peek / Reveal ───────────────────────────────────────────────
+  // ── Filtered Item List ───────────────────────────────────────────────────
+  const filteredItems = useMemo(() => {
+    return vaultItems
+      .filter((item) => {
+        if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(q) ||
+          item.usernameOrEmail.toLowerCase().includes(q) ||
+          (item.websiteUrl || '').toLowerCase().includes(q) ||
+          (item.notes || '').toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [vaultItems, selectedCategory, searchQuery]);
+
+  // ── Peek / Reveal Password ───────────────────────────────────────────────
   const handleToggleReveal = async (item: VaultItem) => {
-    if (!vaultKey) return;
     triggerHaptic('light');
+    lastActiveRef.current = Date.now();
 
     if (revealedPasswords[item.id]) {
       setRevealedPasswords((prev) => {
-        const next = { ...prev };
-        delete next[item.id];
-        return next;
+        const copy = { ...prev };
+        delete copy[item.id];
+        return copy;
       });
       return;
     }
 
+    if (!vaultKey) return;
     try {
       const plain = await decryptPassword(item.encryptedPassword, item.iv, vaultKey);
       setRevealedPasswords((prev) => ({
@@ -272,14 +277,17 @@ export default function Vault({ data, updateData }: VaultProps) {
         },
       }));
     } catch {
-      setToastMessage('Decryption error');
+      setToastMessage('Could not decrypt password');
+      setTimeout(() => setToastMessage(null), 2500);
     }
   };
 
-  // ── Copy Password ───────────────────────────────────────────
+  // ── Copy Password ────────────────────────────────────────────────────────
   const handleCopyPassword = async (item: VaultItem) => {
     if (!vaultKey) return;
-    triggerHaptic('success');
+    lastActiveRef.current = Date.now();
+    triggerHaptic('save');
+
     try {
       let plain = revealedPasswords[item.id]?.plain;
       if (!plain) {
@@ -287,30 +295,31 @@ export default function Vault({ data, updateData }: VaultProps) {
       }
       await navigator.clipboard.writeText(plain);
       setCopiedId(item.id);
-      setToastMessage('Password copied to clipboard');
-      setTimeout(() => setCopiedId(null), 2500);
+      setToastMessage('Password copied to clipboard (will clear in 30s)');
+      setTimeout(() => setCopiedId(null), 2000);
+      setTimeout(() => setToastMessage(null), 3000);
     } catch {
       setToastMessage('Failed to copy password');
+      setTimeout(() => setToastMessage(null), 2000);
     }
   };
 
-  const handleCopyUsername = async (itemId: string, username: string) => {
+  const handleCopyUsername = async (itemId: string, text: string) => {
     triggerHaptic('light');
-    try {
-      await navigator.clipboard.writeText(username);
-      setCopiedUserItemId(itemId);
-      setToastMessage(`Copied: ${username}`);
-      setTimeout(() => setCopiedUserItemId(null), 2000);
-    } catch {}
+    lastActiveRef.current = Date.now();
+    await navigator.clipboard.writeText(text);
+    setCopiedUserItemId(itemId);
+    setTimeout(() => setCopiedUserItemId(null), 1500);
   };
 
-  // ── Add / Edit / Delete Credential ───────────────────────────────────────
+  // ── Add / Edit Item ──────────────────────────────────────────────────────
   const openAddModal = () => {
     triggerHaptic('light');
+    lastActiveRef.current = Date.now();
     setEditingItem(null);
     setModalForm({
       title: '',
-      category: 'personal',
+      category: selectedCategory === 'all' ? 'personal' : selectedCategory,
       usernameOrEmail: '',
       password: '',
       websiteUrl: '',
@@ -321,17 +330,17 @@ export default function Vault({ data, updateData }: VaultProps) {
   };
 
   const openEditModal = async (item: VaultItem) => {
-    if (!vaultKey) return;
     triggerHaptic('light');
+    lastActiveRef.current = Date.now();
     setEditingItem(item);
+
     let plain = revealedPasswords[item.id]?.plain || '';
-    if (!plain) {
+    if (!plain && vaultKey) {
       try {
         plain = await decryptPassword(item.encryptedPassword, item.iv, vaultKey);
-      } catch {
-        plain = '';
-      }
+      } catch {}
     }
+
     setModalForm({
       title: item.title,
       category: item.category,
@@ -346,80 +355,81 @@ export default function Vault({ data, updateData }: VaultProps) {
 
   const handleSaveCredential = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vaultKey) return;
-    if (!modalForm.title.trim() || !modalForm.password.trim()) {
-      setToastMessage('Title and password are required');
-      return;
-    }
+    if (!modalForm.title.trim() || !modalForm.password.trim() || !vaultKey) return;
+    lastActiveRef.current = Date.now();
 
     try {
-      triggerHaptic('medium');
-      const encrypted = await encryptPassword(modalForm.password.trim(), vaultKey);
-
-      let updatedList: VaultItem[];
+      const { cipherText, iv } = await encryptPassword(modalForm.password, vaultKey);
       const now = new Date().toISOString();
 
+      let updatedList: VaultItem[];
       if (editingItem) {
-        updatedList = vaultItems.map((item) =>
-          item.id === editingItem.id
+        updatedList = vaultItems.map((i) =>
+          i.id === editingItem.id
             ? {
-                ...item,
+                ...i,
                 title: modalForm.title.trim(),
                 category: modalForm.category,
                 usernameOrEmail: modalForm.usernameOrEmail.trim(),
-                encryptedPassword: encrypted.cipherText,
-                iv: encrypted.iv,
+                encryptedPassword: cipherText,
+                iv,
                 websiteUrl: modalForm.websiteUrl.trim() || undefined,
                 notes: modalForm.notes.trim() || undefined,
                 updatedAt: now,
               }
-            : item
+            : i
         );
-        setToastMessage('Account credentials updated');
         showEditedFeedback({
-          title: 'Account Updated',
-          message: `Credentials for "${modalForm.title.trim()}" updated`,
-          section: 'vault',
+          title: 'Credential Updated',
+          message: modalForm.title,
+          section: 'settings',
         });
       } else {
         const newItem: VaultItem = {
-          id: `vault_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          id: `vault_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
           title: modalForm.title.trim(),
           category: modalForm.category,
           usernameOrEmail: modalForm.usernameOrEmail.trim(),
-          encryptedPassword: encrypted.cipherText,
-          iv: encrypted.iv,
+          encryptedPassword: cipherText,
+          iv,
           websiteUrl: modalForm.websiteUrl.trim() || undefined,
           notes: modalForm.notes.trim() || undefined,
           createdAt: now,
           updatedAt: now,
         };
-        updatedList = [newItem, ...vaultItems];
-        setToastMessage('Password encrypted & saved');
+        updatedList = [...vaultItems, newItem];
         showSavedFeedback({
-          title: 'Vault Item Secured',
-          message: `"${modalForm.title.trim()}" encrypted & stored`,
-          section: 'vault',
+          title: 'Password Encrypted & Saved',
+          message: newItem.title,
+          section: 'settings',
         });
       }
 
       await updateData({ vaultItems: updatedList });
       setIsModalOpen(false);
-    } catch (err: any) {
-      setToastMessage('Encryption failed: ' + err.message);
+    } catch (err) {
+      console.warn('Failed to encrypt:', err);
+      setToastMessage('Encryption error occurred');
+      setTimeout(() => setToastMessage(null), 2500);
     }
   };
 
+  // ── Delete Item ──────────────────────────────────────────────────────────
   const handleDeleteItem = (item: VaultItem) => {
+    lastActiveRef.current = Date.now();
     confirmDelete({
-      title: 'Delete from Vault?',
+      title: 'Delete Password?',
       itemName: item.title,
-      message: 'This encrypted credential will be permanently removed from your vault.',
-      section: 'vault',
+      message: 'This encrypted credential will be permanently removed.',
+      section: 'settings',
       onConfirm: async () => {
         const updated = vaultItems.filter((i) => i.id !== item.id);
         await updateData({ vaultItems: updated });
-        setToastMessage(`Deleted ${item.title}`);
+        setRevealedPasswords((prev) => {
+          const c = { ...prev };
+          delete c[item.id];
+          return c;
+        });
       },
     });
   };
@@ -427,70 +437,55 @@ export default function Vault({ data, updateData }: VaultProps) {
   // ── Password Generator ───────────────────────────────────────────────────
   const handleOpenGenerator = () => {
     triggerHaptic('light');
-    const pass = generateSecurePassword(genOptions);
-    setGeneratedPassword(pass);
+    lastActiveRef.current = Date.now();
+    const pw = generateSecurePassword(genOptions);
+    setGeneratedPassword(pw);
     setIsGenModalOpen(true);
   };
 
   const handleRegeneratePassword = () => {
-    triggerHaptic('light');
-    const pass = generateSecurePassword(genOptions);
-    setGeneratedPassword(pass);
+    triggerHaptic('selection');
+    lastActiveRef.current = Date.now();
+    setGeneratedPassword(generateSecurePassword(genOptions));
   };
 
   const handleUseGeneratedPassword = () => {
-    triggerHaptic('medium');
+    triggerHaptic('save');
     setModalForm((prev) => ({ ...prev, password: generatedPassword }));
     setIsGenModalOpen(false);
-    setToastMessage('Generated password applied');
   };
-
-  // Filtered vault items
-  const filteredItems = useMemo(() => {
-    return vaultItems.filter((item) => {
-      const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
-      const q = searchQuery.toLowerCase();
-      const matchesQuery =
-        !q ||
-        item.title.toLowerCase().includes(q) ||
-        item.usernameOrEmail.toLowerCase().includes(q) ||
-        (item.websiteUrl && item.websiteUrl.toLowerCase().includes(q));
-      return matchesCat && matchesQuery;
-    });
-  }, [vaultItems, selectedCategory, searchQuery]);
 
   const modalPasswordStrength = useMemo(
     () => evaluatePasswordStrength(modalForm.password),
     [modalForm.password]
   );
-
   const genPasswordStrength = useMemo(
     () => evaluatePasswordStrength(generatedPassword),
     [generatedPassword]
   );
 
-  // ── RENDER: LOCKED STATE ──────────────────────────────────────────────────
+  // ── Locked State View ─────────────────────────────────────────────────────
   if (!isUnlocked) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col p-4">
-        <div className="w-full flex items-center justify-start pt-2">
+      <div className="min-h-screen bg-black text-white flex flex-col selection:bg-[#8E7CFF]/30">
+        <div className="p-4 pt-6 flex items-center justify-between">
           <button
-            onClick={() => navigate('/')}
-            className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
-            title="Back to Home"
+            onClick={() => navigate('/settings')}
+            className="p-2 rounded-full glass-flat text-white active:scale-95 transition-transform"
+            title="Back to Settings"
           >
             <CaretLeft size={20} weight="bold" />
           </button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center p-2 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-sm rounded-3xl p-8 bg-[#1C1C1E] border border-white/[0.08] flex flex-col items-center space-y-5 shadow-2xl"
+            className="w-full max-w-sm rounded-3xl p-8 glass-card flex flex-col items-center space-y-5 shadow-2xl"
           >
             {/* Biometric Holographic Scanner Icon */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-[#8E7CFF]/15 border border-[#8E7CFF]/30 flex items-center justify-center text-[#8E7CFF]">
+              <div className="w-24 h-24 rounded-full glass-card flex items-center justify-center text-[#8E7CFF]">
                 <Fingerprint size={48} weight="light" />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-[#8E7CFF] text-black rounded-full p-1.5 shadow-md">
@@ -503,12 +498,12 @@ export default function Vault({ data, updateData }: VaultProps) {
                 LifeOS Vault
               </h2>
               <p className="text-xs text-[#8E8E93] max-w-xs leading-relaxed">
-                Protected by device biometrics and screen lock. Zero master passwords.
+                Protected by device biometrics and screen lock · Zero knowledge AES-256
               </p>
             </div>
 
             {authError && (
-              <div className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FF453A]/15 border border-[#FF453A]/30 text-[#FF453A] text-xs text-left">
+              <div className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-[#FF453A]/15 text-[#FF453A] text-xs text-left">
                 <WarningCircle size={16} weight="fill" className="shrink-0" />
                 <span>{authError}</span>
               </div>
@@ -525,7 +520,7 @@ export default function Vault({ data, updateData }: VaultProps) {
               {isAuthenticating ? 'Verifying Lock...' : 'Unlock Vault'}
             </Button>
 
-            <div className="w-full pt-4 border-t border-white/[0.06] space-y-2 text-[11px] text-[#8E8E93]">
+            <div className="w-full pt-4 border-t border-white/[0.04] space-y-2 text-[11px] text-[#8E8E93]">
               <div className="flex items-center justify-center gap-1.5">
                 <DeviceMobile size={13} className="text-[#8E7CFF]" />
                 <span>Hardware-backed device lock</span>
@@ -541,46 +536,41 @@ export default function Vault({ data, updateData }: VaultProps) {
     );
   }
 
-  // ── RENDER: UNLOCKED VAULT DASHBOARD ──────────────────────────────────────
+  // ── Unlocked Main Vault View ──────────────────────────────────────────────
   return (
-    <div className="w-full text-white pb-4">
+    <div className="min-h-screen bg-black text-white pb-32 selection:bg-[#8E7CFF]/30">
+      {/* ── Top Navigation Bar ── */}
       <Toolbar
         leading={
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-              title="Back"
-            >
-              <CaretLeft size={20} weight="bold" />
-            </button>
-            <button
-              onClick={handleLock}
-              className="p-2 rounded-lg text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
-              title="Lock Vault"
-            >
-              <Lock size={20} weight="bold" />
-            </button>
-          </div>
+          <button
+            onClick={() => handleLockVault('Vault locked')}
+            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
+            title="Lock Vault"
+          >
+            <CaretLeft size={22} weight="bold" />
+          </button>
         }
         center={
-          <span className="text-sm font-semibold text-white">
-            Vault
-          </span>
+          <div className="flex flex-col items-center">
+            <span className="text-sm font-semibold text-white">Encrypted Vault</span>
+            <span className="text-[10px] text-[#8E7CFF] font-mono">
+              Auto-locks in {lockCountdown}s
+            </span>
+          </div>
         }
         trailing={
           <div className="flex items-center gap-1">
             <button
               onClick={handleOpenGenerator}
               className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-              title="Generator"
+              title="Password Generator"
             >
               <Sparkle size={20} />
             </button>
             <button
               onClick={openAddModal}
-              className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-              title="Add Credential"
+              className="p-2 rounded-lg text-[#8E7CFF] hover:bg-[#8E7CFF]/15 transition-colors"
+              title="Add Password"
             >
               <Plus size={20} weight="bold" />
             </button>
@@ -588,13 +578,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         }
       />
 
-      <div className="flex flex-col gap-3 pt-2">
-        {/* Subtitle & Timer */}
-        <div className="flex items-center justify-between px-1 text-xs text-[#8E8E93]">
-          <span>{vaultItems.length} accounts secured</span>
-          <span>Auto-locks in <strong className="text-[#8E7CFF] font-semibold">{lockCountdown}s</strong></span>
-        </div>
-
+      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
         {/* Search */}
         <SearchPill
           value={searchQuery}
@@ -611,8 +595,8 @@ export default function Vault({ data, updateData }: VaultProps) {
             }}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
               selectedCategory === 'all'
-                ? 'bg-[#8E7CFF] text-white'
-                : 'bg-[#1C1C1E] text-[#8E8E93] border border-white/[0.06] hover:text-white'
+                ? 'bg-[#8E7CFF] text-white shadow-sm'
+                : 'glass-flat text-[#8E8E93] hover:text-white'
             }`}
           >
             All ({vaultItems.length})
@@ -630,8 +614,8 @@ export default function Vault({ data, updateData }: VaultProps) {
                 }}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   active
-                    ? 'bg-[#8E7CFF] text-white'
-                    : 'bg-[#1C1C1E] text-[#8E8E93] border border-white/[0.06] hover:text-white'
+                    ? 'bg-[#8E7CFF] text-white shadow-sm'
+                    : 'glass-flat text-[#8E8E93] hover:text-white'
                 }`}
               >
                 {config.shortLabel} {count > 0 && `(${count})`}
@@ -642,7 +626,7 @@ export default function Vault({ data, updateData }: VaultProps) {
 
         {/* Toast */}
         {toastMessage && (
-          <div className="p-3 rounded-xl bg-[#1C1C1E] border border-white/[0.08] text-white text-xs font-medium flex items-center gap-2">
+          <div className="p-3 rounded-xl glass-card text-white text-xs font-medium flex items-center gap-2">
             <Sparkle size={14} className="text-[#8E7CFF]" />
             <span>{toastMessage}</span>
           </div>
@@ -678,12 +662,12 @@ export default function Vault({ data, updateData }: VaultProps) {
               return (
                 <div
                   key={item.id}
-                  className="rounded-2xl p-4 bg-[#1C1C1E] border border-white/[0.08] space-y-3"
+                  className="rounded-2xl p-4 glass-card space-y-3"
                 >
                   {/* Top: Icon + Title + Category + Actions */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${categoryConfig.bg} shrink-0`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${categoryConfig.bg} shrink-0`}>
                         <CategoryIcon size={18} className={categoryConfig.color} />
                       </div>
                       <div className="min-w-0">
@@ -694,14 +678,15 @@ export default function Vault({ data, updateData }: VaultProps) {
                           <span>{categoryConfig.shortLabel}</span>
                           {item.websiteUrl && (
                             <>
-                              <span>•</span>
+                              <span>·</span>
                               <a
                                 href={item.websiteUrl.startsWith('http') ? item.websiteUrl : `https://${item.websiteUrl}`}
                                 target="_blank"
-                                rel="noreferrer"
-                                className="text-[#8E7CFF] hover:underline flex items-center gap-0.5 truncate max-w-[140px]"
+                                rel="noopener noreferrer"
+                                onClick={() => triggerHaptic('selection')}
+                                className="text-[#8E7CFF] hover:underline truncate inline-flex items-center gap-0.5"
                               >
-                                <span>{item.websiteUrl.replace(/^https?:\/\//, '')}</span>
+                                <span className="truncate">{item.websiteUrl.replace(/^https?:\/\//, '')}</span>
                                 <ArrowSquareOut size={10} />
                               </a>
                             </>
@@ -713,7 +698,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => openEditModal(item)}
-                        className="p-1.5 rounded-lg text-[#8E8E93] hover:text-white hover:bg-[#2C2C2E] transition-colors"
+                        className="p-1.5 rounded-lg text-[#8E8E93] hover:text-white hover:bg-white/10 transition-colors"
                         title="Edit"
                       >
                         <PencilSimple size={15} />
@@ -730,7 +715,7 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                   {/* Username Row */}
                   {item.usernameOrEmail && (
-                    <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#2C2C2E] border border-white/[0.04] text-xs">
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl glass-flat text-xs">
                       <div className="flex items-center gap-2 truncate text-[#8E8E93] min-w-0">
                         <User size={13} className="shrink-0" />
                         <span className="font-medium truncate text-white">{item.usernameOrEmail}</span>
@@ -748,7 +733,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   )}
 
                   {/* Password Row */}
-                  <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#2C2C2E] border border-white/[0.04]">
+                  <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl glass-flat">
                     <div className="flex items-center gap-2 px-1 min-w-0 truncate font-mono text-xs">
                       <Key size={14} className="text-[#8E7CFF] shrink-0" />
                       {isRevealed ? (
@@ -764,17 +749,17 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {isRevealed && (
-                        <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#8E7CFF]/20 text-[#8E7CFF] border border-[#8E7CFF]/30 animate-pulse">
+                        <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#8E7CFF]/20 text-[#8E7CFF] animate-pulse">
                           {peekSecondsLeft}s
                         </span>
                       )}
 
                       <button
                         onClick={() => handleToggleReveal(item)}
-                        className={`p-2 rounded-lg border transition-all ${
+                        className={`p-2 rounded-lg transition-all ${
                           isRevealed
-                            ? 'bg-[#8E7CFF] text-white border-[#8E7CFF]'
-                            : 'bg-[#1C1C1E] border-white/[0.08] text-[#8E8E93] hover:text-white'
+                            ? 'bg-[#8E7CFF] text-white'
+                            : 'glass-flat text-[#8E8E93] hover:text-white'
                         }`}
                         title={isRevealed ? 'Hide' : 'Peek for 10s'}
                       >
@@ -783,10 +768,10 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                       <button
                         onClick={() => handleCopyPassword(item)}
-                        className={`p-2 rounded-lg border transition-all ${
+                        className={`p-2 rounded-lg transition-all ${
                           isPasswordCopied
-                            ? 'bg-[#30D158] text-white border-[#30D158]'
-                            : 'bg-[#1C1C1E] border-white/[0.08] text-[#8E8E93] hover:text-white'
+                            ? 'bg-[#30D158] text-white'
+                            : 'glass-flat text-[#8E8E93] hover:text-white'
                         }`}
                         title="Copy Password"
                       >
@@ -796,7 +781,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   </div>
 
                   {item.notes && (
-                    <div className="px-2.5 py-1.5 rounded-xl bg-[#2C2C2E] text-[11px] text-[#8E8E93] italic">
+                    <div className="px-2.5 py-1.5 rounded-xl glass-flat text-[11px] text-[#8E8E93] italic">
                       Note: {item.notes}
                     </div>
                   )}
@@ -836,10 +821,10 @@ export default function Vault({ data, updateData }: VaultProps) {
                       triggerHaptic('light');
                       setModalForm({ ...modalForm, category: cat });
                     }}
-                    className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                    className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-semibold transition-all ${
                       active
-                        ? 'bg-[#8E7CFF] text-white border-[#8E7CFF]'
-                        : 'bg-[#2C2C2E] text-[#8E8E93] border-white/[0.08]'
+                        ? 'bg-[#8E7CFF] text-white shadow-sm'
+                        : 'glass-flat text-[#8E8E93]'
                     }`}
                   >
                     <c.icon size={14} className={active ? 'text-white' : c.color} />
@@ -876,7 +861,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                 value={modalForm.password}
                 onChange={(e) => setModalForm({ ...modalForm, password: e.target.value })}
                 placeholder="••••••••••••"
-                className="w-full bg-[#2C2C2E] border border-white/[0.08] rounded-xl px-3 py-2.5 pr-10 text-sm font-mono text-white focus:outline-none focus:border-[#8E7CFF]"
+                className="w-full glass-flat rounded-xl px-3 py-2.5 pr-10 text-sm font-mono text-white focus:outline-none"
               />
               <button
                 type="button"
@@ -929,7 +914,7 @@ export default function Vault({ data, updateData }: VaultProps) {
         title="Password Generator"
       >
         <div className="space-y-4">
-          <div className="p-3.5 rounded-xl bg-[#2C2C2E] border border-white/[0.08] space-y-2">
+          <div className="p-3.5 rounded-xl glass-card space-y-2">
             <div className="flex items-center justify-between gap-2">
               <span className="font-mono text-sm font-bold text-white break-all select-all">
                 {generatedPassword}
@@ -988,10 +973,10 @@ export default function Vault({ data, updateData }: VaultProps) {
                     setGenOptions(updated);
                     setGeneratedPassword(generateSecurePassword(updated));
                   }}
-                  className={`p-2.5 rounded-xl border text-xs font-semibold transition-all flex items-center justify-between ${
+                  className={`p-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between ${
                     active
-                      ? 'bg-[#8E7CFF]/15 text-[#8E7CFF] border-[#8E7CFF]/30'
-                      : 'bg-[#2C2C2E] text-[#8E8E93] border-white/[0.04]'
+                      ? 'bg-[#8E7CFF]/20 text-[#8E7CFF]'
+                      : 'glass-flat text-[#8E8E93]'
                   }`}
                 >
                   <span>{label}</span>

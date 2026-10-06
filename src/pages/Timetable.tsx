@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, startOfWeek, addDays } from 'date-fns';
 import { motion } from 'framer-motion';
 import type { AppData, TimetableBlock } from '../types';
 import { triggerHaptic } from '../utils/haptics';
@@ -15,7 +15,6 @@ import {
   Timer,
   Plus,
   Trash,
-  Check,
 } from '../ui';
 
 interface TimetableProps {
@@ -37,6 +36,11 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   const [room, setRoom] = useState('');
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
+
+  const weekDates = useMemo(() => {
+    const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
+    return DAYS.map((_, idx) => addDays(monday, idx));
+  }, []);
 
   useEffect(() => {
     if (data?.timetable) {
@@ -89,27 +93,27 @@ export default function Timetable({ data, updateData }: TimetableProps) {
   };
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-white selection:bg-[#5E5CE6]/30">
       <LargeTitleHeader
         title="Timetable"
-        subtitle={`${activeDayName} • ${dayBlocks.length} classes`}
-        onBack={() => navigate('/')}
+        subtitle={`${activeDayName}, ${format(weekDates[activeDayIndex], 'd MMM')} · ${dayBlocks.length} classes`}
+        tint="#5E5CE6"
         actions={
           <Button
             variant="glass"
             tint="#5E5CE6"
             size="sm"
             onClick={() => setIsAddOpen(true)}
-            icon={<Plus size={16} weight="bold" />}
+            icon={<Plus size={15} weight="bold" />}
           >
-            Add Class
+            Add
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 pb-2">
-        {/* Horizontal Week Strip (indigo circle on selected day) */}
-        <div className="grid grid-cols-7 gap-1.5 p-1.5 bg-[#1C1C1E] rounded-full border border-white/[0.06] select-none">
+      <div className="flex flex-col gap-3.5 pb-2">
+        {/* Horizontal Week Strip */}
+        <div className="grid grid-cols-7 gap-1.5 p-1.5 glass-card rounded-full select-none">
           {DAYS.map((day, idx) => {
             const isSelected = idx === activeDayIndex;
             const isCur = idx === todayIndex;
@@ -122,20 +126,20 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   triggerHaptic('selection');
                   setActiveDayIndex(idx);
                 }}
-                className={`relative flex flex-col items-center justify-center py-2 rounded-full transition-all ${
-                  isSelected ? 'text-white' : 'text-[rgba(235,235,245,0.60)]'
+                className={`relative flex flex-col items-center justify-center py-2 rounded-full transition-all cursor-pointer ${
+                  isSelected ? 'text-white' : 'text-[rgba(235,235,245,0.60)] hover:text-white'
                 }`}
               >
                 {isSelected && (
                   <motion.div
                     layoutId="timetable-day-indicator"
-                    className="absolute inset-0 bg-[#5E5CE6] rounded-full -z-10 shadow-md"
+                    className="absolute inset-0 bg-[#5E5CE6] rounded-full -z-10 shadow-md shadow-[#5E5CE6]/30"
                     transition={{ type: 'spring', stiffness: 520, damping: 38 }}
                   />
                 )}
                 <span className="text-[10px] font-bold uppercase">{SHORT_DAYS[idx]}</span>
                 <span className={`text-xs font-bold mt-0.5 ${isCur && !isSelected ? 'text-[#5E5CE6]' : ''}`}>
-                  {idx + 1}
+                  {format(weekDates[idx], 'd')}
                 </span>
               </button>
             );
@@ -153,35 +157,35 @@ export default function Timetable({ data, updateData }: TimetableProps) {
             tint="#5E5CE6"
           />
         ) : (
-          <div className="flex flex-col gap-3 py-2">
+          <div className="flex flex-col gap-3 py-1">
             {dayBlocks.map((block) => {
               const active = isCurrentBlock(block);
 
               return (
                 <motion.div
                   key={block.id}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full rounded-[24px] p-4 flex items-center justify-between gap-3 border transition-all ${
+                  whileTap={{ scale: 0.985 }}
+                  className={`w-full rounded-[24px] p-4 flex items-center justify-between gap-3 transition-all ${
                     active
-                      ? 'bg-[#5E5CE6]/20 border-[#5E5CE6]/50 shadow-lg shadow-[#5E5CE6]/10'
-                      : 'bg-[#1C1C1E] border-white/[0.06]'
+                      ? 'glass-card bg-[#5E5CE6]/25 shadow-lg shadow-[#5E5CE6]/15'
+                      : 'glass-card'
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex flex-col items-center justify-center min-w-[50px] border-r border-white/10 pr-3">
+                    <div className="flex flex-col items-center justify-center min-w-[50px] pr-3 border-r border-white/[0.08]">
                       <span className="text-sm font-bold text-white tabular-nums">
                         {block.startTime}
                       </span>
-                      <span className="text-[11px] text-[rgba(235,235,245,0.40)] tabular-nums">
+                      <span className="text-[11px] text-[rgba(235,235,245,0.45)] tabular-nums">
                         {block.endTime}
                       </span>
                     </div>
 
                     <div className="flex flex-col min-w-0">
-                      <div className="text-[17px] font-bold text-white truncate">
+                      <div className="text-[16px] font-bold text-white truncate">
                         {block.subject}
                       </div>
-                      <div className="text-[13px] text-[rgba(235,235,245,0.60)] truncate flex items-center gap-2 mt-0.5">
+                      <div className="text-[12px] text-[rgba(235,235,245,0.60)] truncate flex items-center gap-2 mt-0.5">
                         {block.room && <span>Room {block.room}</span>}
                         {active && (
                           <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#5E5CE6] text-white">
@@ -198,16 +202,16 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                       tint="#5E5CE6"
                       size="sm"
                       onClick={() => handleStartTimer(block)}
-                      icon={<Timer size={16} weight="bold" />}
+                      icon={<Timer size={15} weight="bold" />}
                     >
                       Focus
                     </Button>
                     <button
                       type="button"
                       onClick={() => handleDeleteBlock(block.id)}
-                      className="p-2 rounded-full text-[rgba(235,235,245,0.30)] hover:text-[#FF453A] transition-colors"
+                      className="p-2 rounded-full text-[rgba(235,235,245,0.35)] hover:text-[#FF453A] transition-colors cursor-pointer"
                     >
-                      <Trash size={16} weight="bold" />
+                      <Trash size={15} weight="bold" />
                     </button>
                   </div>
                 </motion.div>
@@ -271,3 +275,4 @@ export default function Timetable({ data, updateData }: TimetableProps) {
     </div>
   );
 }
+

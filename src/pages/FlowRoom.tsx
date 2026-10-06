@@ -4,12 +4,10 @@ import { motion } from 'framer-motion';
 import type { AppData, StudySession } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
+import { handleAppBack } from '../utils/backNavigation';
 import {
-  Button,
   Segmented,
   Ring,
-  GlassSurface,
-  MOTION_SPRINGS,
   Play,
   Pause,
   ArrowClockwise,
@@ -39,7 +37,7 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
 
   const [timeLeft, setTimeLeft] = useState(durationMap.pomodoro);
   const [isRunning, setIsRunning] = useState(false);
-  const [subject, setSubject] = useState('Deep Work Session');
+  const [subject] = useState('Deep Work Session');
   const [sound, setSound] = useState<Soundscape>('none');
 
   // Audio Context for Zero-Download Web Audio Noise Synthesis
@@ -103,14 +101,14 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
 
       const bufferSize = ctx.sampleRate * 2;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
+      const channelData = buffer.getChannelData(0);
       let lastOut = 0.0;
 
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
-        data[i] = (lastOut + 0.02 * white) / 1.02;
-        lastOut = data[i];
-        data[i] *= 3.5;
+        channelData[i] = (lastOut + 0.02 * white) / 1.02;
+        lastOut = channelData[i];
+        channelData[i] *= 3.5;
       }
 
       const noise = ctx.createBufferSource();
@@ -165,29 +163,29 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
           type="button"
           onClick={() => {
             stopSound();
-            navigate('/study');
+            handleAppBack(navigate);
           }}
-          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20"
+          className="w-10 h-10 rounded-full glass-flat flex items-center justify-center text-white active:scale-95 transition-transform"
         >
           <CaretLeft size={20} weight="bold" />
         </button>
 
-        <span className="text-xs font-bold tracking-wider text-[rgba(235,235,245,0.60)] uppercase">
-          FLOW ROOM
+        <span className="text-xs font-semibold text-[rgba(235,235,245,0.70)]">
+          Flow Room
         </span>
 
-        <div className="px-3 py-1 rounded-full bg-[#64D2FF]/20 text-[#64D2FF] text-xs font-bold">
+        <div className="px-3 py-1 rounded-full glass-flat text-[#64D2FF] text-xs font-bold shadow-sm">
           {subject}
         </div>
       </div>
 
       {/* Mode Selector */}
-      <div className="max-w-xs mx-auto w-full pt-2">
+      <div className="max-w-xs mx-auto w-full pt-1">
         <Segmented<ModeType>
           options={[
-            { value: 'pomodoro', label: 'Pomodoro (25m)' },
-            { value: 'deep', label: 'Deep (50m)' },
-            { value: 'ultra', label: 'Ultra (90m)' },
+            { value: 'pomodoro', label: '25 min' },
+            { value: 'deep', label: '50 min' },
+            { value: 'ultra', label: '90 min' },
           ]}
           value={mode}
           onChange={setMode}
@@ -196,32 +194,32 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
       </div>
 
       {/* Center 96pt Display Numeral & Concentric Ring */}
-      <div className="flex-1 flex flex-col items-center justify-center select-none py-6">
+      <div className="flex-1 flex flex-col items-center justify-center select-none py-2 min-h-0">
         <Ring
           progress={progress}
-          size={260}
+          size={Math.min(typeof window !== 'undefined' ? window.innerWidth * 0.68 : 250, 260)}
           strokeWidth={8}
           color="#64D2FF"
-          trackColor="#1C1C1E"
+          trackColor="rgba(255, 255, 255, 0.06)"
         >
           <div className="flex flex-col items-center justify-center text-center">
-            <span className="text-[72px] font-extrabold text-white tabular-nums tracking-[-0.03em] leading-none">
+            <span className="text-[64px] sm:text-[72px] font-black text-white tabular-nums tracking-[-0.04em] leading-none">
               {mins}:{secs < 10 ? `0${secs}` : secs}
             </span>
-            <span className="text-xs uppercase font-bold text-[rgba(235,235,245,0.50)] tracking-widest mt-2">
-              {isRunning ? 'FOCUS ACTIVE' : 'PAUSED'}
+            <span className="text-xs font-semibold text-[rgba(235,235,245,0.50)] tracking-wider mt-2">
+              {isRunning ? 'Focus Active' : 'Paused'}
             </span>
           </div>
         </Ring>
 
         {/* Ambient Soundscapes Glass Pill */}
-        <div className="mt-8 flex items-center gap-2 p-1.5 rounded-full bg-[#1C1C1E] border border-white/[0.06]">
+        <div className="mt-5 flex items-center gap-1.5 p-1.5 rounded-full glass-flat">
           <button
             type="button"
             onClick={() => toggleSound('brown')}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
               sound === 'brown'
-                ? 'bg-[#64D2FF] text-black font-bold'
+                ? 'bg-[#64D2FF] text-black font-bold shadow-sm'
                 : 'text-[rgba(235,235,245,0.60)] hover:text-white'
             }`}
           >
@@ -234,7 +232,7 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
             onClick={() => toggleSound('rain')}
             className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
               sound === 'rain'
-                ? 'bg-[#64D2FF] text-black font-bold'
+                ? 'bg-[#64D2FF] text-black font-bold shadow-sm'
                 : 'text-[rgba(235,235,245,0.60)] hover:text-white'
             }`}
           >
@@ -244,8 +242,8 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
         </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="flex items-center justify-center gap-6 pb-[env(safe-area-inset-bottom,16px)]">
+      {/* Bottom Controls inside safe area */}
+      <div className="flex items-center justify-center gap-6 pb-[max(env(safe-area-inset-bottom,16px),16px)] pt-1">
         {/* Reset Action */}
         <button
           type="button"
@@ -254,31 +252,28 @@ export default function FlowRoom({ data, updateData }: FlowRoomProps) {
             setIsRunning(false);
             setTimeLeft(durationMap[mode]);
           }}
-          className="w-12 h-12 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-[rgba(235,235,245,0.60)] hover:text-white"
+          className="w-12 h-12 rounded-full glass-flat flex items-center justify-center text-[rgba(235,235,245,0.70)] hover:text-white active:scale-95 transition-transform"
         >
           <ArrowClockwise size={20} weight="bold" />
         </button>
 
         {/* Big 64px Glass Play/Pause Trigger */}
-        <GlassSurface
-          as="button"
-          interactive
-          tint="#64D2FF"
-          tintOpacity={0.4}
+        <button
+          type="button"
           onClick={() => {
             triggerHaptic('medium');
             setIsRunning(!isRunning);
           }}
-          className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl shadow-2xl border border-white/20"
+          className="w-16 h-16 rounded-full glass-nav nav-rim-light flex items-center justify-center text-[#64D2FF] text-3xl shadow-xl active:scale-95 transition-transform"
         >
           {isRunning ? <Pause weight="fill" /> : <Play weight="fill" className="pl-1" />}
-        </GlassSurface>
+        </button>
 
         {/* Complete Action */}
         <button
           type="button"
           onClick={handleCompleteSession}
-          className="w-12 h-12 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-[#30D158]"
+          className="w-12 h-12 rounded-full glass-flat flex items-center justify-center text-[#30D158] active:scale-95 transition-transform"
         >
           <Check size={20} weight="bold" />
         </button>

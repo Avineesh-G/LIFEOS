@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
-import { navigateBack } from '../utils/backNavigation';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import {
+  LargeTitleHeader,
   Ring,
   ProgressBar,
   Sheet,
@@ -16,10 +16,10 @@ import {
   Sun,
   Moon,
   Plus,
+  Minus,
   Check,
   Trash,
   Drop,
-  CaretLeft,
 } from '../ui';
 
 interface NutritionProps {
@@ -113,7 +113,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const [isAddCustomOpen, setIsAddCustomOpen] = useState(false);
   const [customSlot, setCustomSlot] = useState<MealSlot>('lunch');
   const [customName, setCustomName] = useState('');
-  const [customCalories, setCustomCalories] = useState('250');
+  const [customCalories, setCustomCalories] = useState('100');
+  const [customPortion, setCustomPortion] = useState(2);
 
   // Toggle or select a mess item directly from the meals diary
   const handleToggleMessItem = async (slot: MealSlot, itemName: string, estCalories: number) => {
@@ -130,7 +131,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         // Deselect / remove
         currentMeals[slotIndex].items.splice(existingItemIndex, 1);
       } else {
-        // Select / add
+        // Select / add with 1 portion
         currentMeals[slotIndex].items.push({
           id: `item_${Date.now()}_${Math.random()}`,
           name: itemName,
@@ -156,7 +157,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     }
 
     const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
       0
     );
 
@@ -174,17 +175,64 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     await updateData({ nutritionLogs: updatedLogs });
   };
 
-  // Add a custom extra food item
+  // Adjust portion quantity for any logged food item (e.g., 2 chapatis -> 4 chapatis)
+  const handleUpdateItemPortion = async (slot: MealSlot, itemId: string, delta: number) => {
+    triggerHaptic('selection');
+    let currentMeals = [...(todayLog.mealsEaten || [])];
+    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+    if (slotIndex < 0) return;
+
+    const itemIndex = currentMeals[slotIndex].items.findIndex((it) => it.id === itemId);
+    if (itemIndex < 0) return;
+
+    const currentItem = currentMeals[slotIndex].items[itemIndex];
+    const nextPortion = Math.max(0, Math.round(((currentItem.portion || 1) + delta) * 10) / 10);
+
+    if (nextPortion <= 0) {
+      // Remove item
+      currentMeals[slotIndex].items.splice(itemIndex, 1);
+    } else {
+      currentMeals[slotIndex].items[itemIndex] = {
+        ...currentItem,
+        portion: nextPortion,
+      };
+    }
+
+    if (currentMeals[slotIndex].items.length === 0) {
+      currentMeals = currentMeals.filter((m) => m.slot !== slot);
+    }
+
+    const newDailyTotal = currentMeals.reduce(
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
+      0
+    );
+
+    const updatedLog: NutritionLog = {
+      ...todayLog,
+      dailyTotal: newDailyTotal,
+      mealsEaten: currentMeals,
+      isSaved: true,
+    };
+
+    const updatedLogs = [
+      updatedLog,
+      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+    ];
+    await updateData({ nutritionLogs: updatedLogs });
+  };
+
+  // Add a custom extra food item with portion multiplier
   const handleLogCustomFood = async () => {
     if (!customName.trim()) return;
     triggerHaptic('success');
-    const caloriesNum = parseInt(customCalories, 10) || 250;
+    const caloriesNum = parseInt(customCalories, 10) || 100;
+    const portionNum = Math.max(1, customPortion || 1);
 
     const newItem: MealItemLog = {
       id: `item_${Date.now()}`,
       name: customName.trim(),
       calories: caloriesNum,
-      portion: 1,
+      portion: portionNum,
       isExtra: true,
     };
 
@@ -198,7 +246,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     }
 
     const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
       0
     );
 
@@ -216,13 +264,15 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     await updateData({ nutritionLogs: updatedLogs });
 
     setCustomName('');
+    setCustomCalories('100');
+    setCustomPortion(2);
     setIsAddCustomOpen(false);
   };
 
   // Remove an item from the meal slot
   const handleRemoveItem = async (slot: MealSlot, itemId: string) => {
     triggerHaptic('light');
-    const currentMeals = (todayLog.mealsEaten || []).map((m) => {
+    let currentMeals = (todayLog.mealsEaten || []).map((m) => {
       if (m.slot === slot) {
         return {
           ...m,
@@ -230,10 +280,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         };
       }
       return m;
-    });
+    }).filter((m) => m.items.length > 0);
 
     const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * it.portion, 0),
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
       0
     );
 
@@ -252,108 +302,95 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   };
 
   return (
-    <div className="w-full text-white selection:bg-[#FF9F0A]/30 font-sans">
-      {/* ── Page Header ── */}
-      <div className="pt-1 pb-2.5 px-0.5 flex items-center justify-between select-none">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigateBack(navigate)}
-            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer mr-1"
-            title="Back"
-          >
-            <CaretLeft size={20} weight="bold" />
-          </button>
-          <div>
-            <p className="text-[12.5px] font-semibold text-[rgba(235,235,245,0.65)] tracking-tight">
-              Day {dayOfMonth} Mess Menu & Diary
-            </p>
-            <h1 className="text-[32px] leading-[38px] font-bold text-white tracking-[-0.02em]">
-              Nutrition
-            </h1>
-          </div>
-        </div>
+    <div className="w-full text-white selection:bg-[#FF9F0A]/30">
+      {/* ── Standard Navigation Header ── */}
+      <LargeTitleHeader
+        title="Nutrition"
+        subtitle={`Day ${dayOfMonth} Mess Menu & Diary`}
+        tint="#FF9F0A"
+        actions={
+          <span className="text-[12px] font-bold px-3 py-1.5 rounded-full bg-[#FF9F0A]/15 text-[#FF9F0A] tabular-nums">
+            {caloriesRemaining} kcal left
+          </span>
+        }
+      />
 
-        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#FF9F0A]/15 text-[#FF9F0A] border border-[#FF9F0A]/25">
-          {caloriesRemaining} kcal left
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-3 pb-2">
-        {/* ── 1. Hero Calorie Ring & Macro Stats ── */}
+      <div className="flex flex-col gap-3.5 pb-2">
+        {/* ── 1. Hero Calorie Ring & Macro Stats (glass-hero with Orange glow) ── */}
         <motion.div
           whileTap={{ scale: 0.99 }}
           transition={MOTION_SPRINGS.default}
-          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.08] flex flex-col items-center gap-4 shadow-xl select-none"
+          style={{ '--hero-accent': '#FF9F0A' } as React.CSSProperties}
+          className="glass-hero p-5 flex flex-col items-center gap-4 select-none min-h-[140px]"
         >
           {/* Main Calorie Ring */}
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center pt-1">
             <Ring
               progress={caloriePercent}
-              size={120}
-              strokeWidth={10}
+              size={130}
+              strokeWidth={9}
               color="#FF9F0A"
-              trackColor="#2C2C2E"
+              trackColor="rgba(255, 255, 255, 0.08)"
             >
               <div className="flex flex-col items-center justify-center text-center">
-                <span className="text-2xl font-extrabold text-white tabular-nums tracking-tight">
+                <span className="text-[28px] font-extrabold text-white tabular-nums tracking-tight leading-none">
                   {caloriesRemaining}
                 </span>
-                <span className="text-[10px] uppercase font-bold text-[rgba(235,235,245,0.50)] tracking-wider">
+                <span className="text-[10.5px] font-bold text-[rgba(235,235,245,0.50)] uppercase tracking-wider mt-1">
                   kcal left
                 </span>
               </div>
             </Ring>
           </div>
 
-          {/* Macro Breakdown */}
-          <div className="grid grid-cols-3 gap-2.5 w-full pt-3 border-t border-white/[0.06]">
-            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
-              <span className="text-xs font-bold text-[#FF453A] tabular-nums">
+          {/* Macro Breakdown (glass-flat) */}
+          <div className="grid grid-cols-3 gap-2.5 w-full pt-2">
+            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+              <span className="text-[12px] font-bold text-[#FF453A] tabular-nums">
                 {Math.round(caloriesEaten * 0.06)} / 140g
               </span>
               <ProgressBar progress={Math.min(1, (caloriesEaten * 0.06) / 140)} height={4} color="#FF453A" />
-              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Protein</span>
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Protein</span>
             </div>
 
-            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
-              <span className="text-xs font-bold text-[#FF9F0A] tabular-nums">
+            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+              <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
                 {Math.round(caloriesEaten * 0.12)} / 220g
               </span>
               <ProgressBar progress={Math.min(1, (caloriesEaten * 0.12) / 220)} height={4} color="#FF9F0A" />
-              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Carbs</span>
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Carbs</span>
             </div>
 
-            <div className="flex flex-col items-center gap-1 p-2 rounded-[16px] bg-[#2C2C2E]/60">
-              <span className="text-xs font-bold text-[#FF375F] tabular-nums">
+            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+              <span className="text-[12px] font-bold text-[#FF375F] tabular-nums">
                 {Math.round(caloriesEaten * 0.03)} / 60g
               </span>
               <ProgressBar progress={Math.min(1, (caloriesEaten * 0.03) / 60)} height={4} color="#FF375F" />
-              <span className="text-[11px] text-[rgba(235,235,245,0.60)]">Fats</span>
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Fats</span>
             </div>
           </div>
         </motion.div>
 
-        {/* ── 2. Water Hydration Tile ── */}
-        <div className="w-full bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.08] flex items-center justify-between gap-3 select-none shadow-md">
+        {/* ── 2. Water Hydration Tile (glass-card) ── */}
+        <div className="glass-card p-4 flex items-center justify-between gap-3 select-none">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-[14px] bg-[#64D2FF]/20 flex items-center justify-center text-[#64D2FF] shrink-0">
               <Drop size={22} weight="fill" />
             </div>
             <div className="flex flex-col min-w-0">
-              <div className="text-base font-bold text-white tabular-nums">
+              <div className="text-[15px] font-bold text-white tabular-nums">
                 {waterLiters.toFixed(2)} L{' '}
-                <span className="text-xs text-[rgba(235,235,245,0.40)] font-normal">
+                <span className="text-[12px] text-[rgba(235,235,245,0.45)] font-normal">
                   / 3.5 L target
                 </span>
               </div>
-              <div className="text-xs text-[rgba(235,235,245,0.60)] truncate">
+              <div className="text-[11.5px] text-[rgba(235,235,245,0.60)] truncate">
                 Daily Hydration Goal
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <Button
               variant="glass"
               tint="#64D2FF"
@@ -373,41 +410,38 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           </div>
         </div>
 
-        {/* ── 3. Integrated Meals Diary with Direct Mess Menu Selection ── */}
+        {/* ── 3. Integrated Meals Diary (glass-card per meal) ── */}
         <div className="flex flex-col gap-3 pt-1">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs uppercase font-bold tracking-wider text-[rgba(235,235,245,0.50)]">
+            <span className="text-section-header">
               Today's Meals Diary & Mess Menu
             </span>
-            <span className="text-xs text-white/50">
-              Tap items to log eaten
+            <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
+              Adjust portions & items
             </span>
           </div>
 
           {MEAL_SLOTS.map((slot) => {
             const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
-            const slotCalories = (slotLog?.items || []).reduce(
-              (s, it) => s + it.calories * it.portion,
+            const slotItems = slotLog?.items || [];
+            const slotCalories = slotItems.reduce(
+              (s, it) => s + it.calories * (it.portion || 1),
               0
             );
 
             const messItems = messItemsBySlot[slot.slot] || [];
-            const loggedItemNames = new Set(
-              (slotLog?.items || []).map((it) => it.name.toLowerCase().trim())
-            );
-
-            // Custom extra items not matching mess list
-            const customItems = (slotLog?.items || []).filter(
-              (it) => it.isExtra || !messItems.some((m) => m.name.toLowerCase().trim() === it.name.toLowerCase().trim())
-            );
+            const loggedItemMap = new Map<string, MealItemLog>();
+            slotItems.forEach((it) => {
+              loggedItemMap.set(it.name.toLowerCase().trim(), it);
+            });
 
             return (
               <div
                 key={slot.slot}
-                className="w-full bg-[#1C1C1E] rounded-[24px] p-4 border border-white/[0.08] flex flex-col gap-3 shadow-lg"
+                className="glass-card p-4 flex flex-col gap-3"
               >
                 {/* Header Row */}
-                <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+                <div className="flex items-center justify-between pb-1">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-[10px] bg-[#FF9F0A]/15 text-[#FF9F0A] flex items-center justify-center">
                       {slot.icon}
@@ -423,7 +457,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#FF9F0A] tabular-nums">
+                    <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
                       {slotCalories} kcal
                     </span>
                     <button
@@ -431,6 +465,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                       onClick={() => {
                         triggerHaptic('light');
                         setCustomSlot(slot.slot);
+                        setCustomPortion(2);
                         setIsAddCustomOpen(true);
                       }}
                       className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
@@ -442,7 +477,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   </div>
                 </div>
 
-                {/* Direct Mess Menu Selectable Pills */}
+                {/* Direct Mess Menu Selectable Pills with Portion Badges */}
                 {messItems.length > 0 && (
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
@@ -450,26 +485,29 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {messItems.map((item, idx) => {
-                        const isSelected = loggedItemNames.has(item.name.toLowerCase().trim());
+                        const logged = loggedItemMap.get(item.name.toLowerCase().trim());
+                        const isSelected = !!logged;
+                        const portion = logged?.portion || 1;
+
                         return (
                           <button
                             key={idx}
                             type="button"
                             onClick={() => handleToggleMessItem(slot.slot, item.name, item.estCalories)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
+                            className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
                               isSelected
                                 ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
-                                : 'bg-[#2C2C2E] text-white/80 hover:text-white hover:bg-[#3A3A3C] border border-white/6'
+                                : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
                             }`}
                           >
-                            {isSelected ? (
-                              <Check size={13} weight="bold" />
-                            ) : (
-                              <Plus size={13} weight="bold" className="text-white/40" />
-                            )}
                             <span>{item.name}</span>
-                            <span className={`text-[10px] ${isSelected ? 'text-black/70 font-bold' : 'text-white/40'}`}>
-                              {item.estCalories} kcal
+                            {isSelected && portion > 1 && (
+                              <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-black text-[10px] font-bold">
+                                {portion}x
+                              </span>
+                            )}
+                            <span className={`text-[10.5px] tabular-nums ${isSelected ? 'text-black/75 font-semibold' : 'text-white/40'}`}>
+                              {isSelected ? item.estCalories * portion : item.estCalories} kcal
                             </span>
                           </button>
                         );
@@ -478,30 +516,64 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   </div>
                 )}
 
-                {/* Custom Logged Items */}
-                {customItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.04]">
+                {/* Logged Foods List with Interactive Quantity / Portion Stepper */}
+                {slotItems.length > 0 && (
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
                     <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
-                      Custom Logged Foods:
+                      Logged Food Items & Portions:
                     </span>
-                    <div className="flex flex-col gap-1">
-                      {customItems.map((item) => (
+                    <div className="flex flex-col gap-1.5">
+                      {slotItems.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between px-3 py-1.5 rounded-[12px] bg-[#2C2C2E]/60 text-xs"
+                          className="flex items-center justify-between px-3 py-2 rounded-[14px] glass-flat text-xs"
                         >
-                          <span className="text-white/90 font-medium">{item.name}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[#FF9F0A] font-semibold tabular-nums">
-                              {item.calories * item.portion} kcal
+                          <div className="flex flex-col min-w-0 pr-2">
+                            <span className="text-white/95 font-semibold truncate">
+                              {item.name}
                             </span>
+                            <span className="text-[10.5px] text-[rgba(235,235,245,0.50)]">
+                              {item.calories} kcal/serving
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 shrink-0">
+                            {/* Quantity Stepper [- quantity +] */}
+                            <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5 border border-white/10">
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, -1)}
+                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
+                                title="Decrease Quantity"
+                              >
+                                <Minus size={11} weight="bold" />
+                              </button>
+                              <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
+                                {item.portion || 1}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, 1)}
+                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
+                                title="Increase Quantity"
+                              >
+                                <Plus size={11} weight="bold" />
+                              </button>
+                            </div>
+
+                            {/* Total Computed Item Calories */}
+                            <span className="text-[#FF9F0A] font-bold tabular-nums min-w-[56px] text-right">
+                              {item.calories * (item.portion || 1)} kcal
+                            </span>
+
+                            {/* Quick Delete */}
                             <button
                               type="button"
                               onClick={() => handleRemoveItem(slot.slot, item.id)}
-                              className="text-white/40 hover:text-[#FF453A] p-0.5 transition-colors cursor-pointer"
+                              className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
                               title="Delete food"
                             >
-                              <Trash size={13} />
+                              <Trash size={14} />
                             </button>
                           </div>
                         </div>
@@ -525,21 +597,85 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         <div className="flex flex-col gap-4 py-2">
           <TextField
             label="Food / Item Name"
-            placeholder="Salad, Paneer bowl, Protein shake..."
+            placeholder="e.g., Chapati, Paneer bowl, Whey shake..."
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             autoFocus
           />
 
           <TextField
-            label="Estimated Calories (kcal)"
+            label="Estimated Calories per piece / serving (kcal)"
             type="number"
-            placeholder="250"
+            placeholder="100"
             value={customCalories}
             onChange={(e) => setCustomCalories(e.target.value)}
           />
 
-          <div className="pt-3">
+          {/* Quantity Stepper & Quick Pills */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.70)]">
+              Quantity / Pieces Eaten
+            </label>
+            <div className="flex items-center justify-between glass-flat p-2 rounded-2xl">
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5, 6].map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setCustomPortion(q);
+                    }}
+                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      customPortion === q
+                        ? 'bg-[#FF9F0A] text-black shadow-md'
+                        : 'bg-white/10 text-white/80 hover:bg-white/15'
+                    }`}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setCustomPortion((p) => Math.max(1, p - 1));
+                  }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white"
+                >
+                  <Minus size={12} weight="bold" />
+                </button>
+                <span className="w-6 text-center font-bold text-white tabular-nums text-sm">
+                  {customPortion}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setCustomPortion((p) => p + 1);
+                  }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white"
+                >
+                  <Plus size={12} weight="bold" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Calorie Total Preview */}
+          <div className="p-3 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-between">
+            <span className="text-xs font-semibold text-white/80">
+              Total Added Calories:
+            </span>
+            <span className="text-sm font-extrabold text-[#FF9F0A] tabular-nums">
+              {customPortion} × {parseInt(customCalories, 10) || 0} = {customPortion * (parseInt(customCalories, 10) || 0)} kcal
+            </span>
+          </div>
+
+          <div className="pt-2">
             <Button
               variant="prominent"
               tint="#FF9F0A"
@@ -547,7 +683,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               disabled={!customName.trim()}
               onClick={handleLogCustomFood}
             >
-              Add Custom Food
+              Log Food ({customPortion * (parseInt(customCalories, 10) || 0)} kcal)
             </Button>
           </div>
         </div>

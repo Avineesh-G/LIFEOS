@@ -28,7 +28,6 @@ const Tasks = lazy(() => import('./pages/Tasks'));
 const Laundry = lazy(() => import('./pages/Laundry'));
 const WorkHistory = lazy(() => import('./pages/WorkHistory'));
 const SettingsPage = lazy(() => import('./pages/Settings'));
-const Vault = lazy(() => import('./pages/Vault'));
 const DownloadPage = lazy(() => import('./pages/DownloadPage'));
 const Auth = lazy(() => import('./pages/Auth'));
 const DevShapes = lazy(() => import('./pages/DevShapes'));
@@ -121,7 +120,6 @@ function MainContent({
     { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} onSignOut={onSignOut} /></RouteErrorBoundary> },
     { path: '/settings/appearance', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
-    { path: '/vault', element: <RouteErrorBoundary routeName="Vault"><Vault data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/morning', element: <RouteErrorBoundary routeName="Morning Battle Plan"><MorningBriefing data={data} updateData={updateData} /></RouteErrorBoundary> },

@@ -16,11 +16,11 @@ export function GroupedList({
   return (
     <div className={`w-full flex flex-col gap-1.5 my-1.5 ${className}`}>
       {header && (
-        <div className="text-[12px] font-bold text-[rgba(255,255,255,0.70)] uppercase tracking-wider px-3 select-none">
+        <div className="text-[13px] font-semibold text-[rgba(255,255,255,0.70)] px-3 select-none">
           {header}
         </div>
       )}
-      <div className="w-full bg-[#1C1C1E] rounded-[24px] overflow-hidden border border-white/[0.09] shadow-[0_6px_24px_rgba(0,0,0,0.55)]">
+      <div className="w-full glass-row overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.65)]">
         {children}
       </div>
       {footer && (

@@ -57,14 +57,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
   const [newListName, setNewListName] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    if (showNewModal && newMode === 'scratch') {
-      const timer = setTimeout(() => inputRef.current?.focus(), 150);
-      return () => clearTimeout(timer);
-    }
-  }, [showNewModal, newMode]);
 
   const handleCreateScratch = async () => {
     const trimmed = newListName.trim() || 'My Shopping List';
@@ -120,11 +113,11 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
   };
 
   return (
-    <div className="w-full text-white pb-2">
+    <div className="w-full text-white pb-2 selection:bg-[#FF375F]/30">
       <LargeTitleHeader
         title="Shopping"
-        subtitle="Checklists, store runs, and templates"
-        onBack={() => navigate('/')}
+        subtitle="Checklists, store runs · Saved templates"
+        tint="#FF375F"
         actions={
           <button
             onClick={() => {
@@ -133,7 +126,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
               setNewListName('');
               setShowNewModal(true);
             }}
-            className="p-2 rounded-full bg-[#FF375F]/15 text-[#FF375F] hover:bg-[#FF375F]/25 transition-colors"
+            className="p-2 rounded-full glass-flat text-[#FF375F] active:scale-95 transition-transform"
             title="New List"
           >
             <Plus size={20} weight="bold" />
@@ -163,7 +156,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                   <button
                     key={starter.name}
                     onClick={() => handleCreateStarterTemplate(starter)}
-                    className="p-4 rounded-2xl bg-[#1C1C1E] border border-white/[0.08] hover:border-[#FF375F]/40 transition-all text-left group active:scale-[0.98]"
+                    className="p-4 rounded-2xl glass-card hover:bg-white/[0.08] transition-all text-left group active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-1 mb-2">
                       <Badge label={starter.category} color="#8E8E93" />
@@ -204,11 +197,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                       triggerHaptic('nav');
                       navigate(`/shopping/${list.id}`);
                     }}
-                    className={`p-4 rounded-2xl cursor-pointer transition-all border select-none ${
-                      isAllDone
-                        ? 'border-[#30D158]/30 bg-[#1C1C1E]'
-                        : 'border-white/[0.08] bg-[#1C1C1E] hover:border-[#FF375F]/40'
-                    }`}
+                    className="p-4 rounded-2xl glass-card cursor-pointer transition-all select-none hover:bg-white/[0.08] active:scale-[0.98]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -240,7 +229,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                         <span className="text-[#8E8E93]">
                           {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
                         </span>
-                        <span className="font-semibold text-[#FF375F]">
+                        <span className={`font-semibold ${isAllDone ? 'text-[#30D158]' : 'text-[#FF375F]'}`}>
                           {percent}%
                         </span>
                       </div>
@@ -275,7 +264,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                 return (
                   <div
                     key={tmpl.id}
-                    className="p-4 rounded-2xl border border-white/[0.08] bg-[#1C1C1E] flex flex-col justify-between gap-3 select-none"
+                    className="p-4 rounded-2xl glass-card flex flex-col justify-between gap-3 select-none"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -304,26 +293,14 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.04]">
-                      <button
-                        onClick={() => {
-                          triggerHaptic('nav');
-                          navigate(`/shopping/${tmpl.id}`);
-                        }}
-                        className="text-xs font-semibold text-[#8E8E93] hover:text-white transition-colors"
-                      >
-                        Edit Items
-                      </button>
-
-                      <Button
-                        size="sm"
-                        variant="glass"
-                        icon={<Plus size={14} weight="bold" />}
-                        onClick={() => handleCreateFromTemplate(tmpl)}
-                      >
-                        Start Outing
-                      </Button>
-                    </div>
+                    <Button
+                      variant="glass"
+                      size="sm"
+                      onClick={() => handleCreateFromTemplate(tmpl)}
+                      className="w-full justify-center"
+                    >
+                      Use Template
+                    </Button>
                   </div>
                 );
               })}
@@ -336,118 +313,79 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
       <Sheet
         isOpen={showNewModal}
         onClose={() => setShowNewModal(false)}
+        detent="half"
         title="Create Shopping List"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 pt-2">
           <Segmented
             options={[
               { value: 'scratch', label: 'From Scratch' },
               { value: 'template', label: 'From Template' },
             ]}
             value={newMode}
-            onChange={(val) => {
-              triggerHaptic('light');
-              setNewMode(val as 'scratch' | 'template');
-              if (val === 'template' && templates.length > 0 && !selectedTemplateId) {
-                setSelectedTemplateId(templates[0].id);
-                setNewListName(templates[0].name.replace(/\s*\(Template\)$/i, ''));
-              }
-            }}
+            onChange={(val) => setNewMode(val as 'scratch' | 'template')}
             tint="#FF375F"
           />
 
           {newMode === 'scratch' ? (
             <div className="space-y-4">
               <TextField
+                autoFocus
                 label="List Name"
+                placeholder="e.g. Weekend Grocery Run, Party Supplies"
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleCreateScratch();
                 }}
-                placeholder="e.g. Trader Joe's, Target, Weekend BBQ..."
               />
 
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <Button variant="glass" onClick={() => setShowNewModal(false)}>
-                  Cancel
-                </Button>
-                <Button variant="prominent" tint="#FF375F" onClick={handleCreateScratch}>
-                  Create List
-                </Button>
-              </div>
+              <Button
+                variant="prominent"
+                tint="#FF375F"
+                className="w-full"
+                onClick={handleCreateScratch}
+              >
+                Create List
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
               {templates.length === 0 ? (
-                <div className="text-center p-4 rounded-2xl border border-white/[0.08] bg-[#2C2C2E] space-y-3">
-                  <p className="text-xs text-[#8E8E93]">No custom templates saved yet.</p>
-                  <p className="text-xs text-white font-medium">Pick a starter template:</p>
-                  <div className="flex flex-col gap-2 pt-1">
-                    {STARTER_TEMPLATES.map((st) => (
-                      <button
-                        key={st.name}
-                        onClick={() => handleCreateStarterTemplate(st)}
-                        className="p-3 rounded-xl border border-white/[0.08] hover:border-[#FF375F]/40 text-left text-xs font-semibold text-white flex items-center justify-between"
-                      >
-                        <span>{st.name}</span>
-                        <span className="text-[11px] text-[#8E8E93]">{st.items.length} items</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="text-center py-6 text-xs text-[#8E8E93]">
+                  No templates saved yet. Create a list first and save it as a template.
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-[#8E8E93]">Select Template</label>
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {templates.map((tmpl) => {
-                        const isSelected = selectedTemplateId === tmpl.id;
-                        return (
-                          <div
-                            key={tmpl.id}
-                            onClick={() => {
-                              setSelectedTemplateId(tmpl.id);
-                              setNewListName(tmpl.name.replace(/\s*\(Template\)$/i, ''));
-                            }}
-                            className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                              isSelected
-                                ? 'border-[#FF375F] bg-[#FF375F]/15 text-white font-semibold'
-                                : 'border-white/[0.08] bg-[#2C2C2E] text-white'
-                            }`}
-                          >
-                            <span className="text-xs truncate">{tmpl.name}</span>
-                            <span className="text-[11px] text-[#8E8E93]">{tmpl.items.length} items</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <TextField
-                    label="List Name"
-                    value={newListName}
-                    onChange={(e) => setNewListName(e.target.value)}
-                    placeholder="Name for this outing..."
-                  />
-
-                  <div className="flex items-center justify-end gap-2 pt-2">
-                    <Button variant="glass" onClick={() => setShowNewModal(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="prominent"
-                      tint="#FF375F"
-                      onClick={() => {
-                        const chosen = templates.find((t) => t.id === selectedTemplateId) || templates[0];
-                        if (chosen) handleCreateFromTemplate(chosen, newListName);
-                      }}
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {templates.map((tmpl) => (
+                    <button
+                      key={tmpl.id}
+                      onClick={() => setSelectedTemplateId(tmpl.id)}
+                      className={`w-full p-3 rounded-xl glass-flat text-left flex items-center justify-between transition-all ${
+                        selectedTemplateId === tmpl.id
+                          ? 'bg-[#FF375F]/20 text-white'
+                          : 'text-[rgba(235,235,245,0.70)] hover:text-white'
+                      }`}
                     >
-                      Create from Template
-                    </Button>
-                  </div>
+                      <span className="font-semibold text-sm">{tmpl.name}</span>
+                      <span className="text-xs text-[#8E8E93]">{tmpl.items.length} items</span>
+                    </button>
+                  ))}
                 </div>
               )}
+
+              <Button
+                variant="prominent"
+                tint="#FF375F"
+                className="w-full"
+                disabled={!selectedTemplateId}
+                onClick={() => {
+                  const tmpl = templates.find((t) => t.id === selectedTemplateId);
+                  if (tmpl) handleCreateFromTemplate(tmpl);
+                }}
+              >
+                Use Selected Template
+              </Button>
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, WorkoutLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
+import { handleAppBack } from '../utils/backNavigation';
 import {
   LargeTitleHeader,
   Button,
@@ -167,7 +168,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
       <div className="pt-[env(safe-area-inset-top,12px)] flex items-center justify-between">
         <button
           type="button"
-          onClick={() => navigate('/gym')}
+          onClick={() => handleAppBack(navigate)}
           className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20"
         >
           <CaretLeft size={20} weight="bold" />
@@ -201,7 +202,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
         {/* Two Large Display Steppers */}
         <div className="grid grid-cols-2 gap-4 w-full">
           {/* Weight Stepper */}
-          <div className="bg-[#1C1C1E] rounded-[28px] p-4 flex flex-col items-center gap-3 border border-white/[0.06]">
+          <div className="glass-card rounded-[28px] p-4 flex flex-col items-center gap-3">
             <span className="text-xs font-bold text-[rgba(235,235,245,0.50)]">
               WEIGHT (KG)
             </span>
@@ -215,7 +216,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           </div>
 
           {/* Reps Stepper */}
-          <div className="bg-[#1C1C1E] rounded-[28px] p-4 flex flex-col items-center gap-3 border border-white/[0.06]">
+          <div className="glass-card rounded-[28px] p-4 flex flex-col items-center gap-3">
             <span className="text-xs font-bold text-[rgba(235,235,245,0.50)]">
               REPS
             </span>
@@ -239,7 +240,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center gap-2 p-4 rounded-[28px] bg-[#1C1C1E] border border-[#FF453A]/30 w-full"
+            className="flex flex-col items-center gap-2 p-4 rounded-[28px] glass-card w-full"
           >
             <div className="text-xs font-bold text-[#FF453A] tracking-wider uppercase">
               Rest Timer

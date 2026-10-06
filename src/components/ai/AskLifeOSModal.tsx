@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Sparkle,
+  NeuralInfinityIcon,
   PaperPlaneRight,
   Microphone,
   Stop,
@@ -373,71 +373,28 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       isOpen={isOpen}
       onClose={onClose}
       detent="full"
-      className="bg-[#000000]/95 backdrop-blur-2xl border border-white/12"
+      className="bg-[#000000]/95 backdrop-blur-2xl"
       title={
         <div className="flex items-center justify-between w-full px-1">
-          {/* Left: Luna AI Branding */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] flex items-center justify-center text-white shadow-lg shadow-[#BF5AF2]/20">
-              <Sparkle size={17} weight="fill" />
+          {/* Left: Luna AI Branding (one line 17 semibold with subtitle) */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[#BF5AF2]/25 p-1">
+              <NeuralInfinityIcon size={19} glow />
             </div>
-            <div className="flex flex-col items-start">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-base text-white tracking-tight leading-none">Luna AI</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#BF5AF2]/20 text-[#BF5AF2] uppercase tracking-wider">
-                  Groq AI
-                </span>
-              </div>
+            <div className="flex flex-col min-w-0 text-left">
+              <span className="font-semibold text-[17px] text-white tracking-tight leading-tight">Luna AI</span>
+              <span className="text-[11px] text-[rgba(235,235,245,0.50)] leading-none">Powered by Groq</span>
             </div>
           </div>
 
-          {/* Right: Segmented Mode Tabs & Close */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center p-0.5 rounded-full bg-[#1C1C1E] border border-white/10">
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setActiveTab('chat');
-                  setTimeout(() => inputRef.current?.focus(), 100);
-                }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === 'chat'
-                    ? 'bg-[#BF5AF2] text-white shadow-sm'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <ChatCircleText size={13} weight="bold" />
-                <span>Chat</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setActiveTab('history');
-                }}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === 'history'
-                    ? 'bg-[#BF5AF2] text-white shadow-sm'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                <ClockCounterClockwise size={13} weight="bold" />
-                <span>History</span>
-                {historyItems.length > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-white/20 text-white text-[9px] flex items-center justify-center font-bold">
-                    {historyItems.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             {messages.length > 0 && activeTab === 'chat' && (
               <button
                 type="button"
                 title="New Chat"
                 onClick={handleStartNewChat}
-                className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
+                className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white flex items-center justify-center active:scale-95 transition-transform"
               >
                 <Plus size={16} weight="bold" />
               </button>
@@ -446,7 +403,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
+              className="w-8 h-8 rounded-full bg-[#1C1C1E] text-white/80 hover:text-white flex items-center justify-center active:scale-95 transition-transform"
               aria-label="Close"
             >
               <X size={16} weight="bold" />
@@ -456,11 +413,53 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       }
     >
       <div className="flex flex-col h-full w-full min-w-0 pb-3">
+        {/* Full-width Segmented Mode Tabs below header */}
+        <div className="mb-3 w-full">
+          <div className="flex items-center p-1 rounded-full glass-flat w-full select-none">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setActiveTab('chat');
+                setTimeout(() => inputRef.current?.focus(), 100);
+              }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'chat'
+                  ? 'bg-white/[0.14] text-white shadow-sm'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <ChatCircleText size={14} weight="bold" />
+              <span>Chat</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setActiveTab('history');
+              }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-white/[0.14] text-white shadow-sm'
+                  : 'text-white/60 hover:text-white'
+              }`}
+            >
+              <ClockCounterClockwise size={14} weight="bold" />
+              <span>History</span>
+              {historyItems.length > 0 && (
+                <span className="w-4 h-4 rounded-full bg-white/20 text-white text-[9px] flex items-center justify-center font-bold">
+                  {historyItems.length}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
         {/* Offline Banner */}
         {!isOnline && (
-          <div className="mb-3 px-3 py-2 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center gap-2 text-amber-300 text-xs font-medium shrink-0">
+          <div className="mb-3 px-3.5 py-2.5 rounded-2xl glass-tile flex items-center gap-2 text-[#FF9F0A] text-xs font-semibold shrink-0">
             <WifiSlash size={16} weight="bold" className="shrink-0" />
-            <span>You are offline. Luna AI requires internet access.</span>
+            <span className="text-white/80">You are offline. Luna AI requires internet access.</span>
           </div>
         )}
 
@@ -479,30 +478,30 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     <motion.div
                       animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.65, 0.35] }}
                       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                      className="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] blur-2xl -z-10"
+                      className="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] blur-2xl -z-10"
                     />
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#BF5AF2] to-[#FF375F] p-[2px] shadow-2xl">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] p-[2px] shadow-2xl">
                       <div className="w-full h-full rounded-full bg-[#000000] flex items-center justify-center">
-                        <Sparkle size={36} weight="fill" className="text-white animate-pulse" />
+                        <NeuralInfinityIcon size={42} glow />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-2xl font-bold text-white tracking-tight">Hi! I am Luna AI</h3>
+                    <h3 className="text-2xl font-bold text-white tracking-tight">Hi, I'm Luna</h3>
                     <p className="text-sm text-white/60 max-w-xs mx-auto mt-1 leading-relaxed">
                       I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
                     </p>
                   </div>
 
-                  {/* 4 Starter Chips in Solid #1C1C1E Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md pt-2">
+                  {/* 4 Starter Chips in 2x2 Bento Glass Tiles */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md pt-2 select-none">
                     {SPEC_STARTER_CHIPS.map((chip) => (
                       <button
                         key={chip.id}
                         type="button"
                         onClick={() => handleSendQuery(chip.label)}
-                        className="p-3.5 rounded-[20px] bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-95 transition-all text-left flex items-center gap-3 group"
+                        className="glass-tile p-3.5 text-left flex items-center gap-3 group cursor-pointer"
                       >
                         <div
                           className="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
@@ -532,7 +531,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         className={`max-w-[88%] p-3.5 rounded-[22px] ${
                           isUser
                             ? 'bg-[#0A84FF] text-white rounded-br-[6px] shadow-md'
-                            : 'bg-[#1C1C1E] text-white/95 rounded-bl-[6px] border border-white/10 shadow-lg'
+                            : 'glass-card text-white/95 rounded-bl-[6px]'
                         }`}
                       >
                         {isUser ? (
@@ -571,7 +570,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           <button
                             type="button"
                             onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="hover:text-white transition-colors flex items-center gap-1"
+                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             {copiedId === msg.id ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
                             <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
@@ -580,7 +579,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           <button
                             type="button"
                             onClick={() => handleToggleSpeak(msg.id, msg.content)}
-                            className={`hover:text-white transition-colors flex items-center gap-1 ${
+                            className={`hover:text-white transition-colors flex items-center gap-1 cursor-pointer ${
                               speakingMsgId === msg.id ? 'text-[#BF5AF2]' : ''
                             }`}
                           >
@@ -591,7 +590,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           <button
                             type="button"
                             onClick={() => handleShareResponse(msg.content)}
-                            className="hover:text-white transition-colors flex items-center gap-1"
+                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <ShareNetwork size={13} />
                             <span>Share</span>
@@ -606,7 +605,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
             {/* Error Message Alert */}
             {errorMessage && (
-              <div className="my-2 p-2.5 rounded-2xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex items-center justify-between shrink-0">
+              <div className="my-2 p-2.5 rounded-2xl bg-red-500/15 text-red-300 text-xs flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <WarningCircle size={15} weight="bold" />
                   <span>{errorMessage}</span>
@@ -624,7 +623,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             {/* ── Bottom Floating Input Bar ── */}
             <div className="pt-2 shrink-0">
               <GlassSurface
-                className="rounded-full p-1.5 flex items-center gap-2 border border-white/16 shadow-2xl"
+                className="rounded-full p-1.5 flex items-center gap-2 shadow-2xl"
               >
                 {/* Voice Dictation Mic Button */}
                 <button
@@ -689,7 +688,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           /* ── History Tab View ── */
           <div className="flex-1 flex flex-col min-h-0 space-y-3">
             {/* Search History Pill */}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-[#1C1C1E] border border-white/10 text-white/80">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-full glass-flat text-white/80">
               <MagnifyingGlass size={16} className="text-white/50" />
               <input
                 type="text"
@@ -716,10 +715,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   <div
                     key={session.id}
                     onClick={() => handleReopenSession(session)}
-                    className="p-3.5 rounded-[22px] bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-[0.98] transition-all flex items-center justify-between cursor-pointer group"
+                    className="p-3.5 rounded-[22px] glass-tile active:scale-[0.98] transition-all flex items-center justify-between cursor-pointer group"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                      <div className="w-9 h-9 rounded-2xl bg-[#BF5AF2]/20 text-[#BF5AF2] flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-2xl glass-flat text-[#BF5AF2] flex items-center justify-center shrink-0">
                         <ChatCircleText size={18} weight="duotone" />
                       </div>
                       <div className="min-w-0 flex-1">

@@ -113,6 +113,7 @@ export interface AppSettings {
   interfaceColors?: Record<string, string>;
   performanceMode?: 'auto' | 'full' | 'lite';
   reduceBlurEffects?: boolean;
+  ambientLight?: 'off' | 'low' | 'medium';
 }
 
 // ── Profile / Body Stats ───────────────────────────────────────────────────

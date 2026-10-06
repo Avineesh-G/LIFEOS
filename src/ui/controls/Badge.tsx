@@ -28,8 +28,13 @@ export function Badge({
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={MOTION_SPRINGS.bouncy}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(255,122,69,0.18)] border border-[rgba(255,122,69,0.30)] text-xs font-bold select-none ${className}`}
-      style={{ color }}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold select-none ${className}`}
+      style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14)',
+        color,
+      }}
     >
       <svg
         viewBox="0 0 24 24"

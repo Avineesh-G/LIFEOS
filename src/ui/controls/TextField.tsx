@@ -24,9 +24,7 @@ export function TextField({
     <div className="w-full flex flex-col gap-1.5">
       {label && <label className="text-[13px] font-medium text-[rgba(235,235,245,0.60)] pl-1">{label}</label>}
       <div
-        className={`relative flex items-center bg-[#2C2C2E] rounded-[14px] px-3.5 h-[44px] border border-white/5 transition-colors focus-within:border-[rgba(10,132,255,0.6)] ${
-          error ? 'border-[#FF453A]' : ''
-        } ${className}`}
+        className={`relative flex items-center bg-[#2C2C2E] rounded-[14px] px-3.5 h-[44px] transition-colors ${className}`}
       >
         {leadingIcon && <div className="text-[rgba(235,235,245,0.50)] mr-2 shrink-0">{leadingIcon}</div>}
         <input

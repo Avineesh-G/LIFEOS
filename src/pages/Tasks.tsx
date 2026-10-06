@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, Task } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
@@ -20,8 +19,6 @@ import {
   Plus,
   Trash,
   Check,
-  CalendarDots,
-  Sparkle,
 } from '../ui';
 
 interface TasksProps {
@@ -46,6 +43,19 @@ export default function Tasks({ data, updateData }: TasksProps) {
       syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
     }
   }, [data?.tasks, data?.settings?.notificationLeadMinutes]);
+
+  const counts = useMemo(() => {
+    const all = data.tasks || [];
+    const todayCount = all.filter((t) => !t.completed && t.date <= todayStr).length;
+    const upcomingCount = all.filter((t) => !t.completed && t.date > todayStr).length;
+    const doneCount = all.filter((t) => t.completed).length;
+    return {
+      today: todayCount,
+      upcoming: upcomingCount,
+      done: doneCount,
+      pending: todayCount + upcomingCount,
+    };
+  }, [data.tasks, todayStr]);
 
   const filteredTasks = useMemo(() => {
     const all = data.tasks || [];
@@ -99,31 +109,31 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-white selection:bg-[#0A84FF]/30">
       <LargeTitleHeader
         title="Tasks"
-        subtitle={`${(data.tasks || []).filter((t) => !t.completed).length} pending`}
-        onBack={() => navigate('/')}
+        subtitle={`${counts.today} due today · ${counts.pending} total pending`}
+        tint="#0A84FF"
         actions={
           <Button
             variant="glass"
             tint="#0A84FF"
             size="sm"
             onClick={() => setIsAddOpen(true)}
-            icon={<Plus size={16} weight="bold" />}
+            icon={<Plus size={15} weight="bold" />}
           >
-            Add Task
+            Add
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 pb-2">
+      <div className="flex flex-col gap-3.5 pb-2">
         {/* Filter Segmented Control */}
         <Segmented<TaskFilter>
           options={[
-            { value: 'today', label: 'Today' },
-            { value: 'upcoming', label: 'Upcoming' },
-            { value: 'done', label: 'Done' },
+            { value: 'today', label: `Today (${counts.today})` },
+            { value: 'upcoming', label: `Upcoming (${counts.upcoming})` },
+            { value: 'done', label: `Done (${counts.done})` },
           ]}
           value={filter}
           onChange={setFilter}
@@ -258,3 +268,4 @@ export default function Tasks({ data, updateData }: TasksProps) {
     </div>
   );
 }
+

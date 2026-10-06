@@ -4,6 +4,7 @@ import { CaretLeft, CalendarDots, Flame } from '../ui/tokens/icons';
 import { Toolbar } from '../ui/navigation/Toolbar';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { format, subDays } from 'date-fns';
+import { handleAppBack } from '../utils/backNavigation';
 import type { AppData } from '../types';
 
 interface StudyHeatmapProps {
@@ -59,16 +60,16 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
   }
 
   return (
-    <div className="w-full flex flex-col pb-32">
+    <div className="w-full flex flex-col pb-4">
       <Toolbar
         leading={
           <button
             type="button"
-            onClick={() => navigate('/study')}
+            onClick={() => handleAppBack(navigate)}
             className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
           >
             <CaretLeft size={20} weight="bold" />
-            <span>Study</span>
+            <span>Back</span>
           </button>
         }
         center={<span className="font-bold text-white text-base">Study Consistency</span>}
@@ -76,15 +77,15 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
 
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-3 gap-2 my-4">
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-[#64D2FF] font-mono">{totalHours}h</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Total Hours</div>
         </div>
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-white font-mono">{avgMinutes}m</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Daily Average</div>
         </div>
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-white font-mono">{bestDayHours}h</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Peak Day</div>
         </div>
@@ -111,7 +112,7 @@ export default function StudyHeatmap({ data }: StudyHeatmapProps) {
             ))}
           </div>
 
-          <div className="flex items-center justify-between text-xs text-white/40 pt-2 border-t border-white/8">
+          <div className="flex items-center justify-between text-xs text-white/40 pt-2 border-t border-white/[0.04]">
             <span>Less focus</span>
             <div className="flex items-center gap-1.5">
               {intensityColors.map((c, i) => (

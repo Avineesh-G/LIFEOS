@@ -1,22 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
 import type { AppData } from '../types';
 import {
   LargeTitleHeader,
   Button,
-  Segmented,
   Sheet,
   TextField,
   EmptyState,
-  Badge,
   Cards,
   Plus,
-  ArrowClockwise,
-  Check,
-  CaretLeft,
 } from '../ui';
 
 interface ActiveRecallProps {
@@ -161,26 +156,25 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
     <div className="w-full text-white selection:bg-[#BF5AF2]/30">
       <LargeTitleHeader
         title="Active Recall"
-        subtitle={`${filteredCards.length} cards in deck`}
+        subtitle={`${filteredCards.length} cards in deck · Spaced Repetition`}
         tint="#BF5AF2"
-        onBack={() => navigate('/study')}
         actions={
           <Button
             variant="glass"
             tint="#BF5AF2"
             size="sm"
             onClick={() => setIsAddOpen(true)}
-            icon={<Plus size={16} weight="bold" />}
+            icon={<Plus size={15} weight="bold" />}
           >
-            Add Card
+            Add
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 pb-2">
+      <div className="flex flex-col gap-3 pb-4 pt-1">
         {/* Deck Filters */}
         {uniqueDecks.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
             {uniqueDecks.map((d) => (
               <button
                 key={d}
@@ -193,8 +187,8 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
                 }}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   selectedDeck === d
-                    ? 'bg-[#BF5AF2] text-white'
-                    : 'bg-[#1C1C1E] text-[rgba(235,235,245,0.60)] hover:text-white'
+                    ? 'glass-tile text-[#BF5AF2] font-bold shadow-sm'
+                    : 'glass-flat text-[rgba(235,235,245,0.60)] hover:text-white'
                 }`}
               >
                 {d}
@@ -214,17 +208,19 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
             tint="#BF5AF2"
           />
         ) : (
-          <div className="flex flex-col gap-5 items-center py-2 select-none">
-            <div className="w-full flex justify-between items-center text-xs font-semibold text-[rgba(235,235,245,0.60)] px-2">
-              <span>
+          <div className="flex flex-col gap-4 items-center py-1 select-none">
+            <div className="w-full flex justify-between items-center text-xs font-semibold px-2">
+              <span className="text-[rgba(235,235,245,0.60)]">
                 Card {currentIndex + 1} of {filteredCards.length}
               </span>
-              <span className="text-[#BF5AF2] font-bold">{currentCard.deck}</span>
+              <span className="px-2.5 py-0.5 rounded-full glass-flat text-[#BF5AF2] font-semibold text-[11px]">
+                {currentCard.deck}
+              </span>
             </div>
 
             {/* 3D Flippable Card Container */}
             <div
-              className="w-full h-[320px] cursor-pointer"
+              className="w-full h-[280px] cursor-pointer"
               style={{ perspective: 1200 }}
               onClick={handleFlip}
             >
@@ -237,7 +233,7 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
                 {/* Front Side */}
                 <div
                   style={{ backfaceVisibility: 'hidden' }}
-                  className="absolute inset-0 bg-[#1C1C1E] rounded-[32px] p-6 border border-white/[0.08] shadow-2xl flex flex-col justify-between"
+                  className="absolute inset-0 glass-card rounded-[32px] p-6 shadow-2xl flex flex-col justify-between"
                 >
                   <span className="text-xs font-bold uppercase tracking-wider text-[rgba(235,235,245,0.40)]">
                     QUESTION
@@ -256,7 +252,7 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
                   }}
-                  className="absolute inset-0 bg-[#2C2C2E] rounded-[32px] p-6 border border-[#BF5AF2]/30 shadow-2xl flex flex-col justify-between"
+                  className="absolute inset-0 glass-card rounded-[32px] p-6 shadow-2xl flex flex-col justify-between"
                 >
                   <span className="text-xs font-bold uppercase tracking-wider text-[#BF5AF2]">
                     ANSWER
@@ -276,28 +272,28 @@ export default function ActiveRecall({ data: _data }: ActiveRecallProps) {
               <button
                 type="button"
                 onClick={() => handleRate('again')}
-                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#FF453A]/30 text-[#FF453A] font-bold text-xs active:scale-95 transition-transform"
+                className="py-3 px-1 rounded-[18px] glass-flat text-[#FF453A] font-bold text-xs active:scale-95 transition-transform"
               >
                 Again
               </button>
               <button
                 type="button"
                 onClick={() => handleRate('hard')}
-                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#FF9F0A]/30 text-[#FF9F0A] font-bold text-xs active:scale-95 transition-transform"
+                className="py-3 px-1 rounded-[18px] glass-flat text-[#FF9F0A] font-bold text-xs active:scale-95 transition-transform"
               >
                 Hard
               </button>
               <button
                 type="button"
                 onClick={() => handleRate('good')}
-                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#30D158]/30 text-[#30D158] font-bold text-xs active:scale-95 transition-transform"
+                className="py-3 px-1 rounded-[18px] glass-flat text-[#30D158] font-bold text-xs active:scale-95 transition-transform"
               >
                 Good
               </button>
               <button
                 type="button"
                 onClick={() => handleRate('easy')}
-                className="py-3 px-1 rounded-[18px] bg-[#1C1C1E] border border-[#0A84FF]/30 text-[#0A84FF] font-bold text-xs active:scale-95 transition-transform"
+                className="py-3 px-1 rounded-[18px] glass-flat text-[#0A84FF] font-bold text-xs active:scale-95 transition-transform"
               >
                 Easy
               </button>

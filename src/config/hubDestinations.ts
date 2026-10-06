@@ -215,14 +215,6 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/history'],
   },
   {
-    id: 'vault',
-    label: 'Vault',
-    route: '/vault',
-    icon: ShieldCheck,
-    family: 'vault',
-    matchRoutes: ['/vault'],
-  },
-  {
     id: 'settings',
     label: 'Settings',
     route: '/settings',

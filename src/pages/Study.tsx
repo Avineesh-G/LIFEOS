@@ -18,8 +18,6 @@ import {
   Microphone,
   ClockCounterClockwise,
   Play,
-  CalendarDots,
-  GraduationCap,
 } from '../ui';
 
 interface StudyProps {
@@ -45,10 +43,10 @@ export default function Study({ data }: StudyProps) {
       });
       const sorted = Object.entries(subjectMap).sort((a, b) => b[1] - a[1]);
 
-      // Heatmap 70 days
-      const days = Array.from({ length: 70 }, (_, i) => {
+      // Heatmap 18 weeks (126 days)
+      const days = Array.from({ length: 126 }, (_, i) => {
         const d = new Date();
-        d.setDate(d.getDate() - (69 - i));
+        d.setDate(d.getDate() - (125 - i));
         const dateStr = format(d, 'yyyy-MM-dd');
         const daySessions = (data.studySessions || []).filter((s) => s.date === dateStr);
         const dayMins = daySessions.reduce((sum, s) => sum + s.duration, 0);
@@ -73,35 +71,38 @@ export default function Study({ data }: StudyProps) {
         title="Study"
         subtitle={`${todayHours}h ${todayMinsRemainder}m focused today`}
         tint="#64D2FF"
-        onBack={() => navigate('/')}
         actions={
           <Button
             variant="glass"
             tint="#64D2FF"
             size="sm"
-            onClick={() => navigate('/flow')}
-            icon={<Headphones size={16} weight="bold" />}
+            onClick={() => {
+              triggerHaptic('nav');
+              navigate('/flow');
+            }}
+            icon={<Headphones size={15} weight="bold" />}
           >
             Flow Room
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 pb-2">
-        {/* ── 1. Hero Summary Card (r-hero 32, surface-1) ── */}
+      <div className="flex flex-col gap-3.5 pb-2">
+        {/* ── 1. Hero Summary Card (glass-hero with Cyan glow) ── */}
         <motion.div
-          whileTap={{ scale: 0.98 }}
+          whileTap={{ scale: 0.985 }}
           transition={MOTION_SPRINGS.default}
-          className="w-full bg-[#1C1C1E] rounded-[32px] p-5 border border-white/[0.06] flex flex-col gap-4 shadow-xl select-none"
+          style={{ '--hero-accent': '#64D2FF' } as React.CSSProperties}
+          className="glass-hero p-5 flex flex-col gap-4 select-none min-h-[140px]"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col">
-              <div className="text-xs font-semibold text-[rgba(235,235,245,0.60)] tracking-tight">
-                TODAY'S FOCUS TIME
+              <div className="text-[11.5px] font-semibold text-[rgba(235,235,245,0.65)] uppercase tracking-wider">
+                Today's Focus Time
               </div>
-              <div className="text-4xl font-extrabold text-[#64D2FF] tabular-nums tracking-tight mt-1">
+              <div className="text-[34px] font-bold text-[#64D2FF] tabular-nums tracking-tight mt-1 leading-none">
                 {todayHours}:{todayMinsRemainder < 10 ? `0${todayMinsRemainder}` : todayMinsRemainder}{' '}
-                <span className="text-sm font-normal text-[rgba(235,235,245,0.50)]">hrs</span>
+                <span className="text-sm font-normal text-[rgba(235,235,245,0.45)]">hrs</span>
               </div>
             </div>
 
@@ -109,28 +110,31 @@ export default function Study({ data }: StudyProps) {
               variant="prominent"
               tint="#64D2FF"
               size="md"
-              onClick={() => navigate('/study/timer')}
-              icon={<Play size={16} weight="fill" />}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/study/timer');
+              }}
+              icon={<Play size={15} weight="fill" />}
             >
               Start Focus
             </Button>
           </div>
 
           {/* Goal Progress Bar */}
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+          <div className="flex flex-col gap-1.5 pt-1">
             <div className="flex justify-between text-xs font-semibold">
               <span className="text-[rgba(235,235,245,0.60)]">Daily 3-Hour Target</span>
               <span className="text-white">{Math.round(percent * 100)}%</span>
             </div>
-            <ProgressBar progress={percent} height={6} color="#64D2FF" />
+            <ProgressBar progress={percent} height={5} color="#64D2FF" />
           </div>
         </motion.div>
 
-        {/* ── 2. 365-Day Study Intensity Heatmap ── */}
-        <div className="w-full bg-[#1C1C1E] rounded-[26px] p-4 border border-white/[0.06] flex flex-col gap-3 select-none">
-          <div className="flex justify-between items-center text-xs font-bold text-[rgba(235,235,245,0.60)]">
-            <span>STUDY CONSISTENCY GRAPH</span>
-            <span className="text-[10px] text-[#64D2FF]">Recent Activity</span>
+        {/* ── 2. 18-Week Study Consistency Heatmap (glass-card) ── */}
+        <div className="glass-card p-4 flex flex-col gap-3 select-none">
+          <div className="flex justify-between items-center text-xs font-semibold text-[rgba(235,235,245,0.70)]">
+            <span className="text-section-header">Study Consistency</span>
+            <span className="text-[11px] text-[#64D2FF] font-bold">Recent Activity</span>
           </div>
           <Heatmap days={heatmapDays} color="#64D2FF" />
         </div>
@@ -141,7 +145,7 @@ export default function Study({ data }: StudyProps) {
             icon={<Headphones weight="bold" />}
             iconTint="#64D2FF"
             title="Flow Room"
-            subtitle="Ambient soundscapes & 96pt focus numeral"
+            subtitle="Ambient soundscapes & focus timer"
             showChevron
             onClick={() => navigate('/flow')}
           />
@@ -179,18 +183,18 @@ export default function Study({ data }: StudyProps) {
           />
         </GroupedList>
 
-        {/* ── 4. Subject Breakdown ── */}
+        {/* ── 4. Subject Breakdown (glass-card) ── */}
         {sortedSubjects.length > 0 && (
-          <div className="w-full bg-[#1C1C1E] rounded-[26px] p-4 border border-white/[0.06] flex flex-col gap-3 select-none">
-            <div className="text-xs font-bold text-[rgba(235,235,245,0.60)]">
+          <div className="glass-card p-4 flex flex-col gap-3 select-none">
+            <div className="text-section-header">
               HOURS PER SUBJECT
             </div>
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3 pt-1">
               {sortedSubjects.slice(0, 4).map(([subj, mins]) => (
                 <div key={subj}>
                   <div className="flex justify-between text-xs font-medium mb-1">
                     <span className="text-white font-semibold">{subj}</span>
-                    <span className="text-[rgba(235,235,245,0.60)]">
+                    <span className="text-[rgba(235,235,245,0.60)] tabular-nums">
                       {(mins / 60).toFixed(1)} hrs
                     </span>
                   </div>
@@ -208,3 +212,4 @@ export default function Study({ data }: StudyProps) {
     </div>
   );
 }
+

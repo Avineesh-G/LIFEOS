@@ -8,13 +8,10 @@ import {
   GroupedList,
   ListRow,
   Button,
-  Sun,
   CalendarDots,
   Barbell,
-  Wallet,
   CheckCircle,
   ForkKnife,
-  Check,
 } from '../ui';
 
 interface MorningBriefingProps {
@@ -69,27 +66,26 @@ export default function MorningBriefing({ data, updateData }: MorningBriefingPro
   };
 
   const handleDone = () => {
-    triggerHaptic('milestone');
+    triggerHaptic('success');
     triggerConfettiBurst();
     navigate('/');
   };
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-white selection:bg-[#0A84FF]/30">
       <LargeTitleHeader
         title="Morning Plan"
         subtitle={`${dayName}, ${formattedDate}`}
-        onBack={() => navigate('/')}
       />
 
-      <div className="flex flex-col gap-3 pb-2">
+      <div className="flex flex-col gap-3.5 pb-4">
         {/* Schedule & Class */}
         <GroupedList header="Schedule">
           <ListRow
             icon={<CalendarDots weight="bold" />}
             iconTint="#5E5CE6"
             title={nextEvent ? nextEvent.subject : 'No classes today'}
-            subtitle={nextEvent ? `Starts at ${nextEvent.startTime} • Room ${nextEvent.room || 'TBD'}` : 'Enjoy your free day'}
+            subtitle={nextEvent ? `Starts at ${nextEvent.startTime} · Room ${nextEvent.room || 'TBD'}` : 'Enjoy your free day'}
             trailing={nextEvent ? `${nextEvent.startTime}` : undefined}
             onClick={() => navigate('/timetable')}
             showSeparator={false}
@@ -115,7 +111,7 @@ export default function MorningBriefing({ data, updateData }: MorningBriefingPro
             icon={<ForkKnife weight="bold" />}
             iconTint="#FF9F0A"
             title="Daily Calorie Budget"
-            subtitle="Target: 2,200 kcal • 140g Protein"
+            subtitle="Target: 2,200 kcal · 140g Protein"
             trailing="2,200 kcal"
             onClick={() => navigate('/nutrition')}
             showSeparator={false}
@@ -149,17 +145,18 @@ export default function MorningBriefing({ data, updateData }: MorningBriefingPro
         </GroupedList>
 
         {/* Done Button */}
-        <div className="pt-4">
+        <div className="pt-2">
           <Button
             variant="prominent"
             tint="#0A84FF"
             className="w-full"
             onClick={handleDone}
           >
-            Done • Launch Day
+            Done · Launch Day
           </Button>
         </div>
       </div>
     </div>
   );
 }
+
