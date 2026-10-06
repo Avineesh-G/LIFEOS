@@ -119,19 +119,27 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
 
   return (
     <div className="w-full flex flex-col pb-4">
-      <Toolbar
-        leading={
-          <button
-            type="button"
-            onClick={() => handleAppBack(navigate)}
-            className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all cursor-pointer"
-          >
-            <CaretLeft size={20} weight="bold" />
-            <span>Back</span>
-          </button>
-        }
-        center={<span className="font-bold text-white text-base">Weekly Split</span>}
-      />
+      <header
+        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+          paddingBottom: '6px',
+        }}
+      >
+        <Toolbar
+          leading={
+            <button
+              type="button"
+              onClick={() => handleAppBack(navigate)}
+              className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all cursor-pointer px-2 py-1 rounded-full hover:bg-white/10"
+            >
+              <CaretLeft size={20} weight="bold" />
+              <span>Back</span>
+            </button>
+          }
+          center={<span className="font-bold text-white text-base">Weekly Split</span>}
+        />
+      </header>
 
       {/* Day Selector Pill Bar */}
       <div className="grid grid-cols-7 gap-1 p-1 glass-card rounded-[22px] my-3">

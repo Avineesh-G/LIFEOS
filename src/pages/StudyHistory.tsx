@@ -57,19 +57,27 @@ export default function StudyHistory({ data }: StudyHistoryProps) {
 
   return (
     <div className="w-full flex flex-col pb-4 selection:bg-[#64D2FF]/30">
-      <Toolbar
-        leading={
-          <button
-            type="button"
-            onClick={() => handleAppBack(navigate)}
-            className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all"
-          >
-            <CaretLeft size={20} weight="bold" />
-            <span>Back</span>
-          </button>
-        }
-        center={<span className="font-bold text-white text-base">Study History</span>}
-      />
+      <header
+        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+          paddingBottom: '6px',
+        }}
+      >
+        <Toolbar
+          leading={
+            <button
+              type="button"
+              onClick={() => handleAppBack(navigate)}
+              className="flex items-center gap-1 text-[#64D2FF] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all cursor-pointer px-2 py-1 rounded-full hover:bg-white/10"
+            >
+              <CaretLeft size={20} weight="bold" />
+              <span>Back</span>
+            </button>
+          }
+          center={<span className="font-bold text-white text-base">Study History</span>}
+        />
+      </header>
 
       {/* Overview Stat Card */}
       <div className="grid grid-cols-2 gap-2 my-4">

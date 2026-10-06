@@ -229,21 +229,29 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
   return (
     <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#AC8E68]/30">
       {/* ── Top Navigation Bar ── */}
-      <Toolbar
-        leading={
-          <button
-            onClick={() => handleAppBack(navigate)}
-            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
-          >
-            <CaretLeft size={22} weight="bold" />
-          </button>
-        }
-        center={
-          <span className="text-sm font-semibold text-white">
-            History Timeline
-          </span>
-        }
-      />
+      <header
+        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+          paddingBottom: '6px',
+        }}
+      >
+        <Toolbar
+          leading={
+            <button
+              onClick={() => handleAppBack(navigate)}
+              className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform cursor-pointer"
+            >
+              <CaretLeft size={22} weight="bold" />
+            </button>
+          }
+          center={
+            <span className="text-sm font-semibold text-white">
+              History Timeline
+            </span>
+          }
+        />
+      </header>
 
       <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
         {/* ── Month Selector ── */}

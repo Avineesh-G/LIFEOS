@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 62,
+  versionCode: 63,
   versionName: '3.2.6',
   releaseDate: '2026-10-06',
   apkSize: '13.85 MB',
   apkSizeBytes: 14520000,
-  releaseNotes: 'LifeOS v3.2.6 (Build 62):\n• 3-Tier Adaptive Performance Engine: Autonomously tunes graphics and memory per device hardware\n• Pure Water Droplet Glass & Dark UI: All surfaces refined to Apple Dark #141416 with color reserved for icons & text\n• Universal Path-Following Back Navigation: LIFO step-by-step backtracking across all pages to Home exit guard\n• Neural Infinity Iconography: Modernized AI Assistant across all interfaces\n• Redundant Space Elimination: Cleaned and normalized padding across all pages',
+  releaseNotes: 'LifeOS v3.2.6 (Build 63):\n• Status Bar Safe Area Clearance: Fixed header collision and brought Back options safely below notch/status bar in Gym and all sub-interfaces\n• Bottom Spacing Optimization: Eliminated oversized trailing gaps for a tight, natural interface flow\n• Hardware Performance Specifications: Added clear auto-detected RAM, CPU Cores, clean GPU rendering profile, and interactive Tier selection\n• Adaptive Tier Calibration: Guaranteed Tier 1 High-Fidelity for 8GB+ RAM devices with seamless fluid animations',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

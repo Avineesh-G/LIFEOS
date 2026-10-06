@@ -164,19 +164,27 @@ export default function StudyTimer({ data, updateData }: StudyTimerProps) {
 
   return (
     <div className="w-full text-white selection:bg-[#64D2FF]/30 pb-4">
-      <Toolbar
-        leading={
-          <button
-            type="button"
-            onClick={() => handleAppBack(navigate)}
-            className="flex items-center justify-center w-10 h-10 rounded-full glass-nav nav-rim-light text-white active:scale-95 transition-all cursor-pointer"
-            aria-label="Back"
-          >
-            <CaretLeft size={20} weight="bold" />
-          </button>
-        }
-        center={<span className="font-semibold text-white text-[17px] tracking-tight">Study Timer</span>}
-      />
+      <header
+        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+          paddingBottom: '6px',
+        }}
+      >
+        <Toolbar
+          leading={
+            <button
+              type="button"
+              onClick={() => handleAppBack(navigate)}
+              className="flex items-center justify-center w-10 h-10 rounded-full glass-nav nav-rim-light text-white active:scale-95 transition-all cursor-pointer"
+              aria-label="Back"
+            >
+              <CaretLeft size={20} weight="bold" />
+            </button>
+          }
+          center={<span className="font-semibold text-white text-[17px] tracking-tight">Study Timer</span>}
+        />
+      </header>
 
       {/* ── Big Stopwatch Display (glass-hero with Cyan accent) ── */}
       <div

@@ -471,7 +471,7 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
             <div
               className="w-full shrink-0 select-none pointer-events-none"
               style={{
-                height: 'calc(56px + max(env(safe-area-inset-bottom, 0px), 12px) + 28px)',
+                height: 'calc(56px + max(env(safe-area-inset-bottom, 0px), 8px) + 8px)',
               }}
               aria-hidden="true"
             />

@@ -204,25 +204,67 @@ export default function Settings({
       {/* ── Hardware Performance & Adaptive Tier ── */}
       <GroupedList
         header="HARDWARE PERFORMANCE & COMPATIBILITY"
-        footer={`Auto-detected: ${deviceTier.ramGb}GB RAM · ${deviceTier.cores} Cores · ${deviceTier.gpuRenderer.slice(0, 32)} · Running at ${deviceTier.tier === 3 ? 'Max Fluidity (Zero-Blur GPU)' : deviceTier.tier === 2 ? 'Balanced 4px Blur' : 'Full Liquid Glass'}`}
+        footer={`Auto-detected: ${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.tier === 1 ? 'Tier 1: High Fidelity (Full Liquid Glass)' : deviceTier.tier === 2 ? 'Tier 2: Balanced Standard (4px Blur)' : 'Tier 3: Max Fluidity (Zero-Blur GPU)'}`}
       >
         <ListRow
           icon={<Lightning size={18} weight="duotone" />}
           iconTint="#FFD60A"
-          title="Performance Engine"
-          subtitle={
-            deviceTier.tier === 3
-              ? 'Tier 3: Max Fluidity (Budget / Low RAM / Battery)'
-              : deviceTier.tier === 2
-              ? 'Tier 2: Balanced Standard (6GB RAM / Mid-range)'
-              : 'Tier 1: High Fidelity (Flagship / 8GB+ RAM)'
-          }
+          title="Hardware Profile"
+          subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu}`}
           trailing={
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#30D158] animate-pulse" />
               <span className="text-xs font-semibold text-[#30D158] glass-flat px-2.5 py-1 rounded-full">
-                Auto-Optimized
+                {deviceTier.userOverride === 'auto' ? 'Auto-Optimized' : `Tier ${deviceTier.tier} Active`}
               </span>
+            </div>
+          }
+        />
+
+        <ListRow
+          icon={<SlidersHorizontal size={18} weight="duotone" />}
+          iconTint="#0A84FF"
+          title="Performance Tier"
+          subtitle={
+            deviceTier.tier === 1
+              ? 'Tier 1: High Fidelity (Flagship · 8GB+ RAM · Full Blur)'
+              : deviceTier.tier === 2
+              ? 'Tier 2: Balanced Standard (Mid-Range · 6GB RAM · 4px Blur)'
+              : 'Tier 3: Max Fluidity (Budget · ≤4GB RAM · 0px Blur)'
+          }
+          trailing={
+            <div className="flex items-center gap-1">
+              {(
+                [
+                  { id: 'auto' as const, label: 'Auto' },
+                  { id: 1 as const, label: 'T1' },
+                  { id: 2 as const, label: 'T2' },
+                  { id: 3 as const, label: 'T3' },
+                ]
+              ).map((opt) => {
+                const isSelected =
+                  opt.id === 'auto'
+                    ? deviceTier.userOverride === 'auto'
+                    : deviceTier.userOverride === opt.id ||
+                      (deviceTier.userOverride === 'auto' && deviceTier.tier === opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      deviceTier.setTier(opt.id);
+                    }}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-all cursor-pointer ${
+                      isSelected
+                        ? 'glass-tile text-[#0A84FF] shadow-sm font-extrabold'
+                        : 'glass-flat text-white/50 hover:text-white'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
           }
           showSeparator={false}

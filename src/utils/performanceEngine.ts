@@ -9,8 +9,11 @@ export type DeviceTier = 1 | 2 | 3;
 export interface PerformanceMetrics {
   tier: DeviceTier;
   ramGb: number;
+  ramDisplay: string;
   cores: number;
   gpuRenderer: string;
+  cleanGpu: string;
+  userOverride: DeviceTier | 'auto';
   isLowPower: boolean;
   canBlur: boolean;
   isLowEnd: boolean;
@@ -18,6 +21,49 @@ export interface PerformanceMetrics {
 
 let cachedMetrics: PerformanceMetrics | null = null;
 const listeners = new Set<(metrics: PerformanceMetrics) => void>();
+
+export function cleanGpuName(raw: string): string {
+  if (!raw || raw === 'unknown' || raw === 'generic webgl') return 'Integrated Graphics';
+  
+  // Clean ANGLE wrappers: ANGLE (Vendor, Device Name Direct3D..., ...)
+  let clean = raw;
+  const angleMatch = raw.match(/angle\s*\([^,]+,\s*([^,)]+)/i);
+  if (angleMatch && angleMatch[1]) {
+    clean = angleMatch[1];
+  }
+  
+  // Remove direct3d/opengl/vulkan build noise
+  clean = clean
+    .replace(/direct3d.*$/i, '')
+    .replace(/vs_\d+_\d+.*$/i, '')
+    .replace(/ps_\d+_\d+.*$/i, '')
+    .replace(/opengl.*$/i, '')
+    .replace(/vulkan.*$/i, '')
+    .replace(/\(tm\)/gi, '')
+    .replace(/\(r\)/gi, '')
+    .replace(/device.*$/i, '')
+    .trim();
+
+  // Mobile Adreno detection
+  if (/adreno\s*\d+/i.test(raw)) {
+    const match = raw.match(/adreno\s*\d+/i);
+    if (match) return `Adreno ${match[0].replace(/adreno\s*/i, '').trim()}`;
+  }
+  // Mobile Mali detection
+  if (/mali-[a-z0-9]+/i.test(raw)) {
+    const match = raw.match(/mali-[a-z0-9]+/i);
+    if (match) return `Mali-${match[0].replace(/mali-/i, '').toUpperCase()}`;
+  }
+  if (/apple/i.test(raw)) {
+    return 'Apple Neural GPU';
+  }
+  if (/immortalis/i.test(raw)) {
+    const match = raw.match(/immortalis-[a-z0-9]+/i);
+    return match ? match[0].toUpperCase() : 'Immortalis GPU';
+  }
+  
+  return clean.length > 2 ? clean.charAt(0).toUpperCase() + clean.slice(1) : 'Standard GPU';
+}
 
 function getGpuRenderer(): string {
   try {
@@ -32,68 +78,81 @@ function getGpuRenderer(): string {
   }
 }
 
-export function detectDeviceTier(): PerformanceMetrics {
-  if (cachedMetrics) return cachedMetrics;
-
-  const ram = (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4; // Defaults to 4GB if undetected
-  const cores = navigator.hardwareConcurrency || 4;
-  const gpu = getGpuRenderer().toLowerCase();
-
-  // Check for budget GPU keywords
-  const isBudgetGpu =
-    gpu.includes('mali-4') ||
-    gpu.includes('mali-t') ||
-    gpu.includes('mali-g51') ||
-    gpu.includes('mali-g52') ||
-    gpu.includes('mali-g57') ||
-    gpu.includes('adreno 5') ||
-    gpu.includes('adreno 610') ||
-    gpu.includes('adreno 612') ||
-    gpu.includes('adreno 613') ||
-    gpu.includes('adreno 616') ||
-    gpu.includes('adreno 618') ||
-    gpu.includes('adreno 619');
-
-  const isFlagshipGpu =
-    gpu.includes('apple') ||
-    gpu.includes('adreno 7') ||
-    gpu.includes('adreno 8') ||
-    gpu.includes('mali-g710') ||
-    gpu.includes('mali-g715') ||
-    gpu.includes('mali-g720') ||
-    gpu.includes('immortalis') ||
-    gpu.includes('nvidia') ||
-    gpu.includes('radeon');
-
-  // Explicit user override stored in localStorage
-  let userOverride: DeviceTier | null = null;
+export function getDeviceTierOverride(): DeviceTier | 'auto' {
   try {
     const saved = localStorage.getItem('lifeos_perf_tier');
     if (saved === '1' || saved === '2' || saved === '3') {
-      userOverride = parseInt(saved, 10) as DeviceTier;
+      return parseInt(saved, 10) as DeviceTier;
     }
   } catch {}
+  return 'auto';
+}
 
+export function detectDeviceTier(): PerformanceMetrics {
+  if (cachedMetrics) return cachedMetrics;
+
+  const rawRam = (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4; // Browser reports 2, 4, 8 max
+  const cores = navigator.hardwareConcurrency || 4;
+  const rawGpu = getGpuRenderer();
+  const gpuLower = rawGpu.toLowerCase();
+  const cleanGpu = cleanGpuName(rawGpu);
+
+  // Check for budget GPU keywords
+  const isBudgetGpu =
+    gpuLower.includes('mali-4') ||
+    gpuLower.includes('mali-t') ||
+    gpuLower.includes('mali-g51') ||
+    gpuLower.includes('mali-g52') ||
+    gpuLower.includes('mali-g57') ||
+    gpuLower.includes('adreno 5') ||
+    gpuLower.includes('adreno 610') ||
+    gpuLower.includes('adreno 612') ||
+    gpuLower.includes('adreno 613') ||
+    gpuLower.includes('adreno 616') ||
+    gpuLower.includes('adreno 618') ||
+    gpuLower.includes('adreno 619');
+
+  const isFlagshipGpu =
+    gpuLower.includes('apple') ||
+    gpuLower.includes('adreno 7') ||
+    gpuLower.includes('adreno 8') ||
+    gpuLower.includes('mali-g710') ||
+    gpuLower.includes('mali-g715') ||
+    gpuLower.includes('mali-g720') ||
+    gpuLower.includes('immortalis') ||
+    gpuLower.includes('nvidia') ||
+    gpuLower.includes('radeon') ||
+    gpuLower.includes('geforce') ||
+    gpuLower.includes('rtx');
+
+  // Explicit user override stored in localStorage
+  const userOverride = getDeviceTierOverride();
   let tier: DeviceTier = 2; // Default to Tier 2 (Balanced)
 
-  if (userOverride) {
+  if (userOverride !== 'auto') {
     tier = userOverride;
-  } else if (ram <= 3 || cores <= 4 || (isBudgetGpu && ram <= 4)) {
-    // Budget Indian phone (Helio G85/G99, Snapdragon 680, 3-4GB RAM)
+  } else if (rawRam <= 3 || cores <= 4 || (isBudgetGpu && rawRam <= 4)) {
+    // Budget phone (Helio G85/G99, Snapdragon 680, 3-4GB RAM)
     tier = 3;
-  } else if (ram >= 8 && cores >= 8 && (isFlagshipGpu || !isBudgetGpu)) {
-    // Flagship device (8GB+ RAM, Snap 7+/8 Gen)
+  } else if (rawRam >= 8 || cores >= 8 || isFlagshipGpu) {
+    // Flagship / High-Spec device (8GB+ RAM, 8+ Cores, Flagship GPU)
     tier = 1;
   } else {
-    // Standard Mid-range Indian phone (6GB RAM, Dimensity 6020/7020/7050, Snap 695)
+    // Standard Mid-range (6GB RAM, Dimensity 6020/7020, Snap 695)
     tier = 2;
   }
 
+  // RAM Display string
+  const ramDisplay = rawRam >= 8 ? '8GB+ (16GB)' : `${rawRam}GB`;
+
   const metrics: PerformanceMetrics = {
     tier,
-    ramGb: ram,
+    ramGb: rawRam,
+    ramDisplay,
     cores,
-    gpuRenderer: gpu,
+    gpuRenderer: rawGpu,
+    cleanGpu,
+    userOverride,
     isLowPower: false,
     canBlur: tier <= 2,
     isLowEnd: tier === 3,

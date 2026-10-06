@@ -58,7 +58,7 @@ export function LargeTitleHeader({
       <header
         className="sticky top-0 z-30 w-full"
         style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)',
           paddingBottom: '4px',
         }}
       >
