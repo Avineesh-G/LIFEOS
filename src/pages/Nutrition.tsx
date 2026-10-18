@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +20,16 @@ import {
   Check,
   Trash,
   Drop,
+  Sparkle,
 } from '../ui';
+import {
+  analyzeFoodWithAi,
+  matchLocalFoodDatabase,
+  extractPortionFromText,
+  parseMultiFoodItems,
+  NutritionEstimate,
+  MultiItemEstimate,
+} from '../utils/aiNutrition';
 
 interface NutritionProps {
   data: AppData;
@@ -109,12 +118,87 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     return map;
   }, [todayMess]);
 
-  // Custom Item Modal State
+  // Custom Food / AI Food Logging State
   const [isAddCustomOpen, setIsAddCustomOpen] = useState(false);
   const [customSlot, setCustomSlot] = useState<MealSlot>('lunch');
   const [customName, setCustomName] = useState('');
-  const [customCalories, setCustomCalories] = useState('100');
-  const [customPortion, setCustomPortion] = useState(2);
+  const [customCalories, setCustomCalories] = useState('');
+  const [customPortion, setCustomPortion] = useState(1);
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [aiEstimate, setAiEstimate] = useState<NutritionEstimate | null>(null);
+  const [multiItemEstimate, setMultiItemEstimate] = useState<MultiItemEstimate | null>(null);
+
+  // Reset or initialize state when modal opens/closes
+  useEffect(() => {
+    if (!isAddCustomOpen) {
+      setCustomName('');
+      setCustomCalories('');
+      setCustomPortion(1);
+      setAiEstimate(null);
+      setMultiItemEstimate(null);
+      setIsAiAnalyzing(false);
+    }
+  }, [isAddCustomOpen]);
+
+  // Synchronous immediate local lookup + debounced AI calorie estimation
+  useEffect(() => {
+    const trimmed = customName.trim();
+    if (!trimmed) {
+      setAiEstimate(null);
+      setMultiItemEstimate(null);
+      setCustomCalories('');
+      setIsAiAnalyzing(false);
+      return;
+    }
+
+    // 1. Auto-extract portion if mentioned in food name (e.g. "3 rotis", "2 eggs")
+    const { portion: extractedPortion } = extractPortionFromText(trimmed);
+    if (extractedPortion !== null && extractedPortion !== customPortion) {
+      setCustomPortion(extractedPortion);
+    }
+
+    // 2. Instant 0ms database lookup to populate calories immediately
+    const instantMatch = matchLocalFoodDatabase(trimmed, extractedPortion !== null ? extractedPortion : customPortion);
+    if (instantMatch) {
+      setCustomCalories(instantMatch.caloriesPerServing.toString());
+      setAiEstimate(instantMatch);
+    }
+
+    // 3. Debounced AI Analysis for unknown/complex foods or multi-item sentences
+    let isCancelled = false;
+    setIsAiAnalyzing(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        // Check for multiple items first (e.g. "2 rotis and 1 bowl dal")
+        const multi = await parseMultiFoodItems(trimmed);
+        if (isCancelled) return;
+        if (multi && multi.items.length > 1) {
+          setMultiItemEstimate(multi);
+          setAiEstimate(null);
+          setCustomCalories(multi.totalCalories.toString());
+          setIsAiAnalyzing(false);
+          return;
+        } else {
+          setMultiItemEstimate(null);
+        }
+
+        const estimate = await analyzeFoodWithAi(trimmed, customPortion);
+        if (isCancelled) return;
+        setAiEstimate(estimate);
+        setCustomCalories(estimate.caloriesPerServing.toString());
+      } catch (err) {
+        console.warn('AI Food analysis error:', err);
+      } finally {
+        if (!isCancelled) setIsAiAnalyzing(false);
+      }
+    }, 320);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [customName, customPortion]);
 
   // Toggle or select a mess item directly from the meals diary
   const handleToggleMessItem = async (slot: MealSlot, itemName: string, estCalories: number) => {
@@ -221,28 +305,46 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     await updateData({ nutritionLogs: updatedLogs });
   };
 
-  // Add a custom extra food item with portion multiplier
+  // Add a custom extra food item with portion multiplier (AI Auto-Implemented)
   const handleLogCustomFood = async () => {
     if (!customName.trim()) return;
     triggerHaptic('success');
-    const caloriesNum = parseInt(customCalories, 10) || 100;
-    const portionNum = Math.max(1, customPortion || 1);
-
-    const newItem: MealItemLog = {
-      id: `item_${Date.now()}`,
-      name: customName.trim(),
-      calories: caloriesNum,
-      portion: portionNum,
-      isExtra: true,
-    };
 
     const currentMeals = [...(todayLog.mealsEaten || [])];
     const slotIndex = currentMeals.findIndex((m) => m.slot === customSlot);
 
-    if (slotIndex >= 0) {
-      currentMeals[slotIndex].items.push(newItem);
+    if (multiItemEstimate && multiItemEstimate.items.length > 1) {
+      // Multiple items detected by AI
+      const newItems: MealItemLog[] = multiItemEstimate.items.map((it, idx) => ({
+        id: `item_${Date.now()}_${idx}`,
+        name: it.name,
+        calories: it.caloriesPerServing,
+        portion: it.detectedPortion || 1,
+        isExtra: true,
+      }));
+
+      if (slotIndex >= 0) {
+        currentMeals[slotIndex].items.push(...newItems);
+      } else {
+        currentMeals.push({ slot: customSlot, items: newItems });
+      }
     } else {
-      currentMeals.push({ slot: customSlot, items: [newItem] });
+      const caloriesNum = parseInt(customCalories, 10) || (aiEstimate?.caloriesPerServing ?? 100);
+      const portionNum = Math.max(0.5, customPortion || 1);
+
+      const newItem: MealItemLog = {
+        id: `item_${Date.now()}`,
+        name: (aiEstimate?.name || customName).trim(),
+        calories: caloriesNum,
+        portion: portionNum,
+        isExtra: true,
+      };
+
+      if (slotIndex >= 0) {
+        currentMeals[slotIndex].items.push(newItem);
+      } else {
+        currentMeals.push({ slot: customSlot, items: [newItem] });
+      }
     }
 
     const newDailyTotal = currentMeals.reduce(
@@ -264,8 +366,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     await updateData({ nutritionLogs: updatedLogs });
 
     setCustomName('');
-    setCustomCalories('100');
-    setCustomPortion(2);
+    setCustomCalories('');
+    setCustomPortion(1);
+    setAiEstimate(null);
+    setMultiItemEstimate(null);
     setIsAddCustomOpen(false);
   };
 
@@ -465,14 +569,14 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                       onClick={() => {
                         triggerHaptic('light');
                         setCustomSlot(slot.slot);
-                        setCustomPortion(2);
+                        setCustomPortion(1);
                         setIsAddCustomOpen(true);
                       }}
-                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
-                      title="Add Custom Item"
+                      className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                      title="Log Food with AI"
                     >
-                      <Plus size={12} weight="bold" />
-                      <span>Custom</span>
+                      <Sparkle size={12} weight="fill" />
+                      <span>Log Food</span>
                     </button>
                   </div>
                 </div>
@@ -587,35 +691,148 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         </div>
       </div>
 
-      {/* Add Custom Food Modal Sheet */}
+      {/* Add Custom Food Modal Sheet - AI Food & Portion Auto-Analyzer */}
       <Sheet
         isOpen={isAddCustomOpen}
         onClose={() => setIsAddCustomOpen(false)}
         detent="half"
-        title={`Add to ${customSlot.charAt(0).toUpperCase() + customSlot.slice(1)}`}
+        title={`Log to ${customSlot.charAt(0).toUpperCase() + customSlot.slice(1)}`}
       >
-        <div className="flex flex-col gap-4 py-2">
-          <TextField
-            label="Food / Item Name"
-            placeholder="e.g., Chapati, Paneer bowl, Whey shake..."
-            value={customName}
-            onChange={(e) => setCustomName(e.target.value)}
-            autoFocus
-          />
+        <div className="flex flex-col gap-3.5 py-2">
+          {/* Quick Popular Food Chips */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
+              Quick Select / Popular Items:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                'Chapati',
+                'Steamed Rice',
+                'Dal Tadka',
+                'Paneer Butter Masala',
+                '2 Boiled Eggs',
+                'Maggi',
+                'Chicken Curry',
+                'Curd',
+                'Banana',
+                'Whey Protein',
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    setCustomName(chip);
+                  }}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+                    customName.toLowerCase().includes(chip.toLowerCase())
+                      ? 'bg-[#FF9F0A] text-black font-semibold'
+                      : 'glass-flat text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <TextField
-            label="Estimated Calories per piece / serving (kcal)"
-            type="number"
-            placeholder="100"
-            value={customCalories}
-            onChange={(e) => setCustomCalories(e.target.value)}
-          />
+          {/* Food Input with AI Badge */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.75)]">
+                Food / Item Name
+              </label>
+              <span className="flex items-center gap-1 text-[10.5px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full">
+                <Sparkle size={11} weight="fill" />
+                AI Analyzed
+              </span>
+            </div>
+            <TextField
+              placeholder="e.g., 3 Chapatis, Paneer bowl, 2 Boiled eggs, Dal..."
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          {/* AI Analysis Status / Insights Card */}
+          {isAiAnalyzing && (
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 text-[#FF9F0A] text-xs font-semibold animate-pulse">
+              <Sparkle size={14} weight="fill" className="animate-spin" />
+              <span>AI is analyzing food ingredients and calculating calories...</span>
+            </div>
+          )}
+
+          {/* Multi-Item AI Detection Card */}
+          {multiItemEstimate && multiItemEstimate.items.length > 1 && !isAiAnalyzing && (
+            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/25">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
+                  <Sparkle size={13} weight="fill" />
+                  AI Detected {multiItemEstimate.items.length} Items:
+                </span>
+                <span className="text-xs font-extrabold text-white tabular-nums">
+                  {multiItemEstimate.totalCalories} kcal total
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {multiItemEstimate.items.map((it, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-1 rounded-full bg-white/10 text-[11px] text-white/90 font-medium"
+                  >
+                    {it.detectedPortion}× {it.name}{' '}
+                    <span className="text-[#FF9F0A] font-bold">({it.totalCalories} kcal)</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Single Item AI Estimate Card */}
+          {aiEstimate && !multiItemEstimate && !isAiAnalyzing && (
+            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
+                  <Sparkle size={13} weight="fill" />
+                  {aiEstimate.name}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/10 text-white/70 font-medium">
+                  {aiEstimate.source === 'database' ? 'Verified Database' : 'Smart AI Estimate'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-0.5">
+                <span className="text-sm font-extrabold text-white">
+                  ~{aiEstimate.caloriesPerServing} kcal{' '}
+                  <span className="text-xs text-white/50 font-normal">/ {aiEstimate.unit}</span>
+                </span>
+                {aiEstimate.macros && (
+                  <div className="flex items-center gap-2 text-[11px] text-white/80 font-mono">
+                    <span>
+                      <span className="text-[#FF453A]">P:</span> {aiEstimate.macros.protein}g
+                    </span>
+                    <span>
+                      <span className="text-[#FF9F0A]">C:</span> {aiEstimate.macros.carbs}g
+                    </span>
+                    <span>
+                      <span className="text-[#FF375F]">F:</span> {aiEstimate.macros.fats}g
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Quantity Stepper & Quick Pills */}
-          <div className="flex flex-col gap-2">
-            <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.70)]">
-              Quantity / Pieces Eaten
-            </label>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.75)]">
+                Quantity / Portions Eaten
+              </label>
+              <span className="text-[10.5px] text-[rgba(235,235,245,0.45)]">
+                User enters quantity · AI computes calories
+              </span>
+            </div>
             <div className="flex items-center justify-between glass-flat p-2 rounded-2xl">
               <div className="flex items-center gap-1.5">
                 {[1, 2, 3, 4, 5, 6].map((q) => (
@@ -642,9 +859,9 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   type="button"
                   onClick={() => {
                     triggerHaptic('light');
-                    setCustomPortion((p) => Math.max(1, p - 1));
+                    setCustomPortion((p) => Math.max(0.5, p - 1));
                   }}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-transform cursor-pointer"
                 >
                   <Minus size={12} weight="bold" />
                 </button>
@@ -657,7 +874,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     triggerHaptic('light');
                     setCustomPortion((p) => p + 1);
                   }}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-transform cursor-pointer"
                 >
                   <Plus size={12} weight="bold" />
                 </button>
@@ -665,25 +882,57 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             </div>
           </div>
 
+          {/* Estimated Calories (Auto-Applied by AI) */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.70)]">
+                Calories per piece / serving (kcal)
+              </label>
+              <span className="text-[10px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full">
+                ✨ Auto-Applied by AI
+              </span>
+            </div>
+            <TextField
+              type="number"
+              placeholder="Auto-calculated by AI"
+              value={customCalories}
+              onChange={(e) => setCustomCalories(e.target.value)}
+            />
+          </div>
+
           {/* Live Calorie Total Preview */}
-          <div className="p-3 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-between">
-            <span className="text-xs font-semibold text-white/80">
-              Total Added Calories:
-            </span>
-            <span className="text-sm font-extrabold text-[#FF9F0A] tabular-nums">
-              {customPortion} × {parseInt(customCalories, 10) || 0} = {customPortion * (parseInt(customCalories, 10) || 0)} kcal
+          <div className="p-3.5 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-semibold text-white/90">
+                Total Calories Auto-Applied:
+              </span>
+              <span className="text-[11px] text-white/50">
+                {multiItemEstimate
+                  ? `${multiItemEstimate.items.length} detected items combined`
+                  : `${customPortion} ${aiEstimate?.unit || 'portion(s)'} × ${parseInt(customCalories, 10) || 0} kcal`}
+              </span>
+            </div>
+            <span className="text-base font-extrabold text-[#FF9F0A] tabular-nums">
+              {multiItemEstimate
+                ? multiItemEstimate.totalCalories
+                : customPortion * (parseInt(customCalories, 10) || 0)}{' '}
+              kcal
             </span>
           </div>
 
-          <div className="pt-2">
+          <div className="pt-1">
             <Button
               variant="prominent"
               tint="#FF9F0A"
               className="w-full"
-              disabled={!customName.trim()}
+              disabled={!customName.trim() || (!customCalories && !multiItemEstimate)}
               onClick={handleLogCustomFood}
             >
-              Log Food ({customPortion * (parseInt(customCalories, 10) || 0)} kcal)
+              Log {multiItemEstimate ? `${multiItemEstimate.items.length} Items` : 'Food'} (
+              {multiItemEstimate
+                ? multiItemEstimate.totalCalories
+                : customPortion * (parseInt(customCalories, 10) || 0)}{' '}
+              kcal)
             </Button>
           </div>
         </div>

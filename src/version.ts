@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 63,
-  versionName: '3.2.6',
-  releaseDate: '2026-10-06',
-  apkSize: '13.85 MB',
-  apkSizeBytes: 14520000,
-  releaseNotes: 'LifeOS v3.2.6 (Build 63):\n• Status Bar Safe Area Clearance: Fixed header collision and brought Back options safely below notch/status bar in Gym and all sub-interfaces\n• Bottom Spacing Optimization: Eliminated oversized trailing gaps for a tight, natural interface flow\n• Hardware Performance Specifications: Added clear auto-detected RAM, CPU Cores, clean GPU rendering profile, and interactive Tier selection\n• Adaptive Tier Calibration: Guaranteed Tier 1 High-Fidelity for 8GB+ RAM devices with seamless fluid animations',
+  versionCode: 64,
+  versionName: '3.2.7',
+  releaseDate: '2026-10-18',
+  apkSize: '8.78 MB',
+  apkSizeBytes: 9204884,
+  releaseNotes: 'LifeOS v3.2.7 (Build 64):\n• AI Nutrition Auto-Calorie & Portion Logging: Users only specify what & how much they ate — AI automatically calculates and applies exact calories\n• 150+ Verified Indian & Student Dishes Database: Instant 0ms offline calorie estimation for standard mess meals, gym food, and street snacks\n• Multi-Item Meal Detection: Intelligently identifies composite meals (e.g. "2 rotis and 1 bowl dal") and logs each item with precise calories\n• Real-Time Macro Breakdown: Displays estimated protein, carbs, and fats per serving and auto-scales with interactive portion steppers',
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

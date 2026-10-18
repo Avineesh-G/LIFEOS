@@ -27,7 +27,7 @@ async function callGeminiDirect(prompt: string, apiKey: string, expectJson: bool
   return text.trim();
 }
 
-async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
+export async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
   let activeKey = (apiKey && apiKey.trim()) || GEMINI_API_KEY;
   if (!activeKey) throw new Error('NO_API_KEY');
   activeKey = activeKey.replace(/^["']|["']$/g, '').trim();
