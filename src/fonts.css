@@ -3,9 +3,11 @@
    ========================================================================== */
 
 @import '@fontsource-variable/inter/index.css';
+@import '@fontsource-variable/google-sans-flex/index.css';
 
 :root {
   --font-family-primary: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-google-sans-flex: "Google Sans Flex Variable", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   --font-primary: var(--font-family-primary);
   --font-heading: var(--font-family-primary);
 
@@ -30,6 +32,19 @@
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-sans-flex,
+.font-sans-flex input,
+.font-sans-flex button,
+.font-sans-flex textarea,
+.font-sans-flex span,
+.font-sans-flex p,
+.font-sans-flex h1,
+.font-sans-flex h2,
+.font-sans-flex h3,
+.font-sans-flex h4 {
+  font-family: var(--font-google-sans-flex) !important;
 }
 
 /* ── Liquid Glass v2 Typography Hierarchy ── */

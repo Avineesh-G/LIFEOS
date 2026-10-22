@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  LunaComicBubbleIcon,
   NeuralInfinityIcon,
   PaperPlaneRight,
   Microphone,
@@ -39,6 +40,8 @@ import { shareContent } from '../../utils/shareUtils';
 import FormattedAiMessage from './FormattedAiMessage';
 import ActionConfirmationCard from './ActionConfirmationCard';
 import type { AiChatSession } from '../../types';
+import { auth } from '../../firebase';
+import { getCachedUserName } from '../../utils/dailyBriefEngine';
 
 interface AskLifeOSModalProps {
   isOpen: boolean;
@@ -57,6 +60,17 @@ export const SPEC_STARTER_CHIPS = [
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const userGreetingName = React.useMemo(() => {
+    try {
+      if (auth.currentUser?.displayName) {
+        return auth.currentUser.displayName.split(' ')[0];
+      }
+    } catch {}
+    const cached = getCachedUserName();
+    if (cached) return cached;
+    return 'there';
+  }, []);
 
   const [activeTab, setActiveTab] = useState<'chat' | 'history'>('chat');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -248,7 +262,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         location.pathname || '/',
         targetedContext,
         (token: string) => {
-          accumulatedResponse += token;
+          accumulatedResponse = token;
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessageId
@@ -374,16 +388,17 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
       onClose={onClose}
       detent="full"
       className="bg-[#000000]/95 backdrop-blur-2xl"
+      contentClassName="flex flex-col h-full p-0 overflow-hidden"
       title={
-        <div className="flex items-center justify-between w-full px-1">
-          {/* Left: Luna AI Branding (one line 17 semibold with subtitle) */}
+        <div className="flex items-center justify-between w-full px-1 font-sans-flex">
+          {/* Left: Luna AI Branding */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] flex items-center justify-center text-white shrink-0 shadow-lg shadow-[#BF5AF2]/25 p-1">
-              <NeuralInfinityIcon size={19} glow />
+            <div className="w-8 h-8 rounded-full glass-flat border border-white/10 flex items-center justify-center shrink-0 shadow-sm text-white">
+              <LunaComicBubbleIcon size={18} />
             </div>
             <div className="flex flex-col min-w-0 text-left">
-              <span className="font-semibold text-[17px] text-white tracking-tight leading-tight">Luna AI</span>
-              <span className="text-[11px] text-[rgba(235,235,245,0.50)] leading-none">Powered by Groq</span>
+              <span className="font-bold text-[17px] text-white tracking-tight leading-tight font-sans-flex">Luna AI</span>
+              <span className="text-[11px] text-[rgba(235,235,245,0.60)] leading-none font-sans-flex">Powered by Groq</span>
             </div>
           </div>
 
@@ -412,9 +427,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
         </div>
       }
     >
-      <div className="flex flex-col h-full w-full min-w-0 pb-3">
+      <div className="flex flex-col h-full w-full min-w-0 font-sans-flex select-none">
         {/* Full-width Segmented Mode Tabs below header */}
-        <div className="mb-3 w-full">
+        <div className="px-4 pt-1 pb-2 shrink-0 w-full">
           <div className="flex items-center p-1 rounded-full glass-flat w-full select-none">
             <button
               type="button"
@@ -423,7 +438,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 setActiveTab('chat');
                 setTimeout(() => inputRef.current?.focus(), 100);
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-all cursor-pointer ${
                 activeTab === 'chat'
                   ? 'bg-white/[0.14] text-white shadow-sm'
                   : 'text-white/60 hover:text-white'
@@ -438,7 +453,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 triggerHaptic('light');
                 setActiveTab('history');
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-all cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-white/[0.14] text-white shadow-sm'
                   : 'text-white/60 hover:text-white'
@@ -457,7 +472,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
         {/* Offline Banner */}
         {!isOnline && (
-          <div className="mb-3 px-3.5 py-2.5 rounded-2xl glass-tile flex items-center gap-2 text-[#FF9F0A] text-xs font-semibold shrink-0">
+          <div className="mx-4 mb-2 px-3.5 py-2 rounded-2xl glass-tile flex items-center gap-2 text-[#FF9F0A] text-xs font-semibold font-sans-flex shrink-0">
             <WifiSlash size={16} weight="bold" className="shrink-0" />
             <span className="text-white/80">You are offline. Luna AI requires internet access.</span>
           </div>
@@ -465,51 +480,46 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
         {/* ── Chat Tab View ── */}
         {activeTab === 'chat' ? (
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Scrollable Message History or Empty State */}
             <div
               ref={chatContainerRef}
-              className="flex-1 overflow-y-auto space-y-4 pr-1 overscroll-contain"
+              className="flex-1 overflow-y-auto px-4 py-2 space-y-3.5 overscroll-contain touch-pan-y"
             >
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 px-2 text-center space-y-5">
-                  {/* Glowing Animated Luna AI Orb */}
-                  <div className="relative flex items-center justify-center my-2">
-                    <motion.div
-                      animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.65, 0.35] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                      className="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] blur-2xl -z-10"
-                    />
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#0A84FF] via-[#38BDF8] to-[#BF5AF2] p-[2px] shadow-2xl">
-                      <div className="w-full h-full rounded-full bg-[#000000] flex items-center justify-center">
-                        <NeuralInfinityIcon size={42} glow />
-                      </div>
+                <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
+                  {/* Clean Minimal Luna Orb */}
+                  <div className="relative flex items-center justify-center my-1 text-white">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full glass-nav nav-rim-light shadow-xl flex items-center justify-center relative border border-white/10">
+                      <LunaComicBubbleIcon size={34} />
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-2xl font-bold text-white tracking-tight">Hi, I'm Luna</h3>
-                    <p className="text-sm text-white/60 max-w-xs mx-auto mt-1 leading-relaxed">
+                    <h3 className="text-2xl font-bold text-white tracking-tight font-sans-flex">
+                      Hi, {userGreetingName}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-white/60 max-w-xs mx-auto mt-1 leading-relaxed font-sans-flex">
                       I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
                     </p>
                   </div>
 
                   {/* 4 Starter Chips in 2x2 Bento Glass Tiles */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-md pt-2 select-none">
+                  <div className="grid grid-cols-2 gap-2.5 w-full max-w-md mx-auto pt-1 select-none">
                     {SPEC_STARTER_CHIPS.map((chip) => (
                       <button
                         key={chip.id}
                         type="button"
                         onClick={() => handleSendQuery(chip.label)}
-                        className="glass-tile p-3.5 text-left flex items-center gap-3 group cursor-pointer"
+                        className="glass-tile p-3 text-left flex flex-col justify-between gap-2.5 rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24"
                       >
                         <div
-                          className="w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 shadow-sm"
+                          className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                           style={{ backgroundColor: `${chip.tint}20`, color: chip.tint }}
                         >
                           {chip.icon}
                         </div>
-                        <span className="text-xs font-semibold text-white/90 leading-snug group-hover:text-white">
+                        <span className="text-[12px] font-medium text-white/90 leading-tight line-clamp-2 group-hover:text-white font-sans-flex">
                           {chip.label}
                         </span>
                       </button>
@@ -528,21 +538,21 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     >
                       {/* Message Bubble */}
                       <div
-                        className={`max-w-[88%] p-3.5 rounded-[22px] ${
+                        className={`max-w-[88%] p-3.5 rounded-[22px] font-sans-flex ${
                           isUser
                             ? 'bg-[#0A84FF] text-white rounded-br-[6px] shadow-md'
                             : 'glass-card text-white/95 rounded-bl-[6px]'
                         }`}
                       >
                         {isUser ? (
-                          <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                          <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap font-sans-flex">{msg.content}</p>
                         ) : (
                           <div className="space-y-2">
                             <FormattedAiMessage content={msg.content} />
                             {msg.content === '' && isGenerating && (
-                              <div className="flex items-center gap-1.5 py-1 text-white/50 text-xs">
-                                <SpinnerGap size={15} className="animate-spin text-[#BF5AF2]" />
-                                <span>Luna is thinking...</span>
+                              <div className="flex items-center gap-2 py-1.5 px-3 rounded-full bg-white/[0.06] border border-white/[0.08] text-white/80 text-xs w-fit animate-pulse">
+                                <SpinnerGap size={14} className="animate-spin text-[#38BDF8] shrink-0" />
+                                <span className="font-sans-flex font-medium text-white/90">Choosing the best model for your question...</span>
                               </div>
                             )}
                           </div>
@@ -551,7 +561,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                       {/* Action Proposals (1-Tap Save actions) */}
                       {!isUser && proposals.length > 0 && (
-                        <div className="w-full max-w-sm space-y-2 pt-1">
+                        <div className="w-full max-w-sm space-y-2 pt-1 font-sans-flex">
                           {proposals.map((prop, idx) => (
                             <ActionConfirmationCard
                               key={idx}
@@ -566,11 +576,11 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
                       {/* Assistant Action Bar (Copy, Speak, Share) */}
                       {!isUser && msg.content && (
-                        <div className="flex items-center gap-2 px-1 text-white/40 text-xs">
+                        <div className="flex items-center gap-2 px-1 text-white/40 text-xs font-sans-flex">
                           <button
                             type="button"
                             onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer font-sans-flex"
                           >
                             {copiedId === msg.id ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
                             <span>{copiedId === msg.id ? 'Copied' : 'Copy'}</span>
@@ -579,7 +589,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           <button
                             type="button"
                             onClick={() => handleToggleSpeak(msg.id, msg.content)}
-                            className={`hover:text-white transition-colors flex items-center gap-1 cursor-pointer ${
+                            className={`hover:text-white transition-colors flex items-center gap-1 cursor-pointer font-sans-flex ${
                               speakingMsgId === msg.id ? 'text-[#BF5AF2]' : ''
                             }`}
                           >
@@ -590,7 +600,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           <button
                             type="button"
                             onClick={() => handleShareResponse(msg.content)}
-                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                            className="hover:text-white transition-colors flex items-center gap-1 cursor-pointer font-sans-flex"
                           >
                             <ShareNetwork size={13} />
                             <span>Share</span>
@@ -605,7 +615,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
             {/* Error Message Alert */}
             {errorMessage && (
-              <div className="my-2 p-2.5 rounded-2xl bg-red-500/15 text-red-300 text-xs flex items-center justify-between shrink-0">
+              <div className="mx-4 my-1.5 p-2.5 rounded-2xl bg-red-500/15 text-red-300 text-xs flex items-center justify-between shrink-0 font-sans-flex">
                 <div className="flex items-center gap-2">
                   <WarningCircle size={15} weight="bold" />
                   <span>{errorMessage}</span>
@@ -621,9 +631,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             )}
 
             {/* ── Bottom Floating Input Bar ── */}
-            <div className="pt-2 shrink-0">
+            <div className="px-4 pt-2 pb-[max(env(safe-area-inset-bottom,0px),16px)] shrink-0">
               <GlassSurface
-                className="rounded-full p-1.5 flex items-center gap-2 shadow-2xl"
+                className="rounded-full p-1.5 flex items-center gap-2 shadow-2xl border border-white/10"
               >
                 {/* Voice Dictation Mic Button */}
                 <button
@@ -658,9 +668,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       handleSendQuery();
                     }
                   }}
-                  placeholder={transcribing ? 'Transcribing speech...' : 'Ask Luna AI or say "Add to-do task..."'}
+                  placeholder={transcribing ? 'Transcribing speech...' : 'Ask Luna or say "Add task..."'}
                   disabled={isGenerating}
-                  className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none px-2 min-w-0"
+                  className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none px-2 min-w-0 font-sans-flex"
                 />
 
                 {/* Send Button */}
@@ -686,7 +696,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           </div>
         ) : (
           /* ── History Tab View ── */
-          <div className="flex-1 flex flex-col min-h-0 space-y-3">
+          <div className="flex-1 flex flex-col min-h-0 space-y-3 px-4 py-2 font-sans-flex">
             {/* Search History Pill */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-full glass-flat text-white/80">
               <MagnifyingGlass size={16} className="text-white/50" />
@@ -695,7 +705,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 value={searchHistoryQuery}
                 onChange={(e) => setSearchHistoryQuery(e.target.value)}
                 placeholder="Search past conversations..."
-                className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none font-sans-flex"
               />
               {searchHistoryQuery && (
                 <button type="button" onClick={() => setSearchHistoryQuery('')}>
@@ -705,9 +715,9 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             </div>
 
             {/* History List */}
-            <div className="flex-1 overflow-y-auto space-y-2 overscroll-contain">
+            <div className="flex-1 overflow-y-auto space-y-2 overscroll-contain touch-pan-y">
               {filteredHistory.length === 0 ? (
-                <div className="py-12 text-center text-white/40 text-sm">
+                <div className="py-12 text-center text-white/40 text-sm font-sans-flex">
                   {searchHistoryQuery ? 'No matching conversations found.' : 'No conversation history saved yet.'}
                 </div>
               ) : (
@@ -722,10 +732,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         <ChatCircleText size={18} weight="duotone" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-bold text-white truncate leading-tight group-hover:text-[#BF5AF2]">
+                        <h4 className="text-xs font-bold text-white truncate leading-tight group-hover:text-[#BF5AF2] font-sans-flex">
                           {session.title}
                         </h4>
-                        <span className="text-[10px] text-white/40 mt-0.5 block">
+                        <span className="text-[10px] text-white/40 mt-0.5 block font-sans-flex">
                           {new Date(session.updatedAt).toLocaleDateString(undefined, {
                             month: 'short',
                             day: 'numeric',

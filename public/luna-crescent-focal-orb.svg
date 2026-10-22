@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bg-grad" cx="50%" cy="50%" r="75%" fx="35%" fy="30%">
+      <stop offset="0%" stopColor="#121217"/>
+      <stop offset="60%" stopColor="#0A0A0D"/>
+      <stop offset="100%" stopColor="#040405"/>
+    </radialGradient>
+
+    <!-- Ambient Crescent Glow -->
+    <radialGradient id="cyan-glow" cx="30%" cy="65%" r="60%">
+      <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.45"/>
+      <stop offset="50%" stopColor="#00B4D8" stopOpacity="0.15"/>
+      <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="purple-glow" cx="70%" cy="30%" r="55%">
+      <stop offset="0%" stopColor="#D946EF" stopOpacity="0.35"/>
+      <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.15"/>
+      <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+    </radialGradient>
+
+    <!-- Main Crescent Glass Gradient (Cyan -> Sky Blue -> Periwinkle -> Soft Lavender) -->
+    <linearGradient id="crescent-glass-1" x1="120" y1="420" x2="380" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.95"/>
+      <stop offset="25%" stopColor="#38BDF8" stopOpacity="0.9"/>
+      <stop offset="55%" stopColor="#60A5FA" stopOpacity="0.85"/>
+      <stop offset="80%" stopColor="#A78BFA" stopOpacity="0.9"/>
+      <stop offset="100%" stopColor="#E9D5FF" stopOpacity="0.95"/>
+    </linearGradient>
+
+    <!-- Inner Crescent Secondary Glass Layer (Gives that multi-layered translucent glass depth) -->
+    <linearGradient id="crescent-glass-2" x1="150" y1="380" x2="340" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#00D2FF" stopOpacity="0.75"/>
+      <stop offset="40%" stopColor="#0284C7" stopOpacity="0.5"/>
+      <stop offset="75%" stopColor="#7C3AED" stopOpacity="0.6"/>
+      <stop offset="100%" stopColor="#C084FC" stopOpacity="0.8"/>
+    </linearGradient>
+
+    <!-- Crescent Specular Rim Light -->
+    <linearGradient id="crescent-rim-light" x1="100" y1="360" x2="370" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95"/>
+      <stop offset="30%" stopColor="#BAE6FD" stopOpacity="0.7"/>
+      <stop offset="70%" stopColor="#DDD6FE" stopOpacity="0.6"/>
+      <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.95"/>
+    </linearGradient>
+
+    <!-- Central Orb Ambient Outer Glow -->
+    <radialGradient id="orb-outer-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor="#C084FC" stopOpacity="0.4"/>
+      <stop offset="50%" stopColor="#6366F1" stopOpacity="0.2"/>
+      <stop offset="100%" stopColor="#000000" stopOpacity="0"/>
+    </radialGradient>
+
+    <!-- Central Orb Main 3D Sphere Body -->
+    <radialGradient id="orb-body" cx="42%" cy="40%" r="58%">
+      <stop offset="0%" stopColor="#FFFFFF"/>
+      <stop offset="22%" stopColor="#E0F7FF"/>
+      <stop offset="48%" stopColor="#67E8F9"/>
+      <stop offset="72%" stopColor="#60A5FA"/>
+      <stop offset="88%" stopColor="#818CF8"/>
+      <stop offset="100%" stopColor="#A855F7"/>
+    </radialGradient>
+
+    <!-- Orb Glass Surface Specular Reflection -->
+    <linearGradient id="orb-specular" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85"/>
+      <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.2"/>
+      <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0"/>
+    </linearGradient>
+
+    <!-- Soft Inner Shadow for the Orb -->
+    <radialGradient id="orb-shadow" cx="55%" cy="60%" r="50%">
+      <stop offset="50%" stopColor="#000000" stopOpacity="0"/>
+      <stop offset="100%" stopColor="#4C1D95" stopOpacity="0.45"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Background Squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-grad)"/>
+  <rect width="508" height="508" x="2" y="2" rx="110" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.5" fill="none"/>
+
+  <!-- 2. Ambient Colorful Background Blooms -->
+  <circle cx="180" cy="300" r="160" fill="url(#cyan-glow)"/>
+  <circle cx="340" cy="200" r="150" fill="url(#purple-glow)"/>
+
+  <!-- 3. Crescent Moon Outer Shadow & Glow -->
+  <path
+    d="M 374 158
+       C 335 125 272 108 212 118
+       C 136 131 82 201 82 278
+       C 82 355 137 421 216 428
+       C 278 433 346 405 388 358
+       C 396 349 391 336 380 339
+       C 342 351 292 354 246 340
+       C 182 321 144 263 150 198
+       C 155 146 195 106 244 98
+       C 292 90 342 108 376 142
+       C 385 151 382 165 374 158 Z"
+    fill="#00F0FF"
+    opacity="0.2"
+    filter="blur(16px)"
+  />
+
+  <!-- 4. Crescent Moon Main Glass Body -->
+  <!-- Outer arc sweeps smoothly around from (376, 156) down to (414, 305). Inner arc hollows back. -->
+  <path
+    d="M 376 156
+       C 328 116 250 102 186 122
+       C 114 145 68 220 72 296
+       C 76 370 134 430 208 434
+       C 278 438 348 402 394 350
+       C 402 341 418 316 414 305
+       C 410 296 398 304 394 314
+       C 356 402 244 416 166 364
+       C 96 317 92 216 154 154
+       C 208 100 292 98 358 138
+       C 369 145 379 152 376 156 Z"
+    fill="url(#crescent-glass-1)"
+  />
+
+  <!-- 5. Secondary Translucent Glass Ridge (Creating the crystal refraction bevel) -->
+  <path
+    d="M 362 168
+       C 320 136 256 126 200 142
+       C 138 160 98 224 100 288
+       C 102 350 150 402 212 408
+       C 272 414 332 384 372 340
+       C 378 333 368 338 360 346
+       C 324 382 268 400 216 392
+       C 158 384 116 338 114 282
+       C 112 224 150 166 204 150
+       C 252 136 312 144 352 172
+       C 358 176 364 172 362 168 Z"
+    fill="url(#crescent-glass-2)"
+  />
+
+  <!-- 6. Specular Glass Crest Highlight Stroke -->
+  <path
+    d="M 374 158
+       C 326 118 250 104 188 124
+       C 118 147 72 220 76 294
+       C 80 368 136 428 208 432
+       C 276 436 346 400 392 348
+       C 404 334 414 314 414 305"
+    stroke="url(#crescent-rim-light)"
+    stroke-width="3.5"
+    stroke-linecap="round"
+    fill="none"
+    opacity="0.9"
+  />
+
+  <!-- Subtle Inner Specular Ridge Arc -->
+  <path
+    d="M 346 176
+       C 304 148 248 140 198 156
+       C 148 172 116 226 116 278
+       C 116 330 152 374 202 386
+       C 246 396 296 384 334 356"
+    stroke="#FFFFFF"
+    stroke-opacity="0.4"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- 7. Central Floating Focal Orb -->
+  <!-- Orb Ambient Outer Violet Glow -->
+  <circle cx="290" cy="245" r="95" fill="url(#orb-outer-glow)"/>
+
+  <!-- Main Radiant Luminous Sphere -->
+  <circle cx="290" cy="245" r="72" fill="url(#orb-body)"/>
+
+  <!-- Spherical 3D Volume Shadow Depth -->
+  <circle cx="290" cy="245" r="72" fill="url(#orb-shadow)"/>
+
+  <!-- Specular Lens Glare Oval (Top Curve) -->
+  <ellipse cx="278" cy="216" rx="36" ry="20" transform="rotate(-25 278 216)" fill="url(#orb-specular)"/>
+
+  <!-- Crisp Specular Pinpoint Highlight -->
+  <circle cx="264" cy="204" r="7" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="264" cy="204" r="11" fill="#FFFFFF" opacity="0.35"/>
+</svg>

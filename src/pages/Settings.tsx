@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
   User,
   Lightning,
-  NeuralInfinityIcon,
+  LunaComicBubbleIcon,
 } from '../ui/tokens/icons';
 import { useDeviceTier } from '../hooks/useDeviceTier';
 import { LargeTitleHeader } from '../ui/navigation/LargeTitleHeader';
@@ -372,8 +372,8 @@ export default function Settings({
         footer="Luna AI analyzes your data locally and securely using your private Groq API key."
       >
         <ListRow
-          icon={<NeuralInfinityIcon size={18} />}
-          iconTint="#BF5AF2"
+          icon={<LunaComicBubbleIcon size={20} />}
+          iconTint="#FFFFFF"
           title="Groq AI Configuration"
           subtitle={groqKey ? 'API Key Configured' : 'Using default intelligence proxy'}
           showChevron
@@ -473,7 +473,12 @@ export default function Settings({
       <Sheet
         isOpen={aiSheetOpen}
         onClose={() => setAiSheetOpen(false)}
-        title="Groq AI Settings"
+        title={
+          <div className="flex items-center justify-center gap-2">
+            <LunaComicBubbleIcon size={20} />
+            <span>Groq AI Settings</span>
+          </div>
+        }
         footer={
           <div className="flex justify-end">
             <Button
@@ -490,8 +495,26 @@ export default function Settings({
         }
       >
         <div className="space-y-4 py-2 text-white">
+          {/* Refined Luna AI Engine Header Card */}
+          <div className="p-3.5 rounded-2xl glass-card flex items-center gap-3.5 border border-white/10 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl glass-tile border border-white/10 shrink-0 shadow-md flex items-center justify-center">
+              <LunaComicBubbleIcon size={26} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-white tracking-tight">Luna AI Engine</h4>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  {groqKey ? 'Direct Key' : 'Proxy Mode'}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/60 mt-0.5 leading-snug">
+                High-speed conversational inference with automated model fallback.
+              </p>
+            </div>
+          </div>
+
           <p className="text-xs text-white/70 leading-relaxed">
-            Enter your custom Groq API key to power Luna AI with high-speed Llama 3 models.
+            Enter your custom Groq API key to power Luna AI directly with high-speed Llama models, or leave empty to use the built-in LifeOS intelligence proxy.
           </p>
           <TextField
             label="Groq API Key"

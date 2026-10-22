@@ -392,12 +392,12 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <div
               key={`step-${segIdx}-${idx}`}
-              className="flex items-start gap-2 my-1.5 p-2 rounded-xl bg-white/5 border border-white/10 font-sans"
+              className="flex items-start gap-2 my-1.5 p-2 rounded-xl bg-white/5 border border-white/10 font-sans-flex"
             >
               <span className="w-4 h-4 rounded-full bg-[#0A84FF]/20 text-[#0A84FF] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                 {stepNum}
               </span>
-              <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere]">
+              <div className="flex-1 min-w-0 text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere] font-sans-flex">
                 {parseInlineContent(stepText, isUser)}
               </div>
             </div>
@@ -420,7 +420,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
           blocks.push(
             <h4
               key={`heading-${segIdx}-${idx}`}
-              className="font-bold text-xs sm:text-sm text-white mt-2 mb-1 tracking-tight font-sans break-words"
+              className="font-bold text-xs sm:text-sm text-white mt-2 mb-1 tracking-tight font-sans-flex break-words"
             >
               {parseInlineContent(headerText, isUser)}
             </h4>
@@ -431,7 +431,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
         flushBullets(idx);
         flushChecklist(idx);
         blocks.push(
-          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans text-white/90 break-words">
+          <p key={`p-${segIdx}-${idx}`} className="my-1 leading-relaxed text-xs sm:text-sm font-sans-flex text-white/90 break-words">
             {parseInlineContent(line, isUser)}
           </p>
         );
@@ -446,7 +446,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
   }, [cleanContent, isUser]);
 
   return (
-    <div className="allow-select select-text space-y-1 break-words max-w-full font-sans">
+    <div className="allow-select select-text space-y-1 break-words max-w-full font-sans-flex">
       {renderedBlocks}
     </div>
   );

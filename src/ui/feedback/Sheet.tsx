@@ -13,6 +13,8 @@ export interface SheetProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  contentClassName?: string;
+  heightClass?: string;
 }
 
 /**
@@ -29,6 +31,8 @@ export function Sheet({
   children,
   footer,
   className = '',
+  contentClassName = '',
+  heightClass,
 }: SheetProps) {
   useEffect(() => {
     if (isOpen) {
@@ -49,7 +53,7 @@ export function Sheet({
     }
   };
 
-  const heightStyle = detent === 'full' ? 'max-h-[86vh] h-auto' : 'max-h-[60vh] h-auto';
+  const heightStyle = heightClass || (detent === 'full' ? 'h-[90vh] max-h-[92vh]' : 'max-h-[60vh] h-auto');
 
   if (typeof document === 'undefined') return null;
 
@@ -98,7 +102,7 @@ export function Sheet({
             )}
 
             {/* Scrollable Content Area */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 overscroll-contain touch-pan-y">
+            <div className={`flex-1 ${contentClassName ? contentClassName : 'overflow-y-auto px-5 py-4 overscroll-contain touch-pan-y'}`}>
               {children}
             </div>
 

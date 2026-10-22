@@ -95,3 +95,11 @@ export {
 
 export { KineticSparkIcon } from './KineticSparkIcon';
 export { NeuralInfinityIcon } from './NeuralInfinityIcon';
+export { LunaComicBubbleIcon } from './LunaComicBubbleIcon';
+export {
+  LunaMinimalLogo,
+  MinimalRadiantSparkIcon,
+  MinimalOrbitalRingsIcon,
+  MinimalLunaHaloIcon,
+} from './LunaMinimalLogo';
+export type { LunaLogoStyle } from './LunaMinimalLogo';

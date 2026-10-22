@@ -220,17 +220,27 @@ export async function streamChatCompletion(
           localStorage.setItem(GROQ_STORAGE_KEYS.LAST_AI_ERROR, JSON.stringify(parsedPayload));
         } catch {}
 
-        // Model not found, decommissioned, or invalid model 404/400 -> mark failed for session and fallback
-        if (
+        // Model not found, decommissioned, invalid model, or server errors -> mark failed for session and fallback
+        const lowerErr = cleanErrorMessage.toLowerCase();
+        const isModelIssue =
           response.status === 404 ||
-          (response.status === 400 && (cleanErrorMessage.toLowerCase().includes('model') || cleanErrorMessage.toLowerCase().includes('decommissioned') || cleanErrorMessage.toLowerCase().includes('deprecated') || cleanErrorMessage.toLowerCase().includes('does not exist')))
-        ) {
-          console.warn(`[AI Client] Model ${modelToTry} unavailable: ${cleanErrorMessage}, marking bad and trying fallback...`);
+          response.status === 422 ||
+          response.status >= 500 ||
+          (response.status === 400 &&
+            (lowerErr.includes('model') ||
+             lowerErr.includes('decommissioned') ||
+             lowerErr.includes('deprecated') ||
+             lowerErr.includes('does not exist') ||
+             lowerErr.includes('not found') ||
+             lowerErr.includes('invalid')));
+
+        if (isModelIssue) {
+          console.warn(`[AI Client] Model ${modelToTry} unavailable (${response.status}: ${cleanErrorMessage}). Marking bad and trying next fallback model...`);
           markModelFailedInSession(modelToTry);
           continue;
         }
 
-        // Fatal errors (401 invalid key, rate limits) should stop trying
+        // Fatal errors (e.g. 401 invalid key, 429 rate limit) stop trying candidates
         onError(lastErrorObj, parsedPayload);
         return;
       }

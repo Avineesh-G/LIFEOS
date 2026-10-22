@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NeuralInfinityIcon, SlidersHorizontal } from '../tokens/icons';
+import { LunaComicBubbleIcon, SlidersHorizontal } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { MOTION_SPRINGS } from '../tokens/motion';
 
@@ -75,7 +75,7 @@ export function TabBar({
   };
 
   return (
-    <div className={`relative flex items-center justify-center pointer-events-auto select-none ${className}`}>
+    <div className={`relative flex items-center justify-center pointer-events-auto select-none gap-2.5 ${className}`}>
       {/* ── Context Menu on Tab Long-Press ── */}
       <AnimatePresence>
         {activeMenuTab && (
@@ -112,8 +112,8 @@ export function TabBar({
         )}
       </AnimatePresence>
 
-      {/* ── Continuous High-Intensity Liquid Glass Navigation Capsule ── */}
-      <div className="h-[52px] px-2 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center gap-1 min-w-[280px] max-w-[340px]">
+      {/* ── High-Intensity Liquid Glass Navigation Capsule ── */}
+      <div className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
         <div className="flex-1 flex items-center gap-0.5">
           {items.map((tab) => {
@@ -164,59 +164,56 @@ export function TabBar({
             );
           })}
         </div>
+      </div>
 
-        {/* Subtle Internal Divider */}
-        <div className="w-[1px] h-5 bg-white/10 mx-0.5 shrink-0" />
-
-        {/* ── Integrated Luna AI Chat Bot Slot ── */}
+      {/* ── Separate Standalone Luna AI Floating Icon Bar ── */}
+      {onAiClick && (
         <motion.button
           type="button"
           aria-label="Ask Luna AI"
           whileTap={{ scale: 0.92 }}
+          whileHover={{ scale: 1.04 }}
           transition={MOTION_SPRINGS.bouncy}
           onClick={() => {
             triggerHaptic('medium');
-            onAiClick?.();
+            onAiClick();
           }}
-          className="relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer select-none shrink-0 bg-white/[0.08] hover:bg-white/[0.14] transition-colors"
+          className="relative h-[52px] w-[52px] rounded-full glass-nav nav-rim-light shadow-2xl flex items-center justify-center cursor-pointer select-none shrink-0"
         >
           {/* Thinking Rotating Ring */}
           {lunaState === 'thinking' && (
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-1 rounded-full border-2 border-transparent border-t-[#BF5AF2] border-r-[#0A84FF]"
+              className="absolute inset-2 rounded-full border-2 border-transparent border-t-white border-r-white/40"
             />
           )}
 
           {/* Listening Waveform Bars */}
           {lunaState === 'listening' ? (
-            <div className="flex items-center gap-0.5 h-3.5">
+            <div className="flex items-center gap-0.5 h-4">
               {[0.4, 0.9, 0.6, 1.0, 0.5].map((scale, i) => (
                 <motion.div
                   key={i}
                   animate={{ scaleY: [0.3, scale, 0.3] }}
                   transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                  className="w-0.5 bg-[#BF5AF2] rounded-full h-full"
+                  className="w-0.5 bg-white rounded-full h-full"
                 />
               ))}
             </div>
           ) : (
-            /* Idle Neural Infinity Loop Icon (Option 3) */
-            <div className="relative z-10 flex items-center justify-center">
-              <NeuralInfinityIcon
-                size={23}
-                glow
-              />
+            /* Idle Luna Comic Bubble Icon - Clean normal white */
+            <div className="relative z-10 flex items-center justify-center text-white/90">
+              <LunaComicBubbleIcon size={22} />
             </div>
           )}
 
           {/* Unread Indicator Dot */}
           {lunaState === 'unread' && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#BF5AF2] ring-2 ring-black" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white ring-2 ring-black" />
           )}
         </motion.button>
-      </div>
+      )}
     </div>
   );
 }

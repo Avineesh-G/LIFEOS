@@ -61,10 +61,17 @@ export function triggerTopDismissible(): boolean {
   return false;
 }
 
-// ── Path Memory Navigation Stack (LIFO History Tracking) ──
-
 const navPathStack: string[] = ['/'];
 let isPoppingNav = false;
+let lastNavWasBack = false;
+
+export function wasLastNavBack(): boolean {
+  return lastNavWasBack;
+}
+
+export function clearLastNavBack(): void {
+  lastNavWasBack = false;
+}
 
 /**
  * Record a route into the path memory stack.
@@ -134,6 +141,7 @@ export function handleAppBack(navigate: (to: any, options?: any) => void): boole
     navPathStack.pop(); // Remove current route
     const prevRoute = navPathStack[navPathStack.length - 1] || '/';
     isPoppingNav = true;
+    lastNavWasBack = true;
     triggerHaptic('nav');
     navigate(prevRoute);
     return true;
@@ -143,6 +151,7 @@ export function handleAppBack(navigate: (to: any, options?: any) => void): boole
   if (navPathStack.length === 1 && navPathStack[0] !== '/') {
     navPathStack[0] = '/';
     isPoppingNav = true;
+    lastNavWasBack = true;
     triggerHaptic('nav');
     navigate('/');
     return true;
@@ -169,10 +178,12 @@ export function navigateBack(navigate: (to: any, options?: any) => void): void {
     navPathStack.pop(); // Remove current route
     const prevRoute = navPathStack[navPathStack.length - 1] || '/';
     isPoppingNav = true;
+    lastNavWasBack = true;
     triggerHaptic('nav');
     navigate(prevRoute);
   } else {
     isPoppingNav = true;
+    lastNavWasBack = true;
     triggerHaptic('nav');
     navigate('/');
   }

@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion, getPageMotionProps } from './utils/motionConfig';
+import { getNavigationDirection } from './utils/navigationDirection';
 import { App as CapApp } from '@capacitor/app';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
-import Layout from './components/Layout';
+import Layout, { ALL_HUB_ITEMS } from './components/Layout';
 import Home from './pages/Home';
 import PageLoadingFallback from './components/common/PageLoadingFallback';
 
@@ -80,17 +81,48 @@ function MainContent({
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
 
-  // Always reset scroll to top immediately when switching interfaces
-  useEffect(() => {
-    document.documentElement.style.scrollBehavior = 'auto';
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+  const pinnedTabs = useMemo(() => {
+    const defaultPinned = ['gym', 'nutrition'];
+    const custom = data?.settings?.navPinned;
+    const pinned =
+      Array.isArray(custom) && custom.length === 2 && custom[0] && custom[1]
+        ? custom
+        : defaultPinned;
 
-    const timer = setTimeout(() => {
-      document.documentElement.style.scrollBehavior = '';
-    }, 60);
-    return () => clearTimeout(timer);
+    const slot2 =
+      ALL_HUB_ITEMS.find((i) => i.id === pinned[0]) ||
+      ALL_HUB_ITEMS.find((i) => i.id === 'gym')!;
+    const slot3 =
+      ALL_HUB_ITEMS.find((i) => i.id === pinned[1]) ||
+      ALL_HUB_ITEMS.find((i) => i.id === 'nutrition')!;
+
+    return [
+      { id: slot2.id, route: slot2.route },
+      { id: slot3.id, route: slot3.route },
+    ];
+  }, [data?.settings?.navPinned]);
+
+  const prevPathRef = useRef<string>(location.pathname);
+  const directionRef = useRef<1 | -1>(1);
+
+  if (prevPathRef.current !== location.pathname) {
+    directionRef.current = getNavigationDirection(
+      prevPathRef.current,
+      location.pathname,
+      pinnedTabs
+    );
+    prevPathRef.current = location.pathname;
+  }
+
+  const direction = directionRef.current;
+  const motionProps = getPageMotionProps(prefersReducedMotion, direction);
+
+  // Always reset scroll to top smoothly when switching interfaces
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [location.pathname]);
 
   const routeElements = useRoutes([
@@ -164,14 +196,12 @@ function MainContent({
     { path: '*', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
   ]);
 
-  const motionProps = getPageMotionProps(prefersReducedMotion);
-
   return (
-    <AnimatePresence mode="popLayout" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false} custom={direction}>
       <motion.div
         key={location.pathname}
         className="w-full gpu-composited"
-        style={{ minHeight: '100%' }}
+        style={{ minHeight: '100%', contain: 'paint' }}
         {...motionProps}
       >
         <Suspense fallback={<PageLoadingFallback />}>
@@ -288,7 +318,6 @@ function App() {
 
   useEffect(() => {
     recordNavigation(location.pathname);
-    window.scrollTo(0, 0);
   }, [location.pathname]);
 
   // Hardware / System Back Button: LIFO overlays -> Speed dial -> Sequential Path Memory -> Root Double-Tap Exit
