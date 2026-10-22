@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion, getPageMotionProps } from './utils/motionConfig';
@@ -117,12 +117,30 @@ function MainContent({
   const direction = directionRef.current;
   const motionProps = getPageMotionProps(prefersReducedMotion, direction);
 
-  // Always reset scroll to top smoothly when switching interfaces
-  useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-    });
-    return () => cancelAnimationFrame(rafId);
+  const transitionSafetyTimerRef = useRef<number | null>(null);
+
+  const handleAnimationStart = useCallback(() => {
+    document.body.classList.add('is-page-transitioning');
+    if (transitionSafetyTimerRef.current) {
+      window.clearTimeout(transitionSafetyTimerRef.current);
+    }
+    // Safety watchdog: remove transition shield after max 300ms even if animation was interrupted
+    transitionSafetyTimerRef.current = window.setTimeout(() => {
+      document.body.classList.remove('is-page-transitioning');
+    }, 300);
+  }, []);
+
+  const handleAnimationComplete = useCallback(() => {
+    document.body.classList.remove('is-page-transitioning');
+    if (transitionSafetyTimerRef.current) {
+      window.clearTimeout(transitionSafetyTimerRef.current);
+      transitionSafetyTimerRef.current = null;
+    }
+  }, []);
+
+  // Synchronously reset scroll before paint when a new route mounts
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [location.pathname]);
 
   const routeElements = useRoutes([
@@ -197,11 +215,13 @@ function MainContent({
   ]);
 
   return (
-    <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+    <AnimatePresence mode="wait" initial={false} custom={direction}>
       <motion.div
         key={location.pathname}
-        className="w-full gpu-composited"
-        style={{ minHeight: '100%', contain: 'paint' }}
+        className="w-full gpu-composited page-transition-container will-change-transform"
+        style={{ minHeight: '100%' }}
+        onAnimationStart={handleAnimationStart}
+        onAnimationComplete={handleAnimationComplete}
         {...motionProps}
       >
         <Suspense fallback={<PageLoadingFallback />}>

@@ -1058,3 +1058,84 @@
   -webkit-backface-visibility: hidden;
   animation: lifeos-marquee-flow 110s linear infinite;
 }
+
+/* ── Hardware Compositor Page Transitions & View Transitions ── */
+@keyframes page-enter-right {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes page-enter-left {
+  from {
+    opacity: 0;
+    transform: translate3d(-20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes page-exit-left {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-20px, 0, 0);
+  }
+}
+
+@keyframes page-exit-right {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+}
+
+/* Performance Shield: Suppress double-pass backdrop filters during active transitions */
+body.is-page-transitioning .glass-card,
+body.is-page-transitioning .glass-tile,
+body.is-page-transitioning .glass-nav,
+body.is-page-transitioning [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.is-page-transitioning .page-transition-container {
+  pointer-events: none;
+}
+
+/* Native View Transitions API CSS Overrides */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: page-exit-left;
+}
+
+::view-transition-new(root) {
+  animation-name: page-enter-right;
+}
+
+[data-direction="back"]::view-transition-old(root) {
+  animation-name: page-exit-right;
+}
+
+[data-direction="back"]::view-transition-new(root) {
+  animation-name: page-enter-left;
+}

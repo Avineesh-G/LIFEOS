@@ -2,7 +2,7 @@
  * LifeOS Navigation Direction & Spatial Flow Engine
  * Determines transition direction (forward / backward) based on:
  * 1. Path-memory sequential back navigation (hardware back, header back, edge-swipe back)
- * 2. Bottom Tab Bar spatial order: Home (0) ↔ Slot 2 (1) ↔ Slot 3 (2)
+ * 2. Bottom Tab Bar spatial order: Home (0) <-> Slot 2 (1) <-> Slot 3 (2)
  * 3. Hierarchical Hub destinations (More drawer / Bento tiles)
  */
 
@@ -50,7 +50,7 @@ export function getNavigationDirection(
   const fromIdx = getTabIndex(fromPath, pinnedTabs);
   const toIdx = getTabIndex(toPath, pinnedTabs);
 
-  // 2. Peer Tab-to-Tab navigation on the bottom bar (Home ↔ Slot 2 ↔ Slot 3)
+  // 2. Peer Tab-to-Tab navigation on the bottom bar (Home <-> Slot 2 <-> Slot 3)
   if (fromIdx !== -1 && toIdx !== -1) {
     if (toIdx > fromIdx) return 1; // Moving right: enters from right (+x), exits to left (-x)
     if (toIdx < fromIdx) return -1; // Moving left: enters from left (-x), exits to right (+x)
