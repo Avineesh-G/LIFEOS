@@ -21,3 +21,4 @@ android/.kotlin/
 google-services.json
 test-results/
 *.tsbuildinfo
+screenshots/

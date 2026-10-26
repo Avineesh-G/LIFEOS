@@ -10,37 +10,37 @@ import Layout, { ALL_HUB_ITEMS } from './components/Layout';
 import Home from './pages/Home';
 import PageLoadingFallback from './components/common/PageLoadingFallback';
 
-// Dynamic lazy imports for instant cold start & efficient chunking
-const Study = lazy(() => import('./pages/Study'));
-const StudyTimer = lazy(() => import('./pages/StudyTimer'));
-const StudyHistory = lazy(() => import('./pages/StudyHistory'));
-const StudyHeatmap = lazy(() => import('./pages/StudyHeatmap'));
-const Gym = lazy(() => import('./pages/Gym'));
-const GymWorkout = lazy(() => import('./pages/GymWorkout'));
-const GymSplit = lazy(() => import('./pages/GymSplit'));
-const GymExerciseHistory = lazy(() => import('./pages/GymExerciseHistory'));
-const GymOnboarding = lazy(() => import('./pages/GymOnboarding'));
-const Nutrition = lazy(() => import('./pages/Nutrition'));
-const Spending = lazy(() => import('./pages/Spending'));
-const ShoppingLists = lazy(() => import('./pages/ShoppingLists'));
-const ShoppingListDetail = lazy(() => import('./pages/ShoppingListDetail'));
-const Timetable = lazy(() => import('./pages/Timetable'));
-const Tasks = lazy(() => import('./pages/Tasks'));
-const Laundry = lazy(() => import('./pages/Laundry'));
-const WorkHistory = lazy(() => import('./pages/WorkHistory'));
-const SettingsPage = lazy(() => import('./pages/Settings'));
-const DownloadPage = lazy(() => import('./pages/DownloadPage'));
-const Auth = lazy(() => import('./pages/Auth'));
-const DevShapes = lazy(() => import('./pages/DevShapes'));
-const MorningBriefing = lazy(() => import('./pages/MorningBriefing'));
-const BrainDump = lazy(() => import('./pages/BrainDump'));
-const FlowRoom = lazy(() => import('./pages/FlowRoom'));
-const ActiveRecall = lazy(() => import('./pages/ActiveRecall'));
-const VoiceTranscribe = lazy(() => import('./pages/VoiceTranscribe'));
-const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
-const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
-const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
-const Notes = lazy(() => import('./pages/Notes'));
+// Direct eager imports for instant zero-latency page switching (no chunk download delay, no blank screens)
+import Study from './pages/Study';
+import StudyTimer from './pages/StudyTimer';
+import StudyHistory from './pages/StudyHistory';
+import StudyHeatmap from './pages/StudyHeatmap';
+import Gym from './pages/Gym';
+import GymWorkout from './pages/GymWorkout';
+import GymSplit from './pages/GymSplit';
+import GymExerciseHistory from './pages/GymExerciseHistory';
+import GymOnboarding from './pages/GymOnboarding';
+import Nutrition from './pages/Nutrition';
+import Spending from './pages/Spending';
+import ShoppingLists from './pages/ShoppingLists';
+import ShoppingListDetail from './pages/ShoppingListDetail';
+import Timetable from './pages/Timetable';
+import Tasks from './pages/Tasks';
+import Laundry from './pages/Laundry';
+import WorkHistory from './pages/WorkHistory';
+import SettingsPage from './pages/Settings';
+import DownloadPage from './pages/DownloadPage';
+import Auth from './pages/Auth';
+import DevShapes from './pages/DevShapes';
+import MorningBriefing from './pages/MorningBriefing';
+import BrainDump from './pages/BrainDump';
+import FlowRoom from './pages/FlowRoom';
+import ActiveRecall from './pages/ActiveRecall';
+import VoiceTranscribe from './pages/VoiceTranscribe';
+import OutingsListPage from './features/outings/pages/OutingsListPage';
+import OutingDetailPage from './features/outings/pages/OutingDetailPage';
+import ThemeSettings from './pages/ThemeSettings';
+import Notes from './pages/Notes';
 const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
@@ -102,41 +102,7 @@ function MainContent({
     ];
   }, [data?.settings?.navPinned]);
 
-  const prevPathRef = useRef<string>(location.pathname);
-  const directionRef = useRef<1 | -1>(1);
-
-  if (prevPathRef.current !== location.pathname) {
-    directionRef.current = getNavigationDirection(
-      prevPathRef.current,
-      location.pathname,
-      pinnedTabs
-    );
-    prevPathRef.current = location.pathname;
-  }
-
-  const direction = directionRef.current;
-  const motionProps = getPageMotionProps(prefersReducedMotion, direction);
-
-  const transitionSafetyTimerRef = useRef<number | null>(null);
-
-  const handleAnimationStart = useCallback(() => {
-    document.body.classList.add('is-page-transitioning');
-    if (transitionSafetyTimerRef.current) {
-      window.clearTimeout(transitionSafetyTimerRef.current);
-    }
-    // Safety watchdog: remove transition shield after max 300ms even if animation was interrupted
-    transitionSafetyTimerRef.current = window.setTimeout(() => {
-      document.body.classList.remove('is-page-transitioning');
-    }, 300);
-  }, []);
-
-  const handleAnimationComplete = useCallback(() => {
-    document.body.classList.remove('is-page-transitioning');
-    if (transitionSafetyTimerRef.current) {
-      window.clearTimeout(transitionSafetyTimerRef.current);
-      transitionSafetyTimerRef.current = null;
-    }
-  }, []);
+  // Clean, instant, reliable page presentation (zero blank screens)
 
   // Synchronously reset scroll before paint when a new route mounts
   useLayoutEffect(() => {
@@ -215,20 +181,11 @@ function MainContent({
   ]);
 
   return (
-    <AnimatePresence mode="wait" initial={false} custom={direction}>
-      <motion.div
-        key={location.pathname}
-        className="w-full gpu-composited page-transition-container will-change-transform"
-        style={{ minHeight: '100%' }}
-        onAnimationStart={handleAnimationStart}
-        onAnimationComplete={handleAnimationComplete}
-        {...motionProps}
-      >
-        <Suspense fallback={<PageLoadingFallback />}>
-          {routeElements}
-        </Suspense>
-      </motion.div>
-    </AnimatePresence>
+    <div className="w-full flex-1 flex flex-col min-h-full">
+      <Suspense fallback={<PageLoadingFallback />}>
+        {routeElements}
+      </Suspense>
+    </div>
   );
 }
 
@@ -402,6 +359,19 @@ function App() {
     };
   }, [navigate]);
 
+  // Immediate compositor wakeup helper: forces Android WebView & Chromium to repaint on wake
+  const triggerCompositorWakeup = () => {
+    window.dispatchEvent(new Event('resize'));
+    requestAnimationFrame(() => {
+      if (document.body) {
+        document.body.style.transform = 'translateZ(0)';
+        requestAnimationFrame(() => {
+          document.body.style.transform = '';
+        });
+      }
+    });
+  };
+
   // Background auto-lock & Cooldown: handle app minimize & resume
   useEffect(() => {
     let stateListener: any;
@@ -412,6 +382,7 @@ function App() {
             handleAppBackgrounded();
           } else {
             handleAppForegrounded();
+            triggerCompositorWakeup();
             if (data) {
               scheduleWidgetSync(data, 500);
             }
@@ -426,6 +397,7 @@ function App() {
         handleAppBackgrounded();
       } else {
         handleAppForegrounded();
+        triggerCompositorWakeup();
         if (data) {
           scheduleWidgetSync(data, 500);
         }

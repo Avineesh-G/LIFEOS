@@ -93,8 +93,8 @@ public class MainActivity extends BridgeActivity {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         // Match decor window background to theme canvas to avoid white/dark flashes
-        boolean isNight = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(isNight ? Color.parseColor("#121316") : Color.parseColor("#FDFDFD")));
+        // Permanently set native window canvas to pure OLED black to eliminate any white flashes on app launch and wake
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.parseColor("#000000")));
 
         // Maximize display refresh rate (60Hz / 90Hz / 120Hz) for silky smooth 60/120 FPS
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -157,7 +157,13 @@ public class MainActivity extends BridgeActivity {
         if (getBridge() != null && getBridge().getWebView() != null) {
             WebView webView = getBridge().getWebView();
             webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-            webView.setBackgroundColor(Color.TRANSPARENT);
+            webView.setBackgroundColor(Color.parseColor("#000000"));
+
+            // Immediately wake and invalidate WebView compositor so UI repaints on wake without requiring touch taps
+            webView.post(() -> {
+                webView.invalidate();
+                webView.requestLayout();
+            });
 
             String url = webView.getUrl();
             if (url != null && url.contains("vercel.app")) {

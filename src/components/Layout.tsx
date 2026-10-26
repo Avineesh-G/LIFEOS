@@ -27,6 +27,7 @@ import {
   LockKey,
 } from '../ui/tokens/icons';
 import { TabBar, TabItem } from '../ui/navigation/TabBar';
+import { useUserProfile } from '../utils/userProfileCache';
 import { BottomCircle } from '../ui/navigation/BottomCircle';
 import { MoreHubSheet, HubItem } from '../ui/navigation/MoreHubSheet';
 import { SlotCustomizerSheet } from '../ui/navigation/SlotCustomizerSheet';
@@ -87,9 +88,11 @@ export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   { id: 'settings', label: 'Settings', route: '/settings', icon: <Gear size={24} weight="duotone" />, tintKey: 'home' },
 ];
 
-export default function Layout({ children, refresh, data, updateData }: LayoutProps) {
+export default function Layout({
+  children, refresh, data, updateData }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const userProfile = useUserProfile();
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -403,16 +406,16 @@ export default function Layout({ children, refresh, data, updateData }: LayoutPr
               title="Open App Directory & More Interfaces"
               aria-label="Open App Directory & More Interfaces"
             >
-              {auth.currentUser?.photoURL ? (
+              {userProfile.photoURL ? (
                 <img
-                  src={auth.currentUser.photoURL}
-                  alt="Profile"
+                  src={userProfile.photoURL}
+                  alt={userProfile.displayName || "Profile"}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-[#0A84FF] to-[#5E5CE6] text-white font-bold text-sm">
-                  {auth.currentUser?.displayName ? auth.currentUser.displayName[0].toUpperCase() : 'U'}
+                  {userProfile.displayName ? userProfile.displayName[0].toUpperCase() : 'U'}
                 </div>
               )}
             </button>

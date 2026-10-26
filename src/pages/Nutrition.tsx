@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
+import { LunaComicBubbleIcon } from '../ui/tokens/LunaComicBubbleIcon';
 import {
   LargeTitleHeader,
   Ring,
@@ -334,7 +335,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
       const newItem: MealItemLog = {
         id: `item_${Date.now()}`,
-        name: (aiEstimate?.name || customName).trim(),
+        name: (customName.trim() || aiEstimate?.name || 'Food item').trim(),
         calories: caloriesNum,
         portion: portionNum,
         isExtra: true,
@@ -572,10 +573,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                         setCustomPortion(1);
                         setIsAddCustomOpen(true);
                       }}
-                      className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer"
+                      className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                       title="Log Food with AI"
                     >
-                      <Sparkle size={12} weight="fill" />
+                      <LunaComicBubbleIcon size={13} color="currentColor" />
                       <span>Log Food</span>
                     </button>
                   </div>
@@ -742,10 +743,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.75)]">
                 Food / Item Name
               </label>
-              <span className="flex items-center gap-1 text-[10.5px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full">
-                <Sparkle size={11} weight="fill" />
-                AI Analyzed
-              </span>
+              <span className="flex items-center gap-1 text-[10.5px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full"><LunaComicBubbleIcon size={12} color="#FF9F0A" variant="filled" />AI Analyzed</span>
             </div>
             <TextField
               placeholder="e.g., 3 Chapatis, Paneer bowl, 2 Boiled eggs, Dal..."
@@ -758,7 +756,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {/* AI Analysis Status / Insights Card */}
           {isAiAnalyzing && (
             <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 text-[#FF9F0A] text-xs font-semibold animate-pulse">
-              <Sparkle size={14} weight="fill" className="animate-spin" />
+              <LunaComicBubbleIcon size={14} color="#FF9F0A" className="animate-spin" />
               <span>AI is analyzing food ingredients and calculating calories...</span>
             </div>
           )}
@@ -768,7 +766,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/25">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
-                  <Sparkle size={13} weight="fill" />
+                  <LunaComicBubbleIcon size={13} color="#FF9F0A" />
                   AI Detected {multiItemEstimate.items.length} Items:
                 </span>
                 <span className="text-xs font-extrabold text-white tabular-nums">
@@ -794,7 +792,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
-                  <Sparkle size={13} weight="fill" />
+                  <LunaComicBubbleIcon size={13} color="#FF9F0A" />
                   {aiEstimate.name}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/10 text-white/70 font-medium">

@@ -33,6 +33,7 @@ import {
 import { triggerHaptic } from '../../utils/haptics';
 import { MODULE_TINTS, ModuleKey } from '../tokens/colors';
 import { auth } from '../../firebase';
+import { useUserProfile } from '../../utils/userProfileCache';
 import type { AppData } from '../../types';
 
 export interface HubItem {
@@ -69,8 +70,9 @@ export function MoreHubSheet({
 }: MoreHubSheetProps) {
   const [search, setSearch] = useState('');
 
-  const userName = auth.currentUser?.displayName || 'User Profile';
-  const userInitial = (auth.currentUser?.displayName ? auth.currentUser.displayName[0] : 'U').toUpperCase();
+  const userProfile = useUserProfile();
+  const userName = userProfile.displayName || 'User Profile';
+  const userInitial = (userProfile.displayName ? userProfile.displayName[0] : 'U').toUpperCase();
 
   // Map of items by ID
   const itemMap = useMemo(() => {
@@ -192,9 +194,9 @@ export function MoreHubSheet({
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
               <div className="w-9 h-9 rounded-xl bg-[#2C2C2E] flex items-center justify-center font-bold text-white text-sm overflow-hidden border border-white/10 select-none">
-                {auth.currentUser?.photoURL ? (
+                {userProfile.photoURL ? (
                   <img
-                    src={auth.currentUser.photoURL}
+                    src={userProfile.photoURL}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

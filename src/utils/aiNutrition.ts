@@ -52,7 +52,9 @@ const FOOD_DATABASE: FoodDbItem[] = [
   { canonical: 'Brown Rice', keywords: ['brown rice'], calories: 165, unit: 'katori / bowl (150g)', macros: { protein: 4, carbs: 35, fats: 1.5 } },
   { canonical: 'Jeera Rice', keywords: ['jeera rice', 'ghee rice'], calories: 220, unit: 'katori / bowl', macros: { protein: 3.5, carbs: 40, fats: 5 } },
   { canonical: 'Fried Rice', keywords: ['fried rice', 'veg fried rice', 'egg fried rice'], calories: 270, unit: 'plate', macros: { protein: 6, carbs: 46, fats: 7 } },
-  { canonical: 'Chicken Biryani', keywords: ['chicken biryani', 'biryani chicken', 'biryani'], calories: 420, unit: 'plate (300g)', macros: { protein: 24, carbs: 52, fats: 14 } },
+  { canonical: 'Paneer Biryani', keywords: ['paneer biryani', 'panner biryani', 'biryani paneer', 'cottage cheese biryani'], calories: 380, unit: 'plate (300g)', macros: { protein: 16, carbs: 54, fats: 12 } },
+  { canonical: 'Chicken Biryani', keywords: ['chicken biryani', 'biryani chicken', 'murgh biryani'], calories: 420, unit: 'plate (300g)', macros: { protein: 24, carbs: 52, fats: 14 } },
+  { canonical: 'Biryani (Mixed / Veg)', keywords: ['biryani', 'dum biryani'], calories: 340, unit: 'plate (300g)', macros: { protein: 10, carbs: 52, fats: 10 } },
   { canonical: 'Veg Biryani / Pulao', keywords: ['veg biryani', 'vegetable biryani', 'pulao', 'veg pulao', 'pulav'], calories: 310, unit: 'plate', macros: { protein: 7, carbs: 54, fats: 8 } },
   { canonical: 'Khichdi', keywords: ['khichdi', 'dal khichdi', 'moong khichdi'], calories: 220, unit: 'bowl', macros: { protein: 8, carbs: 38, fats: 4 } },
 
@@ -218,7 +220,18 @@ export function matchLocalFoodDatabase(inputFood: string, explicitPortion = 1): 
   let bestMatch: FoodDbItem | null = null;
   let highestScore = 0;
 
+  const isVegQuery = /\b(paneer|panner|veg|vegetable|sabzi|sabji|aloo|alu|gobi|dal|palak|soya|tofu|mushroom|chana|rajma)\b/i.test(searchStr);
+  const isNonVegQuery = /\b(chicken|mutton|fish|egg|eggs|prawn|meat|beef|pork|murgh|tikka)\b/i.test(searchStr);
+
   for (const item of FOOD_DATABASE) {
+    const itemFullText = (item.canonical + ' ' + item.keywords.join(' ')).toLowerCase();
+    const isItemNonVeg = /\b(chicken|mutton|fish|egg|eggs|prawn|meat|beef|pork|murgh)\b/i.test(itemFullText);
+    const isItemStrictlyVeg = /\b(paneer|panner|soya|tofu)\b/i.test(itemFullText);
+
+    // Prevent cross-dietary false positives (e.g., paneer matching chicken biryani)
+    if (isVegQuery && isItemNonVeg) continue;
+    if (isNonVegQuery && isItemStrictlyVeg) continue;
+
     for (const kw of item.keywords) {
       if (searchStr === kw) {
         bestMatch = item;

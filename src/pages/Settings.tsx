@@ -43,6 +43,7 @@ import {
 import { exportBackupFile, restoreBackupPackage } from '../utils/backupRestore';
 import { checkForAppUpdate, CURRENT_VERSION_NAME, CURRENT_VERSION_CODE } from '../utils/updater';
 import { auth } from '../firebase';
+import { useUserProfile } from '../utils/userProfileCache';
 import type { AppData } from '../types';
 
 interface SettingsProps {
@@ -166,7 +167,8 @@ export default function Settings({
   // Reset Confirmation Sheet
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
-  const currentUser = auth.currentUser;
+  const userProfile = useUserProfile();
+  const currentUser = { ...auth.currentUser, photoURL: userProfile.photoURL || auth.currentUser?.photoURL, displayName: userProfile.displayName || auth.currentUser?.displayName, email: userProfile.email || auth.currentUser?.email };
 
   return (
     <div className="w-full flex flex-col pb-2 selection:bg-[#0A84FF]/30">
