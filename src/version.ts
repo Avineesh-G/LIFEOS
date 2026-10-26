@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 68,
-  versionName: '3.3.1',
+  versionCode: 69,
+  versionName: '3.3.2',
   releaseDate: '2026-10-26',
   apkSize: '8.93 MB',
-  apkSizeBytes: 9365670,
-  releaseNotes: "LifeOS v3.3.1 (Build 68):\n• Premium Horizontal Card Stacking: Natural gesture-driven horizontal card stacks with subtle 3D perspective depth and fluid pagination across Nutrition meal slots, Shopping active lists & templates, Laundry batches, and Outings\n• Seamless Detail Transitions: Integrated hero layout continuity between card stacks and detail views\n• High-Efficiency Home Layout: Kept Home page in its pure high-speed 2x2 Bento grid\n• Performance Hardening: 120fps Android WebView GPU composited animations strictly utilizing transforms and opacities",
+  apkSizeBytes: 9361966,
+  releaseNotes: "LifeOS v3.3.2 (Build 69):\n• Layout Restoration: Reverted to standard clean vertical view layouts across Outings, Nutrition, Shopping Lists, and Laundry\n• Native Stability: Ensured 100% stable, jitter-free navigation across all device views\n• Full 120fps Performance: Optimized memory footprint and fluid gesture response",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

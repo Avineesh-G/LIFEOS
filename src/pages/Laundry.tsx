@@ -29,7 +29,6 @@ import { Sheet } from '../ui/feedback/Sheet';
 import { EmptyState } from '../ui/feedback/EmptyState';
 import { TextField } from '../ui/controls/TextField';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
-import { HorizontalCardStack } from '../ui/stack';
 import type { AppData, LaundryBatch, LaundryItemCount } from '../types';
 
 interface LaundryProps {
@@ -286,143 +285,132 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             </h2>
           </div>
 
-          {batches.length > 0 && (
-            <div className="-mx-4 select-none">
-              <HorizontalCardStack<LaundryBatch>
-                items={batches}
-                tint="#63E6E2"
-                peekWidth={24}
-                cardGap={12}
-                ariaLabel="Laundry batches stack"
-                renderCard={({ item: batch }) => {
-                  const isExpanded = expandedBatchId === batch.id;
-                  const isReturned = batch.status === 'received';
-                  const isSubmitted = batch.status === 'submitted';
+          {batches.map((batch) => {
+            const isExpanded = expandedBatchId === batch.id;
+            const isReturned = batch.status === 'received';
+            const isSubmitted = batch.status === 'submitted';
 
-                  const badgeLabel = isReturned ? 'Received' : isSubmitted ? 'At Laundry' : 'Pending';
-                  const badgeColor = isReturned ? '#30D158' : isSubmitted ? '#63E6E2' : '#FF9F0A';
+            const badgeLabel = isReturned ? 'Received' : isSubmitted ? 'At Laundry' : 'Pending';
+            const badgeColor = isReturned ? '#30D158' : isSubmitted ? '#63E6E2' : '#FF9F0A';
 
-                  return (
-                    <div
-                      key={batch.id}
-                      className="glass-card p-4 space-y-3"
-                    >
-                      {/* Top Row: Dates & Status */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-base font-bold text-white">
-                              {batch.totalClothes} Clothes
-                            </span>
+            return (
+              <div
+                key={batch.id}
+                className="glass-card p-4 space-y-3"
+              >
+                {/* Top Row: Dates & Status */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-base font-bold text-white">
+                        {batch.totalClothes} Clothes
+                      </span>
 
-                            <button
-                              onClick={() => toggleBatchStatus(batch)}
-                              className="cursor-pointer"
-                            >
-                              <Badge label={badgeLabel} color={badgeColor} />
-                            </button>
+                      <button
+                        onClick={() => toggleBatchStatus(batch)}
+                        className="cursor-pointer"
+                      >
+                        <Badge label={badgeLabel} color={badgeColor} />
+                      </button>
 
-                            {!isReturned && (
-                              <button
-                                onClick={() => openEditModal(batch)}
-                                className="p-1 rounded-lg text-[rgba(235,235,245,0.50)] hover:text-[#63E6E2] hover:bg-white/10 transition-colors cursor-pointer"
-                                title="Edit batch"
-                              >
-                                <PencilSimple size={14} />
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-3 text-xs text-[rgba(235,235,245,0.60)] font-medium flex-wrap">
-                            <span className="inline-flex items-center gap-1">
-                              <CalendarBlank size={12} className="text-[#63E6E2]" />
-                              Submitted: <strong className="text-white font-medium">{batch.submitDate}</strong>
-                            </span>
-
-                            <span className="inline-flex items-center gap-1">
-                              <Clock size={12} className="text-[#BF5AF2]" />
-                              Return: <strong className="text-white font-medium">{batch.returnDate || 'Pending'}</strong>
-                            </span>
-                          </div>
-                        </div>
-
+                      {!isReturned && (
                         <button
-                          onClick={() => {
-                            triggerHaptic('light');
-                            setExpandedBatchId(isExpanded ? null : batch.id);
-                          }}
-                          className="p-1.5 rounded-lg glass-flat text-[rgba(235,235,245,0.60)] hover:text-white cursor-pointer"
+                          onClick={() => openEditModal(batch)}
+                          className="p-1 rounded-lg text-[rgba(235,235,245,0.50)] hover:text-[#63E6E2] hover:bg-white/10 transition-colors cursor-pointer"
+                          title="Edit batch"
                         >
-                          {isExpanded ? <CaretUp size={16} /> : <CaretDown size={16} />}
+                          <PencilSimple size={14} />
                         </button>
-                      </div>
-
-                      {/* Clothes Item Badges Summary */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {(batch.items || []).map((item, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium glass-flat text-white"
-                          >
-                            <span className="text-[rgba(235,235,245,0.60)]">{item.category}:</span>
-                            <strong className="text-[#63E6E2]">{item.count}</strong>
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Expanded Details */}
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="pt-3 border-t border-white/[0.08] space-y-3 overflow-hidden"
-                          >
-                            <div>
-                              <label className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] block mb-1">
-                                Update Return Date
-                              </label>
-                              <input
-                                type="date"
-                                value={batch.returnDate || ''}
-                                onChange={(e) => updateBatchReturnDate(batch.id, e.target.value)}
-                                className="w-full glass-flat rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
-                              />
-                            </div>
-
-                            {batch.notes && (
-                              <p className="text-xs text-[rgba(235,235,245,0.70)] italic glass-flat p-2.5 rounded-xl">
-                                "{batch.notes}"
-                              </p>
-                            )}
-
-                            <div className="flex items-center justify-between pt-1">
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteBatch(batch)}
-                                className="text-xs font-semibold text-[#FF453A] hover:underline cursor-pointer"
-                              >
-                                Delete Batch
-                              </button>
-
-                              <Button
-                                size="sm"
-                                variant="glass"
-                                onClick={() => toggleBatchStatus(batch)}
-                              >
-                                {isReturned ? 'Mark as At Laundry' : 'Mark as Received'}
-                              </Button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      )}
                     </div>
-                  );
-                }}
-              />
-            </div>
-          )}
+
+                    <div className="flex items-center gap-3 text-xs text-[rgba(235,235,245,0.60)] font-medium flex-wrap">
+                      <span className="inline-flex items-center gap-1">
+                        <CalendarBlank size={12} className="text-[#63E6E2]" />
+                        Submitted: <strong className="text-white font-medium">{batch.submitDate}</strong>
+                      </span>
+
+                      <span className="inline-flex items-center gap-1">
+                        <Clock size={12} className="text-[#BF5AF2]" />
+                        Return: <strong className="text-white font-medium">{batch.returnDate || 'Pending'}</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setExpandedBatchId(isExpanded ? null : batch.id);
+                    }}
+                    className="p-1.5 rounded-lg glass-flat text-[rgba(235,235,245,0.60)] hover:text-white cursor-pointer"
+                  >
+                    {isExpanded ? <CaretUp size={16} /> : <CaretDown size={16} />}
+                  </button>
+                </div>
+
+                {/* Clothes Item Badges Summary */}
+                <div className="flex flex-wrap gap-1.5">
+                  {(batch.items || []).map((item, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium glass-flat text-white"
+                    >
+                      <span className="text-[rgba(235,235,245,0.60)]">{item.category}:</span>
+                      <strong className="text-[#63E6E2]">{item.count}</strong>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Expanded Details */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="pt-3 border-t border-white/[0.08] space-y-3 overflow-hidden"
+                    >
+                      <div>
+                        <label className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] block mb-1">
+                          Update Return Date
+                        </label>
+                        <input
+                          type="date"
+                          value={batch.returnDate || ''}
+                          onChange={(e) => updateBatchReturnDate(batch.id, e.target.value)}
+                          className="w-full glass-flat rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+                        />
+                      </div>
+
+                      {batch.notes && (
+                        <p className="text-xs text-[rgba(235,235,245,0.70)] italic glass-flat p-2.5 rounded-xl">
+                          "{batch.notes}"
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBatch(batch)}
+                          className="text-xs font-semibold text-[#FF453A] hover:underline cursor-pointer"
+                        >
+                          Delete Batch
+                        </button>
+
+                        <Button
+                          size="sm"
+                          variant="glass"
+                          onClick={() => toggleBatchStatus(batch)}
+                        >
+                          {isReturned ? 'Mark as At Laundry' : 'Mark as Received'}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
 
           {batches.length === 0 && (
             <EmptyState
