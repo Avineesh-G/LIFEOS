@@ -29,6 +29,7 @@ import { ProgressBar } from '../ui/visualization/ProgressBar';
 import { EmptyState } from '../ui/feedback/EmptyState';
 import { Sheet } from '../ui/feedback/Sheet';
 import { Badge } from '../ui/controls/Badge';
+import { HorizontalCardStack } from '../ui/stack';
 import type { AppData, ShoppingList } from '../types';
 
 interface ShoppingListsProps {
@@ -185,64 +186,71 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {activeLists.map((list) => {
-                const { checkedCount, totalCount, percent } = calculateListProgress(list);
-                const isAllDone = totalCount > 0 && checkedCount === totalCount;
+            <div className="-mx-4 select-none">
+              <HorizontalCardStack<ShoppingList>
+                items={activeLists}
+                tint="#FF375F"
+                peekWidth={24}
+                cardGap={12}
+                ariaLabel="Active shopping lists"
+                renderCard={({ item: list }) => {
+                  const { checkedCount, totalCount, percent } = calculateListProgress(list);
+                  const isAllDone = totalCount > 0 && checkedCount === totalCount;
 
-                return (
-                  <div
-                    key={list.id}
-                    onClick={() => {
-                      triggerHaptic('nav');
-                      navigate(`/shopping/${list.id}`);
-                    }}
-                    className="p-4 rounded-2xl glass-card cursor-pointer transition-all select-none hover:bg-white/[0.08] active:scale-[0.98]"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-base text-white truncate">
-                          {list.name}
-                        </h3>
-                        <p className="text-xs text-[#8E8E93] mt-0.5">
-                          Updated {format(new Date(list.updatedAt), 'MMM d, h:mm a')}
-                        </p>
+                  return (
+                    <div
+                      key={list.id}
+                      onClick={() => {
+                        triggerHaptic('nav');
+                        navigate(`/shopping/${list.id}`);
+                      }}
+                      className="p-4 rounded-2xl glass-card cursor-pointer transition-all select-none hover:bg-white/[0.08] active:scale-[0.98] h-[132px] flex flex-col justify-between"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-base text-white truncate">
+                            {list.name}
+                          </h3>
+                          <p className="text-xs text-[#8E8E93] mt-0.5">
+                            Updated {format(new Date(list.updatedAt), 'MMM d, h:mm a')}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            triggerHaptic('light');
+                            handleDeleteList(list);
+                          }}
+                          className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                          title="Delete List"
+                        >
+                          <Trash size={15} />
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          triggerHaptic('light');
-                          handleDeleteList(list);
-                        }}
-                        className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
-                        title="Delete List"
-                      >
-                        <Trash size={15} />
-                      </button>
-                    </div>
+                      {/* Progress Row */}
+                      <div className="mt-2 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#8E8E93]">
+                            {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
+                          </span>
+                          <span className={`font-semibold ${isAllDone ? 'text-[#30D158]' : 'text-[#FF375F]'}`}>
+                            {percent}%
+                          </span>
+                        </div>
 
-                    {/* Progress Row */}
-                    <div className="mt-3.5 space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[#8E8E93]">
-                          {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
-                        </span>
-                        <span className={`font-semibold ${isAllDone ? 'text-[#30D158]' : 'text-[#FF375F]'}`}>
-                          {percent}%
-                        </span>
+                        <ProgressBar
+                          progress={percent / 100}
+                          color={isAllDone ? '#30D158' : '#FF375F'}
+                          height={6}
+                        />
                       </div>
-
-                      <ProgressBar
-                        progress={percent / 100}
-                        color={isAllDone ? '#30D158' : '#FF375F'}
-                        height={6}
-                      />
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }}
+              />
             </div>
           </div>
         )}
@@ -257,53 +265,62 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {templates.map((tmpl) => {
-                const itemCount = tmpl.items.length;
+            <div className="-mx-4 select-none">
+              <HorizontalCardStack<ShoppingList>
+                items={templates}
+                tint="#BF5AF2"
+                peekWidth={24}
+                cardGap={12}
+                ariaLabel="Saved shopping templates"
+                renderCard={({ item: tmpl }) => {
+                  const itemCount = tmpl.items.length;
 
-                return (
-                  <div
-                    key={tmpl.id}
-                    className="p-4 rounded-2xl glass-card flex flex-col justify-between gap-3 select-none"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge label="TEMPLATE" color="#BF5AF2" />
-                          <span className="text-xs text-[#8E8E93]">
-                            {itemCount} {itemCount === 1 ? 'item' : 'items'}
-                          </span>
+                  return (
+                    <div
+                      key={tmpl.id}
+                      className="p-4 rounded-2xl glass-card flex flex-col justify-between gap-3 select-none h-[142px]"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge label="TEMPLATE" color="#BF5AF2" />
+                            <span className="text-xs text-[#8E8E93]">
+                              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                            </span>
+                          </div>
+
+                          <h3 className="font-semibold text-base text-white truncate">
+                            {tmpl.name}
+                          </h3>
                         </div>
 
-                        <h3 className="font-semibold text-base text-white truncate">
-                          {tmpl.name}
-                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            handleDeleteList(tmpl);
+                          }}
+                          className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
+                          title="Delete Template"
+                        >
+                          <Trash size={15} />
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('light');
-                          handleDeleteList(tmpl);
-                        }}
-                        className="p-2 rounded-xl text-[#8E8E93] hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
-                        title="Delete Template"
+                      <Button
+                        variant="glass"
+                        size="sm"
+                        onClick={() => handleCreateFromTemplate(tmpl)}
+                        className="w-full justify-center"
+                        tint="#BF5AF2"
+                        icon={<ArrowRight size={14} weight="bold" />}
                       >
-                        <Trash size={15} />
-                      </button>
+                        Use Template
+                      </Button>
                     </div>
-
-                    <Button
-                      variant="glass"
-                      size="sm"
-                      onClick={() => handleCreateFromTemplate(tmpl)}
-                      className="w-full justify-center"
-                    >
-                      Use Template
-                    </Button>
-                  </div>
-                );
-              })}
+                  );
+                }}
+              />
             </div>
           </div>
         )}

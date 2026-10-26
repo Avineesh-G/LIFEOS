@@ -5,3 +5,4 @@ export * from './grouped';
 export * from './feedback';
 export * from './visualization';
 export * from './navigation';
+export * from './stack';

@@ -23,6 +23,7 @@ import {
   Drop,
   Sparkle,
 } from '../ui';
+import { HorizontalCardStack } from '../ui/stack';
 import {
   analyzeFoodWithAi,
   matchLocalFoodDatabase,
@@ -526,169 +527,178 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             </span>
           </div>
 
-          {MEAL_SLOTS.map((slot) => {
-            const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
-            const slotItems = slotLog?.items || [];
-            const slotCalories = slotItems.reduce(
-              (s, it) => s + it.calories * (it.portion || 1),
-              0
-            );
+          <div className="select-none -mx-4">
+            <HorizontalCardStack
+              items={MEAL_SLOTS.map((s) => ({ ...s, id: s.slot }))}
+              tint="#FF9F0A"
+              peekWidth={22}
+              cardGap={12}
+              ariaLabel="Today's meals diary"
+              renderCard={({ item: slot }) => {
+                const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
+                const slotItems = slotLog?.items || [];
+                const slotCalories = slotItems.reduce(
+                  (s, it) => s + it.calories * (it.portion || 1),
+                  0
+                );
 
-            const messItems = messItemsBySlot[slot.slot] || [];
-            const loggedItemMap = new Map<string, MealItemLog>();
-            slotItems.forEach((it) => {
-              loggedItemMap.set(it.name.toLowerCase().trim(), it);
-            });
+                const messItems = messItemsBySlot[slot.slot] || [];
+                const loggedItemMap = new Map<string, MealItemLog>();
+                slotItems.forEach((it) => {
+                  loggedItemMap.set(it.name.toLowerCase().trim(), it);
+                });
 
-            return (
-              <div
-                key={slot.slot}
-                className="glass-card p-4 flex flex-col gap-3"
-              >
-                {/* Header Row */}
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-[10px] bg-[#FF9F0A]/15 text-[#FF9F0A] flex items-center justify-center">
-                      {slot.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-[15px] font-bold text-white tracking-tight">
-                        {slot.label}
-                      </h3>
-                      <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
-                        {slot.time}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
-                      {slotCalories} kcal
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setCustomSlot(slot.slot);
-                        setCustomPortion(1);
-                        setIsAddCustomOpen(true);
-                      }}
-                      className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                      title="Log Food with AI"
-                    >
-                      <LunaComicBubbleIcon size={13} color="currentColor" />
-                      <span>Log Food</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Direct Mess Menu Selectable Pills with Portion Badges */}
-                {messItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
-                      Mess Menu Items:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {messItems.map((item, idx) => {
-                        const logged = loggedItemMap.get(item.name.toLowerCase().trim());
-                        const isSelected = !!logged;
-                        const portion = logged?.portion || 1;
-
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => handleToggleMessItem(slot.slot, item.name, item.estCalories)}
-                            className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
-                              isSelected
-                                ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
-                                : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
-                            }`}
-                          >
-                            <span>{item.name}</span>
-                            {isSelected && portion > 1 && (
-                              <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-black text-[10px] font-bold">
-                                {portion}x
-                              </span>
-                            )}
-                            <span className={`text-[10.5px] tabular-nums ${isSelected ? 'text-black/75 font-semibold' : 'text-white/40'}`}>
-                              {isSelected ? item.estCalories * portion : item.estCalories} kcal
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Logged Foods List with Interactive Quantity / Portion Stepper */}
-                {slotItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
-                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
-                      Logged Food Items & Portions:
-                    </span>
-                    <div className="flex flex-col gap-1.5">
-                      {slotItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between px-3 py-2 rounded-[14px] glass-flat text-xs"
-                        >
-                          <div className="flex flex-col min-w-0 pr-2">
-                            <span className="text-white/95 font-semibold truncate">
-                              {item.name}
-                            </span>
-                            <span className="text-[10.5px] text-[rgba(235,235,245,0.50)]">
-                              {item.calories} kcal/serving
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            {/* Quantity Stepper [- quantity +] */}
-                            <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5 border border-white/10">
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, -1)}
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
-                                title="Decrease Quantity"
-                              >
-                                <Minus size={11} weight="bold" />
-                              </button>
-                              <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
-                                {item.portion || 1}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, 1)}
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
-                                title="Increase Quantity"
-                              >
-                                <Plus size={11} weight="bold" />
-                              </button>
-                            </div>
-
-                            {/* Total Computed Item Calories */}
-                            <span className="text-[#FF9F0A] font-bold tabular-nums min-w-[56px] text-right">
-                              {item.calories * (item.portion || 1)} kcal
-                            </span>
-
-                            {/* Quick Delete */}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveItem(slot.slot, item.id)}
-                              className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
-                              title="Delete food"
-                            >
-                              <Trash size={14} />
-                            </button>
-                          </div>
+                return (
+                  <div
+                    key={slot.slot}
+                    className="glass-card p-4 flex flex-col gap-3 min-h-[200px]"
+                  >
+                    {/* Header Row */}
+                    <div className="flex items-center justify-between pb-1">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-[10px] bg-[#FF9F0A]/15 text-[#FF9F0A] flex items-center justify-center">
+                          {slot.icon}
                         </div>
-                      ))}
+                        <div>
+                          <h3 className="text-[15px] font-bold text-white tracking-tight">
+                            {slot.label}
+                          </h3>
+                          <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
+                            {slot.time}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
+                          {slotCalories} kcal
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setCustomSlot(slot.slot);
+                            setCustomPortion(1);
+                            setIsAddCustomOpen(true);
+                          }}
+                          className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                          title="Log Food with AI"
+                        >
+                          <LunaComicBubbleIcon size={13} color="currentColor" />
+                          <span>Log Food</span>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Direct Mess Menu Selectable Pills with Portion Badges */}
+                    {messItems.length > 0 && (
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
+                          Mess Menu Items:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {messItems.map((item, idx) => {
+                            const logged = loggedItemMap.get(item.name.toLowerCase().trim());
+                            const isSelected = !!logged;
+                            const portion = logged?.portion || 1;
+
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleToggleMessItem(slot.slot, item.name, item.estCalories)}
+                                className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
+                                  isSelected
+                                    ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
+                                    : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
+                                }`}
+                              >
+                                <span>{item.name}</span>
+                                {isSelected && portion > 1 && (
+                                  <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-black text-[10px] font-bold">
+                                    {portion}x
+                                  </span>
+                                )}
+                                <span className={`text-[10.5px] tabular-nums ${isSelected ? 'text-black/75 font-semibold' : 'text-white/40'}`}>
+                                  {isSelected ? item.estCalories * portion : item.estCalories} kcal
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Logged Foods List with Interactive Quantity / Portion Stepper */}
+                    {slotItems.length > 0 && (
+                      <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+                        <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
+                          Logged Food Items & Portions:
+                        </span>
+                        <div className="flex flex-col gap-1.5">
+                          {slotItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between px-3 py-2 rounded-[14px] glass-flat text-xs"
+                            >
+                              <div className="flex flex-col min-w-0 pr-2">
+                                <span className="text-white/95 font-semibold truncate">
+                                  {item.name}
+                                </span>
+                                <span className="text-[10.5px] text-[rgba(235,235,245,0.50)]">
+                                  {item.calories} kcal/serving
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2.5 shrink-0">
+                                {/* Quantity Stepper [- quantity +] */}
+                                <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5 border border-white/10">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateItemPortion(slot.slot, item.id, -1)}
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
+                                    title="Decrease Quantity"
+                                  >
+                                    <Minus size={11} weight="bold" />
+                                  </button>
+                                  <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
+                                    {item.portion || 1}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUpdateItemPortion(slot.slot, item.id, 1)}
+                                    className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
+                                    title="Increase Quantity"
+                                  >
+                                    <Plus size={11} weight="bold" />
+                                  </button>
+                                </div>
+
+                                {/* Total Computed Item Calories */}
+                                <span className="text-[#FF9F0A] font-bold tabular-nums min-w-[56px] text-right">
+                                  {item.calories * (item.portion || 1)} kcal
+                                </span>
+
+                                {/* Quick Delete */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveItem(slot.slot, item.id)}
+                                  className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
+                                  title="Delete food"
+                                >
+                                  <Trash size={14} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              }}
+            />
+          </div>
         </div>
       </div>
 

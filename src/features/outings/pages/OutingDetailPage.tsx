@@ -4,6 +4,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { getStackTitleLayoutId } from '../../../ui/stack';
 import {
   CaretLeft,
   MapPin,
@@ -220,9 +222,12 @@ export default function OutingDetailPage() {
         {/* ── Outing Title & Metadata ── */}
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">
+            <motion.h1
+              layoutId={getStackTitleLayoutId('outings', activeOuting.id)}
+              className="text-2xl font-bold tracking-tight text-white leading-tight"
+            >
               {activeOuting.name}
-            </h1>
+            </motion.h1>
             <Badge label={statusLabel} color={statusColor} />
           </div>
 
