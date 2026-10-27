@@ -15,37 +15,35 @@ import {
   Sparkles, 
   Moon, 
   Sun, 
-  HelpCircle, 
   Layers, 
-  Flame, 
   Calendar, 
   Check, 
   ExternalLink,
-  Heart,
-  QrCode,
-  Share2,
-  Play,
-  Pause,
-  RotateCcw,
-  Wifi,
-  Battery,
-  ChevronDown,
-  X,
-  Copy,
-  Cpu,
-  Bot,
-  Compass,
-  Palette,
-  Briefcase,
-  ListTodo,
-  ShoppingBag,
-  Bell,
-  RefreshCw,
-  Eye,
-  Sliders,
-  Award,
-  Terminal,
-  FileText
+  QrCode, 
+  Share2, 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Wifi, 
+  Battery, 
+  X, 
+  Copy, 
+  Cpu, 
+  Bot, 
+  Compass, 
+  Palette, 
+  Briefcase, 
+  ListTodo, 
+  ShoppingBag, 
+  RefreshCw, 
+  Eye, 
+  FileText,
+  Mic,
+  Brain,
+  ChevronRight,
+  ShieldAlert,
+  Flame,
+  CheckCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -55,21 +53,24 @@ interface DownloadPageProps {
   accentColor?: string;
 }
 
-export type ModuleId = 
+type ModuleId = 
   | 'home' 
-  | 'study' 
   | 'gym' 
   | 'nutrition' 
-  | 'spending' 
-  | 'vault' 
+  | 'study' 
+  | 'flow'
+  | 'recall'
+  | 'transcribe'
   | 'timetable' 
+  | 'spending' 
+  | 'outings' 
   | 'tasks' 
   | 'notes' 
   | 'shopping' 
-  | 'outings' 
   | 'laundry' 
-  | 'history' 
-  | 'colors';
+  | 'vault' 
+  | 'colors'
+  | 'luna';
 
 interface ModuleConfig {
   id: ModuleId;
@@ -83,69 +84,146 @@ interface ModuleConfig {
   bulletPoints: string[];
 }
 
+const THEME_PALETTES = [
+  { id: 'burgundy', name: 'Burgundy', primary: '#8B1E3F', secondary: '#B82E58', darkText: '#5A0B22' },
+  { id: 'deep-navy', name: 'Deep Navy', primary: '#183B5B', secondary: '#2C5784', darkText: '#0E2338' },
+  { id: 'emerald', name: 'Emerald', primary: '#087F5B', secondary: '#12B886', darkText: '#05523A' },
+  { id: 'plum', name: 'Plum', primary: '#6A1B6D', secondary: '#9C27B0', darkText: '#451047' },
+  { id: 'indigo', name: 'Indigo', primary: '#4936A3', secondary: '#6741D9', darkText: '#2F2070' },
+  { id: 'terracotta', name: 'Terracotta', primary: '#A84A32', secondary: '#D95B3B', darkText: '#702D1E' },
+  { id: 'teal', name: 'Teal', primary: '#087F83', secondary: '#15AABF', darkText: '#055356' },
+  { id: 'rose', name: 'Rose', primary: '#A83F5D', secondary: '#D64E77', darkText: '#702339' },
+  { id: 'mocha', name: 'Mocha', primary: '#765548', secondary: '#966B5A', darkText: '#4A342B' },
+  { id: 'slate', name: 'Slate', primary: '#53616D', secondary: '#738494', darkText: '#343E47' },
+];
+
 const MODULES: ModuleConfig[] = [
   {
     id: 'home',
-    name: 'Home Engine & Daily Brief',
+    name: 'Home Intelligence & Rhythm',
     shortName: 'Home',
-    tagline: 'Ambient System Intelligence & Unified Snapshot',
+    tagline: 'Ambient Circadian Lighting & Unified Daily Feed',
     category: 'Core System',
-    accent: '#2563EB',
-    accentTint: '#60A5FA',
+    accent: '#8B1E3F',
+    accentTint: '#B82E58',
     icon: Compass,
     bulletPoints: [
-      'Gemini AI daily briefing summarizing upcoming classes, target calories, and tasks',
-      'Dynamic date pill with live clock isolated for 0% battery overhead',
-      'Rive vector avatar with interactive streak and mood animations',
-      'Habit dot indicators across Study, Gym, Tasks, and Expenses at a glance',
+      'Circadian day phases smoothly adapting surface tones across Dawn, Morning, Dusk, and Night',
+      'Morning Battle Plan briefing synthesizing today\'s classes, target calories, and priorities',
+      'Unified lifestyle feed with scheduled workout split, urgent task pills, and live date chips',
+      'Marquee motivation ticker with continuous high-performance mindset quotes',
+    ],
+  },
+  {
+    id: 'gym',
+    name: 'Hypertrophy Gym & Split Architect',
+    shortName: 'Gym',
+    tagline: 'Set Logger, 1RM Engine & Floating Rest Timer',
+    category: 'Fitness',
+    accent: '#E11D48',
+    accentTint: '#FB7185',
+    icon: Dumbbell,
+    bulletPoints: [
+      'Split Architect with PPL, Upper/Lower, Cardio, or fully customizable 7-day routine builder',
+      'High-speed set, repetition, and weight tracking with previous-session PR hints & RPE metrics',
+      'Automated floating rest timer with tactile haptic completion feedback',
+      'Automated 1RM Brzycki formula calculation and historical exercise progression curves',
+    ],
+  },
+  {
+    id: 'nutrition',
+    name: 'Nutrition & Campus Fuel Engine',
+    shortName: 'Nutrition',
+    tagline: 'Calorie Rings, Campus Mess Schedules & Water HUD',
+    category: 'Health',
+    accent: '#D97706',
+    accentTint: '#FBBF24',
+    icon: Utensils,
+    bulletPoints: [
+      'Circular macro distribution rings (Protein, Carbohydrates, Healthy Fats) with deficit targets',
+      'Pre-configured campus mess schedules (Breakfast, Lunch, Snacks, Dinner, Night Canteen)',
+      'One-tap water hydration tracker with daily target progress (+250ml / +500ml quick increments)',
+      'Meal category logs with macronutrient percentage breakdown and surplus guardrails',
     ],
   },
   {
     id: 'study',
     name: 'Study Hub & Focus Engine',
     shortName: 'Study',
-    tagline: 'Pomodoro Timer, Subject Tracking & Annual Heatmaps',
+    tagline: 'Subject Analytics, Deep Work & Annual Heatmaps',
     category: 'Academics',
     accent: '#0891B2',
     accentTint: '#38BDF8',
     icon: BookOpen,
     bulletPoints: [
-      'Interactive Pomodoro countdown timer with customizable focus & break cycles',
-      'Subject-wise session logging with deep-work duration metrics',
-      'GitHub-style annual study heatmap visualizing year-long discipline',
-      'Exam target countdowns and revision notes tagging',
+      'Customizable focus intervals with subject tagging and deep work duration tracking',
+      'GitHub-style 365-day annual study heatmap visualizing year-round discipline',
+      'Subject-wise session breakdowns, revision velocity, and exam countdowns',
+      'Hardware-synced study session logger with zero background battery overhead',
     ],
   },
   {
-    id: 'gym',
-    name: 'Gym & Split Routine Tracker',
-    shortName: 'Gym',
-    tagline: 'PPL Splits, Set Logging & Live Rest Countdown',
-    category: 'Fitness',
-    accent: '#E11D48',
-    accentTint: '#FB7185',
-    icon: Dumbbell,
+    id: 'flow',
+    name: 'Flow Room & Soundscapes',
+    shortName: 'Flow Room',
+    tagline: 'Zero-Download Audio Synthesis & Ambient Immersion',
+    category: 'Focus',
+    accent: '#6366F1',
+    accentTint: '#818CF8',
+    icon: Zap,
     bulletPoints: [
-      'Custom split manager (Push / Pull / Legs / Upper / Lower / Custom)',
-      'High-speed set, repetition, and weight tracking with previous-session PR hints',
-      'Automated floating rest timer with subtle haptic vibration triggers',
-      'Exercise history library and muscle recovery guidelines',
+      'Client-side Web Audio API synthesizer for zero-download noise generation',
+      'Ambient audio soundscapes: Binaural Beats (Alpha/Beta focus), Pure Brown Noise, and Rain',
+      'Full-screen minimalist Pomodoro timer designed for zero distraction and pure flow',
+      'Auto-resumes and suspends audio context cleanly on route change',
     ],
   },
   {
-    id: 'nutrition',
-    name: 'Nutrition & Macro Analytics',
-    shortName: 'Nutrition',
-    tagline: 'Caloric Targets, Macro Rings & Water Tracker',
-    category: 'Health',
-    accent: '#D97706',
-    accentTint: '#FBBF24',
-    icon: Utensils,
+    id: 'recall',
+    name: 'Active Recall Flashcards',
+    shortName: 'Recall',
+    tagline: 'Spaced Repetition Decks & Self-Rating Engine',
+    category: 'Academics',
+    accent: '#8B5CF6',
+    accentTint: '#C4B5FD',
+    icon: Brain,
     bulletPoints: [
-      'Dynamic circular macro distribution rings (Protein, Carbohydrates, Healthy Fats)',
-      'Target calorie burn vs intake budget with visual surplus/deficit indicators',
-      'One-tap water intake logger with daily hydration goal progress',
-      'Meal category logs (Breakfast, Lunch, Dinner, Post-Workout Snacks)',
+      'Spaced repetition algorithm scheduling cards based on mastery rating (Again, Hard, Good, Easy)',
+      'Clean flashcard popups with distraction-free flipping and gesture ratings',
+      'Deck organization by university courses, technical subjects, and certification modules',
+      'Retain 2x more knowledge with scientifically proven active recall scheduling',
+    ],
+  },
+  {
+    id: 'transcribe',
+    name: 'Smart Voice Transcriber',
+    shortName: 'Transcribe',
+    tagline: 'Speech-to-Text Lectures & Instant AI Summaries',
+    category: 'Productivity',
+    accent: '#EC4899',
+    accentTint: '#F472B6',
+    icon: Mic,
+    bulletPoints: [
+      'Live speech-to-text recording engine for university lectures, meetings, and brainstorming',
+      'Instant AI bullet-point summarization extracting key takeaways and action items',
+      'One-tap export directly into Notes & Ideas board or Eisenhower tasks',
+      'Hardware microphone level visualizer with pause, resume, and audio waveform feedback',
+    ],
+  },
+  {
+    id: 'timetable',
+    name: 'College Timetable & Matrix',
+    shortName: 'Timetable',
+    tagline: 'Period Matrix, Room Locator & Notification Alarms',
+    category: 'Academics',
+    accent: '#0D9488',
+    accentTint: '#2DD4BF',
+    icon: Calendar,
+    bulletPoints: [
+      '7-day multi-period timetable grid with lecture rooms, instructors, and credits',
+      'Android native WorkManager alarms dispatched 10-15 minutes prior to classes',
+      'Real-time "Upcoming Lecture" countdown pill directly on Home dashboard',
+      'Clean horizontal scrollable period view with active lecture time-highlighting',
     ],
   },
   {
@@ -159,46 +237,30 @@ const MODULES: ModuleConfig[] = [
     icon: Wallet,
     bulletPoints: [
       'Monthly budget envelope tracking with real-time remaining allowance calculation',
-      'Categorized expense tagging (Food, Transit, Bills, Health, Books, Entertainment)',
+      'Categorized expense tagging (Food, Transit, Bills, Books, Entertainment, Health)',
       'Spending velocity charts illustrating weekly burn rate vs monthly cap',
       '100% private and offline: zero bank credential access or telemetry scraping',
     ],
   },
   {
-    id: 'vault',
-    name: 'Biometric Secure Vault',
-    shortName: 'Vault',
-    tagline: 'Hardware Biometrics & Encrypted Local Storage',
-    category: 'Security',
-    accent: '#2034A0',
-    accentTint: '#818CF8',
-    icon: Lock,
+    id: 'outings',
+    name: 'Outings & Trip Expense Splitter',
+    shortName: 'Outings',
+    tagline: 'Day-by-Day Itineraries, Packing & Group Debt Settler',
+    category: 'Lifestyle',
+    accent: '#A84A32',
+    accentTint: '#D95B3B',
+    icon: Compass,
     bulletPoints: [
-      'Hardware-level biometric unlock (Fingerprint / Face ID) via Android BiometricPrompt',
-      'Fallback secure PIN encryption with automated lock timeout on app backgrounding',
-      'Encrypted vault for recovery keys, sensitive passwords, private credentials, and confidential notes',
-      'Isolated sandbox: credentials never leave the device hardware',
-    ],
-  },
-  {
-    id: 'timetable',
-    name: 'Weekly Timetable & Schedule',
-    shortName: 'Timetable',
-    tagline: 'Period Matrix, Room Locator & Background Alarms',
-    category: 'Academics',
-    accent: '#0891B2',
-    accentTint: '#22D3EE',
-    icon: Calendar,
-    bulletPoints: [
-      '7-day multi-period timetable grid with room numbers and professor credits',
-      'Android WorkManager notification alarms dispatched 10-15 mins before lectures',
-      'Real-time "Upcoming Class" countdown card directly on Home dashboard',
-      'Home screen widget synchronization for viewing today\'s schedule at a glance',
+      'Multi-day trip itinerary timeline with location spots and packing checklist',
+      'Group expense logging with automated net settlement matrix (who owes whom)',
+      'One-tap clipboard payment summary ready to paste into WhatsApp / Telegram groups',
+      'Standard clean vertical view layout with instant offline sync',
     ],
   },
   {
     id: 'tasks',
-    name: 'Priority Tasks & To-Do',
+    name: 'Priority Tasks & Eisenhower HUD',
     shortName: 'Tasks',
     tagline: 'Eisenhower Matrix & Tactile Haptic Completion',
     category: 'Productivity',
@@ -206,10 +268,10 @@ const MODULES: ModuleConfig[] = [
     accentTint: '#A78BFA',
     icon: ListTodo,
     bulletPoints: [
-      'Eisenhower prioritization badges (High, Medium, Normal, Backlog)',
-      'Category filtering (Work, Academic, Personal, Errands) with quick-entry drawer',
+      'Eisenhower prioritization quadrants (Urgent & Important, Plan, Delegate, Backlog)',
+      'Category filtering (Work, Academic, Personal, Errands) with rapid quick-entry drawer',
       'Tactile haptic completion with fluid celebratory micro-interactions',
-      'Overdue deadline warnings and recurring task rollover',
+      'Overdue deadline warnings and automated recurring task rollover',
     ],
   },
   {
@@ -218,11 +280,11 @@ const MODULES: ModuleConfig[] = [
     shortName: 'Notes',
     tagline: 'Masonry Board, Paper Textures & Tag Taxonomy',
     category: 'Creativity',
-    accent: '#8436E9',
+    accent: '#9333EA',
     accentTint: '#C084FC',
     icon: FileText,
     bulletPoints: [
-      'Masonry grid and compact list view with live search & instant filtering',
+      'Dual-view rich markdown note-taking with live search & instant tag filtering',
       'Lined notebook and grid paper textures tailored for reading and quick memos',
       'Color-coded taxonomy tags for separating project brainstorming from class notes',
       'Autosave engine with instant local storage commit',
@@ -232,9 +294,9 @@ const MODULES: ModuleConfig[] = [
     id: 'shopping',
     name: 'Categorized Shopping Lists',
     shortName: 'Shopping',
-    tagline: 'Grouped Aisles & Strike-Through Checklist',
+    tagline: 'Aisle Grouping, Estimated Cart & Checklists',
     category: 'Lifestyle',
-    accent: '#254BB5',
+    accent: '#2563EB',
     accentTint: '#93C5FD',
     icon: ShoppingBag,
     bulletPoints: [
@@ -245,29 +307,13 @@ const MODULES: ModuleConfig[] = [
     ],
   },
   {
-    id: 'outings',
-    name: 'Outings & Trip Itinerary Planner',
-    shortName: 'Outings',
-    tagline: 'Day-by-Day Schedules, Packing & Split Costs',
-    category: 'Lifestyle',
-    accent: '#8C500A',
-    accentTint: '#C88A58',
-    icon: Compass,
-    bulletPoints: [
-      'Multi-day itinerary timeline with spot schedules and navigation links',
-      'Luggage & essential packing checklist with completion percentage meter',
-      'Group expense logging with automatic per-person split calculator',
-      'Emergency contacts and location bookmarking',
-    ],
-  },
-  {
     id: 'laundry',
-    name: 'Laundry Cycle Monitor',
+    name: 'Hostel Laundry Cycle Monitor',
     shortName: 'Laundry',
-    tagline: 'Machine Timers & Push Notification Dispatch',
+    tagline: 'Washer & Dryer Timers with Local Push Alerts',
     category: 'Utility',
-    accent: '#0D9488',
-    accentTint: '#2DD4BF',
+    accent: '#087F83',
+    accentTint: '#15AABF',
     icon: Clock,
     bulletPoints: [
       'Dedicated Washer and Dryer cycle countdown timers with quick presets',
@@ -277,65 +323,82 @@ const MODULES: ModuleConfig[] = [
     ],
   },
   {
-    id: 'history',
-    name: 'Career & Work History',
-    shortName: 'History',
-    tagline: 'Chronological Timeline & Milestone Badges',
-    category: 'Career',
-    accent: '#8C1D40',
-    accentTint: '#D66FA0',
-    icon: Briefcase,
+    id: 'vault',
+    name: 'Biometric Hardware Vault',
+    shortName: 'Vault',
+    tagline: 'Hardware Biometrics & AES-256-GCM Encryption',
+    category: 'Security',
+    accent: '#183B5B',
+    accentTint: '#818CF8',
+    icon: Lock,
     bulletPoints: [
-      'Interactive career milestone timeline tracking promotions and deliverables',
-      'Project portfolio showcase with tech stack tags and impact metrics',
-      'Skill acquisition tracker logging engineering competencies',
-      'One-click export ready for portfolio and CV synchronizations',
+      'Hardware-level biometric unlock (Fingerprint / Face ID) via AndroidX BiometricPrompt',
+      'AES-256-GCM client-side encryption with PBKDF2 key derivation for private credentials',
+      'Auto-lock timeout protection whenever the app leaves the foreground',
+      'Completely isolated sandbox: sensitive vault data never leaves local device hardware',
     ],
   },
   {
     id: 'colors',
-    name: 'Material 3 Color Families',
+    name: 'Material 3 Color Engine',
     shortName: 'Theming',
-    tagline: 'OKLab ΔE Mathematical Separation Customizer',
+    tagline: '10 Curated Palettes & True OLED Pure Black',
     category: 'Personalization',
-    accent: '#2563EB',
-    accentTint: '#8DB0FF',
+    accent: '#8B1E3F',
+    accentTint: '#B82E58',
     icon: Palette,
     bulletPoints: [
-      'Powered by @material/material-color-utilities with OKLab ΔE perceptual distance',
-      'Personalize any interface with curated color families (Royal Blue, Emerald, Amethyst, Amber, etc.)',
-      'Guarantees WCAG AAA text contrast across both day and night dynamic transitions',
-      'Live in-app swatch preview with instant persistence',
+      '10 mathematically balanced color families (Burgundy, Deep Navy, Emerald, Plum, etc.)',
+      'True OLED Pure Black (#000000) base with liquid glass tonal card elevation',
+      'Guarantees WCAG AAA contrast across both day and night dynamic transitions',
+      'Live in-app swatch preview with instant persistence and zero restart required',
+    ],
+  },
+  {
+    id: 'luna',
+    name: 'Luna AI Autonomous Core',
+    shortName: 'Luna AI',
+    tagline: 'Speech-to-Action Parser & Neural Daily Briefs',
+    category: 'Intelligence',
+    accent: '#F59E0B',
+    accentTint: '#FCD34D',
+    icon: Bot,
+    bulletPoints: [
+      'Autonomous action execution: turns spoken sentences into structured database mutations',
+      'Action Confirmation Cards allowing 1-tap review before logging workouts, tasks, or expenses',
+      'Daily Briefing synthesizer reviewing calendar, upcoming deadlines, and calorie targets',
+      'Natural language Brain Dump parser categorizing unstructured thoughts automatically',
     ],
   },
 ];
 
-// Interactive Gemini AI Demo Prompts
-const GEMINI_PROMPTS = [
+// Interactive Luna AI Prompts
+const LUNA_PROMPTS = [
   {
-    title: 'Workout Split',
-    prompt: 'Plan a 4-day hypertrophy split balancing chest and back',
-    response: 'Here is your optimal 4-day split:\n• Day 1 (Push): Incline DB Press 4x8, Dips 3x10, Lateral Raises 4x15\n• Day 2 (Pull): Barbell Rows 4x8, Lat Pulldowns 3x10, Facepulls 4x15\n• Day 3 (Rest / Light Cardio): 30m brisk walk & mobility\n• Day 4 (Legs & Arms): Squats 4x8, RDLs 3x10, Bicep/Tricep superset 3x12.',
+    title: 'Workout Log',
+    prompt: 'Log 4 sets of Incline Dumbbell Press at 32kg for 8 reps with RPE 8',
+    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_WORKOUT\n• Exercise: Incline Dumbbell Press\n• Sets: 4 sets × 8 reps @ 32 kg (RPE 8.0)\n• Estimated 1RM: 40.5 kg (Brzycki)\n• Target Rest: 90s countdown initialized.\n[Action Ready to Commit to Local DB]',
   },
   {
-    title: 'Study Schedule',
-    prompt: 'Structure a 3-hour deep work block for Algorithms',
-    response: 'Recommended 180-min Pomodoro sequence:\n• Block 1 (50m): Dynamic Programming recurrence relations\n• Rest (10m): Hydrate, avoid screen\n• Block 2 (50m): LeetCode Medium problem solving (Graph BFS/DFS)\n• Rest (10m): Quick walk\n• Block 3 (50m): Review mistakes & write summary notes in Notes Hub.',
+    title: 'Study Deep Work',
+    prompt: 'Block 90 minutes of Operating Systems focus with brown noise',
+    response: '🤖 Luna AI Action Prepared:\n• Action: START_FLOW_SESSION\n• Duration: 90 Minutes (2 × 45m Pomodoro cycles)\n• Subject: Operating Systems (Virtual Memory & Paging)\n• Soundscape: Pure Brown Noise (Synthesizing via Web Audio)\n• Timetable Conflict Check: Clear until 15:30 lecture.',
   },
   {
-    title: 'Macro Target',
-    prompt: 'Calculate daily macros for 75kg athlete in caloric deficit',
-    response: 'For a moderate 350 kcal deficit:\n• Daily Calories: 2,100 kcal\n• Protein: 165g (31%) — Preserves lean muscle mass\n• Carbohydrates: 210g (40%) — Fuels intense training\n• Healthy Fats: 65g (29%) — Supports hormonal balance & recovery.',
+    title: 'Mess Nutrition',
+    prompt: 'Log college mess dinner: 3 rotis, paneer curry, and dal with 500ml water',
+    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_MEAL\n• Category: Dinner (Campus Mess)\n• Estimated Macros: 680 kcal | 28g Protein | 82g Carbs | 24g Fat\n• Daily Calorie Goal Progress: 1,940 / 2,200 kcal (88%)\n• Water HUD: +500ml logged (Total today: 3.1L / 3.5L target).',
   },
   {
-    title: 'Weekly Budget',
-    prompt: 'Help me allocate a monthly student allowance of $600',
-    response: 'Suggested 50/30/20 envelope allocation:\n• Groceries & Food: $280 ($70/week)\n• Academic & Transit: $120 (Metro pass + books)\n• Social & Outings: $100 ($25/weekend)\n• Emergency Savings: $100 (Direct to Vault reserve).',
+    title: 'Outing Expense',
+    prompt: 'Paid 1400 rupees for group dinner at cafe with Rohan, Vikram, and me',
+    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_OUTING_EXPENSE\n• Outing: Weekend Cafe Trip\n• Amount: ₹1,400 paid by You\n• Split: ₹466.67 each (Rohan, Vikram, You)\n• Balance Matrix: Rohan owes ₹467, Vikram owes ₹467.\n• Clipboard summary generated for WhatsApp group.',
   },
 ];
 
 export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>('home');
+  const [selectedAccent, setSelectedAccent] = useState(THEME_PALETTES[0]); // Burgundy default
   const [isDarkLocal, setIsDarkLocal] = useState(() => {
     if (typeof document !== 'undefined') {
       return document.documentElement.classList.contains('dark');
@@ -343,15 +406,38 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
     return true;
   });
 
+  // Dynamic Version Manifest Hydration
+  const [manifest, setManifest] = useState({
+    versionName: '3.3.2',
+    versionCode: 69,
+    releaseDate: '2026-10-26',
+    apkSize: '8.93 MB',
+    apkSizeBytes: 9361966,
+    sha256: '5dde67a98741b1b6368e1f312682cfdbe63355c90aeb2d6b1b4db5faa73cc34a',
+    releaseNotes: '• Layout Restoration across Outings, Nutrition, Shopping Lists, and Laundry\n• Native Stability: 100% stable, jitter-free navigation\n• Full 120fps Performance: Optimized memory footprint',
+    apkUrl: 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk',
+  });
+
+  useEffect(() => {
+    fetch('/version.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.versionName) {
+          setManifest(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Interactive Focus Timer State
-  const [timerSeconds, setTimerSeconds] = useState(25 * 60 - 24);
+  const [timerSeconds, setTimerSeconds] = useState(25 * 60 - 15);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
     let interval: any = null;
     if (isTimerRunning) {
       interval = setInterval(() => {
-        setTimerSeconds(prev => (prev > 0 ? prev - 1 : 0));
+        setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -365,61 +451,73 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
   // Interactive Workout Sets State
   const [gymSets, setGymSets] = useState([
-    { id: 1, name: 'Bench Press', reps: '10 reps', weight: '80 kg', done: true },
-    { id: 2, name: 'Bench Press', reps: '8 reps', weight: '85 kg', done: true },
-    { id: 3, name: 'Bench Press', reps: '6 reps', weight: '90 kg', done: false },
-    { id: 4, name: 'Incline Dumbbell', reps: '12 reps', weight: '28 kg', done: false },
+    { id: 1, name: 'Incline DB Press', reps: '10 reps', weight: '32 kg', done: true },
+    { id: 2, name: 'Incline DB Press', reps: '8 reps', weight: '34 kg', done: true },
+    { id: 3, name: 'Incline DB Press', reps: '8 reps', weight: '34 kg', done: false },
+    { id: 4, name: 'Weighted Dips', reps: '12 reps', weight: '+15 kg', done: false },
   ]);
 
   const toggleGymSet = (id: number) => {
-    setGymSets(prev => prev.map(s => s.id === id ? { ...s, done: !s.done } : s));
+    setGymSets((prev) => prev.map((s) => (s.id === id ? { ...s, done: !s.done } : s)));
   };
 
-  // Interactive Gemini Assistant Sandbox
-  const [activeGeminiIndex, setActiveGeminiIndex] = useState(0);
-  const [geminiCustomQuery, setGeminiCustomQuery] = useState('');
-  const [isGeminiGenerating, setIsGeminiGenerating] = useState(false);
-  const [geminiDisplayResponse, setGeminiDisplayResponse] = useState(GEMINI_PROMPTS[0].response);
+  // Interactive Tasks State
+  const [interactiveTasks, setInteractiveTasks] = useState([
+    { id: 1, text: 'Submit Operating Systems Lab 4', priority: 'Urgent', done: true },
+    { id: 2, text: 'Review Spaced Repetition Flashcards', priority: 'High', done: false },
+    { id: 3, text: 'Laundry dryer cycle pickup', priority: 'Medium', done: false },
+  ]);
 
-  const handleSelectGeminiPrompt = (index: number) => {
-    setActiveGeminiIndex(index);
-    setIsGeminiGenerating(true);
+  const toggleTask = (id: number) => {
+    setInteractiveTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  };
+
+  // Interactive Luna Assistant Sandbox
+  const [activeLunaIndex, setActiveLunaIndex] = useState(0);
+  const [lunaCustomQuery, setLunaCustomQuery] = useState('');
+  const [isLunaGenerating, setIsLunaGenerating] = useState(false);
+  const [lunaDisplayResponse, setLunaDisplayResponse] = useState(LUNA_PROMPTS[0].response);
+
+  const handleSelectLunaPrompt = (index: number) => {
+    setActiveLunaIndex(index);
+    setIsLunaGenerating(true);
     setTimeout(() => {
-      setGeminiDisplayResponse(GEMINI_PROMPTS[index].response);
-      setIsGeminiGenerating(false);
-    }, 350);
+      setLunaDisplayResponse(LUNA_PROMPTS[index].response);
+      setIsLunaGenerating(false);
+    }, 300);
   };
 
   const handleCustomQuery = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!geminiCustomQuery.trim()) return;
-    setIsGeminiGenerating(true);
+    if (!lunaCustomQuery.trim()) return;
+    setIsLunaGenerating(true);
     setTimeout(() => {
-      setGeminiDisplayResponse(
-        `Gemini AI Analysis for "${geminiCustomQuery.trim()}":\n• Action 1: Scheduled automatic reminder into your LifeOS Timetable.\n• Action 2: Calculated nutrition & calorie impact (+120 kcal adjustment).\n• Action 3: Added milestone checkpoint to Tasks with High Priority tag.`
+      setLunaDisplayResponse(
+        `🤖 Luna Autonomous Engine Analysis for "${lunaCustomQuery.trim()}":\n• Parsed Intent: MULTI_MODULE_MUTATION\n• Action 1: Dispatched high-priority checkpoint into Tasks Matrix.\n• Action 2: Calculated nutrition & calorie impact (+140 kcal adjustment).\n• Action 3: Synced local Android WorkManager reminder with 0ms latency.\n[Committed to offline IndexedDB]`
       );
-      setIsGeminiGenerating(false);
-      setGeminiCustomQuery('');
-    }, 450);
+      setIsLunaGenerating(false);
+      setLunaCustomQuery('');
+    }, 400);
   };
 
   // Interactive Subscription Calculator
   const [subs, setSubs] = useState<Record<string, { cost: number; name: string; checked: boolean }>>({
-    gym: { name: 'Workout Logger Pro', cost: 12, checked: true },
-    study: { name: 'Pomodoro & Heatmap App', cost: 7, checked: true },
-    budget: { name: 'Budget & Finance Tracker', cost: 9, checked: true },
-    timetable: { name: 'Schedule & Routine Manager', cost: 5, checked: true },
+    gym: { name: 'Hypertrophy Workout Logger', cost: 12, checked: true },
+    study: { name: 'Pomodoro & Heatmap Pro', cost: 7, checked: true },
+    nutrition: { name: 'Macro Counter & Diet App', cost: 14, checked: true },
+    transcribe: { name: 'AI Voice Lecture Transcriber', cost: 10, checked: true },
+    budget: { name: 'Finance & Splitter App', cost: 8, checked: true },
     vault: { name: 'Encrypted Password Vault', cost: 6, checked: true },
   });
 
   const toggleSub = (key: string) => {
-    setSubs(prev => ({
+    setSubs((prev) => ({
       ...prev,
       [key]: { ...prev[key], checked: !prev[key].checked },
     }));
   };
 
-  const monthlySavings = Object.values(subs).reduce((acc, s) => s.checked ? acc + s.cost : acc, 0);
+  const monthlySavings = Object.values(subs).reduce((acc, s) => (s.checked ? acc + s.cost : acc), 0);
   const yearlySavings = monthlySavings * 12;
 
   // Real-time Phone Clock
@@ -441,13 +539,9 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
   const [copiedSha, setCopiedSha] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const SHA_256_HASH = '342d3989f63029cccff5b99f5c5ea68b9e48e9a00513cd6d665c5fbfabe81f69';
-  const APK_DOWNLOAD_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk';
-  const LIVE_WEB_URL = 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/';
-
   const copySha = () => {
     if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText(SHA_256_HASH);
+      navigator.clipboard.writeText(manifest.sha256);
       setCopiedSha(true);
       setTimeout(() => setCopiedSha(false), 2000);
     }
@@ -476,49 +570,89 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
   };
 
   const currentMod = useMemo(() => {
-    return MODULES.find(m => m.id === activeModule) || MODULES[0];
+    return MODULES.find((m) => m.id === activeModule) || MODULES[0];
   }, [activeModule]);
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-blue-600/30 transition-colors duration-300 ${isDarkLocal ? 'bg-[#090A0F] text-[#F3F4F8]' : 'bg-[#F8F9FD] text-[#131418]'}`}>
+    <div 
+      className={`min-h-screen font-sans selection:bg-rose-500/30 transition-colors duration-300 ${
+        isDarkLocal ? 'bg-[#000000] text-[#F3F4F8]' : 'bg-[#F8F9FA] text-[#131418]'
+      }`}
+      style={{
+        // Inject active accent as CSS variable
+        ['--theme-accent' as any]: selectedAccent.primary,
+        ['--theme-accent-tint' as any]: selectedAccent.secondary,
+      }}
+    >
       
-      {/* ── Android 17 / Gemini Ambient System Glow ── */}
+      {/* ── Ambient Radial Atmosphere Glow ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div 
-          className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full blur-[140px] opacity-35 transition-all duration-700"
+          className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[1000px] h-[650px] rounded-full blur-[140px] opacity-30 transition-all duration-700"
           style={{
-            background: `radial-gradient(circle, ${currentMod.accent} 0%, #7C3AED 40%, transparent 75%)`,
+            background: `radial-gradient(circle, ${selectedAccent.primary} 0%, rgba(139, 30, 63, 0.4) 40%, transparent 75%)`,
           }}
         />
         <div 
-          className="absolute top-[60%] right-[-10%] w-[650px] h-[650px] rounded-full blur-[160px] opacity-25"
-          style={{ background: 'radial-gradient(circle, #0891B2 0%, #2563EB 50%, transparent 70%)' }}
+          className="absolute top-[65%] right-[-10%] w-[650px] h-[650px] rounded-full blur-[160px] opacity-20"
+          style={{ 
+            background: `radial-gradient(circle, ${selectedAccent.secondary} 0%, rgba(20, 20, 25, 0.8) 50%, transparent 70%)` 
+          }}
         />
       </div>
 
-      {/* ── Top Navigation Bar: Android 17 System Chip + Controls ── */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/[0.08] dark:border-white/[0.08] bg-white/70 dark:bg-[#090A0F]/75 px-4 sm:px-8 py-3.5 transition-all">
+      {/* ── Top Navigation Bar: Liquid Glass Bar ── */}
+      <header className="sticky top-0 z-50 border-b border-white/[0.08] dark:border-white/[0.08] bg-white/80 dark:bg-[#000000]/80 backdrop-blur-xl px-4 sm:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
-          {/* Brand & Android 17 Gemini Chip */}
+          {/* Brand & Version Badge */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 p-0.5 shadow-lg shadow-blue-600/25 flex items-center justify-center">
-              <div className="w-full h-full bg-[#0E111A] rounded-[14px] flex items-center justify-center">
-                <Sparkles size={20} className="text-blue-400 animate-pulse" />
+            <div 
+              className="w-10 h-10 rounded-2xl p-0.5 shadow-lg flex items-center justify-center transition-colors"
+              style={{
+                background: `linear-gradient(135deg, ${selectedAccent.primary}, ${selectedAccent.secondary})`,
+                boxShadow: `0 8px 24px -4px ${selectedAccent.primary}40`,
+              }}
+            >
+              <div className="w-full h-full bg-[#0C0E14] rounded-[14px] flex items-center justify-center">
+                <Sparkles size={20} style={{ color: selectedAccent.secondary }} />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-base tracking-tight font-heading">LifeOS</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/20 uppercase tracking-wider">
-                  v2.1.3
+                <span 
+                  className="text-[10px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                  style={{
+                    backgroundColor: `${selectedAccent.primary}20`,
+                    borderColor: `${selectedAccent.primary}40`,
+                    color: selectedAccent.secondary,
+                  }}
+                >
+                  v{manifest.versionName} (Build {manifest.versionCode})
                 </span>
               </div>
               <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
-                <Bot size={12} className="text-indigo-400" />
-                <span>Android 17 • Gemini AI Ambient Engine</span>
+                <Bot size={12} style={{ color: selectedAccent.secondary }} />
+                <span>Material 3 Expressive • Luna AI Core</span>
               </div>
             </div>
+          </div>
+
+          {/* Center: Accent Color Selector Swatches (Desktop) */}
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mr-1">Accent:</span>
+            {THEME_PALETTES.slice(0, 6).map((pal) => (
+              <button
+                key={pal.id}
+                onClick={() => setSelectedAccent(pal)}
+                aria-label={`Select ${pal.name} theme`}
+                className={`w-5 h-5 rounded-full transition-transform ${
+                  selectedAccent.id === pal.id ? 'scale-125 ring-2 ring-white ring-offset-2 ring-offset-black' : 'hover:scale-110 opacity-70 hover:opacity-100'
+                }`}
+                style={{ backgroundColor: pal.primary }}
+              />
+            ))}
           </div>
 
           {/* Quick Actions Dock */}
@@ -526,23 +660,27 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 text-zinc-700 dark:text-zinc-300 hover:scale-105 transition-all"
+              className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:scale-105 transition-all"
             >
               {isDarkLocal ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             <a
-              href={LIVE_WEB_URL}
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60 text-xs font-bold hover:border-blue-500/50 transition-all"
+              href="/"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-zinc-300 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 text-xs font-bold hover:border-zinc-500 transition-all"
             >
-              <Eye size={14} className="text-blue-500" />
-              <span>Try Live Web App</span>
+              <Eye size={14} style={{ color: selectedAccent.secondary }} />
+              <span>Launch Web App</span>
             </a>
 
             <a
-              href={APK_DOWNLOAD_URL}
+              href={manifest.apkUrl}
               download="LifeOS.apk"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:scale-105 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-extrabold text-xs sm:text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              style={{
+                backgroundColor: selectedAccent.primary,
+                boxShadow: `0 8px 24px -4px ${selectedAccent.primary}60`,
+              }}
             >
               <Download size={15} />
               <span>Download APK</span>
@@ -552,17 +690,22 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
         </div>
       </header>
 
-      {/* ── Hero Section: Material 3 Expressive & Android 17 Intelligence ── */}
+      {/* ── Hero Section ── */}
       <section className="relative z-10 pt-12 sm:pt-20 pb-16 px-4 sm:px-6 max-w-7xl mx-auto text-center space-y-8">
         
-        {/* Android 17 Ambient Pill */}
+        {/* Release Pill Badge */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-rose-500/10 border border-blue-500/25 text-xs font-bold text-blue-600 dark:text-blue-400 shadow-sm"
+          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-xs font-bold shadow-sm"
+          style={{
+            backgroundColor: `${selectedAccent.primary}15`,
+            borderColor: `${selectedAccent.primary}35`,
+            color: selectedAccent.secondary,
+          }}
         >
-          <Bot size={14} className="text-purple-400 animate-spin" style={{ animationDuration: '8s' }} />
-          <span>Android 17 Ready • Material 3 Expressive • Gemini AI Ambient Intelligence</span>
+          <Sparkles size={14} />
+          <span>v{manifest.versionName} Released • True OLED Pure Black • 120 FPS Fluid Motion</span>
         </motion.div>
 
         {/* Hero Title */}
@@ -573,7 +716,12 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl mx-auto leading-[1.08] font-heading"
         >
           Your Entire Daily Life,{' '}
-          <span className="bg-gradient-to-r from-blue-500 via-indigo-400 to-rose-500 bg-clip-text text-transparent">
+          <span 
+            className="bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${selectedAccent.secondary}, #FFFFFF 70%)`,
+            }}
+          >
             Engineered Into One
           </span>{' '}
           Operating System.
@@ -586,8 +734,9 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           transition={{ delay: 0.2 }}
           className="text-sm sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-3xl mx-auto leading-relaxed"
         >
-          Consolidate your workouts, academics, nutrition, financial budget, weekly timetable, biometric vault, 
-          and task matrix into a single, offline-first native mobile application. Zero subscription paywalls. Zero telemetry tracking.
+          Consolidate your hypertrophy fitness, nutrition & mess meals, deep work pomodoros, college timetable, 
+          expense budgeting, biometric vault, and Luna AI autonomous action execution into a single, offline-first 
+          native mobile application. Zero subscription paywalls. Zero telemetry tracking.
         </motion.p>
 
         {/* Hero Action CTAs */}
@@ -598,25 +747,29 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2"
         >
           <a
-            href={APK_DOWNLOAD_URL}
+            href={manifest.apkUrl}
             download="LifeOS.apk"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-base shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:scale-105 active:scale-95 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl hover:scale-105 active:scale-95 transition-all"
+            style={{
+              backgroundColor: selectedAccent.primary,
+              boxShadow: `0 12px 32px -4px ${selectedAccent.primary}60`,
+            }}
           >
             <Download size={20} />
-            <span>Download Signed APK (13.7 MB)</span>
+            <span>Download Signed APK ({manifest.apkSize})</span>
           </a>
 
           <button
             onClick={() => setShowQrModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:border-blue-500/50 hover:scale-105 transition-all shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:scale-105 transition-all shadow-sm"
           >
-            <QrCode size={18} className="text-blue-500" />
+            <QrCode size={18} style={{ color: selectedAccent.secondary }} />
             <span>Scan Mobile QR</span>
           </button>
 
           <button
             onClick={copyLink}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-blue-500 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-white transition-all"
           >
             <Share2 size={16} />
             <span>{copiedLink ? 'Link Copied!' : 'Share'}</span>
@@ -625,71 +778,99 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
         {/* Feature Pills */}
         <div className="pt-4 flex flex-wrap items-center justify-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/60">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800">
             <CheckCircle2 size={14} className="text-emerald-500" /> 100% Offline-First
           </span>
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/60">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800">
             <ShieldCheck size={14} className="text-blue-500" /> SHA-256 Verified
           </span>
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/60">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800">
             <Zap size={14} className="text-amber-500" /> 120 FPS Fluid Motion
           </span>
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-800/60">
-            <Bot size={14} className="text-purple-500" /> Gemini AI Engine
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800">
+            <Bot size={14} style={{ color: selectedAccent.secondary }} /> Luna AI Core
+          </span>
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800">
+            <Lock size={14} className="text-indigo-400" /> Hardware Biometrics
           </span>
         </div>
 
       </section>
 
-      {/* ── Android 17 Gemini AI Ambient Intelligence Playground ── */}
+      {/* ── Interactive Luna AI Autonomous Playground ── */}
       <section className="relative z-10 py-12 px-4 sm:px-6 max-w-5xl mx-auto">
-        <div className="p-6 sm:p-10 rounded-[32px] bg-gradient-to-br from-indigo-950/40 via-zinc-900/90 to-zinc-950/90 border border-indigo-500/30 shadow-2xl backdrop-blur-xl relative overflow-hidden space-y-6">
-          
+        <div 
+          className="p-6 sm:p-10 rounded-[32px] border shadow-2xl relative overflow-hidden space-y-6"
+          style={{
+            backgroundColor: isDarkLocal ? '#0E1017' : '#FFFFFF',
+            borderColor: `${selectedAccent.primary}40`,
+          }}
+        >
           {/* Subtle Ambient Halo */}
-          <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] bg-indigo-600/20 pointer-events-none" />
+          <div 
+            className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-25"
+            style={{ backgroundColor: selectedAccent.primary }}
+          />
 
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping" />
-                <span className="text-xs font-black tracking-widest uppercase text-indigo-400 font-tag">
-                  Ambient Intelligence Core
+                <span 
+                  className="w-2.5 h-2.5 rounded-full animate-ping"
+                  style={{ backgroundColor: selectedAccent.secondary }}
+                />
+                <span 
+                  className="text-xs font-black tracking-widest uppercase font-tag"
+                  style={{ color: selectedAccent.secondary }}
+                >
+                  Autonomous Intelligence Engine
                 </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white font-heading">
-                Integrated with Gemini AI
+              <h2 className="text-2xl sm:text-3xl font-black font-heading">
+                Luna AI Action Core
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-400">
-                Experience context-aware intelligence that proactively synthesizes your daily schedule, workout loads, and study blocks.
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+                Experience voice-to-action parsing that transforms natural spoken prompts into structured, offline local database transactions.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold shrink-0 self-start sm:self-auto">
-              <Cpu size={14} className="text-indigo-400" />
-              <span>Android 17 Ambient Assistant</span>
+            <div 
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold shrink-0 self-start sm:self-auto"
+              style={{
+                backgroundColor: `${selectedAccent.primary}20`,
+                borderColor: `${selectedAccent.primary}40`,
+                color: selectedAccent.secondary,
+              }}
+            >
+              <Cpu size={14} />
+              <span>Offline-First Autonomous Agent</span>
             </div>
           </div>
 
           {/* Interactive Prompt Chips */}
           <div className="space-y-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Tap to test real Gemini outputs:</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Tap to test real Luna action execution:</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {GEMINI_PROMPTS.map((gp, idx) => (
+              {LUNA_PROMPTS.map((lp, idx) => (
                 <button
                   key={idx}
-                  onClick={() => handleSelectGeminiPrompt(idx)}
+                  onClick={() => handleSelectLunaPrompt(idx)}
                   className={`p-3 rounded-2xl text-left border text-xs font-bold transition-all ${
-                    activeGeminiIndex === idx
-                      ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30'
-                      : 'bg-zinc-800/60 text-zinc-300 border-zinc-700/60 hover:border-indigo-500/50'
+                    activeLunaIndex === idx
+                      ? 'text-white shadow-md'
+                      : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-500'
                   }`}
+                  style={{
+                    backgroundColor: activeLunaIndex === idx ? selectedAccent.primary : undefined,
+                    borderColor: activeLunaIndex === idx ? selectedAccent.secondary : undefined,
+                  }}
                 >
                   <div className="flex items-center gap-1.5 mb-1 text-[11px] opacity-80">
                     <Sparkles size={12} />
-                    <span>{gp.title}</span>
+                    <span>{lp.title}</span>
                   </div>
                   <div className="line-clamp-2 text-[11px] font-normal leading-tight opacity-90">
-                    "{gp.prompt}"
+                    "{lp.prompt}"
                   </div>
                 </button>
               ))}
@@ -697,22 +878,22 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           </div>
 
           {/* Live AI Response Display */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#090A10] border border-indigo-500/30 space-y-3 font-mono text-xs">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#05060A] border border-zinc-800 space-y-3 font-mono text-xs">
             <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-zinc-800/80 pb-2">
-              <span className="flex items-center gap-1.5 text-indigo-400 font-bold">
-                <Bot size={14} /> Gemini Intelligence Output
+              <span className="flex items-center gap-1.5 font-bold" style={{ color: selectedAccent.secondary }}>
+                <Bot size={14} /> Luna Neural Pipeline Output
               </span>
-              <span className="text-[10px] text-zinc-500">Zero latency • Offline context</span>
+              <span className="text-[10px] text-zinc-500">Zero telemetry • Offline context</span>
             </div>
             
             <div className="text-zinc-200 leading-relaxed whitespace-pre-line min-h-[90px] flex items-center">
-              {isGeminiGenerating ? (
-                <div className="flex items-center gap-2 text-indigo-400 py-4">
+              {isLunaGenerating ? (
+                <div className="flex items-center gap-2 py-4" style={{ color: selectedAccent.secondary }}>
                   <RefreshCw size={16} className="animate-spin" />
-                  <span>Synthesizing routines and neural data...</span>
+                  <span>Parsing natural language parameters into structured JSON...</span>
                 </div>
               ) : (
-                geminiDisplayResponse
+                lunaDisplayResponse
               )}
             </div>
           </div>
@@ -721,38 +902,48 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           <form onSubmit={handleCustomQuery} className="flex gap-2">
             <input
               type="text"
-              value={geminiCustomQuery}
-              onChange={(e) => setGeminiCustomQuery(e.target.value)}
-              placeholder="Ask Gemini AI anything about your daily routine, workouts, or timetable..."
-              className="flex-1 px-4 py-3 rounded-2xl bg-zinc-900 border border-zinc-700/80 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition-colors"
+              value={lunaCustomQuery}
+              onChange={(e) => setLunaCustomQuery(e.target.value)}
+              placeholder="Give Luna an action command (e.g. 'Add 500 pushups this week' or 'Log $15 taxi ride')..."
+              className="flex-1 px-4 py-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-xs text-zinc-900 dark:text-white placeholder-zinc-500 focus:outline-none transition-colors"
             />
             <button
               type="submit"
-              disabled={isGeminiGenerating}
-              className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 shrink-0 transition-all shadow-md shadow-indigo-600/30"
+              disabled={isLunaGenerating}
+              className="px-5 py-3 rounded-2xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 transition-all shadow-md disabled:opacity-50"
+              style={{
+                backgroundColor: selectedAccent.primary,
+              }}
             >
               <Sparkles size={14} />
-              <span>Ask AI</span>
+              <span>Execute</span>
             </button>
           </form>
 
         </div>
       </section>
 
-      {/* ── Interactive 14-Module Showcase: Material 3 Expressive Architecture ── */}
+      {/* ── Complete 17-Module Architecture Showcase ── */}
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-7xl mx-auto space-y-10">
         
         {/* Section Heading */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 text-xs font-extrabold uppercase tracking-wider">
+          <div 
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-xs font-extrabold uppercase tracking-wider"
+            style={{
+              backgroundColor: `${selectedAccent.primary}15`,
+              borderColor: `${selectedAccent.primary}30`,
+              color: selectedAccent.secondary,
+            }}
+          >
             <Layers size={14} />
-            <span>Complete Functional Architecture</span>
+            <span>Complete Unified Workspace</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight font-heading">
-            Every Module Engineered to Perfection
+            Every Aspect of Daily Life, Solved.
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm sm:text-base">
-            LifeOS includes 14 specialized, deeply integrated interfaces. Select any module below to inspect its features and interactive live mockup.
+            LifeOS integrates 17 dedicated interfaces. Select any module below to inspect its features and live interactive preview.
           </p>
         </div>
 
@@ -767,11 +958,12 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 onClick={() => setActiveModule(m.id)}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold shrink-0 transition-all ${
                   isSel
-                    ? 'text-white shadow-lg shadow-blue-600/25 scale-105'
-                    : 'bg-zinc-200/70 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500/40 border border-transparent'
+                    ? 'text-white shadow-lg scale-105'
+                    : 'bg-zinc-200/70 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500/40 border border-transparent'
                 }`}
                 style={{
                   backgroundColor: isSel ? m.accent : undefined,
+                  boxShadow: isSel ? `0 6px 20px -4px ${m.accent}60` : undefined,
                 }}
               >
                 <Icon size={14} />
@@ -782,7 +974,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
         </div>
 
         {/* Detailed Module View Card */}
-        <div className="p-6 sm:p-10 rounded-[36px] bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-xl grid lg:grid-cols-12 gap-8 items-center">
+        <div className="p-6 sm:p-10 rounded-[36px] bg-white dark:bg-[#0D0F16] border border-zinc-200 dark:border-zinc-800 shadow-xl grid lg:grid-cols-12 gap-8 items-center">
           
           {/* Left Column: Feature Highlights */}
           <div className="lg:col-span-7 space-y-6 text-left">
@@ -821,16 +1013,16 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
               ))}
             </div>
 
-            {/* Try Interactive Action in Mockup */}
+            {/* Interactive hint */}
             <div className="pt-2 text-xs font-bold text-zinc-400 flex items-center gap-1.5">
               <Sparkles size={14} style={{ color: currentMod.accent }} />
-              <span>Try the live interactive controls on the right phone frame</span>
+              <span>Interact with the live module controls in the phone frame below</span>
             </div>
           </div>
 
           {/* Right Column: Interactive Phone Mockup Frame */}
           <div className="lg:col-span-5 flex justify-center">
-            <div className="w-[310px] sm:w-[330px] rounded-[48px] p-3.5 bg-zinc-950 border-[6px] border-zinc-800 shadow-2xl shadow-black/60 relative overflow-hidden text-left">
+            <div className="w-[310px] sm:w-[330px] rounded-[48px] p-3.5 bg-zinc-950 border-[6px] border-zinc-800 shadow-2xl relative overflow-hidden text-left">
               
               {/* Phone Speaker & Dynamic Island Camera */}
               <div className="w-24 h-4 bg-zinc-900 rounded-full mx-auto mb-2 flex items-center justify-center">
@@ -847,7 +1039,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
               </div>
 
               {/* Mockup Screen Canvas */}
-              <div className="p-3.5 bg-[#0C0E14] text-white rounded-[32px] min-h-[420px] flex flex-col justify-between space-y-4">
+              <div className="p-3.5 bg-[#000000] text-white rounded-[32px] min-h-[420px] flex flex-col justify-between space-y-4">
                 
                 {/* Header within screen */}
                 <div className="flex items-center justify-between">
@@ -860,8 +1052,8 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                     </div>
                     <span className="font-extrabold text-xs tracking-tight">{currentMod.shortName}</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold font-mono">
-                    ONLINE
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold font-mono">
+                    120 FPS
                   </span>
                 </div>
 
@@ -898,11 +1090,27 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                     </div>
                   )}
 
+                  {/* FLOW ROOM AUDIO PREVIEW */}
+                  {activeModule === 'flow' && (
+                    <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 text-center space-y-2.5">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">
+                        <Zap size={12} /> Flow Room Active
+                      </div>
+                      <div className="text-2xl font-black font-mono text-white">Binaural Beats (Alpha 10Hz)</div>
+                      <p className="text-[10px] text-zinc-400">Zero-download client Web Audio synthesis</p>
+                      <div className="flex justify-center gap-1.5 pt-1">
+                        <span className="px-2.5 py-1 rounded-full bg-indigo-600/30 text-indigo-300 text-[10px] font-bold">Rain</span>
+                        <span className="px-2.5 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold">Alpha Wave</span>
+                        <span className="px-2.5 py-1 rounded-full bg-indigo-600/30 text-indigo-300 text-[10px] font-bold">Brown Noise</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* GYM INTERACTIVE PREVIEW */}
                   {activeModule === 'gym' && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-bold text-rose-400">
-                        <span>PUSH DAY (Chest/Tri)</span>
+                        <span>PUSH HYPERTROPHY</span>
                         <span>Rest: 90s</span>
                       </div>
                       <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
@@ -953,8 +1161,32 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                     </div>
                   )}
 
+                  {/* TASKS INTERACTIVE PREVIEW */}
+                  {activeModule === 'tasks' && (
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Priority Matrix</div>
+                      <div className="space-y-1.5">
+                        {interactiveTasks.map(task => (
+                          <div 
+                            key={task.id}
+                            onClick={() => toggleTask(task.id)}
+                            className={`p-2.5 rounded-xl border flex items-center justify-between text-[11px] cursor-pointer transition-all ${
+                              task.done ? 'bg-purple-950/20 border-purple-500/40 opacity-60 line-through' : 'bg-zinc-900 border-zinc-800'
+                            }`}
+                          >
+                            <span className="font-medium text-white">{task.text}</span>
+                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold">
+                              {task.priority}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-zinc-500 text-center">Tap to toggle completion</p>
+                    </div>
+                  )}
+
                   {/* DEFAULT / OTHER MODULES MOCKUP DISPLAY */}
-                  {activeModule !== 'study' && activeModule !== 'gym' && activeModule !== 'nutrition' && (
+                  {activeModule !== 'study' && activeModule !== 'flow' && activeModule !== 'gym' && activeModule !== 'nutrition' && activeModule !== 'tasks' && (
                     <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-3">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: currentMod.accent }} />
@@ -967,10 +1199,10 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                         </div>
                       </div>
                       <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: '78%', backgroundColor: currentMod.accent }} />
+                        <div className="h-full rounded-full" style={{ width: '84%', backgroundColor: currentMod.accent }} />
                       </div>
                       <div className="flex justify-between text-[10px] text-zinc-400 font-mono">
-                        <span>Status: 100% Synced</span>
+                        <span>Status: 100% Offline</span>
                         <span>0ms Latency</span>
                       </div>
                     </div>
@@ -981,7 +1213,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 {/* Divided Navigation Dock in Mockup */}
                 <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
                   <div className="flex items-center gap-4 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400">
-                    <Compass size={14} className="text-blue-500" />
+                    <Compass size={14} style={{ color: selectedAccent.secondary }} />
                     <Dumbbell size={14} />
                     <Utensils size={14} />
                   </div>
@@ -999,19 +1231,106 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
       </section>
 
+      {/* ── Visual UI Gallery Showcase ── */}
+      <section className="relative z-10 py-16 px-4 sm:px-6 max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <span 
+            className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border"
+            style={{
+              backgroundColor: `${selectedAccent.primary}15`,
+              borderColor: `${selectedAccent.primary}30`,
+              color: selectedAccent.secondary,
+            }}
+          >
+            Real UI Exposure
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black font-heading">
+            Authentic Screen Previews
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+            Engineered exclusively with clean vector iconography, Google Sans Flex variable typography, and liquid glass cards.
+          </p>
+        </div>
+
+        {/* Feature Cards Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+          
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+              <Compass size={20} />
+            </div>
+            <h4 className="text-base font-black">Home Intelligence HUD</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Circadian day phases that adapt lighting automatically, live class countdowns, scheduled workout splits, and habit dots.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+              <Dumbbell size={20} />
+            </div>
+            <h4 className="text-base font-black">Hypertrophy Fitness Tracker</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Split Architect for PPL and custom routines, live set recording with previous session PR hints, and automated rest timers.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <Utensils size={20} />
+            </div>
+            <h4 className="text-base font-black">Nutrition & Mess Meal Plans</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Calorie and macro distribution rings paired with pre-configured college mess menus for breakfast, lunch, snacks, and dinner.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
+              <BookOpen size={20} />
+            </div>
+            <h4 className="text-base font-black">Pomodoro & 365-Day Heatmap</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Deep work timer with subject logs and an annual GitHub-style consistency grid visualizing everyday discipline.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+              <Lock size={20} />
+            </div>
+            <h4 className="text-base font-black">Biometric Hardware Vault</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Native fingerprint & face unlock via AndroidX BiometricPrompt protecting client-side AES-256 encrypted passwords & notes.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <Wallet size={20} />
+            </div>
+            <h4 className="text-base font-black">Finance & Trip Bill Splitter</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Daily spending envelopes with weekly burn velocity and group trip split calculators generating instant WhatsApp payment texts.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
       {/* ── Subscription Fatigue Calculator ── */}
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-5xl mx-auto">
-        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-zinc-900 to-[#0A0B10] border border-zinc-800 shadow-2xl text-left space-y-8">
+        <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-b from-zinc-900 to-[#000000] border border-zinc-800 shadow-2xl text-left space-y-8">
           
           <div className="space-y-2">
             <span className="text-xs font-black uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30">
               Zero Subscription Fatigue
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white font-heading">
-              Replace 5 Separate Paid Subscriptions
+              Replace 6 Disconnected Paid Subscriptions
             </h2>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl">
-              Most productivity platforms charge $5–$15 per month for fitness trackers, Pomodoro timers, and budgeting apps. LifeOS consolidates them all under one high-performance, free open-source APK.
+              Most productivity utilities charge $6–$14 per month individually. LifeOS unifies them all into one private, hardware-accelerated, free open-source APK.
             </p>
           </div>
 
@@ -1046,11 +1365,11 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 <span className="text-lg text-emerald-400 font-sans block">/ year</span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                By sideloading LifeOS directly onto your Android device, you get a clean, lifetime operating system without recurring monthly fees.
+                By sideloading LifeOS directly onto your Android device, you gain a lifetime personal operating system without monthly paywalls or forced accounts.
               </p>
               <div className="pt-2">
                 <a
-                  href={APK_DOWNLOAD_URL}
+                  href={manifest.apkUrl}
                   download="LifeOS.apk"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition-all"
                 >
@@ -1069,46 +1388,62 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-5xl mx-auto space-y-10">
         
         <div className="text-center space-y-3">
-          <span className="text-xs font-black uppercase tracking-wider text-blue-500 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+          <span 
+            className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border"
+            style={{
+              backgroundColor: `${selectedAccent.primary}15`,
+              borderColor: `${selectedAccent.primary}30`,
+              color: selectedAccent.secondary,
+            }}
+          >
             Installation Walkthrough
           </span>
           <h2 className="text-3xl sm:text-4xl font-black font-heading">
             How to Install on Android in 30 Seconds
           </h2>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
-            Android allows direct APK installation. Here are the 3 quick steps to sideload LifeOS onto your device safely.
+            Android natively supports direct APK installation. Follow these 3 easy steps to install LifeOS safely.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 text-left">
           
           <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3 relative shadow-sm">
-            <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/30">
+            <span 
+              className="w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-sm shadow-md"
+              style={{ backgroundColor: selectedAccent.primary }}
+            >
               1
             </span>
             <h4 className="text-base font-black">Download APK</h4>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              Tap the <strong>Download APK</strong> button. Your mobile browser will fetch the signed <strong>LifeOS.apk</strong> package (14.4 MB).
+              Tap the <strong>Download APK</strong> button. Your mobile browser will fetch the signed <strong>LifeOS.apk</strong> package ({manifest.apkSize}).
             </p>
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3 relative shadow-sm">
-            <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/30">
+            <span 
+              className="w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-sm shadow-md"
+              style={{ backgroundColor: selectedAccent.primary }}
+            >
               2
             </span>
-            <h4 className="text-base font-black">Allow Unknown Source</h4>
+            <h4 className="text-base font-black">Tap "Download Anyway"</h4>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              Chrome may display a standard prompt: <em>"File might be harmful"</em>. Tap <strong>Download anyway</strong> (Android standard notice for all direct non-store APKs).
+              Chrome may display a standard notice: <em>"File might be harmful"</em>. Tap <strong>Download anyway</strong> (Android standard notice for all direct non-store APKs).
             </p>
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3 relative shadow-sm">
-            <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-600/30">
+            <span 
+              className="w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-sm shadow-md"
+              style={{ backgroundColor: selectedAccent.primary }}
+            >
               3
             </span>
             <h4 className="text-base font-black">Tap Install & Launch</h4>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              Open the downloaded file from notifications or your Downloads app, tap <strong>Install</strong>, and launch your personalized LifeOS!
+              Open the downloaded file from notifications or Downloads, tap <strong>Install</strong>, and launch your personalized LifeOS!
             </p>
           </div>
 
@@ -1121,7 +1456,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <div>
               <span className="font-bold">Cryptographic Integrity Checksum (SHA-256):</span>
               <div className="font-mono text-[10px] text-zinc-500 dark:text-zinc-400 break-all select-all pt-0.5">
-                {SHA_256_HASH}
+                {manifest.sha256}
               </div>
             </div>
           </div>
@@ -1138,9 +1473,20 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
       {/* ── Final Call to Action ── */}
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-4xl mx-auto text-center space-y-6">
-        <div className="p-8 sm:p-12 rounded-[40px] bg-gradient-to-br from-blue-600/20 via-indigo-600/10 to-rose-600/20 border border-blue-500/30 shadow-2xl backdrop-blur-xl space-y-6">
-          
-          <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-600/40">
+        <div 
+          className="p-8 sm:p-12 rounded-[40px] border shadow-2xl backdrop-blur-xl space-y-6"
+          style={{
+            backgroundColor: isDarkLocal ? '#090B10' : '#FFFFFF',
+            borderColor: `${selectedAccent.primary}40`,
+          }}
+        >
+          <div 
+            className="w-14 h-14 rounded-2xl text-white flex items-center justify-center mx-auto shadow-xl"
+            style={{
+              backgroundColor: selectedAccent.primary,
+              boxShadow: `0 8px 24px -4px ${selectedAccent.primary}60`,
+            }}
+          >
             <Sparkles size={28} />
           </div>
 
@@ -1149,30 +1495,34 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           </h2>
 
           <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 max-w-xl mx-auto">
-            Take command of your day with genuine Material 3 Expressive motion and Gemini AI ambient intelligence.
+            Take command of your day with genuine Material 3 Expressive motion and Luna AI autonomous intelligence.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <a
-              href={APK_DOWNLOAD_URL}
+              href={manifest.apkUrl}
               download="LifeOS.apk"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-base shadow-xl shadow-blue-600/40 transition-all hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl transition-all hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: selectedAccent.primary,
+                boxShadow: `0 10px 28px -4px ${selectedAccent.primary}60`,
+              }}
             >
               <Download size={18} />
-              <span>Download LifeOS.apk (v2.1.3)</span>
+              <span>Download LifeOS.apk (v{manifest.versionName})</span>
             </a>
 
             <button
               onClick={() => setShowQrModal(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 font-bold text-sm hover:border-blue-500/50 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 font-bold text-sm hover:border-zinc-500 transition-all"
             >
-              <QrCode size={16} className="text-blue-500" />
+              <QrCode size={16} style={{ color: selectedAccent.secondary }} />
               <span>Mobile QR Code</span>
             </button>
           </div>
 
           <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
-            Android 8.0+ Required • ARM64 / Universal Build • 100% Free & Open Source
+            Android 8.0+ Required • ARM64 Universal Build • 100% Free & Open Source
           </div>
 
         </div>
@@ -1181,17 +1531,17 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       {/* ── Footer ── */}
       <footer className="relative z-10 py-10 border-t border-zinc-200/80 dark:border-zinc-800/80 text-center text-xs text-zinc-500 space-y-2">
         <p className="font-bold text-zinc-700 dark:text-zinc-300">
-          LifeOS — Your Daily Routine, Engineered.
+          LifeOS — The Unified Personal Operating System.
         </p>
         <p className="text-[11px]">
-          Crafted with Material 3 Expressive, Capacitor 8, and Gemini AI by Gujjeti Avineesh.
+          Crafted with Material 3 Expressive, Liquid Glass, Capacitor 8, and Luna AI Core by Gujjeti Avineesh.
         </p>
       </footer>
 
       {/* ── Mobile QR Code Modal ── */}
       <AnimatePresence>
         {showQrModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1205,7 +1555,13 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 <X size={18} />
               </button>
 
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-500 flex items-center justify-center mx-auto">
+              <div 
+                className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
+                style={{
+                  backgroundColor: `${selectedAccent.primary}20`,
+                  color: selectedAccent.secondary,
+                }}
+              >
                 <QrCode size={24} />
               </div>
 
@@ -1220,14 +1576,14 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
               {/* QR Image via public QR server */}
               <div className="p-4 rounded-2xl bg-white flex items-center justify-center border border-zinc-200 w-48 h-48 mx-auto">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(APK_DOWNLOAD_URL)}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(manifest.apkUrl)}`}
                   alt="LifeOS Download QR Code"
                   className="w-full h-full object-contain"
                 />
               </div>
 
               <div className="text-[11px] font-mono text-zinc-400 break-all select-all">
-                {APK_DOWNLOAD_URL}
+                {manifest.apkUrl}
               </div>
 
               <button
