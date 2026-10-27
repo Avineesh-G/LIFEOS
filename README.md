@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/luna-crescent-focal-orb.svg" width="112" height="112" alt="LifeOS Logo" />
+<img src="public/icon.svg" width="96" height="96" alt="LifeOS Logo" />
 
 # LifeOS
 

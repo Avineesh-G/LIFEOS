@@ -614,8 +614,8 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 boxShadow: `0 8px 24px -4px ${selectedAccent.primary}40`,
               }}
             >
-              <div className="w-full h-full bg-[#0C0E14] rounded-[14px] flex items-center justify-center">
-                <Sparkles size={20} style={{ color: selectedAccent.secondary }} />
+              <div className="w-full h-full bg-[#0C0E14] rounded-[14px] flex items-center justify-center p-1">
+                <img src="/icon.svg" width="22" height="22" alt="LifeOS Logo" />
               </div>
             </div>
             <div>
