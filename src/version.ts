@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 69,
-  versionName: '3.3.2',
-  releaseDate: '2026-10-26',
+  versionCode: 70,
+  versionName: '3.3.3',
+  releaseDate: '2026-11-02',
   apkSize: '8.93 MB',
-  apkSizeBytes: 9361966,
-  releaseNotes: "LifeOS v3.3.2 (Build 69):\n• Layout Restoration: Reverted to standard clean vertical view layouts across Outings, Nutrition, Shopping Lists, and Laundry\n• Native Stability: Ensured 100% stable, jitter-free navigation across all device views\n• Full 120fps Performance: Optimized memory footprint and fluid gesture response",
+  apkSizeBytes: 9365562,
+  releaseNotes: "LifeOS v3.3.3 (Build 70):\n• November 2026 Mess Menu: Complete 30-day schedule with full Veg, Non-Veg, and Special Mess options\n• Nutrition Diary: Interactive 1-tap food logging with portion adjustment and accurate calorie tracking\n• Native Stability: Jitter-free navigation and 120 FPS fluid motion across all device views",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

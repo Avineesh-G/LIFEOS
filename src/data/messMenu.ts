@@ -80,517 +80,6 @@ export const HARDCODED_MESS_MENU: WeeklyMenu[] = [
 export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
   {
     "date": 1,
-    "dayName": "Thursday",
-    "meals": [
-      {
-        "slot": "breakfast",
-        "items": [
-          {
-            "name": "Methi Poori (3 Pcs standard size)",
-            "estCalories": 240
-          },
-          {
-            "name": "Lemon Sevai",
-            "estCalories": 180
-          },
-          {
-            "name": "Aloo Mutter Curry",
-            "estCalories": 150
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "White Bread+Butter+Jam",
-            "estCalories": 150
-          },
-          {
-            "name": "Sprouts (1 small cup)",
-            "estCalories": 50
-          },
-          {
-            "name": "Tea/Coffee/Milk",
-            "estCalories": 80
-          },
-          {
-            "name": "Masala Onion Omelet",
-            "diet": "non-veg",
-            "estCalories": 120
-          }
-        ]
-      },
-      {
-        "slot": "lunch",
-        "items": [
-          {
-            "name": "Carrot & Cucumber Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Pulka",
-            "estCalories": 80
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Sorrel Leaves Dal (Gongura Pappu)",
-            "estCalories": 140
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
-          },
-          {
-            "name": "Pudina Rice",
-            "estCalories": 180
-          },
-          {
-            "name": "Guthi Vankaya Curry",
-            "estCalories": 160
-          },
-          {
-            "name": "Ridge Gourd Fry",
-            "estCalories": 100
-          },
-          {
-            "name": "Finger Fryums",
-            "estCalories": 70
-          },
-          {
-            "name": "Lemon Water w/o Sugar + Sabja Seeds",
-            "estCalories": 20
-          },
-          {
-            "name": "Potlakaya Perugu Chutney",
-            "estCalories": 60
-          },
-          {
-            "name": "Ghee + Podi",
-            "estCalories": 60
-          }
-        ]
-      },
-      {
-        "slot": "snacks",
-        "items": [
-          {
-            "name": "Veg Puff",
-            "estCalories": 220
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
-          },
-          {
-            "name": "Tea/Coffee/Milk",
-            "estCalories": 80
-          }
-        ]
-      },
-      {
-        "slot": "dinner",
-        "items": [
-          {
-            "name": "Onions & Lemon Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Roti",
-            "estCalories": 100
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Dal Fry",
-            "estCalories": 150
-          },
-          {
-            "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
-          },
-          {
-            "name": "Veg Manchuria",
-            "estCalories": 180
-          },
-          {
-            "name": "Noodles",
-            "estCalories": 200
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
-          },
-          {
-            "name": "Butternut Squash Curry",
-            "estCalories": 120
-          },
-          {
-            "name": "Thick Curd",
-            "estCalories": 80
-          },
-          {
-            "name": "Banana",
-            "estCalories": 90
-          },
-          {
-            "name": "Ginger Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Milk + Coffee Powder",
-            "estCalories": 80
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "date": 2,
-    "dayName": "Friday",
-    "meals": [
-      {
-        "slot": "breakfast",
-        "items": [
-          {
-            "name": "Uggani + Mirchi Bajji",
-            "estCalories": 280
-          },
-          {
-            "name": "Vegetable Daliya Kitchidi",
-            "estCalories": 160
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Mango Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Brown Bread+Butter+Jam",
-            "estCalories": 150
-          },
-          {
-            "name": "Sprouts (1 small cup)",
-            "estCalories": 50
-          },
-          {
-            "name": "Tea/Coffee/Milk",
-            "estCalories": 80
-          },
-          {
-            "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
-          }
-        ]
-      },
-      {
-        "slot": "lunch",
-        "items": [
-          {
-            "name": "Beetroot & Cucumber Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Chapathi",
-            "estCalories": 100
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Dal Tadka",
-            "estCalories": 150
-          },
-          {
-            "name": "Rasam",
-            "estCalories": 50
-          },
-          {
-            "name": "Jeera Rice",
-            "estCalories": 180
-          },
-          {
-            "name": "Raw Banana Fry",
-            "estCalories": 120
-          },
-          {
-            "name": "Red Lentil Pumpkin Curry",
-            "estCalories": 130
-          },
-          {
-            "name": "Papad",
-            "estCalories": 40
-          },
-          {
-            "name": "Butter Milk",
-            "estCalories": 50
-          },
-          {
-            "name": "Beerakaya Chutney",
-            "estCalories": 40
-          },
-          {
-            "name": "Moong Dal Payasam",
-            "estCalories": 180
-          }
-        ]
-      },
-      {
-        "slot": "snacks",
-        "items": [
-          {
-            "name": "Raw Banana Bhajji 2 PCs (Less Oily)",
-            "estCalories": 180
-          },
-          {
-            "name": "Coconut Coriander Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Ginger Tea/Coffee/Milk",
-            "estCalories": 80
-          }
-        ]
-      },
-      {
-        "slot": "dinner",
-        "items": [
-          {
-            "name": "Onions & Lemon Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Lacha Paratha",
-            "estCalories": 220
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Pesara Pappu",
-            "estCalories": 130
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
-          },
-          {
-            "name": "Garlic Chicken Curry",
-            "diet": "non-veg",
-            "estCalories": 240
-          },
-          {
-            "name": "Paneer Lababdar",
-            "diet": "veg",
-            "estCalories": 230
-          },
-          {
-            "name": "Tomato Peas Capsicum Masala",
-            "estCalories": 120
-          },
-          {
-            "name": "Thick Curd",
-            "estCalories": 80
-          },
-          {
-            "name": "(Watermelon + Muskmelon + Papaya) Cut Fruit",
-            "estCalories": 70
-          },
-          {
-            "name": "Mango Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Milk + Coffee Powder",
-            "estCalories": 80
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "date": 3,
-    "dayName": "Saturday",
-    "meals": [
-      {
-        "slot": "breakfast",
-        "items": [
-          {
-            "name": "Mix Veg Utappam - 2 Pcs Std Size",
-            "estCalories": 220
-          },
-          {
-            "name": "Vegetable Poha",
-            "estCalories": 180
-          },
-          {
-            "name": "Peanut Chutney",
-            "estCalories": 70
-          },
-          {
-            "name": "Tomato Chutney",
-            "estCalories": 40
-          },
-          {
-            "name": "White Bread+Butter+Jam",
-            "estCalories": 150
-          },
-          {
-            "name": "Sprouts (1 small cup)",
-            "estCalories": 50
-          },
-          {
-            "name": "Tea/Coffee/Milk",
-            "estCalories": 80
-          },
-          {
-            "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
-          }
-        ]
-      },
-      {
-        "slot": "lunch",
-        "items": [
-          {
-            "name": "Carrot & Cucumber Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Pulka",
-            "estCalories": 80
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Mudda Pappu",
-            "estCalories": 140
-          },
-          {
-            "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
-          },
-          {
-            "name": "Pulihora (Tamarind Rice)",
-            "estCalories": 200
-          },
-          {
-            "name": "Dondakaya Stir Fry",
-            "estCalories": 100
-          },
-          {
-            "name": "Chole Curry",
-            "estCalories": 180
-          },
-          {
-            "name": "Papad",
-            "estCalories": 40
-          },
-          {
-            "name": "Majjiga Pulusu",
-            "estCalories": 60
-          },
-          {
-            "name": "Avakaya (Mango Pickle)",
-            "estCalories": 20
-          },
-          {
-            "name": "Ghee + Podi",
-            "estCalories": 60
-          }
-        ]
-      },
-      {
-        "slot": "snacks",
-        "items": [
-          {
-            "name": "Punugulu 8 Pcs Medium Size",
-            "estCalories": 240
-          },
-          {
-            "name": "Groundnut/Coconut Chutney",
-            "estCalories": 60
-          },
-          {
-            "name": "Cold Badam Milk (1 Medium Glass)",
-            "estCalories": 150
-          }
-        ]
-      },
-      {
-        "slot": "dinner",
-        "items": [
-          {
-            "name": "Beetroot & Carrot Salad",
-            "estCalories": 30
-          },
-          {
-            "name": "Roti",
-            "estCalories": 100
-          },
-          {
-            "name": "White Rice",
-            "estCalories": 150
-          },
-          {
-            "name": "Dal Maharani",
-            "estCalories": 160
-          },
-          {
-            "name": "Bendakaya (Bhindi) Pulusu",
-            "estCalories": 110
-          },
-          {
-            "name": "Vegetable Fried Rice",
-            "estCalories": 210
-          },
-          {
-            "name": "Gobhi Manchuria",
-            "estCalories": 180
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
-          },
-          {
-            "name": "Cabbage Beans Poriyal",
-            "estCalories": 90
-          },
-          {
-            "name": "Thick Curd",
-            "estCalories": 80
-          },
-          {
-            "name": "Fruit Custard with Pineapple",
-            "estCalories": 150
-          },
-          {
-            "name": "Red Chilli Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Milk + Coffee Powder",
-            "estCalories": 80
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "date": 4,
     "dayName": "Sunday",
     "meals": [
       {
@@ -598,26 +87,22 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Shavige Bath",
-            "estCalories": 180
+            "estCalories": 200
           },
           {
             "name": "Paneer Paratha - 2 Pcs Thin",
-            "estCalories": 260
+            "estCalories": 280
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Peanut Chutney",
+            "estCalories": 60
           },
           {
-            "name": "Thick Curd",
+            "name": "Thick Curd, Mango Pickle",
             "estCalories": 80
           },
           {
-            "name": "Mango Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Brown Bread+Butter+Jam",
+            "name": "Brown Bread+butter+Jam",
             "estCalories": 150
           },
           {
@@ -630,8 +115,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 140,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Apple + Pomegranate Fresh Juice without Sugar",
+            "estCalories": 80
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Raagi Malt",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -640,7 +142,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Chapathi",
@@ -660,7 +162,12 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Chicken Thick Gravy / Hyderabadi Mirchi Ka Salan",
-            "estCalories": 180
+            "estCalories": 180,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Tomato Rasam",
+            "estCalories": 45
           },
           {
             "name": "Onion Raitha",
@@ -671,16 +178,24 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 70
           },
           {
-            "name": "Nannari Sharbath",
-            "estCalories": 90
-          },
-          {
-            "name": "Fresh Gongura Chutney",
+            "name": "Mint Lemon Jal Jeera Drink (200 ml)",
             "estCalories": 40
           },
           {
+            "name": "Fresh Gongura Chutney",
+            "estCalories": 35
+          },
+          {
             "name": "Basundhi (60 ml)",
-            "estCalories": 180
+            "estCalories": 160
+          },
+          {
+            "name": "Vanilla Ice Cream (Not Frozen Dessert)",
+            "estCalories": 140
+          },
+          {
+            "name": "Gulab Jamun",
+            "estCalories": 150
           }
         ]
       },
@@ -688,7 +203,12 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Plum Cake (Egg Less) 1 Big Pc",
+            "name": "Cup Cake (Egg Less) 2 Pcs",
+            "estCalories": 180,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Dahi Puri (8 Pcs)",
             "estCalories": 220
           },
           {
@@ -717,19 +237,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Radish Sambar",
             "estCalories": 80
           },
           {
-            "name": "Ragi Idly",
-            "estCalories": 120
+            "name": "Ragi Idly, Groundnut Chutney",
+            "estCalories": 190
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 60
-          },
-          {
-            "name": "Dondakaya Fry",
+            "name": "Dondakaya Stir Fry",
             "estCalories": 100
           },
           {
@@ -751,13 +267,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Lemon Coriander Soup",
+            "estCalories": 45
           }
         ]
       }
     ]
   },
   {
-    "date": 5,
+    "date": 2,
     "dayName": "Monday",
     "meals": [
       {
@@ -772,12 +292,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 70
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Groundnut Chutney, Sambar",
+            "estCalories": 60
           },
           {
             "name": "Chole Curry",
@@ -797,8 +313,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Banana Milk Shake without Sugar",
+            "estCalories": 120
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Mixed Beans Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -807,7 +336,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Boiled Chana Salad with Onion & Tomato",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Chapathi",
@@ -822,16 +351,16 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Brinjal Sambar",
             "estCalories": 80
           },
           {
             "name": "Tomato Rice",
-            "estCalories": 180
+            "estCalories": 190
           },
           {
             "name": "Pesara Punugulu Curry (Pakka Andhra Style)",
-            "estCalories": 160
+            "estCalories": 170
           },
           {
             "name": "Capsicum Tomato Masala",
@@ -843,19 +372,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Sorakaya Perugu Chutney",
             "estCalories": 60
           },
           {
-            "name": "Ghee + Podi",
-            "estCalories": 60
+            "name": "Jilebi",
+            "estCalories": 160
           },
           {
-            "name": "Jilebi",
-            "estCalories": 180
+            "name": "Ghee + Podi",
+            "estCalories": 60
           }
         ]
       },
@@ -864,7 +393,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Dry Maggi (Non-Sticky)",
-            "estCalories": 250
+            "estCalories": 220
           },
           {
             "name": "Tomato Sauce",
@@ -881,10 +410,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
-            "name": "Methi Roti",
+            "name": "Roti",
             "estCalories": 100
           },
           {
@@ -896,49 +425,57 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Tomato Rasam",
-            "estCalories": 50
+            "name": "Andhra Charu",
+            "estCalories": 45
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
-            "name": "Chicken Mughlai",
-            "diet": "non-veg",
-            "estCalories": 260
+            "name": "Hyderabadi Chicken Curry",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
             "name": "Paneer Butter Masala",
-            "diet": "veg",
-            "estCalories": 240
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Ladies Finger Boiled Fry",
-            "estCalories": 90
+            "estCalories": 100
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Black Grapes, Banana, Pomegranate)",
-            "estCalories": 80
+            "name": "Water Melon Cut Fruit",
+            "estCalories": 50
           },
           {
-            "name": "Gongura Pickle",
-            "estCalories": 20
+            "name": "Radish Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Butter Methi Naan",
+            "estCalories": 220
+          },
+          {
+            "name": "Sweet Corn Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 6,
+    "date": 3,
     "dayName": "Tuesday",
     "meals": [
       {
@@ -946,11 +483,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onion Dosa - 2 Pcs Std Size",
-            "estCalories": 200
+            "estCalories": 240
           },
           {
             "name": "Vada Pav",
-            "estCalories": 250
+            "estCalories": 220
           },
           {
             "name": "Coconut Chutney",
@@ -958,7 +495,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Mint Chutney",
-            "estCalories": 30
+            "estCalories": 35
           },
           {
             "name": "Brown Bread+Butter+Jam",
@@ -974,8 +511,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Pomegranate Fresh Juice without Sugar",
+            "estCalories": 70
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Crunchy Soya Vegetable Salad",
+            "estCalories": 80,
+            "diet": "veg"
           }
         ]
       },
@@ -1000,11 +554,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Bisbele Bath",
-            "estCalories": 220
+            "estCalories": 210
           },
           {
             "name": "Kakarakaya (Bitter Gourd) Fry",
@@ -1012,15 +566,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
             "name": "Potato Chips",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Dahi Vada",
-            "estCalories": 160
+            "estCalories": 150
           },
           {
             "name": "Dosakaya Tomato Chutney",
@@ -1029,6 +583,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Makkan Peda",
+            "estCalories": 180
           }
         ]
       },
@@ -1040,12 +598,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 220
           },
           {
-            "name": "Tomato Sauce",
+            "name": "Tomato Sauce, Salt Mirchi",
             "estCalories": 20
-          },
-          {
-            "name": "Salt Mirchi",
-            "estCalories": 15
           },
           {
             "name": "Ginger Tea/Coffee/Milk",
@@ -1070,10 +624,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
-            "name": "Sambar",
+            "name": "Kadamba Sambar",
             "estCalories": 80
           },
           {
@@ -1081,8 +635,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Snake Gourd Poriyal",
-            "estCalories": 90
+            "name": "Cluster Beans Coconut Fry",
+            "estCalories": 110
           },
           {
             "name": "Aloo Mutter Curry",
@@ -1093,43 +647,47 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Guava Fruit",
-            "estCalories": 60
+            "name": "Banana Fruit",
+            "estCalories": 90
           },
           {
-            "name": "Tomato Pickle",
+            "name": "Ginger Pickle",
             "estCalories": 20
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Broccoli Soup",
+            "estCalories": 50
           }
         ]
       }
     ]
   },
   {
-    "date": 7,
+    "date": 4,
     "dayName": "Wednesday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Methi Vada (Big size 3pcs, if not 4pcs)",
-            "estCalories": 210
+            "name": "Pesarattu Thin 2 Pcs Std Size",
+            "estCalories": 220
           },
           {
-            "name": "Cucumber Poha",
-            "estCalories": 170
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Tomato Suji Upma",
+            "estCalories": 180
           },
           {
             "name": "Coconut Chutney",
             "estCalories": 50
+          },
+          {
+            "name": "Ginger Chutney",
+            "estCalories": 40
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -1145,8 +703,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Onion Omelet",
-            "diet": "non-veg",
-            "estCalories": 120
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Pineapple Fresh Juice without Sugar",
+            "estCalories": 75
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Greek Yogurt Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -1155,7 +726,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Palak Roti",
@@ -1171,18 +742,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Pachi Pulusu",
-            "estCalories": 60
+            "estCalories": 50
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
-            "name": "Hyderabadi Chicken Curry",
-            "estCalories": 240
+            "name": "Kadai Chicken",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Shahi Paneer",
+            "name": "Kadai Paneer",
             "estCalories": 230
           },
           {
@@ -1190,16 +762,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Butter Milk",
-            "estCalories": 50
-          },
-          {
-            "name": "Fresh Vegetable Chutney",
+            "name": "Papad",
             "estCalories": 40
           },
           {
-            "name": "Badusha",
-            "estCalories": 180
+            "name": "Butter Milk",
+            "estCalories": 45
+          },
+          {
+            "name": "Fresh Vegetable Chutney",
+            "estCalories": 35
+          },
+          {
+            "name": "Semiya Sabudana Kheer",
+            "estCalories": 160
           }
         ]
       },
@@ -1207,15 +783,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Onion Soft Pakoda (Less Oily)",
-            "estCalories": 200
+            "name": "Bhelpuri",
+            "estCalories": 180
           },
           {
-            "name": "Tomato Chutney",
-            "estCalories": 40
-          },
-          {
-            "name": "Tea/Coffee/Milk",
+            "name": "Ginger Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -1240,19 +812,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Garlic Rasam",
+            "estCalories": 45
           },
           {
-            "name": "Broken Wheat Rava Upma",
-            "estCalories": 160
+            "name": "Broken Wheat Rava Upma, Coconut Chutney",
+            "estCalories": 190
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Bottle Gourd Chana Dal Fry",
+            "name": "Bottle Guard Chana Dal Fry",
             "estCalories": 110
           },
           {
@@ -1264,8 +832,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Pomegranate, Pineapple, Green grapes)",
-            "estCalories": 80
+            "name": "Pine Apple Cut Fruit",
+            "estCalories": 60
           },
           {
             "name": "Lemon Pickle",
@@ -1274,50 +842,57 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Tomato Soup with Roasted Bread",
+            "estCalories": 70
           }
         ]
       }
     ]
   },
   {
-    "date": 8,
+    "date": 5,
     "dayName": "Thursday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Poori (3 pcs standard size)",
+            "name": "Medu Vada (3 Pcs)",
             "estCalories": 240
           },
           {
-            "name": "Rice Rava Kitchidi",
-            "estCalories": 180
+            "name": "Pav Bhaji",
+            "estCalories": 250
           },
           {
-            "name": "Aloo Basin Chutney",
-            "estCalories": 120
+            "name": "Sambar",
+            "estCalories": 80
           },
           {
-            "name": "Dal Chutney",
-            "estCalories": 60
+            "name": "Coconut Chutney",
+            "estCalories": 50
           },
           {
             "name": "Brown Bread+Butter+Jam",
             "estCalories": 150
           },
           {
-            "name": "Ragi Malt with Salt (1 Medium Glass)",
-            "estCalories": 90
+            "name": "Sprouts (1 small cup)",
+            "estCalories": 50
           },
           {
             "name": "Tea/Coffee/Milk",
             "estCalories": 80
           },
           {
-            "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "name": "Papaya Fresh Juice without Sugar",
+            "estCalories": 70
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
           }
         ]
       },
@@ -1338,10 +913,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Ridge Gourd Dal",
-            "estCalories": 140
+            "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Drumstick Brinjal Sambar",
             "estCalories": 80
           },
           {
@@ -1354,7 +929,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Kala Chana Masala",
-            "estCalories": 170
+            "estCalories": 160
           },
           {
             "name": "Finger Fryums",
@@ -1362,7 +937,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Lemon Water + Sabja Seeds",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Potlakaya Perugu Chutney",
@@ -1371,6 +946,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Mothichoor Laddu",
+            "estCalories": 170
           }
         ]
       },
@@ -1378,11 +957,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Sambar Vada 2 Pcs (Separate)",
+            "name": "Mysore Bonda 2 Pcs Std Size (Less Oily)",
             "estCalories": 220
           },
           {
-            "name": "Masala Tea/Coffee/Milk",
+            "name": "Coconut Chutney",
+            "estCalories": 50
+          },
+          {
+            "name": "Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -1408,74 +991,90 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Veg Manchurian",
-            "estCalories": 180
+            "name": "Veg Manchurian, Noodles, Tomato Sauce",
+            "estCalories": 280
           },
           {
-            "name": "Noodles",
-            "estCalories": 200
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "name": "Dhaba Style Egg Curry",
+            "estCalories": 180,
+            "diet": "non-veg"
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Sweet Lime",
+            "name": "Green Grapes",
             "estCalories": 60
           },
           {
-            "name": "Ginger Pickle",
-            "estCalories": 20
+            "name": "Gongura Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Chicken Tikka Fry/Malabar Fish Fry",
+            "estCalories": 240,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Paneer Tikka/Chilli Babycorn",
+            "estCalories": 210,
+            "diet": "veg"
+          },
+          {
+            "name": "Paneer Bhurji",
+            "estCalories": 200,
+            "diet": "veg"
+          },
+          {
+            "name": "Creamy Mushroom Soup",
+            "estCalories": 75
           }
         ]
       }
     ]
   },
   {
-    "date": 9,
+    "date": 6,
     "dayName": "Friday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Pesarattu Thin 2 Pcs Std Size",
-            "estCalories": 200
+            "name": "Poori (3 pcs standard size)",
+            "estCalories": 240
           },
           {
-            "name": "Tomato Suji Upma",
-            "estCalories": 170
+            "name": "Rice Rava Upma (Dry)",
+            "estCalories": 180
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Aloo Basin Chutney",
+            "estCalories": 70
           },
           {
-            "name": "Ginger Chutney",
-            "estCalories": 40
+            "name": "Dal Chutney",
+            "estCalories": 60
           },
           {
-            "name": "White Bread+Butter+Jam",
+            "name": "Brown Bread+Butter+Jam",
             "estCalories": 150
           },
           {
-            "name": "Sprouts (1 small cup)",
-            "estCalories": 50
+            "name": "Ragi Malt with Salt (1 Medium Glass)",
+            "estCalories": 90
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -1483,8 +1082,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Grapes Fresh Juice with Light Sugar",
+            "estCalories": 90
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chick Peas Salad",
+            "estCalories": 85,
+            "diet": "veg"
           }
         ]
       },
@@ -1508,8 +1124,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 150
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Andhra Charu",
+            "estCalories": 45
           },
           {
             "name": "Jeera Rice",
@@ -1520,8 +1136,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 120
           },
           {
-            "name": "Cauliflower Stir Fry (Less Oil)",
-            "estCalories": 100
+            "name": "Turnip Spinach Curry (Punjabi Style)",
+            "estCalories": 120
           },
           {
             "name": "Papad",
@@ -1537,7 +1153,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Carrot Halwa",
-            "estCalories": 200
+            "estCalories": 180
           }
         ]
       },
@@ -1545,15 +1161,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Mysore Bonda 2 Pcs Std Size (Less Oily)",
-            "estCalories": 220
+            "name": "Sambar Vada 2 Pcs (Separate)",
+            "estCalories": 240
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Tea/Coffee/Milk",
+            "name": "Masala Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -1563,11 +1175,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Beetroot Chapathi",
-            "estCalories": 110
+            "estCalories": 105
           },
           {
             "name": "White Rice",
@@ -1578,45 +1190,49 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Mix Veg Sambar",
             "estCalories": 80
           },
           {
-            "name": "Kadai Chicken",
-            "diet": "non-veg",
-            "estCalories": 250
+            "name": "Chicken Tikka Masala",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Kadai Paneer",
-            "diet": "veg",
-            "estCalories": 240
+            "name": "Paneer Lababdar",
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Amritsari Chole",
-            "estCalories": 180
+            "estCalories": 170
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "(Watermelon + Muskmelon + Papaya) Cut Fruit",
-            "estCalories": 70
+            "name": "Muskmelon Cut Fruit",
+            "estCalories": 50
           },
           {
-            "name": "Fresh Vegetable Chutney/Pickle",
-            "estCalories": 30
+            "name": "Amla Pickle",
+            "estCalories": 20
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Mix Veg Raagi Soup",
+            "estCalories": 55
           }
         ]
       }
     ]
   },
   {
-    "date": 10,
+    "date": 7,
     "dayName": "Saturday",
     "meals": [
       {
@@ -1628,11 +1244,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Moong Dal Palak Tepla (Hand Made) 2 Pcs",
-            "estCalories": 200
+            "estCalories": 220
           },
           {
             "name": "Groundnut Chutney",
-            "estCalories": 70
+            "estCalories": 60
           },
           {
             "name": "Onion Tomato Chutney",
@@ -1652,8 +1268,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Mosambi Fresh Juice without Sugar",
+            "estCalories": 65
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Peanut Sundal",
+            "estCalories": 110,
+            "diet": "veg"
           }
         ]
       },
@@ -1677,7 +1310,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Beetroot Tomato Rasam",
+            "name": "Pachi Pulusu",
             "estCalories": 50
           },
           {
@@ -1685,8 +1318,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 200
           },
           {
-            "name": "Cauliflower Fry",
-            "estCalories": 110
+            "name": "Cauli Flower Fry",
+            "estCalories": 120
           },
           {
             "name": "Chole Curry",
@@ -1698,7 +1331,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Majjiga Pulusu",
-            "estCalories": 60
+            "estCalories": 65
           },
           {
             "name": "Avakaya (Mango Pickle)",
@@ -1707,6 +1340,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Cauli Flower Tomato Stir Fry",
+            "estCalories": 120
+          },
+          {
+            "name": "Chocolate Cake (Egg Less)",
+            "estCalories": 180,
+            "diet": "non-veg"
           }
         ]
       },
@@ -1715,14 +1357,18 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Vada Pav 2 Pcs",
-            "estCalories": 320
+            "estCalories": 360
           },
           {
             "name": "Mint Sauce",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Cold Badam Milk (1 Medium Glass)",
+            "estCalories": 150
+          },
+          {
+            "name": "Cold Badam Milk 150 ml",
             "estCalories": 150
           }
         ]
@@ -1748,27 +1394,23 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Drumstick Sambar",
-            "estCalories": 85
+            "estCalories": 80
           },
           {
-            "name": "Ghee + Podi + Idly",
-            "estCalories": 180
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Ghee + Podi + Idly, Coconut Chutney",
+            "estCalories": 220
           },
           {
             "name": "Tomato Baingan Fry",
-            "estCalories": 100
+            "estCalories": 110
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Muskmelon Cut Fruit",
-            "estCalories": 60
+            "name": "Banana",
+            "estCalories": 90
           },
           {
             "name": "Red Chilli Pickle",
@@ -1777,13 +1419,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Veg Manchow Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 11,
+    "date": 8,
     "dayName": "Sunday",
     "meals": [
       {
@@ -1791,23 +1437,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Shavige Bath",
-            "estCalories": 180
+            "estCalories": 200
           },
           {
-            "name": "Mix Veg Paratha (2 Pcs Thin)",
-            "estCalories": 240
+            "name": "Aloo Paratha (2 Pcs Thin)",
+            "estCalories": 260
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 70
+            "name": "Mint Coriander Chutney",
+            "estCalories": 35
           },
           {
-            "name": "Thick Curd",
+            "name": "Thick Curd, Mango Pickle",
             "estCalories": 80
-          },
-          {
-            "name": "Mango Pickle",
-            "estCalories": 20
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -1823,8 +1465,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 140,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Apple + Pomegranate Fresh Juice without Sugar",
+            "estCalories": 80
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Ragi Malt",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -1833,7 +1488,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Chapathi",
@@ -1845,7 +1500,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
             "name": "Chicken Fry Piece Biryani/Paneer Fry Piece Biryani",
@@ -1853,27 +1508,36 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Chicken Thick Gravy / Hyderabadi Mirchi Ka Salan",
-            "estCalories": 180
+            "estCalories": 180,
+            "diet": "non-veg"
           },
           {
             "name": "Onion Raitha",
             "estCalories": 60
           },
           {
+            "name": "Tomato Rasam",
+            "estCalories": 45
+          },
+          {
             "name": "Fryums",
             "estCalories": 70
           },
           {
-            "name": "Nannari Sharbath",
-            "estCalories": 90
-          },
-          {
-            "name": "Fresh Gongura Chutney",
+            "name": "Mint Lemon Jal Jeera Drink (200 ml)",
             "estCalories": 40
           },
           {
+            "name": "Fresh Gongura Chutney",
+            "estCalories": 35
+          },
+          {
             "name": "Vanilla Ice Cream (Not Frozen Dessert)",
-            "estCalories": 160
+            "estCalories": 140
+          },
+          {
+            "name": "Gajar Ka Halwa",
+            "estCalories": 180
           }
         ]
       },
@@ -1886,7 +1550,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Onions",
-            "estCalories": 15
+            "estCalories": 25
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -1914,24 +1578,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Radish Sambar",
             "estCalories": 80
           },
           {
-            "name": "Karam Dosa (2 Pcs Thin)",
-            "estCalories": 200
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Karam Dosa (2 Pcs Thin), Coconut Chutney",
+            "estCalories": 230
           },
           {
             "name": "Dondakaya Fry",
             "estCalories": 100
           },
           {
-            "name": "Vegetable Kolhapuri",
-            "estCalories": 150
+            "name": "Drumstick Tomato Curry",
+            "estCalories": 120
           },
           {
             "name": "Thick Curd",
@@ -1948,29 +1608,33 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Lemon Coriander Soup",
+            "estCalories": 45
           }
         ]
       }
     ]
   },
   {
-    "date": 12,
+    "date": 9,
     "dayName": "Monday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Roasted Idli Upma",
+            "name": "Vegetable Moong Dal Kitchidi",
             "estCalories": 180
           },
           {
             "name": "Bhature - 3 Pcs Big",
-            "estCalories": 320
+            "estCalories": 360
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Peanut Chutney, Sambar",
+            "estCalories": 60
           },
           {
             "name": "Chole Curry",
@@ -1990,8 +1654,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Omelet",
-            "diet": "non-veg",
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Cold Badam Milk without Sugar",
             "estCalories": 120
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Red Beans Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -2000,7 +1681,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Boiled Chana Salad with Onion & Tomato",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Chapathi",
@@ -2015,20 +1696,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Brinjal Sambar",
             "estCalories": 80
           },
           {
             "name": "Ghee Rice",
-            "estCalories": 210
+            "estCalories": 220
           },
           {
-            "name": "Crispy Dragon Potato",
-            "estCalories": 190
-          },
-          {
-            "name": "Drumstick Tomato Curry",
+            "name": "French Beans Potato Fry",
             "estCalories": 120
+          },
+          {
+            "name": "Ghobi Masala",
+            "estCalories": 130
           },
           {
             "name": "Fryums",
@@ -2036,19 +1717,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Sorakaya Perugu Chutney",
+            "name": "Sorakaya Perugu Chutney, Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Semiya Sabudana Kheer",
+            "estCalories": 160
           },
           {
             "name": "Ghee + Podi",
             "estCalories": 60
-          },
-          {
-            "name": "Mysore Pak",
-            "estCalories": 200
           }
         ]
       },
@@ -2056,8 +1737,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Chatakedar Corn",
-            "estCalories": 160
+            "name": "Mexican Sweet Corn Salad",
+            "estCalories": 110
           },
           {
             "name": "Lemon Sauce",
@@ -2074,7 +1755,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Methi Roti",
@@ -2089,34 +1770,34 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 150
           },
           {
-            "name": "Tomato Rasam",
-            "estCalories": 50
+            "name": "Jeera-Milagu Rasam",
+            "estCalories": 45
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
             "name": "Chettinad Chicken Curry",
-            "diet": "non-veg",
-            "estCalories": 250
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
             "name": "Paneer Green Peas Masala",
-            "diet": "veg",
-            "estCalories": 230
+            "estCalories": 220,
+            "diet": "veg"
           },
           {
-            "name": "Bhindi Masala",
-            "estCalories": 110
+            "name": "Snake Gourd Poriyal",
+            "estCalories": 90
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Black Grapes, Banana, Pomegranate)",
-            "estCalories": 80
+            "name": "Water Melon Cut Fruit",
+            "estCalories": 50
           },
           {
             "name": "Gongura Pickle",
@@ -2125,13 +1806,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Butter Methi Naan",
+            "estCalories": 220
+          },
+          {
+            "name": "Mix Veg Raagi Soup",
+            "estCalories": 55
           }
         ]
       }
     ]
   },
   {
-    "date": 13,
+    "date": 10,
     "dayName": "Tuesday",
     "meals": [
       {
@@ -2139,23 +1828,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Ghee Podi Dosa (2 Pcs Thin)",
-            "estCalories": 220
+            "estCalories": 240
           },
           {
             "name": "Pav Bhaji",
-            "estCalories": 260
+            "estCalories": 250
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Sambar",
+            "name": "Coconut Chutney, Sambar",
             "estCalories": 80
           },
           {
             "name": "Mint Chutney",
-            "estCalories": 30
+            "estCalories": 35
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -2171,8 +1856,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Scrambled Egg",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 130,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Pomegranate Fresh Juice with Light Sugar",
+            "estCalories": 90
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Soya Bean Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -2197,11 +1895,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Bisbele Bath",
-            "estCalories": 220
+            "estCalories": 210
           },
           {
             "name": "Kakarakaya (Bitter Gourd) Fry",
@@ -2209,15 +1907,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
-            "name": "Potato Chips",
-            "estCalories": 120
+            "name": "Kara Boondi",
+            "estCalories": 110
           },
           {
             "name": "Dahi Vada",
-            "estCalories": 160
+            "estCalories": 150
           },
           {
             "name": "Dosakaya Tomato Chutney",
@@ -2226,6 +1924,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Kalakand",
+            "estCalories": 160
           }
         ]
       },
@@ -2237,12 +1939,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 220
           },
           {
-            "name": "Tomato Sauce",
+            "name": "Tomato Sauce, Salt Mirchi",
             "estCalories": 20
-          },
-          {
-            "name": "Salt Mirchi",
-            "estCalories": 15
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -2267,10 +1965,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
-            "name": "Sambar",
+            "name": "Kadamba Sambar",
             "estCalories": 80
           },
           {
@@ -2278,8 +1976,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Snake Gourd Poriyal",
-            "estCalories": 90
+            "name": "French Beans Coconut Poriyal",
+            "estCalories": 100
           },
           {
             "name": "Aloo Mutter Curry",
@@ -2290,8 +1988,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Sweet Lime",
-            "estCalories": 60
+            "name": "Banana",
+            "estCalories": 90
           },
           {
             "name": "Tomato Pickle",
@@ -2300,25 +1998,29 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Broccoli Soup",
+            "estCalories": 50
           }
         ]
       }
     ]
   },
   {
-    "date": 14,
+    "date": 11,
     "dayName": "Wednesday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Methi Vada (Big size 3pcs, if not 4pcs)",
-            "estCalories": 210
+            "name": "Methu Vada (3 Pcs)",
+            "estCalories": 240
           },
           {
-            "name": "Vegetable Poha",
-            "estCalories": 180
+            "name": "Mix Veg Suji Bun (2 Pcs)",
+            "estCalories": 210
           },
           {
             "name": "Sambar",
@@ -2342,8 +2044,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Muskmelon Fresh Juice without Sugar",
+            "estCalories": 60
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chick Peas Salad",
+            "estCalories": 85,
+            "diet": "veg"
           }
         ]
       },
@@ -2352,7 +2071,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Palak Roti",
@@ -2367,8 +2086,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Rasam",
+            "estCalories": 45
           },
           {
             "name": "Vegetable Dum Pulav",
@@ -2376,7 +2095,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Andhra Chicken Fry",
-            "estCalories": 250
+            "estCalories": 250,
+            "diet": "non-veg"
           },
           {
             "name": "Kaju Tomato Paneer Fry",
@@ -2387,12 +2107,16 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 160
           },
           {
+            "name": "Triangular Fryums",
+            "estCalories": 70
+          },
+          {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Coriander + Tomato Chutney",
-            "estCalories": 40
+            "estCalories": 35
           },
           {
             "name": "Gulab Jamun",
@@ -2405,11 +2129,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Bandi Style Ragda Chat",
-            "estCalories": 220
+            "estCalories": 200
           },
           {
             "name": "Onion Small pieces",
-            "estCalories": 15
+            "estCalories": 120
           },
           {
             "name": "Ginger Tea/Coffee/Milk",
@@ -2437,19 +2161,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Drumstick Sambar",
+            "estCalories": 80
           },
           {
-            "name": "Sooji Upma",
-            "estCalories": 160
+            "name": "Sooji Upma, Coconut Chutney",
+            "estCalories": 200
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Bottle Gourd Tomato Stir Fry",
+            "name": "Bottle Guard Tomato Stir Fry",
             "estCalories": 100
           },
           {
@@ -2471,13 +2191,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Tomato Soup with Roasted Bread",
+            "estCalories": 70
           }
         ]
       }
     ]
   },
   {
-    "date": 15,
+    "date": 12,
     "dayName": "Thursday",
     "meals": [
       {
@@ -2492,8 +2216,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 180
           },
           {
-            "name": "Chickpea Masala",
-            "estCalories": 160
+            "name": "Aloo Mutter Curry",
+            "estCalories": 150
           },
           {
             "name": "Coconut Chutney",
@@ -2513,8 +2237,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Onion Omelet",
-            "diet": "non-veg",
-            "estCalories": 120
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Grapes Fresh Juice without sugar",
+            "estCalories": 75
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chickpeas Salad",
+            "estCalories": 40,
+            "diet": "veg"
           }
         ]
       },
@@ -2538,7 +2275,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Drumstick Brinjal Sambar",
             "estCalories": 80
           },
           {
@@ -2558,8 +2295,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 70
           },
           {
-            "name": "Lemon Water w/o Sugar + Sabja Seeds",
-            "estCalories": 20
+            "name": "Lemon Water + Sabja Seeds",
+            "estCalories": 25
           },
           {
             "name": "Potlakaya Perugu Chutney",
@@ -2568,6 +2305,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Shahi Ki Tukda",
+            "estCalories": 190
           }
         ]
       },
@@ -2576,11 +2317,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Boiled Peanuts with Onion/Tomato",
-            "estCalories": 180
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "estCalories": 120
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -2593,7 +2330,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Roti",
@@ -2609,23 +2346,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Veg Manchuria",
-            "estCalories": 180
+            "name": "Veg Manchuria, Noodles, Tomato Sauce",
+            "estCalories": 280
           },
           {
-            "name": "Noodles",
-            "estCalories": 200
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
-          },
-          {
-            "name": "Butternut Squash Curry",
-            "estCalories": 120
+            "name": "Black Channa Curry",
+            "estCalories": 160
           },
           {
             "name": "Thick Curd",
@@ -2636,19 +2365,33 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 90
           },
           {
-            "name": "Ginger Pickle",
-            "estCalories": 20
+            "name": "Gongura Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Chicken 65 / Andhra Fish Fry",
+            "estCalories": 240,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Paneer 65",
+            "estCalories": 210,
+            "diet": "veg"
+          },
+          {
+            "name": "Creamy Mushroom Soup",
+            "estCalories": 75
           }
         ]
       }
     ]
   },
   {
-    "date": 16,
+    "date": 13,
     "dayName": "Friday",
     "meals": [
       {
@@ -2660,7 +2403,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Vegetable Daliya Kitchidi",
-            "estCalories": 160
+            "estCalories": 170
           },
           {
             "name": "Coconut Chutney",
@@ -2684,8 +2427,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Sweet Lime + Pineapple Fresh Juice without sugar",
             "estCalories": 75
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Peanut Sundal",
+            "estCalories": 110,
+            "diet": "veg"
           }
         ]
       },
@@ -2710,7 +2470,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Jeera Rice",
@@ -2721,8 +2481,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 120
           },
           {
-            "name": "Red Lentil Pumpkin Curry",
-            "estCalories": 130
+            "name": "Red Rajma Masala",
+            "estCalories": 160
           },
           {
             "name": "Papad",
@@ -2730,7 +2490,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Beerakaya Chutney",
@@ -2738,7 +2498,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Moong Dal Payasam",
-            "estCalories": 180
+            "estCalories": 170
           }
         ]
       },
@@ -2746,15 +2506,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Raw Banana Bhajji 2 PCs (Less Oily)",
-            "estCalories": 180
+            "name": "Aloo Bonda (Medium size 2 pc)",
+            "estCalories": 220
           },
           {
-            "name": "Coconut Coriander Chutney",
+            "name": "Coconut Chutney",
             "estCalories": 50
           },
           {
-            "name": "Ginger Tea/Coffee/Milk",
+            "name": "Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -2764,7 +2524,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Lacha Paratha",
@@ -2779,18 +2539,18 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Mix Veg Sambar",
             "estCalories": 80
           },
           {
             "name": "Garlic Chicken Curry",
-            "diet": "non-veg",
-            "estCalories": 240
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Paneer Lababdar",
-            "diet": "veg",
-            "estCalories": 230
+            "name": "Paneer Tikka Masala",
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Tomato Peas Capsicum Masala",
@@ -2801,8 +2561,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "(Watermelon + Muskmelon + Papaya) Cut Fruit",
-            "estCalories": 70
+            "name": "Muskmelon Cut Fruit",
+            "estCalories": 50
           },
           {
             "name": "Mango Pickle",
@@ -2811,13 +2571,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Sweet Corn Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 17,
+    "date": 14,
     "dayName": "Saturday",
     "meals": [
       {
@@ -2833,7 +2597,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Peanut Chutney",
-            "estCalories": 70
+            "estCalories": 60
           },
           {
             "name": "Tomato Chutney",
@@ -2853,8 +2617,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Watermelon & Pomegranate Juice with Light Sugar",
+            "estCalories": 85
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Sweet Potato Salad",
+            "estCalories": 100,
+            "diet": "veg"
           }
         ]
       },
@@ -2878,7 +2655,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Beetroot Tomato Rasam",
+            "name": "Pachi Pulusu",
             "estCalories": 50
           },
           {
@@ -2886,7 +2663,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 200
           },
           {
-            "name": "Dondakaya Stir Fry",
+            "name": "Radish Tomato Stir Fry",
             "estCalories": 100
           },
           {
@@ -2898,8 +2675,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 40
           },
           {
-            "name": "Majjiga Pulusu",
-            "estCalories": 60
+            "name": "Majiga Pulusu",
+            "estCalories": 65
           },
           {
             "name": "Avakaya (Mango Pickle)",
@@ -2908,6 +2685,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Carrot Halwa",
+            "estCalories": 180
           }
         ]
       },
@@ -2920,10 +2701,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Groundnut/Coconut Chutney",
-            "estCalories": 60
+            "estCalories": 50
           },
           {
-            "name": "Cold Badam Milk (1 Medium Glass)",
+            "name": "Cold Badam Milk 150 ml",
             "estCalories": 150
           }
         ]
@@ -2952,16 +2733,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 110
           },
           {
-            "name": "Vegetable Fried Rice",
-            "estCalories": 210
-          },
-          {
-            "name": "Gobhi Manchuria",
-            "estCalories": 180
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "name": "Vegetable Fried Rice, Gobhi Manchuria, Tomato Sauce",
+            "estCalories": 320
           },
           {
             "name": "Cabbage Beans Poriyal",
@@ -2982,13 +2755,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Red Lentil Soup",
+            "estCalories": 60
           }
         ]
       }
     ]
   },
   {
-    "date": 18,
+    "date": 15,
     "dayName": "Sunday",
     "meals": [
       {
@@ -2996,26 +2773,22 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Shavige Bath",
-            "estCalories": 180
+            "estCalories": 200
           },
           {
             "name": "Paneer Paratha - 2 Pcs Thin",
-            "estCalories": 260
+            "estCalories": 280
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Peanut Chutney",
+            "estCalories": 60
           },
           {
-            "name": "Thick Curd",
+            "name": "Thick Curd, Mango Pickle",
             "estCalories": 80
           },
           {
-            "name": "Mango Pickle",
-            "estCalories": 20
-          },
-          {
-            "name": "Brown Bread+Butter+Jam",
+            "name": "Brown Bread+butter+Jam",
             "estCalories": 150
           },
           {
@@ -3028,8 +2801,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 140,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Apple + Pomegranate Fresh Juice without Sugar",
+            "estCalories": 80
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Raagi Malt",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -3038,7 +2828,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Chapathi",
@@ -3058,7 +2848,12 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Chicken Thick Gravy / Hyderabadi Mirchi Ka Salan",
-            "estCalories": 180
+            "estCalories": 180,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Tomato Rasam",
+            "estCalories": 45
           },
           {
             "name": "Onion Raitha",
@@ -3069,16 +2864,24 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 70
           },
           {
-            "name": "Nannari Sharbath",
-            "estCalories": 90
-          },
-          {
-            "name": "Fresh Gongura Chutney",
+            "name": "Mint Lemon Jal Jeera Drink (200 ml)",
             "estCalories": 40
           },
           {
+            "name": "Fresh Gongura Chutney",
+            "estCalories": 35
+          },
+          {
             "name": "Basundhi (60 ml)",
-            "estCalories": 180
+            "estCalories": 160
+          },
+          {
+            "name": "Vanilla Ice Cream (Not Frozen Dessert)",
+            "estCalories": 140
+          },
+          {
+            "name": "Gulab Jamun",
+            "estCalories": 150
           }
         ]
       },
@@ -3086,8 +2889,12 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Plum Cake (Egg Less) 1 Big Pc",
+            "name": "Dahi Puri (8 Pcs)",
             "estCalories": 220
+          },
+          {
+            "name": "Onions",
+            "estCalories": 25
           },
           {
             "name": "Masala Tea/Coffee/Milk",
@@ -3115,19 +2922,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Radish Sambar",
             "estCalories": 80
           },
           {
-            "name": "Ragi Idly",
-            "estCalories": 120
+            "name": "Ragi Idly, Groundnut Chutney",
+            "estCalories": 190
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 60
-          },
-          {
-            "name": "Dondakaya Fry",
+            "name": "Dondakaya Stir Fry",
             "estCalories": 100
           },
           {
@@ -3149,13 +2952,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Lemon Coriander Soup",
+            "estCalories": 45
           }
         ]
       }
     ]
   },
   {
-    "date": 19,
+    "date": 16,
     "dayName": "Monday",
     "meals": [
       {
@@ -3170,12 +2977,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 70
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Groundnut Chutney, Sambar",
+            "estCalories": 60
           },
           {
             "name": "Chole Curry",
@@ -3195,8 +2998,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Banana Milk Shake without Sugar",
+            "estCalories": 120
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Mixed Beans Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -3205,7 +3021,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Boiled Chana Salad with Onion & Tomato",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Chapathi",
@@ -3220,16 +3036,16 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Brinjal Sambar",
             "estCalories": 80
           },
           {
             "name": "Tomato Rice",
-            "estCalories": 180
+            "estCalories": 190
           },
           {
             "name": "Pesara Punugulu Curry (Pakka Andhra Style)",
-            "estCalories": 160
+            "estCalories": 170
           },
           {
             "name": "Capsicum Tomato Masala",
@@ -3241,19 +3057,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Sorakaya Perugu Chutney",
             "estCalories": 60
           },
           {
-            "name": "Ghee + Podi",
-            "estCalories": 60
+            "name": "Jilebi",
+            "estCalories": 160
           },
           {
-            "name": "Jilebi",
-            "estCalories": 180
+            "name": "Ghee + Podi",
+            "estCalories": 60
           }
         ]
       },
@@ -3262,7 +3078,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Dry Maggi (Non-Sticky)",
-            "estCalories": 250
+            "estCalories": 220
           },
           {
             "name": "Tomato Sauce",
@@ -3279,10 +3095,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
-            "name": "Methi Roti",
+            "name": "Roti",
             "estCalories": 100
           },
           {
@@ -3294,49 +3110,57 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Tomato Rasam",
-            "estCalories": 50
+            "name": "Andhra Charu",
+            "estCalories": 45
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
-            "name": "Chicken Mughlai",
-            "diet": "non-veg",
-            "estCalories": 260
+            "name": "Hyderabadi Chicken Curry",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
             "name": "Paneer Butter Masala",
-            "diet": "veg",
-            "estCalories": 240
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Ladies Finger Boiled Fry",
-            "estCalories": 90
+            "estCalories": 100
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Black Grapes, Banana, Pomegranate)",
-            "estCalories": 80
+            "name": "Water Melon Cut Fruit",
+            "estCalories": 50
           },
           {
-            "name": "Gongura Pickle",
-            "estCalories": 20
+            "name": "Radish Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Butter Methi Naan",
+            "estCalories": 220
+          },
+          {
+            "name": "Sweet Corn Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 20,
+    "date": 17,
     "dayName": "Tuesday",
     "meals": [
       {
@@ -3344,11 +3168,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Masala Dosa - 2 Pcs Std Size",
-            "estCalories": 240
+            "estCalories": 250
           },
           {
             "name": "Vada Pav",
-            "estCalories": 250
+            "estCalories": 220
           },
           {
             "name": "Coconut Chutney",
@@ -3356,7 +3180,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Mint Chutney",
-            "estCalories": 30
+            "estCalories": 35
           },
           {
             "name": "Brown Bread+Butter+Jam",
@@ -3372,8 +3196,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Pomegranate Fresh Juice without Sugar",
+            "estCalories": 70
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Crunchy Soya Vegetable Salad",
+            "estCalories": 80,
+            "diet": "veg"
           }
         ]
       },
@@ -3398,11 +3239,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Bisbele Bath",
-            "estCalories": 220
+            "estCalories": 210
           },
           {
             "name": "Kakarakaya (Bitter Gourd) Fry",
@@ -3410,15 +3251,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
             "name": "Potato Chips",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Dahi Vada",
-            "estCalories": 160
+            "estCalories": 150
           },
           {
             "name": "Dosakaya Tomato Chutney",
@@ -3427,6 +3268,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Makkan Peda",
+            "estCalories": 180
           }
         ]
       },
@@ -3438,12 +3283,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 220
           },
           {
-            "name": "Tomato Sauce",
+            "name": "Tomato Sauce, Salt Mirchi",
             "estCalories": 20
-          },
-          {
-            "name": "Salt Mirchi",
-            "estCalories": 15
           },
           {
             "name": "Ginger Tea/Coffee/Milk",
@@ -3468,10 +3309,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
-            "name": "Sambar",
+            "name": "Kadamba Sambar",
             "estCalories": 80
           },
           {
@@ -3479,8 +3320,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Snake Gourd Poriyal",
-            "estCalories": 90
+            "name": "Cluster Beans Coconut Fry",
+            "estCalories": 110
           },
           {
             "name": "Aloo Mutter Curry",
@@ -3491,43 +3332,47 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Guava Fruit",
-            "estCalories": 60
+            "name": "Banana Fruit",
+            "estCalories": 90
           },
           {
-            "name": "Tomato Pickle",
+            "name": "Ginger Pickle",
             "estCalories": 20
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Broccoli Soup",
+            "estCalories": 50
           }
         ]
       }
     ]
   },
   {
-    "date": 21,
+    "date": 18,
     "dayName": "Wednesday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Methi Vada (Big size 3pcs, if not 4pcs)",
-            "estCalories": 210
+            "name": "Pesarattu Thin 2 Pcs Std Size",
+            "estCalories": 220
           },
           {
-            "name": "Cucumber Poha",
-            "estCalories": 170
-          },
-          {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Tomato Suji Upma",
+            "estCalories": 180
           },
           {
             "name": "Coconut Chutney",
             "estCalories": 50
+          },
+          {
+            "name": "Ginger Chutney",
+            "estCalories": 40
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -3543,8 +3388,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Onion Omelet",
-            "diet": "non-veg",
-            "estCalories": 120
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Pineapple Fresh Juice without Sugar",
+            "estCalories": 75
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Greek Yogurt Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -3553,7 +3411,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Palak Roti",
@@ -3569,18 +3427,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Pachi Pulusu",
-            "estCalories": 60
+            "estCalories": 50
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
-            "name": "Hyderabadi Chicken Curry",
-            "estCalories": 240
+            "name": "Kadai Chicken",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Shahi Paneer",
+            "name": "Kadai Paneer",
             "estCalories": 230
           },
           {
@@ -3588,16 +3447,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Butter Milk",
-            "estCalories": 50
-          },
-          {
-            "name": "Fresh Vegetable Chutney",
+            "name": "Papad",
             "estCalories": 40
           },
           {
-            "name": "Badusha",
-            "estCalories": 180
+            "name": "Butter Milk",
+            "estCalories": 45
+          },
+          {
+            "name": "Fresh Vegetable Chutney",
+            "estCalories": 35
+          },
+          {
+            "name": "Double ka Meeta",
+            "estCalories": 220
           }
         ]
       },
@@ -3605,15 +3468,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Onion Soft Pakoda (Less Oily)",
-            "estCalories": 200
+            "name": "Bhelpuri",
+            "estCalories": 180
           },
           {
-            "name": "Tomato Chutney",
-            "estCalories": 40
-          },
-          {
-            "name": "Tea/Coffee/Milk",
+            "name": "Ginger Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -3638,19 +3497,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Garlic Rasam",
+            "estCalories": 45
           },
           {
-            "name": "Broken Wheat Rava Upma",
-            "estCalories": 160
+            "name": "Broken Wheat Rava Upma, Coconut Chutney",
+            "estCalories": 190
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Bottle Gourd Chana Dal Fry",
+            "name": "Bottle Guard Chana Dal Fry",
             "estCalories": 110
           },
           {
@@ -3662,8 +3517,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Pomegranate, Pineapple, Green grapes)",
-            "estCalories": 80
+            "name": "Pine Apple Cut Fruit",
+            "estCalories": 60
           },
           {
             "name": "Lemon Pickle",
@@ -3672,50 +3527,57 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Tomato Soup with Roasted Bread",
+            "estCalories": 70
           }
         ]
       }
     ]
   },
   {
-    "date": 22,
+    "date": 19,
     "dayName": "Thursday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Poori (3 pcs standard size)",
+            "name": "Medu Vada (3 Pcs)",
             "estCalories": 240
           },
           {
-            "name": "Rice Rava Kitchidi",
-            "estCalories": 180
+            "name": "Pav Bhaji",
+            "estCalories": 250
           },
           {
-            "name": "Aloo Basin Chutney",
-            "estCalories": 120
+            "name": "Sambar",
+            "estCalories": 80
           },
           {
-            "name": "Dal Chutney",
-            "estCalories": 60
+            "name": "Coconut Chutney",
+            "estCalories": 50
           },
           {
             "name": "Brown Bread+Butter+Jam",
             "estCalories": 150
           },
           {
-            "name": "Ragi Malt with Salt (1 Medium Glass)",
-            "estCalories": 90
+            "name": "Sprouts (1 small cup)",
+            "estCalories": 50
           },
           {
             "name": "Tea/Coffee/Milk",
             "estCalories": 80
           },
           {
-            "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "name": "Papaya Fresh Juice without Sugar",
+            "estCalories": 70
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
           }
         ]
       },
@@ -3736,10 +3598,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Ridge Gourd Dal",
-            "estCalories": 140
+            "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Drumstick Brinjal Sambar",
             "estCalories": 80
           },
           {
@@ -3752,7 +3614,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Kala Chana Masala",
-            "estCalories": 170
+            "estCalories": 160
           },
           {
             "name": "Finger Fryums",
@@ -3760,7 +3622,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Lemon Water + Sabja Seeds",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Potlakaya Perugu Chutney",
@@ -3769,6 +3631,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Mothichoor Laddu",
+            "estCalories": 170
           }
         ]
       },
@@ -3776,11 +3642,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Sambar Vada 2 Pcs (Separate)",
+            "name": "Mysore Bonda 2 Pcs Std Size (Less Oily)",
             "estCalories": 220
           },
           {
-            "name": "Masala Tea/Coffee/Milk",
+            "name": "Coconut Chutney",
+            "estCalories": 50
+          },
+          {
+            "name": "Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -3806,74 +3676,90 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Veg Manchurian",
-            "estCalories": 180
+            "name": "Veg Manchurian, Noodles, Tomato Sauce",
+            "estCalories": 280
           },
           {
-            "name": "Noodles",
-            "estCalories": 200
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "name": "Dhaba Style Egg Curry",
+            "estCalories": 180,
+            "diet": "non-veg"
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Sweet Lime",
+            "name": "Green Grapes",
             "estCalories": 60
           },
           {
-            "name": "Ginger Pickle",
-            "estCalories": 20
+            "name": "Gongura Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Chicken Tikka Fry/Malabar Fish Fry",
+            "estCalories": 240,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Paneer Tikka/Chilli Babycorn",
+            "estCalories": 210,
+            "diet": "veg"
+          },
+          {
+            "name": "Paneer Bhurji",
+            "estCalories": 200,
+            "diet": "veg"
+          },
+          {
+            "name": "Creamy Mushroom Soup",
+            "estCalories": 75
           }
         ]
       }
     ]
   },
   {
-    "date": 23,
+    "date": 20,
     "dayName": "Friday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Pesarattu Thin 2 Pcs Std Size",
-            "estCalories": 200
+            "name": "Poori (3 pcs standard size)",
+            "estCalories": 240
           },
           {
-            "name": "Tomato Suji Upma",
-            "estCalories": 170
+            "name": "Rice Rava Upma (Dry)",
+            "estCalories": 180
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Aloo Basin Chutney",
+            "estCalories": 70
           },
           {
-            "name": "Ginger Chutney",
-            "estCalories": 40
+            "name": "Dal Chutney",
+            "estCalories": 60
           },
           {
-            "name": "White Bread+Butter+Jam",
+            "name": "Brown Bread+Butter+Jam",
             "estCalories": 150
           },
           {
-            "name": "Sprouts (1 small cup)",
-            "estCalories": 50
+            "name": "Ragi Malt with Salt (1 Medium Glass)",
+            "estCalories": 90
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -3881,8 +3767,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Grapes Fresh Juice with Light Sugar",
+            "estCalories": 90
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chick Peas Salad",
+            "estCalories": 85,
+            "diet": "veg"
           }
         ]
       },
@@ -3906,8 +3809,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 150
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Andhra Charu",
+            "estCalories": 45
           },
           {
             "name": "Jeera Rice",
@@ -3918,8 +3821,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 120
           },
           {
-            "name": "Cauliflower Stir Fry (Less Oil)",
-            "estCalories": 100
+            "name": "Turnip Spinach Curry (Punjabi Style)",
+            "estCalories": 120
           },
           {
             "name": "Papad",
@@ -3935,7 +3838,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Carrot Halwa",
-            "estCalories": 200
+            "estCalories": 180
           }
         ]
       },
@@ -3943,15 +3846,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Mysore Bonda 2 Pcs Std Size (Less Oily)",
-            "estCalories": 220
+            "name": "Sambar Vada 2 Pcs (Separate)",
+            "estCalories": 240
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Tea/Coffee/Milk",
+            "name": "Masala Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -3961,11 +3860,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Beetroot Chapathi",
-            "estCalories": 110
+            "estCalories": 105
           },
           {
             "name": "White Rice",
@@ -3976,45 +3875,49 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Mix Veg Sambar",
             "estCalories": 80
           },
           {
-            "name": "Kadai Chicken",
-            "diet": "non-veg",
-            "estCalories": 250
+            "name": "Chicken Tikka Masala",
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Kadai Paneer",
-            "diet": "veg",
-            "estCalories": 240
+            "name": "Paneer Lababdar",
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Amritsari Chole",
-            "estCalories": 180
+            "estCalories": 170
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "(Watermelon + Muskmelon + Papaya) Cut Fruit",
-            "estCalories": 70
+            "name": "Muskmelon Cut Fruit",
+            "estCalories": 50
           },
           {
-            "name": "Fresh Vegetable Chutney/Pickle",
-            "estCalories": 30
+            "name": "Amla Pickle",
+            "estCalories": 20
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Mix Veg Raagi Soup",
+            "estCalories": 55
           }
         ]
       }
     ]
   },
   {
-    "date": 24,
+    "date": 21,
     "dayName": "Saturday",
     "meals": [
       {
@@ -4026,11 +3929,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Moong Dal Palak Tepla (Hand Made) 2 Pcs",
-            "estCalories": 200
+            "estCalories": 220
           },
           {
             "name": "Groundnut Chutney",
-            "estCalories": 70
+            "estCalories": 60
           },
           {
             "name": "Onion Tomato Chutney",
@@ -4050,8 +3953,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Mosambi Fresh Juice without Sugar",
+            "estCalories": 65
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Peanut Sundal",
+            "estCalories": 110,
+            "diet": "veg"
           }
         ]
       },
@@ -4075,7 +3995,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Beetroot Tomato Rasam",
+            "name": "Pachi Pulusu",
             "estCalories": 50
           },
           {
@@ -4083,8 +4003,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 200
           },
           {
-            "name": "Cauliflower Fry",
-            "estCalories": 110
+            "name": "Cauli Flower Fry",
+            "estCalories": 120
           },
           {
             "name": "Chole Curry",
@@ -4096,7 +4016,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Majjiga Pulusu",
-            "estCalories": 60
+            "estCalories": 65
           },
           {
             "name": "Avakaya (Mango Pickle)",
@@ -4105,6 +4025,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Cauli Flower Tomato Stir Fry",
+            "estCalories": 120
+          },
+          {
+            "name": "Chocolate Cake (Egg Less)",
+            "estCalories": 180,
+            "diet": "non-veg"
           }
         ]
       },
@@ -4113,14 +4042,18 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Vada Pav 2 Pcs",
-            "estCalories": 320
+            "estCalories": 360
           },
           {
             "name": "Mint Sauce",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Cold Badam Milk (1 Medium Glass)",
+            "estCalories": 150
+          },
+          {
+            "name": "Cold Badam Milk 150 ml",
             "estCalories": 150
           }
         ]
@@ -4146,27 +4079,23 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Drumstick Sambar",
-            "estCalories": 85
+            "estCalories": 80
           },
           {
-            "name": "Ghee + Podi + Idly",
-            "estCalories": 180
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Ghee + Podi + Idly, Coconut Chutney",
+            "estCalories": 220
           },
           {
             "name": "Tomato Baingan Fry",
-            "estCalories": 100
+            "estCalories": 110
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Muskmelon Cut Fruit",
-            "estCalories": 60
+            "name": "Banana",
+            "estCalories": 90
           },
           {
             "name": "Red Chilli Pickle",
@@ -4175,13 +4104,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Veg Manchow Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 25,
+    "date": 22,
     "dayName": "Sunday",
     "meals": [
       {
@@ -4189,23 +4122,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Shavige Bath",
-            "estCalories": 180
+            "estCalories": 200
           },
           {
-            "name": "Mix Veg Paratha (2 Pcs Thin)",
-            "estCalories": 240
+            "name": "Aloo Paratha (2 Pcs Thin)",
+            "estCalories": 260
           },
           {
-            "name": "Groundnut Chutney",
-            "estCalories": 70
+            "name": "Mint Coriander Chutney",
+            "estCalories": 35
           },
           {
-            "name": "Thick Curd",
+            "name": "Thick Curd, Mango Pickle",
             "estCalories": 80
-          },
-          {
-            "name": "Mango Pickle",
-            "estCalories": 20
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -4221,8 +4150,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Egg Bhurji",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 140,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Apple + Pomegranate Fresh Juice without Sugar",
+            "estCalories": 80
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Ragi Malt",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -4231,7 +4173,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Chapathi",
@@ -4243,7 +4185,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
             "name": "Chicken Fry Piece Biryani/Paneer Fry Piece Biryani",
@@ -4251,27 +4193,36 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Chicken Thick Gravy / Hyderabadi Mirchi Ka Salan",
-            "estCalories": 180
+            "estCalories": 180,
+            "diet": "non-veg"
           },
           {
             "name": "Onion Raitha",
             "estCalories": 60
           },
           {
+            "name": "Tomato Rasam",
+            "estCalories": 45
+          },
+          {
             "name": "Fryums",
             "estCalories": 70
           },
           {
-            "name": "Nannari Sharbath",
-            "estCalories": 90
-          },
-          {
-            "name": "Fresh Gongura Chutney",
+            "name": "Mint Lemon Jal Jeera Drink (200 ml)",
             "estCalories": 40
           },
           {
+            "name": "Fresh Gongura Chutney",
+            "estCalories": 35
+          },
+          {
             "name": "Vanilla Ice Cream (Not Frozen Dessert)",
-            "estCalories": 160
+            "estCalories": 140
+          },
+          {
+            "name": "Gajar Ka Halwa",
+            "estCalories": 180
           }
         ]
       },
@@ -4284,7 +4235,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Onions",
-            "estCalories": 15
+            "estCalories": 25
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -4312,24 +4263,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Radish Sambar",
             "estCalories": 80
           },
           {
-            "name": "Karam Dosa (2 Pcs Thin)",
-            "estCalories": 200
-          },
-          {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Karam Dosa (2 Pcs Thin), Coconut Chutney",
+            "estCalories": 230
           },
           {
             "name": "Dondakaya Fry",
             "estCalories": 100
           },
           {
-            "name": "Vegetable Kolhapuri",
-            "estCalories": 150
+            "name": "Drumstick Tomato Curry",
+            "estCalories": 120
           },
           {
             "name": "Thick Curd",
@@ -4346,29 +4293,33 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Lemon Coriander Soup",
+            "estCalories": 45
           }
         ]
       }
     ]
   },
   {
-    "date": 26,
+    "date": 23,
     "dayName": "Monday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Roasted Idli Upma",
+            "name": "Vegetable Moong Dal Kitchidi",
             "estCalories": 180
           },
           {
             "name": "Bhature - 3 Pcs Big",
-            "estCalories": 320
+            "estCalories": 360
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
+            "name": "Peanut Chutney, Sambar",
+            "estCalories": 60
           },
           {
             "name": "Chole Curry",
@@ -4388,8 +4339,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Omelet",
-            "diet": "non-veg",
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Cold Badam Milk without Sugar",
             "estCalories": 120
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Red Beans Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -4398,7 +4366,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Boiled Chana Salad with Onion & Tomato",
-            "estCalories": 120
+            "estCalories": 90
           },
           {
             "name": "Chapathi",
@@ -4413,20 +4381,20 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Brinjal Sambar",
             "estCalories": 80
           },
           {
             "name": "Ghee Rice",
-            "estCalories": 210
+            "estCalories": 220
           },
           {
-            "name": "Crispy Dragon Potato",
-            "estCalories": 190
-          },
-          {
-            "name": "Drumstick Tomato Curry",
+            "name": "French Beans Potato Fry",
             "estCalories": 120
+          },
+          {
+            "name": "Ghobi Masala",
+            "estCalories": 130
           },
           {
             "name": "Fryums",
@@ -4434,19 +4402,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Sorakaya Perugu Chutney",
+            "name": "Sorakaya Perugu Chutney, Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Semiya Sabudana Kheer",
+            "estCalories": 160
           },
           {
             "name": "Ghee + Podi",
             "estCalories": 60
-          },
-          {
-            "name": "Mysore Pak",
-            "estCalories": 200
           }
         ]
       },
@@ -4454,8 +4422,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Chatakedar Corn",
-            "estCalories": 160
+            "name": "Mexican Sweet Corn Salad",
+            "estCalories": 110
           },
           {
             "name": "Lemon Sauce",
@@ -4472,7 +4440,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Methi Roti",
@@ -4487,34 +4455,34 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 150
           },
           {
-            "name": "Tomato Rasam",
-            "estCalories": 50
+            "name": "Jeera-Milagu Rasam",
+            "estCalories": 45
           },
           {
             "name": "Bhagara Rice",
-            "estCalories": 190
+            "estCalories": 200
           },
           {
             "name": "Chettinad Chicken Curry",
-            "diet": "non-veg",
-            "estCalories": 250
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
             "name": "Paneer Green Peas Masala",
-            "diet": "veg",
-            "estCalories": 230
+            "estCalories": 220,
+            "diet": "veg"
           },
           {
-            "name": "Bhindi Masala",
-            "estCalories": 110
+            "name": "Snake Gourd Poriyal",
+            "estCalories": 90
           },
           {
             "name": "Thick Curd",
             "estCalories": 80
           },
           {
-            "name": "Mixed Fruit Salad (Black Grapes, Banana, Pomegranate)",
-            "estCalories": 80
+            "name": "Water Melon Cut Fruit",
+            "estCalories": 50
           },
           {
             "name": "Gongura Pickle",
@@ -4523,13 +4491,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Butter Methi Naan",
+            "estCalories": 220
+          },
+          {
+            "name": "Mix Veg Raagi Soup",
+            "estCalories": 55
           }
         ]
       }
     ]
   },
   {
-    "date": 27,
+    "date": 24,
     "dayName": "Tuesday",
     "meals": [
       {
@@ -4537,23 +4513,19 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Ghee Podi Dosa (2 Pcs Thin)",
-            "estCalories": 220
+            "estCalories": 240
           },
           {
             "name": "Pav Bhaji",
-            "estCalories": 260
+            "estCalories": 250
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Sambar",
+            "name": "Coconut Chutney, Sambar",
             "estCalories": 80
           },
           {
             "name": "Mint Chutney",
-            "estCalories": 30
+            "estCalories": 35
           },
           {
             "name": "White Bread+Butter+Jam",
@@ -4569,8 +4541,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Scrambled Egg",
-            "diet": "non-veg",
-            "estCalories": 140
+            "estCalories": 130,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Pomegranate Fresh Juice with Light Sugar",
+            "estCalories": 90
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Soya Bean Salad",
+            "estCalories": 90,
+            "diet": "veg"
           }
         ]
       },
@@ -4595,11 +4580,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Bisbele Bath",
-            "estCalories": 220
+            "estCalories": 210
           },
           {
             "name": "Kakarakaya (Bitter Gourd) Fry",
@@ -4607,15 +4592,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rajma Masala",
-            "estCalories": 180
+            "estCalories": 160
           },
           {
-            "name": "Potato Chips",
-            "estCalories": 120
+            "name": "Kara Boondi",
+            "estCalories": 110
           },
           {
             "name": "Dahi Vada",
-            "estCalories": 160
+            "estCalories": 150
           },
           {
             "name": "Dosakaya Tomato Chutney",
@@ -4624,6 +4609,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Kalakand",
+            "estCalories": 160
           }
         ]
       },
@@ -4635,12 +4624,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 220
           },
           {
-            "name": "Tomato Sauce",
+            "name": "Tomato Sauce, Salt Mirchi",
             "estCalories": 20
-          },
-          {
-            "name": "Salt Mirchi",
-            "estCalories": 15
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -4665,10 +4650,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Dal Makhani",
-            "estCalories": 200
+            "estCalories": 180
           },
           {
-            "name": "Sambar",
+            "name": "Kadamba Sambar",
             "estCalories": 80
           },
           {
@@ -4676,8 +4661,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 280
           },
           {
-            "name": "Snake Gourd Poriyal",
-            "estCalories": 90
+            "name": "French Beans Coconut Poriyal",
+            "estCalories": 100
           },
           {
             "name": "Aloo Mutter Curry",
@@ -4688,8 +4673,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "Sweet Lime",
-            "estCalories": 60
+            "name": "Banana",
+            "estCalories": 90
           },
           {
             "name": "Tomato Pickle",
@@ -4698,25 +4683,29 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Broccoli Soup",
+            "estCalories": 50
           }
         ]
       }
     ]
   },
   {
-    "date": 28,
+    "date": 25,
     "dayName": "Wednesday",
     "meals": [
       {
         "slot": "breakfast",
         "items": [
           {
-            "name": "Methi Vada (Big size 3pcs, if not 4pcs)",
-            "estCalories": 210
+            "name": "Methu Vada (3 Pcs)",
+            "estCalories": 240
           },
           {
-            "name": "Vegetable Poha",
-            "estCalories": 180
+            "name": "Mix Veg Suji Bun (2 Pcs)",
+            "estCalories": 210
           },
           {
             "name": "Sambar",
@@ -4740,8 +4729,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Muskmelon Fresh Juice without Sugar",
+            "estCalories": 60
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chick Peas Salad",
+            "estCalories": 85,
+            "diet": "veg"
           }
         ]
       },
@@ -4750,7 +4756,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Palak Roti",
@@ -4765,8 +4771,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
-            "estCalories": 80
+            "name": "Rasam",
+            "estCalories": 45
           },
           {
             "name": "Vegetable Dum Pulav",
@@ -4774,7 +4780,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Andhra Chicken Fry",
-            "estCalories": 250
+            "estCalories": 250,
+            "diet": "non-veg"
           },
           {
             "name": "Kaju Tomato Paneer Fry",
@@ -4785,12 +4792,16 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 160
           },
           {
+            "name": "Triangular Fryums",
+            "estCalories": 70
+          },
+          {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Coriander + Tomato Chutney",
-            "estCalories": 40
+            "estCalories": 35
           },
           {
             "name": "Gulab Jamun",
@@ -4803,11 +4814,11 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Bandi Style Ragda Chat",
-            "estCalories": 220
+            "estCalories": 200
           },
           {
             "name": "Onion Small pieces",
-            "estCalories": 15
+            "estCalories": 120
           },
           {
             "name": "Ginger Tea/Coffee/Milk",
@@ -4835,19 +4846,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Rasam",
-            "estCalories": 50
+            "name": "Drumstick Sambar",
+            "estCalories": 80
           },
           {
-            "name": "Sooji Upma",
-            "estCalories": 160
+            "name": "Sooji Upma, Coconut Chutney",
+            "estCalories": 200
           },
           {
-            "name": "Coconut Chutney",
-            "estCalories": 50
-          },
-          {
-            "name": "Bottle Gourd Tomato Stir Fry",
+            "name": "Bottle Guard Tomato Stir Fry",
             "estCalories": 100
           },
           {
@@ -4869,13 +4876,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Tomato Soup with Roasted Bread",
+            "estCalories": 70
           }
         ]
       }
     ]
   },
   {
-    "date": 29,
+    "date": 26,
     "dayName": "Thursday",
     "meals": [
       {
@@ -4911,8 +4922,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Masala Onion Omelet",
-            "diet": "non-veg",
-            "estCalories": 120
+            "estCalories": 120,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Grapes Fresh Juice without sugar",
+            "estCalories": 75
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Chickpeas Salad",
+            "estCalories": 40,
+            "diet": "veg"
           }
         ]
       },
@@ -4936,7 +4960,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Sambar",
+            "name": "Drumstick Brinjal Sambar",
             "estCalories": 80
           },
           {
@@ -4956,8 +4980,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 70
           },
           {
-            "name": "Lemon Water w/o Sugar + Sabja Seeds",
-            "estCalories": 20
+            "name": "Lemon Water + Sabja Seeds",
+            "estCalories": 25
           },
           {
             "name": "Potlakaya Perugu Chutney",
@@ -4966,6 +4990,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Shahi Ki Tukda",
+            "estCalories": 190
           }
         ]
       },
@@ -4973,12 +5001,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Veg Puff",
-            "estCalories": 220
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "name": "Boiled Black Chana with Onion/Tomato",
+            "estCalories": 100
           },
           {
             "name": "Tea/Coffee/Milk",
@@ -4991,7 +5015,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Roti",
@@ -5007,23 +5031,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Beetroot Tomato Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
-            "name": "Veg Manchuria",
-            "estCalories": 180
+            "name": "Veg Manchuria, Noodles, Tomato Sauce",
+            "estCalories": 280
           },
           {
-            "name": "Noodles",
-            "estCalories": 200
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
-          },
-          {
-            "name": "Butternut Squash Curry",
-            "estCalories": 120
+            "name": "Black Channa Curry",
+            "estCalories": 160
           },
           {
             "name": "Thick Curd",
@@ -5034,19 +5050,33 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 90
           },
           {
-            "name": "Ginger Pickle",
-            "estCalories": 20
+            "name": "Gongura Fresh Chutney",
+            "estCalories": 35
           },
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Chicken 65 / Andhra Fish Fry",
+            "estCalories": 240,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Paneer 65",
+            "estCalories": 210,
+            "diet": "veg"
+          },
+          {
+            "name": "Creamy Mushroom Soup",
+            "estCalories": 75
           }
         ]
       }
     ]
   },
   {
-    "date": 30,
+    "date": 27,
     "dayName": "Friday",
     "meals": [
       {
@@ -5058,7 +5088,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Vegetable Daliya Kitchidi",
-            "estCalories": 160
+            "estCalories": 170
           },
           {
             "name": "Coconut Chutney",
@@ -5082,8 +5112,25 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Sweet Lime + Pineapple Fresh Juice without sugar",
             "estCalories": 75
+          },
+          {
+            "name": "Museli",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Peanut Sundal",
+            "estCalories": 110,
+            "diet": "veg"
           }
         ]
       },
@@ -5108,7 +5155,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Rasam",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Jeera Rice",
@@ -5119,8 +5166,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 120
           },
           {
-            "name": "Red Lentil Pumpkin Curry",
-            "estCalories": 130
+            "name": "Red Rajma Masala",
+            "estCalories": 160
           },
           {
             "name": "Papad",
@@ -5128,7 +5175,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Butter Milk",
-            "estCalories": 50
+            "estCalories": 45
           },
           {
             "name": "Beerakaya Chutney",
@@ -5136,7 +5183,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Moong Dal Payasam",
-            "estCalories": 180
+            "estCalories": 170
           }
         ]
       },
@@ -5144,15 +5191,15 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "slot": "snacks",
         "items": [
           {
-            "name": "Raw Banana Bhajji 2 PCs (Less Oily)",
-            "estCalories": 180
+            "name": "Aloo Bonda (Medium size 2 pc)",
+            "estCalories": 220
           },
           {
-            "name": "Coconut Coriander Chutney",
+            "name": "Coconut Chutney",
             "estCalories": 50
           },
           {
-            "name": "Ginger Tea/Coffee/Milk",
+            "name": "Tea/Coffee/Milk",
             "estCalories": 80
           }
         ]
@@ -5162,7 +5209,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
         "items": [
           {
             "name": "Onions & Lemon Salad",
-            "estCalories": 30
+            "estCalories": 25
           },
           {
             "name": "Lacha Paratha",
@@ -5177,18 +5224,18 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 130
           },
           {
-            "name": "Sambar",
+            "name": "Mix Veg Sambar",
             "estCalories": 80
           },
           {
             "name": "Garlic Chicken Curry",
-            "diet": "non-veg",
-            "estCalories": 240
+            "estCalories": 240,
+            "diet": "non-veg"
           },
           {
-            "name": "Paneer Lababdar",
-            "diet": "veg",
-            "estCalories": 230
+            "name": "Paneer Tikka Masala",
+            "estCalories": 230,
+            "diet": "veg"
           },
           {
             "name": "Tomato Peas Capsicum Masala",
@@ -5199,8 +5246,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 80
           },
           {
-            "name": "(Watermelon + Muskmelon + Papaya) Cut Fruit",
-            "estCalories": 70
+            "name": "Muskmelon Cut Fruit",
+            "estCalories": 50
           },
           {
             "name": "Mango Pickle",
@@ -5209,13 +5256,17 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Sweet Corn Soup",
+            "estCalories": 65
           }
         ]
       }
     ]
   },
   {
-    "date": 31,
+    "date": 28,
     "dayName": "Saturday",
     "meals": [
       {
@@ -5231,7 +5282,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Peanut Chutney",
-            "estCalories": 70
+            "estCalories": 60
           },
           {
             "name": "Tomato Chutney",
@@ -5251,8 +5302,21 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Boiled Egg",
-            "diet": "non-veg",
-            "estCalories": 75
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Watermelon & Pomegranate Juice with Light Sugar",
+            "estCalories": 85
+          },
+          {
+            "name": "Chocos",
+            "estCalories": 150
+          },
+          {
+            "name": "Sweet Potato Salad",
+            "estCalories": 100,
+            "diet": "veg"
           }
         ]
       },
@@ -5276,7 +5340,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 140
           },
           {
-            "name": "Beetroot Tomato Rasam",
+            "name": "Pachi Pulusu",
             "estCalories": 50
           },
           {
@@ -5284,7 +5348,7 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 200
           },
           {
-            "name": "Dondakaya Stir Fry",
+            "name": "Radish Tomato Stir Fry",
             "estCalories": 100
           },
           {
@@ -5296,8 +5360,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 40
           },
           {
-            "name": "Majjiga Pulusu",
-            "estCalories": 60
+            "name": "Majiga Pulusu",
+            "estCalories": 65
           },
           {
             "name": "Avakaya (Mango Pickle)",
@@ -5306,6 +5370,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Ghee + Podi",
             "estCalories": 60
+          },
+          {
+            "name": "Carrot Halwa",
+            "estCalories": 180
           }
         ]
       },
@@ -5318,10 +5386,10 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           },
           {
             "name": "Groundnut/Coconut Chutney",
-            "estCalories": 60
+            "estCalories": 50
           },
           {
-            "name": "Cold Badam Milk (1 Medium Glass)",
+            "name": "Cold Badam Milk 150 ml",
             "estCalories": 150
           }
         ]
@@ -5350,16 +5418,8 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
             "estCalories": 110
           },
           {
-            "name": "Vegetable Fried Rice",
-            "estCalories": 210
-          },
-          {
-            "name": "Gobhi Manchuria",
-            "estCalories": 180
-          },
-          {
-            "name": "Tomato Sauce",
-            "estCalories": 20
+            "name": "Vegetable Fried Rice, Gobhi Manchuria, Tomato Sauce",
+            "estCalories": 320
           },
           {
             "name": "Cabbage Beans Poriyal",
@@ -5380,6 +5440,405 @@ export const MONTHLY_MESS_MENU: MonthlyMenu[] = [
           {
             "name": "Milk + Coffee Powder",
             "estCalories": 80
+          },
+          {
+            "name": "Red Lentil Soup",
+            "estCalories": 60
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "date": 29,
+    "dayName": "Sunday",
+    "meals": [
+      {
+        "slot": "breakfast",
+        "items": [
+          {
+            "name": "Shavige Bath",
+            "estCalories": 200
+          },
+          {
+            "name": "Paneer Paratha - 2 Pcs Thin",
+            "estCalories": 280
+          },
+          {
+            "name": "Peanut Chutney",
+            "estCalories": 60
+          },
+          {
+            "name": "Thick Curd, Mango Pickle",
+            "estCalories": 80
+          },
+          {
+            "name": "Brown Bread+butter+Jam",
+            "estCalories": 150
+          },
+          {
+            "name": "Sprouts (1 small cup)",
+            "estCalories": 50
+          },
+          {
+            "name": "Tea/Coffee/Milk",
+            "estCalories": 80
+          },
+          {
+            "name": "Egg Bhurji",
+            "estCalories": 140,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Brown Bread+Peanut Butter+Jam",
+            "estCalories": 180
+          },
+          {
+            "name": "Apple + Pomegranate Fresh Juice without Sugar",
+            "estCalories": 80
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Raagi Malt",
+            "estCalories": 90,
+            "diet": "veg"
+          }
+        ]
+      },
+      {
+        "slot": "lunch",
+        "items": [
+          {
+            "name": "Onions & Lemon Salad",
+            "estCalories": 25
+          },
+          {
+            "name": "Chapathi",
+            "estCalories": 100
+          },
+          {
+            "name": "White Rice",
+            "estCalories": 150
+          },
+          {
+            "name": "Dal Fry",
+            "estCalories": 150
+          },
+          {
+            "name": "Chicken Dum Biryani/Paneer Dum Biryani",
+            "estCalories": 350
+          },
+          {
+            "name": "Chicken Thick Gravy / Hyderabadi Mirchi Ka Salan",
+            "estCalories": 180,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Tomato Rasam",
+            "estCalories": 45
+          },
+          {
+            "name": "Onion Raitha",
+            "estCalories": 60
+          },
+          {
+            "name": "Triangular Fryums",
+            "estCalories": 70
+          },
+          {
+            "name": "Mint Lemon Jal Jeera Drink (200 ml)",
+            "estCalories": 40
+          },
+          {
+            "name": "Fresh Gongura Chutney",
+            "estCalories": 35
+          },
+          {
+            "name": "Basundhi (60 ml)",
+            "estCalories": 160
+          },
+          {
+            "name": "Vanilla Ice Cream (Not Frozen Dessert)",
+            "estCalories": 140
+          },
+          {
+            "name": "Gulab Jamun",
+            "estCalories": 150
+          }
+        ]
+      },
+      {
+        "slot": "snacks",
+        "items": [
+          {
+            "name": "Dahi Puri (8 Pcs)",
+            "estCalories": 220
+          },
+          {
+            "name": "Onions",
+            "estCalories": 25
+          },
+          {
+            "name": "Masala Tea/Coffee/Milk",
+            "estCalories": 80
+          }
+        ]
+      },
+      {
+        "slot": "dinner",
+        "items": [
+          {
+            "name": "Beetroot & Carrot Salad",
+            "estCalories": 30
+          },
+          {
+            "name": "Pulka",
+            "estCalories": 80
+          },
+          {
+            "name": "White Rice",
+            "estCalories": 150
+          },
+          {
+            "name": "Pesara Pappu",
+            "estCalories": 130
+          },
+          {
+            "name": "Radish Sambar",
+            "estCalories": 80
+          },
+          {
+            "name": "Ragi Idly, Groundnut Chutney",
+            "estCalories": 190
+          },
+          {
+            "name": "Dondakaya Stir Fry",
+            "estCalories": 100
+          },
+          {
+            "name": "Vegetable Kurma Gravy",
+            "estCalories": 140
+          },
+          {
+            "name": "Thick Curd",
+            "estCalories": 80
+          },
+          {
+            "name": "Papaya Cut Fruit",
+            "estCalories": 60
+          },
+          {
+            "name": "Tomato Pickle",
+            "estCalories": 20
+          },
+          {
+            "name": "Milk + Coffee Powder",
+            "estCalories": 80
+          },
+          {
+            "name": "Lemon Coriander Soup",
+            "estCalories": 45
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "date": 30,
+    "dayName": "Monday",
+    "meals": [
+      {
+        "slot": "breakfast",
+        "items": [
+          {
+            "name": "Ghee + Veg Pongal",
+            "estCalories": 220
+          },
+          {
+            "name": "Bhature - 2 Pcs Big",
+            "estCalories": 280
+          },
+          {
+            "name": "Groundnut Chutney, Sambar",
+            "estCalories": 60
+          },
+          {
+            "name": "Chole Curry",
+            "estCalories": 180
+          },
+          {
+            "name": "White Bread+Butter+Jam",
+            "estCalories": 150
+          },
+          {
+            "name": "Sprouts (1 small cup)",
+            "estCalories": 50
+          },
+          {
+            "name": "Tea/Coffee/Milk",
+            "estCalories": 80
+          },
+          {
+            "name": "Boiled Egg",
+            "estCalories": 75,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Banana Milk Shake without Sugar",
+            "estCalories": 120
+          },
+          {
+            "name": "Cornflakes",
+            "estCalories": 150
+          },
+          {
+            "name": "Boiled Mixed Beans Salad",
+            "estCalories": 90,
+            "diet": "veg"
+          }
+        ]
+      },
+      {
+        "slot": "lunch",
+        "items": [
+          {
+            "name": "Boiled Chana Salad with Onion & Tomato",
+            "estCalories": 90
+          },
+          {
+            "name": "Chapathi",
+            "estCalories": 100
+          },
+          {
+            "name": "White Rice",
+            "estCalories": 150
+          },
+          {
+            "name": "Palak Dal",
+            "estCalories": 140
+          },
+          {
+            "name": "Brinjal Sambar",
+            "estCalories": 80
+          },
+          {
+            "name": "Tomato Rice",
+            "estCalories": 190
+          },
+          {
+            "name": "Pesara Punugulu Curry (Pakka Andhra Style)",
+            "estCalories": 170
+          },
+          {
+            "name": "Capsicum Tomato Masala",
+            "estCalories": 120
+          },
+          {
+            "name": "Fryums",
+            "estCalories": 70
+          },
+          {
+            "name": "Butter Milk",
+            "estCalories": 45
+          },
+          {
+            "name": "Sorakaya Perugu Chutney",
+            "estCalories": 60
+          },
+          {
+            "name": "Jilebi",
+            "estCalories": 160
+          },
+          {
+            "name": "Ghee + Podi",
+            "estCalories": 60
+          }
+        ]
+      },
+      {
+        "slot": "snacks",
+        "items": [
+          {
+            "name": "Dry Maggi (Non-Sticky)",
+            "estCalories": 220
+          },
+          {
+            "name": "Tomato Sauce",
+            "estCalories": 20
+          },
+          {
+            "name": "Tea/Coffee/Milk",
+            "estCalories": 80
+          }
+        ]
+      },
+      {
+        "slot": "dinner",
+        "items": [
+          {
+            "name": "Onions & Lemon Salad",
+            "estCalories": 25
+          },
+          {
+            "name": "Roti",
+            "estCalories": 100
+          },
+          {
+            "name": "White Rice",
+            "estCalories": 150
+          },
+          {
+            "name": "Pesara Pappu",
+            "estCalories": 130
+          },
+          {
+            "name": "Andhra Charu",
+            "estCalories": 45
+          },
+          {
+            "name": "Bhagara Rice",
+            "estCalories": 200
+          },
+          {
+            "name": "Hyderabadi Chicken Curry",
+            "estCalories": 240,
+            "diet": "non-veg"
+          },
+          {
+            "name": "Paneer Butter Masala",
+            "estCalories": 230,
+            "diet": "veg"
+          },
+          {
+            "name": "Ladies Finger Boiled Fry",
+            "estCalories": 100
+          },
+          {
+            "name": "Thick Curd",
+            "estCalories": 80
+          },
+          {
+            "name": "Water Melon Cut Fruit",
+            "estCalories": 50
+          },
+          {
+            "name": "Radish Fresh Chutney",
+            "estCalories": 35
+          },
+          {
+            "name": "Milk + Coffee Powder",
+            "estCalories": 80
+          },
+          {
+            "name": "Butter Methi Naan",
+            "estCalories": 220
+          },
+          {
+            "name": "Sweet Corn Soup",
+            "estCalories": 65
           }
         ]
       }

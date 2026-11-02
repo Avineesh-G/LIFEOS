@@ -1,10 +1,10 @@
 {
-  "versionCode": 69,
-  "versionName": "3.3.2",
-  "releaseDate": "2026-10-26",
+  "versionCode": 70,
+  "versionName": "3.3.3",
+  "releaseDate": "2026-11-02",
   "apkSize": "8.93 MB",
-  "apkSizeBytes": 9361966,
-  "releaseNotes": "LifeOS v3.3.2 (Build 69):\n• Layout Restoration: Reverted to standard clean vertical view layouts across Outings, Nutrition, Shopping Lists, and Laundry\n• Native Stability: Ensured 100% stable, jitter-free navigation across all device views\n• Full 120fps Performance: Optimized memory footprint and fluid gesture response",
+  "apkSizeBytes": 9365562,
+  "releaseNotes": "LifeOS v3.3.3 (Build 70):\n• November 2026 Mess Menu: Complete 30-day schedule with full Veg, Non-Veg, and Special Mess options\n• Nutrition Diary: Interactive 1-tap food logging with portion adjustment and accurate calorie tracking\n• Native Stability: Jitter-free navigation and 120 FPS fluid motion across all device views",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "5dde67a98741b1b6368e1f312682cfdbe63355c90aeb2d6b1b4db5faa73cc34a"
+  "sha256": "e506c299f6a3978179f7fa9fe3486ceb7455f4ff515fb5ae0a0f0eb28e36840b"
 }

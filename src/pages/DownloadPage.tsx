@@ -408,13 +408,13 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
   // Dynamic Version Manifest Hydration
   const [manifest, setManifest] = useState({
-    versionName: '3.3.2',
-    versionCode: 69,
-    releaseDate: '2026-10-26',
+    versionName: '3.3.3',
+    versionCode: 70,
+    releaseDate: '2026-11-02',
     apkSize: '8.93 MB',
-    apkSizeBytes: 9361966,
-    sha256: '5dde67a98741b1b6368e1f312682cfdbe63355c90aeb2d6b1b4db5faa73cc34a',
-    releaseNotes: '• Layout Restoration across Outings, Nutrition, Shopping Lists, and Laundry\n• Native Stability: 100% stable, jitter-free navigation\n• Full 120fps Performance: Optimized memory footprint',
+    apkSizeBytes: 9365562,
+    sha256: 'e506c299f6a3978179f7fa9fe3486ceb7455f4ff515fb5ae0a0f0eb28e36840b',
+    releaseNotes: '• November 2026 Mess Menu: Complete 30-day schedule with full Veg, Non-Veg, and Special Mess options\n• Nutrition Diary: Interactive 1-tap food logging with portion adjustment and accurate calorie tracking\n• Native Stability: Jitter-free navigation and 120 FPS fluid motion across all device views',
     apkUrl: 'https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk',
   });
 

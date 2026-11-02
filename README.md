@@ -9,7 +9,7 @@
 
 <br />
 
-[![Version](https://img.shields.io/badge/Version-v3.3.2_(Build_69)-8B1E3F?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
+[![Version](https://img.shields.io/badge/Version-v3.3.3_(Build_70)-8B1E3F?style=for-the-badge&logo=android&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![UI/UX](https://img.shields.io/badge/Design-Apple_Dark_Glass_%26_Water_Droplets-000000?style=for-the-badge&logo=apple&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download)
 [![Typography](https://img.shields.io/badge/Typography-Inter_Variable_%26_Google_Sans_Flex-10B981?style=for-the-badge&logo=google&logoColor=white)](https://fonts.google.com/)
 [![AI Engine](https://img.shields.io/badge/AI_Core-Luna_Autonomous_Engine-F59E0B?style=for-the-badge&logo=sparkles&logoColor=white)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/)
@@ -18,7 +18,7 @@
 
 <br />
 
-[Download Signed APK (v3.3.2)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
+[Download Signed APK (v3.3.3)](https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk) &nbsp;•&nbsp; 
 [Live Showcase Website](https://lifeos-gujjeti-avineeshs-projects.vercel.app/download) &nbsp;•&nbsp; 
 [Launch Web App](https://lifeos-gujjeti-avineeshs-projects.vercel.app/) &nbsp;•&nbsp; 
 [Release Manifest](public/version.json)
@@ -45,9 +45,10 @@ Modern high-performers, engineers, students, and athletes suffer from severe cog
 
 ---
 
-## What is New in v3.3.2 (Build 69)
+## What is New in v3.3.3 (Build 70)
 
-* **Layout Restoration**: Reverted to standard clean vertical view layouts across Outings, Nutrition, Shopping Lists, and Laundry for maximum ergonomic comfort.
+* **November 2026 Mess Menu**: Full 30-day schedule integration with complete Veg, Non-Veg, and Special Mess meal options.
+* **Nutrition Diary & Quick Logging**: Interactive 1-tap food logging with portion adjustment, calorie tracking, and campus mess schedule alignment.
 * **Native Jitter-Free Stability**: Completely stabilized navigation journeys with smooth LIFO path memory backtracking across all 17 device interfaces.
 * **120 FPS Hardware Acceleration**: Optimized memory footprint, zero layout shifts, and instantaneous gesture response on physical Android hardware.
 * **Water Droplet Sub-Cards**: Refined sub-cards and bento tiles with subtle top rim highlights (`inset 0 1px 1px rgba(255,255,255,0.10)`) on pure black OLED backgrounds.
