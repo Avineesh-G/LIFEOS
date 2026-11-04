@@ -9,6 +9,9 @@ export const CHAT_FALLBACKS = ['openai/gpt-oss-20b'] as const;
 export const STT_PRIMARY = 'whisper-large-v3-turbo';
 export const STT_FALLBACKS = ['whisper-large-v3'] as const;
 
+export const VISION_PRIMARY = 'qwen/qwen3.8-27b';
+export const VISION_FALLBACKS = [] as const;
+
 export const ALLOWED_CHAT_MODELS = [
   CHAT_PRIMARY,
   ...CHAT_FALLBACKS,
@@ -17,6 +20,11 @@ export const ALLOWED_CHAT_MODELS = [
 export const ALLOWED_STT_MODELS = [
   STT_PRIMARY,
   ...STT_FALLBACKS,
+] as const;
+
+export const ALLOWED_VISION_MODELS = [
+  VISION_PRIMARY,
+  ...VISION_FALLBACKS,
 ] as const;
 
 /**
@@ -39,12 +47,12 @@ export const RETIRED_MODELS = [
   'deepseek-r1-distill-qwen-32b',
   'qwen/qwen3-32b',
   'qwen/qwen3.6-27b',
-  'qwen/qwen3.8-27b',
   'groq/compound-mini',
 ] as const;
 
 export type AllowedChatModel = (typeof ALLOWED_CHAT_MODELS)[number];
 export type AllowedSttModel = (typeof ALLOWED_STT_MODELS)[number];
+export type AllowedVisionModel = (typeof ALLOWED_VISION_MODELS)[number];
 
 export const GROQ_STORAGE_KEYS = {
   ACTIVE_CHAT_MODEL: 'lifeos_groq_active_chat_model',

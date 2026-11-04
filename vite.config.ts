@@ -20,6 +20,7 @@ export default defineConfig({
       'date-fns',
       '@material/material-color-utilities',
       '@rive-app/react-canvas-lite',
+      '@capacitor/camera',
       'recharts',
     ],
   },

@@ -91,6 +91,13 @@ export {
   CaretUpDown,
   DotsThree,
   Lightning,
+  Camera,
+  Image as ImageIcon,
+  Compass,
+  ArrowSquareOut,
+  ArrowUpRight,
+  Globe,
+  Translate,
 } from '@phosphor-icons/react';
 
 export { KineticSparkIcon } from './KineticSparkIcon';

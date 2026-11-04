@@ -66,7 +66,7 @@ export default function VoiceTranscribe({ data: _data, updateData: _updateData }
 
         setTranscribing(true);
         try {
-          const text = await transcribeAudio(audioBlob);
+          const { text } = await transcribeAudio(audioBlob);
           if (text) {
             setTranscript(text);
             const bullets = text
@@ -114,8 +114,8 @@ export default function VoiceTranscribe({ data: _data, updateData: _updateData }
         title="Voice Notes"
         subtitle={
           isRecording
-            ? `Recording (${mins}:${secs < 10 ? `0${secs}` : secs}) · Luna AI Listening`
-            : 'Tap mic to record speech · Luna AI Transcription'
+            ? `Recording (${mins}:${secs < 10 ? `0${secs}` : secs}) · Luna AI Automatic Listening`
+            : 'Tap mic to record in any language · Luna AI Automatic Transcription'
         }
         tint="#FF6B35"
       />
@@ -157,7 +157,7 @@ export default function VoiceTranscribe({ data: _data, updateData: _updateData }
 
           {transcribing && (
             <span className="text-xs font-semibold text-[rgba(235,235,245,0.60)] animate-pulse">
-              Transcribing audio with Luna...
+              Analyzing language & transcribing with Luna...
             </span>
           )}
         </div>
@@ -199,6 +199,6 @@ export default function VoiceTranscribe({ data: _data, updateData: _updateData }
           </div>
         )}
       </div>
-    </div>
+          </div>
   );
 }

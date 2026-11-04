@@ -4,6 +4,7 @@ import {
   CHAT_FALLBACKS,
   STT_PRIMARY,
   STT_FALLBACKS,
+  VISION_PRIMARY,
   GROQ_STORAGE_KEYS,
 } from '../config/aiModels.ts';
 import { getGroqApiKey, getAiProxyUrl } from '../utils/aiSecurity.ts';
@@ -16,6 +17,7 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   dataSentContext?: string;
+  images?: string[];
 }
 
 export interface AiErrorPayload {
@@ -123,7 +125,7 @@ export function formatAiError(err: any, status?: number, headers?: Headers): AiE
  * Streams chat completions from Groq (Mode A) or Proxy URL (Mode B).
  */
 export async function streamChatCompletion(
-  messages: { role: string; content: string }[],
+  messages: { role: string; content: string; images?: string[] }[],
   currentPathname: string,
   userDataContext: string,
   onChunk: (chunkText: string) => void,
@@ -157,9 +159,35 @@ export async function streamChatCompletion(
     ? `${baseSystemPrompt}\n\nUSER DATA CONTEXT:\n${userDataContext}`
     : baseSystemPrompt;
 
+  const hasImages = messages.some((m) => Array.isArray(m.images) && m.images.length > 0);
+
   const fullMessages = [
     { role: 'system', content: fullSystemPrompt },
-    ...messages,
+    ...messages.map((m) => {
+      if (Array.isArray(m.images) && m.images.length > 0) {
+        return {
+          role: m.role,
+          content: [
+            {
+              type: 'text',
+              text:
+                m.content ||
+                'Analyze the attached image(s). First identify the language used in the image, transcribe what is written, divide the points logically by LifeOS interface, and ask whether to save in the original language or translate to English before uploading. Emit action proposals for both options so I can choose with 1 tap.',
+            },
+            ...m.images.map((imgUrl) => ({
+              type: 'image_url',
+              image_url: {
+                url: imgUrl,
+              },
+            })),
+          ],
+        };
+      }
+      return {
+        role: m.role,
+        content: m.content,
+      };
+    }),
   ];
 
   const headers: Record<string, string> = {
@@ -170,15 +198,18 @@ export async function streamChatCompletion(
     headers['Authorization'] = `Bearer ${apiKey}`;
   }
 
-  // Resolve best active model dynamically
-  const resolution = await resolveActiveChatModel(apiKey);
-  const initialModel = resolution.activeModel;
-
-  const candidateModels = [
-    initialModel,
-    ...CHAT_FALLBACKS.filter(m => m !== initialModel),
-    CHAT_PRIMARY,
-  ].filter((v, i, a) => a.indexOf(v) === i);
+  let candidateModels: string[];
+  if (hasImages) {
+    candidateModels = [VISION_PRIMARY];
+  } else {
+    const resolution = await resolveActiveChatModel(apiKey);
+    const initialModel = resolution.activeModel;
+    candidateModels = [
+      initialModel,
+      ...CHAT_FALLBACKS.filter((m) => m !== initialModel),
+      CHAT_PRIMARY,
+    ].filter((v, i, a) => a.indexOf(v) === i);
+  }
 
   let lastErrorPayload: AiErrorPayload | null = null;
   let lastErrorObj: Error | null = null;
@@ -188,8 +219,8 @@ export async function streamChatCompletion(
       const requestPayload: any = {
         model: modelToTry,
         messages: fullMessages,
-        temperature: 0.3,
-        max_completion_tokens: 2048,
+        temperature: hasImages ? 0.2 : 0.3,
+        max_completion_tokens: hasImages ? 2048 : 1536,
         stream: true,
       };
 
@@ -339,10 +370,16 @@ export async function streamChatCompletion(
   }
 }
 
+export interface AudioTranscriptionResult {
+  text: string;
+  language?: string;
+}
+
 /**
- * Transcribes recorded audio blob using Groq Whisper model (Mode A or Mode B).
+ * Transcribes recorded audio blob using Groq Whisper model with automatic language detection.
+ * Whisper analyzes the audio to detect the exact spoken human language and transcribes accurately.
  */
-export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+export async function transcribeAudio(audioBlob: Blob): Promise<AudioTranscriptionResult> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     throw new Error('AI needs internet.');
   }
@@ -359,12 +396,32 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   const candidateAudioModels = [STT_PRIMARY, ...STT_FALLBACKS];
   let lastError: Error | null = null;
 
+  // Determine file extension matching blob type for optimal Whisper decoder parsing
+  const mime = audioBlob.type || 'audio/webm';
+  let ext = 'webm';
+  if (mime.includes('mp4') || mime.includes('m4a')) {
+    ext = 'm4a';
+  } else if (mime.includes('ogg')) {
+    ext = 'ogg';
+  } else if (mime.includes('wav')) {
+    ext = 'wav';
+  } else if (mime.includes('aac')) {
+    ext = 'aac';
+  }
+
+  // Anchor prompt with multilingual vocabulary priors to guide Whisper language identification
+  // accurately across Indian languages (Telugu, Hindi, Tamil, Kannada, Marathi, Bengali, etc.) and global languages
+  const conditioningPrompt =
+    'LifeOS speech recognition: Automatically transcribe in the exact spoken language and script: English, Telugu (తెలుగు), Hindi (हिंदी), Tamil (தமிழ்), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Marathi (मराठी), Bengali (বাংলা), Gujarati (ગુજરાતી), and global languages.';
+
   for (const modelToTry of candidateAudioModels) {
     try {
       const formData = new FormData();
-      formData.append('file', audioBlob, 'voice_recording.webm');
+      formData.append('file', audioBlob, `voice_recording.${ext}`);
       formData.append('model', modelToTry);
-      formData.append('response_format', 'json');
+      formData.append('response_format', 'verbose_json');
+      formData.append('temperature', '0');
+      formData.append('prompt', conditioningPrompt);
 
       const headers: Record<string, string> = {};
       if (!proxyUrl && apiKey) {
@@ -390,7 +447,10 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
       }
 
       const json = await response.json();
-      return json.text || '';
+      return {
+        text: json.text || '',
+        language: json.language || undefined,
+      };
     } catch (err: any) {
       lastError = err instanceof Error ? err : new Error(String(err));
     }

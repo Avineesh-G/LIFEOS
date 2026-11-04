@@ -9,6 +9,11 @@
 - **Persisted State Resilience**: Every new persisted field needs a default value, schema versioning, and an error-tolerant migration function.
 - **Route Error Isolation**: Every route is wrapped in `RouteErrorBoundary` and `Suspense`.
 - **HMR-Safe Module Singletons**: Never leave module-level side effects without HMR dispose handling (`import.meta.hot.dispose`). Firebase, IndexedDB, and global listeners must use singleton checks.
+- **App Version & What's New Updates**: Whenever updating or releasing a new version of the application:
+  1. Increment `versionCode` and update `versionName` in `src/version.ts` and `package.json`.
+  2. Prepend the new release entry to `APP_UPDATES` in `src/data/appUpdates.ts` with exact date & time, tag `v${CURRENT_VERSION_NAME} • Latest`, concrete feature bullet points, and the developer contact emails (`avineeshgujjeti2006@gmail.com` and `avineeshgujjeti@outlook.com`).
+  3. Ensure the "What's new & updates" carousel and pop-up modal always reflect the latest release details accurately.
+- **Strict No Emojis**: Never use emojis anywhere in the application. Always use Phosphor icons.
 
 ---
 

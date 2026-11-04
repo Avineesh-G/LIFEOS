@@ -1,5 +1,5 @@
 import { getLetAiMakeChanges } from '../utils/aiSecurity';
-import type { Task, ShoppingList, ShoppingItem } from '../types';
+import type { Task, ShoppingList, ShoppingItem, NoteItem, StudySession } from '../types';
 import { createShoppingList, generateShoppingId } from '../utils/shoppingStorage';
 import { saveOuting } from '../features/outings/storage/outingsIdb';
 import { DEFAULT_ME_PERSON } from '../features/outings/constants';
@@ -12,7 +12,9 @@ export type AiActionType =
   | 'ADD_SHOPPING_ITEM'
   | 'ADD_MULTIPLE_SHOPPING_ITEMS'
   | 'CREATE_OUTING'
-  | 'ADD_EXPENSE';
+  | 'ADD_EXPENSE'
+  | 'ADD_NOTE'
+  | 'ADD_STUDY_SESSION';
 
 export interface AiActionProposal {
   id: string;
@@ -24,6 +26,35 @@ export interface AiActionProposal {
   executed: boolean;
 }
 
+/**
+ * Robust JSON parser with automatic error-correction for model outputs:
+ * - Handles trailing commas
+ * - Handles unclosed closing braces
+ * - Handles array of action proposals
+ */
+function cleanAndParseJsonAction(raw: string): any {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    let sanitized = trimmed;
+    // 1. Remove trailing commas before closing braces/brackets
+    sanitized = sanitized.replace(/,\s*([}\]])/g, '$1');
+    try {
+      return JSON.parse(sanitized);
+    } catch {
+      // 2. Try closing brace if missing
+      if (sanitized.startsWith('{') && !sanitized.endsWith('}')) {
+        try {
+          return JSON.parse(sanitized + '}');
+        } catch {}
+      }
+      return null;
+    }
+  }
+}
+
 export function extractAiActionProposals(text: string): { cleanText: string; proposals: AiActionProposal[] } {
   if (!getLetAiMakeChanges()) {
     return { cleanText: text, proposals: [] };
@@ -33,26 +64,29 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
   let cleanText = text;
 
   // 1. Match standard markdown fenced action blocks (```json_action, ```json, ```action)
-  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?\{[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT)"[\s\S]*?\})\s*```/gi;
+  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|ADD_STUDY_SESSION)"[\s\S]*?(?:\}|\]))\s*```/gi;
   let match;
 
   while ((match = actionRegex.exec(text)) !== null) {
     try {
       const rawJson = match[1];
-      const parsed = JSON.parse(rawJson);
-      
-      if (parsed && typeof parsed.type === 'string' && isAllowListedAction(parsed.type.toUpperCase())) {
-        const type = parsed.type.toUpperCase() as AiActionType;
-        const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-        proposals.push({
-          id,
-          type,
-          title: buildActionTitle({ ...parsed, type }),
-          description: buildActionDescription({ ...parsed, type }),
-          payload: parsed.payload || {},
-          confirmed: false,
-          executed: false,
-        });
+      const parsed = cleanAndParseJsonAction(rawJson);
+      const items = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+
+      for (const item of items) {
+        if (item && typeof item.type === 'string' && isAllowListedAction(item.type.toUpperCase())) {
+          const type = item.type.toUpperCase() as AiActionType;
+          const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          proposals.push({
+            id,
+            type,
+            title: buildActionTitle({ ...item, type }),
+            description: buildActionDescription({ ...item, type }),
+            payload: item.payload || {},
+            confirmed: false,
+            executed: false,
+          });
+        }
       }
     } catch (err) {
       console.warn('Failed to parse AI action proposal JSON:', err);
@@ -63,25 +97,29 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
 
   // 2. Fallback: match un-fenced JSON at the end of the text
   if (proposals.length === 0) {
-    const rawJsonRegex = /(\{\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT)"[\s\S]*?\})\s*$/i;
+    const rawJsonRegex = /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|ADD_STUDY_SESSION)"[\s\S]*?(?:\}|\]))\s*$/i;
     const rawMatch = rawJsonRegex.exec(cleanText);
     if (rawMatch) {
       try {
-        const parsed = JSON.parse(rawMatch[1]);
-        if (parsed && typeof parsed.type === 'string' && isAllowListedAction(parsed.type.toUpperCase())) {
-          const type = parsed.type.toUpperCase() as AiActionType;
-          const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-          proposals.push({
-            id,
-            type,
-            title: buildActionTitle({ ...parsed, type }),
-            description: buildActionDescription({ ...parsed, type }),
-            payload: parsed.payload || {},
-            confirmed: false,
-            executed: false,
-          });
-          cleanText = cleanText.replace(rawJsonRegex, '').trim();
+        const parsed = cleanAndParseJsonAction(rawMatch[1]);
+        const items = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+
+        for (const item of items) {
+          if (item && typeof item.type === 'string' && isAllowListedAction(item.type.toUpperCase())) {
+            const type = item.type.toUpperCase() as AiActionType;
+            const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+            proposals.push({
+              id,
+              type,
+              title: buildActionTitle({ ...item, type }),
+              description: buildActionDescription({ ...item, type }),
+              payload: item.payload || {},
+              confirmed: false,
+              executed: false,
+            });
+          }
         }
+        cleanText = cleanText.replace(rawJsonRegex, '').trim();
       } catch (err) {
         console.warn('Failed to parse fallback AI action JSON:', err);
       }
@@ -99,7 +137,9 @@ function isAllowListedAction(type: string): boolean {
     'ADD_SHOPPING_ITEM', 
     'ADD_MULTIPLE_SHOPPING_ITEMS',
     'CREATE_OUTING',
-    'ADD_EXPENSE'
+    'ADD_EXPENSE',
+    'ADD_NOTE',
+    'ADD_STUDY_SESSION',
   ].includes(type);
 }
 
@@ -120,6 +160,10 @@ function buildActionTitle(parsed: any): string {
       return `Log Meal: ${p.name || 'Meal'} (${p.calories || 0} kcal)`;
     case 'LOG_WORKOUT':
       return `Log Workout: ${p.type || 'Session'}`;
+    case 'ADD_NOTE':
+      return `Create Note: ${p.title || 'Untitled Note'}`;
+    case 'ADD_STUDY_SESSION':
+      return `Add Study Topic: ${p.subject || 'Study'} - ${p.topic || 'Analysis'}`;
     default:
       return 'Proposed Action';
   }
@@ -158,6 +202,15 @@ function buildActionDescription(parsed: any): string {
       return `Calories: ${p.calories || 0} kcal • Protein: ${p.protein || 0}g • Type: ${p.mealType || 'General'}`;
     case 'LOG_WORKOUT':
       return `Duration: ${p.durationMinutes || 30} mins • Notes: ${p.notes || 'None'}`;
+    case 'ADD_NOTE': {
+      const preview = p.content ? (p.content.length > 60 ? p.content.slice(0, 57) + '...' : p.content) : 'Empty note';
+      return `Note: ${preview}`;
+    }
+    case 'ADD_STUDY_SESSION': {
+      const date = p.date || new Date().toISOString().split('T')[0];
+      const doubts = p.doubts ? ` • Doubts: ${p.doubts.slice(0, 40)}...` : '';
+      return `Date: ${date}${doubts}`;
+    }
     default:
       return '';
   }
@@ -197,6 +250,51 @@ export async function executeConfirmedAiAction(
         };
       }
 
+      case 'ADD_NOTE': {
+        const nowIso = new Date().toISOString();
+        const monthKey = nowIso.slice(0, 7);
+        const newNote: NoteItem = {
+          id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          title: p.title || 'Extracted Note',
+          content: p.content || '',
+          pageView: 'lined',
+          monthKey,
+          isArchived: false,
+          createdAt: nowIso,
+          updatedAt: nowIso,
+        };
+        const existingNotes = Array.isArray(currentData.notes) ? currentData.notes : [];
+        const updatedNotes = [newNote, ...existingNotes];
+        await updateData({ notes: updatedNotes });
+        return {
+          success: true,
+          message: `Note "${newNote.title}" saved to Notes.`,
+          undoPayload: { notes: existingNotes },
+        };
+      }
+
+      case 'ADD_STUDY_SESSION': {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const newSession: StudySession = {
+          id: `study_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          subject: p.subject || 'Exam Analysis',
+          topic: p.topic || 'Extracted Topic',
+          date: p.date || todayStr,
+          startTime: p.startTime || new Date().toTimeString().slice(0, 5),
+          duration: Number(p.duration) || 30,
+          notes: p.notes || p.content || '',
+          doubts: p.doubts || '',
+        };
+        const existingSessions = Array.isArray(currentData.studySessions) ? currentData.studySessions : [];
+        const updatedSessions = [newSession, ...existingSessions];
+        await updateData({ studySessions: updatedSessions });
+        return {
+          success: true,
+          message: `Study analysis for "${newSession.subject}" added to Study.`,
+          undoPayload: { studySessions: existingSessions },
+        };
+      }
+
       case 'ADD_SHOPPING_ITEM': {
         const existingLists: ShoppingList[] = Array.isArray(currentData.shoppingLists) ? currentData.shoppingLists : [];
         const newItem: ShoppingItem = {
@@ -212,7 +310,6 @@ export async function executeConfirmedAiAction(
           const newList = createShoppingList('Shopping List', false, [newItem]);
           updatedLists = [newList];
         } else {
-          // Add to first active list
           const targetIndex = 0;
           updatedLists = existingLists.map((l, idx) => 
             idx === targetIndex ? { ...l, items: [newItem, ...l.items], updatedAt: new Date().toISOString() } : l

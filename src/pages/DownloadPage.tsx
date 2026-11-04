@@ -377,22 +377,22 @@ const LUNA_PROMPTS = [
   {
     title: 'Workout Log',
     prompt: 'Log 4 sets of Incline Dumbbell Press at 32kg for 8 reps with RPE 8',
-    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_WORKOUT\n• Exercise: Incline Dumbbell Press\n• Sets: 4 sets × 8 reps @ 32 kg (RPE 8.0)\n• Estimated 1RM: 40.5 kg (Brzycki)\n• Target Rest: 90s countdown initialized.\n[Action Ready to Commit to Local DB]',
+    response: 'Luna AI Action Prepared:\n• Action: LOG_WORKOUT\n• Exercise: Incline Dumbbell Press\n• Sets: 4 sets × 8 reps @ 32 kg (RPE 8.0)\n• Estimated 1RM: 40.5 kg (Brzycki)\n• Target Rest: 90s countdown initialized.\n[Action Ready to Commit to Local DB]',
   },
   {
     title: 'Study Deep Work',
     prompt: 'Block 90 minutes of Operating Systems focus with brown noise',
-    response: '🤖 Luna AI Action Prepared:\n• Action: START_FLOW_SESSION\n• Duration: 90 Minutes (2 × 45m Pomodoro cycles)\n• Subject: Operating Systems (Virtual Memory & Paging)\n• Soundscape: Pure Brown Noise (Synthesizing via Web Audio)\n• Timetable Conflict Check: Clear until 15:30 lecture.',
+    response: 'Luna AI Action Prepared:\n• Action: START_FLOW_SESSION\n• Duration: 90 Minutes (2 × 45m Pomodoro cycles)\n• Subject: Operating Systems (Virtual Memory & Paging)\n• Soundscape: Pure Brown Noise (Synthesizing via Web Audio)\n• Timetable Conflict Check: Clear until 15:30 lecture.',
   },
   {
     title: 'Mess Nutrition',
     prompt: 'Log college mess dinner: 3 rotis, paneer curry, and dal with 500ml water',
-    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_MEAL\n• Category: Dinner (Campus Mess)\n• Estimated Macros: 680 kcal | 28g Protein | 82g Carbs | 24g Fat\n• Daily Calorie Goal Progress: 1,940 / 2,200 kcal (88%)\n• Water HUD: +500ml logged (Total today: 3.1L / 3.5L target).',
+    response: 'Luna AI Action Prepared:\n• Action: LOG_MEAL\n• Category: Dinner (Campus Mess)\n• Estimated Macros: 680 kcal | 28g Protein | 82g Carbs | 24g Fat\n• Daily Calorie Goal Progress: 1,940 / 2,200 kcal (88%)\n• Water HUD: +500ml logged (Total today: 3.1L / 3.5L target).',
   },
   {
     title: 'Outing Expense',
     prompt: 'Paid 1400 rupees for group dinner at cafe with Rohan, Vikram, and me',
-    response: '🤖 Luna AI Action Prepared:\n• Action: LOG_OUTING_EXPENSE\n• Outing: Weekend Cafe Trip\n• Amount: ₹1,400 paid by You\n• Split: ₹466.67 each (Rohan, Vikram, You)\n• Balance Matrix: Rohan owes ₹467, Vikram owes ₹467.\n• Clipboard summary generated for WhatsApp group.',
+    response: 'Luna AI Action Prepared:\n• Action: LOG_OUTING_EXPENSE\n• Outing: Weekend Cafe Trip\n• Amount: ₹1,400 paid by You\n• Split: ₹466.67 each (Rohan, Vikram, You)\n• Balance Matrix: Rohan owes ₹467, Vikram owes ₹467.\n• Clipboard summary generated for WhatsApp group.',
   },
 ];
 
@@ -493,7 +493,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
     setIsLunaGenerating(true);
     setTimeout(() => {
       setLunaDisplayResponse(
-        `🤖 Luna Autonomous Engine Analysis for "${lunaCustomQuery.trim()}":\n• Parsed Intent: MULTI_MODULE_MUTATION\n• Action 1: Dispatched high-priority checkpoint into Tasks Matrix.\n• Action 2: Calculated nutrition & calorie impact (+140 kcal adjustment).\n• Action 3: Synced local Android WorkManager reminder with 0ms latency.\n[Committed to offline IndexedDB]`
+        `Luna Autonomous Engine Analysis for "${lunaCustomQuery.trim()}":\n• Parsed Intent: MULTI_MODULE_MUTATION\n• Action 1: Dispatched high-priority checkpoint into Tasks Matrix.\n• Action 2: Calculated nutrition & calorie impact (+140 kcal adjustment).\n• Action 3: Synced local Android WorkManager reminder with 0ms latency.\n[Committed to offline IndexedDB]`
       );
       setIsLunaGenerating(false);
       setLunaCustomQuery('');

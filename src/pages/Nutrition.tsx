@@ -887,7 +887,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 Calories per piece / serving (kcal)
               </label>
               <span className="text-[10px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full">
-                ✨ Auto-Applied by AI
+                <Sparkle size={11} weight="fill" /> Auto-Applied by AI
               </span>
             </div>
             <TextField
