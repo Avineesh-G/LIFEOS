@@ -17,8 +17,6 @@ const VIEWPORTS: TestViewport[] = [
 const ROUTES = [
   { name: 'Home', path: '/' },
   { name: 'Nutrition', path: '/nutrition' },
-  { name: 'Study', path: '/study' },
-  { name: 'Study History', path: '/study/history' },
   { name: 'Gym', path: '/gym' },
   { name: 'Gym Split', path: '/gym/split' },
   { name: 'Spending', path: '/spending' },

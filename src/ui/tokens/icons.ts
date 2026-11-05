@@ -98,6 +98,12 @@ export {
   ArrowUpRight,
   Globe,
   Translate,
+  QrCode,
+  FileText,
+  FilePdf,
+  FileImage,
+  FolderSimplePlus,
+  CloudArrowDown,
 } from '@phosphor-icons/react';
 
 export { KineticSparkIcon } from './KineticSparkIcon';

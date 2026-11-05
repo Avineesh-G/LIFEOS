@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Compass, Microphone, ForkKnife, Flame } from '../ui/tokens/icons';
+import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive } from '../ui/tokens/icons';
 import { CURRENT_VERSION_NAME } from '../version';
 
 export interface AppUpdate {
@@ -23,15 +23,33 @@ export const OFFICIAL_DEVELOPER_EMAILS = [
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-drive-docs-ai-inspector',
+    category: 'Drive & AI Routing',
+    icon: React.createElement(HardDrive, { size: 13, weight: 'bold' }),
+    title: 'Drive & AI Document Inspector',
+    dateTime: 'Nov 5 • 07:45 PM',
+    fullDateTime: 'Thursday, Nov 5, 2026 • 07:45 PM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#0A84FF]',
+    summary: 'Built-in 5.0 GB Drive & Docs cloud storage, in-reader AI intelligence that extracts and routes document receipts, and optimized native edge header layouts.',
+    points: [
+      'LifeOS Drive & Docs Hub: Fast local-first cloud storage with 5.0 GB quota, instant multi-file uploads, and cross-device QR transfer.',
+      'In-Reader AI Document Inspector: AI reads images and documents in reading mode, extracts amounts, items, and tasks, and routes directly to Finance, Gym, Nutrition, Tasks, or Notes.',
+      'Native Android Edge Refinement: Zero header overshadowing, optimized status bar clearance, and pinned bottom actions for smooth one-hand mobile ergonomics.',
+      'Mobile Stability: Unified split-chip controls, secure delete confirmation safeguards, and zero frame drops on Android WebView.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+  },
+  {
     id: 'update-auto-voice-vision',
     category: 'Universal Voice AI',
     icon: React.createElement(Microphone, { size: 13, weight: 'bold' }),
     title: 'Universal Voice & Vision AI',
     dateTime: 'Nov 4 • 11:15 PM',
     fullDateTime: 'Wednesday, Nov 4, 2026 • 11:15 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.4',
     colorClass: 'text-[#0A84FF]',
-    summary: 'Universal automatic language analysis for microphone speech, zero-hallucination transcription, and multimodal study notes vision in Luna AI.',
+    summary: 'Universal automatic language analysis for microphone speech, zero-hallucination transcription, and multimodal notes vision in Luna AI.',
     points: [
       'Universal Automatic Voice Recognition: Luna AI automatically analyzes and detects the spoken human language (English, Telugu, Hindi, Tamil, Kannada, Marathi, Bengali, and all global languages) and transcribes with zero cross-language hallucination.',
       'Instant Chat Paste: Spoken queries are instantly analyzed, transcribed, and pasted directly into the chat input bar with detected language feedback.',
@@ -49,11 +67,11 @@ export const APP_UPDATES: AppUpdate[] = [
     fullDateTime: 'Wednesday, Nov 4, 2026 • 09:30 PM',
     tag: 'v3.3.3',
     colorClass: 'text-[#30D158]',
-    summary: 'Capture exam analysis notes, handwritten doubts, or lecture whiteboards directly in Luna AI with multimodal recognition.',
+    summary: 'Capture exam analysis notes, handwritten formulas, or lecture whiteboards directly in Luna AI with multimodal recognition.',
     points: [
-      'Multimodal Photo Input: Snap live pictures or attach up to 3 study sheets from phone storage or laptop webcam.',
+      'Multimodal Photo Input: Snap live pictures or attach up to 3 note sheets from phone storage or laptop webcam.',
       'Groq Qwen 27B Vision: High-speed OCR and contextual comprehension for handwritten notes, equations, and tables.',
-      'Smart Interface Categorization: Automatically sorts points into Notes, Study Doubts, or Daily Tasks based on context.',
+      'Smart Interface Categorization: Automatically sorts points into Notes, Formulas, or Daily Tasks based on context.',
       '1-Tap Action Cards: Interactive confirmation cards let you review and add items directly into target interfaces.',
     ],
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
@@ -76,19 +94,19 @@ export const APP_UPDATES: AppUpdate[] = [
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
   },
   {
-    id: 'update-voice-transcriber',
-    category: 'Speech AI',
-    icon: React.createElement(Microphone, { size: 13, weight: 'bold' }),
-    title: 'Voice Transcriber',
+    id: 'update-timetable-classes',
+    category: 'Timetable & Classes',
+    icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
+    title: 'Timetable & Classes Hub',
     dateTime: 'Oct 20 • 11:00 AM',
     fullDateTime: 'Tuesday, Oct 20, 2026 • 11:00 AM',
     tag: 'v3.3.1',
     colorClass: 'text-[#BF5AF2]',
-    summary: 'Record voice notes and lectures with rapid Whisper AI speech-to-text and instant bullet summarization in LifeOS.',
+    summary: 'Real-time class schedule planner with automatic reminders, venue room tracking, and rapid subject switching in LifeOS.',
     points: [
-      'Whisper Turbo Engine: High-fidelity voice transcription for fast lectures, ideas, and revision notes.',
-      'Automated Bullet Takeaways: Automatically extracts crisp action points and key concept summaries.',
-      'Notes Integration: Saves full transcripts and bullet points directly into the LifeOS Notes interface with timestamps.',
+      'Dynamic Class Schedule: Daily and weekly timetable views tailored for university lectures and lab sessions.',
+      'Timetable Lead Reminders: Native 10-minute notifications keep you punctual for every scheduled lecture slot.',
+      'One-Tap Navigation: Quick-launch timetable directly from the home Quick Hub or bottom navigation drawer.',
     ],
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
   },
@@ -110,21 +128,20 @@ export const APP_UPDATES: AppUpdate[] = [
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
   },
   {
-    id: 'update-focus-flow',
-    category: 'Focus Flow',
-    icon: React.createElement(Flame, { size: 13, weight: 'bold' }),
-    title: 'Deep Work Room',
+    id: 'update-finances-ledger',
+    category: 'Finances',
+    icon: React.createElement(Wallet, { size: 13, weight: 'bold' }),
+    title: 'Finance & Expense Tracker',
     dateTime: 'Oct 05 • 6:45 PM',
     fullDateTime: 'Monday, Oct 05, 2026 • 06:45 PM',
     tag: 'v3.2.0',
-    colorClass: 'text-[#FF453A]',
-    summary: 'Distraction-free Pomodoro deep focus environment with ambient soundscapes and study streak analytics in LifeOS.',
+    colorClass: 'text-[#30D158]',
+    summary: 'Daily expense logging, budget monitoring, category insights, and offline-first finance management in LifeOS.',
     points: [
-      'Custom Sprint Intervals: Seamless work-rest cycles optimized for exam preparation and code sprints.',
-      'Focus Audio Soundscapes: Integrated white noise, rain, and binaural audio to isolate room distractions.',
-      'Study Heatmap & Streaks: Tracks daily focused hours, milestone badges, and consistency trends in the Study heatmap.',
+      'Rapid Expense Logging: Record food, travel, and miscellaneous spends in under 3 seconds with auto-categorization.',
+      'Budget Limit Alerts: Visual balance metrics that safeguard your monthly student budget.',
+      'Offline-Ready Storage: Secure local-first persistence synced automatically with cloud backups.',
     ],
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
   },
 ];
-

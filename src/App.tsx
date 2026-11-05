@@ -11,10 +11,6 @@ import Home from './pages/Home';
 import PageLoadingFallback from './components/common/PageLoadingFallback';
 
 // Direct eager imports for instant zero-latency page switching (no chunk download delay, no blank screens)
-import Study from './pages/Study';
-import StudyTimer from './pages/StudyTimer';
-import StudyHistory from './pages/StudyHistory';
-import StudyHeatmap from './pages/StudyHeatmap';
 import Gym from './pages/Gym';
 import GymWorkout from './pages/GymWorkout';
 import GymSplit from './pages/GymSplit';
@@ -32,15 +28,12 @@ import SettingsPage from './pages/Settings';
 import DownloadPage from './pages/DownloadPage';
 import Auth from './pages/Auth';
 import DevShapes from './pages/DevShapes';
-import MorningBriefing from './pages/MorningBriefing';
-import BrainDump from './pages/BrainDump';
-import FlowRoom from './pages/FlowRoom';
-import ActiveRecall from './pages/ActiveRecall';
-import VoiceTranscribe from './pages/VoiceTranscribe';
 import OutingsListPage from './features/outings/pages/OutingsListPage';
 import OutingDetailPage from './features/outings/pages/OutingDetailPage';
 import ThemeSettings from './pages/ThemeSettings';
 import Notes from './pages/Notes';
+import Drive from './pages/Drive';
+import PublicShareView from './pages/PublicShareView';
 const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
@@ -111,10 +104,6 @@ function MainContent({
 
   const routeElements = useRoutes([
     { path: '/', element: <RouteErrorBoundary routeName="Home"><Home data={data} refresh={refresh} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/study', element: <RouteErrorBoundary routeName="Study"><Study data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/study/timer', element: <RouteErrorBoundary routeName="Study Timer"><StudyTimer data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/study/history', element: <RouteErrorBoundary routeName="Study History"><StudyHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/study/heatmap', element: <RouteErrorBoundary routeName="Study Analytics"><StudyHeatmap data={data} /></RouteErrorBoundary> },
     { path: '/gym', element: <RouteErrorBoundary routeName="Gym"><Gym data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/gym/onboarding', element: <RouteErrorBoundary routeName="Gym Onboarding"><GymOnboarding data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/gym/workout', element: <RouteErrorBoundary routeName="Workout"><GymWorkout data={data} updateData={updateData} /></RouteErrorBoundary> },
@@ -138,11 +127,8 @@ function MainContent({
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
-    { path: '/morning', element: <RouteErrorBoundary routeName="Morning Battle Plan"><MorningBriefing data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/brain-dump', element: <RouteErrorBoundary routeName="Brain Dump HUD"><BrainDump data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/flow', element: <RouteErrorBoundary routeName="Flow Room"><FlowRoom data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/recall', element: <RouteErrorBoundary routeName="Active Recall"><ActiveRecall data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/transcribe', element: <RouteErrorBoundary routeName="Voice Transcriber"><VoiceTranscribe data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/drive', element: <RouteErrorBoundary routeName="Drive & Docs"><Drive data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/share/:shareId', element: <RouteErrorBoundary routeName="Shared Document"><PublicShareView /></RouteErrorBoundary> },
     { path: '/kit', element: <RouteErrorBoundary routeName="UI Kit Preview"><Suspense fallback={<PageLoadingFallback />}><KitPreview /></Suspense></RouteErrorBoundary> },
     { path: '/dev/shapes', element: <RouteErrorBoundary routeName="Squircle Shapes Board"><DevShapes /></RouteErrorBoundary> },
     ...(import.meta.env.DEV && DevPaletteBoard ? [{
@@ -333,10 +319,6 @@ function App() {
               navigate('/gym/workout');
             } else if (clean.startsWith('gym')) {
               navigate('/gym');
-            } else if (clean.startsWith('study/timer')) {
-              navigate('/study/timer');
-            } else if (clean.startsWith('study')) {
-              navigate('/study');
             } else if (clean.startsWith('tasks')) {
               navigate('/tasks');
             } else if (clean.startsWith('shopping')) {
@@ -437,6 +419,18 @@ function App() {
       });
     }
   }, [user?.uid]);
+
+  if (location.pathname.toLowerCase().startsWith('/share/')) {
+    return (
+      <ThemeProvider>
+        <DayThemeProvider>
+          <Suspense fallback={<PageLoadingFallback />}>
+            <PublicShareView />
+          </Suspense>
+        </DayThemeProvider>
+      </ThemeProvider>
+    );
+  }
 
   if (location.pathname.toLowerCase().startsWith('/download')) {
     return (

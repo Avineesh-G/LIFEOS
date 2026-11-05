@@ -2,7 +2,7 @@ import { format, differenceInMinutes, parse, isBefore, startOfDay, addDays } fro
 import type { AppData, Task, TimetableBlock } from '../types';
 
 export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
-export type SuggestionModule = 'study' | 'gym' | 'shopping' | 'laundry' | 'timetable' | 'tasks';
+export type SuggestionModule = 'gym' | 'shopping' | 'laundry' | 'timetable' | 'tasks' | 'notes';
 
 export interface TimeWindowInfo {
   type: 'in_progress' | 'upcoming_window' | 'clear_rest_of_day' | 'no_events_today';
@@ -259,8 +259,8 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
   const timeWindow = calculateTimeWindow(data.timetable || [], now);
 
   // ── 3. Study Module ──
-  const todaySessions = (data.studySessions || []).filter(s => s.date === todayStr);
-  const totalStudyMinutes = todaySessions.reduce((acc, s) => acc + (s.duration || 0), 0);
+  const todaySessions: any[] = [];
+  const totalStudyMinutes = 0;
   const studyHours = Math.floor(totalStudyMinutes / 60);
   const studyMins = totalStudyMinutes % 60;
   const studyFormatted = studyHours > 0 
@@ -271,8 +271,6 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
   let primaryStudySubject = 'Core Revision';
   if (todaySessions.length > 0 && todaySessions[0].subject) {
     primaryStudySubject = todaySessions[0].subject;
-  } else if (data.studySessions && data.studySessions.length > 0) {
-    primaryStudySubject = data.studySessions[data.studySessions.length - 1].subject || 'Core Revision';
   } else if (data.timetable && data.timetable.length > 0) {
     primaryStudySubject = data.timetable[0].subject || 'Core Revision';
   }
@@ -373,8 +371,8 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
       metadata: `${taskDuration} min · ${windowFitText}${isOverdue ? ' · Overdue' : ''}`,
       durationMinutes: taskDuration,
       task: selectedTask,
-      actionLabel: 'Start Focus',
-      actionRoute: '/study/timer',
+      actionLabel: 'View Task',
+      actionRoute: '/tasks',
       actionContext: {
         taskName: selectedTask.text,
         duration: taskDuration,
@@ -433,15 +431,15 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
       } else {
         // Evening deep focus on core subject
         recommendation = {
-          module: 'study',
-          type: 'study_session',
-          badgeLabel: 'DEEP FOCUS SESSION',
-          title: `25m Focus: ${primaryStudySubject}`,
+          module: 'tasks',
+          type: 'focus_task',
+          badgeLabel: 'EVENING REVIEW',
+          title: 'Review Tasks & Schedule',
           subtitle: 'Build momentum and wrap up academic priorities',
           metadata: '25 min · Recommended Pomodoro session',
           durationMinutes: 25,
-          actionLabel: 'Start Focus',
-          actionRoute: '/study/timer',
+          actionLabel: 'View Task',
+      actionRoute: '/tasks',
           actionContext: {
             taskName: primaryStudySubject,
             duration: 25,
@@ -464,15 +462,15 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
     } else {
       // Default smart focus session
       recommendation = {
-        module: 'study',
-        type: 'study_session',
+        module: 'tasks',
+        type: 'focus_task',
         badgeLabel: 'RECOMMENDED FOCUS',
-        title: `25m Focus: ${primaryStudySubject}`,
+        title: 'Complete Priority Task',
         subtitle: 'Build study momentum on your primary subject',
         metadata: '25 min · Uninterrupted Pomodoro',
         durationMinutes: 25,
-        actionLabel: 'Start Focus',
-        actionRoute: '/study/timer',
+        actionLabel: 'View Task',
+      actionRoute: '/tasks',
         actionContext: {
           taskName: primaryStudySubject,
           duration: 25,
@@ -487,11 +485,11 @@ export function getDailyBriefData(data: AppData, now: Date = new Date()): DailyB
   // Suggestion 1: Quick Focus Timer
   if (recommendation.type !== 'study_session') {
     smartSuggestions.push({
-      id: 'focus_pomodoro',
-      module: 'study',
-      label: `25m Focus`,
-      sublabel: primaryStudySubject,
-      actionRoute: `/study/timer?subject=${encodeURIComponent(primaryStudySubject)}`,
+      id: 'quick_tasks',
+      module: 'tasks',
+      label: 'To-Do Tasks',
+      sublabel: 'View checklist',
+      actionRoute: '/tasks',
     });
   }
 

@@ -13,6 +13,7 @@ export interface LargeTitleHeaderProps {
   actions?: React.ReactNode;
   tint?: string;
   className?: string;
+  showBack?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export function LargeTitleHeader({
   actions,
   tint = '#0A84FF',
   className = '',
+  showBack = true,
 }: LargeTitleHeaderProps) {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,21 +58,27 @@ export function LargeTitleHeader({
     <div className={`w-full select-none ${className}`}>
       {/* ── 1. Top Toolbar (Sticky, Single Row) ── */}
       <header
-        className="sticky top-0 z-30 w-full"
+        className={`sticky top-0 z-30 w-full transition-colors duration-200 ${
+          isScrolled ? 'bg-black/95 border-b border-white/[0.08]' : 'bg-transparent'
+        }`}
         style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)',
-          paddingBottom: '4px',
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
         }}
       >
         <Toolbar
           leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={handleBackClick}
-              />
-            </ToolbarGroup>
+            showBack ? (
+              <ToolbarGroup>
+                <ToolbarButton
+                  icon={<CaretLeft size={20} weight="bold" />}
+                  label="Back"
+                  onClick={handleBackClick}
+                />
+              </ToolbarGroup>
+            ) : (
+              <div className="w-10" />
+            )
           }
           center={
             <motion.div
@@ -89,7 +97,7 @@ export function LargeTitleHeader({
       </header>
 
       {/* ── 2. Large Title Block (12px Gap Below Toolbar) ── */}
-      <div className="px-4 pt-3 pb-3">
+      <div className="px-1.5 pt-2 pb-3">
         {subtitle && (
           <div className="text-sub font-medium text-white/70 mb-1">
             {subtitle}

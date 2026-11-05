@@ -40,8 +40,6 @@ export default function ActionConfirmationCard({
         return <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />;
       case 'ADD_NOTE':
         return <NotePencil size={16} weight="duotone" className="text-[#FFD60A]" />;
-      case 'ADD_STUDY_SESSION':
-        return <GraduationCap size={16} weight="duotone" className="text-[#64D2FF]" />;
       case 'ADD_EXPENSE':
         return <Wallet size={16} weight="duotone" className="text-[#30D158]" />;
       case 'ADD_SHOPPING_ITEM':

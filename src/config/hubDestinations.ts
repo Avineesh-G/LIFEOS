@@ -11,6 +11,7 @@ import {
   Flame,
   Brain,
   Mic,
+  HardDrive as HardDriveIcon,
 } from 'lucide-react';
 import {
   HomeAppLogoIcon,
@@ -27,14 +28,8 @@ import { AppSection } from '../theme/sectionSeedColors';
 export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
 
 export type DestinationId =
-  | 'morning'
-  | 'brainDump'
-  | 'flow'
-  | 'recall'
-  | 'transcribe'
   | 'gym'
   | 'nutrition'
-  | 'study'
   | 'timetable'
   | 'spending'
   | 'shopping'
@@ -44,7 +39,8 @@ export type DestinationId =
   | 'history'
   | 'vault'
   | 'settings'
-  | 'notes';
+  | 'notes'
+  | 'drive';
 
 export interface HubDestination {
   id: DestinationId;
@@ -70,52 +66,20 @@ export const HOME_DESTINATION: HomeDestination = {
   route: '/',
   icon: HomeAppLogoIcon,
   family: 'home',
-  matchRoutes: ['/', '/tasks', '/laundry', '/morning', '/brain-dump'],
+  matchRoutes: ['/', '/tasks', '/laundry'],
 };
 
 /**
  * Static typed array of all editable-pool destinations sorted cleanly by domain.
  */
 export const DESTINATIONS: HubDestination[] = [
-  // ── 1. Focus & Deep Work (Study Suite) ──
-  {
-    id: 'flow',
-    label: 'Flow Room',
-    route: '/flow',
-    icon: Flame,
-    family: 'study',
-    matchRoutes: ['/flow'],
-  },
-  {
-    id: 'recall',
-    label: 'Active Recall',
-    route: '/recall',
-    icon: Brain,
-    family: 'study',
-    matchRoutes: ['/recall'],
-  },
-  {
-    id: 'transcribe',
-    label: 'Transcriber',
-    route: '/transcribe',
-    icon: Mic,
-    family: 'study',
-    matchRoutes: ['/transcribe'],
-  },
-  {
-    id: 'study',
-    label: 'Study',
-    route: '/study',
-    icon: Book2Icon,
-    family: 'study',
-    matchRoutes: ['/study'],
-  },
+  // ── 1. Academic & Notes ──
   {
     id: 'timetable',
     label: 'Timetable',
     route: '/timetable',
     icon: CalendarDays,
-    family: 'study',
+    family: 'home',
     matchRoutes: ['/timetable'],
   },
   {
@@ -128,22 +92,6 @@ export const DESTINATIONS: HubDestination[] = [
   },
 
   // ── 2. Daily Operations & Planning ──
-  {
-    id: 'morning',
-    label: 'Morning Plan',
-    route: '/morning',
-    icon: Sun,
-    family: 'home',
-    matchRoutes: ['/morning'],
-  },
-  {
-    id: 'brainDump',
-    label: 'Brain Dump',
-    route: '/brain-dump',
-    icon: Wand2,
-    family: 'notes',
-    matchRoutes: ['/brain-dump'],
-  },
   {
     id: 'tasks',
     label: 'To-Do Tasks',
@@ -205,6 +153,14 @@ export const DESTINATIONS: HubDestination[] = [
     matchRoutes: ['/outings'],
   },
 
+  {
+    id: 'drive',
+    label: 'Drive & Docs',
+    route: '/drive',
+    icon: HardDriveIcon,
+    family: 'home',
+    matchRoutes: ['/drive'],
+  },
   // ── 5. Security & System ──
   {
     id: 'history',

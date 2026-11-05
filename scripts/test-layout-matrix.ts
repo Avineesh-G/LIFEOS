@@ -24,10 +24,6 @@ const FONT_SCALES = [0.85, 1.0, 1.3, 1.5, 2.0];
 const ROUTES = [
   { name: 'home', path: '/', expectedLandmark: 'Welcome to LifeOS' },
   { name: 'nutrition', path: '/nutrition', expectedLandmark: 'Nutrition Protocol' },
-  { name: 'study', path: '/study', expectedLandmark: 'Focus' },
-  { name: 'study-timer', path: '/study/timer', expectedLandmark: 'Timer' },
-  { name: 'study-history', path: '/study/history', expectedLandmark: 'History' },
-  { name: 'study-heatmap', path: '/study/heatmap', expectedLandmark: 'Analytics' },
   { name: 'gym', path: '/gym', expectedLandmark: 'PUSH' },
   { name: 'gym-split', path: '/gym/split', expectedLandmark: 'Split' },
   { name: 'gym-history', path: '/gym/history/Bench%20Press', expectedLandmark: 'Bench Press' },

@@ -165,11 +165,17 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   return (
     <div className="w-full min-h-screen bg-black text-white flex flex-col justify-between p-4 selection:bg-[#FF453A]/30">
       {/* Top Header */}
-      <div className="pt-[env(safe-area-inset-top,12px)] flex items-center justify-between">
+      <header
+        className="w-full flex items-center justify-between"
+        style={{
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
+        }}
+      >
         <button
           type="button"
           onClick={() => handleAppBack(navigate)}
-          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20"
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20 cursor-pointer"
         >
           <CaretLeft size={20} weight="bold" />
         </button>
@@ -181,11 +187,11 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
         <button
           type="button"
           onClick={() => setIsListSheetOpen(true)}
-          className="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-white active:bg-white/20"
+          className="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-white active:bg-white/20 cursor-pointer"
         >
           Exercises ({currentExIndex + 1}/{activePlan.exercises.length || 1})
         </button>
-      </div>
+      </header>
 
       {/* Center Immersive HUD Display */}
       <div className="flex-1 flex flex-col items-center justify-center gap-6 py-6 select-none max-w-sm mx-auto w-full">

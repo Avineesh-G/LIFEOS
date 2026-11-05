@@ -61,7 +61,8 @@ export type ModuleKey =
   | 'vault'
   | 'history'
   | 'streak'
-  | 'luna';
+  | 'luna'
+  | 'drive';
 
 export const MODULE_TINTS: Record<ModuleKey, string> = {
   home: '#0A84FF',        // Blue
@@ -83,6 +84,7 @@ export const MODULE_TINTS: Record<ModuleKey, string> = {
   history: '#AC8E68',     // Tan
   streak: '#FF7A45',      // Flame
   luna: '#BF5AF2',        // Luna base
+  drive: '#0A84FF',       // Blue
 };
 
 export const LUNA_GRADIENT = ['#0A84FF', '#BF5AF2', '#FF375F'];

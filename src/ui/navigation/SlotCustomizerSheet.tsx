@@ -44,11 +44,11 @@ export function SlotCustomizerSheet({
     const itemMap = new Map<string, HubItem & { route: string }>();
     ALL_HUB_ITEMS.forEach((it) => itemMap.set(it.id, it));
 
-    const planItems = ['tasks', 'morning', 'timetable', 'laundry']
+    const planItems = ['tasks', 'timetable', 'laundry', 'drive']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem & { route: string } => !!i);
 
-    const learnItems = ['notes', 'study', 'flow', 'recall', 'brainDump', 'transcribe']
+    const captureItems = ['notes']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem & { route: string } => !!i);
 
@@ -67,7 +67,7 @@ export function SlotCustomizerSheet({
     return [
       { title: 'Health & Fitness (Default Quick Slots)', items: healthItems },
       { title: 'Plan & Routines', items: planItems },
-      { title: 'Deep Work & Learning', items: learnItems },
+      { title: 'Notes & Capture', items: captureItems },
       { title: 'Finances & Life', items: moneyItems },
       { title: 'Security & System', items: systemItems },
     ];

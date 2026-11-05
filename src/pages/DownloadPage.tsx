@@ -602,7 +602,12 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       </div>
 
       {/* ── Top Navigation Bar: Liquid Glass Bar ── */}
-      <header className="sticky top-0 z-50 border-b border-white/[0.08] dark:border-white/[0.08] bg-white/80 dark:bg-[#000000]/80 backdrop-blur-xl px-4 sm:px-8 py-3.5 transition-all">
+      <header
+        className="sticky top-0 z-50 border-b border-white/[0.08] dark:border-white/[0.08] bg-white/80 dark:bg-[#000000]/80 backdrop-blur-xl px-4 sm:px-8 pb-3.5 transition-all"
+        style={{
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+        }}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
           {/* Brand & Version Badge */}

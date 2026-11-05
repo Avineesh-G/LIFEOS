@@ -256,6 +256,11 @@ export interface AppData {
 
   // AI Chat History Module (Saved search and assistant sessions)
   aiChatHistory?: AiChatSession[];
+
+  // Drive & Documents Module
+  driveFolders?: DriveFolder[];
+  driveFiles?: DriveFile[];
+  driveStorage?: DriveStorageMetadata;
 }
 
 export interface AiChatSession {
@@ -322,4 +327,51 @@ export interface ShoppingList {
   isTemplate: boolean;
   items: ShoppingItem[];
   category?: string;
+}
+
+// ── Drive & Document Locker Module ──────────────────────────────────────────
+export interface DriveFolder {
+  id: string;
+  name: string;
+  color?: string;
+  parentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DriveFile {
+  id: string;
+  name: string;
+  folderId?: string | null;
+  fileSize: number; // in bytes
+  mimeType: string;
+  storagePath: string;
+  downloadUrl: string;
+  localCachedUri?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DriveStorageMetadata {
+  usedBytes: number;
+  maxBytes: number; // 5 * 1024 * 1024 * 1024 (5 GB)
+  fileCount: number;
+  folderCount: number;
+  lastCalculatedAt: string;
+}
+
+export interface PublicShareRecord {
+  shareId: string;
+  ownerUid: string;
+  ownerEmail?: string;
+  type: 'file' | 'folder';
+  itemId: string;
+  title: string;
+  fileSize: number;
+  mimeType?: string;
+  downloadUrl: string;
+  folderItems?: { id: string; name: string; size: number; downloadUrl: string; mimeType?: string }[];
+  createdAt: string;
+  expiresAt?: string | null;
+  isRevoked: boolean;
 }

@@ -115,7 +115,14 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 sm:space-y-7 max-w-xl mx-auto">
 
       {/* Header & Progress Bar */}
-      <motion.div variants={item} className="flex items-center justify-between pt-2">
+      <motion.div
+        variants={item}
+        className="flex items-center justify-between"
+        style={{
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
+        }}
+      >
         <button
           onClick={handleBack}
           className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-all shadow-sm"

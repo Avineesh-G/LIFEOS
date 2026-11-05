@@ -12,7 +12,12 @@ export default function DevShapes() {
   }, []);
 
   return (
-    <div className="space-y-6 pb-12 select-none">
+    <div
+      className="space-y-6 pb-12 select-none"
+      style={{
+        paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+      }}
+    >
       {/* Header */}
       <div className="space-y-1">
         <div className="flex items-center gap-2">

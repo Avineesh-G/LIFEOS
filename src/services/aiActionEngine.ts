@@ -1,5 +1,5 @@
 import { getLetAiMakeChanges } from '../utils/aiSecurity';
-import type { Task, ShoppingList, ShoppingItem, NoteItem, StudySession } from '../types';
+import type { Task, ShoppingList, ShoppingItem, NoteItem } from '../types';
 import { createShoppingList, generateShoppingId } from '../utils/shoppingStorage';
 import { saveOuting } from '../features/outings/storage/outingsIdb';
 import { DEFAULT_ME_PERSON } from '../features/outings/constants';
@@ -13,8 +13,7 @@ export type AiActionType =
   | 'ADD_MULTIPLE_SHOPPING_ITEMS'
   | 'CREATE_OUTING'
   | 'ADD_EXPENSE'
-  | 'ADD_NOTE'
-  | 'ADD_STUDY_SESSION';
+  | 'ADD_NOTE';
 
 export interface AiActionProposal {
   id: string;
@@ -64,7 +63,7 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
   let cleanText = text;
 
   // 1. Match standard markdown fenced action blocks (```json_action, ```json, ```action)
-  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|ADD_STUDY_SESSION)"[\s\S]*?(?:\}|\]))\s*```/gi;
+  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*```/gi;
   let match;
 
   while ((match = actionRegex.exec(text)) !== null) {
@@ -97,7 +96,7 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
 
   // 2. Fallback: match un-fenced JSON at the end of the text
   if (proposals.length === 0) {
-    const rawJsonRegex = /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|ADD_STUDY_SESSION)"[\s\S]*?(?:\}|\]))\s*$/i;
+    const rawJsonRegex = /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*$/i;
     const rawMatch = rawJsonRegex.exec(cleanText);
     if (rawMatch) {
       try {
@@ -139,8 +138,7 @@ function isAllowListedAction(type: string): boolean {
     'CREATE_OUTING',
     'ADD_EXPENSE',
     'ADD_NOTE',
-    'ADD_STUDY_SESSION',
-  ].includes(type);
+    ].includes(type);
 }
 
 function buildActionTitle(parsed: any): string {
@@ -162,8 +160,6 @@ function buildActionTitle(parsed: any): string {
       return `Log Workout: ${p.type || 'Session'}`;
     case 'ADD_NOTE':
       return `Create Note: ${p.title || 'Untitled Note'}`;
-    case 'ADD_STUDY_SESSION':
-      return `Add Study Topic: ${p.subject || 'Study'} - ${p.topic || 'Analysis'}`;
     default:
       return 'Proposed Action';
   }
@@ -205,11 +201,6 @@ function buildActionDescription(parsed: any): string {
     case 'ADD_NOTE': {
       const preview = p.content ? (p.content.length > 60 ? p.content.slice(0, 57) + '...' : p.content) : 'Empty note';
       return `Note: ${preview}`;
-    }
-    case 'ADD_STUDY_SESSION': {
-      const date = p.date || new Date().toISOString().split('T')[0];
-      const doubts = p.doubts ? ` • Doubts: ${p.doubts.slice(0, 40)}...` : '';
-      return `Date: ${date}${doubts}`;
     }
     default:
       return '';
@@ -270,28 +261,6 @@ export async function executeConfirmedAiAction(
           success: true,
           message: `Note "${newNote.title}" saved to Notes.`,
           undoPayload: { notes: existingNotes },
-        };
-      }
-
-      case 'ADD_STUDY_SESSION': {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const newSession: StudySession = {
-          id: `study_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          subject: p.subject || 'Exam Analysis',
-          topic: p.topic || 'Extracted Topic',
-          date: p.date || todayStr,
-          startTime: p.startTime || new Date().toTimeString().slice(0, 5),
-          duration: Number(p.duration) || 30,
-          notes: p.notes || p.content || '',
-          doubts: p.doubts || '',
-        };
-        const existingSessions = Array.isArray(currentData.studySessions) ? currentData.studySessions : [];
-        const updatedSessions = [newSession, ...existingSessions];
-        await updateData({ studySessions: updatedSessions });
-        return {
-          success: true,
-          message: `Study analysis for "${newSession.subject}" added to Study.`,
-          undoPayload: { studySessions: existingSessions },
         };
       }
 

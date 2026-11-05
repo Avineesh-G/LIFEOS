@@ -27,7 +27,7 @@ import {
   duplicateAsTemplate,
   calculateListProgress,
 } from '../utils/shoppingStorage';
-import { Toolbar } from '../ui/navigation/Toolbar';
+import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { Button } from '../ui/controls/Button';
 import { TextField } from '../ui/controls/TextField';
 import { ProgressBar } from '../ui/visualization/ProgressBar';
@@ -221,20 +221,21 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
     <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#FF375F]/30">
       {/* ── Top Navigation Bar ── */}
       <header
-        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
         style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
-          paddingBottom: '6px',
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
         }}
       >
         <Toolbar
           leading={
-            <button
-              onClick={() => handleAppBack(navigate)}
-              className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform cursor-pointer"
-            >
-              <CaretLeft size={22} weight="bold" />
-            </button>
+            <ToolbarGroup>
+              <ToolbarButton
+                icon={<CaretLeft size={20} weight="bold" />}
+                label="Back"
+                onClick={() => handleAppBack(navigate)}
+              />
+            </ToolbarGroup>
           }
           center={
             <span className="text-sm font-semibold text-white truncate max-w-[180px]">

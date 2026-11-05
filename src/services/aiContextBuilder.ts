@@ -73,14 +73,7 @@ export function buildTargetedAiContext(query: string, data: AppData): string {
     contextBlocks.push(`Spending Summary: Total logged expenses ₹${Math.round(totalSpent)}. Recent entries: ${monthlyExpenses.slice(0, 5).map((e: any) => `₹${e.amount} (${e.category || 'General'})`).join(', ') || 'None'}`);
   }
 
-  // 6. Study & Sessions (if permitted & relevant)
-  if (perms.study && (isGeneralQuery || lowerQuery.includes('study') || lowerQuery.includes('session') || lowerQuery.includes('focus') || lowerQuery.includes('hours') || lowerQuery.includes('subject'))) {
-    const todayStudy = (data.studySessions || []).filter((s: any) => s.date === format(new Date(), 'yyyy-MM-dd'));
-    const totalMinsToday = todayStudy.reduce((acc: number, s: any) => acc + (s.duration || 0), 0);
-    contextBlocks.push(`Study Today: ${totalMinsToday} mins logged across ${todayStudy.length} sessions.`);
-  }
-
-  // 7. Notes & Ideas (if permitted & relevant, excluding hidden/locked/archived notes)
+  // 6. Notes & Ideas (if permitted & relevant, excluding hidden/locked/archived notes)
   if (perms.notes && (lowerQuery.includes('note') || lowerQuery.includes('idea') || lowerQuery.includes('thought') || lowerQuery.includes('brainstorm'))) {
     const activeAllowedNotes = (data.notes || [])
       .filter((n: NoteItem) => !isNoteExcludedFromAi(n))
@@ -93,7 +86,7 @@ export function buildTargetedAiContext(query: string, data: AppData): string {
     }
   }
 
-  // 8. Outings & Location Context (if permitted & relevant)
+  // 7. Outings & Location Context (if permitted & relevant)
   if (perms.outings && (isGeneralQuery || lowerQuery.includes('outing') || lowerQuery.includes('trip') || lowerQuery.includes('plan') || lowerQuery.includes('travel') || lowerQuery.includes('weekend') || lowerQuery.includes('saturday') || lowerQuery.includes('sunday') || lowerQuery.includes('place') || lowerQuery.includes('visit') || lowerQuery.includes('food') || lowerQuery.includes('spot') || lowerQuery.includes('cafe'))) {
     const loc = getStoredLocation();
     const locStr = loc.city

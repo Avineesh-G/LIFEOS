@@ -1,20 +1,20 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { initializeFirestore, persistentLocalCache, getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-
-const env = (typeof import.meta !== 'undefined' && (import.meta as any).env) || (typeof process !== 'undefined' && process.env) || {};
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || 'mock-api-key',
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'lifeos-app.firebaseapp.com',
-  projectId: env.VITE_FIREBASE_PROJECT_ID || 'lifeos-app',
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || 'lifeos-app.appspot.com',
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '123456789',
-  appId: env.VITE_FIREBASE_APP_ID || '1:123456789:web:abcdef'
+  apiKey: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_API_KEY) || 'AIzaSyDwyxGvvFlBNv2LLDZ6Jo22AY0sSNcIyuE',
+  authDomain: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_AUTH_DOMAIN) || 'lifeos-f4de3.firebaseapp.com',
+  projectId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_PROJECT_ID) || 'lifeos-f4de3',
+  storageBucket: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_STORAGE_BUCKET) || 'lifeos-f4de3.firebasestorage.app',
+  messagingSenderId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_MESSAGING_SENDER_ID) || '527411007566',
+  appId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FIREBASE_APP_ID) || '1:527411007566:web:7a85f483d2b5efeafdb31f'
 };
 
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 // Explicit 100MB Firestore cache cap to keep mobile storage ultra-lean & fast
 let firestoreDb;

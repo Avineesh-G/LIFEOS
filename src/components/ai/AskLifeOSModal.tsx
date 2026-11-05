@@ -18,7 +18,7 @@ import {
   Wallet,
   CheckSquare,
   Barbell,
-  BookOpen,
+  NotePencil,
   ChatCircleText,
   ClockCounterClockwise,
   MagnifyingGlass,
@@ -64,7 +64,7 @@ interface AskLifeOSModalProps {
 
 export const SPEC_STARTER_CHIPS = [
   { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />, tint: '#0A84FF' },
-  { id: 'study_focus', label: 'How is my study focus this week?', icon: <BookOpen size={16} weight="duotone" className="text-[#64D2FF]" />, tint: '#64D2FF' },
+  { id: 'notes_summary', label: 'What notes did I capture recently?', icon: <NotePencil size={16} weight="duotone" className="text-[#64D2FF]" />, tint: '#64D2FF' },
   { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" className="text-[#FF453A]" />, tint: '#FF453A' },
   { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" className="text-[#30D158]" />, tint: '#30D158' },
 ];
@@ -727,7 +727,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       Hi, {userGreetingName}
                     </h3>
                     <p className="text-xs sm:text-sm text-white/60 max-w-xs mx-auto mt-1 leading-relaxed font-sans-flex">
-                      I analyze your tasks, timetable, study hours, workouts, and budget using Groq AI.
+                      I analyze your tasks, timetable, notes, workouts, and budget using Groq AI.
                     </p>
                   </div>
 

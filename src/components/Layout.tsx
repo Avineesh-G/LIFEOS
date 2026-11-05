@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   Gear,
   LockKey,
+  HardDrive,
 } from '../ui/tokens/icons';
 import { TabBar, TabItem } from '../ui/navigation/TabBar';
 import { useUserProfile } from '../utils/userProfileCache';
@@ -61,18 +62,13 @@ interface LayoutProps {
 
 export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   // Plan & Operations
-  { id: 'morning', label: 'Morning Plan', route: '/morning', icon: <Sun size={24} weight="duotone" />, tintKey: 'tasks' },
   { id: 'tasks', label: 'To-Do Tasks', route: '/tasks', icon: <CheckSquare size={24} weight="duotone" />, tintKey: 'tasks' },
   { id: 'timetable', label: 'Timetable', route: '/timetable', icon: <CalendarCheck size={24} weight="duotone" />, tintKey: 'timetable' },
   { id: 'laundry', label: 'Laundry', route: '/laundry', icon: <TShirt size={24} weight="duotone" />, tintKey: 'laundry' },
+  { id: 'drive', label: 'Drive & Docs', route: '/drive', icon: <HardDrive size={24} weight="duotone" />, tintKey: 'drive' },
 
   // Learn & Focus
-  { id: 'study', label: 'Study', route: '/study', icon: <BookOpen size={24} weight="duotone" />, tintKey: 'study' },
-  { id: 'flow', label: 'Flow Room', route: '/flow', icon: <Flame size={24} weight="duotone" />, tintKey: 'flow' },
-  { id: 'recall', label: 'Active Recall', route: '/recall', icon: <Brain size={24} weight="duotone" />, tintKey: 'flashcards' },
-  { id: 'transcribe', label: 'Transcriber', route: '/transcribe', icon: <Microphone size={24} weight="duotone" />, tintKey: 'transcriber' },
   { id: 'notes', label: 'Notes & Ideas', route: '/notes', icon: <NotePencil size={24} weight="duotone" />, tintKey: 'notes' },
-  { id: 'brainDump', label: 'Brain Dump', route: '/brain-dump', icon: <Sparkle size={24} weight="duotone" />, tintKey: 'braindump' },
 
   // Health & Fitness
   { id: 'gym', label: 'Gym', route: '/gym', icon: <Barbell size={24} weight="duotone" />, tintKey: 'gym' },
@@ -102,9 +98,30 @@ export default function Layout({
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [homeLockedToast, setHomeLockedToast] = useState(false);
+  const [isSubInterfaceOpen, setIsSubInterfaceOpen] = useState(false);
 
   // Path Memory Edge-Swipe back gesture
-  useEdgeSwipeBack(!moreOpen && !quickAddOpen && !aiSheetOpen);
+  useEdgeSwipeBack(!moreOpen && !quickAddOpen && !aiSheetOpen && !isSubInterfaceOpen);
+
+  // Sub-interface visibility tracking (hides bottom navigation bar during full-screen sheets / modals)
+  useEffect(() => {
+    let count = 0;
+    const handleSubOpen = () => {
+      count++;
+      setIsSubInterfaceOpen(true);
+    };
+    const handleSubClose = () => {
+      count = Math.max(0, count - 1);
+      if (count === 0) setIsSubInterfaceOpen(false);
+    };
+
+    window.addEventListener('lifeos-subinterface-open', handleSubOpen);
+    window.addEventListener('lifeos-subinterface-close', handleSubClose);
+    return () => {
+      window.removeEventListener('lifeos-subinterface-open', handleSubOpen);
+      window.removeEventListener('lifeos-subinterface-close', handleSubClose);
+    };
+  }, []);
 
   useEffect(() => {
     const handleOpenAi = () => setAiSheetOpen(true);
@@ -177,15 +194,15 @@ export default function Layout({
   // Active module tint
   const activeModuleTint = useMemo(() => {
     if (pathname.startsWith('/gym')) return MODULE_TINTS.gym;
-    if (pathname.startsWith('/study') || pathname.startsWith('/flow') || pathname.startsWith('/recall')) return MODULE_TINTS.study;
-    if (pathname.startsWith('/nutrition')) return MODULE_TINTS.nutrition;
+        if (pathname.startsWith('/nutrition')) return MODULE_TINTS.nutrition;
     if (pathname.startsWith('/spending')) return MODULE_TINTS.spending;
     if (pathname.startsWith('/shopping')) return MODULE_TINTS.shopping;
     if (pathname.startsWith('/outings')) return MODULE_TINTS.outing;
     if (pathname.startsWith('/vault')) return MODULE_TINTS.vault;
     if (pathname.startsWith('/laundry')) return MODULE_TINTS.laundry;
     if (pathname.startsWith('/tasks')) return MODULE_TINTS.tasks;
-    if (pathname.startsWith('/notes') || pathname.startsWith('/brain-dump')) return MODULE_TINTS.notes;
+    if (pathname.startsWith('/notes')) return MODULE_TINTS.notes;
+    if (pathname.startsWith('/drive')) return MODULE_TINTS.drive;
     return '#0A84FF';
   }, [pathname]);
 
@@ -227,7 +244,7 @@ export default function Layout({
       isCustomizable: false,
       quickActions: [
         { label: 'Add Task', action: () => navigate('/tasks') },
-        { label: 'Morning Plan', action: () => navigate('/morning') },
+        { label: 'Timetable', action: () => navigate('/timetable') }
       ],
     },
     {
@@ -346,13 +363,7 @@ export default function Layout({
       icon: <Wallet size={20} weight="duotone" className="text-[#BF5AF2]" />,
       onClick: () => navigate('/spending'),
     },
-    {
-      key: 'flow',
-      label: 'Focus Flow Room',
-      icon: <Flame size={20} weight="duotone" className="text-[#FF9F0A]" />,
-      onClick: () => navigate('/flow'),
-    },
-    {
+        {
       key: 'notes',
       label: 'Capture Note / Idea',
       icon: <NotePencil size={20} weight="duotone" className="text-[#63E6E2]" />,
@@ -363,10 +374,8 @@ export default function Layout({
   // Hide nav on sub-routes that manage their own full-screen flow
   const isSubRoute = useMemo(() => {
     return (
-      pathname.startsWith('/study/timer') ||
       pathname.startsWith('/gym/workout') ||
-      (pathname.startsWith('/shopping/') && pathname !== '/shopping') ||
-      pathname.startsWith('/flow')
+      (pathname.startsWith('/shopping/') && pathname !== '/shopping')
     );
   }, [pathname]);
 
@@ -374,9 +383,6 @@ export default function Layout({
     <div className="relative min-h-screen bg-black text-white selection:bg-[#0A84FF]/30 font-sans">
       {/* ── Ambient Light (Top 45vh Module Glow) ── */}
       <AmbientLight />
-
-      {/* ── Top Scroll Edge Gradient ── */}
-      <div className="scroll-edge-top" />
 
       {/* ── Smooth Auto-Hiding Liquid Glass Top Header (Home Screen Only) ── */}
       {pathname === '/' && (
@@ -388,8 +394,8 @@ export default function Layout({
           transition={{ type: 'spring', stiffness: 380, damping: 32 }}
           className="sticky top-0 left-0 right-0 z-30 pointer-events-none w-full"
           style={{
-            paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)',
-            paddingBottom: '6px',
+            paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+            paddingBottom: '8px',
             paddingLeft: 'max(env(safe-area-inset-left, 0px), 12px)',
             paddingRight: 'max(env(safe-area-inset-right, 0px), 12px)',
           }}
@@ -466,11 +472,11 @@ export default function Layout({
 
       {/* ── Main Content Area ── */}
       <main
-        className="relative z-10 w-full"
+        className="relative w-full"
       >
         <div className="w-full max-w-lg mx-auto px-3.5 pt-0.5">
           {children}
-          {!isSubRoute && (
+          {!isSubRoute && !isSubInterfaceOpen && (
             <div
               className="w-full shrink-0 select-none pointer-events-none"
               style={{
@@ -483,7 +489,7 @@ export default function Layout({
       </main>
 
       {/* ── Floating Liquid Glass Navigation Bar (Home + 2 Quick Slots + AI) ── */}
-      {!isSubRoute && (
+      {!isSubRoute && !isSubInterfaceOpen && (
         <>
           {/* Natural edge fade gradient behind navigation bar */}
           <div className="scroll-edge-bottom" />

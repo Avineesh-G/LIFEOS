@@ -8,7 +8,7 @@ import {
   Check,
   Flame,
 } from '../ui/tokens/icons';
-import { Toolbar } from '../ui/navigation/Toolbar';
+import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { Button } from '../ui/controls/Button';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
@@ -120,22 +120,21 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   return (
     <div className="w-full flex flex-col pb-4">
       <header
-        className="sticky top-0 z-30 w-full bg-black/85 backdrop-blur-md"
+        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
         style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
-          paddingBottom: '6px',
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
         }}
       >
         <Toolbar
           leading={
-            <button
-              type="button"
-              onClick={() => handleAppBack(navigate)}
-              className="flex items-center gap-1 text-[#FF453A] font-semibold text-sm hover:opacity-80 active:scale-95 transition-all cursor-pointer px-2 py-1 rounded-full hover:bg-white/10"
-            >
-              <CaretLeft size={20} weight="bold" />
-              <span>Back</span>
-            </button>
+            <ToolbarGroup>
+              <ToolbarButton
+                icon={<CaretLeft size={20} weight="bold" />}
+                label="Back"
+                onClick={() => handleAppBack(navigate)}
+              />
+            </ToolbarGroup>
           }
           center={<span className="font-bold text-white text-base">Weekly Split</span>}
         />

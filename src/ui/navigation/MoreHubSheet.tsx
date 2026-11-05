@@ -98,11 +98,11 @@ export function MoreHubSheet({
 
   // Clean categorized sections for all 18 LifeOS interfaces
   const sections: NavSection[] = useMemo(() => {
-    const planItems = ['tasks', 'morning', 'timetable', 'laundry']
+    const planItems = ['tasks', 'timetable', 'laundry', 'drive']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem => !!i);
 
-    const learnItems = ['notes', 'study', 'flow', 'recall', 'brainDump', 'transcribe']
+    const captureItems = ['notes']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem => !!i);
 
@@ -119,8 +119,8 @@ export function MoreHubSheet({
       .filter((i): i is HubItem => !!i);
 
     return [
-      { title: 'Plan & Routines', items: planItems },
-      { title: 'Deep Work & Learning', items: learnItems },
+      { title: 'Plan & Operations', items: planItems },
+      { title: 'Notes & Capture', items: captureItems },
       { title: 'Health & Fitness', items: healthItems },
       { title: 'Finances & Life', items: moneyItems },
       { title: 'Security & System', items: systemItems },

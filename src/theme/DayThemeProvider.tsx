@@ -20,8 +20,6 @@ const MODULE_RGB_MAP: Record<string, [number, number, number]> = {
   home: [94, 92, 230],        // Indigo
   gym: [255, 69, 58],         // Coral
   nutrition: [255, 159, 10],   // Orange
-  study: [100, 210, 255],     // Cyan
-  flow: [100, 210, 255],      // Cyan
   timetable: [10, 132, 255],   // Blue
   tasks: [94, 92, 230],       // Indigo
   spending: [48, 209, 88],    // Green
@@ -29,10 +27,6 @@ const MODULE_RGB_MAP: Record<string, [number, number, number]> = {
   shopping: [48, 209, 88],    // Green
   laundry: [100, 210, 255],   // Cyan
   notes: [255, 214, 10],      // Yellow/Gold
-  braindump: [255, 214, 10],  // Yellow/Gold
-  transcribe: [255, 69, 58],  // Red-orange
-  recall: [191, 90, 242],     // Purple
-  flashcards: [191, 90, 242], // Purple
   outing: [100, 210, 255],    // Cyan
   settings: [142, 142, 147],  // Slate
   vault: [94, 92, 230],       // Indigo

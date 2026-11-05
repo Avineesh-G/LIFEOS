@@ -155,6 +155,37 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
       : [],
   }));
 
+  merged.driveFolders = (merged.driveFolders || []).map((folder: any) => ({
+    id: folder?.id || `folder_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    name: folder?.name || 'Untitled Folder',
+    color: folder?.color || '#0A84FF',
+    parentId: folder?.parentId || null,
+    createdAt: folder?.createdAt || new Date().toISOString(),
+    updatedAt: folder?.updatedAt || new Date().toISOString(),
+  }));
+
+  merged.driveFiles = (merged.driveFiles || []).map((file: any) => ({
+    id: file?.id || `file_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    name: file?.name || 'Untitled File',
+    folderId: file?.folderId || null,
+    fileSize: Number(file?.fileSize) || 0,
+    mimeType: file?.mimeType || 'application/octet-stream',
+    storagePath: file?.storagePath || '',
+    downloadUrl: file?.downloadUrl || '',
+    localCachedUri: file?.localCachedUri || undefined,
+    createdAt: file?.createdAt || new Date().toISOString(),
+    updatedAt: file?.updatedAt || new Date().toISOString(),
+  }));
+
+  const calculatedUsedBytes = (merged.driveFiles || []).reduce((acc: number, f: any) => acc + (f.fileSize || 0), 0);
+  merged.driveStorage = {
+    usedBytes: calculatedUsedBytes,
+    maxBytes: 5 * 1024 * 1024 * 1024,
+    fileCount: merged.driveFiles.length,
+    folderCount: merged.driveFolders.length,
+    lastCalculatedAt: new Date().toISOString(),
+  };
+
   merged.settings = {
     ...DEFAULT_DATA.settings,
     ...(merged.settings || {}),

@@ -561,25 +561,26 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setCustomSlot(slot.slot);
+                      setCustomPortion(1);
+                      setIsAddCustomOpen(true);
+                    }}
+                    className="inline-flex items-center rounded-full bg-[#FF9F0A]/12 hover:bg-[#FF9F0A]/20 active:bg-[#FF9F0A]/25 border border-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation shadow-sm select-none"
+                    title="Log Food with AI"
+                  >
+                    <span className="px-3 py-1 text-[#FF9F0A] text-[11.5px] font-bold tabular-nums tracking-tight">
                       {slotCalories} kcal
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerHaptic('light');
-                        setCustomSlot(slot.slot);
-                        setCustomPortion(1);
-                        setIsAddCustomOpen(true);
-                      }}
-                      className="px-2.5 py-1 rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 text-[#FF9F0A] text-[11px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                      title="Log Food with AI"
-                    >
+                    <span className="w-[1px] h-3.5 bg-[#FF9F0A]/30" />
+                    <span className="flex items-center gap-1.5 px-3 py-1 text-[#FF9F0A] text-[11.5px] font-semibold">
                       <LunaComicBubbleIcon size={13} color="currentColor" />
                       <span>Log Food</span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
 
                 {/* Direct Mess Menu Selectable Pills with Portion Badges */}

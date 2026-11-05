@@ -49,9 +49,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
     triggerHaptic('medium');
     const { actionRoute, actionContext } = brief.recommendation;
 
-    if (actionRoute === '/study/timer' && actionContext?.taskName) {
-      navigate(`/study/timer?subject=${encodeURIComponent(actionContext.taskName)}`);
-    } else {
+    if (actionRoute) {
       navigate(actionRoute);
     }
   }, [brief.recommendation, navigate]);
@@ -70,8 +68,8 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
         return <ShoppingCartIcon size={size} className={className} />;
       case 'laundry':
         return <LaundryIcon size={size} className={className} />;
-      case 'study':
-        return <Book2Icon size={size} className={className} />;
+      case 'notes':
+        return <TargetCheckIcon size={size} className={className} />;
       case 'timetable':
         return <ScheduleIcon size={size} className={className} />;
       case 'tasks':
@@ -118,7 +116,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
             <CheckCircleRoundedIcon size={13} className="text-emerald-500 shrink-0" />
             <span>
               {brief.progressSummary.completedCount}/{brief.progressSummary.totalCount} tasks
-              {brief.progressSummary.studyMinutes > 0 ? ` · ${brief.progressSummary.studyFormatted}` : ''}
+              
             </span>
           </div>
         )}
@@ -169,7 +167,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
               onClick={handlePrimaryAction}
               className="py-2 px-4 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-95 transition-all select-none shadow-none cursor-pointer"
             >
-              {brief.recommendation.type === 'focus_task' || brief.recommendation.type === 'study_session' ? (
+              {brief.recommendation.type === 'focus_task' ? (
                 <PlayArrowRoundedIcon size={14} className="fill-current shrink-0" />
               ) : brief.recommendation.type === 'workout' ? (
                 <ExerciseIcon size={14} className="shrink-0" />

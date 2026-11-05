@@ -6,8 +6,6 @@ const ROUTES = [
   '/',
   '/settings',
   '/nutrition',
-  '/study',
-  '/study/timer',
   '/gym',
   '/spending',
   '/tasks',

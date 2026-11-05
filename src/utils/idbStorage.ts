@@ -10,7 +10,7 @@
  */
 
 const DB_NAME = 'lifeos_local_cache';
-const DB_VERSION = 4;
+const DB_VERSION = 6;
 const STORE_NAME = 'app_state';
 
 let dbInstance: IDBDatabase | null = null;
@@ -53,6 +53,10 @@ export function getIndexedDB(): Promise<IDBDatabase | null> {
         // Dedicated Notes store
         if (!db.objectStoreNames.contains('notes')) {
           db.createObjectStore('notes', { keyPath: 'id' });
+        }
+        // Dedicated Drive file blobs store
+        if (!db.objectStoreNames.contains('drive_blobs')) {
+          db.createObjectStore('drive_blobs', { keyPath: 'id' });
         }
       };
 
@@ -163,4 +167,76 @@ export async function getIdbItem<T = any>(key: string): Promise<T | null> {
   } catch {
     return null;
   }
+}
+
+export async function saveDriveBlob(id: string, blob: Blob): Promise<void> {
+  try {
+    let db = await getIndexedDB();
+    if (!db) return;
+
+    if (!db.objectStoreNames.contains('drive_blobs')) {
+      console.warn('[LifeOS IDB] drive_blobs store missing, refreshing DB connection...');
+      closeIndexedDB();
+      db = await getIndexedDB();
+      if (!db || !db.objectStoreNames.contains('drive_blobs')) {
+        console.warn('[LifeOS IDB] drive_blobs store still unavailable, skipping local blob cache.');
+        return;
+      }
+    }
+
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction('drive_blobs', 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => {
+          console.warn('[LifeOS IDB] saveDriveBlob tx error:', e);
+          resolve();
+        };
+        tx.objectStore('drive_blobs').put({ id, blob, updatedAt: Date.now() });
+      } catch (txErr) {
+        console.warn('[LifeOS IDB] saveDriveBlob tx catch:', txErr);
+        resolve();
+      }
+    });
+  } catch (err) {
+    console.warn('[LifeOS IDB] saveDriveBlob warning:', err);
+  }
+}
+
+export async function getDriveBlob(id: string): Promise<Blob | null> {
+  try {
+    const db = await getIndexedDB();
+    if (!db || !db.objectStoreNames.contains('drive_blobs')) return null;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction('drive_blobs', 'readonly');
+        const req = tx.objectStore('drive_blobs').get(id);
+        req.onsuccess = () => {
+          resolve(req.result?.blob || null);
+        };
+        req.onerror = () => resolve(null);
+      } catch {
+        resolve(null);
+      }
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteDriveBlob(id: string): Promise<void> {
+  try {
+    const db = await getIndexedDB();
+    if (!db || !db.objectStoreNames.contains('drive_blobs')) return;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction('drive_blobs', 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+        tx.objectStore('drive_blobs').delete(id);
+      } catch {
+        resolve();
+      }
+    });
+  } catch {}
 }

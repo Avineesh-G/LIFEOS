@@ -27,8 +27,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div className="relative min-h-screen bg-black text-white selection:bg-[#0A84FF]/30 overflow-x-hidden">
-      {/* 72px Top and Bottom Scroll Edge Gradient Overlays */}
-      <div className="scroll-edge-top" />
+      {/* Bottom Scroll Edge Gradient Overlay */}
       <div className="scroll-edge-bottom" />
 
       {/* Main Content Area */}

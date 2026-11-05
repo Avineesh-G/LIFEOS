@@ -88,6 +88,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     if (section && section === 'spending') return '#15803D';
     if (section && (section === 'outings' || section === 'outing')) return '#8C500A';
     if (section && section === 'notes') return '#8436E9';
+    if (section && section === 'drive') return '#0A84FF';
     return 'var(--md-primary, #8436E9)';
   }, []);
 

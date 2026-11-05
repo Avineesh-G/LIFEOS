@@ -31,7 +31,7 @@ import { SettleUpModal } from '../components/SettleUpModal';
 import { triggerHaptic } from '../../../utils/haptics';
 import { handleAppBack } from '../../../utils/backNavigation';
 import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
-import { Toolbar } from '../../../ui/navigation/Toolbar';
+import { Toolbar, ToolbarGroup, ToolbarButton } from '../../../ui/navigation/Toolbar';
 import { Segmented } from '../../../ui/controls/Segmented';
 import { Button } from '../../../ui/controls/Button';
 import { Badge } from '../../../ui/controls/Badge';
@@ -158,15 +158,23 @@ export default function OutingDetailPage() {
   return (
     <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#40C8E0]/30">
       {/* ── Top Navigation Bar ── */}
-      <Toolbar
-        leading={
-          <button
-            onClick={() => handleAppBack(navigate)}
-            className="p-2 rounded-full text-white hover:bg-white/10 active:scale-95 transition-transform"
-          >
-            <CaretLeft size={22} weight="bold" />
-          </button>
-        }
+      <header
+        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
+        style={{
+          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
+          paddingBottom: '8px',
+        }}
+      >
+        <Toolbar
+          leading={
+            <ToolbarGroup>
+              <ToolbarButton
+                icon={<CaretLeft size={20} weight="bold" />}
+                label="Back"
+                onClick={() => handleAppBack(navigate)}
+              />
+            </ToolbarGroup>
+          }
         center={
           <span className="text-sm font-semibold text-white truncate max-w-[180px]">
             {activeOuting.name}
@@ -215,6 +223,7 @@ export default function OutingDetailPage() {
           </div>
         }
       />
+      </header>
 
       <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
         {/* ── Outing Title & Metadata ── */}

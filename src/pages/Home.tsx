@@ -18,16 +18,13 @@ import {
   Drop,
   Wallet,
   CheckCircle,
-  Sun,
   CalendarDots,
   CalendarCheck,
   Plus,
-  Flame,
-  Brain,
-  Microphone,
 } from '../ui';
 
 import { HomeCalendarSync } from '../components/home/HomeCalendarSync';
+import { CheckSquare, NotePencil, Receipt } from '../ui/tokens/icons';
 
 interface HomeProps {
   data: AppData;
@@ -117,8 +114,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
   // Streak calculation
   const streakDays = useMemo(() => {
-    return data.studySessions?.length ? Math.min(data.studySessions.length, 14) : 7;
-  }, [data.studySessions]);
+    return data.workoutLogs?.length ? Math.min(data.workoutLogs.length, 14) : 7;
+  }, [data.workoutLogs]);
 
   return (
     <div className="w-full text-white selection:bg-[#0A84FF]/30">
@@ -283,19 +280,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           />
         </GroupedList>
 
-        {/* ── 4. Morning Briefing Entry Row ── */}
-        <GroupedList header="Daily Briefing">
-          <ListRow
-            icon={<Sun weight="bold" />}
-            iconTint="#FF9F0A"
-            title="Morning Plan"
-            subtitle="Schedule, macros, split and daily targets"
-            showChevron
-            onClick={() => navigate('/morning')}
-            showSeparator={false}
-          />
-        </GroupedList>
-
         {/* ── 5. Streak & Daily Intent (glass-card) ── */}
         <div className="glass-card p-4 flex items-center justify-between select-none">
           <Badge count={streakDays} label="Day Streak" points={12} color="#FF7A45" />
@@ -304,26 +288,12 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           </span>
         </div>
 
-        {/* ── 6. Quick Hub Power Tools ── */}
+        {/* ── 5. Quick Hub Power Tools ── */}
         <div className="flex flex-col gap-2 select-none pt-1">
           <div className="text-section-header px-1">
             Quick Hub
           </div>
           <div className="grid grid-cols-4 gap-2.5">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                triggerHaptic('nav');
-                navigate('/flow');
-              }}
-              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#FF9F0A] flex items-center justify-center">
-                <Flame size={18} weight="duotone" />
-              </div>
-              <span className="text-[11.5px] font-semibold text-white/90">Flow</span>
-            </motion.button>
-
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => {
@@ -342,28 +312,42 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               whileTap={{ scale: 0.95 }}
               onClick={() => {
                 triggerHaptic('nav');
-                navigate('/recall');
+                navigate('/tasks');
               }}
               className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
             >
-              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#BF5AF2] flex items-center justify-center">
-                <Brain size={18} weight="duotone" />
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#32D74B] flex items-center justify-center">
+                <CheckSquare size={18} weight="duotone" />
               </div>
-              <span className="text-[11.5px] font-semibold text-white/90">Recall</span>
+              <span className="text-[11.5px] font-semibold text-white/90">Tasks</span>
             </motion.button>
 
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => {
                 triggerHaptic('nav');
-                navigate('/transcribe');
+                navigate('/notes');
               }}
               className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
             >
               <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#64D2FF] flex items-center justify-center">
-                <Microphone size={18} weight="duotone" />
+                <NotePencil size={18} weight="duotone" />
               </div>
-              <span className="text-[11.5px] font-semibold text-white/90">Voice</span>
+              <span className="text-[11.5px] font-semibold text-white/90">Notes</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                triggerHaptic('nav');
+                navigate('/outings');
+              }}
+              className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <div className="w-[34px] h-[34px] rounded-full glass-flat text-[#FF9F0A] flex items-center justify-center">
+                <Receipt size={18} weight="duotone" />
+              </div>
+              <span className="text-[11.5px] font-semibold text-white/90">Outings</span>
             </motion.button>
           </div>
         </div>

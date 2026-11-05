@@ -19,7 +19,7 @@ export function Toolbar({
 }: ToolbarProps) {
   return (
     <div
-      className={`relative w-full h-[44px] flex items-center justify-between z-30 select-none px-3 ${className}`}
+      className={`relative w-full h-[44px] flex items-center justify-between z-30 select-none px-1 ${className}`}
     >
       {/* Leading slot: 40px glass circle */}
       <div className="flex items-center shrink-0 min-w-[40px]">{leading}</div>

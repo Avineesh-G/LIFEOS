@@ -40,26 +40,6 @@ export const APP_GUIDE_DATA: Record<string, InterfaceGuide> = {
     ],
   },
 
-  study: {
-    id: 'study',
-    name: 'Study',
-    routes: ['/study', '/study/timer', '/study/history', '/study/heatmap'],
-    purpose: 'Focus timer, study session logging, topic notes, doubt tracking, and 365-day consistency heatmap.',
-    mainFeatures: [
-      'Interactive Stopwatch / Pomodoro timer with vibration signals',
-      'Subject selector with customizable subject list',
-      'Doubt & notes logger (supports up to 10,000 words per session)',
-      'Session history log with subject breakdown',
-      '365-Day study consistency heatmap',
-    ],
-    commonActions: [
-      { action: 'Start a study session', steps: 'Navigate to Study > Select Subject > Tap "Start Session" to open StudyTimer.' },
-      { action: 'Log session notes & doubts', steps: 'Inside StudyTimer or after finishing, enter notes in the Notes/Doubts text field.' },
-      { action: 'View 365-day study heatmap', steps: 'Tap "View Heatmap" at the top right of the Study page.' },
-      { action: 'View session history', steps: 'Tap "Study History" button to view past logged focus sessions.' },
-    ],
-  },
-
   gym: {
     id: 'gym',
     name: 'Gym & Workouts',
@@ -226,6 +206,26 @@ export const APP_GUIDE_DATA: Record<string, InterfaceGuide> = {
     ],
   },
 
+  drive: {
+    id: 'drive',
+    name: 'Drive & Documents',
+    routes: ['/drive'],
+    purpose: '5.0 GB cloud storage per account for documents, PDFs, photos, custom folders, and cross-device QR code sharing.',
+    mainFeatures: [
+      '5.0 GB fixed storage quota per account with visual capacity filler bar',
+      'Custom folders for organizing college work, notes, and photos',
+      'Cross-device instant QR Code sharing for files and folders (no login required for recipient)',
+      '1-Tap direct download and native system sharing',
+      'Direct access with zero passcode or biometric gating',
+    ],
+    commonActions: [
+      { action: 'Upload a file', steps: 'Navigate to Drive > Tap "Upload" > Select documents or photos.' },
+      { action: 'Create a new folder', steps: 'Navigate to Drive > Tap "New Folder" > Enter name & pick accent color > Tap "Create Folder".' },
+      { action: 'Share file via QR code', steps: 'In file list, tap the QR icon next to the file > Show the on-screen QR code to another device to scan and download.' },
+      { action: 'Revoke QR share', steps: 'Open QR share dialog > Tap "Revoke QR Link" to disable downloads.' },
+    ],
+  },
+
   laundry: {
     id: 'laundry',
     name: 'Laundry Tracker',
@@ -246,11 +246,11 @@ export const APP_GUIDE_DATA: Record<string, InterfaceGuide> = {
     id: 'history',
     name: 'Life History Log',
     routes: ['/history'],
-    purpose: 'Timeline view of past study focus hours, workout sessions, task completions, and daily mood reviews.',
+    purpose: 'Timeline view of past workout sessions, task completions, and daily mood reviews.',
     mainFeatures: [
       'Chronological activity feed',
       'Daily mood & reflection reviews',
-      'Filter by category (All, Study, Gym, Tasks)',
+      'Filter by category (All, Gym, Tasks)',
     ],
     commonActions: [
       { action: 'View past activity history', steps: 'Navigate to History (via More Hub) > Scroll timeline feed.' },
@@ -307,13 +307,13 @@ export function getInterfaceIdFromPath(pathname: string): string {
   const cleanPath = (pathname || '/').toLowerCase().split('?')[0];
 
   if (cleanPath === '/' || cleanPath === '') return 'home';
-  if (cleanPath.startsWith('/study')) return 'study';
   if (cleanPath.startsWith('/gym')) return 'gym';
   if (cleanPath.startsWith('/nutrition')) return 'nutrition';
   if (cleanPath.startsWith('/spending')) return 'spending';
   if (cleanPath.startsWith('/tasks')) return 'tasks';
   if (cleanPath.startsWith('/timetable')) return 'timetable';
   if (cleanPath.startsWith('/notes')) return 'notes';
+  if (cleanPath.startsWith('/drive')) return 'drive';
   if (cleanPath.startsWith('/vault')) return 'vault';
   if (cleanPath.startsWith('/shopping')) return 'shopping';
   if (cleanPath.startsWith('/outings')) return 'outings';
@@ -341,7 +341,7 @@ CORE CAPABILITIES & ROLES:
    • When the user speaks or writes in a specific language, understand it natively and reply accurately in that same language or the requested target language.
 
 2. APP NAVIGATION & MECHANICS: Explain all LifeOS features, routines, settings, and navigation clearly.
-3. PERSONAL PRODUCTIVITY & SCHEDULE COPILOT: Check pending tasks, study logs, workouts, meal nutrition targets, and budget.
+3. PERSONAL PRODUCTIVITY & SCHEDULE COPILOT: Check pending tasks, workouts, meal nutrition targets, and budget.
 
 4. MULTILINGUAL PHOTO & VISION ANALYSIS PROTOCOL:
    • When the user attaches or shares images of handwritten or printed notes, exam analysis, study sheets, workout logs, or receipts in ANY language:
@@ -350,11 +350,11 @@ CORE CAPABILITIES & ROLES:
      b. **Transcribe & Extract Content**: Accurately transcribe what is written in the photo:
         **Extracted Content**:
         [Provide clean, organized transcription of the written points]
-     c. **Divide by Topic & Interface**: Categorize the extracted points logically by LifeOS interface (Study, Notes, Tasks, Gym, Nutrition, Spending).
+     c. **Divide by Topic & Interface**: Categorize the extracted points logically by LifeOS interface (Notes, Tasks, Gym, Nutrition, Spending).
      d. **Ask Translation vs Original**: Explicitly ask the user:
         "Would you like to save this to your interfaces in the original language, or translate it into English before uploading?"
      e. **Provide Dual Action Proposals**: Provide action proposal cards for BOTH choices so the user can easily choose with 1 tap:
-        - Card A (Original Language): Keep the original script/text in the action payload (e.g. ADD_NOTE or ADD_STUDY_SESSION).
+        - Card A (Original Language): Keep the original script/text in the action payload (e.g. ADD_NOTE or ADD_TASK).
         - Card B (English Translation): Translate the notes/tasks into clear English in the action payload.
         (If the image is already in English, provide the standard action proposal cards directly).
 3. OUTINGS, TRIPS & LOCAL DISCOVERY:
