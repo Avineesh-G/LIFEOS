@@ -3,12 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 import { registerDismissible } from '../../utils/backNavigation';
 import { PALETTE } from '../../theme/palette';
-import {
-  M3SaveSymbolAnimation,
-  M3EditSymbolAnimation,
-  M3DeleteSymbolAnimation,
-  M3DeleteForeverIcon,
-} from './M3Shapes';
+import { Trash, Check, PencilSimple } from '../../ui/tokens/icons';
 
 export interface ConfirmDeleteOptions {
   title?: string;
@@ -89,7 +84,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     if (section && (section === 'outings' || section === 'outing')) return '#8C500A';
     if (section && section === 'notes') return '#8436E9';
     if (section && section === 'drive') return '#0A84FF';
-    return 'var(--md-primary, #8436E9)';
+    return '#8436E9';
   }, []);
 
   // 1. Confirm Delete Flow
@@ -117,14 +112,13 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
   const handleExecuteDelete = useCallback(async () => {
     if (!deleteDialog.options) return;
     triggerHaptic('heavy');
-    // Transition immediately to M3 Deleted Symbol Animation stage
+    // Transition immediately to Deleted stage
     setDeleteDialog((prev) => ({ ...prev, stage: 'deleting' }));
 
     try {
       await Promise.all([
         Promise.resolve(deleteDialog.options.onConfirm()),
-        // Allow the M3 Deleted Symbol Animation to play fully (650ms)
-        new Promise((r) => setTimeout(r, 680)),
+        new Promise((r) => setTimeout(r, 650)),
       ]);
     } catch (err) {
       console.error('[M3Feedback] Delete execution error:', err);
@@ -144,7 +138,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       setFeedback({
         type: 'saved',
-        title: opts.title || 'Saved!',
+        title: opts.title || 'Saved Successfully',
         message: opts.message,
         section: opts.section,
       });
@@ -161,7 +155,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       setFeedback({
         type: 'edited',
-        title: opts.title || 'Updated!',
+        title: opts.title || 'Updated Successfully',
         message: opts.message,
         section: opts.section,
       });
@@ -189,8 +183,6 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     []
   );
 
-  const activeDeleteColor = resolveSectionColor(deleteDialog.options?.section);
-
   return (
     <M3FeedbackContext.Provider
       value={{
@@ -202,14 +194,15 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     >
       {children}
 
-      {/* ── 1. M3 Expressive Delete Confirmation Modal with Morphing Animation ── */}
+      {/* ── 1. LifeOS Native Delete Confirmation Modal with Dim Backdrop ── */}
       <AnimatePresence>
         {deleteDialog.isOpen && deleteDialog.options && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-transparent flex items-center justify-center p-4 sm:p-6"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[10000] bg-black/80 flex items-center justify-center p-4 sm:p-6 select-none"
             onClick={deleteDialog.stage === 'confirm' ? handleCancelDelete : undefined}
           >
             <motion.div
@@ -217,82 +210,66 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-              className="w-full max-w-sm rounded-[28px] bg-white dark:bg-[#1E1929] border border-black/[0.08] dark:border-white/[0.12] shadow-2xl p-6 sm:p-7 overflow-hidden relative select-none"
+              className="w-full max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden relative select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {deleteDialog.stage === 'confirm' ? (
-                /* Confirmation Stage: "Are you sure?" with Google delete_forever symbol */
+                /* Confirmation Stage: "Are you sure?" with clean Phosphor Trash Icon */
                 <div className="flex flex-col items-center text-center space-y-4">
-                  {/* M3 Scallop / Squircle Icon Container in Section Theme */}
-                  <div className="relative w-14 h-14 flex items-center justify-center">
-                    <div
-                      className="absolute inset-0 rounded-[20px] opacity-15"
-                      style={{ backgroundColor: activeDeleteColor }}
-                    />
-                    <div
-                      className="relative w-10 h-10 rounded-[14px] flex items-center justify-center text-white shadow-sm"
-                      style={{ backgroundColor: activeDeleteColor }}
-                    >
-                      <M3DeleteForeverIcon size={22} color="#FFFFFF" />
-                    </div>
+                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400">
+                    <Trash size={28} weight="duotone" />
                   </div>
 
                   {/* Title & Body Text */}
                   <div className="space-y-1.5 px-2">
-                    <h3 className="text-lg font-black text-primary-light dark:text-primary-dark tracking-tight">
+                    <h3 className="text-[17px] font-bold text-white tracking-tight">
                       {deleteDialog.options.title || 'Delete Item?'}
                     </h3>
                     {deleteDialog.options.itemName && (
-                      <p className="text-xs font-bold text-secondary-light dark:text-secondary-dark truncate max-w-[240px] mx-auto bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-1 rounded-full">
+                      <p className="text-[12px] font-semibold text-white/90 truncate max-w-[240px] mx-auto bg-white/10 px-3 py-1 rounded-full">
                         "{deleteDialog.options.itemName}"
                       </p>
                     )}
-                    <p className="text-xs text-secondary-light/80 dark:text-secondary-dark/80 leading-relaxed pt-1">
+                    <p className="text-[13px] text-white/60 leading-relaxed pt-1">
                       {deleteDialog.options.message ||
                         'Are you sure? This item will be permanently removed and cannot be recovered.'}
                     </p>
                   </div>
 
-                  {/* Action Buttons: Cancel (Outlined Pill) & Continue (Filled Pill) */}
-                  <div className="grid grid-cols-2 gap-3 w-full pt-3">
+                  {/* Action Buttons: Cancel & Delete */}
+                  <div className="grid grid-cols-2 gap-3 w-full pt-2">
                     <button
                       type="button"
                       onClick={handleCancelDelete}
-                      className="py-3 px-4 rounded-full border border-black/[0.12] dark:border-white/[0.15] text-secondary-light dark:text-secondary-dark font-bold text-xs hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all active:scale-95"
+                      className="py-3 px-4 rounded-2xl bg-white/[0.06] hover:bg-white/10 text-white/80 font-semibold text-[13px] border border-white/10 transition-all active:scale-95 touch-manipulation cursor-pointer"
                     >
                       {deleteDialog.options.cancelLabel || 'Cancel'}
                     </button>
                     <button
                       type="button"
                       onClick={handleExecuteDelete}
-                      className="py-3 px-4 rounded-full text-white font-bold text-xs shadow-md transition-all active:scale-95 hover:opacity-95"
-                      style={{
-                        backgroundColor: '#DC2626',
-                        boxShadow: '0 4px 14px rgba(220, 38, 38, 0.35)',
-                      }}
+                      className="py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-[13px] shadow-lg shadow-rose-500/30 transition-all active:scale-95 touch-manipulation cursor-pointer"
                     >
-                      {deleteDialog.options.confirmLabel || 'Continue'}
+                      {deleteDialog.options.confirmLabel || 'Delete'}
                     </button>
                   </div>
                 </div>
               ) : (
-                /* Deleting Stage: Official Google M3 Deleted Symbol Animation with Trash + X */
+                /* Deleting Stage: Clean Deleted confirmation with Phosphor Trash */
                 <motion.div
                   key="deleting-animation"
-                  initial={{ opacity: 0, scale: 0.85 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-6 space-y-4"
+                  className="flex flex-col items-center justify-center py-4 space-y-3"
                 >
-                  <M3DeleteSymbolAnimation accentColor="#DC2626" size={68} />
+                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400">
+                    <Trash size={28} weight="fill" />
+                  </div>
                   <div className="text-center space-y-1">
-                    <motion.h4
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-base font-black text-primary-light dark:text-primary-dark"
-                    >
+                    <h4 className="text-[17px] font-bold text-white tracking-tight">
                       Deleted
-                    </motion.h4>
-                    <p className="text-xs text-secondary-light dark:text-secondary-dark font-medium">
+                    </h4>
+                    <p className="text-[13px] text-white/60 font-normal">
                       Item permanently removed
                     </p>
                   </div>
@@ -303,65 +280,66 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
         )}
       </AnimatePresence>
 
-      {/* ── 2. Centered Material 3 Action Feedback Modal (Saved / Edited / Deleted) ── */}
+      {/* ── 2. Centered Action Feedback Modal with Dim Backdrop (Saved / Edited / Deleted) ── */}
       <AnimatePresence>
         {feedback && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] bg-transparent flex items-center justify-center p-4 sm:p-6 select-none"
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[10000] bg-black/80 flex items-center justify-center p-4 sm:p-6 select-none"
             onClick={() => setFeedback(null)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.88, y: 15 }}
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 8 }}
+              exit={{ opacity: 0, scale: 0.94, y: 8 }}
               transition={{ type: 'spring', stiffness: 440, damping: 28 }}
-              className="w-full max-w-xs sm:max-w-sm rounded-[28px] bg-white dark:bg-[#1E1929] border border-black/[0.08] dark:border-white/[0.12] shadow-2xl p-6 sm:p-7 overflow-hidden relative flex flex-col items-center justify-center text-center space-y-4"
+              className="w-full max-w-xs sm:max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden relative flex flex-col items-center justify-center text-center space-y-3.5"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Centered Animated Symbol */}
-              <div className="py-1">
-                {feedback.type === 'saved' ? (
-                  <M3SaveSymbolAnimation
-                    accentColor={resolveSectionColor(feedback.section)}
-                    size={72}
-                  />
-                ) : feedback.type === 'edited' ? (
-                  <M3EditSymbolAnimation
-                    accentColor={resolveSectionColor(feedback.section)}
-                    size={72}
-                  />
+              {/* Centered Phosphor Icon */}
+              <div
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                  feedback.type === 'deleted'
+                    ? 'bg-rose-500/15 border border-rose-500/25 text-rose-400'
+                    : feedback.type === 'saved'
+                    ? 'bg-[#30D158]/15 border border-[#30D158]/25 text-[#30D158]'
+                    : 'bg-[#0A84FF]/15 border border-[#0A84FF]/25 text-[#0A84FF]'
+                }`}
+              >
+                {feedback.type === 'deleted' ? (
+                  <Trash size={28} weight="duotone" />
+                ) : feedback.type === 'saved' ? (
+                  <Check size={28} weight="bold" />
                 ) : (
-                  <M3DeleteSymbolAnimation accentColor="#DC2626" size={72} />
+                  <PencilSimple size={28} weight="duotone" />
                 )}
               </div>
 
-              {/* Title & Body Message */}
+              {/* Title & Body Message in Crisp White LifeOS Typography */}
               <div className="space-y-1 px-2">
-                <motion.h4
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-base sm:text-lg font-black text-primary-light dark:text-primary-dark tracking-tight"
-                >
+                <h4 className="text-[17px] font-bold text-white tracking-tight">
                   {feedback.title}
-                </motion.h4>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-xs text-secondary-light dark:text-secondary-dark font-medium leading-relaxed max-w-[240px] mx-auto"
-                >
-                  {feedback.message}
-                </motion.p>
+                </h4>
+                {feedback.message && (
+                  <p className="text-[13px] text-white/60 font-normal leading-relaxed max-w-[240px] mx-auto">
+                    {feedback.message}
+                  </p>
+                )}
               </div>
 
               {/* Progress timer bar */}
-              <div className="w-24 h-1 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden mt-1">
+              <div className="w-20 h-1 rounded-full bg-white/10 overflow-hidden mt-1">
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: resolveSectionColor(feedback.section) }}
+                  className={`h-full rounded-full ${
+                    feedback.type === 'deleted'
+                      ? 'bg-rose-500'
+                      : feedback.type === 'saved'
+                      ? 'bg-[#30D158]'
+                      : 'bg-[#0A84FF]'
+                  }`}
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 1.35, ease: 'linear' }}

@@ -9,7 +9,6 @@ import { streamChatCompletion } from '../../services/aiClient';
 import { triggerHaptic } from '../../utils/haptics';
 import {
   CaretLeft,
-  DownloadSimple,
   ShareNetwork,
   Trash,
   Sparkle,
@@ -76,6 +75,11 @@ export function FileReaderModal({
     if (!file) return '';
     return file.name.split('.').pop()?.toLowerCase() || '';
   }, [file]);
+
+  const parentFolder = useMemo(() => {
+    if (!file?.folderId) return null;
+    return (data?.driveFolders || []).find((f) => f.id === file.folderId) || null;
+  }, [file?.folderId, data?.driveFolders]);
 
   const isImage = useMemo(() => {
     return (
@@ -428,21 +432,6 @@ Payload specifications:
     }
   };
 
-  // Download / Save to Android Storage trigger
-  const handleDownload = () => {
-    if (!file) return;
-    triggerHaptic('light');
-    const targetUrl = blobUrl || file.downloadUrl;
-    if (!targetUrl) return;
-
-    const a = document.createElement('a');
-    a.href = targetUrl;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
   // Android Native Share Sheet trigger
   const handleNativeShare = async () => {
     if (!file) return;
@@ -456,7 +445,13 @@ Payload specifications:
         });
       } catch {}
     } else {
-      handleDownload();
+      const shareUrl = file.downloadUrl || blobUrl;
+      if (shareUrl) {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          triggerHaptic('success');
+        } catch {}
+      }
     }
   };
 
@@ -542,7 +537,18 @@ Payload specifications:
             <h2 className="text-[14px] font-bold text-white truncate max-w-[210px] mx-auto">
               {file.name}
             </h2>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-white/50 mt-0.5">
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-white/50 mt-0.5 flex-wrap">
+              {parentFolder && (
+                <>
+                  <span
+                    className="font-semibold px-1.5 py-0.5 rounded text-[10px]"
+                    style={{ color: parentFolder.color, backgroundColor: `${parentFolder.color}22` }}
+                  >
+                    {parentFolder.name}
+                  </span>
+                  <span>•</span>
+                </>
+              )}
               <span>{formatStorageSize(file.fileSize)}</span>
               <span>•</span>
               <span className="uppercase font-medium tracking-wider text-[10px]">{fileExt || 'file'}</span>
@@ -561,17 +567,6 @@ Payload specifications:
                 aria-label="Share"
               >
                 <ShareNetwork size={16} weight="bold" />
-              </button>
-
-              {/* Download */}
-              <button
-                type="button"
-                onClick={handleDownload}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-manipulation"
-                title="Save to Device"
-                aria-label="Save to Device"
-              >
-                <DownloadSimple size={16} weight="bold" />
               </button>
 
               {/* Delete */}
@@ -602,11 +597,11 @@ Payload specifications:
                 <span className="text-[13px]">Opening file...</span>
               </div>
             ) : isImage && (blobUrl || file.localCachedUri) ? (
-              <div className="relative max-w-full max-h-full flex items-center justify-center touch-manipulation">
+              <div className="relative max-w-full max-h-full flex items-center justify-center touch-manipulation pb-16">
                 <img
                   src={blobUrl || file.localCachedUri || ''}
                   alt={file.name}
-                  className="max-w-full max-h-[72vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+                  className="max-w-[88vw] max-h-[55vh] object-contain rounded-2xl shadow-2xl border border-white/10"
                 />
               </div>
             ) : isText && textContent !== null ? (
@@ -624,11 +619,14 @@ Payload specifications:
                 </p>
                 <button
                   type="button"
-                  onClick={handleDownload}
+                  onClick={() => {
+                    const targetUrl = blobUrl || file.downloadUrl;
+                    if (targetUrl) window.open(targetUrl, '_blank');
+                  }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
                 >
-                  <DownloadSimple size={16} weight="bold" />
-                  <span>Open / View PDF</span>
+                  <FilePdf size={16} weight="bold" />
+                  <span>Open PDF</span>
                 </button>
               </div>
             ) : isAudio && blobUrl ? (
@@ -652,11 +650,14 @@ Payload specifications:
                 </p>
                 <button
                   type="button"
-                  onClick={handleDownload}
+                  onClick={() => {
+                    const targetUrl = blobUrl || file.downloadUrl;
+                    if (targetUrl) window.open(targetUrl, '_blank');
+                  }}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
                 >
-                  <DownloadSimple size={16} weight="bold" />
-                  <span>Open File</span>
+                  <FileText size={16} weight="bold" />
+                  <span>Open Document</span>
                 </button>
               </div>
             )}

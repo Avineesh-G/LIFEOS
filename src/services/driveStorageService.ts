@@ -129,12 +129,19 @@ export async function uploadDriveFile(
   const storagePath = `users/${uid}/drive/${fileId}_${sanitizedFileName}`;
 
   // Step 1: Instant local persistence (< 50ms)
+  if (onProgress) {
+    onProgress(5, Math.round(file.size * 0.05), file.size);
+  }
   try {
     await saveDriveBlob(fileId, file);
   } catch (blobErr) {
     console.warn('[LifeOS Drive] Non-fatal local blob cache notice:', blobErr);
   }
   const localBlobUrl = URL.createObjectURL(file);
+
+  if (onProgress) {
+    onProgress(15, Math.round(file.size * 0.15), file.size);
+  }
 
   // Generate lightweight thumbnail for images
   const thumbnail = await generateImageThumbnail(file);
@@ -146,8 +153,11 @@ export async function uploadDriveFile(
   let finalDownloadUrl = localBlobUrl;
   let isCancelled = false;
 
-  // Step 2: Attempt cloud storage stream with cancellable task and 12-second timeout
+  // Step 2: Attempt cloud storage stream with active continuous progress reporting
   if (currentUser && !storagePath.startsWith('users/offline_user/')) {
+    let currentPct = 25;
+    let progressTimer: ReturnType<typeof setInterval> | null = null;
+
     try {
       const storageRef = ref(storage, storagePath);
       const uploadTask: UploadTask = uploadBytesResumable(storageRef, file, {
@@ -160,10 +170,23 @@ export async function uploadDriveFile(
         },
       });
 
+      // Active ticker: continuously increments progress every 120ms so the user sees live number progression
+      progressTimer = setInterval(() => {
+        if (currentPct < 92) {
+          const step = currentPct < 60 ? 2 : 1;
+          currentPct = Math.min(92, currentPct + step);
+          if (onProgress) {
+            const simulatedTransferred = Math.min(file.size, Math.round(file.size * (currentPct / 100)));
+            onProgress(currentPct, simulatedTransferred, file.size);
+          }
+        }
+      }, 120);
+
       if (controlHandle) {
         controlHandle.current = {
           cancel: () => {
             isCancelled = true;
+            if (progressTimer) clearInterval(progressTimer);
             try {
               uploadTask.cancel();
             } catch {}
@@ -175,16 +198,29 @@ export async function uploadDriveFile(
         uploadTask.on(
           'state_changed',
           (snapshot) => {
-            const rawPct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            const progress = Math.min(95, Math.max(25, Math.round(rawPct)));
-            if (onProgress) {
-              onProgress(progress, snapshot.bytesTransferred, snapshot.totalBytes);
+            if (snapshot.totalBytes > 0) {
+              const rawPct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              if (Number.isFinite(rawPct)) {
+                // Map the 0-100% cloud range onto 25% - 94%
+                const mapped = Math.min(94, Math.max(currentPct, Math.round(25 + rawPct * 0.69)));
+                currentPct = mapped;
+                if (onProgress) {
+                  onProgress(currentPct, snapshot.bytesTransferred, snapshot.totalBytes);
+                }
+              }
             }
           },
           (error) => {
+            if (progressTimer) clearInterval(progressTimer);
             reject(error);
           },
           async () => {
+            if (progressTimer) clearInterval(progressTimer);
+            // Advance to 96% while resolving download URL
+            currentPct = 96;
+            if (onProgress) {
+              onProgress(96, file.size, file.size);
+            }
             try {
               const url = await getDownloadURL(uploadTask.snapshot.ref);
               resolve(url);
@@ -195,18 +231,24 @@ export async function uploadDriveFile(
         );
       });
 
-      // 12-second timeout: if Firebase hangs or network drops, don't stall the UI
+      // 8-second timeout: if Firebase hangs or network drops, don't stall the UI
       const timeoutPromise = new Promise<string>((_, reject) => {
-        setTimeout(() => reject(new Error('CLOUD_UPLOAD_TIMEOUT')), 12000);
+        setTimeout(() => {
+          if (progressTimer) clearInterval(progressTimer);
+          reject(new Error('CLOUD_UPLOAD_TIMEOUT'));
+        }, 8000);
       });
 
       finalDownloadUrl = await Promise.race([cloudUploadPromise, timeoutPromise]);
     } catch (err: any) {
+      if (progressTimer) clearInterval(progressTimer);
       if (isCancelled) {
         throw new Error('UPLOAD_CANCELLED');
       }
       console.warn('[LifeOS Drive] Cloud sync notice:', err?.message || err, '- saving locally.');
       finalDownloadUrl = localBlobUrl;
+    } finally {
+      if (progressTimer) clearInterval(progressTimer);
     }
   }
 

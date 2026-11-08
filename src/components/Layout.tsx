@@ -41,9 +41,7 @@ import { triggerHaptic } from '../utils/haptics';
 import {
   checkNotificationPermission,
   requestAndSyncNotifications,
-  syncTimetableNotifications,
-  syncTaskNotifications,
-  syncNutritionNotifications,
+  syncAllNotifications,
 } from '../utils/notifications';
 import { MODULE_TINTS } from '../ui/tokens/colors';
 import { useEdgeSwipeBack } from '../hooks/useEdgeSwipeBack';
@@ -142,12 +140,9 @@ export default function Layout({
 
   // Sync scheduled notifications on data changes
   useEffect(() => {
-    checkNotificationPermission().then(granted => {
-      if (!granted) return;
-      if (data?.timetable) syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
-      if (data?.tasks) syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-      syncNutritionNotifications();
-    });
+    if (data) {
+      syncAllNotifications(data).catch(() => {});
+    }
   }, [data?.timetable, data?.tasks]);
 
   // Smooth auto-hiding header on scroll down, reappearing on scroll up

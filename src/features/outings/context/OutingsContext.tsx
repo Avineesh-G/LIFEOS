@@ -29,7 +29,9 @@ import {
   saveReceiptRecord,
   deleteReceiptRecord,
 } from '../storage/outingsIdb';
-import { syncOutingsWithCloud } from '../storage/outingsSync';
+import { syncOutingsWithCloud, pushOutingsToCloud } from '../storage/outingsSync';
+import { clearAllOutingsData } from '../storage/outingsIdb';
+import { onAuthStateChanged } from 'firebase/auth';
 import { calculateOutingSummary } from '../utils/calculations';
 import { auth } from '../../../firebase';
 import type {
@@ -107,21 +109,17 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [undoItem, setUndoItem] = useState<UndoAction | null>(null);
 
-  // Load base data
+  // Load base data with strict user session isolation
   const loadBaseData = useCallback(async () => {
     try {
+      const currentUid = auth.currentUser?.uid;
+      if (currentUid) {
+        await syncOutingsWithCloud(currentUid);
+      }
       await ensureMePerson();
       const [allOutings, allPeople] = await Promise.all([getOutings(), getPeople()]);
       setOutings(allOutings);
       setPeople(allPeople);
-
-      // Cloud sync in background if user is authenticated
-      if (auth.currentUser?.uid) {
-        syncOutingsWithCloud(auth.currentUser.uid).then(async () => {
-          const freshOutings = await getOutings();
-          setOutings(freshOutings);
-        });
-      }
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +127,30 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     loadBaseData();
+
+    // Listen for auth state transitions (switch account, log out)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser?.uid) {
+        setIsLoading(true);
+        await syncOutingsWithCloud(currentUser.uid);
+        await ensureMePerson();
+        const [freshOutings, freshPeople] = await Promise.all([getOutings(), getPeople()]);
+        setOutings(freshOutings);
+        setPeople(freshPeople);
+        setIsLoading(false);
+      } else {
+        await clearAllOutingsData();
+        setOutings([]);
+        setPeople([]);
+        setActiveExpenses([]);
+        setActiveSettlements([]);
+        setActiveReceipts([]);
+        setActiveOutingId(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, [loadBaseData]);
 
   // Load active outing details
@@ -209,7 +231,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await saveOuting(newOuting);
       setOutings((prev) => [newOuting, ...prev]);
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       return id;
     },
     []
@@ -228,7 +250,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await saveOuting(updated);
       setOutings((prev) => prev.map((o) => (o.id === id ? updated : o)));
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
     },
     []
   );
@@ -248,7 +270,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
         // Permanent delete after 5 seconds
         await idbDeleteOuting(id, true);
         setUndoItem(null);
-        if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+        if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       }, 5000);
 
       setUndoItem({
@@ -276,7 +298,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await savePerson(newPerson);
       setPeople((prev) => [...prev, newPerson]);
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       return newPerson;
     },
     [people]
@@ -323,7 +345,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await saveExpense(newExpense);
       setActiveExpenses((prev) => [newExpense, ...prev]);
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       return expenseId;
     },
     []
@@ -371,7 +393,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await saveExpense(updated);
       setActiveExpenses((prev) => prev.map((e) => (e.id === id ? updated : e)));
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
     },
     [activeExpenses]
   );
@@ -389,7 +411,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
       const timerId = setTimeout(async () => {
         await idbDeleteExpense(id, true);
         setUndoItem(null);
-        if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+        if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       }, 5000);
 
       setUndoItem({
@@ -421,7 +443,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
 
       await saveSettlement(newSettlement);
       setActiveSettlements((prev) => [newSettlement, ...prev]);
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
       return id;
     },
     []
@@ -431,7 +453,7 @@ export function OutingsProvider({ children }: { children: React.ReactNode }) {
     async (id: string): Promise<void> => {
       await idbDeleteSettlement(id);
       setActiveSettlements((prev) => prev.filter((s) => s.id !== id));
-      if (auth.currentUser?.uid) syncOutingsWithCloud(auth.currentUser.uid);
+      if (auth.currentUser?.uid) pushOutingsToCloud(auth.currentUser.uid);
     },
     []
   );

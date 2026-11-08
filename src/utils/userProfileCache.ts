@@ -116,3 +116,13 @@ export function useUserProfile(): CachedUserProfile {
 
   return profile;
 }
+
+/**
+ * Explicitly clears the in-memory and persistent profile cache upon sign out.
+ */
+export function clearUserProfileCache(): void {
+  memoryCachedProfile = null;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {}
+}

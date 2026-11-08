@@ -1,3 +1,5 @@
+import { clearAllOutingsData } from './features/outings/storage/outingsIdb';
+import { clearUserProfileCache } from './utils/userProfileCache';
 import React, { useEffect, useLayoutEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -54,7 +56,7 @@ const DevPaletteBoard = import.meta.env.DEV ? lazy(() => import('./components/de
 const DevShapeBoard = import.meta.env.DEV ? lazy(() => import('./components/dev/ShapeBoard')) : null;
 import { subscribeToLockState, isAppLocked, handleAppBackgrounded, handleAppForegrounded } from './utils/security';
 import { DEFAULT_DATA } from './db';
-import { checkNotificationPermission, requestAndSyncNotifications, syncTimetableNotifications, syncTaskNotifications } from './utils/notifications';
+import { checkNotificationPermission, requestAndSyncNotifications, syncAllNotifications } from './utils/notifications';
 import { scheduleWidgetSync } from './utils/widgetBridge';
 import { triggerTopDismissible, handleRootBackPress, recordNavigation, handleAppBack } from './utils/backNavigation';
 
@@ -198,9 +200,13 @@ function App() {
   const handleSignOut = useCallback(async () => {
     try {
       localStorage.removeItem('lifeos_cached_auth_user');
+      localStorage.removeItem('lifeos_cached_app_data');
+      localStorage.removeItem('lifeos_active_outings_uid');
       localStorage.removeItem('lifeos_mock_auth');
       (window as any).__LIFEOS_MOCK_AUTH__ = false;
       setUser(null);
+      clearUserProfileCache();
+      await clearAllOutingsData().catch(() => {});
 
       if (Capacitor.isNativePlatform()) {
         try {
@@ -222,6 +228,7 @@ function App() {
       console.error('Sign out error:', err);
     } finally {
       setUser(null);
+      clearUserProfileCache();
     }
   }, []);
 
@@ -367,6 +374,7 @@ function App() {
             triggerCompositorWakeup();
             if (data) {
               scheduleWidgetSync(data, 500);
+              syncAllNotifications(data).catch(() => {});
             }
           }
         });
@@ -382,6 +390,7 @@ function App() {
         triggerCompositorWakeup();
         if (data) {
           scheduleWidgetSync(data, 500);
+          syncAllNotifications(data).catch(() => {});
         }
       }
     };
@@ -413,8 +422,7 @@ function App() {
           }, 1000);
           return () => clearTimeout(t);
         } else {
-          if (safeData?.timetable) syncTimetableNotifications(safeData.timetable, safeData.settings?.notificationLeadMinutes || 10);
-          if (safeData?.tasks) syncTaskNotifications(safeData.tasks, safeData.settings?.notificationLeadMinutes || 10);
+          syncAllNotifications(safeData).catch(() => {});
         }
       });
     }

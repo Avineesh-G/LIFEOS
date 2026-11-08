@@ -1,3 +1,4 @@
+import { auth } from '../firebase';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -78,7 +79,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   // Water tracking state
   const [waterLiters, setWaterLiters] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem(`lifeos_water_${todayStr}`);
+      const saved = localStorage.getItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`);
       return saved ? parseFloat(saved) : 1.5;
     } catch {
       return 1.5;
@@ -90,7 +91,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     setWaterLiters((prev) => {
       const next = Math.round((prev + amountLiters) * 100) / 100;
       try {
-        localStorage.setItem(`lifeos_water_${todayStr}`, next.toString());
+        localStorage.setItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`, next.toString());
       } catch {}
       return next;
     });

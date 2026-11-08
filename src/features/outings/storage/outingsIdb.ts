@@ -297,3 +297,47 @@ export async function clearAllReceiptBlobs(): Promise<void> {
     console.warn('[LifeOS IDB] Error clearing receipt blobs:', err);
   }
 }
+
+
+/**
+ * Permanently purges all outings, participants, expenses, settlements, and receipts
+ * from local IndexedDB and localStorage fallbacks to guarantee tenant isolation on user switch or sign-out.
+ */
+export async function clearAllOutingsData(): Promise<void> {
+  const outingStores = [
+    STORE_OUTINGS,
+    STORE_PEOPLE,
+    STORE_EXPENSES,
+    STORE_SETTLEMENTS,
+    STORE_RECEIPTS,
+  ];
+
+  try {
+    const db = await getIndexedDB();
+    if (db) {
+      for (const store of outingStores) {
+        if (db.objectStoreNames.contains(store)) {
+          await new Promise<void>((resolve) => {
+            try {
+              const tx = db.transaction(store, 'readwrite');
+              tx.objectStore(store).clear();
+              tx.oncomplete = () => resolve();
+              tx.onerror = () => resolve();
+            } catch {
+              resolve();
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[LifeOS Outings IDB] Error wiping outings IDB stores:', err);
+  }
+
+  // Clear fallback localStorage items
+  for (const store of outingStores) {
+    try {
+      localStorage.removeItem('lifeos_' + store);
+    } catch {}
+  }
+}

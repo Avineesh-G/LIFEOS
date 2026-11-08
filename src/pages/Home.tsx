@@ -1,3 +1,4 @@
+import { auth } from '../firebase';
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -75,7 +76,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     const target = data.profile?.currentCalorieTarget || 2200;
     let water = 1.5;
     try {
-      const saved = localStorage.getItem(`lifeos_water_${todayStr}`);
+      const saved = localStorage.getItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`);
       if (saved) water = parseFloat(saved);
     } catch {}
     return {
@@ -93,7 +94,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     const current = parseFloat(nutritionToday.waterLiters);
     const next = Math.round((current + 0.25) * 100) / 100;
     try {
-      localStorage.setItem(`lifeos_water_${todayStr}`, next.toString());
+      localStorage.setItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`, next.toString());
     } catch {}
   };
 

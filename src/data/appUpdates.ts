@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive } from '../ui/tokens/icons';
+import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck } from '../ui/tokens/icons';
 import { CURRENT_VERSION_NAME } from '../version';
 
 export interface AppUpdate {
@@ -23,13 +23,32 @@ export const OFFICIAL_DEVELOPER_EMAILS = [
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-tenant-isolation-drive-polish',
+    category: 'Tenant Security & Drive',
+    icon: React.createElement(ShieldCheck, { size: 13, weight: 'bold' }),
+    title: 'Tenant Isolation & Drive Upgrades',
+    dateTime: 'Nov 8 • 01:30 PM',
+    fullDateTime: 'Sunday, Nov 8, 2026 • 01:30 PM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#30D158]',
+    summary: 'Airtight multi-tenant user data isolation, continuous Drive upload percentage ticker, burgundy folder color accents, and precision notification dispatch.',
+    points: [
+      'Zero Cross-User Sync: Complete tenant isolation across local cache, Firestore auto-healing, and Outings to guarantee strict privacy between different user accounts.',
+      'Active Upload Ticker: Real-time dynamic progress percentage ticker during Drive uploads from 25% through 100% completion.',
+      'Jewel-Tone Folder Accents: Added Burgundy (#9F1239) and dynamic folder color inheritance across file icons and reader badges.',
+      'Streamlined File Inspector: Clean reader modal layout with optimized image sizing and removed direct downloads/QR codes for sleek mobile viewing.',
+      'Precision Event Alarms: Enhanced Android exact alarm scheduling with prompt notifications 20 minutes before events and starting reminders.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+  },
+  {
     id: 'update-drive-docs-ai-inspector',
     category: 'Drive & AI Routing',
     icon: React.createElement(HardDrive, { size: 13, weight: 'bold' }),
     title: 'Drive & AI Document Inspector',
     dateTime: 'Nov 5 • 07:45 PM',
     fullDateTime: 'Thursday, Nov 5, 2026 • 07:45 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.5',
     colorClass: 'text-[#0A84FF]',
     summary: 'Built-in 5.0 GB Drive & Docs cloud storage, in-reader AI intelligence that extracts and routes document receipts, and optimized native edge header layouts.',
     points: [

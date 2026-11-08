@@ -1,10 +1,10 @@
 {
-  "versionCode": 72,
-  "versionName": "3.3.5",
-  "releaseDate": "2026-11-05",
-  "apkSize": "10.19 MB",
-  "apkSizeBytes": 10681651,
-  "releaseNotes": "LifeOS v3.3.5 (Build 72):\n• LifeOS Drive & Docs Hub: 5.0 GB local-first cloud storage with high-speed multi-file uploads and instant cross-device QR code transfer\n• In-Reader AI Document Inspector: Extracts and auto-routes document receipts, workouts, meals, notes, and tasks directly to LifeOS hubs\n• Edge-to-Edge Android Layout: Refined status bar clearance, zero header overshadowing, and pinned ergonomic mobile action bars\n• Enhanced Stability: Unified Nutrition split chip, secure deletion confirmation dialogs, and butter-smooth 120 FPS performance",
+  "versionCode": 73,
+  "versionName": "3.3.6",
+  "releaseDate": "2026-11-08",
+  "apkSize": "10.20 MB",
+  "apkSizeBytes": 10695000,
+  "releaseNotes": "LifeOS v3.3.6 (Build 73):\n• Zero Cross-User Contamination: Strict tenant isolation across local cache, Firestore auto-healing, and Outings ensuring complete privacy between user accounts.\n• Drive Live Upload Ticker: Active continuous progress indicator showing real-time upload percentage from 25% through completion.\n• Folder Palette & Accent Matching: Added Burgundy (#9F1239) and curated jewel tones with file icons dynamically inheriting their parent folder accent.\n• Reader & Interface Polish: Streamlined file inspection view, removed redundant buttons for spacious mobile layout, and perfected modal backdrops.\n• Timely Event Notifications: Optimized exact alarm scheduling with reminders fixed 20 mins before events and immediate starting alerts.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "a7d54f845bbbf0b8abc8b5ad7e6491b1ce8ec8f2521d4b9d3511bbc7c6e7e310"
+  "sha256": "e4e7c1145223470359a82adaf5a839ff5aff495d4c83e13cd1b671799d44bf5b"
 }

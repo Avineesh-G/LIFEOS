@@ -42,7 +42,7 @@ async function ensureNotificationChannels() {
       id: NUTRITION_CHANNEL_ID,
       name: 'Nutrition & Meal Alerts',
       description: 'Daily breakfast, lunch, snacks, and dinner mess reminders',
-      importance: 4,
+      importance: 5, // High/Max importance for heads-up alert
       visibility: 1,
       vibration: true,
       lights: true,
@@ -206,11 +206,14 @@ const DAY_MAP: Record<string, number> = {
 };
 
 /**
- * Schedules timetable class alerts in the Android Notification Center.
+ * Schedules timetable class alerts in the Android Notification Center:
+ * 1) Exactly 20 minutes before class starts (pre-event alert)
+ * 2) Exactly 1 minute after class starts (start confirmation alert)
+ * Uses exact RTC_WAKEUP alarms (setExactAndAllowWhileIdle) with wakeful lock to prevent delays.
  */
 export async function syncTimetableNotifications(
   blocks: TimetableBlock[],
-  leadMinutes: number = 10
+  _leadMinutes?: number
 ): Promise<number> {
   if (!Capacitor.isNativePlatform()) return 0;
   const hasPermission = await checkNotificationPermission();
@@ -248,28 +251,54 @@ export async function syncTimetableNotifications(
         scheduledTime.setDate(now.getDate() + dayDiff + week * 7);
         scheduledTime.setHours(hours, minutes, 0, 0);
 
-        // Subtract lead minutes
-        const triggerTime = new Date(scheduledTime.getTime() - leadMinutes * 60 * 1000);
+        const dateKey = scheduledTime.toISOString().slice(0, 10);
 
-        // Only schedule if it's at least 30 seconds in the future
-        if (triggerTime.getTime() > now.getTime() + 30 * 1000) {
-          const notifId = hashStringToInt(`tt_${block.id}_${triggerTime.toISOString().slice(0, 10)}`);
-          
-          let bodyText = `Class starts in ${leadMinutes}m at ${block.startTime}`;
+        // ── 1. Alert exactly 20 minutes BEFORE event starts ──
+        const preTriggerTime = new Date(scheduledTime.getTime() - 20 * 60 * 1000);
+        if (preTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+          const preNotifId = hashStringToInt(`tt_pre20_${block.id}_${dateKey}`);
+          let bodyText = `Class starts in 20m at ${block.startTime}`;
           if (block.room) bodyText += ` • Room ${block.room}`;
           if (block.teacher) bodyText += ` • ${block.teacher}`;
 
           notificationsToSchedule.push({
-            id: notifId,
-            title: `${block.subject || 'Class'} Reminder`,
+            id: preNotifId,
+            title: `Upcoming in 20m: ${block.subject || 'Class'}`,
             body: bodyText,
             channelId: TIMETABLE_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: NOTIFICATION_COLOR,
-            isExactNotification: false,
-            schedule: { at: triggerTime, allowWhileIdle: true },
+            isExactNotification: true,
+            schedule: { at: preTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'timetable',
+              phase: 'pre20',
+              blockId: block.id,
+              subject: block.subject,
+            },
+          });
+        }
+
+        // ── 2. Alert exactly 1 minute AFTER event starts ──
+        const postTriggerTime = new Date(scheduledTime.getTime() + 1 * 60 * 1000);
+        if (postTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+          const postNotifId = hashStringToInt(`tt_post1_${block.id}_${dateKey}`);
+          let bodyText = `Class started at ${block.startTime} (1m ago)`;
+          if (block.room) bodyText += ` • Room ${block.room}`;
+          if (block.teacher) bodyText += ` • ${block.teacher}`;
+
+          notificationsToSchedule.push({
+            id: postNotifId,
+            title: `Started: ${block.subject || 'Class'}`,
+            body: bodyText,
+            channelId: TIMETABLE_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: NOTIFICATION_COLOR,
+            isExactNotification: true,
+            schedule: { at: postTriggerTime, allowWhileIdle: true },
+            extra: {
+              type: 'timetable',
+              phase: 'post1',
               blockId: block.id,
               subject: block.subject,
             },
@@ -279,7 +308,7 @@ export async function syncTimetableNotifications(
     }
 
     if (notificationsToSchedule.length > 0) {
-      const capped = notificationsToSchedule.slice(0, 35);
+      const capped = notificationsToSchedule.slice(0, 64);
       await LocalNotifications.schedule({ notifications: capped });
       return capped.length;
     }
@@ -290,11 +319,14 @@ export async function syncTimetableNotifications(
 }
 
 /**
- * Schedules reminders for pending tasks that have dueDate and startTime/reminderTime.
+ * Schedules reminders for pending tasks:
+ * 1) Exactly 20 minutes before scheduled start time
+ * 2) Exactly 1 minute after scheduled start time
+ * Uses exact RTC_WAKEUP alarms (setExactAndAllowWhileIdle) with wakeful lock to prevent delays.
  */
 export async function syncTaskNotifications(
   tasks: Task[],
-  leadMinutes: number = 10
+  _leadMinutes?: number
 ): Promise<number> {
   if (!Capacitor.isNativePlatform()) return 0;
   const hasPermission = await checkNotificationPermission();
@@ -325,26 +357,51 @@ export async function syncTaskNotifications(
       if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hours) || isNaN(minutes)) continue;
 
       const taskDateTime = new Date(year, month - 1, day, hours, minutes, 0);
-      const triggerTime = new Date(taskDateTime.getTime() - leadMinutes * 60 * 1000);
 
-      if (triggerTime.getTime() > now.getTime() + 30 * 1000) {
-        const notifId = hashStringToInt(`task_${task.id}_${triggerTime.getTime()}`);
-        
-        let bodyText = task.subtask ? `${task.subtask} • ` : '';
-        bodyText += `Starts at ${targetTimeStr}`;
-        if (task.endTime) bodyText += ` until ${task.endTime}`;
+      // ── 1. Alert exactly 20 minutes BEFORE task starts ──
+      const preTriggerTime = new Date(taskDateTime.getTime() - 20 * 60 * 1000);
+      if (preTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+        const preNotifId = hashStringToInt(`task_pre20_${task.id}_${taskDateTime.getTime()}`);
+        let bodyText = `Starts in 20m at ${targetTimeStr}`;
+        if (task.subtask) bodyText += ` • ${task.subtask}`;
+        if (task.endTime) bodyText += ` (until ${task.endTime})`;
 
         notificationsToSchedule.push({
-          id: notifId,
-          title: `Task Reminder: ${task.text}`,
+          id: preNotifId,
+          title: `Task in 20m: ${task.text}`,
           body: bodyText,
           channelId: TASKS_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
           iconColor: '#10B981',
-          isExactNotification: false,
-          schedule: { at: triggerTime, allowWhileIdle: true },
+          isExactNotification: true,
+          schedule: { at: preTriggerTime, allowWhileIdle: true },
           extra: {
             type: 'task',
+            phase: 'pre20',
+            taskId: task.id,
+          },
+        });
+      }
+
+      // ── 2. Alert exactly 1 minute AFTER task starts ──
+      const postTriggerTime = new Date(taskDateTime.getTime() + 1 * 60 * 1000);
+      if (postTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+        const postNotifId = hashStringToInt(`task_post1_${task.id}_${taskDateTime.getTime()}`);
+        let bodyText = `Scheduled start was ${targetTimeStr} (1m ago)`;
+        if (task.subtask) bodyText += ` • ${task.subtask}`;
+
+        notificationsToSchedule.push({
+          id: postNotifId,
+          title: `Task Started: ${task.text}`,
+          body: bodyText,
+          channelId: TASKS_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#10B981',
+          isExactNotification: true,
+          schedule: { at: postTriggerTime, allowWhileIdle: true },
+          extra: {
+            type: 'task',
+            phase: 'post1',
             taskId: task.id,
           },
         });
@@ -352,7 +409,7 @@ export async function syncTaskNotifications(
     }
 
     if (notificationsToSchedule.length > 0) {
-      const capped = notificationsToSchedule.slice(0, 35);
+      const capped = notificationsToSchedule.slice(0, 64);
       await LocalNotifications.schedule({ notifications: capped });
       return capped.length;
     }
@@ -363,7 +420,10 @@ export async function syncTaskNotifications(
 }
 
 /**
- * Schedules daily Nutrition and Mess meal reminders (Breakfast, Lunch, Snacks, Dinner).
+ * Schedules daily Nutrition and Mess meal reminders (Breakfast, Lunch, Snacks, Dinner):
+ * 1) Exactly 20 minutes before meal serving starts
+ * 2) Exactly 1 minute after meal serving starts
+ * Uses exact RTC_WAKEUP alarms (setExactAndAllowWhileIdle) with wakeful lock to prevent delays.
  */
 export async function syncNutritionNotifications(): Promise<number> {
   if (!Capacitor.isNativePlatform()) return 0;
@@ -381,11 +441,12 @@ export async function syncNutritionNotifications(): Promise<number> {
       await LocalNotifications.cancel({ notifications: nutritionNotifications });
     }
 
+    // Official mess meal timings
     const MEAL_TIMES = [
-      { slot: 'breakfast', hour: 8,  minute: 0,  title: 'Breakfast Time', body: 'Mess breakfast is serving (7:30–9:45 AM). Fuel your day!' },
-      { slot: 'lunch',     hour: 13, minute: 0,  title: 'Lunch Time',     body: 'Mess lunch is active (12:15–2:45 PM). Don\'t skip your nutrition!' },
-      { slot: 'snacks',    hour: 17, minute: 0,  title: 'Evening Snacks', body: 'Evening snacks are ready (4:15–6:15 PM). Grab a healthy bite!' },
-      { slot: 'dinner',    hour: 20, minute: 0,  title: 'Dinner Time',    body: 'Mess dinner is open (7:15–9:30 PM). Hit your protein and calorie targets!' },
+      { slot: 'breakfast', hour: 7,  minute: 30, title: 'Breakfast', startTimeStr: '7:30 AM',  windowStr: '7:30–9:45 AM' },
+      { slot: 'lunch',     hour: 12, minute: 15, title: 'Lunch',     startTimeStr: '12:15 PM', windowStr: '12:15–2:45 PM' },
+      { slot: 'snacks',    hour: 16, minute: 15, title: 'Snacks',    startTimeStr: '4:15 PM',  windowStr: '4:15–6:15 PM' },
+      { slot: 'dinner',    hour: 19, minute: 15, title: 'Dinner',    startTimeStr: '7:15 PM',  windowStr: '7:15–9:30 PM' },
     ];
 
     const now = new Date();
@@ -394,23 +455,49 @@ export async function syncNutritionNotifications(): Promise<number> {
     // Schedule for next 5 days
     for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
       for (const meal of MEAL_TIMES) {
-        const triggerTime = new Date(now);
-        triggerTime.setDate(now.getDate() + dayOffset);
-        triggerTime.setHours(meal.hour, meal.minute, 0, 0);
+        const scheduledTime = new Date(now);
+        scheduledTime.setDate(now.getDate() + dayOffset);
+        scheduledTime.setHours(meal.hour, meal.minute, 0, 0);
 
-        if (triggerTime.getTime() > now.getTime() + 60 * 1000) {
-          const notifId = hashStringToInt(`nutri_${meal.slot}_${triggerTime.toISOString().slice(0, 10)}`);
+        const dateKey = scheduledTime.toISOString().slice(0, 10);
+
+        // ── 1. Alert exactly 20 minutes BEFORE meal starts ──
+        const preTriggerTime = new Date(scheduledTime.getTime() - 20 * 60 * 1000);
+        if (preTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+          const preNotifId = hashStringToInt(`nutri_pre20_${meal.slot}_${dateKey}`);
           notificationsToSchedule.push({
-            id: notifId,
-            title: meal.title,
-            body: meal.body,
+            id: preNotifId,
+            title: `${meal.title} in 20m`,
+            body: `Mess ${meal.slot} starts at ${meal.startTimeStr} (${meal.windowStr}). Fuel your day!`,
             channelId: NUTRITION_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: '#F59E0B',
-            isExactNotification: false,
-            schedule: { at: triggerTime, allowWhileIdle: true },
+            isExactNotification: true,
+            schedule: { at: preTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'nutrition',
+              phase: 'pre20',
+              slot: meal.slot,
+            },
+          });
+        }
+
+        // ── 2. Alert exactly 1 minute AFTER meal starts ──
+        const postTriggerTime = new Date(scheduledTime.getTime() + 1 * 60 * 1000);
+        if (postTriggerTime.getTime() > now.getTime() + 15 * 1000) {
+          const postNotifId = hashStringToInt(`nutri_post1_${meal.slot}_${dateKey}`);
+          notificationsToSchedule.push({
+            id: postNotifId,
+            title: `${meal.title} is Active`,
+            body: `Mess ${meal.slot} is serving now (${meal.windowStr}). Don't skip your nutrition!`,
+            channelId: NUTRITION_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: '#F59E0B',
+            isExactNotification: true,
+            schedule: { at: postTriggerTime, allowWhileIdle: true },
+            extra: {
+              type: 'nutrition',
+              phase: 'post1',
               slot: meal.slot,
             },
           });
@@ -419,7 +506,7 @@ export async function syncNutritionNotifications(): Promise<number> {
     }
 
     if (notificationsToSchedule.length > 0) {
-      const capped = notificationsToSchedule.slice(0, 20);
+      const capped = notificationsToSchedule.slice(0, 40);
       await LocalNotifications.schedule({ notifications: capped });
       return capped.length;
     }
@@ -427,6 +514,47 @@ export async function syncNutritionNotifications(): Promise<number> {
     console.warn('[Notifications] Error syncing nutrition notifications:', err);
   }
   return 0;
+}
+
+/**
+ * Unified master synchronization of all scheduled local notifications:
+ * Synchronizes Timetable, Tasks, and Nutrition reminders with dual exact alarms:
+ * - 20 minutes before event start
+ * - 1 minute after event start
+ */
+export async function syncAllNotifications(data?: any): Promise<{
+  timetableCount: number;
+  taskCount: number;
+  nutritionCount: number;
+}> {
+  if (!Capacitor.isNativePlatform() || !data) {
+    return { timetableCount: 0, taskCount: 0, nutritionCount: 0 };
+  }
+
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) {
+    return { timetableCount: 0, taskCount: 0, nutritionCount: 0 };
+  }
+
+  const timetableCount = data.timetable ? await syncTimetableNotifications(data.timetable) : 0;
+  const taskCount = data.tasks ? await syncTaskNotifications(data.tasks) : 0;
+  const nutritionCount = await syncNutritionNotifications();
+
+  return { timetableCount, taskCount, nutritionCount };
+}
+
+/**
+ * Checks whether the app can schedule exact alarms on Android 12+.
+ */
+export async function checkExactAlarmPermission(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return true;
+  try {
+    if (typeof (LocalNotifications as any).checkExactNotificationSetting === 'function') {
+      const res = await (LocalNotifications as any).checkExactNotificationSetting();
+      return res?.exact_alarm === 'granted';
+    }
+  } catch {}
+  return true;
 }
 
 /**

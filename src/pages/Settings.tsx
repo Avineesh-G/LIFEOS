@@ -31,8 +31,7 @@ import {
   checkNotificationPermission,
   requestNotificationPermission,
   sendInstantTestNotification,
-  syncTimetableNotifications,
-  syncTaskNotifications,
+  syncAllNotifications,
 } from '../utils/notifications';
 import {
   getGroqApiKey,
@@ -319,8 +318,7 @@ export default function Settings({
                   const granted = await requestNotificationPermission();
                   setHasNotifications(granted);
                   if (granted) {
-                    if (data.timetable) syncTimetableNotifications(data.timetable, leadMinutes);
-                    if (data.tasks) syncTaskNotifications(data.tasks, leadMinutes);
+                    await syncAllNotifications(data);
                   }
                 }
               }}
@@ -328,11 +326,11 @@ export default function Settings({
           }
         />
         <ListRow
-          title="Lead Time"
-          subtitle="Alert before event starts"
+          title="Alert Schedule"
+          subtitle="Fixed: 20m before and 1m after event starts"
           trailing={
-            <span className="font-semibold text-white/80 text-sm">
-              {leadMinutes} min
+            <span className="font-semibold text-white/80 text-xs px-2 py-0.5 rounded-full bg-white/10">
+              -20m / +1m
             </span>
           }
         />

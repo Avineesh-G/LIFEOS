@@ -261,6 +261,7 @@ export interface AppData {
   driveFolders?: DriveFolder[];
   driveFiles?: DriveFile[];
   driveStorage?: DriveStorageMetadata;
+  _ownerUid?: string;
 }
 
 export interface AiChatSession {

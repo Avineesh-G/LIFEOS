@@ -8,9 +8,7 @@ import {
   FileText,
   FilePdf,
   FileImage,
-  QrCode,
   ShareNetwork,
-  DownloadSimple,
   Trash,
   MagnifyingGlass,
   CaretLeft,
@@ -32,14 +30,11 @@ import {
   formatStorageSize,
   uploadDriveFile,
   deleteDriveFile,
-  createPublicShareRecord,
   checkStorageQuota,
-  resolveFileBlobUrl,
   UploadControlHandle,
 } from '../services/driveStorageService';
-import { ShareQrModal } from '../components/drive/ShareQrModal';
 import { FileReaderModal } from '../components/drive/FileReaderModal';
-import type { AppData, DriveFile, DriveFolder, PublicShareRecord } from '../types';
+import type { AppData, DriveFile, DriveFolder } from '../types';
 
 function dataUrlToFile(dataUrl: string, fileName: string): File {
   const arr = dataUrl.split(',');
@@ -58,9 +53,20 @@ interface DriveProps {
   updateData: (partial: Partial<AppData>) => Promise<any>;
 }
 
+const FOLDER_COLORS = [
+  '#9F1239', // Burgundy / Wine (User requested)
+  '#0A84FF', // Electric Blue (LifeOS Primary)
+  '#30D158', // Emerald Green (Health / Nutrition)
+  '#FF9F0A', // Warm Amber (Timetable / Focus)
+  '#BF5AF2', // Amethyst Violet (Notes / AI)
+  '#FF453A', // Crimson Rose (Vitality / Gym)
+  '#14B8A6', // Jewel Teal (Finance / Stability)
+  '#64D2FF', // Sky Blue (Drive / Cloud)
+];
+
 export default function Drive({ data, updateData }: DriveProps) {
   const navigate = useNavigate();
-  const { confirmDelete, showDeleteFeedback } = useM3Feedback();
+  const { confirmDelete } = useM3Feedback();
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date');
@@ -68,6 +74,7 @@ export default function Drive({ data, updateData }: DriveProps) {
   // Uploading state
   const [isUploading, setIsUploading] = useState(false);
   const [uploadPercent, setUploadPercent] = useState<number>(0);
+  const [uploadBytes, setUploadBytes] = useState<{ transferred: number; total: number } | null>(null);
   const [uploadingFileName, setUploadingFileName] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -77,11 +84,7 @@ export default function Drive({ data, updateData }: DriveProps) {
   // New folder dialog state
   const [isNewFolderOpen, setIsNewFolderOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
-  const [newFolderColor, setNewFolderColor] = useState('#0A84FF');
-
-  // Share QR modal state
-  const [activeShareRecord, setActiveShareRecord] = useState<PublicShareRecord | null>(null);
-  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [newFolderColor, setNewFolderColor] = useState(FOLDER_COLORS[0]);
 
   // File Reader modal state (Reading mode)
   const [activeReadingFile, setActiveReadingFile] = useState<DriveFile | null>(null);
@@ -176,6 +179,7 @@ export default function Drive({ data, updateData }: DriveProps) {
     setIsUploading(false);
     setUploadingFileName('');
     setUploadPercent(0);
+    setUploadBytes(null);
     setUploadError('Upload cancelled.');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (galleryInputRef.current) galleryInputRef.current.value = '';
@@ -194,7 +198,8 @@ export default function Drive({ data, updateData }: DriveProps) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         setUploadingFileName(file.name);
-        setUploadPercent(15);
+        setUploadPercent(5);
+        setUploadBytes({ transferred: 0, total: file.size });
 
         // Pre-check quota
         const quota = checkStorageQuota(file.size, { ...data, driveFiles: updatedFileList });
@@ -210,15 +215,23 @@ export default function Drive({ data, updateData }: DriveProps) {
           file,
           currentFolderId,
           { ...data, driveFiles: updatedFileList },
-          (percent) => setUploadPercent(percent),
+          (percent, transferred, total) => {
+            setUploadPercent(percent);
+            if (total > 0) {
+              setUploadBytes({ transferred, total });
+            }
+          },
           uploadControlRef
         );
 
         updatedFileList.push(uploaded);
       }
 
+      setUploadPercent(100);
       await updateData({ driveFiles: updatedFileList });
       triggerHaptic('success');
+      // Visibly show 100% completion state for 450ms before hiding banner
+      await new Promise((r) => setTimeout(r, 450));
     } catch (err: any) {
       if (err?.message === 'UPLOAD_CANCELLED') {
         setUploadError('Upload cancelled.');
@@ -231,6 +244,7 @@ export default function Drive({ data, updateData }: DriveProps) {
       setIsUploading(false);
       setUploadingFileName('');
       setUploadPercent(0);
+      setUploadBytes(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       if (galleryInputRef.current) galleryInputRef.current.value = '';
     }
@@ -278,12 +292,7 @@ export default function Drive({ data, updateData }: DriveProps) {
           setIsReaderOpen(false);
           setActiveReadingFile(null);
         }
-        deleteDriveFile(file).catch(() => {});
-        showDeleteFeedback({
-          title: 'File Deleted',
-          message: `"${file.name}" was permanently removed.`,
-          section: 'drive',
-        });
+        deleteDriveFile(file).catch(() => { });
       },
     });
   };
@@ -305,114 +314,14 @@ export default function Drive({ data, updateData }: DriveProps) {
       onConfirm: async () => {
         triggerHaptic('medium');
         for (const file of filesInFolder) {
-          deleteDriveFile(file).catch(() => {});
+          deleteDriveFile(file).catch(() => { });
         }
         const updatedFiles = allFiles.filter((f: DriveFile) => f.folderId !== folder.id);
         const updatedFolders = allFolders.filter((f: DriveFolder) => f.id !== folder.id);
         await updateData({ driveFiles: updatedFiles, driveFolders: updatedFolders });
         if (currentFolderId === folder.id) setCurrentFolderId(null);
-        showDeleteFeedback({
-          title: 'Folder Deleted',
-          message: `Folder "${folder.name}" was removed.`,
-          section: 'drive',
-        });
       },
     });
-  };
-
-  // Direct download handler (resolves local blob or cloud URL)
-  const handleDownload = async (file: DriveFile) => {
-    triggerHaptic('light');
-    try {
-      const url = await resolveFileBlobUrl(file);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {
-      window.open(file.downloadUrl, '_blank');
-    }
-  };
-
-  // Share file via QR Code
-  const handleShareFileQr = async (file: DriveFile) => {
-    triggerHaptic('light');
-    try {
-      const { shareId } = await createPublicShareRecord({
-        type: 'file',
-        itemId: file.id,
-        title: file.name,
-        fileSize: file.fileSize,
-        downloadUrl: file.downloadUrl,
-        mimeType: file.mimeType,
-      });
-
-      const record: PublicShareRecord = {
-        shareId,
-        ownerUid: 'self',
-        type: 'file',
-        itemId: file.id,
-        title: file.name,
-        fileSize: file.fileSize,
-        mimeType: file.mimeType,
-        downloadUrl: file.downloadUrl,
-        createdAt: new Date().toISOString(),
-        isRevoked: false,
-      };
-
-      setActiveShareRecord(record);
-      setIsQrModalOpen(true);
-    } catch (err) {
-      console.error('Failed to create QR share:', err);
-    }
-  };
-
-  // Share folder via QR Code
-  const handleShareFolderQr = async (folder: DriveFolder) => {
-    triggerHaptic('light');
-    try {
-      const filesInFolder = allFiles.filter((f: DriveFile) => f.folderId === folder.id);
-      const totalSize = filesInFolder.reduce((acc: number, f: DriveFile) => acc + (f.fileSize || 0), 0);
-
-      const folderItems = filesInFolder.map((f: DriveFile) => ({
-        id: f.id,
-        name: f.name,
-        size: f.fileSize,
-        downloadUrl: f.downloadUrl,
-        mimeType: f.mimeType,
-      }));
-
-      const { shareId } = await createPublicShareRecord({
-        type: 'folder',
-        itemId: folder.id,
-        title: folder.name,
-        fileSize: totalSize,
-        downloadUrl: filesInFolder[0]?.downloadUrl || '',
-        folderItems,
-      });
-
-      const record: PublicShareRecord = {
-        shareId,
-        ownerUid: 'self',
-        type: 'folder',
-        itemId: folder.id,
-        title: folder.name,
-        fileSize: totalSize,
-        downloadUrl: filesInFolder[0]?.downloadUrl || '',
-        folderItems,
-        createdAt: new Date().toISOString(),
-        isRevoked: false,
-      };
-
-      setActiveShareRecord(record);
-      setIsQrModalOpen(true);
-    } catch (err) {
-      console.error('Failed to share folder QR:', err);
-    }
   };
 
   // Native share sheet
@@ -428,13 +337,16 @@ export default function Drive({ data, updateData }: DriveProps) {
       } catch {
         // User cancelled
       }
-    } else {
-      handleShareFileQr(file);
+    } else if (file.downloadUrl) {
+      try {
+        await navigator.clipboard.writeText(file.downloadUrl);
+        triggerHaptic('success');
+      } catch { }
     }
   };
 
-  // File icon or thumbnail preview
-  const getFileIcon = (file: DriveFile) => {
+  // File icon or thumbnail preview with dynamic folder color matching
+  const getFileIcon = (file: DriveFile, accentColor: string = '#0A84FF') => {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
 
     // Render image thumbnail preview if available
@@ -450,12 +362,12 @@ export default function Drive({ data, updateData }: DriveProps) {
     }
 
     if (['jpg', 'jpeg', 'png', 'webp', 'heic', 'gif'].includes(ext) || file.mimeType?.startsWith('image/')) {
-      return <FileImage size={22} weight="duotone" className="text-[#30D158]" />;
+      return <FileImage size={22} weight="duotone" style={{ color: accentColor }} />;
     }
     if (ext === 'pdf' || file.mimeType?.includes('pdf')) {
-      return <FilePdf size={22} weight="duotone" className="text-[#FF453A]" />;
+      return <FilePdf size={22} weight="duotone" style={{ color: accentColor }} />;
     }
-    return <FileText size={22} weight="duotone" className="text-[#0A84FF]" />;
+    return <FileText size={22} weight="duotone" style={{ color: accentColor }} />;
   };
 
   return (
@@ -464,16 +376,13 @@ export default function Drive({ data, updateData }: DriveProps) {
       <LargeTitleHeader
         title={currentFolder ? currentFolder.name : "Drive & Docs"}
         subtitle={currentFolder ? "Folder · Cloud Storage" : "Cloud Storage · 5.0 GB Quota"}
-        tint="#0A84FF"
+        tint={currentFolder?.color || "#0A84FF"}
         onBack={() => {
           if (isUploadSheetOpen) {
             setIsUploadSheetOpen(false);
           } else if (isReaderOpen) {
             setIsReaderOpen(false);
             setActiveReadingFile(null);
-          } else if (isQrModalOpen) {
-            setIsQrModalOpen(false);
-            setActiveShareRecord(null);
           } else if (isNewFolderOpen) {
             setIsNewFolderOpen(false);
           } else if (currentFolderId) {
@@ -590,28 +499,52 @@ export default function Drive({ data, updateData }: DriveProps) {
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-2xl bg-[#0A84FF]/15 border border-[#0A84FF]/30 mb-4 flex items-center justify-between gap-3 shadow-lg"
+          className="p-3.5 rounded-2xl bg-[#0A84FF]/15 border border-[#0A84FF]/30 mb-4 shadow-lg"
         >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="w-4 h-4 border-2 border-[#0A84FF] border-t-transparent rounded-full animate-spin shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[12.5px] font-semibold text-white truncate">
-                Uploading {uploadingFileName}...
-              </p>
-              <p className="text-[11px] text-white/60">{uploadPercent}% completed</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="w-4 h-4 border-2 border-[#0A84FF] border-t-transparent rounded-full animate-spin shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[12.5px] font-semibold text-white truncate">
+                  Uploading {uploadingFileName}...
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[12px] font-bold text-[#0A84FF] tabular-nums">
+                    {uploadPercent}%
+                  </span>
+                  <span className="text-[11px] text-white/60">
+                    {uploadPercent >= 100 ? 'Completed' : 'uploading...'}
+                  </span>
+                  {uploadBytes && uploadBytes.total > 0 && (
+                    <span className="text-[11px] text-white/40 truncate">
+                      • {formatStorageSize(uploadBytes.transferred)} of {formatStorageSize(uploadBytes.total)}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Cancel / Delete button on the upload bar */}
+            {uploadPercent < 100 && (
+              <button
+                type="button"
+                onClick={handleCancelUpload}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 active:scale-95 text-red-400 text-[12px] font-semibold transition-all shrink-0 cursor-pointer border border-red-500/30 touch-manipulation"
+                title="Cancel and delete this upload"
+              >
+                <Trash size={14} weight="bold" />
+                <span>Cancel</span>
+              </button>
+            )}
           </div>
 
-          {/* Cancel / Delete button on the upload bar */}
-          <button
-            type="button"
-            onClick={handleCancelUpload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 active:scale-95 text-red-400 text-[12px] font-semibold transition-all shrink-0 cursor-pointer border border-red-500/30"
-            title="Cancel and delete this upload"
-          >
-            <Trash size={14} weight="bold" />
-            <span>Cancel</span>
-          </button>
+          {/* Smooth animated progress track */}
+          <div className="w-full bg-white/10 rounded-full h-1.5 mt-2.5 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-[#0A84FF] to-[#30D158] transition-all duration-150 ease-out rounded-full"
+              style={{ width: `${Math.min(100, Math.max(0, uploadPercent))}%` }}
+            />
+          </div>
         </motion.div>
       )}
 
@@ -715,14 +648,6 @@ export default function Drive({ data, updateData }: DriveProps) {
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        onClick={() => handleShareFolderQr(folder)}
-                        title="Share folder via QR Code"
-                        className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                      >
-                        <QrCode size={16} />
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => handleDeleteFolder(folder)}
                         title="Delete folder"
                         className="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-white/10 transition-colors cursor-pointer"
@@ -780,81 +705,87 @@ export default function Drive({ data, updateData }: DriveProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            {visibleFiles.map((file: DriveFile) => (
-              <div
-                key={file.id}
-                className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/10 flex items-center justify-between gap-3 hover:border-white/20 transition-colors"
-              >
-                {/* File Icon / Thumbnail & Info (Click to Open Reader) */}
+            {visibleFiles.map((file: DriveFile) => {
+              const parentFolder = file.folderId
+                ? allFolders.find((f: DriveFolder) => f.id === file.folderId)
+                : currentFolder;
+              const fileAccent = parentFolder?.color || currentFolder?.color || '#0A84FF';
+
+              return (
                 <div
-                  onClick={() => handleOpenFile(file)}
-                  className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
+                  key={file.id}
+                  className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/10 flex items-center justify-between gap-3 hover:border-white/20 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center shrink-0 overflow-hidden border border-white/[0.08]">
-                    {getFileIcon(file)}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-[13.5px] font-semibold text-white truncate group-hover:text-[#0A84FF] transition-colors" title={file.name}>
-                      {file.name}
-                    </h4>
-                    <p className="text-[11px] text-white/40 mt-0.5">
-                      {formatStorageSize(file.fileSize)} · {new Date(file.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* File Actions */}
-                <div className="flex items-center gap-1 shrink-0">
-                  {/* Read / View File Button */}
-                  <button
-                    type="button"
+                  {/* File Icon / Thumbnail & Info (Click to Open Reader) */}
+                  <div
                     onClick={() => handleOpenFile(file)}
-                    title="Open in Reader Mode"
-                    className="p-2 rounded-xl text-[#0A84FF] hover:bg-[#0A84FF]/15 active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
                   >
-                    <BookOpen size={18} weight="bold" />
-                  </button>
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden border transition-all"
+                      style={{
+                        backgroundColor: `${fileAccent}18`,
+                        borderColor: `${fileAccent}35`,
+                      }}
+                    >
+                      {getFileIcon(file, fileAccent)}
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleShareFileQr(file)}
-                    title="Generate QR code for cross-device download"
-                    className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
-                  >
-                    <QrCode size={18} weight="duotone" />
-                  </button>
+                    <div className="min-w-0 flex-1">
+                      <h4
+                        className="text-[13.5px] font-semibold text-white truncate transition-colors"
+                        title={file.name}
+                      >
+                        {file.name}
+                      </h4>
+                      <p className="text-[11px] text-white/40 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                        <span>{formatStorageSize(file.fileSize)} · {new Date(file.createdAt).toLocaleDateString()}</span>
+                        {parentFolder && !currentFolder && (
+                          <span
+                            className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide"
+                            style={{ backgroundColor: `${parentFolder.color}22`, color: parentFolder.color }}
+                          >
+                            {parentFolder.name}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleNativeShare(file)}
-                    title="Share link"
-                    className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
-                  >
-                    <ShareNetwork size={18} weight="duotone" />
-                  </button>
+                  {/* File Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Read / View File Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenFile(file)}
+                      title="Open in Reader Mode"
+                      className="p-2 rounded-xl text-[#0A84FF] hover:bg-[#0A84FF]/15 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <BookOpen size={18} weight="bold" />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDownload(file)}
-                    title="Download file"
-                    className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
-                  >
-                    <DownloadSimple size={18} weight="bold" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNativeShare(file)}
+                      title="Share link"
+                      className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
+                    >
+                      <ShareNetwork size={18} weight="duotone" />
+                    </button>
 
-                  {/* Prominent Delete Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteFile(file)}
-                    title="Delete file"
-                    className="p-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Trash size={18} weight="duotone" />
-                  </button>
+                    {/* Prominent Delete Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteFile(file)}
+                      title="Delete file"
+                      className="p-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <Trash size={18} weight="duotone" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -870,8 +801,13 @@ export default function Drive({ data, updateData }: DriveProps) {
               className="w-full max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 p-5 sm:p-6 text-white space-y-4 shadow-2xl relative"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FolderSimplePlus size={20} weight="duotone" className="text-[#0A84FF]" />
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
+                    style={{ backgroundColor: `${newFolderColor}22`, color: newFolderColor }}
+                  >
+                    <FolderSimplePlus size={18} weight="duotone" />
+                  </div>
                   <h3 className="text-[16px] font-bold text-white">Create New Folder</h3>
                 </div>
                 <button
@@ -891,25 +827,29 @@ export default function Drive({ data, updateData }: DriveProps) {
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="e.g. Academics, Receipts, Certificates"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-[13.5px] text-white placeholder-white/30 focus:outline-none focus:border-[#0A84FF]"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-[13.5px] text-white placeholder-white/30 focus:outline-none transition-colors"
+                  style={{ borderColor: `${newFolderColor}60` }}
                 />
               </div>
 
               <div>
                 <label className="text-[12px] text-white/50 mb-1.5 block">Color Accent</label>
-                <div className="flex items-center gap-2.5">
-                  {['#0A84FF', '#30D158', '#FF9F0A', '#BF5AF2', '#FF453A', '#64D2FF'].map((c) => (
+                <div className="grid grid-cols-4 gap-2.5 sm:flex sm:items-center">
+                  {FOLDER_COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
-                      onClick={() => setNewFolderColor(c)}
-                      className="w-7 h-7 rounded-full transition-transform active:scale-90 flex items-center justify-center cursor-pointer"
+                      onClick={() => {
+                        triggerHaptic('light');
+                        setNewFolderColor(c);
+                      }}
+                      className="w-8 h-8 rounded-full transition-all active:scale-90 flex items-center justify-center cursor-pointer shadow-sm"
                       style={{
                         backgroundColor: c,
-                        boxShadow: newFolderColor === c ? '0 0 0 2px white' : 'none',
+                        boxShadow: newFolderColor === c ? `0 0 0 2px #1C1C1E, 0 0 0 4px ${c}` : 'none',
                       }}
                     >
-                      {newFolderColor === c && <CheckCircle size={14} weight="bold" className="text-white" />}
+                      {newFolderColor === c && <CheckCircle size={15} weight="bold" className="text-white" />}
                     </button>
                   ))}
                 </div>
@@ -919,7 +859,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                 <button
                   type="button"
                   onClick={() => setIsNewFolderOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/[0.08] text-[13px] font-medium text-white/80 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/15 text-[13px] font-medium text-white/80 cursor-pointer active:scale-95 transition-all"
                 >
                   Cancel
                 </button>
@@ -927,7 +867,8 @@ export default function Drive({ data, updateData }: DriveProps) {
                   type="button"
                   onClick={handleCreateFolder}
                   disabled={!newFolderName.trim()}
-                  className="px-4 py-2 rounded-xl bg-[#0A84FF] text-[13px] font-semibold text-white disabled:opacity-40 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 cursor-pointer active:scale-95 transition-all shadow-md"
+                  style={{ backgroundColor: newFolderColor }}
                 >
                   Create Folder
                 </button>
@@ -1036,16 +977,6 @@ export default function Drive({ data, updateData }: DriveProps) {
           </>
         )}
       </AnimatePresence>
-
-      {/* ── Share QR Code Modal ── */}
-      <ShareQrModal
-        isOpen={isQrModalOpen}
-        onClose={() => {
-          setIsQrModalOpen(false);
-          setActiveShareRecord(null);
-        }}
-        shareRecord={activeShareRecord}
-      />
 
       {/* ── File Reader & AI Intelligence Modal ── */}
       <FileReaderModal
