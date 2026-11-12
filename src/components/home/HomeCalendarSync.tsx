@@ -31,6 +31,7 @@ import { MOTION_SPRINGS } from '../../ui/tokens/motion';
 import { getOutings } from '../../features/outings/storage/outingsIdb';
 import type { Outing } from '../../features/outings/types';
 import type { AppData, Task, TimetableBlock } from '../../types';
+import CalendarQuickPopup from '../calendar/CalendarQuickPopup';
 
 export interface HomeCalendarSyncProps {
   data: AppData;
@@ -44,6 +45,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
   const [outings, setOutings] = useState<Outing[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [isEventPopupOpen, setIsEventPopupOpen] = useState(false);
 
   // Load Outings from IDB
   useEffect(() => {
@@ -214,16 +216,23 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
     <div className="flex flex-col gap-3.5 select-none">
       {/* ── Section Header ── */}
       <div className="flex items-center justify-between px-1 pt-1">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg glass-tile text-[#5E5CE6] flex items-center justify-center">
-            <CalendarDots size={16} weight="duotone" />
+        <div
+          onClick={() => {
+            triggerHaptic('light');
+            setIsEventPopupOpen(true);
+          }}
+          className="flex items-center gap-2 cursor-pointer group active:scale-[0.99] transition-transform touch-manipulation"
+          title="Open today's event schedule"
+        >
+          <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/10 text-[#5E5CE6] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors shadow-sm">
+            <CalendarDots size={18} weight="duotone" />
           </div>
           <div>
-            <h2 className="text-[17px] font-bold text-white tracking-tight leading-none">
+            <h2 className="text-[17px] font-bold text-white tracking-tight leading-none group-hover:text-[#A5A3FF] transition-colors">
               Synced Schedule & Calendar
             </h2>
             <p className="text-[11.5px] text-[rgba(235,235,245,0.55)] mt-0.5">
-              Live sync across tasks, timetable, outings & gym
+              Tap to view today's events & schedule
             </p>
           </div>
         </div>
@@ -238,17 +247,6 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               Today
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              navigate('/calendar');
-            }}
-            className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#5E5CE6]/20 border border-[#5E5CE6]/35 text-[11px] font-bold text-[#A5A3FF] hover:bg-[#5E5CE6]/30 active:scale-95 transition-all cursor-pointer"
-          >
-            <span>Full Calendar</span>
-            <ArrowRight size={12} weight="bold" />
-          </button>
         </div>
       </div>
 
@@ -607,6 +605,16 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
           )}
         </div>
       </div>
+
+      {/* ── Today's Event Schedule Popup ── */}
+      {updateData && (
+        <CalendarQuickPopup
+          isOpen={isEventPopupOpen}
+          onClose={() => setIsEventPopupOpen(false)}
+          data={data}
+          updateData={updateData}
+        />
+      )}
     </div>
   );
 }

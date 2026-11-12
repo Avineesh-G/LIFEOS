@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format, isToday } from 'date-fns';
 import {
   CalendarBlank,
@@ -38,7 +37,6 @@ export default function CalendarQuickPopup({
   data,
   updateData,
 }: CalendarQuickPopupProps) {
-  const navigate = useNavigate();
   const [quickTitle, setQuickTitle] = useState('');
   const [quickTime, setQuickTime] = useState('11:00');
   const [quickLead, setQuickLead] = useState<number>(20);
@@ -102,12 +100,6 @@ export default function CalendarQuickPopup({
     await updateData({ tasks: updated });
   };
 
-  const handleOpenFullCalendar = () => {
-    triggerHaptic('light');
-    onClose();
-    navigate('/calendar');
-  };
-
   return (
     <FloatingPopup
       isOpen={isOpen}
@@ -118,22 +110,16 @@ export default function CalendarQuickPopup({
       maxWidth="max-w-md"
     >
       <div className="space-y-3.5 select-none text-left">
-        {/* Quick Summary Pill & Open Full Link */}
+        {/* Quick Summary Header */}
         <div className="flex items-center justify-between pb-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-white/90">
               {totalTodayItems} item{totalTodayItems === 1 ? '' : 's'} today
             </span>
           </div>
-
-          <button
-            type="button"
-            onClick={handleOpenFullCalendar}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#5E5CE6]/15 hover:bg-[#5E5CE6]/25 border border-[#5E5CE6]/30 text-[#A5A3FF] hover:text-white text-xs font-bold active:scale-95 transition-all cursor-pointer"
-          >
-            <span>Full Calendar</span>
-            <ArrowRight size={13} weight="bold" />
-          </button>
+          <div className="text-[11px] text-white/50 font-mono">
+            {format(new Date(), 'yyyy')}
+          </div>
         </div>
 
         {/* Quick Add Event Form / Button */}
@@ -207,11 +193,13 @@ export default function CalendarQuickPopup({
         {/* Items Stream */}
         <div className="space-y-2 max-h-[340px] overflow-y-auto pr-0.5 scrollbar-none">
           {totalTodayItems === 0 && !isAdding && (
-            <div className="py-8 text-center rounded-2xl bg-white/[0.02] border border-white/5">
-              <CalendarBlank size={28} weight="duotone" className="mx-auto text-white/20 mb-1.5" />
-              <p className="text-xs font-semibold text-white/60">No items scheduled for today</p>
-              <p className="text-[11px] text-white/40 mt-0.5">
-                Tap above to quickly schedule an event or task.
+            <div className="py-9 px-4 text-center rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#5E5CE6] mb-1 shadow-sm">
+                <CalendarBlank size={24} weight="duotone" />
+              </div>
+              <p className="text-[14px] font-bold text-white">No Events Today</p>
+              <p className="text-[12px] text-white/50 max-w-xs leading-relaxed">
+                Your schedule is clear for today. Tap above to quickly add an event or class.
               </p>
             </div>
           )}
@@ -220,8 +208,8 @@ export default function CalendarQuickPopup({
           {todayEvents.map((ev) => (
             <div
               key={ev.id}
-              onClick={handleOpenFullCalendar}
-              className="p-3 rounded-2xl bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-3 relative overflow-hidden"
+              className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-3 relative overflow-hidden"
+              style={{ boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.08)' }}
             >
               <div
                 className="absolute left-0 top-0 bottom-0 w-1"

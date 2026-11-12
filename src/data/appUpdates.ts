@@ -26,13 +26,34 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-3-8-calendar-dock-droplet-fixes',
+    category: 'Calendar & Mobile UX',
+    icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
+    title: 'Calendar Safe Insets & Mobile Liquid Droplet Architecture',
+    dateTime: 'Nov 12 • 08:00 PM',
+    fullDateTime: 'Thursday, Nov 12, 2026 • 08:00 PM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#5E5CE6]',
+    summary: 'Calendar status bar collision resolution with back button navigation, complete floating bottom navigation dock clearance, liquid water droplet styling, and non-truncating category filters.',
+    points: [
+      'Calendar Top Status Bar Clearance: Lowered Calendar top controls with native safe-area insets and integrated dedicated Back navigation button, preventing collision with phone punch-holes and status bar indicators.',
+      'Zero Bottom Dock Collision: Enhanced bottom scroll padding and added a generous clearance spacer so scheduled tasks and events sit comfortably above the floating navigation dock.',
+      'Liquid Water Droplet Day Drawer: Redesigned the Selected Day drawer inside a squircle liquid glass chassis with specular micro-sheens, and optimized mobile cell heights to 58px for spacious viewing.',
+      'No-Truncation Category Pills: Added horizontal smooth scroll track with shrink-prevention, keeping filters like Study & Exams, Gym & Fitness, and Work & Projects fully readable.',
+      'Separated Calendar Experience: Removed redundant Full Calendar button from Home screen and placed Calendar as the lead module under Plan & Operations in More Hub, while Home calendar icon triggers instant quick agenda popup.',
+      'Drive Folder & File Palette Harmony: Deep Burgundy (#9F1239) and jewel tones registered with files dynamically inheriting their parent folder accent colors.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-3-7-liquid-calendar-notifications',
     category: 'Calendar & Liquid UI',
     icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
     title: 'Professional Calendar & Liquid Design',
     dateTime: 'Nov 12 • 12:30 PM',
     fullDateTime: 'Thursday, Nov 12, 2026 • 12:30 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.7',
     colorClass: 'text-[#5E5CE6]',
     summary: 'Professional Apple/Google calendar suite, Liquid Design color typography, smart 30-min nutrition nudges, morning/evening gym alerts, and Outings glass redesign.',
     points: [

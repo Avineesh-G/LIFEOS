@@ -98,7 +98,7 @@ export function MoreHubSheet({
 
   // Clean categorized sections for all 18 LifeOS interfaces
   const sections: NavSection[] = useMemo(() => {
-    const planItems = ['tasks', 'timetable', 'laundry', 'drive']
+    const planItems = ['calendar', 'tasks', 'timetable', 'laundry', 'drive']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem => !!i);
 
