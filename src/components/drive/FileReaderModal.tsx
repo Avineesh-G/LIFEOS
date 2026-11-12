@@ -597,11 +597,11 @@ Payload specifications:
                 <span className="text-[13px]">Opening file...</span>
               </div>
             ) : isImage && (blobUrl || file.localCachedUri) ? (
-              <div className="relative max-w-full max-h-full flex items-center justify-center touch-manipulation pb-16">
+              <div className="relative max-w-full max-h-full flex items-center justify-center touch-manipulation pb-24 px-4">
                 <img
                   src={blobUrl || file.localCachedUri || ''}
                   alt={file.name}
-                  className="max-w-[88vw] max-h-[55vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+                  className="max-w-[78vw] max-h-[50vh] object-contain rounded-2xl shadow-2xl border border-white/10"
                 />
               </div>
             ) : isText && textContent !== null ? (

@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 73,
-  versionName: '3.3.6',
-  releaseDate: '2026-11-08',
-  apkSize: '10.18 MB',
-  apkSizeBytes: 10677532,
-  releaseNotes: "LifeOS v3.3.6 (Build 73):\n• Zero Cross-User Contamination: Strict tenant isolation across local cache, Firestore auto-healing, and Outings ensuring complete privacy between user accounts.\n• Drive Live Upload Ticker: Active continuous progress indicator showing real-time upload percentage from 25% through completion.\n• Folder Palette & Accent Matching: Added Burgundy (#9F1239) and curated jewel tones with file icons dynamically inheriting their parent folder accent.\n• Reader & Interface Polish: Streamlined file inspection view, removed redundant buttons for spacious mobile layout, and perfected modal backdrops.\n• Timely Event Notifications: Optimized exact alarm scheduling with reminders fixed 20 mins before events and immediate starting alerts.",
+  versionCode: 74,
+  versionName: '3.3.7',
+  releaseDate: '2026-11-12',
+  apkSize: '10.20 MB',
+  apkSizeBytes: 10694542,
+  releaseNotes: "LifeOS v3.3.7 (Build 74):\n• Liquid Design Evolution: Refined all interfaces so color lives on words, numbers, and glyphs while preserving pure dark liquid glass droplets.\n• Professional Apple & Google Calendar Grade System: Month grid with colored date typography, 24-hour Google Calendar timeline with hourly slots and NOW indicator, and Agenda schedule view.\n• Header Calendar Quick Popup: Replaced alerts bell with Calendar in the top-right capsule for one-tap daily schedule access.\n• Smart Nutrition & Gym Notifications: 30-minute daytime meal logging nudges (muted when meals logged), and twice-daily morning (8:00 AM) and evening (6:00 PM) workout logging reminders.\n• Outings Liquid Glass Restyle: Re-themed New Outing modals with translucent liquid glass, high-contrast inputs, and crisp typography.\n• Drive Upload Ticker & Reader Polish: Continuous progress percentage counter from 0% to 100% and resized preview images avoiding button collision.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

@@ -11,6 +11,7 @@ import {
   Bell,
   Sparkle,
   CalendarCheck,
+  CalendarBlank,
   Wallet,
   CheckSquare,
   Flame,
@@ -36,6 +37,7 @@ import { ActionSheet, ActionSheetOption } from '../ui/feedback/ActionSheet';
 import { AmbientLight } from '../ui/feedback/AmbientLight';
 import { GlassSurface } from '../ui/glass/GlassSurface';
 import AskLifeOSModal from './ai/AskLifeOSModal';
+import CalendarQuickPopup from './calendar/CalendarQuickPopup';
 import { auth } from '../firebase';
 import { triggerHaptic } from '../utils/haptics';
 import {
@@ -60,6 +62,7 @@ interface LayoutProps {
 
 export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   // Plan & Operations
+  { id: 'calendar', label: 'Calendar', route: '/calendar', icon: <CalendarBlank size={24} weight="duotone" />, tintKey: 'calendar' },
   { id: 'tasks', label: 'To-Do Tasks', route: '/tasks', icon: <CheckSquare size={24} weight="duotone" />, tintKey: 'tasks' },
   { id: 'timetable', label: 'Timetable', route: '/timetable', icon: <CalendarCheck size={24} weight="duotone" />, tintKey: 'timetable' },
   { id: 'laundry', label: 'Laundry', route: '/laundry', icon: <TShirt size={24} weight="duotone" />, tintKey: 'laundry' },
@@ -91,6 +94,7 @@ export default function Layout({
   const [moreOpen, setMoreOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [calendarPopupOpen, setCalendarPopupOpen] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const [headerVisible, setHeaderVisible] = useState(true);
@@ -143,7 +147,7 @@ export default function Layout({
     if (data) {
       syncAllNotifications(data).catch(() => {});
     }
-  }, [data?.timetable, data?.tasks]);
+  }, [data?.timetable, data?.tasks, data?.nutritionLogs, data?.workoutLogs, data?.calendarEvents]);
 
   // Smooth auto-hiding header on scroll down, reappearing on scroll up
   useEffect(() => {
@@ -425,22 +429,18 @@ export default function Layout({
             <GlassSurface
               className="pointer-events-auto h-10 px-2 rounded-full flex items-center gap-1.5 shadow-lg select-none"
             >
-              {/* Clean Free Notification Button */}
+              {/* Calendar Quick View Button (Replaces Bell) */}
               <button
                 type="button"
-                onClick={async () => {
-                  triggerHaptic('medium');
-                  const granted = await requestAndSyncNotifications(data, updateData);
-                  setHasNotificationPermission(granted);
+                onClick={() => {
+                  triggerHaptic('light');
+                  setCalendarPopupOpen(true);
                 }}
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer relative"
-                title="Alerts & Notifications"
-                aria-label="Alerts & Notifications"
+                title="Calendar & Timeline"
+                aria-label="Calendar & Timeline"
               >
-                <Bell size={18} weight={hasNotificationPermission ? 'regular' : 'fill'} className={hasNotificationPermission ? '' : 'text-[#FFD60A]'} />
-                {!hasNotificationPermission && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FFD60A] ring-2 ring-black" />
-                )}
+                <CalendarBlank size={18} weight="duotone" className="text-[#5E5CE6]" />
               </button>
 
               <span className="w-[1px] h-3.5 bg-white/15 shrink-0" />
@@ -554,6 +554,14 @@ export default function Layout({
         onClose={() => setQuickAddOpen(false)}
         title="Quick Actions"
         options={quickAddOptions}
+      />
+
+      {/* ── Floating Calendar Quick Window ── */}
+      <CalendarQuickPopup
+        isOpen={calendarPopupOpen}
+        onClose={() => setCalendarPopupOpen(false)}
+        data={data || ({} as any)}
+        updateData={updateData || (async () => ({} as any))}
       />
 
       {/* ── Ask LifeOS AI Assistant Modal ── */}

@@ -62,10 +62,12 @@ export type ModuleKey =
   | 'history'
   | 'streak'
   | 'luna'
+  | 'calendar'
   | 'drive';
 
 export const MODULE_TINTS: Record<ModuleKey, string> = {
   home: '#0A84FF',        // Blue
+  calendar: '#5E5CE6',    // Indigo Apple Calendar
   gym: '#FF453A',         // Coral red
   nutrition: '#FF9F0A',   // Orange
   study: '#64D2FF',       // Cyan

@@ -176,44 +176,64 @@
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-/* TIER 2: Balanced Standard (Most Indian Mid-range phones - 4px single-pass blur) */
-.tier-2 .glass-tile {
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-  background: rgba(22, 22, 26, 0.85);
-}
-
-.tier-2 .glass-row {
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-  background: rgba(22, 22, 26, 0.85);
+/* TIER 2: Balanced Standard (Lean, zero-blur solid dark surface for 120 FPS) */
+.tier-2 .glass-tile,
+.tier-2 .glass-row,
+.tier-2 .liquid-glass,
+.tier-2 .glass-surface {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #18181B !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
 }
 
 .tier-2 .glass-nav {
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  background: rgba(20, 20, 24, 0.90);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #141416 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .tier-2 .sheet-backdrop {
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* TIER 1: Flagship / High-End Devices (Full Fidelity Liquid Droplets) */
+/* TIER 1 ONLY: Flagship / Top-Tier Devices (Exclusive Apple-Grade Specular Highlights & Liquid Reflections) */
+.tier-1 .glass-card,
+.tier-1 .glass-hero {
+  box-shadow: 0 14px 40px -8px rgba(0, 0, 0, 0.90), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+}
+
 .tier-1 .glass-tile {
-  backdrop-filter: blur(10px) saturate(175%);
-  -webkit-backdrop-filter: blur(10px) saturate(175%);
+  backdrop-filter: blur(12px) saturate(185%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(185%) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
+    0 10px 28px -4px rgba(0, 0, 0, 0.80) !important;
+}
+
+.tier-1 .glass-row {
+  backdrop-filter: blur(12px) saturate(185%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(185%) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.14),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
+    0 12px 32px -6px rgba(0, 0, 0, 0.80) !important;
 }
 
 .tier-1 .glass-nav {
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
 }
 
 .tier-1 .sheet-backdrop {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
 }
 
 /* Edge Fades */

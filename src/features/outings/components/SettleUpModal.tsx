@@ -11,17 +11,17 @@
 
 import React, { useState } from 'react';
 import {
-  CheckCircle2,
+  CheckCircle,
   ArrowRight,
-  Share2,
+  ShareNetwork,
   Copy,
   Check,
-  Undo2,
+  ArrowUUpLeft,
   Users,
-  Sparkles,
-  AlertCircle,
+  Sparkle,
+  WarningCircle,
   X,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { BottomSheet } from '../../../components/BottomSheet';
 import { formatPaiseToRupees, parseRupeesToPaise } from '../utils/calculations';
 import { triggerHaptic } from '../../../utils/haptics';
@@ -133,14 +133,14 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <div className="space-y-4 pt-1 pb-6 select-none">
-        <div className="flex items-center justify-between pb-2 border-b border-border-light dark:border-border-dark">
-          <h2 className="text-lg font-heading font-bold text-primary-light dark:text-primary-dark">
+        <div className="flex items-center justify-between pb-2 border-b border-white/10">
+          <h2 className="text-lg font-heading font-bold text-white">
             Settle Up & Balances
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
+            className="p-1.5 rounded-xl text-white/70 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
           >
             <X size={18} />
           </button>
@@ -150,20 +150,20 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
         {isAllSettled && (
           <div className="p-4 rounded-[24px] bg-emerald-500/10 border border-emerald-500/25 text-center space-y-1">
             <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
-              <Sparkles size={20} />
+              <Sparkle weight="duotone" size={20} />
             </div>
             <h4 className="text-sm font-heading font-bold text-emerald-700 dark:text-emerald-300">
               All Balances Settled!
             </h4>
-            <p className="text-xs text-secondary-light dark:text-secondary-dark">
+            <p className="text-xs text-white/70">
               Everyone is squared away. No payments are currently owed.
             </p>
           </div>
         )}
 
         {/* 1. Net Balances Breakdown */}
-        <div className="rounded-[24px] bg-black/[0.02] dark:bg-white/[0.03] border border-[var(--card-border)] p-4 space-y-2.5">
-          <span className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+        <div className="rounded-[24px] bg-black/[0.02] dark:bg-white/[0.03] border border-white/10 p-4 space-y-2.5">
+          <span className="block text-xs font-tag uppercase tracking-wider text-white/70 font-bold">
             Participant Balances
           </span>
 
@@ -178,9 +178,9 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                 return (
                   <div
                     key={personId}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03]"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-black/[0.03] dark:border-white/[0.03]"
                   >
-                    <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1">
+                    <span className="text-xs font-medium text-white truncate flex-1">
                       {name}
                     </span>
 
@@ -190,7 +190,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                           ? 'text-emerald-600 dark:text-emerald-400'
                           : isDebtor
                           ? 'text-rose-600 dark:text-rose-400'
-                          : 'text-muted-light dark:text-muted-dark'
+                          : 'text-white/40'
                       }`}
                     >
                       {isCreditor && `Gets ${formatPaiseToRupees(balance)}`}
@@ -206,7 +206,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
         {/* 2. Suggested Payments */}
         {summary && summary.suggestedPayments.length > 0 && (
           <div className="space-y-2">
-            <span className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+            <span className="block text-xs font-tag uppercase tracking-wider text-white/70 font-bold">
               Suggested Payments ({summary.suggestedPayments.length})
             </span>
 
@@ -217,7 +217,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                   className="p-3.5 rounded-[22px] bg-accent/5 border border-accent/20 flex flex-col gap-2"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-white truncate flex-1">
                       <span className="font-bold truncate">{getPersonName(payment.fromPersonId)}</span>
                       <ArrowRight size={13} className="text-accent shrink-0" />
                       <span className="font-bold truncate">{getPersonName(payment.toPersonId)}</span>
@@ -237,7 +237,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                         setPartialPaymentTarget(payment);
                         setPartialAmountInput((payment.amount / 100).toString());
                       }}
-                      className="px-3 py-1 rounded-full text-[11px] font-bold text-secondary-light dark:text-secondary-dark hover:text-primary-light active:scale-95 transition-all"
+                      className="px-3 py-1 rounded-full text-[11px] font-bold text-white/70 hover:text-white active:scale-95 transition-all"
                     >
                       Partial...
                     </button>
@@ -248,7 +248,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                       }
                       className="px-3.5 py-1 rounded-full text-xs font-bold bg-accent text-white shadow-xs active:scale-95 transition-all flex items-center gap-1"
                     >
-                      <CheckCircle2 size={13} />
+                      <CheckCircle weight="fill" size={13} />
                       <span>Mark Paid</span>
                     </button>
                   </div>
@@ -260,8 +260,8 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
 
         {/* Partial payment popover / input */}
         {partialPaymentTarget && (
-          <div className="p-3 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05] border border-accent/30 space-y-2">
-            <span className="block text-xs font-bold text-primary-light dark:text-primary-dark">
+          <div className="p-3 rounded-2xl bg-white/[0.06] border border-accent/30 space-y-2">
+            <span className="block text-xs font-bold text-white">
               Record Partial Payment: {getPersonName(partialPaymentTarget.fromPersonId)} →{' '}
               {getPersonName(partialPaymentTarget.toPersonId)}
             </span>
@@ -274,7 +274,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                   value={partialAmountInput}
                   onChange={(e) => setPartialAmountInput(e.target.value)}
                   placeholder="0"
-                  className="w-full pl-6 pr-3 py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] text-xs font-stat font-bold text-primary-light dark:text-primary-dark focus:outline-none focus:border-accent"
+                  className="w-full pl-6 pr-3 py-1.5 rounded-xl bg-white/[0.06] text-xs font-stat font-bold text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <button
@@ -296,7 +296,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
               <button
                 type="button"
                 onClick={() => setPartialPaymentTarget(null)}
-                className="px-2 py-1.5 text-xs text-muted-light dark:text-muted-dark hover:text-primary-light"
+                className="px-2 py-1.5 text-xs text-white/40 hover:text-white"
               >
                 Cancel
               </button>
@@ -307,7 +307,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
         {/* 3. Recorded Settlements List (with undo) */}
         {activeSettlements.length > 0 && (
           <div className="space-y-1.5 pt-1">
-            <span className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+            <span className="block text-xs font-tag uppercase tracking-wider text-white/70 font-bold">
               Recorded Settlements ({activeSettlements.length})
             </span>
 
@@ -315,14 +315,14 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
               {activeSettlements.map((set) => (
                 <div
                   key={set.id}
-                  className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between text-xs"
+                  className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-1.5 truncate flex-1">
-                    <span className="font-bold text-primary-light dark:text-primary-dark truncate">
+                    <span className="font-bold text-white truncate">
                       {getPersonName(set.fromPersonId)}
                     </span>
                     <ArrowRight size={11} className="text-secondary-light opacity-60 shrink-0" />
-                    <span className="font-bold text-primary-light dark:text-primary-dark truncate">
+                    <span className="font-bold text-white truncate">
                       {getPersonName(set.toPersonId)}
                     </span>
                     <span className="font-stat font-bold text-emerald-600 dark:text-emerald-400 shrink-0 ml-1">
@@ -336,10 +336,10 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                       triggerHaptic('selection');
                       deleteSettlement(set.id);
                     }}
-                    className="p-1 rounded-lg text-secondary-light dark:text-secondary-dark hover:text-rose-500 active:scale-90 transition-all ml-2 shrink-0"
+                    className="p-1 rounded-lg text-white/70 hover:text-rose-500 active:scale-90 transition-all ml-2 shrink-0"
                     title="Undo settlement"
                   >
-                    <Undo2 size={13} />
+                    <ArrowUUpLeft weight="bold" size={13} />
                   </button>
                 </div>
               ))}
@@ -352,7 +352,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
           <button
             type="button"
             onClick={handleCopyRecap}
-            className="flex-1 py-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs font-bold text-primary-light dark:text-primary-dark hover:bg-black/[0.06] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-xs font-bold text-white hover:bg-black/[0.06] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             <span>{copied ? 'Copied to Clipboard!' : 'Copy Recap'}</span>
@@ -363,7 +363,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
             onClick={handleShareRecap}
             className="flex-1 py-3 rounded-2xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Share2 size={14} />
+            <ShareNetwork weight="duotone" size={14} />
             <span>Share Recap</span>
           </button>
         </div>

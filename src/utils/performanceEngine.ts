@@ -4,6 +4,8 @@
  * optimized for the Indian mobile landscape (Android 13+, 3GB-8GB RAM, Mali/Adreno GPUs).
  */
 
+import { useState, useEffect } from 'react';
+
 export type DeviceTier = 1 | 2 | 3;
 
 export interface PerformanceMetrics {
@@ -154,7 +156,7 @@ export function detectDeviceTier(): PerformanceMetrics {
     cleanGpu,
     userOverride,
     isLowPower: false,
-    canBlur: tier <= 2,
+    canBlur: tier === 1,
     isLowEnd: tier === 3,
   };
 
@@ -214,4 +216,25 @@ export function setDeviceTierOverride(tier: DeviceTier | 'auto') {
     cachedMetrics = null;
     detectDeviceTier();
   } catch {}
+}
+
+/**
+ * Returns true if the device is currently operating at Tier 1 (Flagship).
+ * Used to gate intense visual effects, specular shaders, and complex blur layers.
+ */
+export function isTopTier(): boolean {
+  return (cachedMetrics ?? detectDeviceTier()).tier === 1;
+}
+
+/**
+ * React hook to reactively consume hardware performance tier in components.
+ */
+export function useDeviceTier(): PerformanceMetrics {
+  const [metrics, setMetrics] = useState<PerformanceMetrics>(() => cachedMetrics ?? detectDeviceTier());
+
+  useEffect(() => {
+    return subscribeToPerformanceMetrics(setMetrics);
+  }, []);
+
+  return metrics;
 }

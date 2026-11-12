@@ -34,6 +34,7 @@ export function Ring({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
+        shapeRendering="geometricPrecision"
         className="rotate-[-90deg]"
       >
         {/* Track */}
@@ -43,6 +44,7 @@ export function Ring({
           r={radius}
           stroke={trackColor}
           strokeWidth={strokeWidth}
+          shapeRendering="geometricPrecision"
           fill="transparent"
         />
         {/* Animated Progress */}
@@ -54,6 +56,7 @@ export function Ring({
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeLinecap="round"
+          shapeRendering="geometricPrecision"
           fill="transparent"
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}

@@ -38,12 +38,12 @@ export function CategoryBreakdown({ expenses, totalCost }: CategoryBreakdownProp
   }
 
   return (
-    <div className="rounded-[24px] liquid-glass border border-[var(--card-border)] p-4 sm:p-5 space-y-3 select-none shadow-xs">
+    <div className="rounded-[24px] liquid-glass border border-white/10 p-4 sm:p-5 space-y-3 select-none shadow-xs">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+        <h4 className="text-xs font-tag uppercase tracking-wider text-white/70 font-bold">
           Category Breakdown
         </h4>
-        <span className="text-xs font-stat font-bold text-primary-light dark:text-primary-dark">
+        <span className="text-xs font-stat font-bold text-white">
           {formatPaiseToRupees(totalCost)}
         </span>
       </div>
@@ -84,16 +84,16 @@ export function CategoryBreakdown({ expenses, totalCost }: CategoryBreakdownProp
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: meta?.color || '#A21CAF' }}
                 />
-                <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate">
+                <span className="text-xs font-medium text-white truncate">
                   {catName}
                 </span>
               </div>
 
               <div className="text-right shrink-0">
-                <span className="text-xs font-stat font-bold text-primary-light dark:text-primary-dark">
+                <span className="text-xs font-stat font-bold text-white">
                   {formatPaiseToRupees(amount)}
                 </span>
-                <span className="text-[10px] text-muted-light dark:text-muted-dark ml-1 font-stat">
+                <span className="text-[10px] text-white/40 ml-1 font-stat">
                   ({pct}%)
                 </span>
               </div>

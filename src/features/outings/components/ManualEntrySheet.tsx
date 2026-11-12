@@ -15,9 +15,9 @@ import {
   ShoppingBag,
   ArrowUpRight,
   ArrowDownLeft,
-  CheckCircle2,
-  AlertTriangle,
-} from 'lucide-react';
+  CheckCircle,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { BottomSheet } from '../../../components/BottomSheet';
 import { parseRupeesToPaise, formatPaiseToRupees } from '../utils/calculations';
@@ -184,21 +184,21 @@ export function ManualEntrySheet({
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <div className="space-y-4 pt-1 pb-6 select-none">
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-border-light dark:border-border-dark">
-          <h2 className="text-lg font-heading font-bold text-primary-light dark:text-primary-dark">
+        <div className="flex items-center justify-between pb-2 border-b border-white/10">
+          <h2 className="text-lg font-heading font-bold text-white">
             Manual Entry
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
+            className="p-1.5 rounded-xl text-white/70 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Mode Selector */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-black/[0.04] dark:bg-white/[0.05]">
+        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-white/[0.06]">
           {(Object.keys(MODE_CONFIG) as EntryMode[]).map((m) => {
             const cfg = MODE_CONFIG[m];
             const Icon = cfg.icon;
@@ -215,7 +215,7 @@ export function ManualEntrySheet({
                 className={`py-2 px-1.5 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
                   active
                     ? `${cfg.bgColor} ${cfg.color} ${cfg.borderColor} border shadow-sm`
-                    : 'text-secondary-light dark:text-secondary-dark'
+                    : 'text-white/70'
                 }`}
               >
                 <Icon size={16} strokeWidth={2.3} />
@@ -238,14 +238,14 @@ export function ManualEntrySheet({
         {/* Error Banner */}
         {error && (
           <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-            <AlertTriangle size={14} className="shrink-0" />
+            <WarningCircle weight="fill" size={14} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Amount Field */}
-        <div className="p-4 rounded-[24px] bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-center">
-          <label className="block text-[11px] font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1">
+        <div className="p-4 rounded-[24px] bg-white/[0.06] border border-white/10 text-center">
+          <label className="block text-[11px] font-tag uppercase tracking-wider text-white/70 mb-1">
             Amount (₹)
           </label>
           <div className="inline-flex items-center justify-center gap-1 max-w-full">
@@ -256,12 +256,12 @@ export function ManualEntrySheet({
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
               placeholder="0"
-              className="w-48 text-center text-3xl font-stat font-bold bg-transparent text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none"
+              className="w-48 text-center text-3xl font-stat font-bold bg-transparent text-white placeholder:text-white/40 focus:outline-none"
               autoFocus
             />
           </div>
           {amountPaise > 0 && (
-            <p className="text-xs text-secondary-light dark:text-secondary-dark mt-1">
+            <p className="text-xs text-white/70 mt-1">
               {formatPaiseToRupees(amountPaise)}
             </p>
           )}
@@ -270,7 +270,7 @@ export function ManualEntrySheet({
         {/* Person Selector (for lend/received only) */}
         {(mode === 'lend' || mode === 'received') && (
           <div>
-            <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+            <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
               {mode === 'lend' ? 'Lent To' : 'Received From'}
             </label>
             {otherPeople.length === 0 ? (
@@ -292,7 +292,7 @@ export function ManualEntrySheet({
                       className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
                         active
                           ? 'bg-accent text-white border-accent shadow-xs'
-                          : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark'
+                          : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
                       }`}
                     >
                       {p.name}
@@ -306,7 +306,7 @@ export function ManualEntrySheet({
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Description (Optional)
           </label>
           <input
@@ -320,26 +320,26 @@ export function ManualEntrySheet({
                 ? 'e.g. Bus fare advance'
                 : 'e.g. Returned share from dinner'
             }
-            className="w-full px-4 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent"
+            className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-accent"
           />
         </div>
 
         {/* Date & Time */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Date & Time
           </label>
           <input
             type="datetime-local"
             value={spentAt}
             onChange={(e) => setSpentAt(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-accent"
+            className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-xs text-white focus:outline-none focus:border-accent"
           />
         </div>
 
         {/* Note */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Note (Optional)
           </label>
           <textarea
@@ -347,7 +347,7 @@ export function ManualEntrySheet({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Any additional context..."
             rows={2}
-            className="w-full px-4 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent resize-none"
+            className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-accent resize-none"
           />
         </div>
 

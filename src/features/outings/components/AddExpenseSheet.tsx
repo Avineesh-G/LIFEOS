@@ -16,13 +16,13 @@ import {
   X,
   Camera,
   Image as ImageIcon,
-  AlertTriangle,
-  CheckCircle2,
-  Calendar,
+  WarningCircle,
+  CheckCircle,
+  CalendarBlank,
   Clock,
-  Trash2,
+  Trash,
   Receipt,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { format, parseISO, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns';
 import { BottomSheet } from '../../../components/BottomSheet';
 import { OUTING_CATEGORIES, MAX_RECEIPTS_PER_EXPENSE } from '../constants';
@@ -330,14 +330,14 @@ export function AddExpenseSheet({
       onClose={onClose}
     >
       <div className="space-y-4 pt-1 pb-6 select-none">
-        <div className="flex items-center justify-between pb-2 border-b border-border-light dark:border-border-dark">
-          <h2 className="text-lg font-heading font-bold text-primary-light dark:text-primary-dark">
+        <div className="flex items-center justify-between pb-2 border-b border-white/10">
+          <h2 className="text-lg font-heading font-bold text-white">
             {expenseToEdit ? 'Edit Expense' : 'Add Outing Expense'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
+            className="p-1.5 rounded-xl text-white/70 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
           >
             <X size={18} />
           </button>
@@ -345,14 +345,14 @@ export function AddExpenseSheet({
 
         {error && (
           <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-            <AlertTriangle size={14} className="shrink-0" />
+            <WarningCircle weight="fill" size={14} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* 1. Large Amount Field (Tap 1) */}
-        <div className="p-4 rounded-[24px] bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-center">
-          <label className="block text-[11px] font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1">
+        <div className="p-4 rounded-[24px] bg-white/[0.06] border border-white/10 text-center">
+          <label className="block text-[11px] font-tag uppercase tracking-wider text-white/70 mb-1">
             Amount Spent
           </label>
           <div className="inline-flex items-center justify-center gap-1 max-w-full">
@@ -363,7 +363,7 @@ export function AddExpenseSheet({
               value={amountInput}
               onChange={(e) => setAmountInput(e.target.value)}
               placeholder="0"
-              className="w-48 text-center text-3xl font-stat font-bold bg-transparent text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none"
+              className="w-48 text-center text-3xl font-stat font-bold bg-transparent text-white placeholder:text-white/40 focus:outline-none"
               autoFocus={!expenseToEdit}
             />
           </div>
@@ -371,7 +371,7 @@ export function AddExpenseSheet({
 
         {/* 2. Category Chips (Tap 2) */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-2">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-2">
             Category
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -390,7 +390,7 @@ export function AddExpenseSheet({
                   className={`py-2.5 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
                     isSelected
                       ? 'bg-accent text-white border-accent shadow-sm shadow-accent/25 scale-[1.02]'
-                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70 hover:border-accent/40'
                   }`}
                 >
                   <Icon size={18} strokeWidth={2.2} />
@@ -403,7 +403,7 @@ export function AddExpenseSheet({
 
         {/* 3. Title / Description */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Title / Note (Optional)
           </label>
           <input
@@ -411,13 +411,13 @@ export function AddExpenseSheet({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={`e.g. ${category} at Downtown`}
-            className="w-full px-4 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent"
+            className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-accent"
           />
         </div>
 
         {/* 4. Paid By Selector */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Paid By
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -434,7 +434,7 @@ export function AddExpenseSheet({
                   className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
                     active
                       ? 'bg-accent text-white border-accent shadow-xs'
-                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark'
+                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
                   }`}
                 >
                   {p.isMe ? 'Me' : p.name}
@@ -445,14 +445,14 @@ export function AddExpenseSheet({
         </div>
 
         {/* 5. Split Options */}
-        <div className="p-4 rounded-[24px] bg-black/[0.02] dark:bg-white/[0.02] border border-[var(--card-border)] space-y-3">
+        <div className="p-4 rounded-[24px] bg-white/[0.03] border border-white/10 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+            <span className="text-xs font-tag uppercase tracking-wider text-white/70 font-bold">
               Split Mode
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05]">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-white/[0.06]">
             <button
               type="button"
               onClick={() => {
@@ -462,7 +462,7 @@ export function AddExpenseSheet({
               className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
                 splitMode === 'equal'
                   ? 'bg-accent text-white shadow-xs'
-                  : 'text-secondary-light dark:text-secondary-dark'
+                  : 'text-white/70'
               }`}
             >
               Equal
@@ -476,7 +476,7 @@ export function AddExpenseSheet({
               className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
                 splitMode === 'personal'
                   ? 'bg-accent text-white shadow-xs'
-                  : 'text-secondary-light dark:text-secondary-dark'
+                  : 'text-white/70'
               }`}
             >
               Only Me
@@ -490,7 +490,7 @@ export function AddExpenseSheet({
               className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
                 splitMode === 'custom'
                   ? 'bg-accent text-white shadow-xs'
-                  : 'text-secondary-light dark:text-secondary-dark'
+                  : 'text-white/70'
               }`}
             >
               Custom
@@ -500,7 +500,7 @@ export function AddExpenseSheet({
           {/* Mode-specific panels */}
           {splitMode === 'equal' && (
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] text-secondary-light dark:text-secondary-dark">
+              <span className="text-[11px] text-white/70">
                 Split equally among ({equalSplitPersonIds.length}):
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -519,7 +519,7 @@ export function AddExpenseSheet({
                       className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                         included
                           ? 'bg-accent/15 border-accent text-accent font-bold'
-                          : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-muted-light dark:text-muted-dark opacity-60'
+                          : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/40 opacity-60'
                       }`}
                     >
                       {p.isMe ? 'Me' : p.name}
@@ -528,7 +528,7 @@ export function AddExpenseSheet({
                 })}
               </div>
               {amountPaise > 0 && equalSplitPersonIds.length > 0 && (
-                <p className="text-[11px] font-stat text-secondary-light dark:text-secondary-dark pt-1">
+                <p className="text-[11px] font-stat text-white/70 pt-1">
                   ≈ {formatPaiseToRupees(Math.round(amountPaise / equalSplitPersonIds.length))} per person
                 </p>
               )}
@@ -536,7 +536,7 @@ export function AddExpenseSheet({
           )}
 
           {splitMode === 'personal' && (
-            <p className="text-xs text-secondary-light dark:text-secondary-dark pt-1">
+            <p className="text-xs text-white/70 pt-1">
               Recorded as your personal expense only. Creates zero debt balance with anyone.
             </p>
           )}
@@ -544,7 +544,7 @@ export function AddExpenseSheet({
           {splitMode === 'custom' && (
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between text-xs font-stat">
-                <span className="text-secondary-light dark:text-secondary-dark">Assigned:</span>
+                <span className="text-white/70">Assigned:</span>
                 <span
                   className={`font-bold ${
                     customSplitSummary.isValid
@@ -554,7 +554,7 @@ export function AddExpenseSheet({
                 >
                   {customSplitSummary.isValid ? (
                     <span className="flex items-center gap-1">
-                      <CheckCircle2 size={13} /> Matches Total
+                      <CheckCircle weight="fill" size={13} /> Matches Total
                     </span>
                   ) : customSplitSummary.remainingPaise > 0 ? (
                     `${formatPaiseToRupees(customSplitSummary.remainingPaise)} remaining`
@@ -567,7 +567,7 @@ export function AddExpenseSheet({
               <div className="space-y-1.5">
                 {participants.map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-medium text-primary-light dark:text-primary-dark truncate flex-1">
+                    <span className="text-xs font-medium text-white truncate flex-1">
                       {p.isMe ? 'Me (You)' : p.name}
                     </span>
                     <div className="relative w-28 shrink-0">
@@ -580,7 +580,7 @@ export function AddExpenseSheet({
                           setCustomSharesInput((prev) => ({ ...prev, [p.id]: e.target.value }))
                         }
                         placeholder="0"
-                        className="w-full pl-6 pr-2.5 py-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--card-border)] text-xs font-stat font-bold text-primary-light dark:text-primary-dark text-right focus:outline-none focus:border-accent"
+                        className="w-full pl-6 pr-2.5 py-1 rounded-xl bg-white/[0.06] border border-white/10 text-xs font-stat font-bold text-white text-right focus:outline-none focus:border-accent"
                       />
                     </div>
                   </div>
@@ -593,12 +593,12 @@ export function AddExpenseSheet({
         {/* 6. Date, Time & Boundary Warning */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+            <label className="text-xs font-tag uppercase tracking-wider text-white/70">
               Spent At
             </label>
             {isDateOutsideOuting && (
               <span className="text-[10px] font-bold text-amber-500 dark:text-amber-400 flex items-center gap-1">
-                <AlertTriangle size={11} /> Outside outing dates
+                <WarningCircle weight="fill" size={11} /> Outside outing dates
               </span>
             )}
           </div>
@@ -606,13 +606,13 @@ export function AddExpenseSheet({
             type="datetime-local"
             value={spentAt}
             onChange={(e) => setSpentAt(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-accent"
+            className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-xs text-white focus:outline-none focus:border-accent"
           />
         </div>
 
         {/* 7. Payment Method */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-xs font-tag uppercase tracking-wider text-white/70 mb-1.5">
             Payment Method
           </label>
           <div className="grid grid-cols-4 gap-1.5">
@@ -627,7 +627,7 @@ export function AddExpenseSheet({
                 className={`py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
                   paymentMethod === m
                     ? 'bg-accent text-white border-accent shadow-xs'
-                    : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark'
+                    : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
                 }`}
               >
                 {m}
@@ -639,7 +639,7 @@ export function AddExpenseSheet({
         {/* 8. Receipts / Photos */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
+            <label className="text-xs font-tag uppercase tracking-wider text-white/70">
               Receipts / Bills ({pendingReceipts.length}/{MAX_RECEIPTS_PER_EXPENSE})
             </label>
             {isCompressing && (
@@ -673,7 +673,7 @@ export function AddExpenseSheet({
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               disabled={isCompressing || pendingReceipts.length >= MAX_RECEIPTS_PER_EXPENSE}
-              className="h-16 w-16 rounded-2xl border-2 border-dashed border-[var(--card-border)] hover:border-accent flex flex-col items-center justify-center gap-1 text-secondary-light dark:text-secondary-dark active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
             >
               <Camera size={16} />
               <span className="text-[9px] font-bold">Camera</span>
@@ -683,7 +683,7 @@ export function AddExpenseSheet({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isCompressing || pendingReceipts.length >= MAX_RECEIPTS_PER_EXPENSE}
-              className="h-16 w-16 rounded-2xl border-2 border-dashed border-[var(--card-border)] hover:border-accent flex flex-col items-center justify-center gap-1 text-secondary-light dark:text-secondary-dark active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
             >
               <ImageIcon size={16} />
               <span className="text-[9px] font-bold">Gallery</span>

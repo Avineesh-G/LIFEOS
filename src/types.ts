@@ -262,6 +262,28 @@ export interface AppData {
   driveFiles?: DriveFile[];
   driveStorage?: DriveStorageMetadata;
   _ownerUid?: string;
+
+  // Calendar Module
+  calendarEvents?: CalendarEvent[];
+}
+
+export type CalendarCategory = 'general' | 'study' | 'gym' | 'work' | 'personal' | 'meeting' | 'outing';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // 'yyyy-MM-dd'
+  startTime?: string; // 'HH:mm'
+  endTime?: string; // 'HH:mm'
+  isAllDay?: boolean;
+  category: CalendarCategory;
+  color?: string;
+  syncToTimeline?: boolean;
+  syncToTasks?: boolean;
+  notificationLeadMinutes?: number; // 0 (at start), 15, 20, 30, 60, 1440, or -1 (off)
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AiChatSession {

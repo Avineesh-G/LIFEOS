@@ -23,7 +23,7 @@
     --more-icon: #1B1C22;
   }
 
-  /* ── Fluid Liquid Glass Surfaces ── */
+  /* ── Fluid Liquid Glass Surfaces (Top Tier 1 Full-Fidelity) ── */
   .liquid-glass,
   .glass-surface {
     background: rgba(30, 30, 34, 0.70) !important;
@@ -47,6 +47,22 @@
     backdrop-filter: blur(28px) saturate(190%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
     box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* ── Hardware Tier Splitting: Non-Top-Tier (Tiers 2 & 3) Gated for Zero Reflow 120 FPS ── */
+  html:not(.tier-1) .liquid-glass,
+  html:not(.tier-1) .glass-surface,
+  html:not(.tier-1) .glass-sheet,
+  html:not(.tier-1) .floating-shell {
+    background: #1C1C1E !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  html:not(.tier-1) .glow-card,
+  html:not(.tier-1) .card-tonal {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
   }
 
   /* Custom smooth horizontal table scrollbar */

@@ -53,6 +53,7 @@ export const ScallopShape: React.FC<ScallopShapeProps> = React.memo(
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        shapeRendering="geometricPrecision"
         className={`shrink-0 select-none ${className}`}
         style={{
           ...style,
@@ -68,6 +69,7 @@ export const ScallopShape: React.FC<ScallopShapeProps> = React.memo(
           stroke={stroke}
           strokeWidth={strokeWidth}
           strokeDasharray={strokeDasharray}
+          shapeRendering="geometricPrecision"
           vectorEffect="non-scaling-stroke"
           style={pathStyle}
         />

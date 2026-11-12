@@ -31,6 +31,7 @@ const DEFAULT_DATA: AppData = {
   notes: [],
   moneyLent: [],
   aiChatHistory: [],
+  calendarEvents: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -185,6 +186,23 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     folderCount: merged.driveFolders.length,
     lastCalculatedAt: new Date().toISOString(),
   };
+
+    merged.calendarEvents = (merged.calendarEvents || []).map((e: any) => ({
+    id: e?.id || ('cal_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+    title: e?.title || 'Untitled Event',
+    description: e?.description || '',
+    date: e?.date || new Date().toISOString().slice(0, 10),
+    startTime: e?.startTime || undefined,
+    endTime: e?.endTime || undefined,
+    isAllDay: Boolean(e?.isAllDay),
+    category: e?.category || 'general',
+    color: e?.color || '#5E5CE6',
+    syncToTimeline: Boolean(e?.syncToTimeline),
+    syncToTasks: Boolean(e?.syncToTasks),
+    notificationLeadMinutes: typeof e?.notificationLeadMinutes === 'number' ? e.notificationLeadMinutes : 20,
+    createdAt: e?.createdAt || new Date().toISOString(),
+    updatedAt: e?.updatedAt || new Date().toISOString(),
+  }));
 
   merged.settings = {
     ...DEFAULT_DATA.settings,

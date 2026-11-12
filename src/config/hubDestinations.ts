@@ -28,6 +28,7 @@ import { AppSection } from '../theme/sectionSeedColors';
 export type HubFamily = 'gym' | 'nutrition' | 'study' | 'finance' | 'home' | 'system' | 'history' | 'outing' | 'shopping' | 'vault' | 'notes';
 
 export type DestinationId =
+  | 'calendar'
   | 'gym'
   | 'nutrition'
   | 'timetable'
@@ -73,7 +74,17 @@ export const HOME_DESTINATION: HomeDestination = {
  * Static typed array of all editable-pool destinations sorted cleanly by domain.
  */
 export const DESTINATIONS: HubDestination[] = [
-  // ── 1. Academic & Notes ──
+  // ── 1. Planning & Calendar ──
+  {
+    id: 'calendar',
+    label: 'Calendar',
+    route: '/calendar',
+    icon: CalendarDays,
+    family: 'home',
+    matchRoutes: ['/calendar'],
+  },
+
+  // ── 2. Academic & Notes ──
   {
     id: 'timetable',
     label: 'Timetable',
@@ -213,6 +224,7 @@ export const HUB_FAMILY_CONFIG: Record<string, typeof DEFAULT_FAMILY_SPEC> = {
 
 export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   home: 'Home',
+  calendar: 'Calendar',
   gym: 'Gym',
   nutrition: 'Nutrition',
   finance: 'Finance',

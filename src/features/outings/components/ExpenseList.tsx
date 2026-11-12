@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Receipt, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { Receipt, PencilSimple, Trash, DotsThreeVertical } from '@phosphor-icons/react';
 import { OUTING_CATEGORIES } from '../constants';
 import { formatPaiseToRupees } from '../utils/calculations';
 import { triggerHaptic } from '../../../utils/haptics';
@@ -78,14 +78,14 @@ export function ExpenseList({
 
   if (expenses.length === 0) {
     return (
-      <div className="p-8 rounded-[28px] liquid-glass border border-[var(--card-border)] text-center space-y-2 select-none">
+      <div className="p-8 rounded-[28px] liquid-glass border border-white/10 text-center space-y-2 select-none">
         <div className="w-12 h-12 rounded-full bg-accent/10 text-accent mx-auto flex items-center justify-center">
           <Receipt size={24} />
         </div>
-        <h4 className="text-sm font-heading font-bold text-primary-light dark:text-primary-dark">
+        <h4 className="text-sm font-heading font-bold text-white">
           No Expenses Recorded Yet
         </h4>
-        <p className="text-xs text-secondary-light dark:text-secondary-dark max-w-xs mx-auto">
+        <p className="text-xs text-white/70 max-w-xs mx-auto">
           Tap "+ Add Expense" above to record outing spending, receipts, and splits.
         </p>
       </div>
@@ -98,16 +98,16 @@ export function ExpenseList({
         <div key={group.dateKey} className="space-y-2">
           {/* Day Group Header */}
           <div className="flex items-center justify-between px-1 text-xs">
-            <span className="font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark font-bold">
+            <span className="font-tag uppercase tracking-wider text-white/70 font-bold">
               {group.dateDisplay}
             </span>
-            <span className="font-stat font-bold text-primary-light dark:text-primary-dark">
+            <span className="font-stat font-bold text-white">
               {formatPaiseToRupees(group.dayTotal)}
             </span>
           </div>
 
           {/* Expense Rows for Day */}
-          <div className="rounded-[24px] liquid-glass border border-[var(--card-border)] divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
+          <div className="rounded-[24px] liquid-glass border border-white/10 divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
             {group.items.map((exp) => {
               const meta = OUTING_CATEGORIES.find((c) => c.label === exp.category);
               const Icon = meta?.icon || Receipt;
@@ -134,7 +134,7 @@ export function ExpenseList({
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <h5 className="text-sm font-bold text-primary-light dark:text-primary-dark truncate">
+                        <h5 className="text-sm font-bold text-white truncate">
                           {exp.title}
                         </h5>
                         {hasReceipts && (
@@ -148,7 +148,7 @@ export function ExpenseList({
                         )}
                       </div>
 
-                      <p className="text-[11px] text-secondary-light dark:text-secondary-dark truncate mt-0.5">
+                      <p className="text-[11px] text-white/70 truncate mt-0.5">
                         <span>Paid by {payerName}</span>
                         <span className="opacity-40 mx-1.5">•</span>
                         <span className="capitalize">
@@ -164,7 +164,7 @@ export function ExpenseList({
 
                   {/* Right: Amount & Actions */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm font-stat font-bold text-primary-light dark:text-primary-dark">
+                    <span className="text-sm font-stat font-bold text-white">
                       {formatPaiseToRupees(exp.amount)}
                     </span>
 
@@ -175,10 +175,10 @@ export function ExpenseList({
                         triggerHaptic('selection');
                         onDeleteExpense(exp.id);
                       }}
-                      className="p-1.5 rounded-full text-secondary-light dark:text-secondary-dark hover:text-rose-500 active:scale-90 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      className="p-1.5 rounded-full text-white/70 hover:text-rose-500 active:scale-90 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
                       title="Delete expense"
                     >
-                      <Trash2 size={14} />
+                      <Trash weight="duotone" size={14} />
                     </button>
                   </div>
                 </div>

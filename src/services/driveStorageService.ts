@@ -63,7 +63,7 @@ export async function generateImageThumbnail(file: File): Promise<string | null>
         img.onload = () => {
           try {
             const canvas = document.createElement('canvas');
-            const MAX_DIM = 160;
+            const MAX_DIM = 400; // Crisp on high-DPI retina mobile screens
             let width = img.width;
             let height = img.height;
 
@@ -83,8 +83,10 @@ export async function generateImageThumbnail(file: File): Promise<string | null>
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.7));
+              resolve(canvas.toDataURL('image/jpeg', 0.85));
               return;
             }
           } catch {}
@@ -249,6 +251,14 @@ export async function uploadDriveFile(
       finalDownloadUrl = localBlobUrl;
     } finally {
       if (progressTimer) clearInterval(progressTimer);
+    }
+  } else {
+    // Offline or local storage mode: smoothly tick through 45%, 70%, 90% so the user sees continuous live progression
+    for (const step of [45, 70, 90]) {
+      if (onProgress) {
+        onProgress(step, Math.round(file.size * (step / 100)), file.size);
+      }
+      await new Promise((r) => setTimeout(r, 80));
     }
   }
 

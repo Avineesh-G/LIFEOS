@@ -14,6 +14,7 @@ export {
   Waveform,
   CalendarDots,
   CalendarCheck,
+  CalendarBlank,
   CheckCircle,
   CheckSquare,
   Square,

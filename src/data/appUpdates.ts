@@ -14,6 +14,7 @@ export interface AppUpdate {
   summary: string;
   points: string[];
   contactEmails: string[];
+  developerGithub?: string;
 }
 
 export const OFFICIAL_DEVELOPER_EMAILS = [
@@ -21,7 +22,31 @@ export const OFFICIAL_DEVELOPER_EMAILS = [
   'avineeshgujjeti@outlook.com',
 ];
 
+export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
+
 export const APP_UPDATES: AppUpdate[] = [
+  {
+    id: 'update-v3-3-7-liquid-calendar-notifications',
+    category: 'Calendar & Liquid UI',
+    icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
+    title: 'Professional Calendar & Liquid Design',
+    dateTime: 'Nov 12 • 12:30 PM',
+    fullDateTime: 'Thursday, Nov 12, 2026 • 12:30 PM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#5E5CE6]',
+    summary: 'Professional Apple/Google calendar suite, Liquid Design color typography, smart 30-min nutrition nudges, morning/evening gym alerts, and Outings glass redesign.',
+    points: [
+      'Apple & Google Calendar Engine: Multi-view calendar suite featuring full Month grid, 24-hour hourly Time Grid with live NOW indicator, and Agenda schedule feed.',
+      'Header Quick Calendar: Added calendar button to top-right header capsule opening a floating popup for instant timeline inspection and quick adds.',
+      'Liquid Design Color Evolution: Color strictly lives on words, numbers, and glyphs with translucent liquid droplets, eliminating heavy solid background blobs.',
+      'Smart Nutrition Nudges: Automated 30-minute meal entry alerts throughout daytime hours (8:00 AM – 9:30 PM) that automatically mute once food is logged.',
+      'Morning & Evening Gym Alarms: Dedicated 8:00 AM preparation and 6:00 PM wrap-up workout reminders that mute as soon as workout sets are logged.',
+      'Outings Liquid Glass Redesign: Translucent glass controls, high-contrast inputs, and clean typography matching core LifeOS liquid styling.',
+      'Drive Upload Progress Ticker: Smooth continuous progress count from 5% to 100% and optimized image preview sizing preventing UI collisions.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
   {
     id: 'update-tenant-isolation-drive-polish',
     category: 'Tenant Security & Drive',
@@ -29,7 +54,7 @@ export const APP_UPDATES: AppUpdate[] = [
     title: 'Tenant Isolation & Drive Upgrades',
     dateTime: 'Nov 8 • 01:30 PM',
     fullDateTime: 'Sunday, Nov 8, 2026 • 01:30 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.6',
     colorClass: 'text-[#30D158]',
     summary: 'Airtight multi-tenant user data isolation, continuous Drive upload percentage ticker, burgundy folder color accents, and precision notification dispatch.',
     points: [
@@ -40,6 +65,7 @@ export const APP_UPDATES: AppUpdate[] = [
       'Precision Event Alarms: Enhanced Android exact alarm scheduling with prompt notifications 20 minutes before events and starting reminders.',
     ],
     contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
   },
   {
     id: 'update-drive-docs-ai-inspector',

@@ -1,11 +1,13 @@
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import type { Task, TimetableBlock } from '../types';
+import type { Task, TimetableBlock, CalendarEvent, NutritionLog, WorkoutLog, WorkoutPlan } from '../types';
 
 export const TIMETABLE_CHANNEL_ID = 'lifeos_timetable';
 export const TASKS_CHANNEL_ID = 'lifeos_tasks';
 export const NUTRITION_CHANNEL_ID = 'lifeos_nutrition';
 export const STUDY_CHANNEL_ID = 'lifeos_study';
+export const GYM_CHANNEL_ID = 'lifeos_gym';
+export const CALENDAR_CHANNEL_ID = 'lifeos_calendar';
 
 export const NOTIFICATION_ICON = 'ic_stat_lifeos';
 export const NOTIFICATION_COLOR = '#6366F1';
@@ -58,6 +60,28 @@ async function ensureNotificationChannels() {
       vibration: false,
       lights: false,
       lightColor: '#6366F1',
+    });
+
+        await LocalNotifications.createChannel({
+      id: GYM_CHANNEL_ID,
+      name: 'Gym & Workout Reminders',
+      description: 'Morning and evening reminders to log your daily workout sessions',
+      importance: 5,
+      visibility: 1,
+      vibration: true,
+      lights: true,
+      lightColor: '#30D158',
+    });
+
+    await LocalNotifications.createChannel({
+      id: CALENDAR_CHANNEL_ID,
+      name: 'Calendar & Event Alerts',
+      description: 'Precise reminders for scheduled events and meetings',
+      importance: 5,
+      visibility: 1,
+      vibration: true,
+      lights: true,
+      lightColor: '#5E5CE6',
     });
 
     channelCreated = true;
@@ -522,6 +546,280 @@ export async function syncNutritionNotifications(): Promise<number> {
  * - 20 minutes before event start
  * - 1 minute after event start
  */
+/**
+ * Schedules interval reminders every 30 minutes during waking hours (8:00 AM - 9:30 PM)
+ * IF the user has not logged any meal items today.
+ * If user has logged meals today, ALL pending nutrition nudges are cancelled!
+ */
+export async function syncNutritionNudgeNotifications(nutritionLogs?: NutritionLog[]): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) return 0;
+
+  await ensureNotificationChannels();
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    const nudgeNotifications = pending.notifications.filter(n =>
+      n.extra?.type === 'nutrition_nudge'
+    );
+    if (nudgeNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: nudgeNotifications });
+    }
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Check if user has logged any meal items today
+    const todayLog = (nutritionLogs || []).find(l => l.date === todayStr);
+    const hasLoggedFoodToday = Boolean(
+      todayLog &&
+      Array.isArray(todayLog.mealsEaten) &&
+      todayLog.mealsEaten.some(m => Array.isArray(m.items) && m.items.length > 0)
+    );
+
+    // If user has already logged food today, DO NOT send reminder messages!
+    if (hasLoggedFoodToday) {
+      return 0;
+    }
+
+    // Schedule 30-minute interval nudges for remainder of active day (8:00 AM to 9:30 PM)
+    const notificationsToSchedule: any[] = [];
+    const endOfDay = new Date(now);
+    endOfDay.setHours(21, 30, 0, 0);
+
+    // Start from next 30-minute slot
+    let nextSlot = new Date(now.getTime() + 30 * 60 * 1000);
+    // Align to nearest 30m boundary
+    const minutes = nextSlot.getMinutes();
+    nextSlot.setMinutes(minutes < 30 ? 30 : 0, 0, 0);
+    if (minutes >= 30) {
+      nextSlot.setHours(nextSlot.getHours() + 1);
+    }
+
+    let count = 0;
+    while (nextSlot.getTime() <= endOfDay.getTime() && count < 16) {
+      if (nextSlot.getHours() >= 8 && nextSlot.getTime() > now.getTime() + 60 * 1000) {
+        const timeLabel = nextSlot.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        const nudgeId = hashStringToInt(`nutri_nudge_${todayStr}_${nextSlot.getTime()}`);
+
+        notificationsToSchedule.push({
+          id: nudgeId,
+          title: 'Nutrition Entry Reminder',
+          body: `Have you eaten? You haven't logged any meals for today yet. Tap to track your mess or snack items (${timeLabel}).`,
+          channelId: NUTRITION_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#F59E0B',
+          isExactNotification: true,
+          schedule: { at: new Date(nextSlot), allowWhileIdle: true },
+          extra: {
+            type: 'nutrition_nudge',
+            date: todayStr,
+            time: timeLabel,
+          },
+        });
+      }
+      nextSlot = new Date(nextSlot.getTime() + 30 * 60 * 1000);
+      count++;
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      const capped = notificationsToSchedule.slice(0, 16);
+      await LocalNotifications.schedule({ notifications: capped });
+      return capped.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing nutrition nudges:', err);
+  }
+  return 0;
+}
+
+/**
+ * Schedules daily Gym workout notifications:
+ * 1) Morning alert at 8:00 AM: Motivates the user to prepare for their workout.
+ * 2) Evening alert at 6:00 PM: Reminds the user to complete and log their daily workout if not done yet.
+ * If user has already logged a workout today, pending reminders are skipped / cancelled!
+ */
+export async function syncGymNotifications(
+  workoutLogs?: WorkoutLog[],
+  workoutPlans?: WorkoutPlan[]
+): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) return 0;
+
+  await ensureNotificationChannels();
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    const gymNotifications = pending.notifications.filter(n =>
+      n.extra?.type === 'gym'
+    );
+    if (gymNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: gymNotifications });
+    }
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Check if user has already logged a workout for today
+    const hasWorkoutToday = (workoutLogs || []).some(w => w.date === todayStr);
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const currentDayName = dayNames[now.getDay()];
+    const todayPlan = (workoutPlans || []).find(p => p.day?.toLowerCase() === currentDayName.toLowerCase());
+    const splitName = todayPlan?.type || 'Today\'s Workout';
+
+    const notificationsToSchedule: any[] = [];
+
+    // Schedule for next 3 days
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+      const targetDate = new Date(now);
+      targetDate.setDate(now.getDate() + dayOffset);
+      const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+      const isTodayOffset = dayOffset === 0;
+
+      // If today and already logged, skip today's notifications
+      if (isTodayOffset && hasWorkoutToday) {
+        continue;
+      }
+
+      // ── Morning Alert (8:00 AM) ──
+      const morningTime = new Date(targetDate);
+      morningTime.setHours(8, 0, 0, 0);
+      if (morningTime.getTime() > now.getTime() + 60 * 1000) {
+        const morningId = hashStringToInt(`gym_morn_${dateKey}`);
+        notificationsToSchedule.push({
+          id: morningId,
+          title: `Morning Gym Reminder: ${splitName}`,
+          body: 'Ready to train today? Check your routine and remember to log your sets in LifeOS.',
+          channelId: GYM_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#30D158',
+          isExactNotification: true,
+          schedule: { at: morningTime, allowWhileIdle: true },
+          extra: {
+            type: 'gym',
+            phase: 'morning',
+            date: dateKey,
+          },
+        });
+      }
+
+      // ── Evening Alert (6:00 PM) ──
+      const eveningTime = new Date(targetDate);
+      eveningTime.setHours(18, 0, 0, 0);
+      if (eveningTime.getTime() > now.getTime() + 60 * 1000) {
+        const eveningId = hashStringToInt(`gym_eve_${dateKey}`);
+        notificationsToSchedule.push({
+          id: eveningId,
+          title: 'Evening Gym Reminder',
+          body: `Haven't logged your workout today? Keep your consistency alive—log your ${splitName} session.`,
+          channelId: GYM_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#30D158',
+          isExactNotification: true,
+          schedule: { at: eveningTime, allowWhileIdle: true },
+          extra: {
+            type: 'gym',
+            phase: 'evening',
+            date: dateKey,
+          },
+        });
+      }
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      await LocalNotifications.schedule({ notifications: notificationsToSchedule });
+      return notificationsToSchedule.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing gym notifications:', err);
+  }
+  return 0;
+}
+
+/**
+ * Schedules precision notifications for Calendar Events based on user lead time
+ * (Default: 20 minutes before, or customized by user).
+ */
+export async function syncCalendarNotifications(events: CalendarEvent[]): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) return 0;
+
+  await ensureNotificationChannels();
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    const calendarNotifications = pending.notifications.filter(n =>
+      n.extra?.type === 'calendar'
+    );
+    if (calendarNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: calendarNotifications });
+    }
+
+    const now = new Date();
+    const notificationsToSchedule: any[] = [];
+
+    for (const event of events) {
+      if (!event.date) continue;
+      // If notification explicitly disabled (-1), skip
+      if (event.notificationLeadMinutes === -1) continue;
+
+      const leadMinutes = typeof event.notificationLeadMinutes === 'number' ? event.notificationLeadMinutes : 20;
+      const [year, month, day] = event.date.split('-').map(Number);
+      if (isNaN(year) || isNaN(month) || isNaN(day)) continue;
+
+      let hours = 9;
+      let minutes = 0;
+      if (event.startTime) {
+        const [h, m] = event.startTime.split(':').map(Number);
+        if (!isNaN(h) && !isNaN(m)) {
+          hours = h;
+          minutes = m;
+        }
+      }
+
+      const eventDateTime = new Date(year, month - 1, day, hours, minutes, 0);
+
+      // Trigger time based on lead minutes
+      const triggerTime = new Date(eventDateTime.getTime() - leadMinutes * 60 * 1000);
+      if (triggerTime.getTime() > now.getTime() + 15 * 1000) {
+        const notifId = hashStringToInt(`cal_event_${event.id}_${eventDateTime.getTime()}`);
+        let bodyText = leadMinutes > 0
+          ? `Starts in ${leadMinutes}m at ${event.startTime || '9:00 AM'}`
+          : `Starting now at ${event.startTime || '9:00 AM'}`;
+        if (event.description) bodyText += ` • ${event.description}`;
+
+        notificationsToSchedule.push({
+          id: notifId,
+          title: `Calendar: ${event.title}`,
+          body: bodyText,
+          channelId: CALENDAR_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: event.color || '#5E5CE6',
+          isExactNotification: true,
+          schedule: { at: triggerTime, allowWhileIdle: true },
+          extra: {
+            type: 'calendar',
+            eventId: event.id,
+            category: event.category,
+          },
+        });
+      }
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      const capped = notificationsToSchedule.slice(0, 48);
+      await LocalNotifications.schedule({ notifications: capped });
+      return capped.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing calendar notifications:', err);
+  }
+  return 0;
+}
+
 export async function syncAllNotifications(data?: any): Promise<{
   timetableCount: number;
   taskCount: number;
@@ -539,6 +837,11 @@ export async function syncAllNotifications(data?: any): Promise<{
   const timetableCount = data.timetable ? await syncTimetableNotifications(data.timetable) : 0;
   const taskCount = data.tasks ? await syncTaskNotifications(data.tasks) : 0;
   const nutritionCount = await syncNutritionNotifications();
+  await syncNutritionNudgeNotifications(data.nutritionLogs);
+  await syncGymNotifications(data.workoutLogs, data.workoutPlans);
+  if (Array.isArray(data.calendarEvents)) {
+    await syncCalendarNotifications(data.calendarEvents);
+  }
 
   return { timetableCount, taskCount, nutritionCount };
 }

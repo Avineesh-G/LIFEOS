@@ -27,6 +27,7 @@ import {
 
 const SECTION_TO_HUB_FAMILY: Record<AppSection, HubFamily> = {
   home: 'home',
+  calendar: 'home',
   gym: 'gym',
   nutrition: 'nutrition',
   study: 'study',

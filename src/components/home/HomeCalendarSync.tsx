@@ -13,6 +13,7 @@ import {
   isToday,
 } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   CaretLeft,
   CaretRight,
@@ -23,7 +24,8 @@ import {
   MapPin,
   Plus,
   Clock,
-} from '../../ui/tokens/icons';
+  ArrowRight,
+} from '@phosphor-icons/react';
 import { triggerHaptic } from '../../utils/haptics';
 import { MOTION_SPRINGS } from '../../ui/tokens/motion';
 import { getOutings } from '../../features/outings/storage/outingsIdb';
@@ -36,6 +38,7 @@ export interface HomeCalendarSyncProps {
 }
 
 export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [outings, setOutings] = useState<Outing[]>([]);
@@ -72,6 +75,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
     const map = new Map<
       string,
       {
+        events: any[];
         tasks: Task[];
         classes: TimetableBlock[];
         outings: Outing[];
@@ -79,11 +83,20 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
       }
     >();
 
+    // Index Calendar Events
+    (data.calendarEvents || []).forEach((ev) => {
+      if (ev.date) {
+        const entry = map.get(ev.date) || { events: [], tasks: [], classes: [], outings: [], hasWorkout: false };
+        entry.events.push(ev);
+        map.set(ev.date, entry);
+      }
+    });
+
     // Index Tasks
     (data.tasks || []).forEach((t) => {
       const d = t.dueDate || t.date;
       if (d) {
-        const entry = map.get(d) || { tasks: [], classes: [], outings: [], hasWorkout: false };
+        const entry = map.get(d) || { events: [], tasks: [], classes: [], outings: [], hasWorkout: false };
         entry.tasks.push(t);
         map.set(d, entry);
       }
@@ -93,7 +106,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
     (outings || []).forEach((o) => {
       const d = o.startDate ? o.startDate.slice(0, 10) : '';
       if (d) {
-        const entry = map.get(d) || { tasks: [], classes: [], outings: [], hasWorkout: false };
+        const entry = map.get(d) || { events: [], tasks: [], classes: [], outings: [], hasWorkout: false };
         entry.outings.push(o);
         map.set(d, entry);
       }
@@ -102,14 +115,14 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
     // Index Workouts
     (data.workoutLogs || []).forEach((w) => {
       if (w.date) {
-        const entry = map.get(w.date) || { tasks: [], classes: [], outings: [], hasWorkout: false };
+        const entry = map.get(w.date) || { events: [], tasks: [], classes: [], outings: [], hasWorkout: false };
         entry.hasWorkout = true;
         map.set(w.date, entry);
       }
     });
 
     return map;
-  }, [data.tasks, data.workoutLogs, outings]);
+  }, [data.calendarEvents, data.tasks, data.workoutLogs, outings]);
 
   // Classes for the selected day of week
   const selectedDayClasses = useMemo(() => {
@@ -117,6 +130,11 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
       (b) => b.day?.toLowerCase() === selectedDayName.toLowerCase()
     );
   }, [data.timetable, selectedDayName]);
+
+  // Calendar Events for the selected day
+  const selectedDayEvents = useMemo(() => {
+    return (data.calendarEvents || []).filter((e) => e.date === selectedDateStr);
+  }, [data.calendarEvents, selectedDateStr]);
 
   // Tasks for the selected day
   const selectedDayTasks = useMemo(() => {
@@ -186,6 +204,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
   };
 
   const totalItemsCount =
+    selectedDayEvents.length +
     selectedDayTasks.length +
     selectedDayClasses.length +
     selectedDayOutings.length +
@@ -209,15 +228,28 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
           </div>
         </div>
 
-        {!isToday(selectedDate) && (
-          <motion.button
-            whileTap={{ scale: 0.94 }}
-            onClick={handleGoToday}
-            className="px-2.5 py-1 rounded-full glass-nav nav-rim-light text-[11px] font-semibold text-[#0A84FF] active:bg-white/10"
+        <div className="flex items-center gap-1.5">
+          {!isToday(selectedDate) && (
+            <button
+              type="button"
+              onClick={handleGoToday}
+              className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-semibold text-white/80 hover:text-white active:scale-95 transition-all cursor-pointer"
+            >
+              Today
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('light');
+              navigate('/calendar');
+            }}
+            className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#5E5CE6]/20 border border-[#5E5CE6]/35 text-[11px] font-bold text-[#A5A3FF] hover:bg-[#5E5CE6]/30 active:scale-95 transition-all cursor-pointer"
           >
-            Today
-          </motion.button>
-        )}
+            <span>Full Calendar</span>
+            <ArrowRight size={12} weight="bold" />
+          </button>
+        </div>
       </div>
 
       {/* ── Calendar Liquid Chassis ── */}
@@ -303,8 +335,6 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                       backgroundColor: 'rgba(255, 255, 255, 0.08)',
                       border: '1px solid rgba(255, 255, 255, 0.12)',
                       boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.6)',
-                      backdropFilter: 'blur(8px)',
-                      WebkitBackdropFilter: 'blur(8px)',
                     }}
                     transition={MOTION_SPRINGS.snappy}
                   />
@@ -325,8 +355,11 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
 
                 {/* Sync Event Multi-Dots */}
                 <div className="flex items-center justify-center gap-0.5 mt-1 h-1.5">
+                  {syncEntry && syncEntry.events && syncEntry.events.length > 0 && (
+                    <span className="w-1 h-1 rounded-full bg-[#5E5CE6]" />
+                  )}
                   {hasTasks && <span className="w-1 h-1 rounded-full bg-[#0A84FF]" />}
-                  {hasClasses && <span className="w-1 h-1 rounded-full bg-[#5E5CE6]" />}
+                  {hasClasses && <span className="w-1 h-1 rounded-full bg-[#BF5AF2]" />}
                   {hasOutings && <span className="w-1 h-1 rounded-full bg-[#30D158]" />}
                   {hasWorkout && <span className="w-1 h-1 rounded-full bg-[#FF9F0A]" />}
                 </div>
@@ -418,6 +451,40 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
             </div>
           ) : (
             <>
+              {/* Calendar Events */}
+              {selectedDayEvents.map((ev) => (
+                <div
+                  key={ev.id}
+                  onClick={() => navigate('/calendar')}
+                  className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#202024] active:scale-[0.99] transition-all select-none"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: ev.color || '#5E5CE6' }}
+                    />
+                    <div className="min-w-0">
+                      <div className="text-[13.5px] font-semibold text-white leading-tight truncate">
+                        {ev.title}
+                      </div>
+                      <div className="text-[11.5px] text-[rgba(235,235,245,0.55)] flex items-center gap-2 mt-0.5 font-mono">
+                        <span>{ev.isAllDay ? 'All-Day' : `${ev.startTime || '10:00'} – ${ev.endTime || '11:00'}`}</span>
+                        {ev.description && <span className="truncate">· {ev.description}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
+                    style={{
+                      backgroundColor: `${ev.color || '#5E5CE6'}20`,
+                      color: ev.color || '#5E5CE6',
+                    }}
+                  >
+                    {ev.category}
+                  </span>
+                </div>
+              ))}
+
               {/* Tasks */}
               {selectedDayTasks.map((t) => (
                 <div

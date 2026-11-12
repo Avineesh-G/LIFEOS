@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { X, AlertTriangle, Check } from 'lucide-react';
+import { X, Warning, Check } from '@phosphor-icons/react';
 import { triggerHaptic } from '../../utils/haptics';
 import { registerDismissible } from '../../utils/backNavigation';
 import { useModalLayer } from '../../hooks/useModalLayer';
@@ -168,7 +168,7 @@ export default function FloatingPopup({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={handleAttemptClose}
-            className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[140] cursor-pointer pointer-events-auto touch-none gpu-composited"
+            className="fixed inset-0 bg-black/75 z-[140] cursor-pointer pointer-events-auto touch-none gpu-composited"
             aria-hidden="true"
           />
 
@@ -209,7 +209,7 @@ export default function FloatingPopup({
                 setIsExpanded(true);
               }
             } : undefined}
-            className={`fixed z-[150] left-2 right-2 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-16px)] sm:w-[calc(100vw-28px)] max-w-full ${maxWidth} pointer-events-auto bg-[var(--md-surface-container-high)] text-[var(--md-on-surface)] border border-[var(--md-outline-variant)] shadow-m3-elevation-3 rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-150 gpu-composited will-change-transform`}
+            className={`fixed z-[150] left-2 right-2 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-16px)] sm:w-[calc(100vw-28px)] max-w-full ${maxWidth} pointer-events-auto bg-[#1C1C1E] text-white border border-white/10 shadow-2xl rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-150 gpu-composited will-change-transform`}
             style={{
               bottom: keyboardOffset > 0
                 ? `calc(${keyboardOffset}px + 8px)`
@@ -233,15 +233,15 @@ export default function FloatingPopup({
               }}
               className="w-full py-2 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
-              <div className="w-9 h-1 rounded-full bg-[var(--md-outline-variant)] hover:bg-[var(--md-primary)] transition-colors" />
+              <div className="w-9 h-1 rounded-full bg-white/20 hover:bg-white/40 transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
             {(title || icon) && (
-              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-black/5 dark:border-white/5 shrink-0 select-none">
+              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-white/10 shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {icon && (
-                    <div className="w-8 h-8 rounded-xl bg-[var(--md-primary-container)] text-[var(--md-on-primary-container)] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0">
                       {icon}
                     </div>
                   )}
@@ -249,13 +249,13 @@ export default function FloatingPopup({
                     {title && (
                       <h2
                         id="popup-title"
-                        className="text-base font-bold text-[var(--md-on-surface)] tracking-tight leading-tight truncate"
+                        className="text-base font-bold text-white tracking-tight leading-tight truncate"
                       >
                         {title}
                       </h2>
                     )}
                     {subtitle && (
-                      <p className="text-[11px] text-[var(--md-on-surface-variant)] font-mono truncate">
+                      <p className="text-[11px] text-white/60 font-mono truncate">
                         {subtitle}
                       </p>
                     )}
@@ -265,7 +265,7 @@ export default function FloatingPopup({
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="w-8 h-8 rounded-full bg-[var(--md-surface-container-highest)] flex items-center justify-center text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] active:scale-95 transition-all shrink-0"
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-all shrink-0"
                   aria-label="Close dialog"
                 >
                   <X size={16} />
@@ -286,11 +286,11 @@ export default function FloatingPopup({
 
             {/* Footer Actions (for form variant if onSave or cancel provided) */}
             {variant === 'form' && onSave && (
-              <div className="p-3.5 sm:p-4 border-t border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 border-t border-white/10 bg-[#161618] flex items-center justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="px-4 py-2.5 rounded-2xl bg-[var(--md-surface-container-highest)] text-xs font-bold text-[var(--md-on-surface)] hover:opacity-90 active:scale-95 transition-all"
+                  className="px-4 py-2.5 rounded-2xl bg-white/10 text-xs font-bold text-white/80 hover:text-white hover:opacity-90 active:scale-95 transition-all"
                 >
                   {cancelLabel}
                 </button>
@@ -301,7 +301,7 @@ export default function FloatingPopup({
                     onSave();
                   }}
                   disabled={saveDisabled || saveLoading}
-                  className="px-5 py-2.5 rounded-2xl bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
+                  className="px-5 py-2.5 rounded-2xl bg-[#0A84FF] text-white text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
                 >
                   {saveLoading ? (
                     <span>Saving...</span>
@@ -324,10 +324,10 @@ export default function FloatingPopup({
                   initial={{ scale: 0.92, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.92, opacity: 0 }}
-                  className="w-full max-w-xs bg-slate-900 border border-amber-500/30 rounded-3xl p-4 space-y-3 text-white shadow-2xl"
+                  className="w-full max-w-xs bg-[#1C1C1E] border border-amber-500/30 rounded-3xl p-4 space-y-3 text-white shadow-2xl"
                 >
                   <div className="flex items-center gap-2.5 text-amber-400">
-                    <AlertTriangle size={20} />
+                    <Warning size={20} weight="duotone" />
                     <h3 className="text-sm font-bold">Discard Unsaved Changes?</h3>
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">

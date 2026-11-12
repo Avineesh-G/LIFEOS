@@ -8,6 +8,7 @@ import { getActiveAccent, type ThemeAccent } from './themeColorManager.ts';
 
 export type AppSection =
   | 'home'
+  | 'calendar'
   | 'finance'
   | 'gym'
   | 'nutrition'
@@ -24,6 +25,7 @@ export type AppSection =
 
 export function getSectionFromPathname(pathname: string): AppSection {
   const p = pathname.toLowerCase();
+  if (p.startsWith('/calendar')) return 'calendar';
   if (p.startsWith('/gym')) return 'gym';
   if (p.startsWith('/nutrition')) return 'nutrition';
   if (p.startsWith('/spending') || p.startsWith('/finance')) return 'finance';
@@ -90,6 +92,7 @@ export type BlobPosition = 'top-right' | 'bottom-left' | 'top-left' | 'bottom-ri
 
 export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   home: 'top-right',
+  calendar: 'top-right',
   gym: 'bottom-left',
   finance: 'top-left',
   nutrition: 'bottom-right',

@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Image as ImageIcon, Trash2, X, ZoomIn, ZoomOut, ExternalLink } from 'lucide-react';
+import { Image as ImageIcon, Trash, X, MagnifyingGlassPlus, MagnifyingGlassMinus, ArrowSquareOut } from '@phosphor-icons/react';
 import { triggerHaptic } from '../../../utils/haptics';
 import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
 import type { OutingReceiptRecord, OutingExpense } from '../types';
@@ -48,14 +48,14 @@ export function ReceiptsGrid({
 
   if (receipts.length === 0) {
     return (
-      <div className="p-8 rounded-[28px] liquid-glass border border-[var(--card-border)] text-center space-y-2 select-none">
+      <div className="p-8 rounded-[28px] liquid-glass border border-white/10 text-center space-y-2 select-none">
         <div className="w-12 h-12 rounded-full bg-accent/10 text-accent mx-auto flex items-center justify-center">
           <ImageIcon size={24} />
         </div>
-        <h4 className="text-sm font-heading font-bold text-primary-light dark:text-primary-dark">
+        <h4 className="text-sm font-heading font-bold text-white">
           No Receipts Attached
         </h4>
-        <p className="text-xs text-secondary-light dark:text-secondary-dark max-w-xs mx-auto">
+        <p className="text-xs text-white/70 max-w-xs mx-auto">
           Take photos or attach bills when recording expenses to view them in this gallery.
         </p>
       </div>
@@ -75,7 +75,7 @@ export function ReceiptsGrid({
                 triggerHaptic('light');
                 setSelectedReceipt(r);
               }}
-              className="aspect-square rounded-[20px] overflow-hidden border border-[var(--card-border)] bg-black/5 dark:bg-white/5 relative group active:scale-95 transition-transform cursor-pointer"
+              className="aspect-square rounded-[20px] overflow-hidden border border-white/10 bg-black/5 dark:bg-white/5 relative group active:scale-95 transition-transform cursor-pointer"
             >
               {thumbUrl ? (
                 <img
@@ -177,7 +177,7 @@ export function ReceiptViewerModal({
             disabled={zoomLevel <= 1}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
           >
-            <ZoomOut size={18} />
+            <MagnifyingGlassMinus weight="bold" size={18} />
           </button>
           <button
             type="button"
@@ -185,7 +185,7 @@ export function ReceiptViewerModal({
             disabled={zoomLevel >= 3}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
           >
-            <ZoomIn size={18} />
+            <MagnifyingGlassPlus weight="bold" size={18} />
           </button>
 
           {/* Delete */}
@@ -205,7 +205,7 @@ export function ReceiptViewerModal({
             className="p-2 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 active:scale-95 transition-all cursor-pointer"
             title="Delete receipt"
           >
-            <Trash2 size={18} />
+            <Trash weight="duotone" size={18} />
           </button>
 
           {/* Close */}
@@ -255,7 +255,7 @@ export function ReceiptViewerModal({
               className="px-3 py-1.5 rounded-full bg-accent text-white font-bold flex items-center gap-1 active:scale-95 transition-all"
             >
               <span>View Expense</span>
-              <ExternalLink size={12} />
+              <ArrowSquareOut weight="bold" size={12} />
             </button>
           )}
         </div>

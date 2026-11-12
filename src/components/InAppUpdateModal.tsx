@@ -11,8 +11,10 @@ import {
   ArrowClockwise, 
   X,
   DeviceMobile,
-  CircleNotch
+  CircleNotch,
+  GithubLogo,
 } from '@phosphor-icons/react';
+import { OFFICIAL_DEVELOPER_GITHUB } from '../data/appUpdates';
 import { 
   checkForAppUpdate, 
   startApkUpdate, 
@@ -493,12 +495,33 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     {remoteVersion?.releaseNotes || 'Optimized performance, updated natural glass interfaces, refined navigation, and stability improvements.'}
                   </p>
                 </div>
+                <a
+                  href={OFFICIAL_DEVELOPER_GITHUB}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <GithubLogo size={16} weight="duotone" className="text-white" />
+                    <span className="font-medium text-[11.5px]">GitHub: Avineesh-G/LIFEOS</span>
+                  </div>
+                  <ArrowRight size={12} weight="bold" className="text-white/40" />
+                </a>
               </div>
             ) : (
               <div className="space-y-3 text-center py-1">
                 <p className="text-xs text-white/60 leading-relaxed">
                   You are currently running the latest build of LifeOS with all features and optimizations enabled.
                 </p>
+                <a
+                  href={OFFICIAL_DEVELOPER_GITHUB}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-all cursor-pointer"
+                >
+                  <GithubLogo size={15} weight="duotone" className="text-white" />
+                  <span className="text-[11px]">View on GitHub</span>
+                </a>
               </div>
             )}
 

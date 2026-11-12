@@ -8,10 +8,21 @@
  * - Budget (optional) with "budget applies to: My share | Total cost" toggle
  * - Participants picker (name chips, add by typing, pick from saved, "Me" is fixed)
  * - Notes & status
+ * 
+ * Styled with LifeOS Dark Theme, crisp contrast, and Phosphor icons.
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, X, MapPin, Calendar, DollarSign, Users, AlertCircle, FileText } from 'lucide-react';
+import {
+  Plus,
+  X,
+  MapPin,
+  CalendarBlank,
+  Users,
+  WarningCircle,
+  NotePencil,
+  Compass,
+} from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { BottomSheet } from '../../../components/BottomSheet';
 import { parseRupeesToPaise } from '../utils/calculations';
@@ -132,59 +143,62 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
   };
 
   return (
-    <BottomSheet
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      <div className="space-y-4 pt-1 pb-6 select-none">
-        <div className="flex items-center justify-between pb-2 border-b border-border-light dark:border-border-dark">
-          <h2 className="text-lg font-heading font-bold text-primary-light dark:text-primary-dark">
-            {outingToEdit ? 'Edit Outing' : 'New Outing'}
-          </h2>
+    <BottomSheet isOpen={isOpen} onClose={onClose}>
+      <div className="space-y-4 pt-1 pb-6 select-none font-sans text-left">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#E11D48]/15 border border-[#E11D48]/25 flex items-center justify-center text-[#FB7185]">
+              <Compass size={18} weight="duotone" />
+            </div>
+            <h2 className="text-lg font-bold text-white tracking-tight">
+              {outingToEdit ? 'Edit Outing' : 'New Outing'}
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-secondary-light dark:text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-transform"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white/70 hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} weight="bold" />
           </button>
         </div>
 
         {error && (
-          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-2">
-            <AlertCircle size={14} className="shrink-0" />
+          <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <WarningCircle size={16} weight="fill" className="shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
 
         {/* 1. Name */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
-            Outing Name *
+          <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5">
+            Outing Name <span className="text-[#FB7185]">*</span>
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Goa Trip, Weekend Movies, Dinner with Friends"
-            className="w-full px-4 py-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm text-primary-light dark:text-primary-dark placeholder:text-muted-light dark:placeholder:text-muted-dark focus:outline-none focus:border-accent transition-colors"
+            className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-all font-sans"
             autoFocus={!outingToEdit}
           />
         </div>
 
         {/* 2. Place */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+          <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5">
             Place / Destination
           </label>
           <div className="relative">
-            <MapPin size={16} className="absolute left-3.5 top-3.5 text-accent opacity-70" />
+            <MapPin size={18} weight="duotone" className="absolute left-3.5 top-3.5 text-[#FB7185] pointer-events-none" />
             <input
               type="text"
               value={place}
               onChange={(e) => setPlace(e.target.value)}
               placeholder="e.g. North Goa, PVR Cinemas, Downtown Cafe"
-              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm text-primary-light dark:text-primary-dark placeholder:text-muted-light dark:placeholder:text-muted-dark focus:outline-none focus:border-accent transition-colors"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-all font-sans"
             />
           </div>
         </div>
@@ -192,65 +206,67 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
         {/* 3. Dates */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
-              Start Date
+            <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5 flex items-center gap-1.5">
+              <CalendarBlank size={14} weight="duotone" className="text-[#FB7185]" />
+              <span>Start Date</span>
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-accent transition-colors"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-all font-sans"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
-              End Date (Optional)
+            <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5 flex items-center gap-1.5">
+              <CalendarBlank size={14} weight="duotone" className="text-white/40" />
+              <span>End Date (Optional)</span>
             </label>
             <input
               type="date"
               value={endDate}
               min={startDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark focus:outline-none focus:border-accent transition-colors"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-all font-sans"
             />
           </div>
         </div>
 
         {/* 4. Budget & Basis */}
-        <div className="p-4 rounded-[22px] bg-black/[0.02] dark:bg-white/[0.02] border border-[var(--card-border)] space-y-3">
+        <div className="p-4 rounded-[22px] bg-white/[0.03] border border-white/10 space-y-3">
           <div>
-            <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+            <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5">
               Budget (₹, Optional)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-sm font-stat font-bold text-accent">₹</span>
+              <span className="absolute left-3.5 top-2.5 text-sm font-bold text-[#FB7185]">₹</span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={budgetInput}
                 onChange={(e) => setBudgetInput(e.target.value)}
                 placeholder="0"
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-sm font-stat font-bold text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent"
+                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 font-sans"
               />
             </div>
           </div>
 
           <div>
-            <span className="block text-[11px] font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+            <span className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">
               Budget applies to
             </span>
-            <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.04]">
+            <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white/[0.04] border border-white/10">
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic('selection');
                   setBudgetBasis('myShare');
                 }}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   budgetBasis === 'myShare'
-                    ? 'bg-accent text-white shadow-xs'
-                    : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
+                    ? 'bg-white/[0.10] border border-white/15 text-[#FB7185] shadow-sm'
+                    : 'text-white/50 hover:text-white'
                 }`}
               >
                 My Share (Default)
@@ -261,10 +277,10 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                   triggerHaptic('selection');
                   setBudgetBasis('totalCost');
                 }}
-                className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                   budgetBasis === 'totalCost'
-                    ? 'bg-accent text-white shadow-xs'
-                    : 'text-secondary-light dark:text-secondary-dark hover:text-primary-light'
+                    ? 'bg-white/[0.10] border border-white/15 text-[#FB7185] shadow-sm'
+                    : 'text-white/50 hover:text-white'
                 }`}
               >
                 Total Cost
@@ -276,10 +292,11 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
         {/* 5. Participants */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark">
-              Participants ({selectedPersonIds.length})
+            <label className="text-[11.5px] font-semibold text-white/70 tracking-wide flex items-center gap-1.5">
+              <Users size={14} weight="duotone" className="text-[#FB7185]" />
+              <span>Participants ({selectedPersonIds.length})</span>
             </label>
-            <span className="text-[10px] text-muted-light dark:text-muted-dark">
+            <span className="text-[11px] text-white/40">
               "Me" is always included
             </span>
           </div>
@@ -287,7 +304,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
           {/* Chips list */}
           <div className="flex flex-wrap gap-1.5 mb-2.5">
             {/* Me Chip (Fixed) */}
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-accent text-white shadow-xs flex items-center gap-1.5">
+            <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-white/[0.06] border border-[#FB7185]/40 text-[#FB7185] shadow-sm flex items-center gap-1.5">
               <span>Me (You)</span>
             </span>
 
@@ -301,14 +318,14 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                     key={p.id}
                     type="button"
                     onClick={() => togglePerson(p.id)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
                       selected
-                        ? 'bg-accent/15 border-accent text-accent font-bold'
-                        : 'bg-black/[0.02] dark:bg-white/[0.04] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark hover:border-accent/40'
+                        ? 'bg-white/[0.08] border-[#FB7185]/60 text-[#FB7185] font-bold shadow-sm'
+                        : 'bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20 hover:text-white'
                     }`}
                   >
                     <span>{p.name}</span>
-                    {selected && <X size={12} />}
+                    {selected && <X size={12} weight="bold" />}
                   </button>
                 );
               })}
@@ -327,24 +344,24 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                 }
               }}
               placeholder="Add friend's name..."
-              className="flex-1 px-3.5 py-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent"
+              className="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 font-sans"
             />
             <button
               type="button"
               onClick={handleAddCustomPerson}
               disabled={!newPersonName.trim()}
-              className="px-3 py-2 rounded-xl bg-accent text-white text-xs font-bold flex items-center gap-1 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              className="px-3.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-[#FB7185]/40 text-[#FB7185] text-xs font-bold flex items-center gap-1 active:scale-95 disabled:opacity-40 transition-all cursor-pointer shadow-sm"
             >
-              <Plus size={14} />
+              <Plus size={14} weight="bold" />
               <span>Add</span>
             </button>
           </div>
         </div>
 
-        {/* 6. Status */}
+        {/* 6. Status (Only in edit mode) */}
         {outingToEdit && (
           <div>
-            <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
+            <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5">
               Status
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -356,10 +373,10 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                     triggerHaptic('selection');
                     setStatus(s);
                   }}
-                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer ${
                     status === s
-                      ? 'bg-accent text-white border-accent shadow-xs'
-                      : 'bg-black/[0.02] dark:bg-white/[0.03] border-[var(--card-border)] text-secondary-light dark:text-secondary-dark'
+                      ? 'bg-white/[0.10] text-[#FB7185] border-[#FB7185]/60 shadow-sm'
+                      : 'bg-white/[0.03] border-white/10 text-white/50 hover:text-white'
                   }`}
                 >
                   {s}
@@ -371,24 +388,25 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
 
         {/* 7. Notes */}
         <div>
-          <label className="block text-xs font-tag uppercase tracking-wider text-secondary-light dark:text-secondary-dark mb-1.5">
-            Notes
+          <label className="block text-[11.5px] font-semibold text-white/70 tracking-wide mb-1.5 flex items-center gap-1.5">
+            <NotePencil size={14} weight="duotone" className="text-white/40" />
+            <span>Notes</span>
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder="Packing list, booking references, or general ideas..."
-            className="w-full px-3.5 py-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.04] border border-[var(--card-border)] text-xs text-primary-light dark:text-primary-dark placeholder:text-muted-light focus:outline-none focus:border-accent resize-none"
+            className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 resize-none font-sans"
           />
         </div>
 
         {/* Action Button */}
-        <div className="pt-4 pb-2">
+        <div className="pt-3 pb-1">
           <button
             type="button"
             onClick={handleSave}
-            className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-2xl bg-white/[0.10] hover:bg-white/[0.16] border border-[#FB7185]/50 text-[#FB7185] font-bold text-sm shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>{outingToEdit ? 'Save Changes' : 'Create Outing'}</span>
           </button>
