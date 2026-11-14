@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 76,
-  versionName: '3.3.9',
+  versionCode: 77,
+  versionName: '3.4.0',
   releaseDate: '2026-11-14',
   apkSize: '10.22 MB',
-  apkSizeBytes: 10720931,
-  releaseNotes: "LifeOS v3.3.9 (Build 76):\n• Split Sector Calorie Architecture: 5 meal sectors (Breakfast, Lunch, Snacks, Dinner, Night Canteen) with slot-based chromatic arcs and curved radial labels.\n• Fluid Droplet Navigation: Water droplet sliding pill indicator on the floating navigation bar with spring-physics transitions.\n• Auto-Expanding Chat Viewport: Multi-line responsive textarea in Luna AI and overflow-scrolling table/code layouts.\n• Borderless OLED Surfaces: Complete elimination of white card outlines across hero and dashboard cards for seamless dark aesthetics.\n• Automated Hydration Notifications: Periodic 30-minute smart hydration reminders without manual logging friction.",
+  apkSizeBytes: 10721259,
+  releaseNotes: "LifeOS v3.4.0 (Build 77):\n• Zero-Lag Compositor Engine: Completely eliminated dock backdrop blur for butter-smooth 60/120 FPS scrolling across all devices.\n• Hardware-Accelerated Calorie Ring: Precomputed SVG paths and removed SVG filters for 100% GPU rendering.\n• GPU Native TabBar Slider: Replaced layout projection with GPU-accelerated CSS translate3d spring transitions.\n• Mobile Viewport Meal Card Refinement: Streamlined actions and non-wrapping meal time intervals for perfect clearance on narrow screens.\n• Tier 1 Flagship OLED Polish: Ultra-deep ambient drop shadows and seamless borderless surfaces.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

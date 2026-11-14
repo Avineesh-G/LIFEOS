@@ -144,16 +144,13 @@
   transform: translateZ(0);
 }
 
-/* ── Floating Navigation Capsule ── */
+/* ── Floating Navigation Capsule (Compositor-Optimized: Zero Runtime Backdrop Blur) ── */
 .glass-nav {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(18, 18, 22, 0.90);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #141416;
+  border: none !important;
   box-shadow:
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.24),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
-    0 18px 44px -8px rgba(0, 0, 0, 0.90);
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 18px 44px -8px rgba(0, 0, 0, 0.95);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -162,13 +159,9 @@
 
 /* Grouped Toolbar Capsule */
 .glass-grouped-toolbar {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(22, 22, 26, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.18),
-    0 8px 24px -4px rgba(0, 0, 0, 0.75);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%), #18181C;
+  border: none !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.75);
   transform: translateZ(0);
   position: relative;
 }
@@ -188,29 +181,29 @@
 
 .tier-3 .glass-tile {
   background: #18181B !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7) !important;
 }
 
 .tier-3 .glass-row {
   background: #18181B !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
 }
 
 .tier-3 .glass-flat {
   background: #1F1F23 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
 }
 
 .tier-3 .glass-nav {
-  background: rgba(18, 18, 20, 0.96) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  background: #141416 !important;
+  border: none !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.85) !important;
 }
 
 .tier-3 .glass-grouped-toolbar {
   background: #1C1C20 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
 }
 
 /* TIER 2: Balanced Standard (Lean, zero-blur solid dark surface for 120 FPS) */
@@ -221,7 +214,7 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: #18181B !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -229,7 +222,7 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: #141416 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border: none !important;
 }
 
 .tier-2 .sheet-backdrop {
@@ -238,7 +231,7 @@
   background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pure Ambient Depth, No White Border Outlines) */
+/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pure Ambient Depth, No White Border Outlines, Zero Dock Blur) */
 .tier-1 .glass-card,
 .tier-1 .glass-hero {
   box-shadow: 0 14px 40px -8px rgba(0, 0, 0, 0.90) !important;
@@ -256,14 +249,17 @@
 }
 
 .tier-1 .glass-nav {
-  backdrop-filter: blur(20px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), #141416 !important;
+  border: none !important;
+  box-shadow: 0 18px 44px -8px rgba(0, 0, 0, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
 }
 
 .tier-1 .sheet-backdrop {
-  backdrop-filter: blur(10px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
 /* Edge Fades */

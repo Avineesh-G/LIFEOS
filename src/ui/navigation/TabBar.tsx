@@ -121,10 +121,22 @@ export function TabBar({
         )}
       </AnimatePresence>
 
-      {/* ── High-Intensity Liquid Glass Navigation Capsule ── */}
-      <div className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
+      {/* ── High-Intensity Liquid Glass Navigation Capsule (Compositor-Optimized) ── */}
+      <div className="h-[52px] px-2.5 rounded-full glass-nav shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
-        <div className="flex-1 flex items-center gap-0.5">
+        <div className="flex-1 flex items-center relative h-[42px]">
+          {/* Hardware-Accelerated Sliding Droplet Pill (Zero Layout Reflows) */}
+          <div
+            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0"
+            style={{
+              width: `${100 / Math.max(1, items.length)}%`,
+              transform: `translate3d(${Math.max(0, items.findIndex((t) => t.key === currentKey)) * 100}%, 0, 0)`,
+              transition: 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1)',
+              background: 'rgba(255, 255, 255, 0.09)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55)',
+            }}
+          />
+
           {items.map((tab) => {
             const isSelected = tab.key === currentKey;
             const tint = tab.tint || '#0A84FF';
@@ -141,7 +153,7 @@ export function TabBar({
                 onTouchEnd={handlePressEnd}
                 onTouchCancel={handlePressEnd}
                 onClick={() => handleTabClick(tab)}
-                className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1"
+                className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1 touch-manipulation"
                 style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.60)' }}
               >
                 {/* Icon */}
@@ -153,25 +165,6 @@ export function TabBar({
                 <span className="text-[9.5px] font-semibold tracking-tight truncate leading-none">
                   {tab.label}
                 </span>
-
-                {/* Liquid Active Droplet Thumb */}
-                {isSelected && (
-                  <motion.div
-                    layoutId="tabbar-liquid-droplet"
-                    className="absolute inset-0 rounded-full -z-10 pointer-events-none"
-                    style={{
-                      background: 'radial-gradient(ellipse at 50% 15%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.02) 100%)',
-                      border: '1.2px solid rgba(255, 255, 255, 0.38)',
-                      boxShadow: 'inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.52), inset 0 -1.5px 1.5px 0 rgba(255, 255, 255, 0.12), inset 0 0 12px 0 rgba(255, 255, 255, 0.06), 0 4px 16px 0 rgba(0, 0, 0, 0.65)',
-                    }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 380,
-                      damping: 28,
-                      mass: 0.85,
-                    }}
-                  />
-                )}
               </button>
             );
           })}

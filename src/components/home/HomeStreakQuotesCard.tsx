@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Badge } from '../../ui';
 import { getDailyQuotesStream, QuoteItem } from '../../data/quotes';
 
@@ -27,11 +27,28 @@ export default function HomeStreakQuotesCard({ streakDays }: HomeStreakQuotesCar
   // Duplicate the list for seamless infinite loop marquee animation
   const marqueeItems = useMemo(() => [...quotes, ...quotes], [quotes]);
 
+  // Pause marquee during active scroll to eliminate GPU composite overhead
+  useEffect(() => {
+    let scrollTimer: any = null;
+    const handleScroll = () => {
+      setIsPaused(true);
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        setIsPaused(false);
+      }, 180);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimer);
+    };
+  }, []);
+
   return (
     <div
       className="droplet-card px-4 py-3 sm:py-3.5 flex items-center gap-3.5 select-none overflow-hidden relative shadow-lg"
       style={{
-        boxShadow: 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px -4px rgba(0, 0, 0, 0.70)',
+        boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.75)',
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -46,15 +63,15 @@ export default function HomeStreakQuotesCard({ streakDays }: HomeStreakQuotesCar
       {/* ── Clean Specular Vertical Divider ── */}
       <div className="w-[1px] h-6 bg-gradient-to-b from-white/20 via-white/10 to-transparent shrink-0 select-none" />
 
-      {/* ── Right: Flowing Marquee of Quotes ── */}
+      {/* ── Right: Flowing Marquee of Quotes (GPU-Friendly Edge Fades, Zero mask-image Overhead) ── */}
       <div
         className="relative flex-1 overflow-hidden min-w-0"
-        style={{
-          maskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
-        }}
         aria-label="Daily Inspirational Quotes Stream"
       >
+        {/* Lightweight hardware-accelerated edge fades */}
+        <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-[#141416] to-transparent pointer-events-none z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-[#141416] to-transparent pointer-events-none z-10" />
+
         <div
           className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap"
           style={{

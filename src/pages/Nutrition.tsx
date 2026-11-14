@@ -619,10 +619,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 }}
               >
                 {/* Header Row */}
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-between gap-2 pb-1">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className="w-8 h-8 rounded-[10px] flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
                       style={{
                         backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : `${slot.color}22`,
                         color: isSkipped ? 'rgba(255, 255, 255, 0.4)' : slot.color,
@@ -630,44 +630,44 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     >
                       {slot.icon}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className={`text-[15px] font-bold tracking-tight ${
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className={`text-[15px] font-bold tracking-tight truncate ${
                           isSkipped ? 'text-white/60 line-through' : 'text-white'
                         }`}>
                           {slot.label}
                         </h3>
                         {isSkipped && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/25 uppercase tracking-wider">
+                          <span className="px-1.5 py-0.5 rounded-full text-[9.5px] font-bold bg-[#FF453A]/15 text-[#FF453A] uppercase tracking-wider shrink-0">
                             Skipped
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
+                      <span className="text-[11px] text-[rgba(235,235,245,0.50)] whitespace-nowrap block">
                         {slot.time}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {/* Meal Skipped Action / Permanently Locked Status */}
                     {isSkipped ? (
                       <div
-                        className="px-2.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/30 select-none cursor-default"
-                        title="Meal recorded as skipped (Permanently locked)"
+                        className="px-2 py-1 rounded-full text-[10.5px] font-semibold flex items-center gap-1 bg-[#FF453A]/15 text-[#FF453A] select-none cursor-default"
+                        title="Meal recorded as skipped"
                       >
                         <Prohibit size={12} weight="bold" />
-                        <span>Skipped (Locked)</span>
+                        <span>Skipped</span>
                       </div>
                     ) : (
                       <button
                         type="button"
                         onClick={() => handleToggleSkipMeal(slot.slot)}
-                        className="px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1 active:scale-95 cursor-pointer select-none bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white border border-white/10 touch-manipulation"
+                        className="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all flex items-center gap-1 active:scale-95 cursor-pointer select-none bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white touch-manipulation"
                         title="Mark Meal as Skipped"
                       >
                         <Prohibit size={12} weight="bold" />
-                        <span>Skip Meal</span>
+                        <span>Skip</span>
                       </button>
                     )}
 
@@ -680,16 +680,20 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                           setCustomPortion(1);
                           setIsAddCustomOpen(true);
                         }}
-                        className="inline-flex items-center rounded-full bg-[#FF9F0A]/12 hover:bg-[#FF9F0A]/20 active:bg-[#FF9F0A]/25 border border-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation shadow-sm select-none"
+                        className="inline-flex items-center rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 active:bg-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation select-none"
                         title="Log Food with AI"
                       >
-                        <span className="px-2.5 sm:px-3 py-1 text-[#FF9F0A] text-[11px] sm:text-[11.5px] font-bold tabular-nums tracking-tight">
-                          {slotCalories} kcal
-                        </span>
-                        <span className="w-[1px] h-3.5 bg-[#FF9F0A]/30" />
-                        <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 text-[#FF9F0A] text-[11px] sm:text-[11.5px] font-semibold">
-                          <LunaComicBubbleIcon size={13} color="currentColor" />
-                          <span>Log Food</span>
+                        {slotCalories > 0 && (
+                          <>
+                            <span className="px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold tabular-nums tracking-tight">
+                              {slotCalories} kcal
+                            </span>
+                            <span className="w-[1px] h-3 bg-[#FF9F0A]/30" />
+                          </>
+                        )}
+                        <span className="flex items-center gap-1 px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold">
+                          <LunaComicBubbleIcon size={12} color="currentColor" />
+                          <span>Log</span>
                         </span>
                       </button>
                     )}
@@ -737,7 +741,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
                 {/* Logged Foods List with Interactive Quantity / Portion Stepper */}
                 {slotItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.04]">
                     <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
                       Logged Food Items & Portions:
                     </span>

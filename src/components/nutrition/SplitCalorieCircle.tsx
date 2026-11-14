@@ -104,17 +104,43 @@ const SLOT_ANGLES: Record<MealSlot, { start: number; end: number; mid: number; t
 // Radial divider notch angles centered exactly in the 8-degree gaps
 const GAP_DIVIDER_ANGLES = [0, 72, 144, 216, 288];
 
-export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
+// Precomputed static SVG paths for zero-overhead GPU rendering
+const SIZE = 260;
+const CENTER = SIZE / 2; // 130
+const RADIUS = 92;
+const STROKE_WIDTH = 28;
+
+const STATIC_ARC_PATHS: Record<MealSlot, string> = {
+  breakfast: describeArcClockwise(CENTER, CENTER, RADIUS, 4, 68),
+  lunch: describeArcClockwise(CENTER, CENTER, RADIUS, 76, 140),
+  snacks: describeArcClockwise(CENTER, CENTER, RADIUS, 148, 212),
+  dinner: describeArcClockwise(CENTER, CENTER, RADIUS, 220, 284),
+  nightCanteen: describeArcClockwise(CENTER, CENTER, RADIUS, 292, 356),
+};
+
+const STATIC_TEXT_PATHS: Record<MealSlot, string> = {
+  breakfast: describeTextArc(CENTER, CENTER, RADIUS, 4, 68, true),
+  lunch: describeTextArc(CENTER, CENTER, RADIUS, 76, 140, true),
+  snacks: describeTextArc(CENTER, CENTER, RADIUS, 148, 212, false),
+  dinner: describeTextArc(CENTER, CENTER, RADIUS, 220, 284, false),
+  nightCanteen: describeTextArc(CENTER, CENTER, RADIUS, 292, 356, true),
+};
+
+const STATIC_GAP_DIVIDERS = GAP_DIVIDER_ANGLES.map((angleDeg) => ({
+  angleDeg,
+  innerPt: polarToCartesian(CENTER, CENTER, RADIUS - STROKE_WIDTH / 2, angleDeg),
+  outerPt: polarToCartesian(CENTER, CENTER, RADIUS + STROKE_WIDTH / 2, angleDeg),
+}));
+
+export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = React.memo(({
   slotsData,
   caloriesRemaining,
   caloriesEaten,
   onSelectSlot,
   selectedSlot,
 }) => {
-  const size = 260;
-  const center = size / 2; // 130
-  const radius = 92;
-  const strokeWidth = 28;
+  const size = SIZE;
+  const strokeWidth = STROKE_WIDTH;
 
   const handleSlotClick = (slot: MealSlot) => {
     triggerHaptic('light');
@@ -125,7 +151,7 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center w-full select-none py-1">
-      {/* ── Circular Split Gauge Container ── */}
+      {/* ── Circular Split Gauge Container (GPU Hardware-Accelerated) ── */}
       <div className="relative w-[260px] h-[260px] flex items-center justify-center shrink-0">
         <svg
           width={size}
@@ -134,42 +160,15 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
           className="overflow-visible"
         >
           <defs>
-            {/* Soft glow filters for active colored meal arcs */}
-            {slotsData.map((slot) => (
-              <filter
-                key={`glow-${slot.slot}`}
-                id={`glow-${slot.slot}`}
-                x="-30%"
-                y="-30%"
-                width="160%"
-                height="160%"
-              >
-                <feDropShadow
-                  dx="0"
-                  dy="0"
-                  stdDeviation="2.5"
-                  floodColor={slot.color}
-                  floodOpacity="0.65"
-                />
-              </filter>
-            ))}
-
             {/* Dedicated curved paths for textPath text curving inside each slot arc */}
             {slotsData.map((slot) => {
-              const angles = SLOT_ANGLES[slot.slot];
-              if (!angles) return null;
+              const textPathD = STATIC_TEXT_PATHS[slot.slot];
+              if (!textPathD) return null;
               return (
                 <path
                   key={`text-path-${slot.slot}`}
                   id={`text-path-${slot.slot}`}
-                  d={describeTextArc(
-                    center,
-                    center,
-                    radius,
-                    angles.start,
-                    angles.end,
-                    angles.textClockwise
-                  )}
+                  d={textPathD}
                   fill="none"
                 />
               );
@@ -177,46 +176,34 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
           </defs>
 
           {/* ── Precision Gap Notches (separates each meal slot) ── */}
-          {GAP_DIVIDER_ANGLES.map((angleDeg) => {
-            const innerPt = polarToCartesian(center, center, radius - strokeWidth / 2, angleDeg);
-            const outerPt = polarToCartesian(center, center, radius + strokeWidth / 2, angleDeg);
-            return (
-              <line
-                key={`gap-tick-${angleDeg}`}
-                x1={innerPt.x}
-                y1={innerPt.y}
-                x2={outerPt.x}
-                y2={outerPt.y}
-                stroke="rgba(255, 255, 255, 0.08)"
-                strokeWidth={1}
-                style={{ strokeLinecap: 'butt' }}
-              />
-            );
-          })}
+          {STATIC_GAP_DIVIDERS.map(({ angleDeg, innerPt, outerPt }) => (
+            <line
+              key={`gap-tick-${angleDeg}`}
+              x1={innerPt.x}
+              y1={innerPt.y}
+              x2={outerPt.x}
+              y2={outerPt.y}
+              stroke="rgba(255, 255, 255, 0.08)"
+              strokeWidth={1}
+              style={{ strokeLinecap: 'butt' }}
+            />
+          ))}
 
           {/* ── Render the 5 Meal Arcs ── */}
           {slotsData.map((slot) => {
-            const angles = SLOT_ANGLES[slot.slot];
-            if (!angles) return null;
-
             const isSelected = selectedSlot === slot.slot;
             const hasCalories = slot.calories > 0;
-            const arcPath = describeArcClockwise(
-              center,
-              center,
-              radius,
-              angles.start,
-              angles.end
-            );
+            const arcPath = STATIC_ARC_PATHS[slot.slot];
+            if (!arcPath) return null;
 
             return (
               <g
                 key={slot.slot}
                 onClick={() => handleSlotClick(slot.slot)}
-                className="cursor-pointer transition-opacity duration-200"
+                className="cursor-pointer transition-opacity duration-150"
                 style={{ opacity: selectedSlot && !isSelected ? 0.55 : 1 }}
               >
-                {/* Background Track Arc (explicit strokeLinecap: butt overrides global CSS) */}
+                {/* Background Track Arc */}
                 <path
                   d={arcPath}
                   fill="none"
@@ -225,14 +212,13 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
                   style={{ strokeLinecap: 'butt', strokeLinejoin: 'miter' }}
                 />
 
-                {/* Active Colored Arc (rich solid color when calories taken) */}
+                {/* Active Colored Arc (Hardware-Accelerated native SVG stroke) */}
                 {hasCalories && (
                   <path
                     d={arcPath}
                     fill="none"
                     stroke={slot.color}
                     strokeWidth={strokeWidth}
-                    filter={`url(#glow-${slot.slot})`}
                     style={{ strokeLinecap: 'butt', strokeLinejoin: 'miter' }}
                   />
                 )}
@@ -302,4 +288,4 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = ({
       </div>
     </div>
   );
-};
+});

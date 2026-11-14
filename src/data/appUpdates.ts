@@ -26,13 +26,33 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-0-zero-lag-engine-tier1-refine',
+    category: 'Performance & Architecture',
+    icon: React.createElement(Compass, { size: 13, weight: 'bold' }),
+    title: 'Zero-Lag Compositor Engine & Tier 1 Ultra-OLED Refinement',
+    dateTime: 'Nov 14 • 12:30 PM',
+    fullDateTime: 'Saturday, Nov 14, 2026 • 12:30 PM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#30D158]',
+    summary: 'Cross-tier GPU optimization eliminating dock backdrop blur, 100% hardware-accelerated split calorie ring, native GPU tab slider, mobile meal header spatial refinement, and ultra-deep OLED aesthetics.',
+    points: [
+      'Zero-Lag Fixed Navigation Compositor: Eliminated runtime backdrop-filter blur on the fixed bottom navigation capsule across all tiers, preventing continuous 60/120Hz GPU texture resampling and restoring butter-smooth scrolling.',
+      'Hardware-Accelerated Calorie Ring: Removed CPU SVG drop shadow filters and precomputed static arc geometries at module load time, enabling 100% GPU rasterization and memoized zero-overhead re-renders.',
+      'GPU Native TabBar Slider: Replaced layout projection with GPU-accelerated CSS translate3d spring transitions and seamless OLED droplet styling.',
+      'Mobile Viewport Meal Card Clearance: Streamlined meal card action pills and enforced non-wrapping meal time intervals, eliminating text truncation and awkward wraps on narrow mobile displays.',
+      'Tier 1 Ultra-OLED Refinement: Polished ambient drop shadows, borderless OLED containers, and deferred rolling notification scheduling during startup.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-3-9-split-calorie-droplet-chat',
     category: 'Nutrition & Liquid UI',
     icon: React.createElement(ForkKnife, { size: 13, weight: 'bold' }),
     title: 'Split Sector Calorie Ring, Fluid Droplet Navigation & Luna AI Viewport',
     dateTime: 'Nov 14 • 09:15 AM',
     fullDateTime: 'Saturday, Nov 14, 2026 • 09:15 AM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.9',
     colorClass: 'text-[#FF9F0A]',
     summary: 'Curved split-sector calorie architecture with 5 meal slots, fluid water droplet navigation bar animations, auto-expanding Luna AI chat textarea with full viewport table containment, borderless dark OLED cards, and automated hydration alerts.',
     points: [

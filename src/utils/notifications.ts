@@ -947,7 +947,17 @@ export async function syncAllNotifications(data?: any): Promise<{
   if (Array.isArray(data.calendarEvents)) {
     await syncCalendarNotifications(data.calendarEvents);
   }
-  await syncHydrationNotifications();
+
+  // Defer heavy rolling hydration scheduler so it does not block the main thread at startup
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(() => {
+      syncHydrationNotifications().catch(() => {});
+    }, { timeout: 3000 });
+  } else {
+    setTimeout(() => {
+      syncHydrationNotifications().catch(() => {});
+    }, 1500);
+  }
 
   return { timetableCount, taskCount, nutritionCount };
 }
