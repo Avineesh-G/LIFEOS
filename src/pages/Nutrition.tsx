@@ -7,9 +7,9 @@ import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { LunaComicBubbleIcon } from '../ui/tokens/LunaComicBubbleIcon';
+import { SplitCalorieCircle, type MealSlotCalorieData } from '../components/nutrition/SplitCalorieCircle';
 import {
   LargeTitleHeader,
-  Ring,
   ProgressBar,
   Sheet,
   TextField,
@@ -23,6 +23,8 @@ import {
   Trash,
   Drop,
   Sparkle,
+  XCircle,
+  Prohibit,
 } from '../ui';
 import {
   analyzeFoodWithAi,
@@ -38,12 +40,20 @@ interface NutritionProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const MEAL_SLOTS: { slot: MealSlot; label: string; icon: React.ReactNode; time: string }[] = [
-  { slot: 'breakfast', label: 'Breakfast', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM' },
-  { slot: 'lunch', label: 'Lunch', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM' },
-  { slot: 'snacks', label: 'Snacks', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM' },
-  { slot: 'dinner', label: 'Dinner', icon: <Moon size={18} weight="bold" />, time: '7:15–9:30 PM' },
-  { slot: 'nightCanteen', label: 'Night Canteen', icon: <Moon size={18} weight="bold" />, time: '10:30 PM–12:30 AM' },
+const MEAL_SLOTS: {
+  slot: MealSlot;
+  label: string;
+  shortLabel: string;
+  icon: React.ReactNode;
+  time: string;
+  color: string;
+  estBudget: number;
+}[] = [
+  { slot: 'breakfast', label: 'Breakfast', shortLabel: 'BRK', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM', color: '#FF9F0A', estBudget: 500 },
+  { slot: 'lunch', label: 'Lunch', shortLabel: 'LUNCH', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM', color: '#30D158', estBudget: 750 },
+  { slot: 'snacks', label: 'Snacks', shortLabel: 'SNACK', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM', color: '#64D2FF', estBudget: 250 },
+  { slot: 'dinner', label: 'Dinner', shortLabel: 'DINNER', icon: <Moon size={18} weight="bold" />, time: '7:15–9:30 PM', color: '#BF5AF2', estBudget: 700 },
+  { slot: 'nightCanteen', label: 'Night Canteen', shortLabel: 'NIGHT', icon: <Moon size={18} weight="bold" />, time: '10:30 PM–12:30 AM', color: '#FF375F', estBudget: 300 },
 ];
 
 const NIGHT_CANTEEN_PRESETS = [
@@ -58,6 +68,9 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const navigate = useNavigate();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const dayOfMonth = new Date().getDate();
+
+  // Selected meal slot for highlight/focus
+  const [selectedSlot, setSelectedSlot] = useState<MealSlot | null>(null);
 
   // Active day's nutrition log
   const todayLog = useMemo(() => {
@@ -76,26 +89,39 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   const caloriesRemaining = Math.max(0, calorieTarget - caloriesEaten);
   const caloriePercent = Math.min(1, caloriesEaten / calorieTarget);
 
-  // Water tracking state
-  const [waterLiters, setWaterLiters] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`);
-      return saved ? parseFloat(saved) : 1.5;
-    } catch {
-      return 1.5;
-    }
-  });
-
-  const handleAddWater = (amountLiters: number) => {
-    triggerHaptic('light');
-    setWaterLiters((prev) => {
-      const next = Math.round((prev + amountLiters) * 100) / 100;
-      try {
-        localStorage.setItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`, next.toString());
-      } catch {}
-      return next;
+  // Calorie and skip data for the 5 meal slots
+  const slotsCalorieData = useMemo<MealSlotCalorieData[]>(() => {
+    return MEAL_SLOTS.map((slot) => {
+      const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
+      const isSkipped = Boolean(slotLog?.isSkipped);
+      const slotItems = isSkipped ? [] : slotLog?.items || [];
+      const calories = slotItems.reduce(
+        (sum, it) => sum + it.calories * (it.portion || 1),
+        0
+      );
+      return {
+        slot: slot.slot,
+        label: slot.label,
+        shortLabel: slot.shortLabel,
+        time: slot.time,
+        color: slot.color,
+        calories,
+        isSkipped,
+        estBudget: slot.estBudget,
+      };
     });
+  }, [todayLog.mealsEaten]);
+
+  // Smoothly scrolls to a meal slot card in the diary
+  const handleSelectSlot = (slot: MealSlot) => {
+    setSelectedSlot((prev) => (prev === slot ? null : slot));
+    const targetEl = document.getElementById(`meal-slot-${slot}`);
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
+
+
 
   // Today's mess menu items mapped by meal slot
   const todayMess = useMemo(() => {
@@ -204,9 +230,16 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   // Toggle or select a mess item directly from the meals diary
   const handleToggleMessItem = async (slot: MealSlot, itemName: string, estCalories: number) => {
-    triggerHaptic('selection');
     const currentMeals = [...(todayLog.mealsEaten || [])];
     const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+
+    // If slot is marked as skipped, it is permanently locked
+    if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+      triggerHaptic('error');
+      return;
+    }
+
+    triggerHaptic('selection');
 
     if (slotIndex >= 0) {
       const existingItemIndex = currentMeals[slotIndex].items.findIndex(
@@ -263,10 +296,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   // Adjust portion quantity for any logged food item (e.g., 2 chapatis -> 4 chapatis)
   const handleUpdateItemPortion = async (slot: MealSlot, itemId: string, delta: number) => {
-    triggerHaptic('selection');
     let currentMeals = [...(todayLog.mealsEaten || [])];
     const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
-    if (slotIndex < 0) return;
+    if (slotIndex < 0 || currentMeals[slotIndex].isSkipped) return;
+    triggerHaptic('selection');
 
     const itemIndex = currentMeals[slotIndex].items.findIndex((it) => it.id === itemId);
     if (itemIndex < 0) return;
@@ -310,10 +343,17 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   // Add a custom extra food item with portion multiplier (AI Auto-Implemented)
   const handleLogCustomFood = async () => {
     if (!customName.trim()) return;
-    triggerHaptic('success');
 
     const currentMeals = [...(todayLog.mealsEaten || [])];
     const slotIndex = currentMeals.findIndex((m) => m.slot === customSlot);
+
+    if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+      triggerHaptic('error');
+      setIsAddCustomOpen(false);
+      return;
+    }
+
+    triggerHaptic('success');
 
     if (multiItemEstimate && multiItemEstimate.items.length > 1) {
       // Multiple items detected by AI
@@ -377,6 +417,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   // Remove an item from the meal slot
   const handleRemoveItem = async (slot: MealSlot, itemId: string) => {
+    const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot);
+    if (slotLog?.isSkipped) return;
     triggerHaptic('light');
     let currentMeals = (todayLog.mealsEaten || []).map((m) => {
       if (m.slot === slot) {
@@ -387,6 +429,48 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }
       return m;
     }).filter((m) => m.items.length > 0);
+
+    const newDailyTotal = currentMeals.reduce(
+      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
+      0
+    );
+
+    const updatedLog: NutritionLog = {
+      ...todayLog,
+      dailyTotal: newDailyTotal,
+      mealsEaten: currentMeals,
+      isSaved: true,
+    };
+
+    const updatedLogs = [
+      updatedLog,
+      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+    ];
+    await updateData({ nutritionLogs: updatedLogs });
+  };
+
+  // Mark meal as skipped (permanent, locked once confirmed)
+  const handleToggleSkipMeal = async (slot: MealSlot) => {
+    const currentMeals = [...(todayLog.mealsEaten || [])];
+    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+
+    // If already skipped, do not allow re-editing or un-skipping
+    if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+      triggerHaptic('error');
+      return;
+    }
+
+    triggerHaptic('medium');
+    if (slotIndex >= 0) {
+      currentMeals[slotIndex].isSkipped = true;
+      currentMeals[slotIndex].items = [];
+    } else {
+      currentMeals.push({
+        slot,
+        items: [],
+        isSkipped: true,
+      });
+    }
 
     const newDailyTotal = currentMeals.reduce(
       (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
@@ -429,29 +513,21 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           style={{ '--hero-accent': '#FF9F0A' } as React.CSSProperties}
           className="glass-hero p-5 flex flex-col items-center gap-4 select-none min-h-[140px]"
         >
-          {/* Main Calorie Ring */}
-          <div className="flex flex-col items-center justify-center pt-1">
-            <Ring
-              progress={caloriePercent}
-              size={130}
-              strokeWidth={9}
-              color="#FF9F0A"
-              trackColor="rgba(255, 255, 255, 0.08)"
-            >
-              <div className="flex flex-col items-center justify-center text-center">
-                <span className="text-[28px] font-extrabold text-white tabular-nums tracking-tight leading-none">
-                  {caloriesRemaining}
-                </span>
-                <span className="text-[10.5px] font-bold text-[rgba(235,235,245,0.50)] uppercase tracking-wider mt-1">
-                  kcal left
-                </span>
-              </div>
-            </Ring>
+          {/* Main Segmented Calorie Ring (split by 5 meal slots with time colors and calorie text) */}
+          <div className="flex flex-col items-center justify-center pt-1 w-full">
+            <SplitCalorieCircle
+              slotsData={slotsCalorieData}
+              caloriesRemaining={caloriesRemaining}
+              caloriesEaten={caloriesEaten}
+              calorieTarget={calorieTarget}
+              selectedSlot={selectedSlot}
+              onSelectSlot={handleSelectSlot}
+            />
           </div>
 
-          {/* Macro Breakdown (glass-flat) */}
+          {/* Macro Breakdown (droplet-tile) */}
           <div className="grid grid-cols-3 gap-2.5 w-full pt-2">
-            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+            <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-[#FF453A] tabular-nums">
                 {Math.round(caloriesEaten * 0.06)} / 140g
               </span>
@@ -459,7 +535,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Protein</span>
             </div>
 
-            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+            <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-[#FF9F0A] tabular-nums">
                 {Math.round(caloriesEaten * 0.12)} / 220g
               </span>
@@ -467,7 +543,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Carbs</span>
             </div>
 
-            <div className="glass-flat flex flex-col items-center gap-1.5 p-2.5">
+            <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-[#FF375F] tabular-nums">
                 {Math.round(caloriesEaten * 0.03)} / 60g
               </span>
@@ -477,43 +553,24 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           </div>
         </motion.div>
 
-        {/* ── 2. Water Hydration Tile (glass-card) ── */}
-        <div className="glass-card p-4 flex items-center justify-between gap-3 select-none">
+        {/* ── 2. Smart Hydration Reminder Banner (droplet-card) ── */}
+        <div className="droplet-card p-3.5 flex items-center justify-between gap-3 select-none">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-[14px] bg-[#64D2FF]/20 flex items-center justify-center text-[#64D2FF] shrink-0">
               <Drop size={22} weight="fill" />
             </div>
             <div className="flex flex-col min-w-0">
-              <div className="text-[15px] font-bold text-white tabular-nums">
-                {waterLiters.toFixed(2)} L{' '}
-                <span className="text-[12px] text-[rgba(235,235,245,0.45)] font-normal">
-                  / 3.5 L target
-                </span>
-              </div>
-              <div className="text-[11.5px] text-[rgba(235,235,245,0.60)] truncate">
-                Daily Hydration Goal
-              </div>
+              <span className="text-[13.5px] font-bold text-white leading-tight">
+                Smart Hydration Active
+              </span>
+              <span className="text-[11.5px] text-[rgba(235,235,245,0.60)] mt-0.5 truncate">
+                Automated 30-min reminders sent to your phone
+              </span>
             </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="glass"
-              tint="#64D2FF"
-              size="sm"
-              onClick={() => handleAddWater(0.25)}
-            >
-              +250ml
-            </Button>
-            <Button
-              variant="glass"
-              tint="#64D2FF"
-              size="sm"
-              onClick={() => handleAddWater(0.5)}
-            >
-              +500ml
-            </Button>
-          </div>
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#64D2FF]/15 text-[#64D2FF] border border-[#64D2FF]/25 shrink-0">
+            Every 30m
+          </span>
         </div>
 
         {/* ── 3. Integrated Meals Diary (glass-card per meal) ── */}
@@ -529,7 +586,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
           {MEAL_SLOTS.map((slot) => {
             const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
-            const slotItems = slotLog?.items || [];
+            const isSkipped = Boolean(slotLog?.isSkipped);
+            const slotItems = isSkipped ? [] : slotLog?.items || [];
             const slotCalories = slotItems.reduce(
               (s, it) => s + it.calories * (it.portion || 1),
               0
@@ -541,51 +599,105 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               loggedItemMap.set(it.name.toLowerCase().trim(), it);
             });
 
+            const isSelected = selectedSlot === slot.slot;
+
             return (
               <div
                 key={slot.slot}
-                className="glass-card p-4 flex flex-col gap-3"
+                id={`meal-slot-${slot.slot}`}
+                className={`p-4 flex flex-col gap-3 transition-all duration-200 ${
+                  isSkipped
+                    ? 'droplet-card opacity-65'
+                    : isSelected
+                    ? 'glass-card shadow-lg'
+                    : 'glass-card'
+                }`}
+                style={{
+                  borderLeftColor: isSelected ? slot.color : undefined,
+                  borderLeftWidth: isSelected ? '3px' : undefined,
+                  borderLeftStyle: isSelected ? 'solid' : undefined,
+                }}
               >
                 {/* Header Row */}
                 <div className="flex items-center justify-between pb-1">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-[10px] bg-[#FF9F0A]/15 text-[#FF9F0A] flex items-center justify-center">
+                    <div
+                      className="w-8 h-8 rounded-[10px] flex items-center justify-center transition-colors"
+                      style={{
+                        backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : `${slot.color}22`,
+                        color: isSkipped ? 'rgba(255, 255, 255, 0.4)' : slot.color,
+                      }}
+                    >
                       {slot.icon}
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-white tracking-tight">
-                        {slot.label}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className={`text-[15px] font-bold tracking-tight ${
+                          isSkipped ? 'text-white/60 line-through' : 'text-white'
+                        }`}>
+                          {slot.label}
+                        </h3>
+                        {isSkipped && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/25 uppercase tracking-wider">
+                            Skipped
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
                         {slot.time}
                       </span>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('light');
-                      setCustomSlot(slot.slot);
-                      setCustomPortion(1);
-                      setIsAddCustomOpen(true);
-                    }}
-                    className="inline-flex items-center rounded-full bg-[#FF9F0A]/12 hover:bg-[#FF9F0A]/20 active:bg-[#FF9F0A]/25 border border-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation shadow-sm select-none"
-                    title="Log Food with AI"
-                  >
-                    <span className="px-3 py-1 text-[#FF9F0A] text-[11.5px] font-bold tabular-nums tracking-tight">
-                      {slotCalories} kcal
-                    </span>
-                    <span className="w-[1px] h-3.5 bg-[#FF9F0A]/30" />
-                    <span className="flex items-center gap-1.5 px-3 py-1 text-[#FF9F0A] text-[11.5px] font-semibold">
-                      <LunaComicBubbleIcon size={13} color="currentColor" />
-                      <span>Log Food</span>
-                    </span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {/* Meal Skipped Action / Permanently Locked Status */}
+                    {isSkipped ? (
+                      <div
+                        className="px-2.5 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1.5 bg-[#FF453A]/15 text-[#FF453A] border border-[#FF453A]/30 select-none cursor-default"
+                        title="Meal recorded as skipped (Permanently locked)"
+                      >
+                        <Prohibit size={12} weight="bold" />
+                        <span>Skipped (Locked)</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSkipMeal(slot.slot)}
+                        className="px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1 active:scale-95 cursor-pointer select-none bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white border border-white/10 touch-manipulation"
+                        title="Mark Meal as Skipped"
+                      >
+                        <Prohibit size={12} weight="bold" />
+                        <span>Skip Meal</span>
+                      </button>
+                    )}
+
+                    {!isSkipped && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('light');
+                          setCustomSlot(slot.slot);
+                          setCustomPortion(1);
+                          setIsAddCustomOpen(true);
+                        }}
+                        className="inline-flex items-center rounded-full bg-[#FF9F0A]/12 hover:bg-[#FF9F0A]/20 active:bg-[#FF9F0A]/25 border border-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation shadow-sm select-none"
+                        title="Log Food with AI"
+                      >
+                        <span className="px-2.5 sm:px-3 py-1 text-[#FF9F0A] text-[11px] sm:text-[11.5px] font-bold tabular-nums tracking-tight">
+                          {slotCalories} kcal
+                        </span>
+                        <span className="w-[1px] h-3.5 bg-[#FF9F0A]/30" />
+                        <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 text-[#FF9F0A] text-[11px] sm:text-[11.5px] font-semibold">
+                          <LunaComicBubbleIcon size={13} color="currentColor" />
+                          <span>Log Food</span>
+                        </span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Direct Mess Menu Selectable Pills with Portion Badges */}
-                {messItems.length > 0 && (
+                {!isSkipped && messItems.length > 0 && (
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
                       Mess Menu Items:
@@ -686,6 +798,15 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+                {/* Skipped Message State (Permanently Locked) */}
+                {isSkipped && (
+                  <div className="py-2.5 px-3 rounded-[16px] bg-[#FF453A]/10 border border-[#FF453A]/20 flex items-center gap-2 text-xs select-none">
+                    <Prohibit size={14} className="text-[#FF453A] shrink-0" weight="bold" />
+                    <span className="text-white/80 font-medium">
+                      Meal recorded as skipped (0 kcal). This entry is permanently locked.
+                    </span>
                   </div>
                 )}
               </div>

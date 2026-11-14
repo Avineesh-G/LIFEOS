@@ -14,6 +14,7 @@
   2. Prepend the new release entry to `APP_UPDATES` in `src/data/appUpdates.ts` with exact date & time, tag `v${CURRENT_VERSION_NAME} • Latest`, concrete feature bullet points, and the developer contact emails (`avineeshgujjeti2006@gmail.com` and `avineeshgujjeti@outlook.com`).
   3. Ensure the "What's new & updates" carousel and pop-up modal always reflect the latest release details accurately.
 - **Strict No Emojis**: Never use emojis anywhere in the application. Always use Phosphor icons.
+- **Strict No White Line Borders on Cards**: Never apply white or light border outlines (`border: 1px solid rgba(255, 255, 255, ...)`, Tailwind `border-white/...`, `ring-...`, or harsh top inset specular box-shadows) around cards, hero containers, or tiles in any implementation. Surfaces must be seamless, dark, borderless OLED containers with pure ambient drop shadows.
 
 ---
 

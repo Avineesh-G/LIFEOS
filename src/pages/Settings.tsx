@@ -303,7 +303,7 @@ export default function Settings({
       {/* ── Notifications ── */}
       <GroupedList
         header="NOTIFICATIONS"
-        footer="LifeOS alerts you in advance for scheduled timetable classes and priority tasks."
+        footer="LifeOS uses high-precision exact alarms with wakeful locks for Timetable, Tasks, Gym, and 30-min Hydration reminders. Keep device battery settings on 'Unrestricted' for 100% on-time delivery."
       >
         <ListRow
           icon={<Bell size={18} weight="duotone" />}

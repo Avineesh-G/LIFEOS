@@ -40,8 +40,16 @@ export function TabBar({
   className = '',
 }: TabBarProps) {
   const [activeMenuTab, setActiveMenuTab] = useState<string | null>(null);
+  const [optimisticKey, setOptimisticKey] = useState<string | null>(null);
   const longPressTimerRef = useRef<any>(null);
   const isLongPressRef = useRef(false);
+
+  // Sync optimistic key back when parent activeKey updates
+  React.useEffect(() => {
+    setOptimisticKey(null);
+  }, [activeKey]);
+
+  const currentKey = optimisticKey || activeKey;
 
   const handlePressStart = (tab: TabItem) => {
     isLongPressRef.current = false;
@@ -71,6 +79,7 @@ export function TabBar({
       return;
     }
     triggerHaptic('selection');
+    setOptimisticKey(tab.key);
     onChange(tab.key);
   };
 
@@ -117,7 +126,7 @@ export function TabBar({
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
         <div className="flex-1 flex items-center gap-0.5">
           {items.map((tab) => {
-            const isSelected = tab.key === activeKey;
+            const isSelected = tab.key === currentKey;
             const tint = tab.tint || '#0A84FF';
 
             return (
@@ -148,16 +157,19 @@ export function TabBar({
                 {/* Liquid Active Droplet Thumb */}
                 {isSelected && (
                   <motion.div
-                    layoutId="tabbar-glass-thumb"
-                    className="absolute inset-0 rounded-full -z-10"
+                    layoutId="tabbar-liquid-droplet"
+                    className="absolute inset-0 rounded-full -z-10 pointer-events-none"
                     style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14), 0 2px 8px rgba(0, 0, 0, 0.5)',
-                      backdropFilter: 'blur(8px)',
-                      WebkitBackdropFilter: 'blur(8px)',
+                      background: 'radial-gradient(ellipse at 50% 15%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.02) 100%)',
+                      border: '1.2px solid rgba(255, 255, 255, 0.38)',
+                      boxShadow: 'inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.52), inset 0 -1.5px 1.5px 0 rgba(255, 255, 255, 0.12), inset 0 0 12px 0 rgba(255, 255, 255, 0.06), 0 4px 16px 0 rgba(0, 0, 0, 0.65)',
                     }}
-                    transition={MOTION_SPRINGS.snappy}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 380,
+                      damping: 28,
+                      mass: 0.85,
+                    }}
                   />
                 )}
               </button>

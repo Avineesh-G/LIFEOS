@@ -417,7 +417,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
       className="w-full min-h-screen bg-black text-white select-none px-3 sm:px-4 max-w-4xl mx-auto font-sans"
       style={{
         paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 36px) + 12px)',
-        paddingBottom: 'calc(130px + max(env(safe-area-inset-bottom, 0px), 24px))',
+        paddingBottom: 'calc(160px + max(env(safe-area-inset-bottom, 0px), 36px))',
       }}
     >
       {/* ── Apple / Google Calendar Top Control Bar ── */}
@@ -670,17 +670,19 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                   key={day.toISOString()}
                   type="button"
                   onClick={() => handleSelectDay(day)}
-                  className={`relative flex flex-col items-stretch justify-start p-1.5 rounded-2xl transition-all cursor-pointer min-h-[58px] sm:min-h-[84px] text-left overflow-hidden touch-manipulation ${
+                  className={`relative flex flex-col items-stretch justify-start p-1 sm:p-1.5 rounded-2xl transition-all cursor-pointer min-h-[48px] sm:min-h-[80px] text-left overflow-hidden touch-manipulation ${
                     isSelected
-                      ? 'bg-white/[0.10] ring-1 ring-white/30 shadow-md'
+                      ? 'droplet-active shadow-md'
                       : inCurrentMonth
-                      ? 'bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04]'
-                      : 'bg-transparent opacity-25 hover:opacity-40'
+                      ? 'bg-gradient-to-b from-white/[0.045] to-transparent hover:from-white/[0.07] border border-white/[0.07]'
+                      : 'bg-transparent opacity-25 hover:opacity-40 border border-transparent'
                   }`}
                   style={{
                     boxShadow: isSelected
-                      ? 'inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.5)'
-                      : 'inset 0 1px 1px rgba(255, 255, 255, 0.04)',
+                      ? 'inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 1px 0 rgba(255, 255, 255, 0.05), 0 4px 14px rgba(0, 0, 0, 0.55)'
+                      : inCurrentMonth
+                      ? 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.25)'
+                      : 'none',
                   }}
                 >
                   {/* Date Number: COLOR IS ON THE WORDS/NUMBERS ONLY, NO SOLID COLOR BLOB */}

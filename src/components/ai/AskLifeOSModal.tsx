@@ -125,7 +125,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   }, [isImageMenuOpen]);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedMimeRef = useRef<string>('audio/webm');
   const speechRecognitionRef = useRef<any>(null);
@@ -133,6 +133,15 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+
+  // Auto-expand textarea height as user types
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      const scrollHeight = inputRef.current.scrollHeight;
+      inputRef.current.style.height = `${Math.min(Math.max(scrollHeight, 24), 120)}px`;
+    }
+  }, [inputQuery]);
 
   // Auto focus & cleanup on modal open/close
   useEffect(() => {
@@ -711,7 +720,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             {/* Scrollable Message History or Empty State */}
             <div
               ref={chatContainerRef}
-              className="flex-1 overflow-y-auto px-4 py-2 space-y-3.5 overscroll-contain touch-pan-y"
+              className="flex-1 overflow-y-auto px-3 sm:px-4 py-2 space-y-3.5 overscroll-contain touch-pan-y w-full min-w-0"
             >
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
@@ -821,14 +830,14 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   return (
                     <div
                       key={msg.id}
-                      className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1.5`}
+                      className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-1.5 w-full min-w-0`}
                     >
                       {/* Message Bubble */}
                       <div
-                        className={`max-w-[88%] p-3.5 rounded-[22px] font-sans-flex ${
+                        className={`font-sans-flex min-w-0 ${
                           isUser
-                            ? 'bg-[#0A84FF] text-white rounded-br-[6px] shadow-md'
-                            : 'glass-card text-white/95 rounded-bl-[6px]'
+                            ? 'max-w-[85%] p-3.5 rounded-[22px] rounded-br-[6px] bg-[#0A84FF] text-white shadow-md self-end'
+                            : 'w-full p-3.5 sm:p-4 rounded-[22px] rounded-tl-[6px] bg-[#141416] text-white/95 shadow-md border-none overflow-hidden'
                         }`}
                       >
                         {isUser ? (
@@ -1031,15 +1040,15 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 </div>
               )}
 
-              <GlassSurface
-                className="rounded-full p-1.5 flex items-center gap-2 shadow-2xl border border-white/10 relative z-40"
+              <div
+                className="rounded-[24px] p-1.5 flex items-end gap-1.5 shadow-2xl bg-[#1C1C1E] relative z-40 w-full"
               >
                 {/* Voice Dictation Mic Button */}
                 <button
                   type="button"
                   onClick={handleToggleVoiceRecord}
                   disabled={isGenerating || transcribing}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer mb-0.5 ${
                     isRecording
                       ? 'bg-red-500 text-white animate-pulse'
                       : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20'
@@ -1056,7 +1065,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 </button>
 
                 {/* Camera / Attachment Button */}
-                <div className="relative">
+                <div className="relative shrink-0 mb-0.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -1084,10 +1093,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   </button>
                 </div>
 
-                {/* Text Input Field */}
-                <input
+                {/* Multi-line Auto-Expanding Textarea Field */}
+                <textarea
                   ref={inputRef}
-                  type="text"
+                  rows={1}
                   value={inputQuery}
                   onChange={(e) => setInputQuery(e.target.value)}
                   onKeyDown={(e) => {
@@ -1106,7 +1115,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       : 'Ask Luna or say "Add task..."'
                   }
                   disabled={isGenerating}
-                  className="flex-1 bg-transparent text-sm text-white placeholder-white/40 focus:outline-none px-2 min-w-0 font-sans-flex"
+                  className="flex-1 bg-transparent text-[14px] text-white placeholder-white/40 focus:outline-none px-2 py-1.5 min-w-0 font-sans-flex resize-none leading-relaxed overflow-y-auto max-h-[120px]"
+                  style={{ minHeight: '24px' }}
                 />
 
                 {/* Send Button */}
@@ -1114,7 +1124,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   onClick={() => handleSendQuery()}
                   disabled={(!inputQuery.trim() && attachedImages.length === 0) || isGenerating}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 mb-0.5 ${
                     (inputQuery.trim() || attachedImages.length > 0) && !isGenerating
                       ? 'bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] text-white shadow-md active:scale-95 cursor-pointer'
                       : 'bg-white/5 text-white/30 cursor-not-allowed'
@@ -1127,7 +1137,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     <PaperPlaneRight size={16} weight="fill" />
                   )}
                 </button>
-              </GlassSurface>
+              </div>
             </div>
           </div>
         ) : (

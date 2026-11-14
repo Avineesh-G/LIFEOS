@@ -16,6 +16,8 @@ export {
   CalendarCheck,
   CalendarBlank,
   CheckCircle,
+  XCircle,
+  Prohibit,
   CheckSquare,
   Square,
   List,

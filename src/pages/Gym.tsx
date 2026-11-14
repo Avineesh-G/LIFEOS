@@ -98,7 +98,7 @@ export default function Gym({ data, updateData }: GymProps) {
 
       <div className="flex flex-col gap-3.5 pb-2">
         {/* ── 7-Day Strip with Workout Dots ── */}
-        <div className="glass-card p-1.5 flex items-center justify-between rounded-[20px] select-none">
+        <div className="droplet-card p-1.5 flex items-center justify-between rounded-[22px] select-none">
           {SHORT_DAYS.map((d) => {
             const isSelected = selectedDay === d.short;
             const isToday = todayShort === d.short;
@@ -111,9 +111,9 @@ export default function Gym({ data, updateData }: GymProps) {
                   triggerHaptic('selection');
                   setSelectedDay(d.short);
                 }}
-                className={`relative flex-1 py-2 flex flex-col items-center justify-center rounded-[14px] transition-all cursor-pointer ${
+                className={`relative flex-1 py-2 flex flex-col items-center justify-center rounded-[16px] transition-all cursor-pointer ${
                   isSelected
-                    ? 'glass-tile text-[#FF453A] shadow-sm'
+                    ? 'droplet-active text-[#FF453A]'
                     : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >

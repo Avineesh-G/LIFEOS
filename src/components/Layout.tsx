@@ -272,9 +272,11 @@ export default function Layout({
 
   const handleTabChange = (key: string) => {
     triggerHaptic('selection');
-    if (key === 'home') navigate('/');
-    else if (key === slot2Item.id) navigate(slot2Item.route);
-    else if (key === slot3Item.id) navigate(slot3Item.route);
+    React.startTransition(() => {
+      if (key === 'home') navigate('/');
+      else if (key === slot2Item.id) navigate(slot2Item.route);
+      else if (key === slot3Item.id) navigate(slot3Item.route);
+    });
   };
 
   const handleCustomizeSlot = (slotKey: string) => {

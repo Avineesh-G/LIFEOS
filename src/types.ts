@@ -193,6 +193,7 @@ export interface NutritionLog {
   mealsEaten: {
     slot: MealSlot;
     items: MealItemLog[];
+    isSkipped?: boolean; // User marked this meal as skipped
   }[];
   dailyTotal: number;
 }

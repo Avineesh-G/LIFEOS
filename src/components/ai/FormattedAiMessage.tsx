@@ -107,8 +107,8 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
   };
 
   return (
-    <div className="my-2.5 rounded-2xl bg-[#000000]/60 border border-white/10 overflow-hidden shadow-sm font-sans">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#1C1C1E] border-b border-white/10 text-[11px] font-medium text-white/60">
+    <div className="my-2.5 rounded-2xl bg-[#141416] overflow-hidden shadow-md font-sans w-full max-w-full">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#1C1C1E] text-[11px] font-medium text-white/60">
         <span>Code / Formatted Output</span>
         <div className="flex items-center gap-1.5">
           <button
@@ -131,7 +131,7 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
           </button>
         </div>
       </div>
-      <pre className="p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words text-white/90 overflow-x-auto">
+      <pre className="p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap break-words text-white/90 overflow-x-auto w-full max-w-full">
         {code}
       </pre>
     </div>
@@ -214,22 +214,22 @@ const MarkdownTable: React.FC<{ rows: string[]; isUser?: boolean }> = ({ rows, i
   const dataRows = cleanRows.slice(dataRowsStartIndex).filter((r) => !isDivider(r));
 
   return (
-    <div className="my-3 w-full rounded-[18px] bg-[#1C1C1E] border border-white/12 overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
-      <div className="overflow-x-auto custom-table-scrollbar">
-        <table className="w-full text-left border-collapse font-sans min-w-[320px]">
+    <div className="my-2.5 w-full max-w-full rounded-[18px] bg-[#18181B] overflow-hidden shadow-lg border-none">
+      <div className="overflow-x-auto w-full max-w-full custom-table-scrollbar overscroll-x-contain">
+        <table className="w-full min-w-full text-left border-collapse font-sans">
           <thead>
-            <tr className="bg-white/[0.08] border-b border-white/10">
+            <tr className="bg-white/[0.05] border-b border-white/[0.08]">
               {headerCells.map((cell, idx) => (
                 <th
                   key={idx}
-                  className="px-3.5 py-2.5 text-[11.5px] font-bold text-white uppercase tracking-wider whitespace-nowrap"
+                  className="px-3 py-2 text-[11px] font-bold text-white uppercase tracking-wider whitespace-nowrap"
                 >
                   {parseInlineContent(cell, isUser)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.06]">
+          <tbody className="divide-y divide-white/[0.05]">
             {dataRows.map((row, rIdx) => {
               const cells = parseRowCells(row);
               return (
@@ -244,7 +244,7 @@ const MarkdownTable: React.FC<{ rows: string[]; isUser?: boolean }> = ({ rows, i
                   {cells.map((cell, cIdx) => (
                     <td
                       key={cIdx}
-                      className="px-3.5 py-2.5 text-[12.5px] leading-relaxed text-white/90 align-top"
+                      className="px-3 py-2 text-[12px] leading-snug text-white/90 align-top"
                     >
                       {parseInlineContent(cell, isUser)}
                     </td>

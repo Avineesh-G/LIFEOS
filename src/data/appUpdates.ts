@@ -26,13 +26,33 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-3-9-split-calorie-droplet-chat',
+    category: 'Nutrition & Liquid UI',
+    icon: React.createElement(ForkKnife, { size: 13, weight: 'bold' }),
+    title: 'Split Sector Calorie Ring, Fluid Droplet Navigation & Luna AI Viewport',
+    dateTime: 'Nov 14 • 09:15 AM',
+    fullDateTime: 'Saturday, Nov 14, 2026 • 09:15 AM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#FF9F0A]',
+    summary: 'Curved split-sector calorie architecture with 5 meal slots, fluid water droplet navigation bar animations, auto-expanding Luna AI chat textarea with full viewport table containment, borderless dark OLED cards, and automated hydration alerts.',
+    points: [
+      'Split Calorie Ring Architecture: Replaced simple calorie ring with 5 discrete curved sectors (Breakfast, Lunch, Snacks, Dinner, Night Canteen), displaying slot-colored arcs and curved radial calorie indicators along SVG sector paths.',
+      'Fluid Droplet Navigation Bar: Interactive water droplet sliding pill indicator on the floating navigation bar with spring physics that glides seamlessly across active interface tabs.',
+      'Auto-Expanding Chat Viewport: Multi-line responsive input textarea in Luna AI that dynamically grows as you type, with touch-accelerated horizontal scrolling on Markdown tables and code blocks to prevent modal overflow.',
+      'Pure Borderless Dark OLED Containers: Completely eliminated harsh white line borders and specular top borders across all glass cards, tiles, and hero containers for an ultra-clean, edge-to-edge dark mode aesthetic.',
+      'Automated Hydration Reminders: Integrated seamless 30-minute interval smart hydration notifications throughout the day, eliminating manual intake logging hassle.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-3-8-calendar-dock-droplet-fixes',
     category: 'Calendar & Mobile UX',
     icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
     title: 'Calendar Safe Insets & Mobile Liquid Droplet Architecture',
     dateTime: 'Nov 12 • 08:00 PM',
     fullDateTime: 'Thursday, Nov 12, 2026 • 08:00 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.3.8',
     colorClass: 'text-[#5E5CE6]',
     summary: 'Calendar status bar collision resolution with back button navigation, complete floating bottom navigation dock clearance, liquid water droplet styling, and non-truncating category filters.',
     points: [

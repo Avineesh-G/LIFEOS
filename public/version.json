@@ -1,10 +1,10 @@
 {
-  "versionCode": 75,
-  "versionName": "3.3.8",
-  "releaseDate": "2026-11-12",
-  "apkSize": "10.20 MB",
-  "apkSizeBytes": 10695000,
-  "releaseNotes": "LifeOS v3.3.8 (Build 75):\n• Calendar Navigation & Status Bar Safe Clearance: Header lowered below status bars and punch-holes with back button navigation.\n• Zero Dock Collision: Enhanced bottom scroll padding and spacer so events and tasks sit cleanly above the floating navigation dock.\n• Liquid Droplet Architecture: Day drawer and calendar cells restyled into liquid glass droplets with specular micro-sheens.\n• Category Filter Layout: Horizontal scroll with zero text truncation for all event filters.\n• Clean Separation: Full Calendar moved to More Hub; Home calendar header launches floating quick agenda popup.",
+  "versionCode": 76,
+  "versionName": "3.3.9",
+  "releaseDate": "2026-11-14",
+  "apkSize": "10.22 MB",
+  "apkSizeBytes": 10720931,
+  "releaseNotes": "LifeOS v3.3.9 (Build 76):\n• Split Sector Calorie Architecture: 5 meal sectors (Breakfast, Lunch, Snacks, Dinner, Night Canteen) with slot-based chromatic arcs and curved radial labels.\n• Fluid Droplet Navigation: Water droplet sliding pill indicator on the floating navigation bar with spring-physics transitions.\n• Auto-Expanding Chat Viewport: Multi-line responsive textarea in Luna AI and overflow-scrolling table/code layouts.\n• Borderless OLED Surfaces: Complete elimination of white card outlines across hero and dashboard cards for seamless dark aesthetics.\n• Automated Hydration Notifications: Periodic 30-minute smart hydration reminders without manual logging friction.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "6dd911e8a466ca43c16cfa88c4bb15029ec03a907b88f925d73788f4f87b3da0"
+  "sha256": "c019ea24f7dd69e51233ba43626224735116dee71e4e0b03859fb72b18bd560c"
 }

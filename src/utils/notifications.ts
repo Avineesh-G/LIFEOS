@@ -8,6 +8,7 @@ export const NUTRITION_CHANNEL_ID = 'lifeos_nutrition';
 export const STUDY_CHANNEL_ID = 'lifeos_study';
 export const GYM_CHANNEL_ID = 'lifeos_gym';
 export const CALENDAR_CHANNEL_ID = 'lifeos_calendar';
+export const HYDRATION_CHANNEL_ID = 'lifeos_hydration';
 
 export const NOTIFICATION_ICON = 'ic_stat_lifeos';
 export const NOTIFICATION_COLOR = '#6366F1';
@@ -71,6 +72,17 @@ async function ensureNotificationChannels() {
       vibration: true,
       lights: true,
       lightColor: '#30D158',
+    });
+
+    await LocalNotifications.createChannel({
+      id: HYDRATION_CHANNEL_ID,
+      name: 'Hydration Reminders',
+      description: 'Exact 30-minute high-precision reminders to drink water and stay hydrated throughout the day',
+      importance: 5,
+      visibility: 1,
+      vibration: true,
+      lights: true,
+      lightColor: '#64D2FF',
     });
 
     await LocalNotifications.createChannel({
@@ -570,15 +582,15 @@ export async function syncNutritionNudgeNotifications(nutritionLogs?: NutritionL
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-    // Check if user has logged any meal items today
+    // Check if user has logged any meal items or marked meals as skipped today
     const todayLog = (nutritionLogs || []).find(l => l.date === todayStr);
     const hasLoggedFoodToday = Boolean(
       todayLog &&
       Array.isArray(todayLog.mealsEaten) &&
-      todayLog.mealsEaten.some(m => Array.isArray(m.items) && m.items.length > 0)
+      todayLog.mealsEaten.some(m => (Array.isArray(m.items) && m.items.length > 0) || m.isSkipped)
     );
 
-    // If user has already logged food today, DO NOT send reminder messages!
+    // If user has already logged food or marked meals today, DO NOT send reminder messages!
     if (hasLoggedFoodToday) {
       return 0;
     }
@@ -820,6 +832,99 @@ export async function syncCalendarNotifications(events: CalendarEvent[]): Promis
   return 0;
 }
 
+/**
+ * Schedules daytime hydration reminder notifications every 30 minutes (8:00 AM to 10:00 PM).
+ */
+export async function syncHydrationNotifications(): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  const hasPermission = await checkNotificationPermission();
+  if (!hasPermission) return 0;
+
+  await ensureNotificationChannels();
+
+  try {
+    const pending = await LocalNotifications.getPending();
+    const hydrationNotifications = pending.notifications.filter(n =>
+      n.extra?.type === 'hydration_reminder'
+    );
+    if (hydrationNotifications.length > 0) {
+      await LocalNotifications.cancel({ notifications: hydrationNotifications });
+    }
+
+    const now = new Date();
+    const notificationsToSchedule: any[] = [];
+
+    const reminderMessages = [
+      {
+        title: 'Hydration Check',
+        body: 'Time for a fresh glass of water! Staying hydrated keeps your focus and energy sharp.',
+      },
+      {
+        title: 'Drink Water Reminder',
+        body: '30-minute hydration pause: Grab a glass of water to refresh your body.',
+      },
+      {
+        title: 'Stay Hydrated',
+        body: 'Hydration check: Take a quick water break to maintain your stamina and clarity.',
+      },
+      {
+        title: 'Hydration Reminder',
+        body: 'Keep your hydration on track with a refreshing glass of water.',
+      },
+    ];
+
+    let messageIdx = 0;
+
+    // Rolling 2-day schedule: Today (dayOffset=0) and Tomorrow (dayOffset=1)
+    for (let dayOffset = 0; dayOffset < 2; dayOffset++) {
+      const baseDate = new Date(now);
+      baseDate.setDate(now.getDate() + dayOffset);
+      const dateKey = `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}-${String(baseDate.getDate()).padStart(2, '0')}`;
+
+      // Active waking hours: 8:00 AM to 10:00 PM (22:00)
+      for (let hour = 8; hour <= 21; hour++) {
+        for (const minute of [0, 30]) {
+          const slotTime = new Date(baseDate);
+          slotTime.setHours(hour, minute, 0, 0);
+
+          // Must be at least 45 seconds in the future
+          if (slotTime.getTime() > now.getTime() + 45 * 1000) {
+            const timeLabel = slotTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            const reminder = reminderMessages[messageIdx % reminderMessages.length];
+            const notifId = hashStringToInt(`hydra_${dateKey}_${hour}_${minute}`);
+
+            notificationsToSchedule.push({
+              id: notifId,
+              title: reminder.title,
+              body: `${reminder.body} (${timeLabel})`,
+              channelId: HYDRATION_CHANNEL_ID,
+              smallIcon: NOTIFICATION_ICON,
+              iconColor: '#64D2FF',
+              isExactNotification: true,
+              schedule: { at: slotTime, allowWhileIdle: true },
+              extra: {
+                type: 'hydration_reminder',
+                date: dateKey,
+                time: timeLabel,
+              },
+            });
+            messageIdx++;
+          }
+        }
+      }
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      const capped = notificationsToSchedule.slice(0, 48);
+      await LocalNotifications.schedule({ notifications: capped });
+      return capped.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing hydration reminders:', err);
+  }
+  return 0;
+}
+
 export async function syncAllNotifications(data?: any): Promise<{
   timetableCount: number;
   taskCount: number;
@@ -842,6 +947,7 @@ export async function syncAllNotifications(data?: any): Promise<{
   if (Array.isArray(data.calendarEvents)) {
     await syncCalendarNotifications(data.calendarEvents);
   }
+  await syncHydrationNotifications();
 
   return { timetableCount, taskCount, nutritionCount };
 }

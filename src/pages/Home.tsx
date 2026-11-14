@@ -25,7 +25,9 @@ import {
 } from '../ui';
 
 import { HomeCalendarSync } from '../components/home/HomeCalendarSync';
+import HomeStreakQuotesCard from '../components/home/HomeStreakQuotesCard';
 import { CheckSquare, NotePencil, Receipt } from '../ui/tokens/icons';
+import { useUserProfile } from '../utils/userProfileCache';
 
 interface HomeProps {
   data: AppData;
@@ -113,6 +115,17 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     updateData({ tasks: updated });
   };
 
+  const userProfile = useUserProfile();
+  const userName = useMemo(() => {
+    return (
+      userProfile.displayName?.trim() ||
+      auth.currentUser?.displayName?.trim() ||
+      userProfile.email?.split('@')[0]?.trim() ||
+      auth.currentUser?.email?.split('@')[0]?.trim() ||
+      'Avineesh'
+    );
+  }, [userProfile]);
+
   // Streak calculation
   const streakDays = useMemo(() => {
     return data.workoutLogs?.length ? Math.min(data.workoutLogs.length, 14) : 7;
@@ -125,15 +138,21 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         <p className="text-[13px] font-semibold text-[rgba(235,235,245,0.60)] tracking-tight">
           {greeting} · {todayDisplay}
         </p>
-        <h1 className="text-[34px] leading-[41px] font-bold text-white tracking-tight mt-0.5">
-          Today
+        <h1 className="text-[34px] leading-[41px] font-bold text-white tracking-tight mt-0.5 truncate">
+          {userName}
         </h1>
+      </div>
+
+      {/* ── Daily Motivation & Streak Marquee (Positioned immediately after greeting) ── */}
+      <div className="mb-3.5">
+        <HomeStreakQuotesCard streakDays={streakDays} />
       </div>
 
       <div className="flex flex-col gap-3.5 pb-2">
         {/* ── 1. Synced Calendar & Schedule (Replaces Focus Block) ── */}
         <HomeCalendarSync data={data} updateData={updateData} />
 
+        
         {/* ── 2. 2x2 Bento Tiles (glass-tile) ── */}
         <div className="grid grid-cols-2 gap-3 select-none">
           {/* Tile A: Calories */}
@@ -281,13 +300,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           />
         </GroupedList>
 
-        {/* ── 5. Streak & Daily Intent (glass-card) ── */}
-        <div className="glass-card p-4 flex items-center justify-between select-none">
-          <Badge count={streakDays} label="Day Streak" points={12} color="#FF7A45" />
-          <span className="text-[13px] text-[rgba(235,235,245,0.65)] italic font-medium truncate max-w-[210px] text-right">
-            "Focus and execute."
-          </span>
-        </div>
+        
 
         {/* ── 5. Quick Hub Power Tools ── */}
         <div className="flex flex-col gap-2 select-none pt-1">

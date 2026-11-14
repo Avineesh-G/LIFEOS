@@ -50,7 +50,7 @@ export function OutingCard({ outing, summary }: OutingCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative rounded-2xl glass-card p-4 shadow-sm hover:bg-white/[0.08] transition-all active:scale-[0.99] cursor-pointer overflow-hidden select-none"
+      className="group relative rounded-2xl droplet-card p-4 shadow-sm hover:bg-white/[0.08] transition-all active:scale-[0.99] cursor-pointer overflow-hidden select-none"
     >
       {/* Top row: Name & Status Chip */}
       <div className="flex items-start justify-between gap-3 mb-2">

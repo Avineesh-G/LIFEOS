@@ -8,7 +8,7 @@
   --card-main: #141416;
   --card-hero: #161618;
   --droplet-base: rgba(24, 24, 28, 0.70);
-  --droplet-border: rgba(255, 255, 255, 0.07);
+  --droplet-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Primary Pure Black Main Card ── */
@@ -51,20 +51,64 @@
   transform: scale(0.99);
 }
 
+/* ── Liquid Droplet Elevated Design System (New Core Tokens) ── */
+
+/* Refined Primary Droplet Card (Standard 26px squircle container) */
+.droplet-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #141416;
+  border: none !important;
+  box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.75);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  contain: layout paint style;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
+}
+
+.droplet-card:active {
+  transform: scale(0.988);
+}
+
+/* Secondary Interactive Micro-Tile (Pills, List Rows, Chips, Event Rows) */
+.droplet-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #1A1A1E;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  contain: layout paint style;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background 0.16s ease;
+}
+
+.droplet-tile:active {
+  transform: scale(0.985);
+}
+
+/* Active / Selected Water Droplet State */
+.droplet-active {
+  background: #222228 !important;
+  border: none !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55) !important;
+}
+
 /* ── Sub-Cards / Bento Tiles: Water Droplet Effect ── */
 .glass-tile {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   border-radius: 22px;
-  background: rgba(22, 22, 26, 0.72);
-  backdrop-filter: blur(10px) saturate(175%);
-  -webkit-backdrop-filter: blur(10px) saturate(175%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.10),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.35),
-    0 8px 24px -4px rgba(0, 0, 0, 0.75);
+  background: #16161A;
+  border: none !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.75);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -82,14 +126,9 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: 24px;
-  background: rgba(22, 22, 26, 0.72);
-  backdrop-filter: blur(10px) saturate(175%);
-  -webkit-backdrop-filter: blur(10px) saturate(175%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.10),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.35),
-    0 10px 28px -6px rgba(0, 0, 0, 0.75);
+  background: #16161A;
+  border: none !important;
+  box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.75);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -98,24 +137,22 @@
 
 /* Flat Sub-Card / Nested Droplet Item */
 .glass-flat {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: #18181C;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  border: none !important;
   outline: none !important;
   transform: translateZ(0);
 }
 
 /* ── Floating Navigation Capsule ── */
 .glass-nav {
-  background: rgba(20, 20, 24, 0.85);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(18, 18, 22, 0.90);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.10),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.24),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
     0 18px 44px -8px rgba(0, 0, 0, 0.90);
   transform: translateZ(0);
   -webkit-backface-visibility: hidden;
@@ -125,12 +162,12 @@
 
 /* Grouped Toolbar Capsule */
 .glass-grouped-toolbar {
-  background: rgba(22, 22, 26, 0.80);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%), rgba(22, 22, 26, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
     0 8px 24px -4px rgba(0, 0, 0, 0.75);
   transform: translateZ(0);
   position: relative;
@@ -201,28 +238,21 @@
   background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* TIER 1 ONLY: Flagship / Top-Tier Devices (Exclusive Apple-Grade Specular Highlights & Liquid Reflections) */
+/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pure Ambient Depth, No White Border Outlines) */
 .tier-1 .glass-card,
 .tier-1 .glass-hero {
-  box-shadow: 0 14px 40px -8px rgba(0, 0, 0, 0.90), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 14px 40px -8px rgba(0, 0, 0, 0.90) !important;
+  border: none !important;
 }
 
 .tier-1 .glass-tile {
-  backdrop-filter: blur(12px) saturate(185%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(185%) !important;
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.14),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
-    0 10px 28px -4px rgba(0, 0, 0, 0.80) !important;
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.80) !important;
+  border: none !important;
 }
 
 .tier-1 .glass-row {
-  backdrop-filter: blur(12px) saturate(185%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(185%) !important;
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.14),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.40),
-    0 12px 32px -6px rgba(0, 0, 0, 0.80) !important;
+  box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.80) !important;
+  border: none !important;
 }
 
 .tier-1 .glass-nav {

@@ -142,7 +142,7 @@ const MODULES: ModuleConfig[] = [
     bulletPoints: [
       'Circular macro distribution rings (Protein, Carbohydrates, Healthy Fats) with deficit targets',
       'Pre-configured campus mess schedules (Breakfast, Lunch, Snacks, Dinner, Night Canteen)',
-      'One-tap water hydration tracker with daily target progress (+250ml / +500ml quick increments)',
+      'Automated 30-minute smart hydration reminders to stay refreshed throughout the day',
       'Meal category logs with macronutrient percentage breakdown and surplus guardrails',
     ],
   },
