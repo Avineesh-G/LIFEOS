@@ -371,7 +371,7 @@ export default function Drive({ data, updateData }: DriveProps) {
   };
 
   return (
-    <div className="w-full text-white selection:bg-[#0A84FF]/30 pb-20 select-none font-sans">
+    <div className="w-full text-white selection:bg-[#0A84FF]/30 pb-6 select-none font-sans">
       {/* ── Standard Large Title Header Bar ── */}
       <LargeTitleHeader
         title={currentFolder ? currentFolder.name : "Drive & Docs"}

@@ -66,11 +66,9 @@ export function Segmented<T extends string = string>({
                 layoutId="segmented-active-thumb"
                 className="absolute inset-0 rounded-full -z-10"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14), 0 3px 10px rgba(0, 0, 0, 0.5)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
+                  background: 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
+                  border: 'none',
+                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 3px 10px rgba(0, 0, 0, 0.5)',
                 }}
                 transition={{
                   type: 'spring',

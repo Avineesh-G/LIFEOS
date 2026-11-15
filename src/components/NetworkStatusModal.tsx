@@ -57,13 +57,13 @@ export default function NetworkStatusModal() {
       {/* ── Offline Pop-up Modal ── */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md pointer-events-auto">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 pointer-events-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 16 }}
               transition={{ type: 'spring', damping: 26, stiffness: 360 }}
-              className="w-full max-w-sm rounded-[32px] bg-[#141416] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.95)] text-center space-y-4"
+              className="w-full max-w-sm rounded-[32px] liquid-sheet border-none p-6 shadow-[0_24px_64px_rgba(0,0,0,0.95)] text-center space-y-4"
             >
               {/* Icon (Droplet Glass Container + Amber Icon) */}
               <div className="w-14 h-14 rounded-2xl glass-tile text-[#FF9F0A] mx-auto flex items-center justify-center">

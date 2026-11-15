@@ -26,13 +26,33 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-1-liquid-glass-ios-calendar-refine',
+    category: 'Design & System Architecture',
+    icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
+    title: 'Liquid Glass Optics, Pure iOS Calendar & Mobile Viewport Geometry',
+    dateTime: 'Nov 16 • 12:15 AM',
+    fullDateTime: 'Monday, Nov 16, 2026 • 12:15 AM',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[#0A84FF]',
+    summary: 'Physics-grounded liquid glass specular meniscus engine with zero color banding, native-resolution vector text rendering, pure Apple iOS dark calendar typography, and mobile safe-area viewport alignment.',
+    points: [
+      'Pristine Liquid Glass Optics: Transitioned from multi-stop radial gradients to continuous linear specular sheens with inset 1px specular meniscus rim highlights, completely eliminating 8-bit color banding and dithering noise on dark OLED screens.',
+      'Native Vector Sharpness Engine: Removed GPU layer promotion overrides (translateZ(0) and paint containment) from static cards and day cells, restoring direct subpixel vector crispness across all text, icons, and borders.',
+      'Pure Apple iOS Calendar Design: Eliminated circular badge containers behind day numbers in favor of native dark iOS typography, proportional squircle day cells (h-42/48px), and 6px high-contrast event micro-dots.',
+      'Mobile Viewport & Dynamic Island Clearance: Added dynamic safe-area top inset padding with 64px fallback guarantee, ensuring zero collision with phone status bars, front camera hole-punches, or Dynamic Island.',
+      'Floating Dock Bottom Clearance: Enforced pb-28 bottom scroll spacing so agenda items and calendar schedules remain fully visible above the floating navigation bar.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-0-zero-lag-engine-tier1-refine',
     category: 'Performance & Architecture',
     icon: React.createElement(Compass, { size: 13, weight: 'bold' }),
     title: 'Zero-Lag Compositor Engine & Tier 1 Ultra-OLED Refinement',
     dateTime: 'Nov 14 • 12:30 PM',
     fullDateTime: 'Saturday, Nov 14, 2026 • 12:30 PM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.0',
     colorClass: 'text-[#30D158]',
     summary: 'Cross-tier GPU optimization eliminating dock backdrop blur, 100% hardware-accelerated split calorie ring, native GPU tab slider, mobile meal header spatial refinement, and ultra-deep OLED aesthetics.',
     points: [

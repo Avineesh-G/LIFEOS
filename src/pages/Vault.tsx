@@ -546,10 +546,10 @@ export default function Vault({ data, updateData }: VaultProps) {
 
   // ── Unlocked Main Vault View ──────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-black text-white pb-32 selection:bg-[#8E7CFF]/30">
+    <div className="w-full text-white pb-6 selection:bg-[#8E7CFF]/30">
       {/* ── Top Navigation Bar ── */}
       <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
+        className="sticky top-0 z-30 w-full bg-black/95 shadow-[0_10px_24px_rgba(0,0,0,0.85)]"
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
           paddingBottom: '8px',

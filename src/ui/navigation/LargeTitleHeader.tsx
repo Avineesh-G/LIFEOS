@@ -59,7 +59,7 @@ export function LargeTitleHeader({
       {/* ── 1. Top Toolbar (Sticky, Single Row) ── */}
       <header
         className={`sticky top-0 z-30 w-full transition-colors duration-200 ${
-          isScrolled ? 'bg-black/95 border-b border-white/[0.08]' : 'bg-transparent'
+          isScrolled ? 'bg-black/95 shadow-[0_10px_24px_rgba(0,0,0,0.85)]' : 'bg-transparent'
         }`}
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',

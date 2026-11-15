@@ -287,17 +287,17 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/75 backdrop-blur-md"
+          className="absolute inset-0 bg-black/85"
           onClick={status === 'downloading' || status === 'installing' ? undefined : handleDismiss}
         />
 
-        {/* Natural Glass Modal Card */}
+        {/* Natural Liquid Glass Modal Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 12 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className="relative w-full max-w-[400px] overflow-hidden rounded-[28px] bg-[#141416] shadow-[0_24px_64px_rgba(0,0,0,0.95)] z-10"
+          className="relative w-full max-w-[400px] overflow-hidden rounded-[28px] liquid-sheet border-none shadow-[0_24px_64px_rgba(0,0,0,0.95)] z-10"
         >
           {/* Header */}
           <div className="p-6 pb-4 flex items-start justify-between gap-3">

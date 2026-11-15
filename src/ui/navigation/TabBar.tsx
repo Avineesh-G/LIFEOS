@@ -122,7 +122,7 @@ export function TabBar({
       </AnimatePresence>
 
       {/* ── High-Intensity Liquid Glass Navigation Capsule (Compositor-Optimized) ── */}
-      <div className="h-[52px] px-2.5 rounded-full glass-nav shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
+      <div className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
         <div className="flex-1 flex items-center relative h-[42px]">
           {/* Hardware-Accelerated Sliding Droplet Pill (Zero Layout Reflows) */}
@@ -132,8 +132,8 @@ export function TabBar({
               width: `${100 / Math.max(1, items.length)}%`,
               transform: `translate3d(${Math.max(0, items.findIndex((t) => t.key === currentKey)) * 100}%, 0, 0)`,
               transition: 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1)',
-              background: 'rgba(255, 255, 255, 0.09)',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55)',
+              background: 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
             }}
           />
 

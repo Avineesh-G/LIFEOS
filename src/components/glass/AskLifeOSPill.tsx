@@ -42,14 +42,10 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
         className="
           group relative flex w-full items-center justify-between gap-3 overflow-hidden
           rounded-full px-4 py-3.5 sm:px-5 sm:py-4
-          bg-[#050B0D]/85 dark:bg-[#050B0D]/85 light:bg-white/85
-          border border-[rgba(255,255,255,0.12)] hover:border-[rgba(56,189,248,0.4)]
+          glass-nav nav-rim-light
+          border-none
           shadow-lg transition-all duration-300 touch-manipulation outline-none select-none
         "
-        style={{
-          backdropFilter: isLite ? 'none' : 'blur(24px) saturate(140%)',
-          WebkitBackdropFilter: isLite ? 'none' : 'blur(24px) saturate(140%)',
-        }}
       >
         {/* Soft inner teal glow */}
         {!isLite && (
@@ -92,7 +88,7 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/70 backdrop-blur-md"
+              className="absolute inset-0 bg-black/85"
               onClick={() => setIsOpen(false)}
             />
 
@@ -101,7 +97,7 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-              className="relative z-10 w-full max-w-lg rounded-[28px] border border-white/15 bg-[#050B0D] p-5 shadow-2xl"
+              className="relative z-10 w-full max-w-lg rounded-[28px] border-none liquid-sheet p-5 shadow-2xl"
             >
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center justify-between">

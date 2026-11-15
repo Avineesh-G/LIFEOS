@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 77,
-  versionName: '3.4.0',
-  releaseDate: '2026-11-14',
+  versionCode: 78,
+  versionName: '3.4.1',
+  releaseDate: '2026-11-16',
   apkSize: '10.22 MB',
-  apkSizeBytes: 10721259,
-  releaseNotes: "LifeOS v3.4.0 (Build 77):\n• Zero-Lag Compositor Engine: Completely eliminated dock backdrop blur for butter-smooth 60/120 FPS scrolling across all devices.\n• Hardware-Accelerated Calorie Ring: Precomputed SVG paths and removed SVG filters for 100% GPU rendering.\n• GPU Native TabBar Slider: Replaced layout projection with GPU-accelerated CSS translate3d spring transitions.\n• Mobile Viewport Meal Card Refinement: Streamlined actions and non-wrapping meal time intervals for perfect clearance on narrow screens.\n• Tier 1 Flagship OLED Polish: Ultra-deep ambient drop shadows and seamless borderless surfaces.",
+  apkSizeBytes: 10720922,
+  releaseNotes: "LifeOS v3.4.1 (Build 78):\n• Liquid Glass Optics Refinement: Pristine continuous specular meniscus reflections with zero color banding or dithering artifacts.\n• Native Vector Sharpness: Removed GPU layer promotion overrides, restoring native Retina/AMOLED subpixel vector crispness across all cards and typography.\n• Pure iOS Calendar Architecture: Removed circular badge containers in favor of Apple iOS native dark typography, proportional squircle day cells, and 6px high-contrast micro-dots.\n• Mobile Viewport & Dynamic Island Geometry: Dynamic safe-area top clearance (+52px fallback) completely clearing camera hole-punches, speaker grilles, and Dynamic Island.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

@@ -100,7 +100,7 @@ export function Modal({
               stiffness: 320,
               mass: 0.8,
             }}
-            className={`relative z-10 w-full ${maxWidth} liquid-glass rounded-[28px] p-5 sm:p-6 border border-[var(--card-border)] shadow-2xl overflow-y-auto max-h-[85vh] gpu-composited ${className}`}
+            className={`relative z-10 w-full ${maxWidth} liquid-sheet rounded-[28px] p-5 sm:p-6 border-none shadow-2xl overflow-y-auto max-h-[85vh] gpu-composited ${className}`}
             onClick={(e) => e.stopPropagation()}
           >
             {children}

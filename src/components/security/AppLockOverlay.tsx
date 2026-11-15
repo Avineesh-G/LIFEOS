@@ -92,7 +92,7 @@ export default function AppLockOverlay() {
           onClick={triggerAuth}
         >
           <Fingerprint size={48} weight="duotone" />
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#1C1C1E] border border-white/10 flex items-center justify-center text-white shadow-md">
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[#1C1C1E] border-none flex items-center justify-center text-white shadow-md">
             <LockKey size={14} weight="bold" />
           </div>
         </motion.div>

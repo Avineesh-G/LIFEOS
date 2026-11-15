@@ -126,7 +126,7 @@ export default function CalendarQuickPopup({
         {isAdding ? (
           <form
             onSubmit={handleQuickAdd}
-            className="p-3 rounded-2xl bg-white/[0.05] border border-white/10 space-y-2.5"
+            className="p-3 rounded-2xl glass-tile space-y-2.5"
           >
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-white/70 uppercase tracking-wide">
@@ -146,19 +146,19 @@ export default function CalendarQuickPopup({
               value={quickTitle}
               onChange={(e) => setQuickTitle(e.target.value)}
               placeholder="Event title..."
-              className="w-full px-3 py-2 rounded-xl bg-white/[0.06] border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#5E5CE6]"
+              className="w-full px-3 py-2 rounded-xl glass-flat text-xs text-white placeholder:text-white/30 focus:outline-none"
             />
             <div className="flex items-center gap-2">
               <input
                 type="time"
                 value={quickTime}
                 onChange={(e) => setQuickTime(e.target.value)}
-                className="px-2.5 py-1.5 rounded-xl bg-white/[0.06] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none"
+                className="px-2.5 py-1.5 rounded-xl glass-flat text-xs text-white [color-scheme:dark] focus:outline-none"
               />
               <select
                 value={quickLead}
                 onChange={(e) => setQuickLead(Number(e.target.value))}
-                className="px-2 py-1.5 rounded-xl bg-white/[0.06] border border-white/10 text-[11px] text-white/80 [color-scheme:dark] focus:outline-none"
+                className="px-2 py-1.5 rounded-xl glass-flat text-[11px] text-white/80 [color-scheme:dark] focus:outline-none"
                 title="Reminder lead time"
               >
                 <option value={0} className="bg-[#1C1C1E]">At event</option>
@@ -170,7 +170,7 @@ export default function CalendarQuickPopup({
               </select>
               <button
                 type="submit"
-                className="flex-1 py-1.5 rounded-xl bg-[#5E5CE6] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-1.5 rounded-xl bg-[#5E5CE6] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 Save
               </button>
@@ -183,7 +183,7 @@ export default function CalendarQuickPopup({
               triggerHaptic('light');
               setIsAdding(true);
             }}
-            className="w-full py-2 px-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.07] border border-white/10 flex items-center justify-center gap-1.5 text-xs font-semibold text-white/70 hover:text-white transition-all cursor-pointer"
+            className="w-full py-2.5 px-3 rounded-2xl glass-tile flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer"
           >
             <Plus size={14} weight="bold" className="text-[#5E5CE6]" />
             <span>Add Event for Today</span>
@@ -191,15 +191,15 @@ export default function CalendarQuickPopup({
         )}
 
         {/* Items Stream */}
-        <div className="space-y-2 max-h-[340px] overflow-y-auto pr-0.5 scrollbar-none">
+        <div className="space-y-1.5 max-h-[340px] overflow-y-auto pr-0.5 scrollbar-none">
           {totalTodayItems === 0 && !isAdding && (
-            <div className="py-9 px-4 text-center rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col items-center justify-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-[#5E5CE6] mb-1 shadow-sm">
-                <CalendarBlank size={24} weight="duotone" />
+            <div className="py-7 px-4 text-center rounded-2xl glass-tile flex flex-col items-center justify-center space-y-1.5">
+              <div className="w-10 h-10 rounded-2xl glass-flat flex items-center justify-center text-[#5E5CE6] mb-0.5 shadow-sm">
+                <CalendarBlank size={22} weight="duotone" />
               </div>
-              <p className="text-[14px] font-bold text-white">No Events Today</p>
-              <p className="text-[12px] text-white/50 max-w-xs leading-relaxed">
-                Your schedule is clear for today. Tap above to quickly add an event or class.
+              <p className="text-[13px] font-bold text-white">No Events Today</p>
+              <p className="text-xs text-white/50 max-w-xs leading-relaxed">
+                Your schedule is clear for today. Tap above to quickly add an event.
               </p>
             </div>
           )}
@@ -208,29 +208,28 @@ export default function CalendarQuickPopup({
           {todayEvents.map((ev) => (
             <div
               key={ev.id}
-              className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-3 relative overflow-hidden"
-              style={{ boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.08)' }}
+              className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-3 relative overflow-hidden"
             >
               <div
-                className="absolute left-0 top-0 bottom-0 w-1"
+                className="w-1 h-6 rounded-full shrink-0"
                 style={{ backgroundColor: ev.color || '#5E5CE6' }}
               />
               <div className="pl-1.5 min-w-0 flex-1">
                 <h4 className="text-xs font-semibold text-white truncate">{ev.title}</h4>
                 <div className="flex items-center gap-2 text-[11px] text-white/40 font-mono mt-0.5">
                   <span className="flex items-center gap-1">
-                    <Clock size={11} />
+                    <Clock size={12} />
                     {ev.isAllDay ? 'All-Day' : `${ev.startTime || '10:00'} – ${ev.endTime || '11:00'}`}
                   </span>
                   {ev.notificationLeadMinutes !== -1 && (
-                    <Bell size={11} weight="fill" className="text-[#FF9F0A]" />
+                    <Bell size={12} weight="fill" className="text-[#FF9F0A]" />
                   )}
                 </div>
               </div>
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0"
                 style={{
-                  backgroundColor: `${ev.color || '#5E5CE6'}15`,
+                  backgroundColor: `${ev.color || '#5E5CE6'}18`,
                   color: ev.color || '#5E5CE6',
                 }}
               >
@@ -244,7 +243,7 @@ export default function CalendarQuickPopup({
             <div
               key={t.id}
               onClick={() => handleToggleTask(t.id)}
-              className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between gap-3 cursor-pointer select-none"
+              className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-2.5 cursor-pointer select-none"
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <button
@@ -282,7 +281,7 @@ export default function CalendarQuickPopup({
           {todayClasses.map((c) => (
             <div
               key={c.id}
-              className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3"
+              className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-2.5"
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-[#5E5CE6]/15 text-[#5E5CE6] flex items-center justify-center shrink-0">
@@ -303,7 +302,7 @@ export default function CalendarQuickPopup({
 
           {/* 4. Workout */}
           {todayWorkout && (
-            <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-3">
+            <div className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-[#30D158]/15 text-[#30D158] flex items-center justify-center shrink-0">
                   <Barbell size={15} weight="duotone" />

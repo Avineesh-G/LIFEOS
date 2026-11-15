@@ -74,14 +74,14 @@ export function Sheet({
             className="absolute inset-0 bg-black/85 sheet-backdrop cursor-pointer"
           />
 
-          {/* Inset Sheet Surface (Pure Dark, Border-Free) */}
+          {/* Inset Sheet Surface (Liquid Water Glass) */}
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={MOTION_SPRINGS.sheet}
             style={{ willChange: 'transform' }}
-            className={`relative mx-2 mb-2 rounded-[32px] ${heightStyle} bg-[#141416] flex flex-col overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.95)] z-10 ${className}`}
+            className={`relative mx-2 mb-2 rounded-[32px] ${heightStyle} liquid-sheet flex flex-col overflow-hidden z-10 ${className}`}
           >
             {/* Grabber Handle */}
             <motion.div
@@ -91,7 +91,7 @@ export function Sheet({
               onDragEnd={handleDragEnd}
               className="w-full pt-3 pb-2 flex flex-col items-center justify-center shrink-0 cursor-grab active:cursor-grabbing select-none"
             >
-              <div className="w-10 h-1.5 rounded-full bg-white/30 hover:bg-white/50 transition-colors" />
+              <div className="w-10 h-1.5 rounded-full bg-white/35 shadow-[0_1px_2px_rgba(0,0,0,0.5)] hover:bg-white/55 transition-colors" />
             </motion.div>
 
             {/* Optional Title Header */}

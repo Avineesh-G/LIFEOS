@@ -209,7 +209,7 @@ export default function FloatingPopup({
                 setIsExpanded(true);
               }
             } : undefined}
-            className={`fixed z-[150] left-2 right-2 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-16px)] sm:w-[calc(100vw-28px)] max-w-full ${maxWidth} pointer-events-auto bg-[#1C1C1E] text-white border border-white/10 shadow-2xl rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-150 gpu-composited will-change-transform`}
+            className={`fixed z-[150] left-2 right-2 sm:left-3.5 sm:right-3.5 mx-auto w-[calc(100vw-16px)] sm:w-[calc(100vw-28px)] max-w-full ${maxWidth} pointer-events-auto liquid-sheet text-white border-none shadow-2xl rounded-[28px] overflow-hidden flex flex-col transition-[max-height,height,background-color] duration-150 gpu-composited will-change-transform`}
             style={{
               bottom: keyboardOffset > 0
                 ? `calc(${keyboardOffset}px + 8px)`
@@ -233,12 +233,12 @@ export default function FloatingPopup({
               }}
               className="w-full py-2 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
-              <div className="w-9 h-1 rounded-full bg-white/20 hover:bg-white/40 transition-colors" />
+              <div className="w-9 h-1 rounded-full bg-white/35 shadow-[0_1px_2px_rgba(0,0,0,0.5)] hover:bg-white/55 transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
             {(title || icon) && (
-              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-white/10 shrink-0 select-none">
+              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-white/[0.06] shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {icon && (
                     <div className="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0">
@@ -286,7 +286,7 @@ export default function FloatingPopup({
 
             {/* Footer Actions (for form variant if onSave or cancel provided) */}
             {variant === 'form' && onSave && (
-              <div className="p-3.5 sm:p-4 border-t border-white/10 bg-[#161618] flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 border-t border-white/[0.06] bg-[#141416] flex items-center justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleAttemptClose}

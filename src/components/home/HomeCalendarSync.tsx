@@ -224,7 +224,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
           className="flex items-center gap-2 cursor-pointer group active:scale-[0.99] transition-transform touch-manipulation"
           title="Open today's event schedule"
         >
-          <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/10 text-[#5E5CE6] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors shadow-sm">
+          <div className="w-8 h-8 rounded-xl glass-tile text-[#5E5CE6] flex items-center justify-center transition-colors shadow-sm">
             <CalendarDots size={18} weight="duotone" />
           </div>
           <div>
@@ -324,42 +324,42 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   !isCurrentMonth ? 'opacity-25' : 'opacity-100'
                 }`}
               >
-                {/* Active Day Liquid Droplet Indicator (Pure Dark Droplet, No Color Fill) */}
+                {/* Active Day Liquid Droplet Indicator */}
                 {isSelected && (
                   <motion.div
                     layoutId="calendar-selected-thumb"
                     className="absolute inset-0 rounded-2xl -z-10"
                     style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.6)',
+                      background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(40, 40, 48, 0.95) 100%)',
+                      border: 'none',
+                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 12px rgba(0, 0, 0, 0.55)',
                     }}
                     transition={MOTION_SPRINGS.snappy}
                   />
                 )}
 
-                {/* Day Number (Color on Letters/Numbers Only) */}
+                {/* Day Number: Pure iOS Typography (No Circular Badges) */}
                 <span
-                  className={`text-[13px] font-semibold tabular-nums leading-none ${
+                  className={`text-[13px] tabular-nums leading-none ${
                     isCurrentDay
-                      ? 'text-[#0A84FF] font-bold'
+                      ? 'text-[#0A84FF] font-black'
                       : isSelected
                       ? 'text-white font-bold'
-                      : 'text-[rgba(235,235,245,0.85)]'
+                      : 'text-[rgba(235,235,245,0.85)] font-semibold'
                   }`}
                 >
                   {format(day, 'd')}
                 </span>
 
                 {/* Sync Event Multi-Dots */}
-                <div className="flex items-center justify-center gap-0.5 mt-1 h-1.5">
+                <div className="flex items-center justify-center gap-1 mt-1 h-1.5">
                   {syncEntry && syncEntry.events && syncEntry.events.length > 0 && (
-                    <span className="w-1 h-1 rounded-full bg-[#5E5CE6]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#5E5CE6] shrink-0" />
                   )}
-                  {hasTasks && <span className="w-1 h-1 rounded-full bg-[#0A84FF]" />}
-                  {hasClasses && <span className="w-1 h-1 rounded-full bg-[#BF5AF2]" />}
-                  {hasOutings && <span className="w-1 h-1 rounded-full bg-[#30D158]" />}
-                  {hasWorkout && <span className="w-1 h-1 rounded-full bg-[#FF9F0A]" />}
+                  {hasTasks && <span className="w-1.5 h-1.5 rounded-full bg-[#0A84FF] shrink-0" />}
+                  {hasClasses && <span className="w-1.5 h-1.5 rounded-full bg-[#BF5AF2] shrink-0" />}
+                  {hasOutings && <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] shrink-0" />}
+                  {hasWorkout && <span className="w-1.5 h-1.5 rounded-full bg-[#FF9F0A] shrink-0" />}
                 </div>
               </motion.button>
             );
@@ -367,7 +367,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-center gap-4 pt-2 border-t border-white/[0.06] text-[10.5px] text-[rgba(235,235,245,0.55)] font-medium">
+        <div className="flex items-center justify-center gap-4 pt-2 border-t border-white/[0.06] text-[11px] text-[rgba(235,235,245,0.55)] font-medium">
           <div className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-[#0A84FF]" />
             <span>Tasks</span>

@@ -436,8 +436,7 @@ export function NavigationHubSheet({
             dragElastic={{ top: 0.05, bottom: 0.6 }}
             style={{
               y: dragY,
-              backgroundColor: sheetBg,
-              border: `0.5px solid rgba(${aR}, ${aG}, ${aB}, 0.35)`,
+              border: 'none',
               bottom: 'calc(var(--nav-h, 64px) + var(--sab, env(safe-area-inset-bottom, 0px)) + 16px)',
               contain: 'layout paint style',
               maxHeight: 'min(76dvh, 480px)',
@@ -448,7 +447,7 @@ export function NavigationHubSheet({
                 onClose();
               }
             }}
-            className="fixed left-2 right-2 max-w-[560px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 shadow-[0_20px_50px_rgba(0,0,0,0.22)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.65)] select-none pointer-events-auto flex flex-col gpu-composited"
+            className="fixed left-2 right-2 max-w-[560px] mx-auto z-[90] overflow-hidden rounded-t-[28px] rounded-b-[24px] px-3 pb-3 pt-0 liquid-sheet shadow-[0_24px_60px_rgba(0,0,0,0.85)] select-none pointer-events-auto flex flex-col gpu-composited"
           >
             {/* ── Active Interface Corner Accent Blob ── */}
             <div
@@ -468,14 +467,7 @@ export function NavigationHubSheet({
                 dragControls.start(e);
               }}
             >
-              <div
-                className="w-8 h-1 rounded-[2px] transition-colors"
-                style={{
-                  backgroundColor: isDark
-                    ? 'rgba(255, 255, 255, 0.22)'
-                    : 'rgba(0, 0, 0, 0.18)',
-                }}
-              />
+              <div className="w-10 h-1.5 rounded-full bg-white/35 shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-colors" />
             </div>
 
             {/* ── Header (Fixed 44px height across both normal and edit modes) ── */}
