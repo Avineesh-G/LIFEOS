@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, startTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -143,11 +143,19 @@ export default function Layout({
     return () => { cancelled = true; };
   }, []);
 
-  // Sync scheduled notifications on data changes
+    // Defer and debounce background notification sync so it never competes with initial app navigation
   useEffect(() => {
-    if (data) {
-      syncAllNotifications(data).catch(() => {});
-    }
+    if (!data) return;
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          syncAllNotifications(data).catch(() => {});
+        }, { timeout: 4000 });
+      } else {
+        syncAllNotifications(data).catch(() => {});
+      }
+    }, 2500);
+    return () => clearTimeout(timer);
   }, [data?.timetable, data?.tasks, data?.nutritionLogs, data?.workoutLogs, data?.calendarEvents]);
 
   // Smooth auto-hiding header on scroll down, reappearing on scroll up
@@ -173,22 +181,27 @@ export default function Layout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Reload & Sync handler with visible hardware-accelerated rotation feedback
+  // Reload & Refresh handler: syncs cloud data and cleanly refreshes the application
   const handleReload = async () => {
     if (isReloading) return;
     triggerHaptic('medium');
     setIsReloading(true);
-    const minSpinPromise = new Promise((resolve) => setTimeout(resolve, 850));
+    const minSpinPromise = new Promise((resolve) => setTimeout(resolve, 650));
     try {
       const refreshPromise = refresh ? refresh() : Promise.resolve();
-      await Promise.all([refreshPromise, minSpinPromise]);
+      await Promise.all([
+        Promise.race([refreshPromise, new Promise((resolve) => setTimeout(resolve, 800))]),
+        minSpinPromise,
+      ]);
       triggerHaptic('success');
     } catch (err) {
       console.warn('Refresh error:', err);
       await minSpinPromise;
       triggerHaptic('error');
     } finally {
-      setIsReloading(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   };
 
@@ -275,11 +288,13 @@ export default function Layout({
     },
   ];
 
-  const handleTabChange = (key: string) => {
-    triggerHaptic('selection');
-    if (key === 'home') navigate('/');
-    else if (key === slot2Item.id) navigate(slot2Item.route);
-    else if (key === slot3Item.id) navigate(slot3Item.route);
+    const handleTabChange = (key: string) => {
+    triggerHaptic('medium');
+    startTransition(() => {
+      if (key === 'home') navigate('/');
+      else if (key === slot2Item.id) navigate(slot2Item.route);
+      else if (key === slot3Item.id) navigate(slot3Item.route);
+    });
   };
 
   const handleCustomizeSlot = (slotKey: string) => {
@@ -517,12 +532,14 @@ export default function Layout({
                 onChange={handleTabChange}
                 onCustomizeSlot={handleCustomizeSlot}
                 onAiClick={() => {
-                  triggerHaptic('light');
-                  if (pathname === '/ai' || pathname === '/chat') {
-                    navigate('/');
-                  } else {
-                    navigate('/ai');
-                  }
+                  triggerHaptic('medium');
+                  startTransition(() => {
+                    if (pathname === '/ai' || pathname === '/chat') {
+                      navigate('/');
+                    } else {
+                      navigate('/ai');
+                    }
+                  });
                 }}
               />
             </div>

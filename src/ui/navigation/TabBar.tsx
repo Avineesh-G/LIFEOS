@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LunaComicBubbleIcon, SlidersHorizontal } from '../tokens/icons';
+import { LunaComicBubbleIcon } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
 import { MOTION_SPRINGS } from '../tokens/motion';
 
@@ -28,7 +28,8 @@ export interface TabBarProps {
 
 /**
  * Pure Apple Liquid Navigation Bar
- * Continuous, sleek, borderless liquid glass capsule with seamlessly integrated Luna AI chat bot.
+ * Features a physics-grounded Hold & Drag fluid droplet gesture with 120Hz responsive tracking,
+ * tactile slot-boundary haptics, and seamless integration with Luna AI.
  */
 export function TabBar({
   items,
@@ -41,67 +42,146 @@ export function TabBar({
 }: TabBarProps) {
   const [activeMenuTab, setActiveMenuTab] = useState<string | null>(null);
   const [optimisticKey, setOptimisticKey] = useState<string | null>(null);
+  
+  // Hold & Drag Gesture State
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [dragHoverIndex, setDragHoverIndex] = useState<number | null>(null);
+
+  const trackRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<any>(null);
   const isLongPressRef = useRef(false);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
+  const lastHapticIndexRef = useRef<number>(-1);
 
   // Sync optimistic key back when parent activeKey updates
-  React.useEffect(() => {
+  useEffect(() => {
     setOptimisticKey(null);
   }, [activeKey]);
 
+  const activeIndex = Math.max(0, items.findIndex((t) => t.key === (optimisticKey || activeKey)));
   const currentKey = optimisticKey || activeKey;
 
-  const handlePressStart = (tab: TabItem, clientX?: number, clientY?: number) => {
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+      }
+    };
+  }, []);
+
+  const calculateSlotFromCoord = useCallback((clientX: number): { index: number; offsetPx: number } => {
+    if (!trackRef.current) return { index: activeIndex, offsetPx: 0 };
+    const rect = trackRef.current.getBoundingClientRect();
+    const trackWidth = rect.width;
+    const tabCount = Math.max(1, items.length);
+    const tabWidth = trackWidth / tabCount;
+    
+    // Relative X clamped within track bounds
+    const relX = Math.max(0, Math.min(trackWidth, clientX - rect.left));
+    const targetIndex = Math.min(tabCount - 1, Math.max(0, Math.floor(relX / tabWidth)));
+    
+    // Calculate droplet X position centered on finger or clamped
+    const dropletLeft = Math.max(0, Math.min(trackWidth - tabWidth, relX - tabWidth / 2));
+    
+    return { index: targetIndex, offsetPx: dropletLeft };
+  }, [items.length, activeIndex]);
+
+  // Touch & Pointer Handlers for Hold & Drag Gesture
+  const handlePointerStart = (clientX: number, clientY: number, tab?: TabItem) => {
     isLongPressRef.current = false;
-    if (clientX !== undefined && clientY !== undefined) {
-      touchStartPosRef.current = { x: clientX, y: clientY };
-    }
+    isDraggingRef.current = false;
+    touchStartPosRef.current = { x: clientX, y: clientY };
+    lastHapticIndexRef.current = activeIndex;
+
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
     }
+
+    // Long-press timer for slot customization (if user holds without dragging)
     longPressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      triggerHaptic('medium');
-      if (tab.isCustomizable && onCustomizeSlot) {
-        onCustomizeSlot(tab.key);
-      } else if (tab.key === 'home' && onCustomizeSlot) {
-        onCustomizeSlot('home');
-      } else if (tab.quickActions && tab.quickActions.length > 0) {
-        setActiveMenuTab(tab.key);
+      if (!isDraggingRef.current) {
+        isLongPressRef.current = true;
+        triggerHaptic('medium');
+        if (tab?.isCustomizable && onCustomizeSlot) {
+          onCustomizeSlot(tab.key);
+        } else if (tab?.key === 'home' && onCustomizeSlot) {
+          onCustomizeSlot('home');
+        } else if (tab?.quickActions && tab.quickActions.length > 0) {
+          setActiveMenuTab(tab.key);
+        }
       }
     }, 600);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!touchStartPosRef.current || !longPressTimerRef.current) return;
-    const touch = e.touches[0];
-    if (!touch) return;
-    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
-    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
-    if (dx > 10 || dy > 10) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
+  const handlePointerMove = (clientX: number, clientY: number) => {
+    if (!touchStartPosRef.current) return;
+    const dx = Math.abs(clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(clientY - touchStartPosRef.current.y);
+
+    // If movement exceeds threshold, cancel long press and engage fluid droplet drag
+    if (dx > 8 || dy > 8) {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+
+      if (!isDraggingRef.current && dx > 8) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+        triggerHaptic('medium');
+      }
+
+      if (isDraggingRef.current) {
+        const { index, offsetPx } = calculateSlotFromCoord(clientX);
+        setDragOffsetPx(offsetPx);
+        setDragHoverIndex(index);
+
+        // Tactile boundary crossing haptics
+        if (index !== lastHapticIndexRef.current) {
+          lastHapticIndexRef.current = index;
+          triggerHaptic('medium');
+          setOptimisticKey(items[index].key);
+        }
+      }
     }
   };
 
-  const handlePressEnd = () => {
-    touchStartPosRef.current = null;
+  const handlePointerEnd = (clientX?: number) => {
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
+
+    if (isDraggingRef.current && clientX !== undefined) {
+      const { index } = calculateSlotFromCoord(clientX);
+      triggerHaptic('medium');
+      const targetTab = items[index];
+      if (targetTab) {
+        setOptimisticKey(targetTab.key);
+        onChange(targetTab.key);
+      }
+    }
+
+    touchStartPosRef.current = null;
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    setDragHoverIndex(null);
   };
 
   const handleTabClick = (tab: TabItem) => {
-    if (isLongPressRef.current) {
+    if (isLongPressRef.current || isDraggingRef.current) {
       isLongPressRef.current = false;
       return;
     }
-    triggerHaptic('selection');
+    triggerHaptic('medium');
     setOptimisticKey(tab.key);
     onChange(tab.key);
   };
+
+  const tabWidthPercent = 100 / Math.max(1, items.length);
 
   return (
     <div className={`relative flex items-center justify-center pointer-events-auto select-none gap-2.5 ${className}`}>
@@ -127,7 +207,7 @@ export function TabBar({
                     key={i}
                     type="button"
                     onClick={() => {
-                      triggerHaptic('light');
+                      triggerHaptic('medium');
                       qa.action();
                       setActiveMenuTab(null);
                     }}
@@ -141,24 +221,46 @@ export function TabBar({
         )}
       </AnimatePresence>
 
-      {/* ── High-Intensity Liquid Glass Navigation Capsule (Compositor-Optimized) ── */}
-      <div className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px]">
+      {/* ── High-Intensity Liquid Glass Navigation Capsule with Fluid Drag Tracking ── */}
+      <div
+        className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px] touch-none cursor-pointer"
+        onMouseMove={(e) => isDraggingRef.current && handlePointerMove(e.clientX, e.clientY)}
+        onMouseUp={(e) => handlePointerEnd(e.clientX)}
+        onMouseLeave={() => isDraggingRef.current && handlePointerEnd()}
+        onTouchMove={(e) => {
+          const t = e.touches[0];
+          if (t) handlePointerMove(t.clientX, t.clientY);
+        }}
+        onTouchEnd={(e) => {
+          const t = e.changedTouches[0];
+          handlePointerEnd(t?.clientX);
+        }}
+        onTouchCancel={() => handlePointerEnd()}
+      >
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
-        <div className="flex-1 flex items-center relative h-[42px]">
-          {/* Hardware-Accelerated Sliding Droplet Pill (Zero Layout Reflows) */}
+        <div ref={trackRef} className="flex-1 flex items-center relative h-[42px]">
+          {/* Fluid Hold & Drag Droplet Pill */}
           <div
-            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0"
+            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform"
             style={{
-              width: `${100 / Math.max(1, items.length)}%`,
-              transform: `translate3d(${Math.max(0, items.findIndex((t) => t.key === currentKey)) * 100}%, 0, 0)`,
-              transition: 'transform 0.24s cubic-bezier(0.16, 1, 0.3, 1)',
-              background: 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
-              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+              width: `${tabWidthPercent}%`,
+              transform: isDragging
+                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.05)`
+                : `translate3d(${activeIndex * 100}%, 0, 0) scale(1)`,
+              transition: isDragging
+                ? 'scale 0.15s ease'
+                : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), scale 0.2s ease',
+              background: isDragging
+                ? 'radial-gradient(ellipse 95% 70% at 50% 0%, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 65%, transparent 95%), rgba(255, 255, 255, 0.14)'
+                : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
+              boxShadow: isDragging
+                ? '0 8px 24px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.25)'
+                : '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
             }}
           />
 
-          {items.map((tab) => {
-            const isSelected = tab.key === currentKey;
+          {items.map((tab, idx) => {
+            const isSelected = isDragging ? dragHoverIndex === idx : tab.key === currentKey;
             const tint = tab.tint || '#0A84FF';
 
             return (
@@ -166,19 +268,20 @@ export function TabBar({
                 key={tab.key}
                 type="button"
                 aria-label={tab.label}
-                onMouseDown={() => handlePressStart(tab)}
-                onMouseUp={handlePressEnd}
-                onMouseLeave={handlePressEnd}
-                onTouchStart={(e) => handlePressStart(tab, e.touches[0]?.clientX, e.touches[0]?.clientY)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handlePressEnd}
-                onTouchCancel={handlePressEnd}
+                onMouseDown={(e) => handlePointerStart(e.clientX, e.clientY, tab)}
+                onTouchStart={(e) => {
+                  const t = e.touches[0];
+                  if (t) handlePointerStart(t.clientX, t.clientY, tab);
+                }}
                 onClick={() => handleTabClick(tab)}
                 className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1 touch-manipulation"
                 style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.60)' }}
               >
-                {/* Icon */}
-                <div className="flex items-center justify-center text-[19px] shrink-0">
+                {/* Icon with smooth scale micro-interaction */}
+                <div
+                  className="flex items-center justify-center text-[19px] shrink-0 transition-transform duration-150"
+                  style={{ transform: isSelected ? 'scale(1.08)' : 'scale(1)' }}
+                >
                   {isSelected ? tab.activeIcon : tab.icon}
                 </div>
 

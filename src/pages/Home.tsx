@@ -156,13 +156,12 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         {/* ── 2. 2x2 Bento Tiles (glass-tile) ── */}
         <div className="grid grid-cols-2 gap-3 select-none">
           {/* Tile A: Calories */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
+          <div
             onClick={() => {
-              triggerHaptic('nav');
+              triggerHaptic('medium');
               navigate('/nutrition');
             }}
-            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
             <div className="flex items-center justify-between">
               <span className="text-[20px] font-bold text-white tabular-nums tracking-tight leading-none">
@@ -177,16 +176,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               <div className="text-[13px] font-semibold text-white">Daily Fuel</div>
               <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Calories today</div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Tile B: Spending */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
+          <div
             onClick={() => {
-              triggerHaptic('nav');
+              triggerHaptic('medium');
               navigate('/spending');
             }}
-            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
             <div className="flex items-center justify-between">
               <span className="text-[20px] font-bold text-[#30D158] tabular-nums tracking-tight leading-none">
@@ -200,16 +198,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               <div className="text-[13px] font-semibold text-white">Daily Ledger</div>
               <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Spent today</div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Tile C: Workout */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
+          <div
             onClick={() => {
-              triggerHaptic('nav');
+              triggerHaptic('medium');
               navigate('/gym');
             }}
-            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
             <div className="flex items-center justify-between">
               <span
@@ -229,16 +226,15 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
               </div>
               <div className="text-[11px] text-[rgba(235,235,245,0.55)] mt-0.5">Gym routine</div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Tile D: Water */}
-          <motion.div
-            whileTap={{ scale: 0.97 }}
+          <div
             onClick={() => {
-              triggerHaptic('nav');
+              triggerHaptic('medium');
               navigate('/nutrition');
             }}
-            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer group"
+            className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer group select-none"
           >
             <div className="flex items-center justify-between">
               <span className="text-[20px] font-bold text-[#64D2FF] tabular-nums tracking-tight leading-none">
@@ -263,7 +259,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 +250ml
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* ── 2. Tasks Grouped List ── */}
@@ -308,8 +304,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             Quick Hub
           </div>
           <div className="grid grid-cols-4 gap-2.5">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => {
                 triggerHaptic('nav');
                 navigate('/timetable');
@@ -320,10 +315,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 <CalendarCheck size={18} weight="duotone" />
               </div>
               <span className="text-[11.5px] font-semibold text-white/90">Classes</span>
-            </motion.button>
+            </button>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => {
                 triggerHaptic('nav');
                 navigate('/tasks');
@@ -334,10 +328,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 <CheckSquare size={18} weight="duotone" />
               </div>
               <span className="text-[11.5px] font-semibold text-white/90">Tasks</span>
-            </motion.button>
+            </button>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => {
                 triggerHaptic('nav');
                 navigate('/notes');
@@ -348,10 +341,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 <NotePencil size={18} weight="duotone" />
               </div>
               <span className="text-[11.5px] font-semibold text-white/90">Notes</span>
-            </motion.button>
+            </button>
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => {
                 triggerHaptic('nav');
                 navigate('/outings');
@@ -362,7 +354,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 <Receipt size={18} weight="duotone" />
               </div>
               <span className="text-[11.5px] font-semibold text-white/90">Outings</span>
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>

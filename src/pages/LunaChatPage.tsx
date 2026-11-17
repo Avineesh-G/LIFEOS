@@ -400,9 +400,9 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
   // Auto-resize textarea as user types
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = '36px';
       const scrollHeight = inputRef.current.scrollHeight;
-      inputRef.current.style.height = `${Math.min(Math.max(scrollHeight, 24), 130)}px`;
+      inputRef.current.style.height = `${Math.min(Math.max(scrollHeight, 36), 130)}px`;
     }
   }, [inputQuery]);
 
@@ -1752,12 +1752,18 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
           paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 12px) + 6px)',
         }}
       >
-        {/* Soft Ambient Vignette & Blur Shield (Completely isolates chat responses from input bar & disclaimer) */}
+        {/* Apple Liquid Glass Progressive Blur & Ambient Scrim Shield */}
         <div
-          className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black via-black/95 via-black/80 to-transparent backdrop-blur-md pointer-events-none"
+          className="absolute inset-x-0 bottom-0 h-44 pointer-events-none"
           style={{
-            maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+            backdropFilter: 'blur(24px) saturate(190%) brightness(0.95)',
+            WebkitBackdropFilter: 'blur(24px) saturate(190%) brightness(0.95)',
+            maskImage:
+              'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.96) 20%, rgba(0,0,0,0.82) 42%, rgba(0,0,0,0.50) 68%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage:
+              'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.96) 20%, rgba(0,0,0,0.82) 42%, rgba(0,0,0,0.50) 68%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)',
+            background:
+              'linear-gradient(to top, rgba(8,8,12,0.82) 0%, rgba(8,8,12,0.72) 20%, rgba(8,8,12,0.54) 42%, rgba(8,8,12,0.30) 68%, rgba(8,8,12,0.10) 88%, rgba(8,8,12,0) 100%)',
           }}
           aria-hidden="true"
         />
@@ -1820,80 +1826,84 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
             onChange={handleFileInputChange}
           />
 
-          {/* Floating Capsule Input Bar */}
-          <div className="p-1.5 sm:p-2 rounded-[28px] glass-nav nav-rim-light shadow-2xl flex items-end gap-1.5 border-none">
-            {/* Attachment Button (+) */}
-            <button
-              type="button"
-              onClick={() => {
-                triggerHaptic('light');
-                setIsAttachMenuOpen((prev) => !prev);
-              }}
-              className="w-10 h-10 rounded-full glass-tile flex items-center justify-center text-white/70 hover:text-white active:scale-90 transition-all cursor-pointer shrink-0"
-              title="Attach photo"
-              aria-label="Attach photo"
-            >
-              <Plus size={19} weight="bold" />
-            </button>
+          {/* Main Input Dock: Matching Height Typing Capsule + Standalone Circular Send Pod */}
+          <div className="flex items-end gap-2 w-full">
+            {/* Resized & Refined Typing Bar Capsule */}
+            <div className="flex-1 min-w-0 min-h-[50px] p-1.5 rounded-[25px] glass-nav nav-rim-light shadow-2xl flex items-center gap-1 border-none">
+              {/* Attachment Button (+) */}
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('medium');
+                  setIsAttachMenuOpen((prev) => !prev);
+                }}
+                className="w-[38px] h-[38px] rounded-full glass-tile flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-all cursor-pointer shrink-0"
+                title="Attach photo"
+                aria-label="Attach photo"
+              >
+                <Plus size={18} weight="bold" />
+              </button>
 
-            {/* Auto-Expanding Textarea */}
-            <textarea
-              ref={inputRef}
-              rows={1}
-              value={inputQuery}
-              onChange={(e) => setInputQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendQuery();
-                }
-              }}
-              placeholder="Message Luna..."
-              className="flex-1 py-2.5 px-2.5 bg-transparent text-[13.5px] sm:text-sm text-white placeholder:text-white/35 focus:outline-none resize-none max-h-36 font-sans leading-relaxed"
-            />
+              {/* Auto-Expanding Textarea */}
+              <textarea
+                ref={inputRef}
+                rows={1}
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendQuery();
+                  }
+                }}
+                placeholder="Message Luna..."
+                className="flex-1 py-1.5 px-2 bg-transparent text-[14px] leading-[22px] text-white placeholder:text-white/35 focus:outline-none resize-none max-h-36 font-sans"
+                style={{ height: '36px' }}
+              />
 
-            {/* Microphone Dictation Button */}
-            <button
-              type="button"
-              onClick={handleToggleVoiceRecord}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                isRecording
-                  ? 'bg-rose-500 text-white animate-pulse'
-                  : 'glass-tile text-white/70 hover:text-white active:scale-90'
-              }`}
-              title="Voice Dictation"
-              aria-label="Voice Dictation"
-            >
-              {isRecording ? <Stop size={18} weight="fill" /> : <Microphone size={18} weight="bold" />}
-            </button>
+              {/* Microphone Dictation Button */}
+              <button
+                type="button"
+                onClick={handleToggleVoiceRecord}
+                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                  isRecording
+                    ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)]'
+                    : 'glass-tile text-white/70 hover:text-white active:scale-95'
+                }`}
+                title="Voice Dictation"
+                aria-label="Voice Dictation"
+              >
+                {isRecording ? <Stop size={16} weight="fill" /> : <Microphone size={17} weight="bold" />}
+              </button>
+            </div>
 
-            {/* Dynamic Send Button (Morphs to Solid Filled Arrow when text is present, or Stop when generating) */}
+            {/* Separate Standalone Circular Send Pod - Exact Matching 50px Height */}
             <button
               type="button"
               disabled={!isGenerating && (!inputQuery.trim() && attachedImages.length === 0)}
               onClick={() => {
+                triggerHaptic('medium');
                 if (isGenerating) {
                   abortControllerRef.current?.abort();
                   setIsGenerating(false);
-                  triggerHaptic('light');
                 } else {
                   handleSendQuery();
                 }
               }}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+              className={`w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all shrink-0 select-none shadow-xl ${
                 isGenerating
-                  ? 'bg-white/20 text-white hover:bg-white/30 active:scale-95 shadow-md'
+                  ? 'bg-white/20 text-white hover:bg-white/30 active:scale-95 shadow-[0_0_14px_rgba(255,255,255,0.25)] cursor-pointer'
                   : inputQuery.trim().length > 0 || attachedImages.length > 0
-                  ? 'bg-white text-black active:scale-95 shadow-md'
-                  : 'opacity-30 text-white/40 cursor-default'
+                  ? 'bg-[#0A84FF] text-white hover:bg-[#0A84FF]/90 active:scale-95 shadow-[0_0_18px_rgba(10,132,255,0.45)] cursor-pointer'
+                  : 'bg-[#232329] text-white/70 hover:text-white cursor-default shadow-lg'
               }`}
-              title={isGenerating ? 'Stop generating' : 'Send query'}
-              aria-label={isGenerating ? 'Stop generating' : 'Send query'}
+              title={isGenerating ? 'Stop generating' : 'Send message'}
+              aria-label={isGenerating ? 'Stop generating' : 'Send message'}
             >
               {isGenerating ? (
                 <Square size={14} weight="fill" />
               ) : (
-                <PaperPlaneRight size={18} weight="fill" />
+                <PaperPlaneRight size={20} weight="fill" className="translate-x-[1px]" />
               )}
             </button>
           </div>

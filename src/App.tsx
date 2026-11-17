@@ -417,17 +417,27 @@ function App() {
 
   const safeData = data || DEFAULT_DATA;
 
-  // Prompt phone OS native notification permission directly on app start if not yet allowed
+    // Prompt phone OS native notification permission directly on app start if not yet allowed (deferred for zero-jank initial navigation)
   useEffect(() => {
     if (user) {
       checkNotificationPermission().then(granted => {
         if (!granted) {
           const t = setTimeout(() => {
             requestAndSyncNotifications(safeData, updateData);
-          }, 1000);
+          }, 2000);
           return () => clearTimeout(t);
         } else {
-          syncAllNotifications(safeData).catch(() => {});
+          // Defer initial notification synchronization by 2.5s so startup page navigation is instantaneous
+          const t = setTimeout(() => {
+            if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+              (window as any).requestIdleCallback(() => {
+                syncAllNotifications(safeData).catch(() => {});
+              }, { timeout: 4000 });
+            } else {
+              syncAllNotifications(safeData).catch(() => {});
+            }
+          }, 2500);
+          return () => clearTimeout(t);
         }
       });
     }

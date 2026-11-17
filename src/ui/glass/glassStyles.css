@@ -389,7 +389,7 @@
   background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* Edge Fades */
+/* ── Apple Liquid Glass Progressive Blur & Ambient Scrim Drop ── */
 .scroll-edge-top {
   display: none !important;
 }
@@ -399,9 +399,63 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 110px;
-  background: linear-gradient(to top, #000000 0%, #000000 70%, rgba(0, 0, 0, 0) 100%);
+  height: 125px;
   pointer-events: none;
   z-index: 25;
+
+  /* Tier 1 / Fallback: 10-stop cubic smooth easing scrim */
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 14, 0.88) 0%,
+    rgba(10, 10, 14, 0.82) 15%,
+    rgba(10, 10, 14, 0.70) 30%,
+    rgba(10, 10, 14, 0.52) 48%,
+    rgba(10, 10, 14, 0.32) 65%,
+    rgba(10, 10, 14, 0.16) 80%,
+    rgba(10, 10, 14, 0.05) 92%,
+    rgba(10, 10, 14, 0) 100%
+  );
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .scroll-edge-bottom {
+    /* Progressive frosted glass with iOS saturation boost & contrast enhancement */
+    backdrop-filter: blur(24px) saturate(190%) brightness(0.95);
+    -webkit-backdrop-filter: blur(24px) saturate(190%) brightness(0.95);
+    
+    /* True Progressive Alpha Mask (S-Curve Gaussian Falloff) */
+    mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.96) 20%,
+      rgba(0, 0, 0, 0.82) 40%,
+      rgba(0, 0, 0, 0.55) 62%,
+      rgba(0, 0, 0, 0.25) 82%,
+      rgba(0, 0, 0, 0.06) 94%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0.96) 20%,
+      rgba(0, 0, 0, 0.82) 40%,
+      rgba(0, 0, 0, 0.55) 62%,
+      rgba(0, 0, 0, 0.25) 82%,
+      rgba(0, 0, 0, 0.06) 94%,
+      rgba(0, 0, 0, 0) 100%
+    );
+
+    /* Ultra-refined deep ambient base: seamlessly preserves navigation bar contrast without flat-black cutoffs */
+    background: linear-gradient(
+      to top,
+      rgba(8, 8, 12, 0.78) 0%,
+      rgba(8, 8, 12, 0.70) 20%,
+      rgba(8, 8, 12, 0.55) 40%,
+      rgba(8, 8, 12, 0.35) 62%,
+      rgba(8, 8, 12, 0.16) 82%,
+      rgba(8, 8, 12, 0.04) 94%,
+      rgba(8, 8, 12, 0) 100%
+    );
+  }
 }
 

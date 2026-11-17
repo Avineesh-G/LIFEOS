@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Badge } from '../../ui';
+import { Quotes } from '../../ui/tokens/icons';
 import { getDailyQuotesStream, QuoteItem } from '../../data/quotes';
 
 interface HomeStreakQuotesCardProps {
-  streakDays: number;
+  streakDays?: number;
 }
 
 // Map quote categories to crisp, vibrant luminescent colors (words have high-contrast color, category name is never mentioned)
@@ -46,7 +46,7 @@ export default function HomeStreakQuotesCard({ streakDays }: HomeStreakQuotesCar
 
   return (
     <div
-      className="droplet-card px-4 py-3 sm:py-3.5 flex items-center gap-3.5 select-none overflow-hidden relative shadow-lg"
+      className="droplet-card px-4 py-3 sm:py-3.5 flex items-center gap-3 select-none overflow-hidden relative shadow-lg"
       style={{
         boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.75)',
       }}
@@ -55,13 +55,13 @@ export default function HomeStreakQuotesCard({ streakDays }: HomeStreakQuotesCar
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
     >
-      {/* ── Left: Streak Badge ── */}
-      <div className="shrink-0">
-        <Badge count={streakDays} label="Day Streak" points={12} color="#FF7A45" />
+      {/* ── Left: Refined Inspirational Quotes Emblem ── */}
+      <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 text-[#FF9F0A] shadow-sm select-none">
+        <Quotes size={16} weight="duotone" />
       </div>
 
       {/* ── Clean Specular Vertical Divider ── */}
-      <div className="w-[1px] h-6 bg-gradient-to-b from-white/20 via-white/10 to-transparent shrink-0 select-none" />
+      <div className="w-[1px] h-5 bg-gradient-to-b from-white/20 via-white/10 to-transparent shrink-0 select-none" />
 
       {/* ── Right: Flowing Marquee of Quotes (GPU-Friendly Edge Fades, Zero mask-image Overhead) ── */}
       <div

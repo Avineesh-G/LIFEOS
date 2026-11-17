@@ -19,12 +19,35 @@ export interface AppUpdate {
 
 export const OFFICIAL_DEVELOPER_EMAILS = [
   'avineeshgujjeti2006@gmail.com',
-  'avineeshgujjeti@outlook.com',
 ];
 
 export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
+  {
+    id: 'update-v3-4-7-liquid-glass-blur-matching-send-pod-rock-solid-cards',
+    category: 'Liquid Glass Aesthetics & Core Stability',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Liquid Glass Progressive Blur, Matching Send Pod, Rock-Solid Cards & Smooth Startup',
+    dateTime: '17 Nov 2026, 02:45 PM',
+    fullDateTime: 'Tuesday, November 17, 2026 at 02:45:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major polish and performance release introducing GPU-accelerated Apple Liquid Glass progressive blur drops, precision 1:1 matching circular send pod, rock-solid container surfaces, seamless non-blocking startup transitions, and dedicated full-width quotation marquee.',
+    points: [
+      'Apple Liquid Glass Progressive Blur Shield: Replaced flat black gradients with true GPU-accelerated backdrop blur (24px, 190% saturation boost) and smooth 8-stop S-curve alpha masks, dissolving cards softly behind the navigation bar without harsh cutoffs.',
+      'Precision 1:1 Sized Send Pod: Sized circular send button to 50px, matching the typing capsule height, with optical centering, rich active illumination, and horizontal paper plane orientation.',
+      'Dedicated Full-Width Quotation Bar: Converted the Home streak widget into a dedicated inspirational quote marquee featuring an amber duotone Quotes badge and smooth edge fades.',
+      'Seamless Startup & Navigation Transitions: Eliminated app launch freezes by debouncing native notification scheduling (requestIdleCallback) and wrapping tab transitions in React startTransition.',
+      'Rock-Solid Container Cards: Fixed outer bento and hero containers across Home, Gym, and Nutrition to prevent outer card compression, focusing micro-interactions exclusively inside components.',
+      'Full Application Refresh Handler: Upgraded the header reload button to sync cloud state, flush widget caches, and cleanly refresh application memory via window.location.reload().',
+      'Universal Medium Haptics: Unified tactile impact across core navigation, action sheets, and interactive surfaces.',
+      'Navigation Droplet Hold & Drag: Implemented 120Hz pointer drag tracking with haptic boundary crossing and elastic snapping on the navigation capsule droplet.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
   {
     id: 'update-v3-4-6-universal-google-flex-always-fresh-chat-oled-cards',
     category: 'Universal Typography & Core Architecture',
@@ -32,7 +55,7 @@ export const APP_UPDATES: AppUpdate[] = [
     title: 'Universal Google Sans Flex, Always-Fresh Chat & Borderless OLED Action Cards',
     dateTime: '17 Nov 2026, 12:20 PM',
     fullDateTime: 'Tuesday, November 17, 2026 at 12:20:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.6',
     colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
     summary:
       'Major milestone release delivering universal Google Sans Flex & Google Flex typography across all screens, an always-fresh chat launch architecture, WebKit-accelerated ambient blur shields, mobile-optimized single-glance tables, and seamless borderless OLED action proposal cards.',

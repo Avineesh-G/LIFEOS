@@ -109,19 +109,19 @@ function playSyntheticHapticAudio(intensity: 'nav' | 'light' | 'medium' | 'heavy
 }
 
 const BASE_DURATIONS: Record<string, number> = {
-  selection: 10,
-  nav: 15,
-  light: 18,
-  medium: 30,
+  selection: 24,
+  nav: 26,
+  light: 28,
+  medium: 32,
   heavy: 48,
   save: 48,
   milestone: 50,
   success: 35,
   error: 45,
-  ai: 25,
+  ai: 28,
 };
 
-export function triggerHaptic(pattern: HapticType = 'light') {
+export function triggerHaptic(pattern: HapticType = 'medium') {
   if (typeof window === 'undefined') return;
 
   const intensity = getHapticIntensity();
@@ -134,7 +134,7 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   const multiplier = getHapticMultiplier(intensity);
 
   // Compute scaled duration
-  let baseDuration = 18;
+  let baseDuration = 28;
   if (typeof pattern === 'number') {
     baseDuration = pattern;
   } else if (!Array.isArray(pattern) && BASE_DURATIONS[pattern]) {
@@ -146,24 +146,19 @@ export function triggerHaptic(pattern: HapticType = 'light') {
   if (Capacitor.isNativePlatform()) {
     try {
       if (pattern === 'selection') {
-        if (intensity > 60) {
-          Haptics.vibrate({ duration: scaledDuration });
-        } else {
-          Haptics.selectionStart();
-        }
+        Haptics.impact({ style: ImpactStyle.Medium });
       } else if (pattern === 'success') {
         Haptics.notification({ type: NotificationType.Success });
       } else if (pattern === 'error') {
         Haptics.notification({ type: NotificationType.Error });
       } else if (intensity > 70) {
-        // High / Max boost intensity: trigger direct motor vibration with scaled duration
+        // High boost intensity: trigger direct motor vibration with scaled duration
         Haptics.vibrate({ duration: scaledDuration });
       } else if (pattern === 'heavy' || pattern === 'milestone') {
         Haptics.impact({ style: ImpactStyle.Heavy });
-      } else if (pattern === 'medium' || pattern === 'save') {
-        Haptics.impact({ style: ImpactStyle.Medium });
       } else {
-        Haptics.impact({ style: intensity >= 50 ? ImpactStyle.Medium : ImpactStyle.Light });
+        // Confident, clean medium haptic impact across all core actions
+        Haptics.impact({ style: ImpactStyle.Medium });
       }
       return;
     } catch {

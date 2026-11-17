@@ -507,9 +507,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
       <div className="flex flex-col gap-3.5 pb-2">
         {/* ── 1. Hero Calorie Ring & Macro Stats (glass-hero with Orange glow) ── */}
-        <motion.div
-          whileTap={{ scale: 0.99 }}
-          transition={MOTION_SPRINGS.default}
+        <div
           style={{ '--hero-accent': '#FF9F0A' } as React.CSSProperties}
           className="glass-hero p-5 flex flex-col items-center gap-4 select-none min-h-[140px]"
         >
@@ -551,7 +549,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <span className="text-[11px] text-[rgba(235,235,245,0.60)] font-medium">Fats</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* ── 2. Smart Hydration Reminder Banner (droplet-card) ── */}
         <div className="droplet-card p-3.5 flex items-center justify-between gap-3 select-none">

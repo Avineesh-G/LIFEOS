@@ -131,9 +131,7 @@ export default function Gym({ data, updateData }: GymProps) {
         </div>
 
         {/* ── 1. Hero Summary Tile (glass-hero with Coral glow) ── */}
-        <motion.div
-          whileTap={{ scale: 0.985 }}
-          transition={MOTION_SPRINGS.default}
+        <div
           style={{ '--hero-accent': '#FF453A' } as React.CSSProperties}
           className="glass-hero p-5 flex flex-col gap-4 select-none min-h-[140px]"
         >
@@ -181,7 +179,7 @@ export default function Gym({ data, updateData }: GymProps) {
               {activePlan.exercises?.length || 0} Exercises
             </span>
           </div>
-        </motion.div>
+        </div>
 
         {/* ── 2. Exercises Grouped List ── */}
         {(activePlan.exercises || []).length === 0 ? (

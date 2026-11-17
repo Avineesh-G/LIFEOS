@@ -107,6 +107,7 @@ export {
   FileImage,
   FolderSimplePlus,
   CloudArrowDown,
+  Quotes,
 } from '@phosphor-icons/react';
 
 export { KineticSparkIcon } from './KineticSparkIcon';
