@@ -11,7 +11,6 @@ import {
   Barbell,
   Wallet,
   NotePencil,
-  GraduationCap,
 } from '../../ui/tokens/icons';
 import { AiActionProposal, executeConfirmedAiAction } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
@@ -83,47 +82,55 @@ export default function ActionConfirmationCard({
 
   if (status === 'cancelled') {
     return (
-      <div className="p-3 rounded-2xl bg-[#1C1C1E] border border-white/10 text-xs text-white/50 italic">
-        Action cancelled.
+      <div className="w-full max-w-full p-3 rounded-2xl bg-white/[0.04] border-none text-xs text-white/40 italic flex items-center gap-2">
+        <X size={13} weight="bold" className="text-white/30 shrink-0" />
+        <span>Action dismissed</span>
       </div>
     );
   }
 
   if (status === 'confirmed') {
     return (
-      <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-300 font-semibold flex items-center gap-2">
-        <Check size={16} weight="bold" className="text-emerald-400 shrink-0" />
-        <span>Confirmed: {proposal.title}</span>
+      <div className="w-full max-w-full p-3 rounded-2xl bg-[#30D158]/15 border-none text-xs text-[#30D158] font-semibold flex items-center gap-2 shadow-sm">
+        <Check size={16} weight="bold" className="text-[#30D158] shrink-0" />
+        <span className="truncate">Confirmed: {proposal.title}</span>
       </div>
     );
   }
 
   return (
-    <div className="p-3.5 rounded-[22px] bg-[#1C1C1E] border border-white/12 shadow-lg space-y-2.5 my-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs font-bold text-white">
-          <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+    <div className="w-full max-w-full p-3.5 rounded-[22px] bg-[#141418] border-none shadow-[0_12px_36px_-8px_rgba(0,0,0,0.85)] space-y-2.5 my-2.5 overflow-hidden">
+      {/* Header Row: Title & Badge with Flexible Wrap */}
+      <div className="flex items-start justify-between gap-2.5 w-full">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+          <div className="w-7 h-7 rounded-xl bg-white/[0.08] flex items-center justify-center shrink-0 mt-0.5">
             {getActionIcon()}
           </div>
-          <span className="truncate">{proposal.title}</span>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-bold text-white leading-snug break-words">
+              {proposal.title}
+            </h4>
+          </div>
         </div>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+        <span className="text-[9.5px] font-bold uppercase tracking-wider text-[#0A84FF] bg-[#0A84FF]/15 px-2 py-0.5 rounded-full shrink-0 shadow-sm self-start mt-0.5">
           Proposal
         </span>
       </div>
 
+      {/* Description / Metadata */}
       {proposal.description && (
-        <p className="text-xs text-white/70 pl-8 leading-relaxed">
+        <p className="text-[11.5px] text-white/60 pl-9.5 leading-relaxed break-words">
           {proposal.description}
         </p>
       )}
 
-      <div className="flex items-center justify-end gap-2 pt-1 border-t border-white/5">
+      {/* Footer Divider & Action Buttons */}
+      <div className="pt-2 border-t border-white/[0.06] flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className="px-3 py-1.5 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-1.5"
+          className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer touch-manipulation"
         >
           <X size={13} weight="bold" />
           <span>Dismiss</span>
@@ -133,7 +140,7 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-black hover:bg-white/90 transition-all active:scale-95 shadow flex items-center gap-1.5"
+          className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-black hover:bg-white/90 active:scale-95 transition-all shadow-[0_2px_12px_rgba(255,255,255,0.2)] flex items-center gap-1.5 cursor-pointer touch-manipulation"
         >
           {loading ? (
             <SpinnerGap size={13} className="animate-spin" />

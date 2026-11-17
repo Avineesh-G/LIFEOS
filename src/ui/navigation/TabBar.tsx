@@ -43,6 +43,7 @@ export function TabBar({
   const [optimisticKey, setOptimisticKey] = useState<string | null>(null);
   const longPressTimerRef = useRef<any>(null);
   const isLongPressRef = useRef(false);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
   // Sync optimistic key back when parent activeKey updates
   React.useEffect(() => {
@@ -51,8 +52,14 @@ export function TabBar({
 
   const currentKey = optimisticKey || activeKey;
 
-  const handlePressStart = (tab: TabItem) => {
+  const handlePressStart = (tab: TabItem, clientX?: number, clientY?: number) => {
     isLongPressRef.current = false;
+    if (clientX !== undefined && clientY !== undefined) {
+      touchStartPosRef.current = { x: clientX, y: clientY };
+    }
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
     longPressTimerRef.current = setTimeout(() => {
       isLongPressRef.current = true;
       triggerHaptic('medium');
@@ -63,10 +70,23 @@ export function TabBar({
       } else if (tab.quickActions && tab.quickActions.length > 0) {
         setActiveMenuTab(tab.key);
       }
-    }, 380);
+    }, 600);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPosRef.current || !longPressTimerRef.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+    if (dx > 10 || dy > 10) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   };
 
   const handlePressEnd = () => {
+    touchStartPosRef.current = null;
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
@@ -149,7 +169,8 @@ export function TabBar({
                 onMouseDown={() => handlePressStart(tab)}
                 onMouseUp={handlePressEnd}
                 onMouseLeave={handlePressEnd}
-                onTouchStart={() => handlePressStart(tab)}
+                onTouchStart={(e) => handlePressStart(tab, e.touches[0]?.clientX, e.touches[0]?.clientY)}
+                onTouchMove={handleTouchMove}
                 onTouchEnd={handlePressEnd}
                 onTouchCancel={handlePressEnd}
                 onClick={() => handleTabClick(tab)}

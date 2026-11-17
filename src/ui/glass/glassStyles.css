@@ -308,22 +308,65 @@
   background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pure Ambient Depth, No White Border Outlines, Zero Dock Blur) */
+/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pristine Water Liquid Glass, Specular Meniscus & Zero Dock Blur) */
 .tier-1 .glass-card,
-.tier-1 .glass-hero,
 .tier-1 .droplet-card {
-  box-shadow: 0 16px 44px -8px rgba(0, 0, 0, 0.92) !important;
+  background: 
+    radial-gradient(ellipse 95% 55% at 50% -8%, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.012) 50%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.008) 30%, rgba(20, 20, 24, 0.98) 100%),
+    #141416 !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 20px 48px -10px rgba(0, 0, 0, 0.95),
+    0 6px 16px -4px rgba(0, 0, 0, 0.65) !important;
+  border: none !important;
+}
+
+.tier-1 .glass-hero {
+  background: 
+    radial-gradient(ellipse 95% 60% at 50% -10%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.016) 55%, transparent 85%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.012) 32%, rgba(22, 22, 26, 0.98) 100%),
+    #161618 !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 24px 56px -12px rgba(0, 0, 0, 0.96),
+    0 8px 20px -4px rgba(0, 0, 0, 0.70) !important;
   border: none !important;
 }
 
 .tier-1 .glass-tile,
 .tier-1 .droplet-tile {
-  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.80) !important;
+  background: 
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255, 255, 255, 0.065) 0%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.008) 38%, rgba(26, 26, 30, 0.98) 100%),
+    #1A1A1E !important;
+  box-shadow: 
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
+    0 10px 28px -4px rgba(0, 0, 0, 0.80),
+    0 3px 8px -1px rgba(0, 0, 0, 0.45) !important;
   border: none !important;
 }
 
 .tier-1 .glass-row {
-  box-shadow: 0 12px 32px -6px rgba(0, 0, 0, 0.80) !important;
+  background: 
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255, 255, 255, 0.06) 0%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.042) 0%, rgba(22, 22, 26, 0.98) 100%),
+    #16161A !important;
+  box-shadow: 
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.09),
+    0 12px 32px -6px rgba(0, 0, 0, 0.82) !important;
+  border: none !important;
+}
+
+.tier-1 .glass-sheet,
+.tier-1 .liquid-sheet {
+  background: 
+    radial-gradient(ellipse 95% 55% at 50% -8%, rgba(255, 255, 255, 0.08) 0%, transparent 75%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.010) 25%, rgba(18, 18, 22, 0.99) 100%),
+    #121216 !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 28px 72px rgba(0, 0, 0, 0.96) !important;
   border: none !important;
 }
 
@@ -331,11 +374,13 @@
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   background: 
-    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.015) 60%, transparent 85%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(20, 20, 24, 0.98) 100%),
+    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.018) 60%, transparent 85%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(20, 20, 24, 0.98) 100%),
     #141416 !important;
   border: none !important;
-  box-shadow: 0 18px 44px -8px rgba(0, 0, 0, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 18px 44px -8px rgba(0, 0, 0, 0.95) !important;
 }
 
 .tier-1 .sheet-backdrop {

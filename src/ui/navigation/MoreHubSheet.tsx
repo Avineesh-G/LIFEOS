@@ -102,7 +102,7 @@ export function MoreHubSheet({
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem => !!i);
 
-    const captureItems = ['notes']
+    const captureItems = ['ai', 'notes']
       .map((id) => itemMap.get(id))
       .filter((i): i is HubItem => !!i);
 
@@ -120,7 +120,7 @@ export function MoreHubSheet({
 
     return [
       { title: 'Plan & Operations', items: planItems },
-      { title: 'Notes & Capture', items: captureItems },
+      { title: 'Intelligence & Notes', items: captureItems },
       { title: 'Health & Fitness', items: healthItems },
       { title: 'Finances & Life', items: moneyItems },
       { title: 'Security & System', items: systemItems },

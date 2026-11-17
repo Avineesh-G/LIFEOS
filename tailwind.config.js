@@ -11,13 +11,13 @@ export default {
         'expanded': '840px',
       },
       fontFamily: {
-        heading: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        body: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        stat: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        tag: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        sans: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        display: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
-        mono: ['"Google Sans Flex"', '"Google Sans"', 'sans-serif'],
+        heading: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        body: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        stat: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        tag: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        sans: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        display: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'sans-serif'],
+        mono: ['"Google Sans Flex Variable"', '"Google Sans Flex"', '"Google Flex"', '"Google Sans"', 'monospace'],
       },
       colors: {
         // ── Material 3 Expressive System Roles ──

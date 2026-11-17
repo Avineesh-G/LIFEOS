@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck } from '../ui/tokens/icons';
+import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck, Sparkle } from '../ui/tokens/icons';
 import { CURRENT_VERSION_NAME } from '../version';
 
 export interface AppUpdate {
@@ -26,13 +26,116 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-6-universal-google-flex-always-fresh-chat-oled-cards',
+    category: 'Universal Typography & Core Architecture',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Universal Google Sans Flex, Always-Fresh Chat & Borderless OLED Action Cards',
+    dateTime: '17 Nov 2026, 12:20 PM',
+    fullDateTime: 'Tuesday, November 17, 2026 at 12:20:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major milestone release delivering universal Google Sans Flex & Google Flex typography across all screens, an always-fresh chat launch architecture, WebKit-accelerated ambient blur shields, mobile-optimized single-glance tables, and seamless borderless OLED action proposal cards.',
+    points: [
+      'Universal Google Sans Flex & Google Flex: Upgraded the entire design system and typography tokens to Google Sans Flex with full variable axes (weight 1-1000, optical size, width, roundness).',
+      'Always-Fresh Luna AI Launch: Navigating to Luna AI now opens a fresh, clean conversation canvas with executive prompt starters every time, while preserving all historical threads in the Chat Threads drawer.',
+      'WebKit Ambient Collision Shield: Multi-stop gradient blur shield with +160px scroll padding isolates chat messages from the floating input capsule and disclaimer.',
+      'Mobile Single-Glance Tables: Compact proportional table layouts (38% / 20% / 24% / 18%) fit workout routines and schedules on mobile screens without horizontal swiping.',
+      'Borderless OLED Action Cards: Completely removed white outline borders from action proposals, replacing with seamless dark #141418 surfaces, ambient drop shadows, and responsive word wrapping.',
+      'Gmail Avatar & Masked API Key: Integrated Google account profile photo into the drawer footer with a tap-to-configure Groq API key modal, asterisk masking, and live two-way sync with Settings.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
+    id: 'update-v3-4-5-action-proposal-card-borderless-oled',
+    category: 'UI & Action Architecture',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Borderless OLED Action Proposal Cards & Zero-Overflow Layout',
+    dateTime: '17 Nov 2026, 11:00 AM',
+    fullDateTime: 'Tuesday, November 17, 2026 at 11:00:00 AM IST',
+    tag: 'v3.4.5',
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Completely redesigned the AI Action Proposal cards to eliminate white border outlines, convert to seamless borderless OLED dark containers (#141418), and resolve title and badge text overflowing.',
+    points: [
+      'Strict No-White-Border Adherence: Removed white border outlines (border-white/12) from AI action proposal cards, replaced with seamless OLED dark background (#141418) and pure ambient drop shadows.',
+      'Flexible Text Wrapping: Engineered flex-1 with min-w-0 and break-words for long task and proposal titles, ensuring words never push or spill out of the card container.',
+      'Anchored Proposal Badge: Constrained the PROPOSAL badge with shrink-0 and self-start alignment, firmly locking it inside the card boundary on all mobile display sizes.',
+      'Refined Dismiss & Confirm Controls: Polished Dismiss and Confirm & Save actions with tactile haptics, seamless button transitions, and OLED-compliant styling.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
+    id: 'update-v3-4-4-always-fresh-new-chat-ambient-shield',
+    category: 'AI & Intelligence Architecture',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Always-Fresh New Chat Architecture & Ambient Collision Shield',
+    dateTime: '17 Nov 2026, 10:00 AM',
+    fullDateTime: 'Tuesday, November 17, 2026 at 10:00:00 AM IST',
+    tag: 'v3.4.4',
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Configured Luna AI to always open a fresh, clean chat session by default on launch while preserving all past conversation threads with executive topic headings in the Chat Threads drawer, reinforced with a WebKit-masked ambient blur shield.',
+    points: [
+      'Always-Fresh New Chat Launch: Navigating to Luna AI now always greets the user with a fresh, clean conversation canvas and executive prompt starters instead of reloading past chats.',
+      'Chat Threads Drawer Preservation: All previous conversations remain permanently saved and organized in the Chat Threads drawer with auto-extracted executive topic titles for instant reopening.',
+      'WebKit-Masked Blur Shield: Engineered a dual-masked ambient gradient blur shield that completely isolates chat messages from colliding with the floating input dock and disclaimer.',
+      'Expanded Scroll Headroom: Increased bottom scroll padding to +160px, ensuring messages and response status emblems scroll with ample breathing room.',
+      'Mobile-Optimized Single-Glance Tables: Fixed table columns with proportional sizing (38% / 20% / 24% / 18%) for seamless viewing on mobile phones without horizontal overflow.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
+    id: 'update-v3-4-3-google-sans-flex-universal-typography-ai-drawer',
+    category: 'Typography & Architecture',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Universal Google Sans Flex & Google Flex Typography System',
+    dateTime: '17 Nov 2026, 09:50 AM',
+    fullDateTime: 'Tuesday, November 17, 2026 at 09:50:00 AM IST',
+    tag: 'v3.4.3',
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Universal deployment of Google Sans Flex & Google Flex across the entire LifeOS application, sub-interfaces, and pop-up dialogs with full variable font axes and subpixel clarity, paired with instant Gmail avatar integration and synchronized Groq API key configuration.',
+    points: [
+      'Universal Google Sans Flex Typography: Deployed Google Sans Flex & Google Flex as the default font stack across all views, headers, cards, dialogs, drawers, and form controls for a clean, modern aesthetic.',
+      'Mobile-Optimized Single-Glance Tables: Engineered responsive, table-fixed proportional column distribution for AI tables (38% item, 20% type, 24% sets/reps, 18% rest) eliminating horizontal scrolling and sideways swiping on mobile screens.',
+      'Full Variable Axis Rendering: Activated full variable font axes (weight 1-1000, optical size, width, roundness, and contextual alternates) for razor-sharp legibility on high-DPI displays.',
+      'Gmail Photo & Synced API Key: Added instant Google avatar rendering in the chat thread drawer with tap-to-configure Groq API key modal, asterisk masking, and live two-way sync with Application Settings.',
+      'Luna Streaming & Response Persistence: Fixed assistant message stream persistence, added live pulsating thinking shimmers, token cursors, and dynamic send/stop controls.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
+    id: 'update-v3-4-2-top-tier-liquid-glass-typography-subinterfaces',
+    category: 'Design & Visual Systems',
+    icon: React.createElement(Sparkle, { size: 13, weight: 'bold' }),
+    title: 'Top-Tier Water Liquid Glass, Crisp Typography & Sub-Interface Architecture',
+    dateTime: 'Nov 17 • 9:20 AM',
+    fullDateTime: 'Tuesday, Nov 17, 2026 • 9:20 AM',
+    tag: 'v3.4.3',
+    colorClass: 'text-[#0A84FF]',
+    summary: 'Flagship Tier-1 liquid glass specular meniscus engine, razor-sharp subpixel OpenType font calibration, seamless borderless OLED popups and drawers, and an executive ChatGPT mobile copilot interface.',
+    points: [
+      'Top-Tier Water Liquid Glass: Enhanced Tier-1 device surfaces with physics-grounded radial specular meniscus reflections, multi-stop volumetric light refraction, and pure OLED ambient drop shadows with zero GPU blur overhead.',
+      'Subpixel Font Crispness: Configured high-precision OpenType typography features (cv02, cv03, cv04, cv11, ss01, ss02, tnum, zero), disabled browser font synthesis blur, and applied calibrated optical tracking for crystal-clear readability on AMOLED and Retina displays.',
+      'Refined Sub-Interfaces & Floating Pop-Ups: Upgraded FloatingPopup and dialogs with borderless OLED depth, refined smooth grab handles, and seamless transitions across all modals.',
+      'Executive ChatGPT Mobile Interface: Overhauled the AI copilot with a 2x2 bento grid, personal Title Case greeting, live emerald status capsules, and intelligent main topic headings with persistent session continuity.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-1-liquid-glass-ios-calendar-refine',
     category: 'Design & System Architecture',
     icon: React.createElement(CalendarCheck, { size: 13, weight: 'bold' }),
     title: 'Liquid Glass Optics, Pure iOS Calendar & Mobile Viewport Geometry',
     dateTime: 'Nov 16 • 12:15 AM',
     fullDateTime: 'Monday, Nov 16, 2026 • 12:15 AM',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.1',
     colorClass: 'text-[#0A84FF]',
     summary: 'Physics-grounded liquid glass specular meniscus engine with zero color banding, native-resolution vector text rendering, pure Apple iOS dark calendar typography, and mobile safe-area viewport alignment.',
     points: [

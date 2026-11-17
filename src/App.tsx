@@ -36,7 +36,8 @@ import ThemeSettings from './pages/ThemeSettings';
 import Notes from './pages/Notes';
 import Drive from './pages/Drive';
 import PublicShareView from './pages/PublicShareView';
-const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+import CalendarPage from './pages/CalendarPage';
+import LunaChatPage from './pages/LunaChatPage';
 const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
@@ -116,21 +117,23 @@ function MainContent({
     { path: '/spending', element: <RouteErrorBoundary routeName="Spending"><Spending data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/shopping', element: <RouteErrorBoundary routeName="Shopping Lists"><ShoppingLists data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/shopping/:listId', element: <RouteErrorBoundary routeName="Shopping List Detail"><ShoppingListDetail data={data} updateData={updateData} /></RouteErrorBoundary> },
-    { path: '/outings', element: <RouteErrorBoundary routeName="Outing Expenses"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outings...</div>}><OutingsListPage /></Suspense></RouteErrorBoundary> },
-    { path: '/outings/:id', element: <RouteErrorBoundary routeName="Outing Detail"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
-    { path: '/outings/:id/add', element: <RouteErrorBoundary routeName="Add Outing Expense"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
-    { path: '/outings/:id/expense/:expenseId', element: <RouteErrorBoundary routeName="Edit Outing Expense"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
-    { path: '/outings/:id/settle', element: <RouteErrorBoundary routeName="Settle Outing"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading outing...</div>}><OutingDetailPage /></Suspense></RouteErrorBoundary> },
-    { path: '/calendar', element: <RouteErrorBoundary routeName="Calendar"><Suspense fallback={<PageLoadingFallback />}><CalendarPage data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/outings', element: <RouteErrorBoundary routeName="Outing Expenses"><OutingsListPage /></RouteErrorBoundary> },
+    { path: '/outings/:id', element: <RouteErrorBoundary routeName="Outing Detail"><OutingDetailPage /></RouteErrorBoundary> },
+    { path: '/outings/:id/add', element: <RouteErrorBoundary routeName="Add Outing Expense"><OutingDetailPage /></RouteErrorBoundary> },
+    { path: '/outings/:id/expense/:expenseId', element: <RouteErrorBoundary routeName="Edit Outing Expense"><OutingDetailPage /></RouteErrorBoundary> },
+    { path: '/outings/:id/settle', element: <RouteErrorBoundary routeName="Settle Outing"><OutingDetailPage /></RouteErrorBoundary> },
+    { path: '/calendar', element: <RouteErrorBoundary routeName="Calendar"><CalendarPage data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/ai', element: <RouteErrorBoundary routeName="Luna AI"><LunaChatPage data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/chat', element: <RouteErrorBoundary routeName="Luna AI"><LunaChatPage data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/timetable', element: <RouteErrorBoundary routeName="Timetable"><Timetable data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/tasks', element: <RouteErrorBoundary routeName="Tasks"><Tasks data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/laundry', element: <RouteErrorBoundary routeName="Laundry"><Laundry data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/history', element: <RouteErrorBoundary routeName="History"><WorkHistory data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/settings', element: <RouteErrorBoundary routeName="Settings"><SettingsPage data={data} updateData={updateData} refresh={refresh} resetAllData={resetAllData} onSignOut={onSignOut} /></RouteErrorBoundary> },
-    { path: '/settings/appearance', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
-    { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><Suspense fallback={<div className="p-8 text-center text-on-surface-variant">Loading Theme Settings...</div>}><ThemeSettings /></Suspense></RouteErrorBoundary> },
-    { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Notes...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
-    { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Suspense fallback={<div className="p-8 text-center text-secondary">Loading Note...</div>}><Notes data={data} updateData={updateData} /></Suspense></RouteErrorBoundary> },
+    { path: '/settings/appearance', element: <RouteErrorBoundary routeName="Appearance & Theme"><ThemeSettings /></RouteErrorBoundary> },
+    { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><ThemeSettings /></RouteErrorBoundary> },
+    { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Notes data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Notes data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/drive', element: <RouteErrorBoundary routeName="Drive & Docs"><Drive data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/share/:shareId', element: <RouteErrorBoundary routeName="Shared Document"><PublicShareView /></RouteErrorBoundary> },
     { path: '/kit', element: <RouteErrorBoundary routeName="UI Kit Preview"><Suspense fallback={<PageLoadingFallback />}><KitPreview /></Suspense></RouteErrorBoundary> },

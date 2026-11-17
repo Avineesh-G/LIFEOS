@@ -153,7 +153,7 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter Variable", "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
+    font-family: var(--font-google-sans-flex);
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;

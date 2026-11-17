@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 78,
-  versionName: '3.4.1',
-  releaseDate: '2026-11-16',
-  apkSize: '10.22 MB',
-  apkSizeBytes: 10720922,
-  releaseNotes: "LifeOS v3.4.1 (Build 78):\n• Liquid Glass Optics Refinement: Pristine continuous specular meniscus reflections with zero color banding or dithering artifacts.\n• Native Vector Sharpness: Removed GPU layer promotion overrides, restoring native Retina/AMOLED subpixel vector crispness across all cards and typography.\n• Pure iOS Calendar Architecture: Removed circular badge containers in favor of Apple iOS native dark typography, proportional squircle day cells, and 6px high-contrast micro-dots.\n• Mobile Viewport & Dynamic Island Geometry: Dynamic safe-area top clearance (+52px fallback) completely clearing camera hole-punches, speaker grilles, and Dynamic Island.",
+  versionCode: 83,
+  versionName: '3.4.6',
+  releaseDate: '2026-11-17',
+  apkSize: '15.03 MB',
+  apkSizeBytes: 15755690,
+  releaseNotes: "LifeOS v3.4.6 (Build 83):\n• Universal Google Sans Flex Typography: Integrated Google Sans Flex & Google Flex across all primary UI surfaces, sub-interfaces, and dialogs.\n• Always-Fresh New Chat: Guarantees that opening Luna AI always launches a fresh, clean conversation canvas while preserving historical threads in the Chat Threads drawer.\n• Ambient WebKit Collision Shield: Added multi-stop WebKit gradient masks and expanded scroll padding (+160px) to prevent message collisions under the bottom input dock.\n• Mobile Single-Glance Tables: Proportional table layouts for exercises and routines without horizontal clipping or scrolling.\n• Borderless OLED Action Confirmation Cards: Converted action proposals to borderless #141418 cards with responsive word wrapping and zero badge overflow.\n• Gmail Avatar & Masked API Key: Synchronous profile photo in the drawer footer with live Groq API key sync and asterisk masking.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

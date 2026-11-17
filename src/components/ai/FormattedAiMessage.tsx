@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Copy, Check, ShareNetwork, CheckSquare, Square } from '../../ui/tokens/icons';
+import { CheckCircle, Circle, Clock, ChartBar, Lightning } from '@phosphor-icons/react';
 import { triggerHaptic } from '../../utils/haptics';
 import { shareContent } from '../../utils/shareUtils';
 
@@ -212,21 +213,38 @@ const MarkdownTable: React.FC<{ rows: string[]; isUser?: boolean }> = ({ rows, i
   }
 
   const dataRows = cleanRows.slice(dataRowsStartIndex).filter((r) => !isDivider(r));
+  const colCount = headerCells.length;
+
+  // Proportional mobile column distribution guaranteeing 100% full-width fit without horizontal scroll
+  const getColWidth = (idx: number): string => {
+    if (colCount === 2) return idx === 0 ? '58%' : '42%';
+    if (colCount === 3) return idx === 0 ? '46%' : '27%';
+    if (colCount === 4) return idx === 0 ? '38%' : idx === 1 ? '20%' : idx === 2 ? '24%' : '18%';
+    return `${Math.floor(100 / colCount)}%`;
+  };
+
+  const isWideTable = colCount >= 5;
 
   return (
-    <div className="my-2.5 w-full max-w-full rounded-[18px] bg-[#18181B] overflow-hidden shadow-lg border-none">
-      <div className="overflow-x-auto w-full max-w-full custom-table-scrollbar overscroll-x-contain">
-        <table className="w-full min-w-full text-left border-collapse font-sans">
+    <div className="my-2.5 w-full max-w-full rounded-[20px] bg-[#151518] overflow-hidden shadow-xl border-none font-sans">
+      <div className={`w-full max-w-full ${isWideTable ? 'overflow-x-auto custom-table-scrollbar overscroll-x-contain' : 'overflow-hidden'}`}>
+        <table className={`w-full ${isWideTable ? 'min-w-[420px]' : 'table-fixed'} border-collapse text-left`}>
           <thead>
             <tr className="bg-white/[0.05] border-b border-white/[0.08]">
-              {headerCells.map((cell, idx) => (
-                <th
-                  key={idx}
-                  className="px-3 py-2 text-[11px] font-bold text-white uppercase tracking-wider whitespace-nowrap"
-                >
-                  {parseInlineContent(cell, isUser)}
-                </th>
-              ))}
+              {headerCells.map((cell, idx) => {
+                const isFirst = idx === 0;
+                return (
+                  <th
+                    key={idx}
+                    style={!isWideTable ? { width: getColWidth(idx) } : undefined}
+                    className={`py-2 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-wider leading-tight ${
+                      isFirst ? 'text-left pl-3 pr-1' : 'text-center px-1'
+                    } break-words`}
+                  >
+                    {parseInlineContent(cell, isUser)}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.05]">
@@ -237,23 +255,181 @@ const MarkdownTable: React.FC<{ rows: string[]; isUser?: boolean }> = ({ rows, i
                   key={rIdx}
                   className={
                     rIdx % 2 === 0
-                      ? 'bg-transparent hover:bg-white/[0.03]'
-                      : 'bg-white/[0.02] hover:bg-white/[0.04]'
+                      ? 'bg-transparent hover:bg-white/[0.02]'
+                      : 'bg-white/[0.02] hover:bg-white/[0.03]'
                   }
                 >
-                  {cells.map((cell, cIdx) => (
-                    <td
-                      key={cIdx}
-                      className="px-3 py-2 text-[12px] leading-snug text-white/90 align-top"
-                    >
-                      {parseInlineContent(cell, isUser)}
-                    </td>
-                  ))}
+                  {cells.map((cell, cIdx) => {
+                    const isFirst = cIdx === 0;
+                    return (
+                      <td
+                        key={cIdx}
+                        style={!isWideTable ? { width: getColWidth(cIdx) } : undefined}
+                        className={`py-2 text-[11px] sm:text-[11.5px] leading-snug align-middle ${
+                          isFirst
+                            ? 'text-left pl-3 pr-1 font-medium text-white break-words'
+                            : 'text-center px-1 text-white/85 font-mono tracking-tight break-words'
+                        }`}
+                      >
+                        {parseInlineContent(cell, isUser)}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+};
+
+
+interface WorkflowStep {
+  step: number;
+  title: string;
+  desc?: string;
+  duration?: string;
+}
+
+interface WorkflowData {
+  title?: string;
+  steps: WorkflowStep[];
+}
+
+const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => {
+  const [completedSteps, setCompletedSteps] = useState<Record<number, boolean>>({});
+
+  const toggleStep = (stepNum: number) => {
+    triggerHaptic('selection');
+    setCompletedSteps(prev => ({ ...prev, [stepNum]: !prev[stepNum] }));
+  };
+
+  const steps = Array.isArray(data.steps) ? data.steps : [];
+  const totalSteps = steps.length;
+  const completedCount = steps.filter(s => !!completedSteps[s.step]).length;
+  const progressPercent = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
+
+  return (
+    <div className="my-3.5 w-full rounded-[24px] glass-card p-4 text-left font-sans select-none shadow-xl border-none">
+      <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.08]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center text-[#0A84FF] shrink-0 shadow-inner">
+            <Lightning size={17} weight="duotone" />
+          </div>
+          <div className="min-w-0">
+            <h4 className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">
+              {data.title || 'Interactive Workflow'}
+            </h4>
+            <p className="text-[11px] text-white/50 font-mono mt-0.5">
+              {completedCount} of {totalSteps} steps completed ({progressPercent}%)
+            </p>
+          </div>
+        </div>
+        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#0A84FF]/20 text-[#0A84FF] shrink-0 uppercase tracking-wider">
+          Workflow
+        </span>
+      </div>
+
+      <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden mb-3.5">
+        <div
+          className="h-full bg-gradient-to-r from-[#0A84FF] to-[#30D158] transition-all duration-300 rounded-full"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      <div className="space-y-2">
+        {steps.map((st, idx) => {
+          const stepKey = st.step || (idx + 1);
+          const isDone = !!completedSteps[stepKey];
+          return (
+            <div
+              key={stepKey}
+              onClick={() => toggleStep(stepKey)}
+              className={`p-3 rounded-[16px] transition-all cursor-pointer flex items-start gap-3 border-none ${
+                isDone ? 'bg-white/[0.025] opacity-60' : 'glass-tile hover:bg-white/[0.06]'
+              }`}
+            >
+              <button
+                type="button"
+                className={`mt-0.5 shrink-0 transition-colors ${isDone ? 'text-[#30D158]' : 'text-white/40 hover:text-white'}`}
+              >
+                {isDone ? <CheckCircle size={19} weight="fill" /> : <Circle size={19} weight="bold" />}
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h5 className={`text-xs font-bold leading-tight ${isDone ? 'line-through text-white/40' : 'text-white'}`}>
+                    {stepKey}. {st.title}
+                  </h5>
+                  {st.duration && (
+                    <span className="text-[10px] text-white/50 font-mono px-2 py-0.5 rounded-full bg-white/[0.06] flex items-center gap-1 shrink-0">
+                      <Clock size={11} weight="bold" />
+                      {st.duration}
+                    </span>
+                  )}
+                </div>
+                {st.desc && (
+                  <p className="text-[11px] text-white/65 mt-1 leading-relaxed">
+                    {st.desc}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+interface ChartItem {
+  label: string;
+  value: number;
+  unit?: string;
+  color?: string;
+}
+
+interface ChartData {
+  title?: string;
+  data: ChartItem[];
+}
+
+const InteractiveChartCard: React.FC<{ data: ChartData }> = ({ data }) => {
+  const items = Array.isArray(data.data) ? data.data : [];
+  const total = items.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) || 1;
+
+  return (
+    <div className="my-3 w-full rounded-[22px] glass-card p-3.5 sm:p-4 text-left font-sans select-none shadow-xl">
+      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/[0.08]">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg glass-tile flex items-center justify-center text-[#30D158]">
+            <ChartBar size={16} weight="duotone" />
+          </div>
+          <h4 className="text-xs sm:text-sm font-bold text-white tracking-tight">{data.title || 'Data Breakdown'}</h4>
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-0.5">
+        {items.map((item, idx) => {
+          const val = Number(item.value) || 0;
+          const percent = Math.min(100, Math.round((val / total) * 100));
+          const color = item.color || (idx === 0 ? '#0A84FF' : idx === 1 ? '#30D158' : idx === 2 ? '#FF9F0A' : '#BF5AF2');
+          return (
+            <div key={idx} className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-white/90">{item.label}</span>
+                <span className="font-mono text-white/60">{val}{item.unit || ''} ({percent}%)</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${percent}%`, backgroundColor: color }}
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -265,7 +441,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
   const renderedBlocks = useMemo(() => {
     if (!cleanContent) return null;
 
-    const codeBlockRegex = /```(?:[a-zA-Z]*)\n([\s\S]*?)```/g;
+    const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g;
     const segments: Array<{ type: 'code' | 'text'; text: string }> = [];
     let lastIndex = 0;
     let match;

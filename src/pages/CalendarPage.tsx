@@ -420,7 +420,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
       }}
     >
       {/* ── 1. Compact Liquid Glass Month & Navigation Header ── */}
-      <div className="glass-card px-3.5 py-2.5 rounded-[22px] mb-2 flex items-center justify-between">
+      <div className="glass-card px-4 py-3 rounded-[24px] mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
@@ -480,7 +480,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
       </div>
 
       {/* ── 2. View Switcher & Action Controls ── */}
-      <div className="flex items-center justify-between gap-1.5 mb-2">
+      <div className="flex items-center justify-between gap-2 mb-2.5">
         {/* 3 View Tabs: Month, Timeline, Schedule */}
         <div className="inline-flex p-0.5 rounded-full glass-tile gap-0.5">
           <button
@@ -580,7 +580,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
       )}
 
       {/* Category Filter Pills (Horizontal Scroll) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar scroll-smooth px-0.5 touch-manipulation">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-3.5 no-scrollbar scroll-smooth px-0.5 touch-manipulation">
         <button
           type="button"
           onClick={() => {
@@ -620,11 +620,11 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
 
       {/* ── 3. MONTH VIEW (Professional Apple Grid with Zero Red Artifacts) ── */}
       {viewMode === 'month' && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3.5 sm:gap-4">
           {/* Calendar Month Chassis */}
-          <div className="glass-card p-2.5 sm:p-3 rounded-[24px]">
+          <div className="glass-card p-3.5 sm:p-4 rounded-[26px]">
             {/* Weekday Labels */}
-            <div className="grid grid-cols-7 mb-1 text-center">
+            <div className="grid grid-cols-7 mb-2 text-center">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => (
                 <span
                   key={idx}
@@ -638,7 +638,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             </div>
 
             {/* Month Days Grid */}
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
               {calendarDays.map((day) => {
                 const dayStr = format(day, 'yyyy-MM-dd');
                 const entry = dateMap.get(dayStr);
@@ -657,7 +657,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     key={day.toISOString()}
                     type="button"
                     onClick={() => handleSelectDay(day)}
-                    className={`relative flex flex-col items-center justify-between h-[42px] sm:h-[48px] p-1 rounded-[14px] transition-all cursor-pointer select-none touch-manipulation ${
+                    className={`relative flex flex-col items-center justify-between h-[46px] sm:h-[50px] p-1.5 rounded-[15px] transition-all cursor-pointer select-none touch-manipulation ${
                       isSelected
                         ? 'droplet-active shadow-sm'
                         : inCurrentMonth
@@ -704,7 +704,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
           </div>
 
           {/* ── Selected Day Summary Agenda (Immediately Below Month Grid) ── */}
-          <div className="glass-card p-3 sm:p-3.5 rounded-[22px] space-y-2">
+          <div className="glass-card p-3.5 sm:p-4 rounded-[24px] space-y-2.5">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white tracking-tight">
@@ -728,7 +728,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
 
             <div className="space-y-1.5">
               {selectedEvents.length === 0 && selectedTasks.length === 0 && selectedClasses.length === 0 && !selectedWorkout ? (
-                <div className="py-4 text-center rounded-2xl glass-tile text-white/50 text-xs">
+                <div className="py-5 text-center rounded-2xl glass-tile text-white/50 text-xs">
                   No events or tasks scheduled for this date
                 </div>
               ) : (
@@ -829,7 +829,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
 
       {/* ── 4. DAY TIMELINE VIEW (Google Calendar 24h Hourly Grid) ── */}
       {viewMode === 'timeline' && (
-        <div className="space-y-2.5">
+        <div className="space-y-3.5">
           {/* 7-Day Horizontal Week Strip */}
           <div className="grid grid-cols-7 gap-1 p-1.5 rounded-2xl glass-card text-center">
             {weekStripDays.map((day) => {
@@ -980,7 +980,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
 
       {/* ── 5. SCHEDULE / AGENDA VIEW (Chronological Stream) ── */}
       {viewMode === 'schedule' && (
-        <div className="space-y-2.5">
+        <div className="space-y-3.5">
           <div className="p-3 rounded-2xl glass-card flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-1.5">

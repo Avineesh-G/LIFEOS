@@ -46,6 +46,7 @@ export function LunaComicBubbleIcon({
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="geometricPrecision"
       className={`inline-block shrink-0 ${className}`}
       style={{ overflow: 'visible' }}
     >
@@ -54,7 +55,7 @@ export function LunaComicBubbleIcon({
         <path
           d={bubblePath}
           fill={color}
-          fillOpacity={0.12}
+          fillOpacity={0.16}
         />
       )}
 
@@ -62,7 +63,7 @@ export function LunaComicBubbleIcon({
       <path
         d={bubblePath}
         stroke={color}
-        strokeWidth="2.3"
+        strokeWidth="2.2"
         strokeLinejoin="round"
         strokeLinecap="round"
         fill="none"

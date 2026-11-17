@@ -231,14 +231,14 @@ export default function FloatingPopup({
                   dragControls.start(e);
                 }
               }}
-              className="w-full py-2 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
+              className="w-full py-2.5 flex items-center justify-center cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
             >
-              <div className="w-9 h-1 rounded-full bg-white/35 shadow-[0_1px_2px_rgba(0,0,0,0.5)] hover:bg-white/55 transition-colors" />
+              <div className="w-10 h-1 rounded-full bg-white/30 shadow-[0_1px_2px_rgba(0,0,0,0.6)] hover:bg-white/50 transition-colors" />
             </div>
 
             {/* Header (if title or icon provided) */}
             {(title || icon) && (
-              <div className="px-4 pb-2.5 flex items-center justify-between gap-3 border-b border-white/[0.06] shrink-0 select-none">
+              <div className="px-4 pb-3 flex items-center justify-between gap-3 shrink-0 select-none">
                 <div className="flex items-center gap-2.5 min-w-0">
                   {icon && (
                     <div className="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center shrink-0">
@@ -286,7 +286,7 @@ export default function FloatingPopup({
 
             {/* Footer Actions (for form variant if onSave or cancel provided) */}
             {variant === 'form' && onSave && (
-              <div className="p-3.5 sm:p-4 border-t border-white/[0.06] bg-[#141416] flex items-center justify-end gap-2.5 shrink-0">
+              <div className="p-3.5 sm:p-4 bg-[#141416] flex items-center justify-end gap-2.5 shrink-0 shadow-inner">
                 <button
                   type="button"
                   onClick={handleAttemptClose}

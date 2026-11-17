@@ -28,6 +28,7 @@ import {
   LockKey,
   HardDrive,
 } from '../ui/tokens/icons';
+import { LunaComicBubbleIcon } from '../ui/tokens/icons';
 import { TabBar, TabItem } from '../ui/navigation/TabBar';
 import { useUserProfile } from '../utils/userProfileCache';
 import { BottomCircle } from '../ui/navigation/BottomCircle';
@@ -172,17 +173,20 @@ export default function Layout({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Reload handler
+  // Reload & Sync handler with visible hardware-accelerated rotation feedback
   const handleReload = async () => {
     if (isReloading) return;
-    triggerHaptic('light');
+    triggerHaptic('medium');
     setIsReloading(true);
+    const minSpinPromise = new Promise((resolve) => setTimeout(resolve, 850));
     try {
-      if (refresh) await refresh();
-      window.location.reload();
+      const refreshPromise = refresh ? refresh() : Promise.resolve();
+      await Promise.all([refreshPromise, minSpinPromise]);
+      triggerHaptic('success');
     } catch (err) {
       console.warn('Refresh error:', err);
-      window.location.reload();
+      await minSpinPromise;
+      triggerHaptic('error');
     } finally {
       setIsReloading(false);
     }
@@ -192,6 +196,7 @@ export default function Layout({
 
   // Active module tint
   const activeModuleTint = useMemo(() => {
+    if (pathname.startsWith('/ai') || pathname.startsWith('/chat')) return '#0A84FF';
     if (pathname.startsWith('/gym')) return MODULE_TINTS.gym;
         if (pathname.startsWith('/nutrition')) return MODULE_TINTS.nutrition;
     if (pathname.startsWith('/spending')) return MODULE_TINTS.spending;
@@ -272,11 +277,9 @@ export default function Layout({
 
   const handleTabChange = (key: string) => {
     triggerHaptic('selection');
-    React.startTransition(() => {
-      if (key === 'home') navigate('/');
-      else if (key === slot2Item.id) navigate(slot2Item.route);
-      else if (key === slot3Item.id) navigate(slot3Item.route);
-    });
+    if (key === 'home') navigate('/');
+    else if (key === slot2Item.id) navigate(slot2Item.route);
+    else if (key === slot3Item.id) navigate(slot3Item.route);
   };
 
   const handleCustomizeSlot = (slotKey: string) => {
@@ -376,6 +379,8 @@ export default function Layout({
   const isSubRoute = useMemo(() => {
     return (
       pathname.startsWith('/gym/workout') ||
+      pathname.startsWith('/ai') ||
+      pathname.startsWith('/chat') ||
       (pathname.startsWith('/shopping/') && pathname !== '/shopping')
     );
   }, [pathname]);
@@ -456,11 +461,21 @@ export default function Layout({
                 title="Sync & Reload"
                 aria-label="Sync & Reload"
               >
-                <ArrowClockwise
-                  size={17}
-                  weight="bold"
-                  className={isReloading ? 'animate-spin text-[#0A84FF]' : ''}
-                />
+                <motion.div
+                  animate={isReloading ? { rotate: 360 } : { rotate: 0 }}
+                  transition={
+                    isReloading
+                      ? { repeat: Infinity, duration: 0.8, ease: 'linear' }
+                      : { duration: 0.25, ease: 'easeOut' }
+                  }
+                  className="flex items-center justify-center pointer-events-none"
+                >
+                  <ArrowClockwise
+                    size={17}
+                    weight="bold"
+                    className={isReloading ? 'text-[#0A84FF]' : ''}
+                  />
+                </motion.div>
               </button>
             </GlassSurface>
           </div>
@@ -471,7 +486,8 @@ export default function Layout({
       <main
         className="relative w-full"
       >
-        <div className="w-full max-w-lg mx-auto px-3.5 pt-0.5">
+        <div className={`w-full max-w-lg mx-auto ${isSubRoute ? 'px-0 pt-0' : 'px-3.5 pt-0.5'}`}>
+
           {children}
           {!isSubRoute && !isSubInterfaceOpen && (
             <div
@@ -500,7 +516,14 @@ export default function Layout({
                 activeKey={activeTabKey}
                 onChange={handleTabChange}
                 onCustomizeSlot={handleCustomizeSlot}
-                onAiClick={() => setAiSheetOpen(true)}
+                onAiClick={() => {
+                  triggerHaptic('light');
+                  if (pathname === '/ai' || pathname === '/chat') {
+                    navigate('/');
+                  } else {
+                    navigate('/ai');
+                  }
+                }}
               />
             </div>
           </div>

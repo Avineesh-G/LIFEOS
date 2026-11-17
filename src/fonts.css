@@ -1,15 +1,36 @@
 /* ==========================================================================
-   LifeOS Typography System — Inter Variable (iOS 26 Spec)
+   LifeOS Typography System — Google Sans Flex & Google Flex Variable
    ========================================================================== */
 
+@import '@fontsource-variable/google-sans-flex/full.css';
 @import '@fontsource-variable/inter/index.css';
-@import '@fontsource-variable/google-sans-flex/index.css';
+
+/* Font Aliases: Ensure 'Google Sans Flex' and 'Google Flex' map directly to the variable font package */
+@font-face {
+  font-family: 'Google Sans Flex';
+  font-style: oblique 0deg 10deg;
+  font-display: swap;
+  font-weight: 1 1000;
+  font-stretch: 25% 151%;
+  src: local('Google Sans Flex'), local('Google Sans Flex Variable'),
+       url('@fontsource-variable/google-sans-flex/files/google-sans-flex-latin-full-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Google Flex';
+  font-style: oblique 0deg 10deg;
+  font-display: swap;
+  font-weight: 1 1000;
+  font-stretch: 25% 151%;
+  src: local('Google Flex'), local('Google Sans Flex Variable'), local('Google Sans Flex'),
+       url('@fontsource-variable/google-sans-flex/files/google-sans-flex-latin-full-normal.woff2') format('woff2-variations');
+}
 
 :root {
-  --font-family-primary: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  --font-google-sans-flex: "Google Sans Flex Variable", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-  --font-primary: var(--font-family-primary);
-  --font-heading: var(--font-family-primary);
+  --font-google-sans-flex: "Google Sans Flex Variable", "Google Sans Flex", "Google Flex", "Google Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  --font-family-primary: var(--font-google-sans-flex);
+  --font-primary: var(--font-google-sans-flex);
+  --font-heading: var(--font-google-sans-flex);
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -26,14 +47,29 @@
   --text-tertiary: var(--text-3);
 }
 
-*, button, input, textarea, select {
-  font-family: var(--font-family-primary);
+html,
+body,
+#root,
+*,
+*::before,
+*::after,
+button,
+input,
+textarea,
+select,
+optgroup,
+option,
+dialog {
+  font-family: var(--font-google-sans-flex);
   font-optical-sizing: auto;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01', 'ss02', 'tnum', 'zero';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
+.font-sans,
 .font-sans-flex,
 .font-sans-flex input,
 .font-sans-flex button,
@@ -52,21 +88,21 @@
   font-size: 34px;
   line-height: 41px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .text-inline-title {
   font-size: 17px;
   line-height: 22px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .text-card-title {
   font-size: 17px;
   line-height: 22px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -79,7 +115,7 @@
   font-weight: 600;
   color: var(--text-2);
   text-transform: capitalize;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.008em;
 }
 
 .text-label {
@@ -87,14 +123,15 @@
   line-height: 16px;
   font-weight: 500;
   color: var(--text-2);
+  letter-spacing: -0.005em;
 }
 
 .text-value {
   font-size: 30px;
   line-height: 34px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .text-value-hero {
