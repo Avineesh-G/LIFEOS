@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 84,
-  versionName: '3.4.7',
-  releaseDate: '2026-11-17',
+  versionCode: 85,
+  versionName: '3.4.8',
+  releaseDate: '2026-11-18',
   apkSize: '15.03 MB',
-  apkSizeBytes: 15758114,
-  releaseNotes: "LifeOS v3.4.7 (Build 84):\n• Progressive Liquid Glass Blur Shield: Replaced flat black gradients with GPU-accelerated frosted glass blur (24px, 190% saturation boost) and smooth 8-stop S-curve alpha masks.\n• Precision 1:1 Matching Send Pod: Sized circular send button to 50px, matching the typing capsule height, with optical centering and rich active illumination.\n• Dedicated Full-Width Quotation Bar: Replaced Home streak pill with a dedicated inspirational quote marquee featuring an amber duotone Quotes badge.\n• Seamless Startup & Navigation Transitions: Eliminated startup freezing by debouncing native notification scheduling and wrapping tab transitions in React startTransition.\n• Rock-Solid Container Cards: Fixed outer bento and hero containers across Home, Gym, and Nutrition, maintaining micro-interactions exclusively inside components.\n• Full Application Refresh Handler: Upgraded header reload button to sync cloud state and cleanly refresh application memory.\n• Universal Medium Haptics: Unified tactile feedback across core navigation and interactive surfaces.\n• Navigation Droplet Hold & Drag: 120Hz pointer tracking with haptic boundary crossing and elastic snapping.",
+  apkSizeBytes: 15759996,
+  releaseNotes: "LifeOS v3.4.8 (Build 85):\n• Blank Page Root Fix: Restored instant, reliable route rendering across all 15 interfaces, eliminating height collapse.\n• Complete Water Liquid Optics: Physics-grounded specular meniscus reflection rims and volumetric dark glass depth across all cards.\n• Rock-Solid Container Stability: Main cards stay firmly anchored on the canvas; interactions occur strictly inside sub-cards, buttons, and chips.\n• Multi-Tier Crisp Haptic Feedback: Distinct physical profiles for selection ticks, light touches, solid medium clicks, and dual-pulse ratchet confirmations.\n• 120Hz Droplet Drag Detents: Fluid navigation droplet scrubbing with tactile hardware detent ticks at every slot boundary.\n• Legacy UI Migration: Modernized Calendar event sheet with unified design system and streamlined daily quotes marquee.\n• Zero-Lag 120 FPS Performance: Replaced costly backdrop blur shaders with GPU-accelerated progressive OLED ambient scrims.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

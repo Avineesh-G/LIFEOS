@@ -77,7 +77,9 @@ export default function Settings({
   const handleHapticChange = (level: HapticLevel) => {
     setHapticLevel(level);
     setHapticLevelState(level);
-    triggerHaptic('medium');
+    if (level === 'light') triggerHaptic('light');
+    else if (level === 'medium') triggerHaptic('medium');
+    else if (level === 'heavy') triggerHaptic('heavy');
   };
 
   // Security

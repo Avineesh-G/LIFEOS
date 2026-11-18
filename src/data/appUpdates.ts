@@ -25,13 +25,36 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-8-blank-page-fix-liquid-water-optics-crisp-haptics',
+    category: 'Liquid Water Optics & Zero-Lag Core',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Blank Page Root Fix, Complete Water Liquid Optics, Crisp Multi-Tier Haptics & Zero-Lag 120 FPS',
+    dateTime: '18 Nov 2026, 09:55 AM',
+    fullDateTime: 'Wednesday, November 18, 2026 at 09:55:00 AM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major performance and stability update resolving interface blank page rendering, bringing complete physics-grounded water liquid optics, rock-solid container stability, crisp multi-tier linear resonant actuator (LRA) haptics, and locked 120 FPS navigation.',
+    points: [
+      'Blank Page Root Fix: Resolved route viewport height collapse and restored instant, reliable rendering across all 15 application interfaces.',
+      'Complete Water Liquid Optics: Applied physics-grounded specular meniscus reflection rims and volumetric dark glass depth across all cards.',
+      'Rock-Solid Container Stability: Outer holding cards remain firmly anchored on the canvas; interactions occur strictly inside sub-cards, buttons, and chips.',
+      'Crisp Multi-Tier Haptics Engine: Dedicated physical profiles for selection ticks (Haptics.selectionChanged), light touches, solid medium clicks, and dual-pulse ratchet confirmations.',
+      '120Hz Droplet Drag Detents: Fluid navigation droplet scrubbing with tactile hardware detent ticks at every slot boundary.',
+      'Legacy UI Migration: Modernized Calendar event sheet with unified design system and purged legacy streak remnants from Home quotes marquee.',
+      'Zero-Lag 120 FPS Performance: Replaced costly backdrop blur shaders with GPU-accelerated progressive OLED ambient scrims.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-7-liquid-glass-blur-matching-send-pod-rock-solid-cards',
     category: 'Liquid Glass Aesthetics & Core Stability',
     icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
     title: 'Liquid Glass Progressive Blur, Matching Send Pod, Rock-Solid Cards & Smooth Startup',
     dateTime: '17 Nov 2026, 02:45 PM',
     fullDateTime: 'Tuesday, November 17, 2026 at 02:45:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.7',
     colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
     summary:
       'Major polish and performance release introducing GPU-accelerated Apple Liquid Glass progressive blur drops, precision 1:1 matching circular send pod, rock-solid container surfaces, seamless non-blocking startup transitions, and dedicated full-width quotation marquee.',

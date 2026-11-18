@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LunaComicBubbleIcon } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
@@ -104,7 +104,7 @@ export function TabBar({
     longPressTimerRef.current = setTimeout(() => {
       if (!isDraggingRef.current) {
         isLongPressRef.current = true;
-        triggerHaptic('medium');
+        triggerHaptic('heavy');
         if (tab?.isCustomizable && onCustomizeSlot) {
           onCustomizeSlot(tab.key);
         } else if (tab?.key === 'home' && onCustomizeSlot) {
@@ -131,7 +131,7 @@ export function TabBar({
       if (!isDraggingRef.current && dx > 8) {
         isDraggingRef.current = true;
         setIsDragging(true);
-        triggerHaptic('medium');
+        triggerHaptic('light');
       }
 
       if (isDraggingRef.current) {
@@ -139,10 +139,10 @@ export function TabBar({
         setDragOffsetPx(offsetPx);
         setDragHoverIndex(index);
 
-        // Tactile boundary crossing haptics
+        // Tactile boundary crossing haptics (ultra-crisp selection detent per slot)
         if (index !== lastHapticIndexRef.current) {
           lastHapticIndexRef.current = index;
-          triggerHaptic('medium');
+          triggerHaptic('selection');
           setOptimisticKey(items[index].key);
         }
       }
@@ -157,11 +157,13 @@ export function TabBar({
 
     if (isDraggingRef.current && clientX !== undefined) {
       const { index } = calculateSlotFromCoord(clientX);
-      triggerHaptic('medium');
+      triggerHaptic('save');
       const targetTab = items[index];
       if (targetTab) {
         setOptimisticKey(targetTab.key);
-        onChange(targetTab.key);
+        startTransition(() => {
+          onChange(targetTab.key);
+        });
       }
     }
 
@@ -178,7 +180,9 @@ export function TabBar({
     }
     triggerHaptic('medium');
     setOptimisticKey(tab.key);
-    onChange(tab.key);
+    startTransition(() => {
+      onChange(tab.key);
+    });
   };
 
   const tabWidthPercent = 100 / Math.max(1, items.length);
@@ -304,7 +308,7 @@ export function TabBar({
           whileHover={{ scale: 1.04 }}
           transition={MOTION_SPRINGS.bouncy}
           onClick={() => {
-            triggerHaptic('medium');
+            triggerHaptic('ai');
             onAiClick();
           }}
           className="relative h-[52px] w-[52px] rounded-full glass-nav nav-rim-light shadow-2xl flex items-center justify-center cursor-pointer select-none shrink-0"

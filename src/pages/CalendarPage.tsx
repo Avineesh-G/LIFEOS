@@ -68,7 +68,7 @@ import {
 import { triggerHaptic } from '../utils/haptics';
 import { useNavigate } from 'react-router-dom';
 import { navigateBack } from '../utils/backNavigation';
-import { BottomSheet } from '../components/BottomSheet';
+import { Sheet } from '../ui';
 import type {
   AppData,
   CalendarEvent,
@@ -1072,10 +1072,11 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
         </div>
       )}
 
-      {/* ── Event Creation / Editing Bottom Sheet ── */}
-      <BottomSheet
+      {/* ── Event Creation / Editing Modern Liquid Sheet ── */}
+      <Sheet
         isOpen={isEventModalOpen}
         onClose={() => setIsEventModalOpen(false)}
+        detent="full"
       >
         <div className="space-y-3.5 pt-1 pb-4 select-none font-sans text-left">
           {/* Header */}
@@ -1250,7 +1251,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             </button>
           </div>
         </div>
-      </BottomSheet>
+      </Sheet>
     </div>
   );
 }

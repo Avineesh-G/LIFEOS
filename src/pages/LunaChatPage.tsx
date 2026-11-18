@@ -1752,18 +1752,12 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
           paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 12px) + 6px)',
         }}
       >
-        {/* Apple Liquid Glass Progressive Blur & Ambient Scrim Shield */}
+        {/* High-Performance Progressive OLED Ambient Scrim Shield (Locked 120 FPS) */}
         <div
           className="absolute inset-x-0 bottom-0 h-44 pointer-events-none"
           style={{
-            backdropFilter: 'blur(24px) saturate(190%) brightness(0.95)',
-            WebkitBackdropFilter: 'blur(24px) saturate(190%) brightness(0.95)',
-            maskImage:
-              'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.96) 20%, rgba(0,0,0,0.82) 42%, rgba(0,0,0,0.50) 68%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.96) 20%, rgba(0,0,0,0.82) 42%, rgba(0,0,0,0.50) 68%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)',
             background:
-              'linear-gradient(to top, rgba(8,8,12,0.82) 0%, rgba(8,8,12,0.72) 20%, rgba(8,8,12,0.54) 42%, rgba(8,8,12,0.30) 68%, rgba(8,8,12,0.10) 88%, rgba(8,8,12,0) 100%)',
+              'linear-gradient(to top, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.88) 22%, rgba(0,0,0,0.72) 44%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0.15) 88%, rgba(0,0,0,0) 100%)',
           }}
           aria-hidden="true"
         />

@@ -2,9 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Quotes } from '../../ui/tokens/icons';
 import { getDailyQuotesStream, QuoteItem } from '../../data/quotes';
 
-interface HomeStreakQuotesCardProps {
-  streakDays?: number;
-}
+interface HomeStreakQuotesCardProps {}
 
 // Map quote categories to crisp, vibrant luminescent colors (words have high-contrast color, category name is never mentioned)
 const CATEGORY_TINTS: Record<string, string> = {
@@ -16,7 +14,7 @@ const CATEGORY_TINTS: Record<string, string> = {
   communication: '#FB7185', // Coral Rose (Voice & Motivation)
 };
 
-export default function HomeStreakQuotesCard({ streakDays }: HomeStreakQuotesCardProps) {
+export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
   const [isPaused, setIsPaused] = useState(false);
 
   // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)

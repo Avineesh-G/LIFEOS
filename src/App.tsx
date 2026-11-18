@@ -101,9 +101,11 @@ function MainContent({
 
   // Clean, instant, reliable page presentation (zero blank screens)
 
-  // Synchronously reset scroll before paint when a new route mounts
-  useLayoutEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+  // Non-blocking scroll reset post-paint (eliminates synchronous layout reflow)
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
   }, [location.pathname]);
 
   const routeElements = useRoutes([

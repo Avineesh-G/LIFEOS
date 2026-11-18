@@ -1,23 +1,36 @@
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 
-export type HapticType = 'nav' | 'light' | 'medium' | 'heavy' | 'save' | 'success' | 'error' | 'milestone' | 'ai' | 'selection' | number | number[];
+export type HapticType =
+  | 'selection'
+  | 'nav'
+  | 'light'
+  | 'medium'
+  | 'heavy'
+  | 'save'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'milestone'
+  | 'ai'
+  | number
+  | number[];
+
+export type HapticLevel = 'off' | 'light' | 'medium' | 'heavy';
 
 let audioCtx: AudioContext | null = null;
 let lastHapticTime = 0;
-
-export type HapticLevel = 'off' | 'medium' | 'high';
+let lastHapticType: string = '';
 
 export function getHapticLevel(): HapticLevel {
   if (typeof window === 'undefined') return 'medium';
   try {
     const saved = localStorage.getItem('lifeos_haptics_level');
-    if (saved === 'off' || saved === 'medium') {
+    if (saved === 'off' || saved === 'light' || saved === 'medium' || saved === 'heavy') {
       return saved;
     }
-    if (saved === 'high') {
-      return 'medium';
-    }
+    // Backward compatibility for 'high'
+    if (saved === 'high') return 'heavy';
   } catch {}
   return 'medium';
 }
@@ -37,9 +50,11 @@ export function getHapticIntensity(): number {
       const num = parseInt(saved, 10);
       if (!isNaN(num) && num >= 0 && num <= 100) return num;
     }
-    const level = localStorage.getItem('lifeos_haptics_level');
+    const level = getHapticLevel();
     if (level === 'off') return 0;
-    return 50;
+    if (level === 'light') return 25;
+    if (level === 'medium') return 50;
+    if (level === 'heavy') return 80;
   } catch {}
   return 50;
 }
@@ -50,28 +65,22 @@ export function setHapticIntensity(intensity: number) {
     const clamped = Math.max(0, Math.min(100, intensity));
     localStorage.setItem('lifeos_haptics_intensity', String(clamped));
     if (clamped === 0) {
-      localStorage.setItem('lifeos_haptics_level', 'off');
+      setHapticLevel('off');
+    } else if (clamped <= 35) {
+      setHapticLevel('light');
+    } else if (clamped <= 65) {
+      setHapticLevel('medium');
     } else {
-      localStorage.setItem('lifeos_haptics_level', 'medium');
+      setHapticLevel('heavy');
     }
   } catch {}
 }
 
 /**
- * Calculates tactile multiplier from the haptics volume bar (0 - 100).
- * Default setting is 50% (1.0X baseline; keep default value same).
- * Increasing slider above 50% adds up to +0.9X (1.9X at 100%).
- * Decreasing slider below 50% smoothly lowers intensity.
+ * Synthesizes an ultra-crisp, acoustic micro-transient click for web / non-vibrating devices.
+ * Uses a steep exponential frequency sweep mimicking high-end precision linear actuators.
  */
-export function getHapticMultiplier(intensity = getHapticIntensity()): number {
-  if (intensity <= 0) return 0;
-  const boost = intensity >= 50
-    ? ((intensity - 50) / 50) * 0.9
-    : -((50 - intensity) / 50) * 0.7;
-  return Math.max(0.1, 1.0 + boost);
-}
-
-function playSyntheticHapticAudio(intensity: 'nav' | 'light' | 'medium' | 'heavy' | 'save', multiplier = 1.0) {
+function playSyntheticHapticAudio(type: HapticType, volumeMultiplier = 1.0) {
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContextClass) return;
@@ -88,12 +97,16 @@ function playSyntheticHapticAudio(intensity: 'nav' | 'light' | 'medium' | 'heavy
     osc.type = 'triangle';
     const now = audioCtx.currentTime;
 
-    const freq = intensity === 'nav' ? 170 : intensity === 'heavy' ? 70 : intensity === 'save' ? 110 : 140;
-    const dur = intensity === 'nav' ? 0.012 : intensity === 'save' ? 0.035 : 0.018;
-    const peakGain = (intensity === 'nav' ? 0.012 : intensity === 'save' ? 0.04 : 0.02) * Math.min(2.0, multiplier);
+    const isTick = type === 'selection' || type === 'nav';
+    const isSave = type === 'save' || type === 'success';
+    const isHeavy = type === 'heavy' || type === 'milestone';
+
+    const freq = isTick ? 240 : isHeavy ? 80 : isSave ? 160 : 190;
+    const dur = isTick ? 0.008 : isSave ? 0.024 : 0.014;
+    const peakGain = (isTick ? 0.012 : isSave ? 0.03 : 0.02) * Math.min(1.5, volumeMultiplier);
 
     osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + dur);
+    osc.frequency.exponentialRampToValueAtTime(35, now + dur);
 
     gain.gain.setValueAtTime(peakGain, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
@@ -103,86 +116,143 @@ function playSyntheticHapticAudio(intensity: 'nav' | 'light' | 'medium' | 'heavy
 
     osc.start(now);
     osc.stop(now + dur);
-  } catch {
-    // Ignore audio restrictions
-  }
+  } catch {}
 }
 
-const BASE_DURATIONS: Record<string, number> = {
-  selection: 24,
-  nav: 26,
-  light: 28,
-  medium: 32,
-  heavy: 48,
-  save: 48,
-  milestone: 50,
-  success: 35,
-  error: 45,
-  ai: 28,
+/**
+ * Ultra-crisp web fallback durations (in milliseconds).
+ * Short pulses avoid the sluggish inertia of coarse phone motors.
+ */
+const CRISP_WEB_PULSES: Record<string, number | number[]> = {
+  selection: 8,
+  nav: 10,
+  light: 12,
+  medium: 18,
+  heavy: 28,
+  save: [16, 40, 10],
+  milestone: [22, 45, 18],
+  success: [14, 45, 20],
+  warning: [20, 45, 16],
+  error: [22, 35, 22, 35, 26],
+  ai: [8, 35, 14],
 };
 
+/**
+ * Central trigger for crisp, tactile, hardware-aligned haptic feedback across LifeOS.
+ */
 export function triggerHaptic(pattern: HapticType = 'medium') {
   if (typeof window === 'undefined') return;
 
-  const intensity = getHapticIntensity();
-  if (intensity <= 0) return;
+  const level = getHapticLevel();
+  if (level === 'off') return;
 
+  const patternStr = typeof pattern === 'string' ? pattern : 'custom';
   const now = Date.now();
-  if (now - lastHapticTime < 40) return;
-  lastHapticTime = now;
 
-  const multiplier = getHapticMultiplier(intensity);
-
-  // Compute scaled duration
-  let baseDuration = 28;
-  if (typeof pattern === 'number') {
-    baseDuration = pattern;
-  } else if (!Array.isArray(pattern) && BASE_DURATIONS[pattern]) {
-    baseDuration = BASE_DURATIONS[pattern];
+  // Tight debounce for selection ticks (e.g. dragging the navbar droplet), 30ms for button taps
+  const minInterval = patternStr === 'selection' ? 18 : 30;
+  if (now - lastHapticTime < minInterval && lastHapticType === patternStr) {
+    return;
   }
-  const scaledDuration = Math.round(baseDuration * multiplier);
+  lastHapticTime = now;
+  lastHapticType = patternStr;
 
-  // 1. Android / iOS Native Hardware Vibration via Capacitor Bridge
+  // 1. Android & iOS Hardware Linear Actuator (Taptic Engine / LRA) via Capacitor Bridge
   if (Capacitor.isNativePlatform()) {
     try {
       if (pattern === 'selection') {
-        Haptics.impact({ style: ImpactStyle.Medium });
-      } else if (pattern === 'success') {
-        Haptics.notification({ type: NotificationType.Success });
-      } else if (pattern === 'error') {
-        Haptics.notification({ type: NotificationType.Error });
-      } else if (intensity > 70) {
-        // High boost intensity: trigger direct motor vibration with scaled duration
-        Haptics.vibrate({ duration: scaledDuration });
-      } else if (pattern === 'heavy' || pattern === 'milestone') {
-        Haptics.impact({ style: ImpactStyle.Heavy });
-      } else {
-        // Confident, clean medium haptic impact across all core actions
-        Haptics.impact({ style: ImpactStyle.Medium });
+        // High-precision mechanical tick / detent
+        Haptics.selectionChanged().catch(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        });
+        return;
       }
-      return;
+
+      if (pattern === 'nav' || pattern === 'light') {
+        // Crisp, lightweight button/toggle touch
+        const style = level === 'heavy' ? ImpactStyle.Medium : ImpactStyle.Light;
+        Haptics.impact({ style });
+        return;
+      }
+
+      if (pattern === 'medium') {
+        // Confident, solid mechanical click
+        const style = level === 'light' ? ImpactStyle.Light : level === 'heavy' ? ImpactStyle.Heavy : ImpactStyle.Medium;
+        Haptics.impact({ style });
+        return;
+      }
+
+      if (pattern === 'heavy' || pattern === 'milestone') {
+        // Authoritative deep tactile impact
+        const style = level === 'light' ? ImpactStyle.Medium : ImpactStyle.Heavy;
+        Haptics.impact({ style });
+        return;
+      }
+
+      if (pattern === 'save') {
+        // Dual-pulse ratchet lock-in: firm click followed by crisp detent snap
+        Haptics.impact({ style: ImpactStyle.Medium });
+        setTimeout(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        }, 45);
+        return;
+      }
+
+      if (pattern === 'ai') {
+        // Futuristic double-tick sparkle
+        Haptics.selectionChanged().catch(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        });
+        setTimeout(() => {
+          Haptics.impact({ style: ImpactStyle.Light });
+        }, 40);
+        return;
+      }
+
+      if (pattern === 'success') {
+        Haptics.notification({ type: NotificationType.Success });
+        return;
+      }
+
+      if (pattern === 'warning') {
+        Haptics.notification({ type: NotificationType.Warning });
+        return;
+      }
+
+      if (pattern === 'error') {
+        Haptics.notification({ type: NotificationType.Error });
+        return;
+      }
+
+      // Fallback for custom number durations
+      if (typeof pattern === 'number') {
+        const style = pattern <= 15 ? ImpactStyle.Light : pattern <= 35 ? ImpactStyle.Medium : ImpactStyle.Heavy;
+        Haptics.impact({ style });
+        return;
+      }
     } catch {
-      // Fallback to browser web APIs below
+      // Fall through to web vibration API below
     }
   }
 
-  // 2. Web / Browser fallback
+  // 2. Web Vibration API Fallback (Ultra-crisp micro-pulses)
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
-      if (Array.isArray(pattern)) {
-        const scaledPattern = pattern.map(p => Math.round(p * multiplier));
-        navigator.vibrate(scaledPattern);
-      } else if (pattern === 'error') {
-        navigator.vibrate([scaledDuration, 60, scaledDuration]);
+      if (typeof pattern === 'string' && CRISP_WEB_PULSES[pattern]) {
+        navigator.vibrate(CRISP_WEB_PULSES[pattern]);
+      } else if (typeof pattern === 'number') {
+        navigator.vibrate(Math.min(30, pattern));
+      } else if (Array.isArray(pattern)) {
+        navigator.vibrate(pattern);
       } else {
-        navigator.vibrate(scaledDuration);
+        navigator.vibrate(14);
       }
     } catch {}
   }
 
-  // 3. Audio feedback
-  if (typeof pattern === 'string' && (pattern === 'nav' || pattern === 'light' || pattern === 'medium' || pattern === 'heavy' || pattern === 'save')) {
-    playSyntheticHapticAudio(pattern, multiplier);
+  // 3. Acoustic Feedback for non-touch / web environments
+  if (typeof pattern === 'string') {
+    playSyntheticHapticAudio(pattern);
   }
 }
 
@@ -195,10 +265,9 @@ export const haptics = {
   snap: () => triggerHaptic('medium'),
   heavy: () => triggerHaptic('heavy'),
   success: () => triggerHaptic('success'),
-  warning: () => triggerHaptic('error'),
+  warning: () => triggerHaptic('warning'),
   error: () => triggerHaptic('error'),
   milestone: () => triggerHaptic('milestone'),
   save: () => triggerHaptic('save'),
   ai: () => triggerHaptic('ai'),
 };
-

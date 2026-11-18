@@ -126,11 +126,6 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     );
   }, [userProfile]);
 
-  // Streak calculation
-  const streakDays = useMemo(() => {
-    return data.workoutLogs?.length ? Math.min(data.workoutLogs.length, 14) : 7;
-  }, [data.workoutLogs]);
-
   return (
     <div className="w-full text-white selection:bg-[#0A84FF]/30">
       {/* ── Two-tone Page Greeting Header ── */}
@@ -143,9 +138,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
         </h1>
       </div>
 
-      {/* ── Daily Motivation & Streak Marquee (Positioned immediately after greeting) ── */}
+      {/* ── Daily Motivation Quotes Marquee (Positioned immediately after greeting) ── */}
       <div className="mb-3.5">
-        <HomeStreakQuotesCard streakDays={streakDays} />
+        <HomeStreakQuotesCard />
       </div>
 
       <div className="flex flex-col gap-3.5 pb-2">

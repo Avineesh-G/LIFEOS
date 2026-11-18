@@ -556,7 +556,9 @@ export default function Layout({
         onSelect={(item) => {
           const match = ALL_HUB_ITEMS.find((i) => i.id === item.id);
           if (match) {
-            navigate(match.route);
+            startTransition(() => {
+              navigate(match.route);
+            });
           }
         }}
         onPinSlot={handlePinSlot}
