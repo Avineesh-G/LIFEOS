@@ -376,6 +376,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
   // Query & Generation State
   const [inputQuery, setInputQuery] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -1479,65 +1480,34 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
           paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 16px) + 160px)',
         }}
       >
-        {/* ── Empty State Hero (ChatGPT Welcome Screen) ── */}
+        {/* ── Empty State Hero: Centered Logo & Welcome Greeting ── */}
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center select-none py-4">
-            {/* Ambient Glowing Luna Starburst Brand Emblem (Icon only, non-interactive) */}
-            <div className="relative mb-3.5 flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
-              <div className="absolute inset-0 rounded-[24px] bg-[#0A84FF]/20 blur-xl scale-110" />
+          <div className="flex flex-col items-center justify-center min-h-[58vh] text-center select-none py-8 my-auto">
+            {/* Ambient Glowing Luna Starburst Brand Emblem */}
+            <div className="relative mb-4 flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
+              <div className="absolute inset-0 rounded-[28px] bg-[#0A84FF]/25 blur-2xl scale-125" />
               <div
-                className="w-16 h-16 rounded-[22px] flex items-center justify-center text-white shadow-2xl relative border-none"
+                className="w-20 h-20 rounded-[24px] flex items-center justify-center text-white shadow-2xl relative border-none"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 40%, rgba(20,20,24,0.98) 100%)',
+                    'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, rgba(20,20,24,0.98) 100%)',
                   boxShadow:
-                    '0 16px 36px -8px rgba(0, 0, 0, 0.95), 0 0 28px -6px rgba(10, 132, 255, 0.35)',
+                    '0 20px 40px -10px rgba(0, 0, 0, 0.95), 0 0 32px -4px rgba(10, 132, 255, 0.40)',
                 }}
               >
-                <LunaComicBubbleIcon size={32} className="text-[#0A84FF] drop-shadow-[0_0_10px_rgba(10,132,255,0.5)]" />
+                <LunaComicBubbleIcon size={40} className="text-[#0A84FF] drop-shadow-[0_0_12px_rgba(10,132,255,0.6)]" />
               </div>
             </div>
 
             {/* Personalized Executive Greeting */}
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-1.5">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
               How can I help you today, {userName}?
             </h2>
 
             {/* Intelligence Status Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-tile text-[11px] font-semibold text-white/50 mb-6 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-tile text-[11.5px] font-semibold text-white/60 shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] shadow-[0_0_6px_#30D158]" />
               <span>Ask about workouts, schedule, budget, or studies</span>
-            </div>
-
-            {/* 2x2 Executive Bento Grid (Compact, Symmetrical & Fast Tap) */}
-            <div className="grid grid-cols-2 gap-2.5 w-full text-left">
-              {PROMPT_STARTERS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleSendQuery(item.query)}
-                  className="p-3.5 rounded-[20px] glass-card hover:bg-white/[0.06] active:scale-[0.97] transition-all cursor-pointer flex flex-col justify-between gap-3 group text-left border-none shadow-lg min-h-[110px] touch-manipulation select-none"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                      {item.icon}
-                    </div>
-                    <CaretRight
-                      size={12}
-                      weight="bold"
-                      className="text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white tracking-tight leading-snug">
-                      {item.title}
-                    </h4>
-                    <p className="text-[11px] text-white/45 mt-0.5 leading-snug line-clamp-2">
-                      {item.subtitle}
-                    </p>
-                  </div>
-                </button>
-              ))}
             </div>
           </div>
         ) : (
@@ -1763,6 +1733,39 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
         />
 
         <div className="relative px-3.5 pointer-events-auto">
+          {/* Minimized Quick-Access Starter Prompts (Docked above input bar, auto-hides when typing/active chat) */}
+          <AnimatePresence>
+            {messages.length === 0 && !inputQuery.trim() && !isInputFocused && attachedImages.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="grid grid-cols-2 gap-2 mb-2.5 w-full pointer-events-auto"
+              >
+                {PROMPT_STARTERS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSendQuery(item.query)}
+                    className="p-2.5 rounded-2xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2.5 text-left border-none shadow-md touch-manipulation select-none"
+                  >
+                    <div className="w-7 h-7 rounded-lg glass-tile flex items-center justify-center shrink-0 shadow-sm text-white">
+                      {item.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-[11.5px] font-bold text-white tracking-tight truncate leading-tight">
+                        {item.title}
+                      </h4>
+                      <p className="text-[10px] text-white/45 truncate leading-tight mt-0.5">
+                        {item.subtitle}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
           {/* Multimodal Attachment Picker Popover */}
           <AnimatePresence>
             {isAttachMenuOpen && (
@@ -1843,6 +1846,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 ref={inputRef}
                 rows={1}
                 value={inputQuery}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
                 onChange={(e) => setInputQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {

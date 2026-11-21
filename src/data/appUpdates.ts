@@ -19,11 +19,34 @@ export interface AppUpdate {
 
 export const OFFICIAL_DEVELOPER_EMAILS = [
   'avineeshgujjeti2006@gmail.com',
+  'avineeshgujjeti@outlook.com',
 ];
 
 export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
+  {
+    id: 'update-v3-4-9-drive-pdf-viewer-droplet-drag-instant-profile',
+    category: 'Drive PDF AI, Fluid Droplet Drag & Zero-Lag Core',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Drive In-App PDF Viewing & AI Extraction, Fluid Droplet Drag Detents, Nutrition AI Layout & Instant Avatars',
+    dateTime: '21 Nov 2026, 11:57 AM',
+    fullDateTime: 'Saturday, November 21, 2026 at 11:57:00 AM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major functionality and fluid experience update bringing native in-app PDF viewing and AI data extraction, ultra-responsive 120Hz liquid droplet navigation dragging, Nutrition AI badge layout perfection, 0ms instant profile pictures, and centered Luna chat experience.',
+    points: [
+      'Drive In-App PDF Viewing & AI Analysis: Read uploaded PDF documents directly within the app and extract actionable entries into Finance, Gym, Nutrition, Tasks, or Notes with non-clashing header and footer controls.',
+      'Nutrition AI Badge Layout Perfection: Re-architected the "Auto-Applied by AI" badge and calorie metric with flex shrink-0 grouping to eliminate wrapping and text collisions on all mobile screens.',
+      'Fluid Droplet Navigation & Quick Access: Refined 6px instant drag threshold with real-time finger tracking, dynamic liquid scaling (scale(1.06, 0.94)), tactile slot boundary haptic detents, and instant 0ms Home navigation.',
+      'Instant 0ms Profile Picture Display: Implemented synchronous offscreen canvas base64 image caching, eliminating avatar pop-in and network lag on every app launch.',
+      'Tasks Completed Log Seen-Mode Only: Hardened the completed tasks history log so completed items remain strictly in read-only mode, preventing accidental re-addition to today\'s active tasks.',
+      'Centered Luna Chatbot UI: Centered the Luna avatar and personalized welcome greeting in the chat viewport, with starter chips cleanly docked above the input bar and auto-hiding when typing.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
   {
     id: 'update-v3-4-8-blank-page-fix-liquid-water-optics-crisp-haptics',
     category: 'Liquid Water Optics & Zero-Lag Core',
@@ -31,7 +54,7 @@ export const APP_UPDATES: AppUpdate[] = [
     title: 'Blank Page Root Fix, Complete Water Liquid Optics, Crisp Multi-Tier Haptics & Zero-Lag 120 FPS',
     dateTime: '18 Nov 2026, 09:55 AM',
     fullDateTime: 'Wednesday, November 18, 2026 at 09:55:00 AM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.8',
     colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
     summary:
       'Major performance and stability update resolving interface blank page rendering, bringing complete physics-grounded water liquid optics, rock-solid container stability, crisp multi-tier linear resonant actuator (LRA) haptics, and locked 120 FPS navigation.',

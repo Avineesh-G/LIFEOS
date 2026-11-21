@@ -1006,14 +1006,15 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           </div>
 
           {/* Estimated Calories (Auto-Applied by AI) */}
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.70)]">
-                Calories per piece / serving (kcal)
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.75)] truncate">
+                Calories per serving (kcal)
               </label>
-              <span className="text-[10px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full">
-                <Sparkle size={11} weight="fill" /> Auto-Applied by AI
-              </span>
+              <div className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full shrink-0 select-none">
+                <Sparkle size={10} weight="fill" />
+                <span>Auto-Applied by AI</span>
+              </div>
             </div>
             <TextField
               type="number"

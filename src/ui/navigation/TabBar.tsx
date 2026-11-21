@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LunaComicBubbleIcon } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
+import { LunaComicBubbleIcon } from '../tokens/icons';
 import { MOTION_SPRINGS } from '../tokens/motion';
-
-export type LunaOrbState = 'idle' | 'listening' | 'thinking' | 'unread';
 
 export interface TabItem {
   key: string;
@@ -12,8 +10,8 @@ export interface TabItem {
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
   tint?: string;
-  quickActions?: { label: string; action: () => void }[];
   isCustomizable?: boolean;
+  quickActions?: Array<{ label: string; action: () => void }>;
 }
 
 export interface TabBarProps {
@@ -22,14 +20,14 @@ export interface TabBarProps {
   onChange: (key: string) => void;
   onAiClick?: () => void;
   onCustomizeSlot?: (slotKey: string) => void;
-  lunaState?: LunaOrbState;
+  lunaState?: 'idle' | 'listening' | 'thinking' | 'unread';
   className?: string;
 }
 
 /**
  * Pure Apple Liquid Navigation Bar
  * Features a physics-grounded Hold & Drag fluid droplet gesture with 120Hz responsive tracking,
- * tactile slot-boundary haptics, and seamless integration with Luna AI.
+ * zero-stuck touch-to-click transition lock, and liquid elastic droplet morphing.
  */
 export function TabBar({
   items,
@@ -48,20 +46,39 @@ export function TabBar({
   const [dragOffsetPx, setDragOffsetPx] = useState(0);
   const [dragHoverIndex, setDragHoverIndex] = useState<number | null>(null);
 
+  // Droplet Liquid Fluid Physics State
+  const [isAnimatingDroplet, setIsAnimatingDroplet] = useState(false);
+
   const trackRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<any>(null);
   const isLongPressRef = useRef(false);
   const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
   const lastHapticIndexRef = useRef<number>(-1);
+  const suppressClickRef = useRef(false);
+  const prevIndexRef = useRef<number>(0);
 
   // Sync optimistic key back when parent activeKey updates
   useEffect(() => {
     setOptimisticKey(null);
   }, [activeKey]);
 
-  const activeIndex = Math.max(0, items.findIndex((t) => t.key === (optimisticKey || activeKey)));
+  const rawActiveIndex = items.findIndex((t) => t.key === (optimisticKey || activeKey));
+  const hasValidActiveTab = rawActiveIndex !== -1;
+  const activeIndex = Math.max(0, rawActiveIndex);
   const currentKey = optimisticKey || activeKey;
+
+  // Track index changes to trigger liquid droplet stretch
+  useEffect(() => {
+    if (rawActiveIndex !== -1 && rawActiveIndex !== prevIndexRef.current) {
+      setIsAnimatingDroplet(true);
+      const timer = setTimeout(() => {
+        setIsAnimatingDroplet(false);
+      }, 300);
+      prevIndexRef.current = rawActiveIndex;
+      return () => clearTimeout(timer);
+    }
+  }, [rawActiveIndex]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -93,6 +110,7 @@ export function TabBar({
   const handlePointerStart = (clientX: number, clientY: number, tab?: TabItem) => {
     isLongPressRef.current = false;
     isDraggingRef.current = false;
+    suppressClickRef.current = false;
     touchStartPosRef.current = { x: clientX, y: clientY };
     lastHapticIndexRef.current = activeIndex;
 
@@ -104,6 +122,7 @@ export function TabBar({
     longPressTimerRef.current = setTimeout(() => {
       if (!isDraggingRef.current) {
         isLongPressRef.current = true;
+        suppressClickRef.current = true;
         triggerHaptic('heavy');
         if (tab?.isCustomizable && onCustomizeSlot) {
           onCustomizeSlot(tab.key);
@@ -121,14 +140,14 @@ export function TabBar({
     const dx = Math.abs(clientX - touchStartPosRef.current.x);
     const dy = Math.abs(clientY - touchStartPosRef.current.y);
 
-    // If movement exceeds threshold, cancel long press and engage fluid droplet drag
-    if (dx > 8 || dy > 8) {
+    // Responsive 6px drag engagement threshold for instant fluid droplet tracking
+    if (dx > 6 || dy > 6) {
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
         longPressTimerRef.current = null;
       }
 
-      if (!isDraggingRef.current && dx > 8) {
+      if (!isDraggingRef.current && dx > 6) {
         isDraggingRef.current = true;
         setIsDragging(true);
         triggerHaptic('light');
@@ -155,34 +174,43 @@ export function TabBar({
       longPressTimerRef.current = null;
     }
 
-    if (isDraggingRef.current && clientX !== undefined) {
-      const { index } = calculateSlotFromCoord(clientX);
-      triggerHaptic('save');
-      const targetTab = items[index];
-      if (targetTab) {
-        setOptimisticKey(targetTab.key);
-        startTransition(() => {
-          onChange(targetTab.key);
-        });
-      }
-    }
-
+    const wasDragging = isDraggingRef.current;
     touchStartPosRef.current = null;
     isDraggingRef.current = false;
     setIsDragging(false);
     setDragHoverIndex(null);
+
+    // If it was an actual drag gesture, suppress synthetic click and navigate via drag drop
+    if (wasDragging) {
+      suppressClickRef.current = true;
+      setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 300);
+
+      if (clientX !== undefined) {
+        const { index } = calculateSlotFromCoord(clientX);
+        triggerHaptic('save');
+        const targetTab = items[index];
+        if (targetTab) {
+          setOptimisticKey(targetTab.key);
+          onChange(targetTab.key);
+        }
+      }
+    }
   };
 
   const handleTabClick = (tab: TabItem) => {
-    if (isLongPressRef.current || isDraggingRef.current) {
+    if (isLongPressRef.current) {
       isLongPressRef.current = false;
+      return;
+    }
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
       return;
     }
     triggerHaptic('medium');
     setOptimisticKey(tab.key);
-    startTransition(() => {
-      onChange(tab.key);
-    });
+    onChange(tab.key);
   };
 
   const tabWidthPercent = 100 / Math.max(1, items.length);
@@ -243,28 +271,34 @@ export function TabBar({
       >
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
         <div ref={trackRef} className="flex-1 flex items-center relative h-[42px]">
-          {/* Fluid Hold & Drag Droplet Pill */}
+          {/* Fluid Hold & Drag Droplet Pill with Liquid Physics */}
           <div
-            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform"
+            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform transition-[opacity,transform] duration-250 ease-out"
             style={{
               width: `${tabWidthPercent}%`,
+              opacity: hasValidActiveTab ? 1 : 0,
               transform: isDragging
-                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.05)`
-                : `translate3d(${activeIndex * 100}%, 0, 0) scale(1)`,
+                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.06, 0.94)`
+                : isAnimatingDroplet
+                ? `translate3d(${activeIndex * 100}%, 0, 0) scale(1.12, 0.90)`
+                : `translate3d(${activeIndex * 100}%, 0, 0) scale(1, 1)`,
               transition: isDragging
                 ? 'scale 0.15s ease'
-                : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), scale 0.2s ease',
+                : 'transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15), scale 0.22s ease-out, opacity 0.2s ease',
               background: isDragging
-                ? 'radial-gradient(ellipse 95% 70% at 50% 0%, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.08) 65%, transparent 95%), rgba(255, 255, 255, 0.14)'
-                : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
+                ? 'radial-gradient(ellipse 95% 70% at 50% 0%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.10) 65%, transparent 95%), rgba(255, 255, 255, 0.16)'
+                : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 60%, transparent 90%), rgba(255, 255, 255, 0.10)',
               boxShadow: isDragging
-                ? '0 8px 24px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.25)'
-                : '0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+                ? '0 8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.35)'
+                : '0 4px 14px rgba(0, 0, 0, 0.60), inset 0 1px 1px rgba(255, 255, 255, 0.22)',
             }}
-          />
+          >
+            {/* Liquid Surface Meniscus Refraction Highlight */}
+            <div className="absolute inset-x-2 top-0.5 h-[1.5px] rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
 
           {items.map((tab, idx) => {
-            const isSelected = isDragging ? dragHoverIndex === idx : tab.key === currentKey;
+            const isSelected = hasValidActiveTab && (isDragging ? dragHoverIndex === idx : tab.key === currentKey);
             const tint = tab.tint || '#0A84FF';
 
             return (
@@ -277,8 +311,16 @@ export function TabBar({
                   const t = e.touches[0];
                   if (t) handlePointerStart(t.clientX, t.clientY, tab);
                 }}
+                onTouchMove={(e) => {
+                  const t = e.touches[0];
+                  if (t) handlePointerMove(t.clientX, t.clientY);
+                }}
+                onTouchEnd={(e) => {
+                  const t = e.changedTouches[0];
+                  handlePointerEnd(t?.clientX);
+                }}
                 onClick={() => handleTabClick(tab)}
-                className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1 touch-manipulation"
+                className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1 touch-none"
                 style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.60)' }}
               >
                 {/* Icon with smooth scale micro-interaction */}

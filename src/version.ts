@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 85,
-  versionName: '3.4.8',
-  releaseDate: '2026-11-18',
+  versionCode: 86,
+  versionName: '3.4.9',
+  releaseDate: '2026-11-21',
   apkSize: '15.03 MB',
-  apkSizeBytes: 15759996,
-  releaseNotes: "LifeOS v3.4.8 (Build 85):\n• Blank Page Root Fix: Restored instant, reliable route rendering across all 15 interfaces, eliminating height collapse.\n• Complete Water Liquid Optics: Physics-grounded specular meniscus reflection rims and volumetric dark glass depth across all cards.\n• Rock-Solid Container Stability: Main cards stay firmly anchored on the canvas; interactions occur strictly inside sub-cards, buttons, and chips.\n• Multi-Tier Crisp Haptic Feedback: Distinct physical profiles for selection ticks, light touches, solid medium clicks, and dual-pulse ratchet confirmations.\n• 120Hz Droplet Drag Detents: Fluid navigation droplet scrubbing with tactile hardware detent ticks at every slot boundary.\n• Legacy UI Migration: Modernized Calendar event sheet with unified design system and streamlined daily quotes marquee.\n• Zero-Lag 120 FPS Performance: Replaced costly backdrop blur shaders with GPU-accelerated progressive OLED ambient scrims.",
+  apkSizeBytes: 15761578,
+  releaseNotes: "LifeOS v3.4.9 (Build 86):\n• Drive In-App PDF Viewer & AI Extraction: View uploaded PDFs directly in-app with intelligent multi-category AI extraction into Finance, Gym, Nutrition, Tasks, and Notes.\n• Nutrition AI Badge Layout Perfection: Redesigned 'Auto-Applied by AI' indicator and calorie metric with zero truncation or text wrapping.\n• Fluid Droplet Drag & Quick Access: 120Hz liquid droplet navigation with 6px instant drag sensitivity, boundary detent haptics, and 0ms Home navigation.\n• Instant 0ms Profile Picture: Synchronous local base64 avatar caching eliminates network loading delay on app startup.\n• Tasks Completed Log Seen-Mode: Completed tasks in historical list are view-only, preventing accidental re-activation.\n• Centered Luna Chatbot UI: Centered Luna hero with dockable quick prompt starters that auto-hide while typing.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

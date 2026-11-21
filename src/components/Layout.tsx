@@ -288,12 +288,20 @@ export default function Layout({
     },
   ];
 
-    const handleTabChange = (key: string) => {
+  const handleTabChange = (key: string) => {
     triggerHaptic('medium');
     startTransition(() => {
-      if (key === 'home') navigate('/');
-      else if (key === slot2Item.id) navigate(slot2Item.route);
-      else if (key === slot3Item.id) navigate(slot3Item.route);
+      if (key === 'home') {
+        if (pathname === '/' || pathname === '') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          navigate('/');
+        }
+      } else if (key === slot2Item.id) {
+        navigate(slot2Item.route);
+      } else if (key === slot3Item.id) {
+        navigate(slot3Item.route);
+      }
     });
   };
 

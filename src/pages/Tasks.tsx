@@ -70,12 +70,23 @@ export default function Tasks({ data, updateData }: TasksProps) {
   }, [data.tasks, filter, todayStr]);
 
   const handleToggleTask = async (task: Task) => {
-    triggerHaptic('success');
-    if (!task.completed) {
-      triggerConfettiBurst();
+    // Completed tasks are in Seen Mode Only — clicks cannot alter or re-add them to today
+    if (task.completed) {
+      triggerHaptic('light');
+      return;
     }
+    triggerHaptic('success');
+    triggerConfettiBurst();
     const updated = (data.tasks || []).map((t) =>
-      t.id === task.id ? { ...t, completed: !t.completed } : t
+      t.id === task.id ? { ...t, completed: true } : t
+    );
+    await updateData({ tasks: updated });
+  };
+
+  const handleRestoreTaskToToday = async (task: Task) => {
+    triggerHaptic('medium');
+    const updated = (data.tasks || []).map((t) =>
+      t.id === task.id ? { ...t, completed: false, date: todayStr } : t
     );
     await updateData({ tasks: updated });
   };
@@ -167,22 +178,41 @@ export default function Tasks({ data, updateData }: TasksProps) {
             {filteredTasks.map((task) => (
               <SwipeActions
                 key={task.id}
-                actions={[
-                  {
-                    key: 'toggle',
-                    label: task.completed ? 'Undo' : 'Done',
-                    icon: <Check size={18} weight="bold" />,
-                    color: '#30D158',
-                    onClick: () => handleToggleTask(task),
-                  },
-                  {
-                    key: 'delete',
-                    label: 'Delete',
-                    icon: <Trash size={18} weight="bold" />,
-                    color: '#FF453A',
-                    onClick: () => handleDeleteTask(task.id),
-                  },
-                ]}
+                actions={
+                  task.completed
+                    ? [
+                        {
+                          key: 'restore',
+                          label: 'Restore',
+                          icon: <Check size={18} weight="bold" />,
+                          color: '#0A84FF',
+                          onClick: () => handleRestoreTaskToToday(task),
+                        },
+                        {
+                          key: 'delete',
+                          label: 'Delete',
+                          icon: <Trash size={18} weight="bold" />,
+                          color: '#FF453A',
+                          onClick: () => handleDeleteTask(task.id),
+                        },
+                      ]
+                    : [
+                        {
+                          key: 'toggle',
+                          label: 'Done',
+                          icon: <Check size={18} weight="bold" />,
+                          color: '#30D158',
+                          onClick: () => handleToggleTask(task),
+                        },
+                        {
+                          key: 'delete',
+                          label: 'Delete',
+                          icon: <Trash size={18} weight="bold" />,
+                          color: '#FF453A',
+                          onClick: () => handleDeleteTask(task.id),
+                        },
+                      ]
+                }
               >
                 <ListRow
                   icon={
@@ -203,9 +233,9 @@ export default function Tasks({ data, updateData }: TasksProps) {
                       {task.text}
                     </span>
                   }
-                  subtitle={task.subtask || undefined}
+                  subtitle={task.subtask || (task.completed ? 'Completed · Seen mode' : undefined)}
                   trailing={task.startTime || undefined}
-                  onClick={() => handleToggleTask(task)}
+                  onClick={task.completed ? undefined : () => handleToggleTask(task)}
                 />
               </SwipeActions>
             ))}

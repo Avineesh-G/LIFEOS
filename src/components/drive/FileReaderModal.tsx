@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { AppData, DriveFile, Expense, Task, NoteItem, WorkoutLog, MealItemLog } from '../../types';
+import type { AppData, DriveFile, Expense, Task, NoteItem, WorkoutLog, MealItemLog, NutritionLog } from '../../types';
 import { getDriveBlob } from '../../utils/idbStorage';
 import { formatStorageSize } from '../../services/driveStorageService';
 import { streamChatCompletion } from '../../services/aiClient';
@@ -46,6 +46,49 @@ interface ExtractedInfoResult {
     type: 'ADD_EXPENSE' | 'LOG_WORKOUT' | 'LOG_MEAL' | 'ADD_TASK' | 'ADD_NOTE';
     payload: Record<string, any>;
   };
+}
+
+/**
+ * Extracts printable ASCII/UTF-8 text streams from a PDF binary blob
+ * for downstream AI analysis without requiring heavyweight external WASM binaries.
+ */
+async function extractTextFromPdfBlob(blob: Blob): Promise<string> {
+  try {
+    const buffer = await blob.arrayBuffer();
+    const decoder = new TextDecoder('utf-8', { fatal: false });
+    const raw = decoder.decode(buffer);
+
+    // Extract text in PDF parentheses: (text) Tj or (text) ' or (text) "
+    const matches = raw.match(/\(([^()]{2,})\)\s*(?:Tj|'|")/g) || [];
+    const extracted = matches
+      .map((m) => m.replace(/^[(\s]+|[)\s]+(?:Tj|'|")?$/g, '').trim())
+      .filter((s) => s.length > 1 && !s.includes('\\'))
+      .join(' ');
+
+    if (extracted.length > 40) {
+      return extracted.slice(0, 4000);
+    }
+
+    // Fallback: clean ASCII alphanumeric lines
+    const lines = raw
+      .split('\n')
+      .map((l) => l.replace(/[^\x20-\x7E]/g, ' ').trim())
+      .filter(
+        (l) =>
+          l.length > 5 &&
+          !l.startsWith('%') &&
+          !l.startsWith('/') &&
+          !l.includes('obj') &&
+          !l.includes('endobj') &&
+          !l.includes('stream')
+      )
+      .slice(0, 100)
+      .join(' ');
+
+    return lines.slice(0, 4000);
+  } catch {
+    return '';
+  }
 }
 
 export function FileReaderModal({
@@ -139,6 +182,9 @@ export function FileReaderModal({
           if (isText) {
             const text = await cachedBlob.text();
             if (active) setTextContent(text);
+          } else if (isPdf) {
+            const pdfText = await extractTextFromPdfBlob(cachedBlob);
+            if (active && pdfText) setTextContent(pdfText);
           }
         } else if (file.localCachedUri && isImage) {
           if (active) setBlobUrl(file.localCachedUri);
@@ -169,7 +215,7 @@ export function FileReaderModal({
         URL.revokeObjectURL(blobUrl);
       }
     };
-  }, [isOpen, file?.id]);
+  }, [isOpen, file?.id, isText, isPdf, isImage]);
 
   // Convert image to base64 for Vision AI
   const getImageBase64 = async (): Promise<string | null> => {
@@ -206,7 +252,7 @@ export function FileReaderModal({
     return null;
   };
 
-  // Run AI Intelligence on the opened file
+  // Run AI Intelligence on the opened file (supports images, PDFs, and text)
   const handleRunAiExtraction = async () => {
     if (!file) return;
     triggerHaptic('medium');
@@ -225,12 +271,20 @@ export function FileReaderModal({
         if (!imageBase64) {
           throw new Error('Unable to read image data for AI analysis.');
         }
+      } else if (isPdf && !textToAnalyze) {
+        const blob = await getDriveBlob(file.id);
+        if (blob) {
+          textToAnalyze = await extractTextFromPdfBlob(blob);
+        }
+        if (!textToAnalyze) {
+          textToAnalyze = `PDF Document Name: ${file.name}, File Size: ${formatStorageSize(file.fileSize)}`;
+        }
       }
 
       const promptText = `You are the LifeOS Document & Image Intelligence Assistant.
-Analyze this file (${file.name}, type: ${file.mimeType}).
+Analyze this file (${file.name}, type: ${file.mimeType || fileExt}).
 Your job is to:
-1. Extract ALL factual information, text, numbers, items, dates, and details from this image/document.
+1. Extract ALL factual information, text, numbers, items, dates, and details from this document/image.
 2. Determine which LifeOS interface is the single best match to route and save this data:
    - "FINANCE": If this is a receipt, invoice, bill, ticket, expense, or purchase.
    - "GYM": If this is a workout routine, gym exercises, sets/reps, or fitness program.
@@ -266,7 +320,9 @@ Payload specifications:
         [
           {
             role: 'user',
-            content: isImage ? promptText : `${promptText}\n\nDocument Text Content:\n${textToAnalyze.slice(0, 4000)}`,
+            content: isImage
+              ? promptText
+              : `${promptText}\n\nDocument Text Content:\n${(textToAnalyze || file.name).slice(0, 4000)}`,
             images: imageBase64 ? [imageBase64] : undefined,
           },
         ],
@@ -284,7 +340,8 @@ Payload specifications:
       );
 
       // Extract JSON from AI response
-      const jsonMatch = fullAiResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || fullAiResponse.match(/(\{[\s\S]*\})/);
+      const jsonMatch =
+        fullAiResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || fullAiResponse.match(/(\{[\s\S]*\})/);
       if (!jsonMatch) {
         throw new Error('Could not parse structured extraction data from AI response.');
       }
@@ -298,205 +355,172 @@ Payload specifications:
       triggerHaptic('success');
     } catch (err: any) {
       console.error('[FileReaderModal] AI extraction failed:', err);
-      setAiError(err?.message || 'Failed to extract file details. Check your connection.');
+      setAiError(err?.message || 'Failed to analyze file with AI.');
       triggerHaptic('error');
     } finally {
       setIsAiAnalyzing(false);
     }
   };
 
-  // 1-Tap Save to detected LifeOS module
+  // Dispatch extracted data into target LifeOS module
   const handleApplyAiAction = async () => {
-    if (!extractedData || !file) return;
+    if (!extractedData) return;
     triggerHaptic('medium');
 
-    const p = extractedData.action.payload || {};
-    const todayStr = new Date().toISOString().split('T')[0];
-
     try {
-      switch (extractedData.action.type) {
-        case 'ADD_EXPENSE': {
-          const newExp: Expense = {
-            id: `exp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            amount: Number(p.amount) || 0,
-            category: p.category || 'Other',
-            note: p.note || extractedData.title || file.name,
-            date: p.date || todayStr,
-          };
-          const updated = [newExp, ...(data.expenses || [])];
-          await updateData({ expenses: updated });
-          setActionAddedMessage(`Saved Rs ${newExp.amount} to Finance (${newExp.category}).`);
-          break;
-        }
+      const { action } = extractedData;
+      const today = new Date().toISOString().split('T')[0];
 
-        case 'LOG_WORKOUT': {
-          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-          const dayName = dayNames[new Date().getDay()];
-          const newWk: WorkoutLog = {
-            id: `wlog_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            date: p.date || todayStr,
-            day: p.day || dayName,
-            type: p.workoutName || extractedData.title || 'Extracted Workout',
-            exercises: (p.exercises || []).map((ex: any) => ({
-              name: ex.name || 'Exercise',
-              howTo: ex.howTo || '',
-              rest: ex.rest || '60s',
-              sets: Array.from({ length: Number(ex.sets) || 3 }).map(() => ({
-                reps: Number(ex.reps) || 10,
-                weight: Number(ex.weight) || 0,
-                completed: true,
-              })),
+      if (action.type === 'ADD_EXPENSE') {
+        const newExpense: Expense = {
+          id: `exp_${Date.now()}`,
+          amount: Number(action.payload.amount) || 0,
+          category: action.payload.category || 'Other',
+          date: action.payload.date || today,
+          note: action.payload.note || extractedData.title,
+        };
+        const currentExpenses = data?.expenses || [];
+        await updateData({ expenses: [newExpense, ...currentExpenses] });
+        setActionAddedMessage('Expense added to Finance!');
+      } else if (action.type === 'ADD_TASK') {
+        const newTask: Task = {
+          id: `task_${Date.now()}`,
+          text: action.payload.title || extractedData.title,
+          subtask: action.payload.subtask || extractedData.summary,
+          completed: false,
+          date: action.payload.dueDate || today,
+        };
+        const currentTasks = data?.tasks || [];
+        await updateData({ tasks: [newTask, ...currentTasks] });
+        setActionAddedMessage('Task added to Today Schedule!');
+      } else if (action.type === 'ADD_NOTE') {
+        const newNote: NoteItem = {
+          id: `note_${Date.now()}`,
+          title: action.payload.title || extractedData.title,
+          content: action.payload.content || extractedData.summary,
+          pageView: 'white',
+          monthKey: today.slice(0, 7),
+          isArchived: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        const currentNotes = data?.notes || [];
+        await updateData({ notes: [newNote, ...currentNotes] });
+        setActionAddedMessage('Note created in Notes & Ideas!');
+      } else if (action.type === 'LOG_WORKOUT') {
+        const newWorkout: WorkoutLog = {
+          id: `wlog_${Date.now()}`,
+          date: today,
+          day: 'Custom',
+          type: 'Custom AI Workout',
+          exercises: (action.payload.exercises || []).map((ex: any) => ({
+            name: ex.name || 'Exercise',
+            sets: Array.from({ length: Number(ex.sets) || 3 }).map(() => ({
+              weight: Number(ex.weight) || 0,
+              reps: Number(ex.reps) || 10,
+              completed: true,
             })),
-          };
-          const updated = [newWk, ...(data.workoutLogs || [])];
-          await updateData({ workoutLogs: updated });
-          setActionAddedMessage(`Logged workout "${newWk.type}" to Gym.`);
-          break;
-        }
-
-        case 'LOG_MEAL': {
-          const newMeal: MealItemLog = {
-            id: `meal_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            name: p.mealName || extractedData.title || 'Logged Meal',
-            calories: Number(p.calories) || 0,
-            portion: Number(p.portion) || 1,
-            isExtra: true,
-          };
-          const currentLogs = Array.isArray(data.nutritionLogs) ? [...data.nutritionLogs] : [];
-          let todayLog = currentLogs.find((l) => l.date === todayStr);
-          if (!todayLog) {
-            todayLog = {
-              id: `nutri_${todayStr}`,
-              date: todayStr,
-              isSaved: true,
-              mealsEaten: [{ slot: 'snacks', items: [newMeal] }],
-              dailyTotal: newMeal.calories,
+          })),
+        };
+        const currentLogs = data?.workoutLogs || [];
+        await updateData({ workoutLogs: [newWorkout, ...currentLogs] });
+        setActionAddedMessage('Workout saved to Gym Log!');
+      } else if (action.type === 'LOG_MEAL') {
+        const newMeal: MealItemLog = {
+          id: `meal_${Date.now()}`,
+          name: action.payload.mealName || extractedData.title,
+          calories: Number(action.payload.calories) || 0,
+          portion: Number(action.payload.portion) || 1,
+          isExtra: true,
+        };
+        const currentNutrition = data?.nutritionLogs || [];
+        const todayLogIndex = currentNutrition.findIndex((n) => n.date === today);
+        let updatedNutrition: NutritionLog[];
+        if (todayLogIndex >= 0) {
+          const existing = currentNutrition[todayLogIndex];
+          const updatedMeals = [...existing.mealsEaten];
+          const snacksIdx = updatedMeals.findIndex((m) => m.slot === 'snacks');
+          if (snacksIdx >= 0) {
+            updatedMeals[snacksIdx] = {
+              ...updatedMeals[snacksIdx],
+              items: [...updatedMeals[snacksIdx].items, newMeal],
             };
-            currentLogs.push(todayLog);
           } else {
-            todayLog.mealsEaten = todayLog.mealsEaten || [];
-            let snackSlot = todayLog.mealsEaten.find((s) => s.slot === 'snacks');
-            if (!snackSlot) {
-              snackSlot = { slot: 'snacks', items: [newMeal] };
-              todayLog.mealsEaten.push(snackSlot);
-            } else {
-              snackSlot.items.push(newMeal);
-            }
-            todayLog.dailyTotal = (todayLog.dailyTotal || 0) + newMeal.calories;
+            updatedMeals.push({ slot: 'snacks', items: [newMeal] });
           }
-          await updateData({ nutritionLogs: currentLogs });
-          setActionAddedMessage(`Logged meal (${newMeal.calories} kcal) to Nutrition.`);
-          break;
-        }
-
-        case 'ADD_TASK': {
-          const newTask: Task = {
-            id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            text: p.title || extractedData.title || 'Extracted Task',
-            subtask: p.subtask || '',
-            completed: false,
-            date: p.dueDate || todayStr,
-            dueDate: p.dueDate || todayStr,
+          const newDailyTotal = existing.dailyTotal + newMeal.calories * newMeal.portion;
+          updatedNutrition = currentNutrition.map((n, idx) =>
+            idx === todayLogIndex ? { ...n, mealsEaten: updatedMeals, dailyTotal: newDailyTotal } : n
+          );
+        } else {
+          const newLog: NutritionLog = {
+            id: `nut_${Date.now()}`,
+            date: today,
+            mealsEaten: [{ slot: 'snacks', items: [newMeal] }],
+            dailyTotal: newMeal.calories * newMeal.portion,
           };
-          const updated = [newTask, ...(data.tasks || [])];
-          await updateData({ tasks: updated });
-          setActionAddedMessage(`Added task "${newTask.text}" to To-Do Tasks.`);
-          break;
+          updatedNutrition = [newLog, ...currentNutrition];
         }
-
-        case 'ADD_NOTE': {
-          const nowIso = new Date().toISOString();
-          const newNote: NoteItem = {
-            id: `note_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            title: p.title || extractedData.title || file.name,
-            content: p.content || extractedData.summary || '',
-            pageView: 'lined',
-            monthKey: nowIso.slice(0, 7),
-            isArchived: false,
-            createdAt: nowIso,
-            updatedAt: nowIso,
-          };
-          const updated = [newNote, ...(data.notes || [])];
-          await updateData({ notes: updated });
-          setActionAddedMessage(`Saved note "${newNote.title}" to Notes.`);
-          break;
-        }
+        await updateData({ nutritionLogs: updatedNutrition });
+        setActionAddedMessage('Meal added to Nutrition Log!');
       }
 
       setActionAdded(true);
       triggerHaptic('success');
-    } catch (err) {
+    } catch (err: any) {
       console.error('[FileReaderModal] Failed to execute action:', err);
-      setAiError('Failed to save to module.');
+      setAiError('Failed to save to target interface.');
       triggerHaptic('error');
     }
   };
 
-  // Android Native Share Sheet trigger
-  const handleNativeShare = async () => {
-    if (!file) return;
-    triggerHaptic('light');
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: file.name,
-          text: `File: ${file.name} (${formatStorageSize(file.fileSize)})`,
-          url: file.downloadUrl || blobUrl || window.location.href,
-        });
-      } catch {}
-    } else {
-      const shareUrl = file.downloadUrl || blobUrl;
-      if (shareUrl) {
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          triggerHaptic('success');
-        } catch {}
-      }
-    }
-  };
-
-  // Module meta info
+  // Helper: target module display metadata
   const getModuleMeta = (mod: ExtractedModule) => {
     switch (mod) {
       case 'FINANCE':
-        return {
-          name: 'Finance',
-          color: '#30D158',
-          icon: <Wallet size={16} weight="duotone" className="text-[#30D158]" />,
-          route: '/spending',
-        };
+        return { name: 'Finance & Spending', color: '#FF9F0A', icon: <Wallet size={16} weight="duotone" />, route: '/spending' };
       case 'GYM':
-        return {
-          name: 'Gym',
-          color: '#FF453A',
-          icon: <Barbell size={16} weight="duotone" className="text-[#FF453A]" />,
-          route: '/gym',
-        };
+        return { name: 'Gym & Fitness', color: '#FF453A', icon: <Barbell size={16} weight="duotone" />, route: '/gym' };
       case 'NUTRITION':
-        return {
-          name: 'Nutrition',
-          color: '#FF9F0A',
-          icon: <ForkKnife size={16} weight="duotone" className="text-[#FF9F0A]" />,
-          route: '/nutrition',
-        };
+        return { name: 'Nutrition Log', color: '#30D158', icon: <ForkKnife size={16} weight="duotone" />, route: '/nutrition' };
       case 'TASKS':
-        return {
-          name: 'Tasks',
-          color: '#0A84FF',
-          icon: <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />,
-          route: '/tasks',
-        };
+        return { name: 'To-Do Tasks', color: '#0A84FF', icon: <CheckSquare size={16} weight="duotone" />, route: '/tasks' };
       case 'NOTES':
-        return {
-          name: 'Notes',
-          color: '#BF5AF2',
-          icon: <NotePencil size={16} weight="duotone" className="text-[#BF5AF2]" />,
-          route: '/notes',
-        };
+        return { name: 'Notes & Ideas', color: '#BF5AF2', icon: <NotePencil size={16} weight="duotone" />, route: '/notes' };
     }
   };
 
-  // Sub-interface event dispatch to hide navigation dock and lock gestures
+  const handleNativeShare = async () => {
+    if (!file) return;
+    triggerHaptic('light');
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = {
+          title: file.name,
+          text: `Sharing ${file.name} from LifeOS Cloud Drive.`,
+        };
+        if (blobUrl) {
+          try {
+            const blob = await getDriveBlob(file.id);
+            if (blob) {
+              const shareFile = new File([blob], file.name, { type: file.mimeType || 'application/octet-stream' });
+              if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+                shareData.files = [shareFile];
+              }
+            }
+          } catch {}
+        }
+        await navigator.share(shareData);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') console.warn('Share error:', err);
+      }
+    } else {
+      const targetUrl = blobUrl || file.downloadUrl;
+      if (targetUrl) window.open(targetUrl, '_blank');
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       window.dispatchEvent(new CustomEvent('lifeos-subinterface-open'));
@@ -511,9 +535,9 @@ Payload specifications:
   return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-[999] flex flex-col bg-[#0B0C0E] text-white select-none overflow-hidden touch-manipulation">
-        {/* ── Native Android Top App Bar ── */}
+        {/* ── Native Top App Bar ── */}
         <header
-          className="w-full flex items-center justify-between px-3 border-b border-white/10 shrink-0 bg-[#121316]"
+          className="w-full flex items-center justify-between px-3.5 border-b border-white/10 shrink-0 bg-[#121316]"
           style={{
             paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
             paddingBottom: '10px',
@@ -532,12 +556,12 @@ Payload specifications:
             <CaretLeft size={20} weight="bold" />
           </button>
 
-          {/* File Name & Type */}
-          <div className="flex-1 min-w-0 px-3 text-center">
-            <h2 className="text-[14px] font-bold text-white truncate max-w-[210px] mx-auto">
+          {/* File Name & Format */}
+          <div className="flex-1 min-w-0 px-2.5 text-center">
+            <h2 className="text-[13.5px] font-bold text-white truncate max-w-[200px] mx-auto">
               {file.name}
             </h2>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-white/50 mt-0.5 flex-wrap">
+            <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-white/50 mt-0.5 flex-wrap">
               {parentFolder && (
                 <>
                   <span
@@ -555,18 +579,29 @@ Payload specifications:
             </div>
           </div>
 
-          {/* Action Icons Pill */}
+          {/* Header Action Suite: Top AI Trigger + System Share + Delete */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Direct Header AI Analysis Button */}
+            <button
+              type="button"
+              onClick={handleRunAiExtraction}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-[11px] active:scale-95 transition-all cursor-pointer touch-manipulation shadow-md"
+              title="AI Intelligence Extraction"
+            >
+              <Sparkle size={13} weight="fill" />
+              <span>AI</span>
+            </button>
+
             <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-full p-1 gap-0.5">
-              {/* Android System Share */}
+              {/* Share */}
               <button
                 type="button"
                 onClick={handleNativeShare}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-manipulation"
                 title="Share"
                 aria-label="Share"
               >
-                <ShareNetwork size={16} weight="bold" />
+                <ShareNetwork size={15} weight="bold" />
               </button>
 
               {/* Delete */}
@@ -577,60 +612,75 @@ Payload specifications:
                     triggerHaptic('medium');
                     onDeleteFile(file);
                   }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-95 transition-all cursor-pointer touch-manipulation"
                   title="Delete"
                   aria-label="Delete"
                 >
-                  <Trash size={16} weight="bold" />
+                  <Trash size={15} weight="bold" />
                 </button>
               )}
             </div>
           </div>
         </header>
 
-        {/* ── Main Mobile Viewport ── */}
+        {/* ── Main Viewport Area ── */}
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
-          <div className="flex-1 min-h-0 flex items-center justify-center p-3 overflow-auto bg-black/40">
+          <div className="flex-1 min-h-0 flex items-center justify-center p-2.5 overflow-hidden bg-black/50">
             {isLoadingContent ? (
               <div className="flex flex-col items-center gap-2 text-white/60">
                 <SpinnerGap size={28} className="animate-spin text-[#0A84FF]" />
                 <span className="text-[13px]">Opening file...</span>
               </div>
             ) : isImage && (blobUrl || file.localCachedUri) ? (
-              <div className="relative max-w-full max-h-full flex items-center justify-center touch-manipulation pb-24 px-4">
+              <div className="relative w-full h-full flex items-center justify-center touch-manipulation p-2">
                 <img
                   src={blobUrl || file.localCachedUri || ''}
                   alt={file.name}
-                  className="max-w-[78vw] max-h-[50vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl border border-white/10"
                 />
+              </div>
+            ) : isPdf && (blobUrl || file.downloadUrl) ? (
+              /* Dedicated In-App PDF Document Viewport */
+              <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden rounded-2xl bg-[#1C1C1E] border border-white/10">
+                <object
+                  data={`${blobUrl || file.downloadUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                  type="application/pdf"
+                  className="w-full h-full rounded-2xl bg-[#1C1C1E]"
+                >
+                  <iframe
+                    src={`${blobUrl || file.downloadUrl}#toolbar=0&navpanes=0`}
+                    title={file.name}
+                    className="w-full h-full rounded-2xl border-none"
+                  >
+                    <div className="flex flex-col items-center justify-center p-6 text-center h-full">
+                      <div className="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-400 mb-3 border border-red-500/30">
+                        <FilePdf size={32} weight="duotone" />
+                      </div>
+                      <h3 className="text-[15px] font-bold text-white truncate max-w-full">{file.name}</h3>
+                      <p className="text-[12px] text-white/60 mt-1 mb-4">
+                        PDF ({formatStorageSize(file.fileSize)})
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetUrl = blobUrl || file.downloadUrl;
+                          if (targetUrl) window.open(targetUrl, '_blank');
+                        }}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                      >
+                        <FilePdf size={16} weight="bold" />
+                        <span>Open Document Reader</span>
+                      </button>
+                    </div>
+                  </iframe>
+                </object>
               </div>
             ) : isText && textContent !== null ? (
               <div className="w-full h-full p-4 rounded-2xl bg-[#1C1C1E] border border-white/10 overflow-y-auto select-text font-mono text-[12.5px] leading-relaxed text-white/90">
                 <pre className="whitespace-pre-wrap break-words">{textContent}</pre>
               </div>
-            ) : isPdf ? (
-              <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-[#1C1C1E] border border-white/10 text-center max-w-xs mx-auto">
-                <div className="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-400 mb-3 border border-red-500/30">
-                  <FilePdf size={32} weight="duotone" />
-                </div>
-                <h3 className="text-[15px] font-bold text-white truncate max-w-full">{file.name}</h3>
-                <p className="text-[12px] text-white/60 mt-1 mb-4">
-                  PDF ({formatStorageSize(file.fileSize)})
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const targetUrl = blobUrl || file.downloadUrl;
-                    if (targetUrl) window.open(targetUrl, '_blank');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
-                >
-                  <FilePdf size={16} weight="bold" />
-                  <span>Open PDF</span>
-                </button>
-              </div>
             ) : isAudio && blobUrl ? (
-              <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-[#1C1C1E] border border-white/10 text-center max-w-xs w-full mx-auto">
+              <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-[#1C1C1E] border border-white/10 text-center max-w-xs w-full mx-auto shadow-2xl">
                 <h3 className="text-[15px] font-bold text-white mb-2 truncate max-w-full">{file.name}</h3>
                 <p className="text-[11.5px] text-white/50 mb-4">{formatStorageSize(file.fileSize)}</p>
                 <audio controls src={blobUrl} className="w-full" />
@@ -663,11 +713,33 @@ Payload specifications:
             )}
           </div>
 
-          {/* ── Native Android Mobile AI Bottom Sheet ── */}
+          {/* ── Dedicated Bottom Control Bar (Docked cleanly below viewport, zero clashing with PDF) ── */}
+          <div
+            className="w-full shrink-0 bg-[#121316] border-t border-white/10 px-4 py-2.5 flex items-center justify-between z-30 select-none"
+            style={{
+              paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 12px) + 4px)',
+            }}
+          >
+            <div className="flex items-center gap-2 text-white/50 text-[11px] font-medium">
+              <span className="uppercase text-white/70 font-semibold">{fileExt || 'DOC'}</span>
+              <span>•</span>
+              <span>{formatStorageSize(file.fileSize)}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRunAiExtraction}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-[12.5px] shadow-md shadow-[#0A84FF]/30 active:scale-95 transition-all cursor-pointer touch-manipulation"
+            >
+              <Sparkle size={15} weight="fill" />
+              <span>AI Document Analysis</span>
+            </button>
+          </div>
+
+          {/* ── Native AI Intelligence Bottom Sheet ── */}
           <AnimatePresence>
             {isAiPanelOpen && (
               <>
-                {/* Backdrop dismiss */}
                 <div
                   className="fixed inset-0 z-[1000] bg-black/85"
                   onClick={() => setIsAiPanelOpen(false)}
@@ -680,14 +752,14 @@ Payload specifications:
                   transition={{ type: 'spring', damping: 28, stiffness: 320 }}
                   className="fixed inset-x-0 bottom-0 z-[1010] rounded-t-[32px] bg-[#16171A] border-t border-white/15 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden"
                 >
-                  {/* Header (Pinned) */}
+                  {/* Header */}
                   <div className="p-4 pb-3 border-b border-white/10 shrink-0">
                     <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto -mt-1 mb-2.5" />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Sparkle size={18} weight="fill" className="text-[#0A84FF]" />
                         <span className="text-[14px] font-bold text-white tracking-tight">
-                          LifeOS AI Inspector
+                          LifeOS AI Document Intelligence
                         </span>
                       </div>
                       <button
@@ -700,7 +772,7 @@ Payload specifications:
                       </button>
                     </div>
                     <p className="text-[11.5px] text-white/60 leading-snug mt-1">
-                      Extracts document/image data and matches target LifeOS interface.
+                      Extracts content from PDF/document/image and matches target LifeOS interface.
                     </p>
                   </div>
 
@@ -751,61 +823,58 @@ Payload specifications:
                                 borderColor: `${meta.color}35`,
                               }}
                             >
-                              <div className="flex items-center gap-2">
-                                {meta.icon}
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className="w-8 h-8 rounded-xl flex items-center justify-center"
+                                  style={{ backgroundColor: `${meta.color}25`, color: meta.color }}
+                                >
+                                  {meta.icon}
+                                </div>
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/60 block">
-                                    Target Destination
-                                  </span>
-                                  <span className="text-[14px] font-bold text-white">
-                                    {meta.name}
-                                  </span>
+                                  <div className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
+                                    Target Interface
+                                  </div>
+                                  <div className="text-[13px] font-bold text-white">{meta.name}</div>
                                 </div>
                               </div>
-
-                              <span
-                                className="px-2.5 py-1 rounded-full text-[10.5px] font-bold"
-                                style={{
-                                  backgroundColor: `${meta.color}25`,
-                                  color: meta.color,
-                                }}
-                              >
-                                Auto-Matched
-                              </span>
                             </div>
                           );
                         })()}
 
-                        {/* Details Card */}
-                        <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] space-y-2.5">
-                          <div>
-                            <p className="text-[13.5px] font-bold text-white">
-                              {extractedData.title}
-                            </p>
-                            <p className="text-[12px] text-white/70 mt-1 leading-snug">
-                              {extractedData.summary}
-                            </p>
-                          </div>
+                        {/* Title & Summary */}
+                        <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] space-y-1">
+                          <h4 className="text-[13.5px] font-bold text-white">{extractedData.title}</h4>
+                          <p className="text-[12px] text-white/70 leading-relaxed">
+                            {extractedData.summary}
+                          </p>
+                        </div>
 
-                          {/* Fields */}
-                          {Array.isArray(extractedData.fields) && extractedData.fields.length > 0 && (
-                            <div className="pt-2 border-t border-white/10 space-y-1.5">
+                        {/* Extracted Fields Table */}
+                        {extractedData.fields && extractedData.fields.length > 0 && (
+                          <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] space-y-2">
+                            <div className="text-[11px] font-bold text-white/50 uppercase tracking-wider">
+                              Extracted Points
+                            </div>
+                            <div className="space-y-1.5">
                               {extractedData.fields.map((f, i) => (
-                                <div key={i} className="flex items-center justify-between text-[11.5px]">
-                                  <span className="text-white/50">{f.label}:</span>
-                                  <span className="font-semibold text-white/90 text-right truncate max-w-[190px]">
+                                <div
+                                  key={i}
+                                  className="flex items-start justify-between text-[12px] py-1 border-b border-white/[0.06] last:border-none"
+                                >
+                                  <span className="text-white/60 font-medium">{f.label}</span>
+                                  <span className="text-white font-semibold text-right max-w-[65%] truncate">
                                     {f.value}
                                   </span>
                                 </div>
                               ))}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* Pinned Action Footer */}
+                  {/* Action Footer */}
                   {extractedData && !isAiAnalyzing && (
                     <div
                       className="shrink-0 p-4 border-t border-white/10 bg-[#16171A]"
@@ -849,29 +918,11 @@ Payload specifications:
               </>
             )}
           </AnimatePresence>
-
-          {/* Floating AI Extraction Pill for reading mode */}
-          {!isAiPanelOpen && (
-            <div
-              className="fixed inset-x-0 bottom-6 z-40 p-4 pointer-events-none flex justify-center"
-              style={{
-                paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 16px) + 8px)',
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleRunAiExtraction}
-                className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-[13.5px] shadow-2xl shadow-[#0A84FF]/40 active:scale-95 transition-all cursor-pointer border border-white/20 touch-manipulation"
-              >
-                <Sparkle size={17} weight="fill" />
-                <span>Extract & Route with AI</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </AnimatePresence>,
     document.body
   );
 }
+
 export default FileReaderModal;
