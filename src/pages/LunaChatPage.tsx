@@ -1474,7 +1474,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
       {/* ── 5. Main Chat Viewport ── */}
       <main
         ref={chatContainerRef}
-        className="flex-1 w-full max-w-lg mx-auto px-4 overflow-y-auto custom-table-scrollbar"
+        className={`flex-1 w-full max-w-lg mx-auto px-4 overflow-y-auto custom-table-scrollbar ${messages.length === 0 ? "flex flex-col justify-center" : ""}`}
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 48px) + 70px)',
           paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 16px) + 160px)',
@@ -1482,12 +1482,12 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
       >
         {/* ── Empty State Hero: Centered Logo & Welcome Greeting ── */}
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[58vh] text-center select-none py-8 my-auto">
+          <div className="flex flex-col items-center justify-center text-center select-none py-6 my-auto">
             {/* Ambient Glowing Luna Starburst Brand Emblem */}
             <div className="relative mb-4 flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
               <div className="absolute inset-0 rounded-[28px] bg-[#0A84FF]/25 blur-2xl scale-125" />
               <div
-                className="w-20 h-20 rounded-[24px] flex items-center justify-center text-white shadow-2xl relative border-none"
+                className="w-16 h-16 rounded-[20px] flex items-center justify-center text-white shadow-2xl relative border-none"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, rgba(20,20,24,0.98) 100%)',
@@ -1495,12 +1495,12 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     '0 20px 40px -10px rgba(0, 0, 0, 0.95), 0 0 32px -4px rgba(10, 132, 255, 0.40)',
                 }}
               >
-                <LunaComicBubbleIcon size={40} className="text-[#0A84FF] drop-shadow-[0_0_12px_rgba(10,132,255,0.6)]" />
+                <LunaComicBubbleIcon size={34} className="text-[#0A84FF] drop-shadow-[0_0_12px_rgba(10,132,255,0.6)]" />
               </div>
             </div>
 
             {/* Personalized Executive Greeting */}
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-1.5">
               How can I help you today, {userName}?
             </h2>
 
@@ -1748,16 +1748,16 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     key={item.id}
                     type="button"
                     onClick={() => handleSendQuery(item.query)}
-                    className="p-2.5 rounded-2xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2.5 text-left border-none shadow-md touch-manipulation select-none"
+                    className="p-2 rounded-xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 text-left border-none shadow-md touch-manipulation select-none"
                   >
-                    <div className="w-7 h-7 rounded-lg glass-tile flex items-center justify-center shrink-0 shadow-sm text-white">
+                    <div className="w-6 h-6 rounded-md glass-tile flex items-center justify-center shrink-0 shadow-sm text-white">
                       {item.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-[11.5px] font-bold text-white tracking-tight truncate leading-tight">
+                      <h4 className="text-[11px] font-bold text-white tracking-tight truncate leading-tight">
                         {item.title}
                       </h4>
-                      <p className="text-[10px] text-white/45 truncate leading-tight mt-0.5">
+                      <p className="text-[9.5px] text-white/45 truncate leading-tight mt-0.5">
                         {item.subtitle}
                       </p>
                     </div>

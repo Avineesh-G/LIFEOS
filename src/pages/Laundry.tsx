@@ -29,6 +29,11 @@ import { Sheet } from '../ui/feedback/Sheet';
 import { EmptyState } from '../ui/feedback/EmptyState';
 import { TextField } from '../ui/controls/TextField';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
+import {
+  sendInstantLaundryDispatchedNotification,
+  sendInstantLaundryReceivedNotification,
+  syncLaundryNotifications,
+} from '../utils/notifications';
 import type { AppData, LaundryBatch, LaundryItemCount } from '../types';
 
 interface LaundryProps {
@@ -124,9 +129,14 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       createdAt: new Date().toISOString(),
     };
 
+    const updatedBatches = [newBatch, ...(data?.laundryBatches || [])];
     await updateData({
-      laundryBatches: [newBatch, ...(data?.laundryBatches || [])],
+      laundryBatches: updatedBatches,
     });
+
+    // Instant notification: bag handed over to dhobi + schedule daily pickup checks
+    sendInstantLaundryDispatchedNotification(totalClothesInNewBatch, newBatch.id).catch(() => {});
+    syncLaundryNotifications(updatedBatches).catch(() => {});
 
     // Reset Form
     const resetCounts: Record<string, number> = {};
@@ -147,11 +157,20 @@ export default function Laundry({ data, updateData }: LaundryProps) {
           ? 'pending'
           : 'submitted';
 
+    const updatedBatches = (data?.laundryBatches || []).map(b =>
+      b.id === batch.id ? { ...b, status: nextStatus } : b
+    );
+
     await updateData({
-      laundryBatches: (data?.laundryBatches || []).map(b =>
-        b.id === batch.id ? { ...b, status: nextStatus } : b
-      ),
+      laundryBatches: updatedBatches,
     });
+
+    if (nextStatus === 'received') {
+      sendInstantLaundryReceivedNotification(batch.id).catch(() => {});
+    } else if (nextStatus === 'submitted') {
+      sendInstantLaundryDispatchedNotification(batch.totalClothes, batch.id).catch(() => {});
+    }
+    syncLaundryNotifications(updatedBatches).catch(() => {});
   };
 
   const updateBatchReturnDate = async (batchId: string, newReturnDate: string) => {
@@ -170,9 +189,11 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       message: 'Are you sure you want to delete this laundry batch history?',
       section: 'laundry',
       onConfirm: async () => {
+        const updatedBatches = (data?.laundryBatches || []).filter(b => b.id !== batch.id);
         await updateData({
-          laundryBatches: (data?.laundryBatches || []).filter(b => b.id !== batch.id),
+          laundryBatches: updatedBatches,
         });
+        syncLaundryNotifications(updatedBatches).catch(() => {});
       },
     });
   };
@@ -204,13 +225,15 @@ export default function Laundry({ data, updateData }: LaundryProps) {
       .filter(([_, count]) => count > 0)
       .map(([category, count]) => ({ category, count }));
     const totalClothes = items.reduce((a, b) => a + b.count, 0);
+    const updatedBatches = (data?.laundryBatches || []).map(b =>
+      b.id === batchToEdit.id
+        ? { ...b, items, totalClothes, submitDate: editSubmitDate, returnDate: editReturnDate || undefined, notes: editNotes.trim() || undefined }
+        : b
+    );
     await updateData({
-      laundryBatches: (data?.laundryBatches || []).map(b =>
-        b.id === batchToEdit.id
-          ? { ...b, items, totalClothes, submitDate: editSubmitDate, returnDate: editReturnDate || undefined, notes: editNotes.trim() || undefined }
-          : b
-      ),
+      laundryBatches: updatedBatches,
     });
+    syncLaundryNotifications(updatedBatches).catch(() => {});
     setBatchToEdit(null);
   };
 

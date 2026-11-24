@@ -15,8 +15,6 @@ const CATEGORY_TINTS: Record<string, string> = {
 };
 
 export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
-  const [isPaused, setIsPaused] = useState(false);
-
   // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)
   const quotes: QuoteItem[] = useMemo(() => {
     return getDailyQuotesStream(new Date(), 10);
@@ -25,33 +23,12 @@ export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps =
   // Duplicate the list for seamless infinite loop marquee animation
   const marqueeItems = useMemo(() => [...quotes, ...quotes], [quotes]);
 
-  // Pause marquee during active scroll to eliminate GPU composite overhead
-  useEffect(() => {
-    let scrollTimer: any = null;
-    const handleScroll = () => {
-      setIsPaused(true);
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => {
-        setIsPaused(false);
-      }, 180);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimer);
-    };
-  }, []);
-
   return (
     <div
       className="droplet-card px-4 py-3 sm:py-3.5 flex items-center gap-3 select-none overflow-hidden relative shadow-lg"
       style={{
         boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.75)',
       }}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={() => setIsPaused(true)}
-      onTouchEnd={() => setIsPaused(false)}
     >
       {/* ── Left: Refined Inspirational Quotes Emblem ── */}
       <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 text-[#FF9F0A] shadow-sm select-none">
@@ -61,21 +38,16 @@ export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps =
       {/* ── Clean Specular Vertical Divider ── */}
       <div className="w-[1px] h-5 bg-gradient-to-b from-white/20 via-white/10 to-transparent shrink-0 select-none" />
 
-      {/* ── Right: Flowing Marquee of Quotes (GPU-Friendly Edge Fades, Zero mask-image Overhead) ── */}
+      {/* ── Right: Flowing Marquee of Quotes (GPU-Friendly Edge Fades, Non-Stop Continuous Flow) ── */}
       <div
-        className="relative flex-1 overflow-hidden min-w-0"
+        className="relative flex-1 overflow-hidden min-w-0 pointer-events-none"
         aria-label="Daily Inspirational Quotes Stream"
       >
         {/* Lightweight hardware-accelerated edge fades */}
         <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-[#141416] to-transparent pointer-events-none z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-[#141416] to-transparent pointer-events-none z-10" />
 
-        <div
-          className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap"
-          style={{
-            animationPlayState: isPaused ? 'paused' : 'running',
-          }}
-        >
+        <div className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap">
           {marqueeItems.map((item, idx) => {
             const tint = CATEGORY_TINTS[item.category] || '#FBBF24';
             return (

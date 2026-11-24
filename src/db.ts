@@ -134,6 +134,7 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
     amount: Number(item?.amount) || 0,
     date: item?.date || new Date().toISOString().slice(0, 10),
     note: item?.note || '',
+    type: (item?.type === 'borrowed' ? 'borrowed' : 'given') as 'given' | 'borrowed',
     status: item?.status === 'returned' ? 'returned' : 'pending',
     returnedDate: item?.returnedDate || undefined,
     createdAt: item?.createdAt || new Date().toISOString(),

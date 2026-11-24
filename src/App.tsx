@@ -45,6 +45,7 @@ import { detectSquircleSupport } from './utils/squircleDetect';
 import { auth } from './firebase';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { ErrorBoundary, RouteErrorBoundary } from './components/ErrorBoundary';
 import AppLockOverlay from './components/security/AppLockOverlay';
@@ -77,6 +78,27 @@ function MainContent({
 }) {
   const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Direct Interface Deep Linking on Notification Taps
+  // When a user taps ANY notification banner or shade item, immediately route to that specific module interface
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const notifListenerPromise = LocalNotifications.addListener(
+      'localNotificationActionPerformed',
+      (action) => {
+        const route = action?.notification?.extra?.route;
+        if (route && typeof route === 'string') {
+          navigate(route);
+        }
+      }
+    );
+
+    return () => {
+      notifListenerPromise.then((handle) => handle.remove()).catch(() => {});
+    };
+  }, [navigate]);
 
   const pinnedTabs = useMemo(() => {
     const defaultPinned = ['gym', 'nutrition'];

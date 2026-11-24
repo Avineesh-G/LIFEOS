@@ -99,6 +99,8 @@ export {
   Compass,
   ArrowSquareOut,
   ArrowUpRight,
+  ArrowDownLeft,
+  HandCoins,
   Globe,
   Translate,
   QrCode,

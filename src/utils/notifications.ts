@@ -1,6 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import type { Task, TimetableBlock, CalendarEvent, NutritionLog, WorkoutLog, WorkoutPlan } from '../types';
+import type { Task, TimetableBlock, CalendarEvent, NutritionLog, WorkoutLog, WorkoutPlan, LaundryBatch } from '../types';
 
 export const TIMETABLE_CHANNEL_ID = 'lifeos_timetable';
 export const TASKS_CHANNEL_ID = 'lifeos_tasks';
@@ -9,6 +9,7 @@ export const STUDY_CHANNEL_ID = 'lifeos_study';
 export const GYM_CHANNEL_ID = 'lifeos_gym';
 export const CALENDAR_CHANNEL_ID = 'lifeos_calendar';
 export const HYDRATION_CHANNEL_ID = 'lifeos_hydration';
+export const LAUNDRY_CHANNEL_ID = 'lifeos_laundry';
 
 export const NOTIFICATION_ICON = 'ic_stat_lifeos';
 export const NOTIFICATION_COLOR = '#6366F1';
@@ -94,6 +95,17 @@ async function ensureNotificationChannels() {
       vibration: true,
       lights: true,
       lightColor: '#5E5CE6',
+    });
+
+    await LocalNotifications.createChannel({
+      id: LAUNDRY_CHANNEL_ID,
+      name: 'Laundry & Dhobi Alerts',
+      description: 'Alerts when laundry is given, daily dhobi pickup checks, and return confirmations',
+      importance: 5,
+      visibility: 1,
+      vibration: true,
+      lights: true,
+      lightColor: '#38BDF8',
     });
 
     channelCreated = true;
@@ -293,13 +305,13 @@ export async function syncTimetableNotifications(
         const preTriggerTime = new Date(scheduledTime.getTime() - 20 * 60 * 1000);
         if (preTriggerTime.getTime() > now.getTime() + 15 * 1000) {
           const preNotifId = hashStringToInt(`tt_pre20_${block.id}_${dateKey}`);
-          let bodyText = `Class starts in 20m at ${block.startTime}`;
-          if (block.room) bodyText += ` • Room ${block.room}`;
+          let bodyText = `Class starts in 20m at ${block.startTime}. Lock in and grab your seat`;
+          if (block.room) bodyText += ` in Room ${block.room}`;
           if (block.teacher) bodyText += ` • ${block.teacher}`;
 
           notificationsToSchedule.push({
             id: preNotifId,
-            title: `Upcoming in 20m: ${block.subject || 'Class'}`,
+            title: `Class in 20m — Lock In: ${block.subject || 'Lecture'}`,
             body: bodyText,
             channelId: TIMETABLE_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
@@ -308,6 +320,7 @@ export async function syncTimetableNotifications(
             schedule: { at: preTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'timetable',
+              route: '/timetable',
               phase: 'pre20',
               blockId: block.id,
               subject: block.subject,
@@ -319,13 +332,13 @@ export async function syncTimetableNotifications(
         const postTriggerTime = new Date(scheduledTime.getTime() + 1 * 60 * 1000);
         if (postTriggerTime.getTime() > now.getTime() + 15 * 1000) {
           const postNotifId = hashStringToInt(`tt_post1_${block.id}_${dateKey}`);
-          let bodyText = `Class started at ${block.startTime} (1m ago)`;
+          let bodyText = `Lecture is live right now at ${block.startTime}`;
           if (block.room) bodyText += ` • Room ${block.room}`;
           if (block.teacher) bodyText += ` • ${block.teacher}`;
 
           notificationsToSchedule.push({
             id: postNotifId,
-            title: `Started: ${block.subject || 'Class'}`,
+            title: `Lecture in Session: ${block.subject || 'Class'}`,
             body: bodyText,
             channelId: TIMETABLE_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
@@ -334,6 +347,7 @@ export async function syncTimetableNotifications(
             schedule: { at: postTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'timetable',
+              route: '/timetable',
               phase: 'post1',
               blockId: block.id,
               subject: block.subject,
@@ -398,13 +412,13 @@ export async function syncTaskNotifications(
       const preTriggerTime = new Date(taskDateTime.getTime() - 20 * 60 * 1000);
       if (preTriggerTime.getTime() > now.getTime() + 15 * 1000) {
         const preNotifId = hashStringToInt(`task_pre20_${task.id}_${taskDateTime.getTime()}`);
-        let bodyText = `Starts in 20m at ${targetTimeStr}`;
+        let bodyText = `Starts in 20m at ${targetTimeStr}. Clear the queue and get it done`;
         if (task.subtask) bodyText += ` • ${task.subtask}`;
         if (task.endTime) bodyText += ` (until ${task.endTime})`;
 
         notificationsToSchedule.push({
           id: preNotifId,
-          title: `Task in 20m: ${task.text}`,
+          title: `Side Quest in 20m: ${task.text}`,
           body: bodyText,
           channelId: TASKS_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
@@ -413,6 +427,7 @@ export async function syncTaskNotifications(
           schedule: { at: preTriggerTime, allowWhileIdle: true },
           extra: {
             type: 'task',
+            route: '/tasks',
             phase: 'pre20',
             taskId: task.id,
           },
@@ -423,12 +438,12 @@ export async function syncTaskNotifications(
       const postTriggerTime = new Date(taskDateTime.getTime() + 1 * 60 * 1000);
       if (postTriggerTime.getTime() > now.getTime() + 15 * 1000) {
         const postNotifId = hashStringToInt(`task_post1_${task.id}_${taskDateTime.getTime()}`);
-        let bodyText = `Scheduled start was ${targetTimeStr} (1m ago)`;
+        let bodyText = `Time to cook! Scheduled start was ${targetTimeStr} (1m ago)`;
         if (task.subtask) bodyText += ` • ${task.subtask}`;
 
         notificationsToSchedule.push({
           id: postNotifId,
-          title: `Task Started: ${task.text}`,
+          title: `Task Due — Time to Cook: ${task.text}`,
           body: bodyText,
           channelId: TASKS_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
@@ -437,6 +452,7 @@ export async function syncTaskNotifications(
           schedule: { at: postTriggerTime, allowWhileIdle: true },
           extra: {
             type: 'task',
+            route: '/tasks',
             phase: 'post1',
             taskId: task.id,
           },
@@ -503,8 +519,8 @@ export async function syncNutritionNotifications(): Promise<number> {
           const preNotifId = hashStringToInt(`nutri_pre20_${meal.slot}_${dateKey}`);
           notificationsToSchedule.push({
             id: preNotifId,
-            title: `${meal.title} in 20m`,
-            body: `Mess ${meal.slot} starts at ${meal.startTimeStr} (${meal.windowStr}). Fuel your day!`,
+            title: `${meal.title} in 20m — Fuel Up`,
+            body: `Mess ${meal.slot} starts at ${meal.startTimeStr} (${meal.windowStr}). Fuel up before you crash dude!`,
             channelId: NUTRITION_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: '#F59E0B',
@@ -512,6 +528,7 @@ export async function syncNutritionNotifications(): Promise<number> {
             schedule: { at: preTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'nutrition',
+              route: '/nutrition',
               phase: 'pre20',
               slot: meal.slot,
             },
@@ -524,8 +541,8 @@ export async function syncNutritionNotifications(): Promise<number> {
           const postNotifId = hashStringToInt(`nutri_post1_${meal.slot}_${dateKey}`);
           notificationsToSchedule.push({
             id: postNotifId,
-            title: `${meal.title} is Active`,
-            body: `Mess ${meal.slot} is serving now (${meal.windowStr}). Don't skip your nutrition!`,
+            title: `${meal.title} is Live`,
+            body: `Mess ${meal.slot} is serving now (${meal.windowStr}). Don't skip meals dude!`,
             channelId: NUTRITION_CHANNEL_ID,
             smallIcon: NOTIFICATION_ICON,
             iconColor: '#F59E0B',
@@ -533,6 +550,7 @@ export async function syncNutritionNotifications(): Promise<number> {
             schedule: { at: postTriggerTime, allowWhileIdle: true },
             extra: {
               type: 'nutrition',
+              route: '/nutrition',
               phase: 'post1',
               slot: meal.slot,
             },
@@ -617,8 +635,8 @@ export async function syncNutritionNudgeNotifications(nutritionLogs?: NutritionL
 
         notificationsToSchedule.push({
           id: nudgeId,
-          title: 'Nutrition Entry Reminder',
-          body: `Have you eaten? You haven't logged any meals for today yet. Tap to track your mess or snack items (${timeLabel}).`,
+          title: 'Nutrition Check — Have You Eaten?',
+          body: `You haven't logged any meals for today yet dude. Tap to track your mess or snack items (${timeLabel}).`,
           channelId: NUTRITION_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
           iconColor: '#F59E0B',
@@ -626,6 +644,7 @@ export async function syncNutritionNudgeNotifications(nutritionLogs?: NutritionL
           schedule: { at: new Date(nextSlot), allowWhileIdle: true },
           extra: {
             type: 'nutrition_nudge',
+            route: '/nutrition',
             date: todayStr,
             time: timeLabel,
           },
@@ -702,8 +721,8 @@ export async function syncGymNotifications(
         const morningId = hashStringToInt(`gym_morn_${dateKey}`);
         notificationsToSchedule.push({
           id: morningId,
-          title: `Morning Gym Reminder: ${splitName}`,
-          body: 'Ready to train today? Check your routine and remember to log your sets in LifeOS.',
+          title: `Gym Time — ${splitName}`,
+          body: 'Ready to train today? Time to hit the iron and lock in your sets in LifeOS.',
           channelId: GYM_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
           iconColor: '#30D158',
@@ -711,6 +730,7 @@ export async function syncGymNotifications(
           schedule: { at: morningTime, allowWhileIdle: true },
           extra: {
             type: 'gym',
+            route: '/gym',
             phase: 'morning',
             date: dateKey,
           },
@@ -724,8 +744,8 @@ export async function syncGymNotifications(
         const eveningId = hashStringToInt(`gym_eve_${dateKey}`);
         notificationsToSchedule.push({
           id: eveningId,
-          title: 'Evening Gym Reminder',
-          body: `Haven't logged your workout today? Keep your consistency alive—log your ${splitName} session.`,
+          title: 'Did You Lift Today?',
+          body: `Don't let today be a zero day. Log your ${splitName} workout before the day closes.`,
           channelId: GYM_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
           iconColor: '#30D158',
@@ -733,6 +753,7 @@ export async function syncGymNotifications(
           schedule: { at: eveningTime, allowWhileIdle: true },
           extra: {
             type: 'gym',
+            route: '/gym',
             phase: 'evening',
             date: dateKey,
           },
@@ -805,7 +826,7 @@ export async function syncCalendarNotifications(events: CalendarEvent[]): Promis
 
         notificationsToSchedule.push({
           id: notifId,
-          title: `Calendar: ${event.title}`,
+          title: `Event Alert: ${event.title}`,
           body: bodyText,
           channelId: CALENDAR_CHANNEL_ID,
           smallIcon: NOTIFICATION_ICON,
@@ -814,6 +835,7 @@ export async function syncCalendarNotifications(events: CalendarEvent[]): Promis
           schedule: { at: triggerTime, allowWhileIdle: true },
           extra: {
             type: 'calendar',
+            route: '/calendar',
             eventId: event.id,
             category: event.category,
           },
@@ -904,6 +926,7 @@ export async function syncHydrationNotifications(): Promise<number> {
               schedule: { at: slotTime, allowWhileIdle: true },
               extra: {
                 type: 'hydration_reminder',
+                route: '/nutrition',
                 date: dateKey,
                 time: timeLabel,
               },
@@ -946,6 +969,9 @@ export async function syncAllNotifications(data?: any): Promise<{
   await syncGymNotifications(data.workoutLogs, data.workoutPlans);
   if (Array.isArray(data.calendarEvents)) {
     await syncCalendarNotifications(data.calendarEvents);
+  }
+  if (Array.isArray(data.laundryBatches)) {
+    await syncLaundryNotifications(data.laundryBatches);
   }
 
   // Defer heavy rolling hydration scheduler so it does not block the main thread at startup
@@ -1063,6 +1089,111 @@ export async function sendInstantTestNotification(title: string, body: string): 
 }
 
 /**
+ * Fires test notifications for all app interfaces that have notifications implemented
+ * (Laundry, Timetable, Tasks, Nutrition, Gym, Calendar).
+ * Each notification uses that interface's dedicated channel, Gen-Z copy, and includes the deep-link route
+ * so clicking it directly opens into that specific interface.
+ */
+export async function sendAllAppInterfaceTestAlerts(): Promise<number> {
+  const alerts = [
+    {
+      id: 91001,
+      title: 'Fits Handed Over to Dhobi',
+      body: 'Bag is ready from your side dude. 14 clothes handed over. Drip in progress.',
+      channelId: LAUNDRY_CHANNEL_ID,
+      iconColor: '#38BDF8',
+      route: '/laundry',
+      type: 'laundry',
+    },
+    {
+      id: 91002,
+      title: 'Class in 20m — Lock In',
+      body: 'Mathematics in Room 302 starts at 9:00 AM. Grab your notebook and pull up dude!',
+      channelId: TIMETABLE_CHANNEL_ID,
+      iconColor: '#0891B2',
+      route: '/timetable',
+      type: 'timetable',
+    },
+    {
+      id: 91003,
+      title: 'Side Quest in 20m',
+      body: 'Physics problem set due at 4:00 PM. Lock in and clear it dude!',
+      channelId: TASKS_CHANNEL_ID,
+      iconColor: '#10B981',
+      route: '/tasks',
+      type: 'task',
+    },
+    {
+      id: 91004,
+      title: 'Lunch in 20m — Fuel Up',
+      body: "Mess lunch starts at 12:15 PM (12:15–2:45 PM). Don't skip meals dude!",
+      channelId: NUTRITION_CHANNEL_ID,
+      iconColor: '#F59E0B',
+      route: '/nutrition',
+      type: 'nutrition',
+    },
+    {
+      id: 91005,
+      title: 'Time to Cook: Push Day',
+      body: "Today is Push Day. 6 exercises waiting. Let's get these gains dude!",
+      channelId: GYM_CHANNEL_ID,
+      iconColor: '#FF453A',
+      route: '/gym',
+      type: 'gym',
+    },
+    {
+      id: 91006,
+      title: 'Event in 20m: Campus Hackathon',
+      body: "Scheduled event starts at 2:00 PM. Don't be late dude!",
+      channelId: CALENDAR_CHANNEL_ID,
+      iconColor: '#5E5CE6',
+      route: '/calendar',
+      type: 'calendar',
+    },
+  ];
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await ensureNotificationChannels();
+      const now = Date.now();
+      const notificationsToSchedule = alerts.map((alert, idx) => ({
+        id: alert.id,
+        title: alert.title,
+        body: alert.body,
+        channelId: alert.channelId,
+        smallIcon: NOTIFICATION_ICON,
+        iconColor: alert.iconColor,
+        isExactNotification: true,
+        schedule: { at: new Date(now + 60 + idx * 80), allowWhileIdle: true },
+        extra: {
+          type: alert.type,
+          route: alert.route,
+          isTest: true,
+        },
+      }));
+      await LocalNotifications.schedule({ notifications: notificationsToSchedule });
+      return notificationsToSchedule.length;
+    } catch (err) {
+      console.warn('[Notifications] sendAllAppInterfaceTestAlerts failed:', err);
+      return 0;
+    }
+  } else if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+    alerts.forEach((alert, idx) => {
+      setTimeout(() => {
+        try {
+          new Notification(alert.title, {
+            body: alert.body,
+            icon: '/pwa-192x192.png',
+          });
+        } catch {}
+      }, idx * 150);
+    });
+    return alerts.length;
+  }
+  return 0;
+}
+
+/**
  * Fires an instant native phone notification when a new LifeOS update is available.
  * Appears in the Android notification bar/shade immediately.
  */
@@ -1095,6 +1226,7 @@ export async function sendUpdateAvailableNotification(
             schedule: { at: new Date(Date.now() + 50), allowWhileIdle: true },
             extra: {
               type: 'update_available',
+              route: '/settings',
               currentVersion,
               newVersion,
             },
@@ -1117,4 +1249,172 @@ export async function sendUpdateAvailableNotification(
     }
   }
   return false;
+}
+
+/**
+ * Synchronizes daily reminders for laundry batches that are currently handed over to the dhobi.
+ * Runs checks at 11:30 AM and 5:30 PM each day while batch is in 'submitted' status.
+ * Daily prompt: "Laundry Check: Is your laundry bag still at dhobi? Go pick it up if ready dude, don't leave your fits waiting."
+ */
+export async function syncLaundryNotifications(batches?: LaundryBatch[]): Promise<number> {
+  if (!Capacitor.isNativePlatform()) return 0;
+  try {
+    await ensureNotificationChannels();
+
+    const pending = await LocalNotifications.getPending();
+    const laundryPending = pending.notifications.filter(
+      (n: any) => n.extra?.type === 'laundry' && n.extra?.phase === 'daily_check'
+    );
+    if (laundryPending.length > 0) {
+      await LocalNotifications.cancel({ notifications: laundryPending });
+    }
+
+    if (!batches || batches.length === 0) return 0;
+
+    // Filter batches currently with the dhobi
+    const activeBatches = batches.filter((b) => b.status === 'submitted');
+    if (activeBatches.length === 0) return 0;
+
+    const now = new Date();
+    const notificationsToSchedule: any[] = [];
+
+    // Schedule reminders for the next 5 days
+    for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
+      for (const batch of activeBatches) {
+        // Morning check at 11:30 AM
+        const morningCheck = new Date(now);
+        morningCheck.setDate(now.getDate() + dayOffset);
+        morningCheck.setHours(11, 30, 0, 0);
+
+        if (morningCheck.getTime() > now.getTime() + 15 * 1000) {
+          const dateKey = morningCheck.toISOString().slice(0, 10);
+          const morningId = hashStringToInt(`laundry_check_am_${batch.id}_${dateKey}`);
+          notificationsToSchedule.push({
+            id: morningId,
+            title: 'Laundry Check',
+            body: "Is your laundry bag still at dhobi? Go pick it up if ready dude, don't leave your fits waiting.",
+            channelId: LAUNDRY_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: '#38BDF8',
+            isExactNotification: true,
+            schedule: { at: morningCheck, allowWhileIdle: true },
+            extra: {
+              type: 'laundry',
+              route: '/laundry',
+              phase: 'daily_check',
+              batchId: batch.id,
+            },
+          });
+        }
+
+        // Evening check at 5:30 PM
+        const eveningCheck = new Date(now);
+        eveningCheck.setDate(now.getDate() + dayOffset);
+        eveningCheck.setHours(17, 30, 0, 0);
+
+        if (eveningCheck.getTime() > now.getTime() + 15 * 1000) {
+          const dateKey = eveningCheck.toISOString().slice(0, 10);
+          const eveningId = hashStringToInt(`laundry_check_pm_${batch.id}_${dateKey}`);
+          notificationsToSchedule.push({
+            id: eveningId,
+            title: 'Laundry Ready Check',
+            body: 'Check in with dhobi dude! Your clean fits might be dried, pressed and ready.',
+            channelId: LAUNDRY_CHANNEL_ID,
+            smallIcon: NOTIFICATION_ICON,
+            iconColor: '#38BDF8',
+            isExactNotification: true,
+            schedule: { at: eveningCheck, allowWhileIdle: true },
+            extra: {
+              type: 'laundry',
+              route: '/laundry',
+              phase: 'daily_check',
+              batchId: batch.id,
+            },
+          });
+        }
+      }
+    }
+
+    if (notificationsToSchedule.length > 0) {
+      const capped = notificationsToSchedule.slice(0, 30);
+      await LocalNotifications.schedule({ notifications: capped });
+      return capped.length;
+    }
+  } catch (err) {
+    console.warn('[Notifications] Error syncing laundry notifications:', err);
+  }
+  return 0;
+}
+
+/**
+ * Fires an instant notification when a laundry bag is handed over / dispatched to the dhobi.
+ * Copy: "Fits Handed Over to Dhobi: Bag is ready from your side dude. ${totalClothes} clothes handed over. Drip in progress."
+ */
+export async function sendInstantLaundryDispatchedNotification(
+  totalClothes: number,
+  batchId: string
+): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await ensureNotificationChannels();
+    const notifId = hashStringToInt(`laundry_dispatch_${batchId}_${Date.now()}`);
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: notifId,
+          title: 'Fits Handed Over to Dhobi',
+          body: `Bag is ready from your side dude. ${totalClothes} clothes handed over. Drip in progress.`,
+          channelId: LAUNDRY_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#38BDF8',
+          schedule: { at: new Date(Date.now() + 50), allowWhileIdle: true },
+          extra: {
+            type: 'laundry',
+            route: '/laundry',
+            phase: 'dispatched',
+            batchId,
+          },
+        },
+      ],
+    });
+    return true;
+  } catch (err) {
+    console.warn('[Notifications] Instant laundry dispatch notification failed:', err);
+    return false;
+  }
+}
+
+/**
+ * Fires an instant notification when the laundry bag is collected / received back by the user.
+ * Copy: "Fresh Fits Secured: Bag is at your bag dude! Clean drip back in the wardrobe."
+ */
+export async function sendInstantLaundryReceivedNotification(batchId: string): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await ensureNotificationChannels();
+    const notifId = hashStringToInt(`laundry_received_${batchId}_${Date.now()}`);
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: notifId,
+          title: 'Fresh Fits Secured',
+          body: 'Bag is at your bag dude! Clean drip back in the wardrobe.',
+          channelId: LAUNDRY_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: '#30D158',
+          schedule: { at: new Date(Date.now() + 50), allowWhileIdle: true },
+          extra: {
+            type: 'laundry',
+            route: '/laundry',
+            phase: 'received',
+            batchId,
+          },
+        },
+      ],
+    });
+    return true;
+  } catch (err) {
+    console.warn('[Notifications] Instant laundry received notification failed:', err);
+    return false;
+  }
 }

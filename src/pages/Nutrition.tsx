@@ -821,10 +821,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       <Sheet
         isOpen={isAddCustomOpen}
         onClose={() => setIsAddCustomOpen(false)}
-        detent="half"
+        heightClass="max-h-[88vh] h-auto"
         title={`Log to ${customSlot.charAt(0).toUpperCase() + customSlot.slice(1)}`}
       >
-        <div className="flex flex-col gap-3.5 py-2">
+        <div className="flex flex-col gap-3.5 py-2 pb-6">
           {/* Quick Popular Food Chips */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
@@ -1008,17 +1008,17 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {/* Estimated Calories (Auto-Applied by AI) */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2">
-              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.75)] truncate">
+              <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.85)]">
                 Calories per serving (kcal)
               </label>
-              <div className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2 py-0.5 rounded-full shrink-0 select-none">
+              <div className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#FF9F0A] bg-[#FF9F0A]/15 px-2.5 py-0.5 rounded-full shrink-0 select-none border-none">
                 <Sparkle size={10} weight="fill" />
                 <span>Auto-Applied by AI</span>
               </div>
             </div>
             <TextField
               type="number"
-              placeholder="Auto-calculated by AI"
+              placeholder="e.g. 250 (Auto-calculated by AI)"
               value={customCalories}
               onChange={(e) => setCustomCalories(e.target.value)}
             />

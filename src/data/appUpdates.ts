@@ -19,12 +19,34 @@ export interface AppUpdate {
 
 export const OFFICIAL_DEVELOPER_EMAILS = [
   'avineeshgujjeti2006@gmail.com',
-  'avineeshgujjeti@outlook.com',
 ];
 
 export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
+  {
+    id: 'update-v3-4-10-laundry-notifications-deep-linking-test-suite-lent-card',
+    category: 'Notifications Lifecycle, Deep-Linking & Spending Ledger',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Complete Laundry Notifications Lifecycle, Direct Deep-Linking, Multi-Interface Test Suite & Redesigned Lending Ledger',
+    dateTime: '24 Nov 2026, 06:45 PM',
+    fullDateTime: 'Tuesday, November 24, 2026 at 06:45:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major notifications and user experience update bringing an end-to-end Laundry notification lifecycle with daily dhobi checks, instant deep-linking on notification taps, a multi-interface test alert suite with 20-second cooldown in Settings, a redesigned Money Lent & Borrowed hero card with flow ratio bar, and 0ms liquid droplet navigation.',
+    points: [
+      'Complete Laundry Notification System: Automated dispatch alerts when handing clothes to dhobi, twice-daily pickup check reminders (11:30 AM & 5:30 PM), and instant confirmation when clean drip is back in the wardrobe.',
+      'Direct Interface Deep-Linking: Tapping any notification in the phone notification bar immediately opens directly into that specific module interface (Laundry, Timetable, Tasks, Nutrition, Gym, Calendar).',
+      'Multi-Interface Test Alert Suite: Trigger all app interface notifications with a single click in Settings with an active 20-second anti-spam cooldown countdown.',
+      'Redesigned Money Lent & Borrowed Hero Card: Unified high-tier architecture with Overall Net Position headline, visual dual-tone flow ratio bar, and integrated To Receive vs To Pay metrics.',
+      '120Hz Liquid Droplet Navigation: Synchronous 0ms tab transitions with Apple Liquid Glass squash-and-stretch kinematics and meniscus refraction.',
+      'Nutrition Calorie Viewport Clearance: Dynamic sheet height with generous scroll padding and unclipped AI calorie calculation indicators.',
+      'Centered Luna Chatbot UI: Centered Luna hero with dockable quick prompt starters that auto-hide while typing.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
   {
     id: 'update-v3-4-9-drive-pdf-viewer-droplet-drag-instant-profile',
     category: 'Drive PDF AI, Fluid Droplet Drag & Zero-Lag Core',
@@ -32,7 +54,7 @@ export const APP_UPDATES: AppUpdate[] = [
     title: 'Drive In-App PDF Viewing & AI Extraction, Fluid Droplet Drag Detents, Nutrition AI Layout & Instant Avatars',
     dateTime: '21 Nov 2026, 11:57 AM',
     fullDateTime: 'Saturday, November 21, 2026 at 11:57:00 AM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.9',
     colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
     summary:
       'Major functionality and fluid experience update bringing native in-app PDF viewing and AI data extraction, ultra-responsive 120Hz liquid droplet navigation dragging, Nutrition AI badge layout perfection, 0ms instant profile pictures, and centered Luna chat experience.',

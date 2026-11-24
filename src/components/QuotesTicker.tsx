@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { getDailyQuotesStream, QuoteItem } from '../data/quotes';
 
 export default function QuotesTicker() {
-  const [isPaused, setIsPaused] = useState(false);
-
   // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)
   const quotes: QuoteItem[] = useMemo(() => {
     return getDailyQuotesStream(new Date(), 8);
@@ -14,23 +12,14 @@ export default function QuotesTicker() {
 
   return (
     <div
-      className="relative w-full py-1.5 overflow-hidden select-none cursor-default"
+      className="relative w-full py-1.5 overflow-hidden select-none cursor-default pointer-events-none"
       style={{
         maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
       }}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={() => setIsPaused(true)}
-      onTouchEnd={() => setIsPaused(false)}
       aria-label="Daily Inspirational Quotes Marquee"
     >
-      <div
-        className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap"
-        style={{
-          animationPlayState: isPaused ? 'paused' : 'running',
-        }}
-      >
+      <div className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap">
         {marqueeItems.map((item, idx) => (
           <div
             key={`${item.id}-${idx}`}

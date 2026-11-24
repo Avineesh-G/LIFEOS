@@ -56,6 +56,7 @@ export interface MoneyLentItem {
   amount: number;
   date: string; // 'YYYY-MM-DD'
   note?: string;
+  type?: 'given' | 'borrowed'; // 'given' (money lent to others) | 'borrowed' (money lent/borrowed from others)
   status: 'pending' | 'returned';
   returnedDate?: string; // 'YYYY-MM-DD'
   createdAt: string;

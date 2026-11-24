@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -31,6 +31,7 @@ import {
   checkNotificationPermission,
   requestNotificationPermission,
   sendInstantTestNotification,
+  sendAllAppInterfaceTestAlerts,
   syncAllNotifications,
 } from '../utils/notifications';
 import {
@@ -66,6 +67,14 @@ export default function Settings({
   // Notifications
   const [hasNotifications, setHasNotifications] = useState(true);
   const [leadMinutes] = useState(data.settings?.notificationLeadMinutes || 10);
+  const [testAlertCooldown, setTestAlertCooldown] = useState(0);
+  const cooldownTimerRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     checkNotificationPermission().then(setHasNotifications);
@@ -337,13 +346,37 @@ export default function Settings({
           }
         />
         <ListRow
-          title="Send Test Alert"
-          subtitle="Trigger instant test notification"
+          title={testAlertCooldown > 0 ? `Send Test Alert (${testAlertCooldown}s)` : 'Send Test Alert'}
+          subtitle={
+            testAlertCooldown > 0
+              ? `Cooldown active · wait ${testAlertCooldown}s before testing again`
+              : 'Trigger test alerts for all app interfaces'
+          }
+          trailing={
+            testAlertCooldown > 0 ? (
+              <span className="font-semibold text-white/40 text-xs px-2.5 py-1 rounded-full bg-white/5 tabular-nums">
+                {testAlertCooldown}s
+              </span>
+            ) : undefined
+          }
           onClick={async () => {
-            triggerHaptic('light');
-            await sendInstantTestNotification('LifeOS Alert', 'Your notification system is working perfectly!');
+            if (testAlertCooldown > 0) return;
+            triggerHaptic('save');
+            await sendAllAppInterfaceTestAlerts();
+            setTestAlertCooldown(20);
+            if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+            cooldownTimerRef.current = setInterval(() => {
+              setTestAlertCooldown((prev) => {
+                if (prev <= 1) {
+                  clearInterval(cooldownTimerRef.current);
+                  cooldownTimerRef.current = null;
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
           }}
-          showChevron
+          showChevron={testAlertCooldown === 0}
           showSeparator={false}
         />
       </GroupedList>

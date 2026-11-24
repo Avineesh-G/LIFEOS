@@ -45,9 +45,7 @@ export function TabBar({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffsetPx, setDragOffsetPx] = useState(0);
   const [dragHoverIndex, setDragHoverIndex] = useState<number | null>(null);
-
-  // Droplet Liquid Fluid Physics State
-  const [isAnimatingDroplet, setIsAnimatingDroplet] = useState(false);
+  const [isDropletMoving, setIsDropletMoving] = useState(false);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<any>(null);
@@ -56,7 +54,6 @@ export function TabBar({
   const isDraggingRef = useRef(false);
   const lastHapticIndexRef = useRef<number>(-1);
   const suppressClickRef = useRef(false);
-  const prevIndexRef = useRef<number>(0);
 
   // Sync optimistic key back when parent activeKey updates
   useEffect(() => {
@@ -68,17 +65,17 @@ export function TabBar({
   const activeIndex = Math.max(0, rawActiveIndex);
   const currentKey = optimisticKey || activeKey;
 
-  // Track index changes to trigger liquid droplet stretch
+  const prevIndexRef = useRef(activeIndex);
+
+  // Fluid Droplet motion trigger on active tab changes
   useEffect(() => {
-    if (rawActiveIndex !== -1 && rawActiveIndex !== prevIndexRef.current) {
-      setIsAnimatingDroplet(true);
-      const timer = setTimeout(() => {
-        setIsAnimatingDroplet(false);
-      }, 300);
-      prevIndexRef.current = rawActiveIndex;
-      return () => clearTimeout(timer);
+    if (prevIndexRef.current !== activeIndex) {
+      setIsDropletMoving(true);
+      prevIndexRef.current = activeIndex;
+      const t = setTimeout(() => setIsDropletMoving(false), 240);
+      return () => clearTimeout(t);
     }
-  }, [rawActiveIndex]);
+  }, [activeIndex]);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -273,28 +270,39 @@ export function TabBar({
         <div ref={trackRef} className="flex-1 flex items-center relative h-[42px]">
           {/* Fluid Hold & Drag Droplet Pill with Liquid Physics */}
           <div
-            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform transition-[opacity,transform] duration-250 ease-out"
+            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform"
             style={{
               width: `${tabWidthPercent}%`,
               opacity: hasValidActiveTab ? 1 : 0,
               transform: isDragging
-                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.06, 0.94)`
-                : isAnimatingDroplet
-                ? `translate3d(${activeIndex * 100}%, 0, 0) scale(1.12, 0.90)`
-                : `translate3d(${activeIndex * 100}%, 0, 0) scale(1, 1)`,
+                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.08, 0.92)`
+                : `translate3d(${activeIndex * 100}%, 0, 0) ${isDropletMoving ? 'scale(1.14, 0.90)' : 'scale(1, 1)'}`,
               transition: isDragging
-                ? 'scale 0.15s ease'
-                : 'transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15), scale 0.22s ease-out, opacity 0.2s ease',
+                ? 'none'
+                : 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.18s ease',
               background: isDragging
                 ? 'radial-gradient(ellipse 95% 70% at 50% 0%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.10) 65%, transparent 95%), rgba(255, 255, 255, 0.16)'
-                : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 60%, transparent 90%), rgba(255, 255, 255, 0.10)',
+                : isDropletMoving
+                  ? 'radial-gradient(ellipse 92% 65% at 50% 0%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 60%, transparent 90%), rgba(255, 255, 255, 0.12)'
+                  : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 60%, transparent 90%), rgba(255, 255, 255, 0.10)',
               boxShadow: isDragging
                 ? '0 8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.35)'
-                : '0 4px 14px rgba(0, 0, 0, 0.60), inset 0 1px 1px rgba(255, 255, 255, 0.22)',
+                : isDropletMoving
+                  ? '0 6px 18px rgba(0, 0, 0, 0.70), inset 0 1px 1.5px rgba(255, 255, 255, 0.28)'
+                  : '0 4px 14px rgba(0, 0, 0, 0.60), inset 0 1px 1px rgba(255, 255, 255, 0.22)',
             }}
           >
             {/* Liquid Surface Meniscus Refraction Highlight */}
-            <div className="absolute inset-x-2 top-0.5 h-[1.5px] rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            <div className="absolute inset-x-2 top-0.5 h-[1.5px] rounded-full bg-gradient-to-r from-transparent via-white/45 to-transparent" />
+            {/* Internal Liquid Droplet Ambient Glow */}
+            <div
+              className="absolute inset-0 rounded-full opacity-60 pointer-events-none transition-opacity duration-200"
+              style={{
+                background: isDropletMoving
+                  ? 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255, 255, 255, 0.24) 0%, transparent 80%)'
+                  : 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 70%)',
+              }}
+            />
           </div>
 
           {items.map((tab, idx) => {

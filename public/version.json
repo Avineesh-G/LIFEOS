@@ -1,10 +1,10 @@
 {
-  "versionCode": 86,
-  "versionName": "3.4.9",
-  "releaseDate": "2026-11-21",
+  "versionCode": 87,
+  "versionName": "3.4.10",
+  "releaseDate": "2026-11-24",
   "apkSize": "15.03 MB",
   "apkSizeBytes": 15761578,
-  "releaseNotes": "LifeOS v3.4.9 (Build 86):\n• Drive In-App PDF Viewer & AI Extraction: View uploaded PDFs directly in-app with intelligent multi-category AI extraction into Finance, Gym, Nutrition, Tasks, and Notes.\n• Nutrition AI Badge Layout Perfection: Redesigned 'Auto-Applied by AI' indicator and calorie metric with zero truncation or text wrapping.\n• Fluid Droplet Drag & Quick Access: 120Hz liquid droplet navigation with 6px instant drag sensitivity, boundary detent haptics, and 0ms Home navigation.\n• Instant 0ms Profile Picture: Synchronous local base64 avatar caching eliminates network loading delay on app startup.\n• Tasks Completed Log Seen-Mode: Completed tasks in historical list are view-only, preventing accidental re-activation.\n• Centered Luna Chatbot UI: Centered Luna hero with dockable quick prompt starters that auto-hide while typing.",
+  "releaseNotes": "LifeOS v3.4.10 (Build 87):\n• Complete Laundry Notification System: Automated dhobi dispatch alerts, twice-daily pickup check reminders (11:30 AM & 5:30 PM), and fresh fits received confirmations.\n• Direct Interface Deep-Linking: Tapping any notification opens directly into that specific module interface (Laundry, Timetable, Tasks, Nutrition, Gym, Calendar).\n• Multi-Interface Test Alert Suite: Trigger all app interface notifications with a single click in Settings with a 20-second anti-spam cooldown timer.\n• Redesigned Money Lent & Borrowed Hero Card: Unified high-tier architecture with Overall Net Position headline, visual dual-tone flow ratio bar, and integrated To Receive vs To Pay metrics.\n• 120Hz Liquid Droplet Navigation: Synchronous 0ms tab transitions with Apple Liquid Glass squash-and-stretch kinematics and meniscus refraction.\n• Nutrition Calorie Viewport Clearance: Dynamic sheet height with generous scroll padding and unclipped AI calorie calculation indicators.\n• Centered Luna Chatbot UI: Centered Luna hero with dockable quick prompt starters that auto-hide while typing.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "308bdb62680faac964dbb439863cb6063f3034162265892f68b93b49db805766"
+  "sha256": "a33ea23f1942585bd015430351665b7bdeb4eafd889d0ca672cc1044e023db04"
 }

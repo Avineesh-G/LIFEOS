@@ -428,8 +428,6 @@ export function MoreHubSheet({
 
                 <div className="space-y-2">
                   {selectedUpdate.contactEmails.map((email) => {
-                    const isOutlook = email.includes('outlook');
-                    const label = isOutlook ? 'Outlook' : 'Gmail';
                     const isCopied = copiedEmail === email;
 
                     return (
@@ -439,7 +437,7 @@ export function MoreHubSheet({
                             {email}
                           </span>
                           <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-white/[0.08] text-white/50 shrink-0 ml-1">
-                            {label}
+                            Developer
                           </span>
                         </div>
                         <div className="flex items-center gap-2 pt-1 border-t border-white/[0.06]">
@@ -454,7 +452,7 @@ export function MoreHubSheet({
                             className="flex-1 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
                             {isCopied ? <Check size={12} className="text-[#30D158]" /> : <Copy size={12} />}
-                            <span>{isCopied ? 'Copied' : `Copy ${label}`}</span>
+                            <span>{isCopied ? 'Copied' : 'Copy Email'}</span>
                           </button>
                           <a
                             href={`mailto:${email}?subject=LifeOS%20Feature%20Recommendation%20-%20${encodeURIComponent(selectedUpdate.title)}`}

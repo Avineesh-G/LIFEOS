@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, startTransition } from 'react';
+import React, { useState, useEffect, useMemo, useRef, startTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -99,7 +99,7 @@ export default function Layout({
   const [isReloading, setIsReloading] = useState(false);
   const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
   const [homeLockedToast, setHomeLockedToast] = useState(false);
   const [isSubInterfaceOpen, setIsSubInterfaceOpen] = useState(false);
 
@@ -156,7 +156,7 @@ export default function Layout({
       }
     }, 2500);
     return () => clearTimeout(timer);
-  }, [data?.timetable, data?.tasks, data?.nutritionLogs, data?.workoutLogs, data?.calendarEvents]);
+  }, [data?.timetable, data?.tasks, data?.nutritionLogs, data?.workoutLogs, data?.calendarEvents, data?.laundryBatches]);
 
   // Smooth auto-hiding header on scroll down, reappearing on scroll up
   useEffect(() => {
@@ -165,12 +165,13 @@ export default function Layout({
       const currentScrollY = window.scrollY || document.documentElement.scrollTop;
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          if (currentScrollY > lastScrollY && currentScrollY > 36) {
+          const prev = lastScrollYRef.current;
+          if (currentScrollY > prev && currentScrollY > 36) {
             setHeaderVisible(false);
-          } else if (currentScrollY < lastScrollY - 6 || currentScrollY <= 12) {
+          } else if (currentScrollY < prev - 6 || currentScrollY <= 12) {
             setHeaderVisible(true);
           }
-          setLastScrollY(currentScrollY);
+          lastScrollYRef.current = currentScrollY;
           ticking = false;
         });
         ticking = true;
@@ -179,7 +180,7 @@ export default function Layout({
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Reload & Refresh handler: syncs cloud data and cleanly refreshes the application
   const handleReload = async () => {
@@ -251,7 +252,7 @@ export default function Layout({
 
   const [customizingSlotIndex, setCustomizingSlotIndex] = useState<number | null>(null);
 
-  const navTabs: TabItem[] = [
+  const navTabs: TabItem[] = useMemo(() => [
     {
       key: 'home',
       label: 'Home',
@@ -286,23 +287,20 @@ export default function Layout({
         { label: 'Customize Quick Slot', action: () => setCustomizingSlotIndex(1) },
       ],
     },
-  ];
+  ], [slot2Item, slot3Item, navigate]);
 
   const handleTabChange = (key: string) => {
-    triggerHaptic('medium');
-    startTransition(() => {
-      if (key === 'home') {
-        if (pathname === '/' || pathname === '') {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          navigate('/');
-        }
-      } else if (key === slot2Item.id) {
-        navigate(slot2Item.route);
-      } else if (key === slot3Item.id) {
-        navigate(slot3Item.route);
+    if (key === 'home') {
+      if (pathname === '/' || pathname === '') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate('/');
       }
-    });
+    } else if (key === slot2Item.id) {
+      navigate(slot2Item.route);
+    } else if (key === slot3Item.id) {
+      navigate(slot3Item.route);
+    }
   };
 
   const handleCustomizeSlot = (slotKey: string) => {
