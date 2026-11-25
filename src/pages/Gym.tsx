@@ -111,18 +111,21 @@ export default function Gym({ data, updateData }: GymProps) {
                   triggerHaptic('selection');
                   setSelectedDay(d.short);
                 }}
-                className={`relative flex-1 py-2 flex flex-col items-center justify-center rounded-[16px] transition-all cursor-pointer ${
+                className={`relative flex-1 py-2 flex flex-col items-center justify-center rounded-[16px] transition-colors cursor-pointer ${
                   isSelected
-                    ? 'droplet-active text-[#FF453A]'
+                    ? 'droplet-active'
                     : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
                 }`}
+                style={isSelected ? { color: 'var(--app-accent-text, #64D2FF)' } : undefined}
               >
                 <span className="text-[12px] font-bold tracking-tight">{d.short}</span>
                 {isToday && (
                   <span
-                    className={`w-1 h-1 rounded-full mt-1 ${
-                      isSelected ? 'bg-[#FF453A]' : 'bg-[#FF453A]/50'
-                    }`}
+                    className="w-1 h-1 rounded-full mt-1"
+                    style={{
+                      backgroundColor: 'var(--app-accent-text, #64D2FF)',
+                      opacity: isSelected ? 1 : 0.48,
+                    }}
                   />
                 )}
               </button>
@@ -130,11 +133,8 @@ export default function Gym({ data, updateData }: GymProps) {
           })}
         </div>
 
-        {/* ── 1. Hero Summary Tile (glass-hero with Coral glow) ── */}
-        <div
-          style={{ '--hero-accent': '#FF453A' } as React.CSSProperties}
-          className="glass-hero p-5 flex flex-col gap-4 select-none min-h-[140px]"
-        >
+        {/* ── 1. Hero Summary Tile (Pure Liquid Glass + Single Ambient Hue) ── */}
+        <div className="glass-hero p-5 flex flex-col gap-4 select-none min-h-[140px]">
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col">
               <div className="text-[11.5px] font-semibold text-[rgba(235,235,245,0.65)] uppercase tracking-wider">
@@ -150,7 +150,10 @@ export default function Gym({ data, updateData }: GymProps) {
             </div>
 
             {isCompletedToday ? (
-              <div className="px-3 py-1.5 rounded-full glass-flat text-[#30D158] font-bold text-xs flex items-center gap-1">
+              <div
+                className="px-3 py-1.5 rounded-full glass-flat font-bold text-xs flex items-center gap-1"
+                style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+              >
                 <Check size={14} weight="bold" />
                 <span>Finished</span>
               </div>
@@ -175,7 +178,7 @@ export default function Gym({ data, updateData }: GymProps) {
             <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-white">
               ~{Math.max(15, (activePlan.exercises?.length || 0) * 9)} min
             </span>
-            <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-[rgba(235,235,245,0.65)]">
+            <span className="glass-flat px-3 py-1 text-[12px] font-semibold text-[rgba(235,235,245,0.72)]">
               {activePlan.exercises?.length || 0} Exercises
             </span>
           </div>
@@ -264,7 +267,7 @@ export default function Gym({ data, updateData }: GymProps) {
         {/* ── 4. AI Split Suggestion (glass-card) ── */}
         <div className="glass-card p-4 flex items-center justify-between gap-3 select-none">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-[12px] glass-flat flex items-center justify-center text-[#BF5AF2] shrink-0">
+            <div className="w-9 h-9 rounded-[12px] glass-flat flex items-center justify-center shrink-0" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>
               <Sparkle size={18} weight="fill" />
             </div>
             <div className="flex flex-col min-w-0">

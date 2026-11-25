@@ -23,15 +23,16 @@
     --more-icon: #1B1C22;
   }
 
-  /* ── Water Liquid Glass Surfaces (Specular Optics & Zero Blur Reflow) ── */
+  /* ── Water Liquid Glass Surfaces (Pure iOS Specular Optics + Light Single-Color Ambient Sheen) ── */
   .liquid-glass,
   .glass-surface {
     position: relative;
     background:
-      radial-gradient(ellipse 105% 46% at 50% -14%, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.012) 55%, transparent 82%),
+      radial-gradient(ellipse 105% 46% at 50% -14%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.016) 55%, transparent 82%),
+      radial-gradient(ellipse 85% 42% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4.5%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
-        rgba(255, 255, 255, 0.042) 0%,
-        rgba(255, 255, 255, 0.008) 28%,
+        rgba(255, 255, 255, 0.048) 0%,
+        rgba(255, 255, 255, 0.01) 28%,
         rgba(18, 18, 22, 0.98) 100%
       ),
       #141416 !important;
@@ -48,13 +49,14 @@
   .card-tonal {
     position: relative;
     background:
-      radial-gradient(ellipse 100% 45% at 50% -14%, rgba(255, 255, 255, 0.065) 0%, transparent 80%),
+      radial-gradient(ellipse 100% 45% at 50% -14%, rgba(255, 255, 255, 0.075) 0%, transparent 80%),
+      radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
-        rgba(255, 255, 255, 0.036) 0%,
-        rgba(255, 255, 255, 0.006) 35%,
-        rgba(24, 24, 28, 0.98) 100%
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.008) 35%,
+        rgba(23, 23, 27, 0.98) 100%
       ),
-      #1A1A1E !important;
+      #19191D !important;
     color: #FFFFFF !important;
     border: none !important;
     box-shadow:
@@ -66,9 +68,10 @@
   .floating-shell {
     position: relative;
     background:
-      radial-gradient(ellipse 108% 46% at 50% -12%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.012) 55%, transparent 82%),
+      radial-gradient(ellipse 108% 46% at 50% -12%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.015) 55%, transparent 82%),
+      radial-gradient(ellipse 85% 40% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5.5%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
-        rgba(255, 255, 255, 0.048) 0%,
+        rgba(255, 255, 255, 0.05) 0%,
         rgba(255, 255, 255, 0.008) 25%,
         rgba(18, 18, 22, 0.99) 100%
       ),
@@ -87,9 +90,10 @@
   html:not(.tier-1) .glass-sheet,
   html:not(.tier-1) .liquid-sheet,
   html:not(.tier-1) .floating-shell {
-    background: 
-      radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.06) 0%, transparent 80%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, rgba(20, 20, 24, 0.98) 100%),
+    background:
+      radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.07) 0%, transparent 80%),
+      radial-gradient(ellipse 80% 40% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3.5%, transparent) 0%, transparent 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(20, 20, 24, 0.98) 100%),
       #141416 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -99,8 +103,8 @@
 
   html:not(.tier-1) .glow-card,
   html:not(.tier-1) .card-tonal {
-    background: 
-      linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, rgba(24, 24, 28, 0.98) 100%),
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(22, 22, 26, 0.98) 100%),
       #18181B !important;
     border: none !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
@@ -220,8 +224,8 @@
 
   .input-field:focus-visible {
     outline: none;
-    border-color: var(--md-primary, #6366F1);
-    box-shadow: 0 0 0 2px rgba(var(--md-primary-rgb, 99, 102, 241), 0.25);
+    border-color: var(--md-primary, #8B1E3F);
+    box-shadow: 0 0 0 2px rgba(var(--md-primary-rgb, 139, 30, 63), 0.25);
   }
 
   .input-field::placeholder {

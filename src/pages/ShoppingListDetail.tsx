@@ -278,7 +278,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
             <div className="flex-1 min-w-0">
               {currentList.isTemplate && (
                 <div className="mb-1.5">
-                  <Badge label="TEMPLATE" color="#BF5AF2" />
+                  <Badge label="TEMPLATE" />
                 </div>
               )}
 
@@ -293,11 +293,13 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                       if (e.key === 'Enter') handleSaveRename();
                       if (e.key === 'Escape') setIsRenaming(false);
                     }}
-                    className="w-full text-xl font-bold text-white bg-transparent border-b border-[#FF375F] focus:outline-none pb-0.5"
+                    className="w-full text-xl font-bold text-white bg-transparent border-b focus:outline-none pb-0.5"
+                    style={{ borderColor: 'var(--app-accent-text, #DE4B64)' }}
                   />
                   <button
                     onClick={handleSaveRename}
-                    className="p-1.5 rounded-lg bg-[#FF375F] text-white"
+                    className="p-1.5 rounded-lg text-white"
+                    style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                   >
                     <Check size={16} />
                   </button>
@@ -337,7 +339,6 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
           {/* Progress bar */}
           <ProgressBar
             progress={percent / 100}
-            color={percent === 100 ? '#30D158' : '#FF375F'}
             height={6}
           />
         </div>
@@ -405,7 +406,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                   className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                   onClick={() => handleToggleItem(item.id)}
                 >
-                  <Circle size={22} weight="bold" className="text-[#8E8E93] shrink-0 hover:text-[#FF375F] transition-colors" />
+                  <Circle size={22} weight="bold" className="text-[#8E8E93] shrink-0 hover:text-white transition-colors" />
 
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-medium text-white block truncate">
@@ -475,7 +476,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                         onClick={() => handleToggleItem(item.id)}
                       >
-                        <CheckCircle size={22} weight="fill" className="text-[#30D158] shrink-0" />
+                        <CheckCircle size={22} weight="fill" className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
 
                         <div className="flex-1 min-w-0">
                           <span className="text-sm font-medium line-through text-[#8E8E93] block truncate">

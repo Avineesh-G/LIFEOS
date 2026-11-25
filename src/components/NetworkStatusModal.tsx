@@ -65,8 +65,11 @@ export default function NetworkStatusModal() {
               transition={{ type: 'spring', damping: 26, stiffness: 360 }}
               className="w-full max-w-sm rounded-[32px] liquid-sheet border-none p-6 shadow-[0_24px_64px_rgba(0,0,0,0.95)] text-center space-y-4"
             >
-              {/* Icon (Droplet Glass Container + Amber Icon) */}
-              <div className="w-14 h-14 rounded-2xl glass-tile text-[#FF9F0A] mx-auto flex items-center justify-center">
+              {/* Icon (Droplet Glass Container) */}
+              <div
+                className="w-14 h-14 rounded-2xl glass-tile mx-auto flex items-center justify-center"
+                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              >
                 <WifiSlash size={28} weight="bold" className="animate-pulse" />
               </div>
 
@@ -81,7 +84,10 @@ export default function NetworkStatusModal() {
 
                 {/* Sub-card (Pure Water Droplet Glass Effect) */}
                 <div className="p-3.5 rounded-2xl glass-tile text-left space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#FF9F0A] text-[13px] font-semibold">
+                  <div
+                    className="flex items-center gap-2 text-[13px] font-semibold"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     <CloudSlash size={16} weight="bold" className="shrink-0" />
                     <span>Offline Storage Active</span>
                   </div>
@@ -99,7 +105,8 @@ export default function NetworkStatusModal() {
                     triggerHaptic('light');
                     setShowModal(false);
                   }}
-                  className="w-full py-3.5 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF9F0A] hover:text-[#FFB340] font-bold text-[14px] active:scale-98 transition-all cursor-pointer select-none"
+                  className="w-full py-3.5 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-[14px] active:scale-98 transition-all cursor-pointer select-none"
+                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
                 >
                   Continue in Offline Mode
                 </button>
@@ -124,7 +131,7 @@ export default function NetworkStatusModal() {
               exit={{ opacity: 0, y: -16, scale: 0.95 }}
               className="pointer-events-auto px-4 py-2.5 rounded-2xl bg-[#141416]/95 glass-tile text-white text-xs font-semibold shadow-2xl flex items-center gap-2.5 max-w-full select-none"
             >
-              <CheckCircle size={17} weight="fill" className="shrink-0 text-[#30D158]" />
+              <CheckCircle size={17} weight="fill" className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
               <span className="truncate text-white/90">Back Online — Connected to Cloud</span>
               <button
                 type="button"

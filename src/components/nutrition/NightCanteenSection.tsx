@@ -140,10 +140,16 @@ export default function NightCanteenSection({
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-500/15 via-accent/10 to-indigo-500/15 border border-purple-500/30 flex items-center justify-between shadow-xs"
+          className="p-3.5 rounded-2xl glass-tile flex items-center justify-between shadow-xs"
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                color: 'var(--app-accent-text, #DE4B64)',
+              }}
+            >
               <Moon size={16} />
             </div>
             <div>
@@ -156,7 +162,13 @@ export default function NightCanteenSection({
             </div>
           </div>
           {canteenOrderStats.totalBill > 0 && (
-            <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 font-mono font-bold text-sm">
+            <div
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl font-mono font-bold text-sm"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                color: 'var(--app-accent-text, #DE4B64)',
+              }}
+            >
               <IndianRupee size={14} />
               <span>{canteenOrderStats.totalBill}</span>
             </div>
@@ -167,7 +179,7 @@ export default function NightCanteenSection({
       {/* ── Quick Canteen Picks Chips ── */}
       <div>
         <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mb-1.5 flex items-center gap-1.5">
-          <Sparkles size={12} className="text-purple-500" />
+          <Sparkles size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
           <span>Popular Canteen Picks:</span>
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -185,11 +197,19 @@ export default function NightCanteenSection({
                   triggerHaptic('light');
                   onToggleItem(itemName, estCals);
                 }}
-                className={`text-xs px-2.5 py-1 rounded-xl border transition-all flex items-center gap-1.5 ${
+                className={`text-xs px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-purple-500/20 border-purple-500/40 text-purple-700 dark:text-purple-300 font-semibold'
-                    : 'bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark hover:border-purple-500/30 text-secondary-light dark:text-secondary-dark'
+                    ? 'font-semibold shadow-sm'
+                    : 'glass-flat text-secondary-light dark:text-secondary-dark'
                 }`}
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                        color: 'var(--app-accent-text, #DE4B64)',
+                      }
+                    : undefined
+                }
               >
                 {isSelected ? <Check size={11} strokeWidth={3} /> : <span>+</span>}
                 <span>{chipName}</span>
@@ -267,9 +287,14 @@ export default function NightCanteenSection({
                 }}
                 className={`text-xs px-2.5 py-1 rounded-xl whitespace-nowrap transition-all flex-shrink-0 ${
                   isSelected
-                    ? 'bg-purple-600 text-white font-semibold shadow-xs'
-                    : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-purple-500/30'
+                    ? 'text-white font-semibold shadow-xs'
+                    : 'glass-flat text-secondary-light dark:text-secondary-dark'
                 }`}
+                style={
+                  isSelected
+                    ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                    : undefined
+                }
               >
                 {cat}
               </button>
@@ -281,7 +306,7 @@ export default function NightCanteenSection({
       {/* ── 91 Items Explorer List ── */}
       <div className="space-y-2 max-h-[460px] overflow-y-auto pr-0.5 no-scrollbar">
         {filteredItems.length === 0 ? (
-          <div className="py-8 text-center bg-surface-light/40 dark:bg-surface-dark/40 rounded-2xl border border-dashed border-border-light dark:border-border-dark">
+          <div className="py-8 text-center glass-tile rounded-2xl">
             <UtensilsCrossed size={28} className="mx-auto text-muted-light dark:text-muted-dark mb-2 opacity-60" />
             <p className="text-xs text-muted-light dark:text-muted-dark">No canteen items match "{searchQuery}"</p>
             <button
@@ -290,7 +315,8 @@ export default function NightCanteenSection({
                 setSelectedCategory('All');
                 setDietFilter('All');
               }}
-              className="text-xs text-purple-500 font-semibold mt-2 hover:underline"
+              className="text-xs font-semibold mt-2 hover:underline"
+              style={{ color: 'var(--app-accent-text, #DE4B64)' }}
             >
               Reset Filters
             </button>
@@ -303,11 +329,12 @@ export default function NightCanteenSection({
             return (
               <div
                 key={item.id}
-                className={`w-full flex flex-col p-3 rounded-2xl border transition-all ${
+                className={`w-full flex flex-col p-3 rounded-2xl transition-all ${
                   isSelected
-                    ? 'bg-purple-500/10 border-purple-500/40 shadow-xs'
-                    : 'bg-white/60 dark:bg-white/[0.03] border-black/5 dark:border-white/5 hover:border-purple-500/20'
+                    ? 'glass-tile shadow-xs'
+                    : 'glass-flat'
                 }`}
+                style={isSelected ? { backgroundColor: 'var(--app-accent-whisper, rgba(181, 43, 77, 0.08))' } : undefined}
               >
                 <div className="flex items-center justify-between gap-3">
                   <button
@@ -318,9 +345,14 @@ export default function NightCanteenSection({
                     <div
                       className={`w-5 h-5 rounded-md border flex flex-shrink-0 items-center justify-center transition-colors ${
                         isSelected
-                          ? 'border-purple-600 bg-purple-600 text-white'
+                          ? 'border-transparent text-white'
                           : 'border-neutral-300 dark:border-neutral-600 text-transparent'
                       }`}
+                      style={
+                        isSelected
+                          ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                          : undefined
+                      }
                     >
                       <Check size={12} strokeWidth={3} />
                     </div>

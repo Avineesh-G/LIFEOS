@@ -28,7 +28,7 @@ export const GlassOrb = React.forwardRef<HTMLButtonElement, GlassOrbProps>(({
         border border-[var(--rim,rgba(255,255,255,0.15))]
         bg-[var(--glass-3)] text-primary
         shadow-md transition-all duration-300 touch-manipulation outline-none
-        ${active ? 'border-[var(--accent,#3B82F6)] bg-[rgba(var(--accent-rgb),0.25)] text-[var(--accent-text,#38BDF8)]' : ''}
+        ${active ? 'bg-[rgba(var(--app-accent-rgb),0.22)] text-[var(--app-accent-text,#DE4B64)]' : ''}
         ${className}
       `}
       style={{
@@ -43,7 +43,7 @@ export const GlassOrb = React.forwardRef<HTMLButtonElement, GlassOrbProps>(({
         <div
           className="pointer-events-none absolute -inset-1 rounded-2xl opacity-40 blur-md transition-opacity duration-500 group-hover:opacity-80"
           style={{
-            background: 'radial-gradient(circle, var(--accent,#38BDF8) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--app-accent, #8B1E3F) 0%, transparent 70%)',
           }}
         />
       )}

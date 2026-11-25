@@ -129,7 +129,7 @@ export function SlotCustomizerSheet({
           <div className="flex items-center gap-1.5 justify-between">
             {/* Slot 0: Home (Locked) */}
             <div className="flex-1 py-2 px-1.5 rounded-xl glass-flat flex items-center justify-center gap-1.5 text-white/40 select-none">
-              <LockKey size={13} weight="fill" className="text-[#FFD60A]" />
+              <LockKey size={13} weight="fill" style={{ color: 'var(--app-accent-text, #64D2FF)' }} />
               <House size={16} weight="duotone" />
               <span className="text-xs font-semibold">Home</span>
               <span className="text-[9px] px-1 py-0.5 rounded bg-white/10 text-white/50 uppercase font-bold tracking-wider">
@@ -139,11 +139,12 @@ export function SlotCustomizerSheet({
 
             {/* Slot 1: Gym / Customizable */}
             <div
-              className={`flex-1 py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 transition-all select-none ${
+              className={`flex-1 py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors select-none ${
                 targetSlotIdx === 0
-                  ? 'glass-tile text-[#0A84FF] shadow-sm'
+                  ? 'glass-tile shadow-sm'
                   : 'glass-flat text-white/60'
               }`}
+              style={targetSlotIdx === 0 ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
             >
               <span className="text-base shrink-0">
                 {targetSlotIdx === 0 ? currentItem?.icon : otherItem?.icon}
@@ -152,17 +153,18 @@ export function SlotCustomizerSheet({
                 {targetSlotIdx === 0 ? currentItem?.label.split(' ')[0] : otherItem?.label.split(' ')[0]}
               </span>
               {targetSlotIdx === 0 && (
-                <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-pulse" />
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
               )}
             </div>
 
             {/* Slot 2: Nutrition / Customizable */}
             <div
-              className={`flex-1 py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 transition-all select-none ${
+              className={`flex-1 py-2 px-1.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors select-none ${
                 targetSlotIdx === 1
-                  ? 'glass-tile text-[#0A84FF] shadow-sm'
+                  ? 'glass-tile shadow-sm'
                   : 'glass-flat text-white/60'
               }`}
+              style={targetSlotIdx === 1 ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
             >
               <span className="text-base shrink-0">
                 {targetSlotIdx === 1 ? currentItem?.icon : otherItem?.icon}
@@ -171,13 +173,13 @@ export function SlotCustomizerSheet({
                 {targetSlotIdx === 1 ? currentItem?.label.split(' ')[0] : otherItem?.label.split(' ')[0]}
               </span>
               {targetSlotIdx === 1 && (
-                <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-pulse" />
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
               )}
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11.5px] text-white/50 px-1">
-            <LockKey size={13} weight="duotone" className="text-[#FFD60A] shrink-0" />
+            <LockKey size={13} weight="duotone" className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
             <span>Home is locked as your primary interface. Slot 1 and Slot 2 can be swapped with any interface.</span>
           </div>
         </div>
@@ -224,7 +226,7 @@ export function SlotCustomizerSheet({
                   </div>
 
                   {isCurrent ? (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0A84FF]">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                       <Check size={16} weight="bold" />
                       <span>Current</span>
                     </div>
@@ -276,7 +278,7 @@ export function SlotCustomizerSheet({
                         </div>
 
                         {isCurrent ? (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A84FF] px-2.5 py-1 rounded-full glass-flat">
+                          <div className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full glass-flat" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                             <Check size={14} weight="bold" />
                             <span>Active in Slot {targetSlotIdx + 1}</span>
                           </div>

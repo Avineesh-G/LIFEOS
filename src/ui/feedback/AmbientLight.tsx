@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { getSectionFromPathname } from '../../theme/sectionSeedColors';
 
 export type AmbientSetting = 'off' | 'low' | 'medium';
 
@@ -9,24 +8,20 @@ export interface AmbientLightProps {
 }
 
 /**
- * Ambient Light Layer (Section 3.6):
- * One fixed layer behind the content, pointer-events: none, height 45vh.
- * Two radial gradients using --ambient fading to transparent at 100%.
- * Sits under the scroll edge gradient and under toolbar glass.
- * Fades smoothly on navigation without animation cost.
+ * Ambient Light Layer — Whisper-light single-hue M3 glow behind top viewport
  */
 export function AmbientLight({ setting }: AmbientLightProps) {
-  const location = useLocation();
-  const [ambientSetting, setAmbientSetting] = useState<AmbientSetting>(() => {
+  useLocation();
+  const [ambientSetting, setAmbientSetting] = React.useState<AmbientSetting>(() => {
     if (setting) return setting;
     try {
       const saved = localStorage.getItem('lifeos_ambient_light') as AmbientSetting;
       if (saved === 'off' || saved === 'low' || saved === 'medium') return saved;
     } catch {}
-    return 'medium'; // Default Medium
+    return 'medium';
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (setting) {
       setAmbientSetting(setting);
       return;
@@ -47,11 +42,11 @@ export function AmbientLight({ setting }: AmbientLightProps) {
 
   return (
     <div
-      className="fixed top-0 inset-x-0 h-[45vh] pointer-events-none -z-10 overflow-hidden transition-opacity duration-400 ease-out"
+      className="fixed top-0 inset-x-0 h-[44vh] pointer-events-none -z-10 overflow-hidden transition-opacity duration-300 ease-out"
       style={{
         background: `
-          radial-gradient(ellipse 70% 60% at 20% 0%, var(--ambient, rgba(94, 92, 230, 0.14)) 0%, transparent 100%),
-          radial-gradient(ellipse 60% 50% at 80% 10%, var(--ambient, rgba(94, 92, 230, 0.14)) 0%, transparent 100%)
+          radial-gradient(ellipse 75% 60% at 22% -4%, var(--ambient, rgba(10, 132, 255, 0.08)) 0%, transparent 100%),
+          radial-gradient(ellipse 65% 50% at 82% 10%, var(--ambient-secondary, rgba(90, 200, 250, 0.055)) 0%, transparent 100%)
         `,
       }}
       aria-hidden="true"

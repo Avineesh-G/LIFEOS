@@ -70,11 +70,17 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
 
         {/* Right Section: Glowing mic circle & Waveform icon */}
         <div className="relative z-10 flex items-center gap-2.5 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 text-white shadow-[0_0_12px_rgba(56,189,248,0.5)] group-hover:scale-105 transition-transform">
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white shadow-md group-hover:scale-105 transition-transform"
+            style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+          >
             <Mic size={15} strokeWidth={2.2} />
           </div>
 
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-cyan-300">
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5"
+            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+          >
             <AudioWaveform size={16} className="animate-pulse" />
           </div>
         </div>
@@ -101,9 +107,9 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
             >
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-cyan-400 font-medium text-sm">
+                  <div className="flex items-center gap-2 font-medium text-sm" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                     <Sparkles size={16} />
-                    <span>Gemini Intelligence</span>
+                    <span>Luna Intelligence</span>
                   </div>
                   <button
                     type="button"

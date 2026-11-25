@@ -124,13 +124,13 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   const priorityColor = (p?: string) => {
-    if (p === 'high') return '#FF453A';
-    if (p === 'medium') return '#FF9F0A';
-    return '#0A84FF';
+    if (p === 'high') return 'var(--app-accent-text, #DE4B64)';
+    if (p === 'medium') return 'var(--app-accent-end, #B52B4D)';
+    return 'var(--app-accent, #8B1E3F)';
   };
 
   return (
-    <div className="w-full text-white selection:bg-[#0A84FF]/30">
+    <div className="w-full text-white">
       <LargeTitleHeader
         title="Tasks"
         subtitle={`${counts.today} due today · ${counts.pending} total pending`}
@@ -195,7 +195,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                           key: 'restore',
                           label: 'Restore',
                           icon: <Check size={18} weight="bold" />,
-                          color: '#0A84FF',
+                          color: 'var(--app-accent, #8B1E3F)',
                           onClick: () => handleRestoreTaskToToday(task),
                         },
                         {
@@ -211,7 +211,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                           key: 'toggle',
                           label: 'Done',
                           icon: <Check size={18} weight="bold" />,
-                          color: '#30D158',
+                          color: 'var(--app-accent, #8B1E3F)',
                           onClick: () => handleToggleTask(task),
                         },
                         {
@@ -228,7 +228,8 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   icon={
                     <CheckCircle
                       weight={task.completed ? 'fill' : 'regular'}
-                      className={task.completed ? 'text-[#30D158]' : 'text-[rgba(235,235,245,0.40)]'}
+                      style={task.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                      className={task.completed ? '' : 'text-[rgba(235,235,245,0.40)]'}
                     />
                   }
                   iconTint={task.completed ? '#30D158' : '#0A84FF'}

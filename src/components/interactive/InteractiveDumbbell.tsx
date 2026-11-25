@@ -80,7 +80,7 @@ export default function InteractiveDumbbell({
           width="2.5"
           height="11"
           rx="1"
-          className={isCompleted ? 'fill-emerald-500 stroke-emerald-600' : 'fill-currentColor text-emerald-500'}
+          className="fill-current text-[var(--app-accent-text)]"
           animate={{ x: isCompressing ? 2.5 : 0 }}
           transition={{ type: 'spring', stiffness: 600, damping: 25 }}
         />
@@ -92,7 +92,7 @@ export default function InteractiveDumbbell({
           width="2.2"
           height="7"
           rx="0.8"
-          className={isCompleted ? 'fill-emerald-400' : 'fill-currentColor text-emerald-400 dark:text-emerald-400/80'}
+          className="fill-current text-[var(--app-accent-text)] opacity-85"
           animate={{ x: isCompressing ? 1.5 : 0 }}
           transition={{ type: 'spring', stiffness: 600, damping: 25 }}
         />
@@ -104,7 +104,7 @@ export default function InteractiveDumbbell({
           width="2.2"
           height="7"
           rx="0.8"
-          className={isCompleted ? 'fill-emerald-400' : 'fill-currentColor text-emerald-400 dark:text-emerald-400/80'}
+          className="fill-current text-[var(--app-accent-text)] opacity-85"
           animate={{ x: isCompressing ? -1.5 : 0 }}
           transition={{ type: 'spring', stiffness: 600, damping: 25 }}
         />
@@ -116,7 +116,7 @@ export default function InteractiveDumbbell({
           width="2.5"
           height="11"
           rx="1"
-          className={isCompleted ? 'fill-emerald-500 stroke-emerald-600' : 'fill-currentColor text-emerald-500'}
+          className="fill-current text-[var(--app-accent-text)]"
           animate={{ x: isCompressing ? -2.5 : 0 }}
           transition={{ type: 'spring', stiffness: 600, damping: 25 }}
         />

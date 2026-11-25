@@ -61,13 +61,13 @@ export default function InteractiveLaundryDrum({
           rx="3.5"
           stroke="currentColor"
           strokeWidth="1.8"
-          className="text-teal-600/70 dark:text-teal-400/80"
+          className="text-[var(--app-accent-text)] opacity-80"
         />
 
         {/* Top Control Bar with 2 knobs */}
-        <circle cx="7" cy="6" r="0.8" className="fill-current text-teal-600 dark:text-teal-400" />
-        <circle cx="10" cy="6" r="0.8" className="fill-current text-teal-600 dark:text-teal-400" />
-        <line x1="13" y1="6" x2="17" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-teal-600/60 dark:text-teal-400/60" />
+        <circle cx="7" cy="6" r="0.8" className="fill-current text-[var(--app-accent-text)]" />
+        <circle cx="10" cy="6" r="0.8" className="fill-current text-[var(--app-accent-text)]" />
+        <line x1="13" y1="6" x2="17" y2="6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-[var(--app-accent-text)] opacity-60" />
 
         {/* Outer Circular Drum Window */}
         <circle
@@ -76,7 +76,7 @@ export default function InteractiveLaundryDrum({
           r="5.5"
           stroke="currentColor"
           strokeWidth="1.6"
-          className="text-teal-500/50"
+          className="text-[var(--app-accent-text)] opacity-50"
         />
 
         {/* Inner Spinning Agitator Paddles */}
@@ -85,10 +85,10 @@ export default function InteractiveLaundryDrum({
           transition={{ duration: isSpinning ? 1.4 : 0.3, repeat: isSpinning ? Infinity : 0, ease: 'linear' }}
           style={{ transformOrigin: '12px 13.5px' }}
         >
-          <path d="M12 9.5V11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-teal-500" />
-          <path d="M15.5 15.5L14.2 14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-teal-500" />
-          <path d="M8.5 15.5L9.8 14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-teal-500" />
-          <circle cx="12" cy="13.5" r="1.4" className="fill-teal-500" />
+          <path d="M12 9.5V11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-[var(--app-accent-text)]" />
+          <path d="M15.5 15.5L14.2 14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-[var(--app-accent-text)]" />
+          <path d="M8.5 15.5L9.8 14.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-[var(--app-accent-text)]" />
+          <circle cx="12" cy="13.5" r="1.4" className="fill-current text-[var(--app-accent-text)]" />
         </motion.g>
       </svg>
     </motion.div>

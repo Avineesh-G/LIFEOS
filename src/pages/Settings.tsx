@@ -15,9 +15,12 @@ import {
   SlidersHorizontal,
   User,
   Lightning,
+  Clock,
+  Palette,
   LunaComicBubbleIcon,
 } from '../ui/tokens/icons';
 import { useDeviceTier } from '../hooks/useDeviceTier';
+import { useM3Theme } from '../theme/ThemeContext';
 import { LargeTitleHeader } from '../ui/navigation/LargeTitleHeader';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
@@ -63,6 +66,7 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const deviceTier = useDeviceTier();
+  const { activePalette } = useM3Theme();
 
   // Notifications
   const [hasNotifications, setHasNotifications] = useState(true);
@@ -181,24 +185,28 @@ export default function Settings({
   const currentUser = { ...auth.currentUser, photoURL: userProfile.photoURL || auth.currentUser?.photoURL, displayName: userProfile.displayName || auth.currentUser?.displayName, email: userProfile.email || auth.currentUser?.email };
 
   return (
-    <div className="w-full flex flex-col pb-2 selection:bg-[#0A84FF]/30">
+    <div className="w-full flex flex-col pb-2 selection:bg-[#8B1E3F]/30">
+      {/* toast/toast + header icons */}
       <LargeTitleHeader
         title="Settings"
         subtitle={`LifeOS v${CURRENT_VERSION_NAME} · Build ${CURRENT_VERSION_CODE}`}
-        tint="#0A84FF"
+        tint={activePalette.secondarySeed}
       />
 
-      {/* User Profile Card (Google photo support) */}
+      {/* User Profile Card (Pure iOS Glass + Unified Theme Accent) */}
       <div className="px-1 mb-3">
-        <div className="w-full p-4 rounded-[26px] glass-card flex items-center gap-3.5 shadow-sm">
+        <div className="w-full p-4 rounded-[26px] glass-hero flex items-center gap-3.5 shadow-sm">
           {currentUser?.photoURL ? (
             <img
               src={currentUser.photoURL}
               alt={currentUser.displayName || 'User Profile'}
-              className="w-12 h-12 rounded-full object-cover shadow-md ring-2 ring-white/10"
+              className="w-12 h-12 rounded-full object-cover shadow-md"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] flex items-center justify-center text-white text-lg font-bold shadow-md">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md"
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
+            >
               {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : <User size={22} weight="bold" />}
             </div>
           )}
@@ -206,12 +214,39 @@ export default function Settings({
             <h3 className="text-base font-bold text-white truncate">
               {currentUser?.displayName || 'LifeOS User'}
             </h3>
-            <p className="text-xs text-white/50 truncate font-mono">
+            <p className="text-xs text-white/65 truncate font-mono">
               {currentUser?.email || 'Offline Local Storage'}
             </p>
           </div>
+          <span
+            className="text-[10.5px] font-bold px-2.5 py-1 rounded-full shrink-0"
+            style={{
+              backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+              color: 'var(--app-accent-text, #DE4B64)',
+            }}
+          >
+            {activePalette.name}
+          </span>
         </div>
       </div>
+
+      {/* ── Appearance & M3 Color Studio ── */}
+      <GroupedList header="APPEARANCE & M3 COLORS">
+        <ListRow
+          icon={<Palette size={18} weight="duotone" />}
+          title="UI Preset & M3 Palette"
+          subtitle={`${activePalette.name} · Unified iOS glass & subtle gradient`}
+          trailing={
+            <span
+              className="w-4 h-4 rounded-full shadow-sm"
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
+            />
+          }
+          showChevron
+          onClick={() => navigate('/settings/appearance')}
+          showSeparator={false}
+        />
+      </GroupedList>
 
       {/* ── Hardware Performance & Adaptive Tier ── */}
       <GroupedList
@@ -225,8 +260,11 @@ export default function Settings({
           subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay}`}
           trailing={
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#30D158] animate-pulse" />
-              <span className="text-xs font-semibold text-[#30D158] glass-flat px-2.5 py-1 rounded-full">
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+              <span
+                className="text-xs font-semibold glass-flat px-2.5 py-1 rounded-full"
+                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              >
                 {deviceTier.userOverride === 'auto' ? 'Auto-Optimized' : `Tier ${deviceTier.tier} Active`}
               </span>
             </div>
@@ -235,7 +273,7 @@ export default function Settings({
 
         <ListRow
           icon={<SlidersHorizontal size={18} weight="duotone" />}
-          iconTint="#0A84FF"
+          iconTint="#8B1E3F"
           title="Performance Tier"
           subtitle={
             deviceTier.tier === 1
@@ -267,11 +305,12 @@ export default function Settings({
                       triggerHaptic('selection');
                       deviceTier.setTier(opt.id);
                     }}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-colors cursor-pointer ${
                       isSelected
-                        ? 'glass-tile text-[#0A84FF] shadow-sm font-extrabold'
-                        : 'glass-flat text-white/50 hover:text-white'
+                        ? 'droplet-active font-extrabold'
+                        : 'glass-flat text-white/55 hover:text-white'
                     }`}
+                    style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
                   >
                     {opt.label}
                   </button>
@@ -287,7 +326,6 @@ export default function Settings({
       <GroupedList header="SYSTEM PREFERENCES">
         <ListRow
           icon={<SlidersHorizontal size={18} weight="duotone" />}
-          iconTint="#BF5AF2"
           title="Haptic Feedback"
           trailing={
             <div className="flex items-center gap-1">
@@ -296,11 +334,12 @@ export default function Settings({
                   key={lvl}
                   type="button"
                   onClick={() => handleHapticChange(lvl)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-all ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-colors ${
                     hapticLevel === lvl
-                      ? 'glass-tile text-[#BF5AF2] shadow-sm'
-                      : 'glass-flat text-white/50 hover:text-white'
+                      ? 'droplet-active'
+                      : 'glass-flat text-white/55 hover:text-white'
                   }`}
+                  style={hapticLevel === lvl ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
                 >
                   {lvl}
                 </button>
@@ -337,15 +376,24 @@ export default function Settings({
           }
         />
         <ListRow
+          icon={<Clock size={18} weight="duotone" />}
           title="Alert Schedule"
           subtitle="Fixed: 20m before and 1m after event starts"
           trailing={
-            <span className="font-semibold text-white/80 text-xs px-2 py-0.5 rounded-full bg-white/10">
+            <span
+              className="font-semibold text-xs px-2.5 py-0.5 rounded-full"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                color: 'var(--app-accent-text, #DE4B64)',
+              }}
+            >
               -20m / +1m
             </span>
           }
         />
         <ListRow
+          icon={<Sparkle size={18} weight="duotone" />}
+          iconTint="#DE4B64"
           title={testAlertCooldown > 0 ? `Send Test Alert (${testAlertCooldown}s)` : 'Send Test Alert'}
           subtitle={
             testAlertCooldown > 0
@@ -408,13 +456,15 @@ export default function Settings({
       >
         <ListRow
           icon={<LunaComicBubbleIcon size={20} />}
-          iconTint="#FFFFFF"
+          iconTint="#B968FF"
           title="Groq AI Configuration"
           subtitle={groqKey ? 'API Key Configured' : 'Using default intelligence proxy'}
           showChevron
           onClick={() => setAiSheetOpen(true)}
         />
         <ListRow
+          icon={<Sparkle size={18} weight="duotone" />}
+          iconTint="#38BDF8"
           title="Allow AI Data Context"
           subtitle="Let Luna analyze tasks & workouts"
           trailing={
@@ -442,7 +492,7 @@ export default function Settings({
         />
         <ListRow
           icon={<HardDrive size={18} weight="duotone" />}
-          iconTint="#64D2FF"
+          iconTint="#DE4B64"
           title="Restore Backup"
           subtitle="Import from backup file"
           trailing={
@@ -499,7 +549,7 @@ export default function Settings({
       {/* Toast Feedback */}
       {backupFeedback && (
         <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto p-3 rounded-2xl glass-card text-white font-semibold text-xs shadow-2xl flex items-center justify-center gap-2 z-50">
-          <Check size={16} weight="bold" className="text-[#30D158]" />
+          <Check size={16} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
           <span>{backupFeedback}</span>
         </div>
       )}
@@ -531,14 +581,23 @@ export default function Settings({
       >
         <div className="space-y-4 py-2 text-white">
           {/* Refined Luna AI Engine Header Card */}
-          <div className="p-3.5 rounded-2xl glass-card flex items-center gap-3.5 border border-white/10 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl glass-tile border border-white/10 shrink-0 shadow-md flex items-center justify-center">
+          <div className="p-3.5 rounded-2xl glass-card flex items-center gap-3.5 shadow-lg">
+            <div
+              className="w-12 h-12 rounded-2xl glass-tile shrink-0 shadow-md flex items-center justify-center"
+              style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            >
               <LunaComicBubbleIcon size={26} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-bold text-white tracking-tight">Luna AI Engine</h4>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{
+                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                    color: 'var(--app-accent-text, #DE4B64)',
+                  }}
+                >
                   {groqKey ? 'Direct Key' : 'Proxy Mode'}
                 </span>
               </div>

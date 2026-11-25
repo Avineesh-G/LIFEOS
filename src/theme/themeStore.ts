@@ -5,6 +5,7 @@
 
 import { DEFAULT_PALETTE_ID, DEFAULT_THEME_MODE, getPaletteById } from './palettes';
 import { getSchemeForPalette, schemeToCssVariables, M3ColorScheme } from './colorEngine';
+import { setActiveAccent } from './themeColorManager';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -78,6 +79,7 @@ export function isDarkModeActive(mode: ThemeMode): boolean {
  */
 export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; isDark: boolean } {
   const isDark = true;
+  const palette = getPaletteById(config.paletteId);
   const scheme = getSchemeForPalette(config.paletteId, true);
   const vars = schemeToCssVariables(scheme);
 
@@ -91,7 +93,7 @@ export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; i
       document.body.style.backgroundColor = '#000000';
     }
 
-    // Write CSS variables
+    // Write CSS variables first, then let setActiveAccent finalize unified single-hue tokens
     for (const [key, value] of Object.entries(vars)) {
       root.style.setProperty(key, value);
     }
@@ -109,6 +111,15 @@ export function applyThemeToDom(config: ThemeConfig): { scheme: M3ColorScheme; i
     }
     metaThemeColor.setAttribute('content', '#000000');
   }
+
+  setActiveAccent({
+    id: palette.id,
+    name: palette.name,
+    primary: palette.seed,
+    secondary: palette.secondarySeed,
+    tertiary: palette.tertiarySeed,
+    darkText: palette.seed,
+  });
 
   return { scheme, isDark: true };
 }

@@ -19,14 +19,14 @@ export function AppShell({
   tabs,
   activeTabKey,
   onTabChange,
-  activeModuleTint = '#0A84FF',
+  activeModuleTint = '#8B1E3F',
   onQuickAddClick,
   onAiClick,
   hideNav = false,
   children,
 }: AppShellProps) {
   return (
-    <div className="relative min-h-screen bg-black text-white selection:bg-[#0A84FF]/30 overflow-x-hidden">
+    <div className="relative min-h-screen bg-black text-white overflow-x-hidden">
       {/* Bottom Scroll Edge Gradient Overlay */}
       <div className="scroll-edge-bottom" />
 

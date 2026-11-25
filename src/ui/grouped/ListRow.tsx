@@ -17,7 +17,7 @@ export interface ListRowProps {
 
 export function ListRow({
   icon,
-  iconTint = '#0A84FF',
+  iconTint: _iconTint,
   title,
   subtitle,
   trailing,
@@ -28,6 +28,7 @@ export function ListRow({
   className = '',
 }: ListRowProps) {
   const isClickable = Boolean(onClick);
+  const effectiveTint = destructive ? '#FF453A' : 'var(--app-accent-text, #DE4B64)';
 
   const handleClick = () => {
     if (!isClickable) return;
@@ -48,28 +49,26 @@ export function ListRow({
           }
         }}
         className={`w-full min-h-[52px] px-4 py-3 flex items-center gap-3.5 transition-colors select-none ${
-          isClickable ? 'cursor-pointer active:bg-[#2C2C2E]' : ''
+          isClickable ? 'cursor-pointer active:bg-white/[0.06]' : ''
         } ${className}`}
       >
-        {/* Leading Icon Tile: 32x32 squircle (r=10) with pure droplet chassis */}
+        {/* Leading Icon Tile: 32x32 borderless iOS glass squircle with light single-hue sheen */}
         {icon && (
           <div
             className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14)',
-              color: iconTint,
+              background: `linear-gradient(135deg, color-mix(in srgb, ${effectiveTint} 16%, #1D1D22) 0%, color-mix(in srgb, ${effectiveTint} 7%, #17171B) 100%)`,
+              color: effectiveTint,
             }}
           >
             {icon}
           </div>
         )}
 
-        {/* Text Content */}
+        {/* Text Content (Crisp White & Legible Subtitles) */}
         <div className="flex-1 flex flex-col justify-center min-w-0">
           <div
-            className={`text-[16.5px] leading-[22px] font-semibold tracking-tight truncate ${
+            className={`text-[16px] leading-[22px] font-semibold tracking-tight truncate ${
               destructive ? 'text-[#FF453A]' : 'text-white'
             }`}
           >
@@ -84,25 +83,26 @@ export function ListRow({
 
         {/* Trailing Value or Actions */}
         {trailing && (
-          <div className="text-[14.5px] font-medium text-[rgba(240,240,245,0.75)] shrink-0 flex items-center gap-1.5">
+          <div className="text-[14px] font-medium text-[rgba(240,240,245,0.82)] shrink-0 flex items-center gap-1.5">
             {trailing}
           </div>
         )}
 
         {/* Trailing Caret */}
         {showChevron && (
-          <div className="text-[rgba(255,255,255,0.45)] shrink-0">
+          <div className="text-[rgba(255,255,255,0.48)] shrink-0">
             <CaretRight size={14} weight="bold" />
           </div>
         )}
       </div>
 
-      {/* Hairline Separator: 0.5px, inset 16px past leading icon */}
+      {/* Hairline Separator */}
       {showSeparator && (
         <div
-          className="absolute bottom-0 right-0 h-[0.5px] bg-[#38383A]"
+          className="absolute bottom-0 right-0 h-[0.5px]"
           style={{
             left: icon ? '58px' : '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.07)',
           }}
         />
       )}

@@ -84,7 +84,8 @@ export function ActionSheet({
                   }}
                   className={`w-full py-3.5 px-4 flex items-center justify-center gap-3 font-semibold text-[17px] active:bg-white/10 select-none cursor-pointer ${
                     i > 0 || title || message ? 'border-t border-white/[0.06]' : ''
-                  } ${opt.destructive ? 'text-[#FF453A]' : 'text-[#0A84FF]'}`}
+                  }`}
+                  style={{ color: opt.destructive ? '#FF453A' : 'var(--app-accent-text, #64D2FF)' }}
                 >
                   {opt.icon && <span className="flex items-center justify-center shrink-0">{opt.icon}</span>}
                   <span>{opt.label}</span>
@@ -100,7 +101,8 @@ export function ActionSheet({
                 triggerHaptic('light');
                 onClose();
               }}
-              className="w-full py-3.5 px-4 rounded-[24px] text-center font-bold text-[17px] text-[#0A84FF] select-none cursor-pointer shadow-xl"
+              className="w-full py-3.5 px-4 rounded-[24px] text-center font-bold text-[17px] select-none cursor-pointer shadow-xl"
+              style={{ color: 'var(--app-accent-text, #64D2FF)' }}
             >
               {cancelLabel}
             </GlassSurface>

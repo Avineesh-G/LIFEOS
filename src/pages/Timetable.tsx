@@ -137,11 +137,19 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   setActiveDayIndex(idx);
                 }}
                 className={`relative flex flex-col items-center justify-center py-2 rounded-full transition-colors cursor-pointer ${
-                  isSelected ? 'text-white bg-[#5E5CE6] shadow-md shadow-[#5E5CE6]/30' : 'text-[rgba(235,235,245,0.60)] hover:text-white'
+                  isSelected ? 'text-white shadow-md' : 'text-[rgba(235,235,245,0.62)] hover:text-white'
                 }`}
+                style={
+                  isSelected
+                    ? { background: 'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)' }
+                    : undefined
+                }
               >
                 <span className="text-[10px] font-bold uppercase">{SHORT_DAYS[idx]}</span>
-                <span className={`text-xs font-bold mt-0.5 ${isCur && !isSelected ? 'text-[#5E5CE6]' : ''}`}>
+                <span
+                  className="text-xs font-bold mt-0.5"
+                  style={isCur && !isSelected ? { color: 'var(--app-accent-text, #64D2FF)' } : undefined}
+                >
                   {format(weekDates[idx], 'd')}
                 </span>
               </button>
@@ -168,11 +176,15 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                 <motion.div
                   key={block.id}
                   whileTap={{ scale: 0.985 }}
-                  className={`w-full rounded-[24px] p-4 flex items-center justify-between gap-3 transition-colors ${
+                  className="w-full rounded-[24px] p-4 flex items-center justify-between gap-3 transition-colors glass-card"
+                  style={
                     active
-                      ? 'glass-card bg-[#5E5CE6]/25 shadow-lg shadow-[#5E5CE6]/15'
-                      : 'glass-card'
-                  }`}
+                      ? {
+                          backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                          boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
+                        }
+                      : undefined
+                  }
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="flex flex-col items-center justify-center min-w-[50px] pr-3 border-r border-white/[0.08]">
@@ -191,7 +203,13 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                       <div className="text-[12px] text-[rgba(235,235,245,0.60)] truncate flex items-center gap-2 mt-0.5">
                         {block.room && <span>Room {block.room}</span>}
                         {active && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#5E5CE6] text-white">
+                          <span
+                            className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white"
+                            style={{
+                              backgroundImage:
+                                'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)',
+                            }}
+                          >
                             LIVE NOW
                           </span>
                         )}

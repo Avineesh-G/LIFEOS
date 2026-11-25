@@ -7,10 +7,6 @@ export interface ToolbarProps {
   className?: string;
 }
 
-/**
- * Liquid Glass v2 Toolbar (Section 4.1):
- * Height 44px, one row only. Leading/trailing controls wrapped in 40px glass circles or pills.
- */
 export function Toolbar({
   leading,
   center,
@@ -21,15 +17,10 @@ export function Toolbar({
     <div
       className={`relative w-full h-[44px] flex items-center justify-between z-30 select-none px-1 ${className}`}
     >
-      {/* Leading slot: 40px glass circle */}
       <div className="flex items-center shrink-0 min-w-[40px]">{leading}</div>
-
-      {/* Center inline title (collapses smoothly on scroll) */}
       <div className="flex items-center justify-center flex-1 min-w-0 px-2 text-center">
         {center}
       </div>
-
-      {/* Trailing slot: optional pill or actions */}
       <div className="flex items-center justify-end shrink-0 min-w-[40px]">{trailing}</div>
     </div>
   );
@@ -71,7 +62,7 @@ export function ToolbarButton({
   icon,
   label,
   onClick,
-  tint,
+  tint: _tint,
   className = '',
 }: {
   icon: React.ReactNode;
@@ -84,8 +75,8 @@ export function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`w-9 h-9 rounded-full flex items-center justify-center text-white/90 hover:text-white active:scale-92 transition-all cursor-pointer ${className}`}
-      style={{ color: tint }}
+      className={`w-9 h-9 rounded-full flex items-center justify-center active:scale-92 transition-transform cursor-pointer ${className}`}
+      style={{ color: 'var(--app-accent-text, #64D2FF)' }}
       aria-label={label}
       title={label}
     >
@@ -93,4 +84,3 @@ export function ToolbarButton({
     </button>
   );
 }
-

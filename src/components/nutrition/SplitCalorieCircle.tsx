@@ -280,7 +280,7 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = React.memo(
             kcal left
           </span>
           {caloriesEaten > 0 && (
-            <span className="text-[10.5px] font-bold text-[#FF9F0A] tabular-nums mt-1">
+            <span className="text-[10.5px] font-bold tabular-nums mt-1" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
               {caloriesEaten} eaten
             </span>
           )}

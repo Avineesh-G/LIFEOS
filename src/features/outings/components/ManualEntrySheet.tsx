@@ -41,23 +41,23 @@ const MODE_CONFIG: Record<
   shopping: {
     label: 'Shopping Receipt',
     icon: ShoppingBag,
-    color: 'text-indigo-600 dark:text-indigo-400',
-    bgColor: 'bg-indigo-500/10',
-    borderColor: 'border-indigo-500/20',
+    color: 'text-[var(--app-accent-text)]',
+    bgColor: 'bg-[var(--app-accent-soft)]',
+    borderColor: 'border-transparent',
   },
   lend: {
     label: 'Money I Lent',
     icon: ArrowUpRight,
-    color: 'text-rose-600 dark:text-rose-400',
-    bgColor: 'bg-rose-500/10',
-    borderColor: 'border-rose-500/20',
+    color: 'text-[var(--app-accent-text)]',
+    bgColor: 'bg-[var(--app-accent-soft)]',
+    borderColor: 'border-transparent',
   },
   received: {
     label: 'Money I Received',
     icon: ArrowDownLeft,
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/20',
+    color: 'text-[var(--app-accent-text)]',
+    bgColor: 'bg-[var(--app-accent-soft)]',
+    borderColor: 'border-transparent',
   },
 };
 

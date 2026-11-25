@@ -38,8 +38,9 @@ export function useMaterialTheme(sectionOverride?: AppSection): UseMaterialTheme
     id: activePalette.id,
     name: activePalette.name,
     primary: activePalette.seed,
-    secondary: activePalette.seed,
-    darkText: '#5A0015',
+    secondary: activePalette.secondarySeed,
+    tertiary: activePalette.tertiarySeed,
+    darkText: activePalette.seed,
   }), [activePalette]);
 
   const theme = useMemo(() => {

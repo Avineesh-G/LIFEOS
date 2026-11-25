@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 
 export interface SegmentedOption<T extends string = string> {
@@ -21,16 +20,14 @@ export function Segmented<T extends string = string>({
   options,
   value,
   onChange,
-  tint,
+  tint: _tint,
   className = '',
 }: SegmentedProps<T>) {
+  const accentText = 'var(--app-accent-text, #64D2FF)';
+  const accentPrimary = 'var(--app-accent, #0A84FF)';
+
   return (
-    <div
-      className={`relative p-1 rounded-full flex items-center gap-1 select-none ${className}`}
-      style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.06)',
-      }}
-    >
+    <div className={`relative p-1 rounded-full flex items-center gap-1 select-none glass-flat ${className}`}>
       {options.map((opt) => {
         const isSelected = opt.value === value;
         return (
@@ -43,39 +40,36 @@ export function Segmented<T extends string = string>({
                 onChange(opt.value);
               }
             }}
-            className={`relative flex-1 min-w-0 py-1.5 px-2 rounded-full text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-colors z-10 ${
-              isSelected ? 'text-white' : 'text-[rgba(240,240,245,0.60)] hover:text-white'
+            className={`relative flex-1 min-w-0 py-1.5 px-2.5 rounded-full text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-colors duration-150 z-10 cursor-pointer active:scale-[0.97] ${
+              isSelected ? 'droplet-active' : 'text-[rgba(240,240,245,0.68)] hover:text-white'
             }`}
-            style={{ color: isSelected && tint ? tint : undefined }}
+            style={
+              isSelected
+                ? { color: accentText }
+                : undefined
+            }
           >
-            {opt.icon && <span className="shrink-0">{opt.icon}</span>}
+            {opt.icon && (
+              <span
+                className="shrink-0"
+                style={{ color: isSelected ? accentText : 'rgba(240,240,245,0.62)' }}
+              >
+                {opt.icon}
+              </span>
+            )}
             <span className="truncate">{opt.label}</span>
             {opt.badge !== undefined && (
               <span
-                className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
-                  isSelected
-                    ? 'bg-white/20 text-white'
-                    : 'bg-white/10 text-[rgba(240,240,245,0.50)]'
-                }`}
+                className="text-[11px] font-bold px-1.5 py-0.2 rounded-full"
+                style={{
+                  backgroundColor: isSelected
+                    ? `color-mix(in srgb, ${accentPrimary} 22%, rgba(255,255,255,0.10))`
+                    : 'rgba(255, 255, 255, 0.08)',
+                  color: isSelected ? '#FFFFFF' : 'rgba(240,240,245,0.62)',
+                }}
               >
                 {opt.badge}
               </span>
-            )}
-            {isSelected && (
-              <motion.div
-                layoutId="segmented-active-thumb"
-                className="absolute inset-0 rounded-full -z-10"
-                style={{
-                  background: 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 60%, transparent 90%), rgba(255, 255, 255, 0.08)',
-                  border: 'none',
-                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 3px 10px rgba(0, 0, 0, 0.5)',
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 520,
-                  damping: 38,
-                }}
-              />
             )}
           </button>
         );

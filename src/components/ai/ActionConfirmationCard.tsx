@@ -34,24 +34,25 @@ export default function ActionConfirmationCard({
   );
 
   const getActionIcon = () => {
+    const iconProps = { size: 16, weight: 'duotone' as const, style: { color: 'var(--app-accent-text, #DE4B64)' } };
     switch (proposal.type) {
       case 'ADD_TASK':
-        return <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />;
+        return <CheckSquare {...iconProps} />;
       case 'ADD_NOTE':
-        return <NotePencil size={16} weight="duotone" className="text-[#FFD60A]" />;
+        return <NotePencil {...iconProps} />;
       case 'ADD_EXPENSE':
-        return <Wallet size={16} weight="duotone" className="text-[#30D158]" />;
+        return <Wallet {...iconProps} />;
       case 'ADD_SHOPPING_ITEM':
       case 'ADD_MULTIPLE_SHOPPING_ITEMS':
-        return <ShoppingCart size={16} weight="duotone" className="text-[#FF375F]" />;
+        return <ShoppingCart {...iconProps} />;
       case 'CREATE_OUTING':
-        return <MapPin size={16} weight="duotone" className="text-[#40C8E0]" />;
+        return <MapPin {...iconProps} />;
       case 'LOG_MEAL':
-        return <ForkKnife size={16} weight="duotone" className="text-[#FF9F0A]" />;
+        return <ForkKnife {...iconProps} />;
       case 'LOG_WORKOUT':
-        return <Barbell size={16} weight="duotone" className="text-[#FF453A]" />;
+        return <Barbell {...iconProps} />;
       default:
-        return <Sparkle size={16} weight="fill" className="text-[#BF5AF2]" />;
+        return <Sparkle size={16} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
     }
   };
 
@@ -91,8 +92,14 @@ export default function ActionConfirmationCard({
 
   if (status === 'confirmed') {
     return (
-      <div className="w-full max-w-full p-3 rounded-2xl bg-[#30D158]/15 border-none text-xs text-[#30D158] font-semibold flex items-center gap-2 shadow-sm">
-        <Check size={16} weight="bold" className="text-[#30D158] shrink-0" />
+      <div
+        className="w-full max-w-full p-3 rounded-2xl border-none text-xs font-semibold flex items-center gap-2 shadow-sm"
+        style={{
+          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+          color: 'var(--app-accent-text, #DE4B64)',
+        }}
+      >
+        <Check size={16} weight="bold" className="shrink-0" />
         <span className="truncate">Confirmed: {proposal.title}</span>
       </div>
     );
@@ -112,7 +119,13 @@ export default function ActionConfirmationCard({
             </h4>
           </div>
         </div>
-        <span className="text-[9.5px] font-bold uppercase tracking-wider text-[#0A84FF] bg-[#0A84FF]/15 px-2 py-0.5 rounded-full shrink-0 shadow-sm self-start mt-0.5">
+        <span
+          className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 shadow-sm self-start mt-0.5"
+          style={{
+            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+            color: 'var(--app-accent-text, #DE4B64)',
+          }}
+        >
           Proposal
         </span>
       </div>

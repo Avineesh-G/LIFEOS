@@ -46,8 +46,9 @@ import {
   requestAndSyncNotifications,
   syncAllNotifications,
 } from '../utils/notifications';
-import { MODULE_TINTS } from '../ui/tokens/colors';
+import { getModuleTint, MODULE_TINTS } from '../ui/tokens/colors';
 import { useEdgeSwipeBack } from '../hooks/useEdgeSwipeBack';
+import { useM3Theme } from '../theme/ThemeContext';
 import type { AppData, AppSettings } from '../types';
 
 interface LayoutProps {
@@ -91,6 +92,7 @@ export default function Layout({
   const location = useLocation();
   const navigate = useNavigate();
   const userProfile = useUserProfile();
+  const { activePalette } = useM3Theme();
 
   const [moreOpen, setMoreOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -208,21 +210,25 @@ export default function Layout({
 
   const pathname = (location.pathname || '').toLowerCase();
 
-  // Active module tint
+  // Active module tint (harmonized with active M3 UI preset)
   const activeModuleTint = useMemo(() => {
-    if (pathname.startsWith('/ai') || pathname.startsWith('/chat')) return '#0A84FF';
-    if (pathname.startsWith('/gym')) return MODULE_TINTS.gym;
-        if (pathname.startsWith('/nutrition')) return MODULE_TINTS.nutrition;
-    if (pathname.startsWith('/spending')) return MODULE_TINTS.spending;
-    if (pathname.startsWith('/shopping')) return MODULE_TINTS.shopping;
-    if (pathname.startsWith('/outings')) return MODULE_TINTS.outing;
-    if (pathname.startsWith('/vault')) return MODULE_TINTS.vault;
-    if (pathname.startsWith('/laundry')) return MODULE_TINTS.laundry;
-    if (pathname.startsWith('/tasks')) return MODULE_TINTS.tasks;
-    if (pathname.startsWith('/notes')) return MODULE_TINTS.notes;
-    if (pathname.startsWith('/drive')) return MODULE_TINTS.drive;
-    return '#0A84FF';
-  }, [pathname]);
+    const preset = activePalette.seed;
+    if (pathname.startsWith('/ai') || pathname.startsWith('/chat')) return getModuleTint('luna', preset);
+    if (pathname.startsWith('/gym')) return getModuleTint('gym', preset);
+    if (pathname.startsWith('/nutrition')) return getModuleTint('nutrition', preset);
+    if (pathname.startsWith('/spending')) return getModuleTint('spending', preset);
+    if (pathname.startsWith('/shopping')) return getModuleTint('shopping', preset);
+    if (pathname.startsWith('/outings')) return getModuleTint('outing', preset);
+    if (pathname.startsWith('/vault')) return getModuleTint('vault', preset);
+    if (pathname.startsWith('/laundry')) return getModuleTint('laundry', preset);
+    if (pathname.startsWith('/tasks')) return getModuleTint('tasks', preset);
+    if (pathname.startsWith('/notes')) return getModuleTint('notes', preset);
+    if (pathname.startsWith('/drive')) return getModuleTint('drive', preset);
+    if (pathname.startsWith('/timetable')) return getModuleTint('timetable', preset);
+    if (pathname.startsWith('/calendar')) return getModuleTint('calendar', preset);
+    if (pathname.startsWith('/history')) return getModuleTint('history', preset);
+    return activePalette.secondarySeed || preset;
+  }, [pathname, activePalette]);
 
   // Customizable Quick Navigation: 4 slots (Home, Slot 2, Slot 3, Directory)
   const pinnedIds = useMemo(() => {
@@ -258,7 +264,7 @@ export default function Layout({
       label: 'Home',
       icon: <House size={20} weight="regular" />,
       activeIcon: <House size={20} weight="fill" />,
-      tint: '#0A84FF',
+      tint: activePalette.secondarySeed || activePalette.seed,
       isCustomizable: false,
       quickActions: [
         { label: 'Add Task', action: () => navigate('/tasks') },
@@ -270,7 +276,7 @@ export default function Layout({
       label: slot2Item.label.split(' ')[0],
       icon: slot2Item.icon,
       activeIcon: slot2Item.icon,
-      tint: MODULE_TINTS[slot2Item.tintKey] || '#FF453A',
+      tint: getModuleTint(slot2Item.tintKey, activePalette.seed),
       isCustomizable: true,
       quickActions: [
         { label: 'Customize Quick Slot', action: () => setCustomizingSlotIndex(0) },
@@ -281,13 +287,13 @@ export default function Layout({
       label: slot3Item.label.split(' ')[0],
       icon: slot3Item.icon,
       activeIcon: slot3Item.icon,
-      tint: MODULE_TINTS[slot3Item.tintKey] || '#FF9F0A',
+      tint: getModuleTint(slot3Item.tintKey, activePalette.seed),
       isCustomizable: true,
       quickActions: [
         { label: 'Customize Quick Slot', action: () => setCustomizingSlotIndex(1) },
       ],
     },
-  ], [slot2Item, slot3Item, navigate]);
+  ], [slot2Item, slot3Item, navigate, activePalette]);
 
   const handleTabChange = useCallback((key: string) => {
     if (key === 'home') {
@@ -367,31 +373,31 @@ export default function Layout({
     {
       key: 'task',
       label: 'New To-Do Task',
-      icon: <CheckSquare size={20} weight="duotone" className="text-[#0A84FF]" />,
+      icon: <CheckSquare size={20} weight="duotone" />,
       onClick: () => navigate('/tasks'),
     },
     {
       key: 'workout',
       label: 'Start Workout',
-      icon: <Barbell size={20} weight="duotone" className="text-[#FF453A]" />,
+      icon: <Barbell size={20} weight="duotone" />,
       onClick: () => navigate('/gym/workout'),
     },
     {
       key: 'nutrition',
       label: 'Log Meal & Calories',
-      icon: <ForkKnife size={20} weight="duotone" className="text-[#30D158]" />,
+      icon: <ForkKnife size={20} weight="duotone" />,
       onClick: () => navigate('/nutrition'),
     },
     {
       key: 'spending',
       label: 'Log Expense',
-      icon: <Wallet size={20} weight="duotone" className="text-[#BF5AF2]" />,
+      icon: <Wallet size={20} weight="duotone" />,
       onClick: () => navigate('/spending'),
     },
-        {
+    {
       key: 'notes',
       label: 'Capture Note / Idea',
-      icon: <NotePencil size={20} weight="duotone" className="text-[#63E6E2]" />,
+      icon: <NotePencil size={20} weight="duotone" />,
       onClick: () => navigate('/notes'),
     },
   ];
@@ -447,28 +453,35 @@ export default function Layout({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-[#0A84FF] to-[#5E5CE6] text-white font-bold text-sm">
+                <div
+                  className="w-full h-full flex items-center justify-center text-white font-bold text-sm"
+                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
+                >
                   {userProfile.displayName ? userProfile.displayName[0].toUpperCase() : 'U'}
                 </div>
               )}
             </button>
 
-            {/* 2. TOP-RIGHT: Clean Free Action Capsule (Alerts, Sync/Refresh, Settings) */}
+            {/* 2. TOP-RIGHT: Clean Free Action Capsule (Calendar, Sync/Refresh) */}
             <GlassSurface
               className="pointer-events-auto h-10 px-2 rounded-full flex items-center gap-1.5 shadow-lg select-none"
             >
-              {/* Calendar Quick View Button (Replaces Bell) */}
+              {/* Calendar Quick View Button */}
               <button
                 type="button"
                 onClick={() => {
                   triggerHaptic('light');
                   setCalendarPopupOpen(true);
                 }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer relative"
+                className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer relative"
+                style={{
+                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                  color: 'var(--app-accent-text, #DE4B64)',
+                }}
                 title="Calendar & Timeline"
                 aria-label="Calendar & Timeline"
               >
-                <CalendarBlank size={18} weight="duotone" className="text-[#5E5CE6]" />
+                <CalendarBlank size={17} weight="duotone" />
               </button>
 
               <span className="w-[1px] h-3.5 bg-white/15 shrink-0" />
@@ -478,7 +491,10 @@ export default function Layout({
                 type="button"
                 onClick={handleReload}
                 disabled={isReloading}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-90 transition-all cursor-pointer disabled:opacity-50"
+                className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-50"
+                style={{
+                  color: isReloading ? 'var(--app-accent-text, #DE4B64)' : 'rgba(255, 255, 255, 0.85)',
+                }}
                 title="Sync & Reload"
                 aria-label="Sync & Reload"
               >
@@ -492,9 +508,8 @@ export default function Layout({
                   className="flex items-center justify-center pointer-events-none"
                 >
                   <ArrowClockwise
-                    size={17}
+                    size={16}
                     weight="bold"
-                    className={isReloading ? 'text-[#0A84FF]' : ''}
                   />
                 </motion.div>
               </button>
@@ -581,7 +596,7 @@ export default function Layout({
             className="fixed bottom-20 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
           >
             <div className="px-4 py-2.5 rounded-2xl glass-nav nav-rim-light shadow-2xl flex items-center gap-2.5 bg-[#1C1C20]/95 text-white text-xs font-semibold">
-              <LockKey size={16} weight="fill" className="text-[#FFD60A]" />
+              <LockKey size={16} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
               <span>Home interface is locked as your primary dashboard</span>
             </div>
           </motion.div>

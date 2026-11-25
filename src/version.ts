@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 88,
-  versionName: '3.4.11',
+  versionCode: 89,
+  versionName: '3.4.12',
   releaseDate: '2026-11-25',
   apkSize: '15.04 MB',
-  apkSizeBytes: 15767509,
-  releaseNotes: "LifeOS v3.4.11 (Build 88):\n• Zero-Lag Route Architecture: Removed dual-DOM route slide transitions and frozen outlets so every tab and page switches instantaneously without hanging or stuck views.\n• Zero-Blur Liquid Glass Optics: Eliminated residual GPU backdrop-filter and CSS blur passes across navigation dock, cards, and modals while fixing the dock droplet inner hairline.\n• Hardware-Aware Performance Engine: Added real-time RAM, CPU core, GPU, and storage tier classification with adaptive smoothness controls in Settings.\n• Non-Blocking Local Persistence: Replaced double synchronous full-state localStorage JSON writes on every tap with idle-batched writes and safe pagehide flushes.\n• Snappier Bottom Dock & Controls: Removed layoutId thrashing, blocking mode=\"wait\" exits, and artificial rAF tap delays across TabBar, Calendar, Timetable, and Gym.\n• Luna AI Full Upgrade (Phases 1-12): Provider-independent AI gateway, bounded conversation summaries, privacy-scoped note RAG, controllable user memory, validated actions, and 6 domain prompts.",
+  apkSizeBytes: 15771219,
+  releaseNotes: "LifeOS v3.4.12 (Build 89):\n• Royal Burgundy Single-Hue Theme: Fixed pink washout across M3 tones and set Royal Burgundy (#8B1E3F → #B52B4D) with subtle gradient depth across every interface, card, and pop-up while preserving iOS Liquid Blue as a preset.\n• Unified Theme Icons & Controls: Replaced stray blue, green, amber, and purple hardcoded icons, spinners, badges, AI logos, and custom interactive vectors across Home, Gym, Nutrition, Spending, Drive, Vault, Laundry, Calendar, Tasks, Shopping, Outings, Luna AI, Settings, and modals with active theme tokens.\n• What's New & Updater Visual Refresh: Replaced Gemini-style star glyphs in What's New updates and the In-App Updater modal with interface-matched Phosphor icons and unified theme styling.\n• Pure iOS Water Liquid Glass Refinement: Preserved borderless meniscus water refraction, dock droplet glass sheen, and crisp white legibility on obsidian surfaces.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

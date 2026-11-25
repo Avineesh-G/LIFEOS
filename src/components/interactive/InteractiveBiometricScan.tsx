@@ -59,7 +59,11 @@ export default function InteractiveBiometricScan({
           initial={{ y: -size / 2, opacity: 0 }}
           animate={{ y: [ -size / 2, size / 2, -size / 2 ], opacity: [0, 1, 0] }}
           transition={{ duration: 0.45, ease: 'easeInOut' }}
-          className="absolute inset-x-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_#22d3ee] pointer-events-none z-20"
+          className="absolute inset-x-0 h-0.5 pointer-events-none z-20"
+          style={{
+            backgroundColor: 'var(--app-accent-text, #DE4B64)',
+            boxShadow: '0 0 8px var(--app-accent-end, #B52B4D)',
+          }}
         />
       )}
 
@@ -71,7 +75,7 @@ export default function InteractiveBiometricScan({
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={isLocked ? 'text-rose-500/80 dark:text-rose-400/80' : 'text-emerald-500/80 dark:text-emerald-400/80'}
+          className="text-[var(--app-accent-text)] opacity-85"
         />
 
         {/* Shackle */}
@@ -80,7 +84,7 @@ export default function InteractiveBiometricScan({
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
-          className={isLocked ? 'text-rose-500 dark:text-rose-400' : 'text-emerald-500 dark:text-emerald-400'}
+          className="text-[var(--app-accent-text)]"
           animate={{
             y: isLocked ? 0 : -2.5,
           }}

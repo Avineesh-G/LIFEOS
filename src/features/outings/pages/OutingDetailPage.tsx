@@ -150,13 +150,13 @@ export default function OutingDetailPage() {
       : startDateStr;
 
   const statusLabel = activeOuting.status ? activeOuting.status.charAt(0).toUpperCase() + activeOuting.status.slice(1) : 'Planned';
-  const statusColor = activeOuting.status === 'completed' ? '#8E8E93' : activeOuting.status === 'ongoing' ? '#30D158' : '#0A84FF';
+  const statusColor = activeOuting.status === 'completed' ? '#8E8E93' : 'var(--app-accent-text, #DE4B64)';
 
   const budgetPaise = activeOuting.budget || 0;
   const budgetProgress = budgetPaise > 0 ? Math.min(1, (activeSummary?.totalCost || 0) / budgetPaise) : 0;
 
   return (
-    <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#40C8E0]/30">
+    <div className="min-h-screen bg-black text-white pb-4">
       {/* ── Top Navigation Bar ── */}
       <header
         className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"

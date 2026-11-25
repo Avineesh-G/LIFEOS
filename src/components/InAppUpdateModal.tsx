@@ -302,11 +302,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
           {/* Header */}
           <div className="p-6 pb-4 flex items-start justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl glass-tile flex items-center justify-center shrink-0">
+              <div
+                className="w-12 h-12 rounded-2xl glass-tile flex items-center justify-center shrink-0"
+                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              >
                 {hasUpdate ? (
-                  <Sparkle size={24} weight="fill" className="text-[#0A84FF]" />
+                  <DownloadSimple size={24} weight="duotone" />
                 ) : (
-                  <CheckCircle size={24} weight="fill" className="text-[#30D158]" />
+                  <CheckCircle size={24} weight="fill" />
                 )}
               </div>
 
@@ -315,11 +318,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   <h3 className="text-lg font-bold text-white tracking-tight">
                     {hasUpdate ? 'LifeOS Update' : 'LifeOS Up to Date'}
                   </h3>
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full glass-flat ${
-                    hasUpdate
-                      ? 'text-[#0A84FF]'
-                      : 'text-[#30D158]'
-                  }`}>
+                  <span
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full glass-flat"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     v{hasUpdate ? (remoteVersion?.versionName || 'New') : CURRENT_VERSION_NAME}
                   </span>
                 </div>
@@ -355,15 +357,24 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     </span>
                   </div>
 
-                  <div className="w-7 h-7 rounded-full glass-flat flex items-center justify-center text-[#0A84FF]">
+                  <div
+                    className="w-7 h-7 rounded-full glass-flat flex items-center justify-center"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     <ArrowRight size={14} weight="bold" />
                   </div>
 
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[11px] font-medium text-[#0A84FF] uppercase tracking-wider">
+                    <span
+                      className="text-[11px] font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    >
                       Latest
                     </span>
-                    <span className="text-sm font-bold text-[#0A84FF]">
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    >
                       v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
                     </span>
                   </div>
@@ -371,7 +382,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-white/50">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <DownloadSimple size={14} className="text-[#0A84FF] shrink-0" />
+                    <DownloadSimple size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     Download Size
                   </span>
                   <span className="font-semibold text-white/80">
@@ -381,13 +392,16 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               </div>
             ) : (
               <div className="p-4 rounded-2xl glass-tile flex items-center justify-between">
-                <div className="flex items-center gap-2.5 text-[#30D158]">
+                <div className="flex items-center gap-2.5" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                   <ShieldCheck size={20} weight="fill" className="shrink-0" />
                   <span className="text-xs font-semibold text-white/90">
                     Version {CURRENT_VERSION_NAME} (Build {CURRENT_VERSION_CODE})
                   </span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full glass-flat text-[#30D158] uppercase tracking-wider">
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full glass-flat uppercase tracking-wider"
+                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                >
                   Latest
                 </span>
               </div>
@@ -396,7 +410,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             {/* Status Views */}
             {status === 'checking' ? (
               <div className="py-6 text-center space-y-3">
-                <CircleNotch size={32} weight="bold" className="text-[#0A84FF] animate-spin mx-auto" />
+                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                 <div>
                   <h4 className="text-sm font-semibold text-white">Checking for Updates...</h4>
                   <p className="text-xs text-white/50 mt-0.5">Connecting to LifeOS release server</p>
@@ -405,11 +419,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             ) : status === 'permission_needed' ? (
               <div className="p-4 rounded-2xl glass-tile space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl glass-flat text-[#FF9F0A] flex items-center justify-center shrink-0">
+                  <div
+                    className="w-8 h-8 rounded-xl glass-flat flex items-center justify-center shrink-0"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     <DeviceMobile size={18} weight="bold" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-[#FF9F0A]">Permission Required</h4>
+                    <h4 className="text-xs font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>Permission Required</h4>
                     <p className="text-xs text-white/70 mt-1 leading-relaxed">
                       LifeOS needs permission to install its own updates. You'll only need to grant this once.
                     </p>
@@ -418,7 +435,8 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <button
                   onClick={handleGrantPermission}
-                  className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF9F0A] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                  className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
                 >
                   <ShieldCheck size={16} weight="bold" />
                   <span>Grant Permission</span>
@@ -427,7 +445,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             ) : status === 'downloading' ? (
               <div className="space-y-3 py-1">
                 {statusNotice && (
-                  <div className="p-2.5 rounded-2xl glass-tile text-xs text-[#0A84FF] flex items-center gap-2">
+                  <div
+                    className="p-2.5 rounded-2xl glass-tile text-xs flex items-center gap-2"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     <ArrowClockwise size={14} className="animate-spin shrink-0" />
                     <span>{statusNotice}</span>
                   </div>
@@ -435,10 +456,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <DownloadSimple size={16} className="text-[#0A84FF] animate-bounce" />
+                    <DownloadSimple size={16} className="animate-bounce" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span className="text-xs font-medium text-white/90">Downloading LifeOS.apk</span>
                   </div>
-                  <span className="text-xs font-bold text-[#0A84FF] tabular-nums">
+                  <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                     {progress >= 0 ? `${progress}%` : 'Connecting...'}
                   </span>
                 </div>
@@ -446,8 +467,11 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 {/* Glass Progress Bar */}
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full bg-[#0A84FF] rounded-full transition-all duration-300"
-                    style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, progress))}%`,
+                      background: 'var(--preset-gradient, linear-gradient(90deg, #8B1E3F 0%, #B52B4D 100%))',
+                    }}
                   />
                 </div>
 
@@ -460,8 +484,8 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               </div>
             ) : status === 'installing' ? (
               <div className="p-5 rounded-2xl glass-tile text-center space-y-2 py-5">
-                <CircleNotch size={32} weight="bold" className="text-[#0A84FF] animate-spin mx-auto" />
-                <h4 className="text-sm font-semibold text-[#0A84FF]">Launching Package Installer...</h4>
+                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                <h4 className="text-sm font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>Launching Package Installer...</h4>
                 <p className="text-xs text-white/50">Tap "Update" on the system prompt appearing on your screen.</p>
               </div>
             ) : status === 'error' ? (
@@ -488,7 +512,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               <div className="space-y-3">
                 <div className="text-xs text-white/70 leading-relaxed max-h-32 overflow-y-auto pr-1 space-y-1">
                   <div className="text-white font-semibold flex items-center gap-1.5">
-                    <CheckCircle size={14} weight="fill" className="text-[#30D158]" />
+                    <CheckCircle size={14} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span>What's New in this Build:</span>
                   </div>
                   <p className="text-[11px] text-white/50 leading-relaxed pl-5">
@@ -499,10 +523,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   href={OFFICIAL_DEVELOPER_GITHUB}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-all cursor-pointer"
+                  className="flex items-center justify-between p-2.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <GithubLogo size={16} weight="duotone" className="text-white" />
+                    <GithubLogo size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span className="font-medium text-[11.5px]">GitHub: Avineesh-G/LIFEOS</span>
                   </div>
                   <ArrowRight size={12} weight="bold" className="text-white/40" />
@@ -517,9 +541,9 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   href={OFFICIAL_DEVELOPER_GITHUB}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-all cursor-pointer"
                 >
-                  <GithubLogo size={15} weight="duotone" className="text-white" />
+                  <GithubLogo size={15} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                   <span className="text-[11px]">View on GitHub</span>
                 </a>
               </div>
@@ -540,7 +564,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleStartUpdate}
-                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-[#0A84FF] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-[2] py-3 px-4 rounded-2xl text-white text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                      style={{
+                        background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                      }}
                     >
                       <DownloadSimple size={16} weight="bold" />
                       <span>Update Now</span>
@@ -559,7 +586,8 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleDismiss}
-                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-[#30D158] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
                     >
                       <CheckCircle size={16} weight="bold" />
                       <span>Got It</span>

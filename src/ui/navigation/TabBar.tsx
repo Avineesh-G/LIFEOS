@@ -205,7 +205,7 @@ export function TabBar({
 
   const tabWidthPercent = 100 / Math.max(1, items.length);
   const activeTabItem = items[activeIndex];
-  const activeTint = activeTabItem?.tint || '#0A84FF';
+  const activeTint = 'var(--app-accent-text, #DE4B64)';
 
   return (
     <div className={`relative flex items-center justify-center pointer-events-auto select-none gap-2.5 ${className}`}>
@@ -276,11 +276,11 @@ export function TabBar({
               transition: isDragging
                 ? 'none'
                 : 'transform 0.16s cubic-bezier(0.2, 0, 0, 1)',
-              background: `radial-gradient(ellipse 88% 58% at 50% 16%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 52%, transparent 82%), radial-gradient(ellipse 92% 68% at 50% 84%, color-mix(in srgb, ${activeTint} 15%, rgba(255, 255, 255, 0.04)) 0%, transparent 78%), rgba(255, 255, 255, 0.09)`,
+              background: `radial-gradient(ellipse 88% 58% at 50% 16%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 54%, transparent 84%), radial-gradient(ellipse 92% 68% at 50% 86%, color-mix(in srgb, var(--app-accent, #8B1E3F) 14%, rgba(255, 255, 255, 0.04)) 0%, transparent 80%), rgba(255, 255, 255, 0.08)`,
               boxShadow: '0 6px 18px rgba(0, 0, 0, 0.72), 0 2px 6px rgba(0, 0, 0, 0.55)',
             }}
           >
-            {/* Volumetric Water Dome Caustic Glow (soft curved optics, zero sharp horizontal line) */}
+            {/* Volumetric Water Dome Caustic Glow (pure Apple water droplet sheen) */}
             <div
               className="absolute inset-0 rounded-full pointer-events-none"
               style={{
@@ -292,7 +292,7 @@ export function TabBar({
 
           {items.map((tab, idx) => {
             const isSelected = hasValidActiveTab && (isDragging ? dragHoverIndex === idx : tab.key === currentKey);
-            const tint = tab.tint || '#0A84FF';
+            const tint = activeTint;
 
             return (
               <button
@@ -314,7 +314,11 @@ export function TabBar({
                 }}
                 onClick={() => handleTabClick(tab)}
                 className="relative flex-1 min-w-0 h-[42px] rounded-full flex flex-col items-center justify-center gap-0.5 select-none cursor-pointer transition-colors z-10 px-1 touch-none"
-                style={{ color: isSelected ? tint : 'rgba(235, 235, 245, 0.60)' }}
+                style={{
+                  color: isSelected
+                    ? tint
+                    : 'rgba(235, 235, 245, 0.62)',
+                }}
               >
                 {/* Icon with smooth scale micro-interaction */}
                 <div
@@ -353,7 +357,11 @@ export function TabBar({
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-2 rounded-full border-2 border-transparent border-t-white border-r-white/40"
+              className="absolute inset-2 rounded-full border-2 border-transparent"
+              style={{
+                borderTopColor: 'var(--app-accent-text, #DE4B64)',
+                borderRightColor: 'rgba(255, 255, 255, 0.35)',
+              }}
             />
           )}
 
@@ -365,20 +373,24 @@ export function TabBar({
                   key={i}
                   animate={{ scaleY: [0.3, scale, 0.3] }}
                   transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                  className="w-0.5 bg-white rounded-full h-full"
+                  className="w-0.5 rounded-full h-full"
+                  style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
                 />
               ))}
             </div>
           ) : (
-            /* Idle Luna Comic Bubble Icon - Clean normal white */
-            <div className="relative z-10 flex items-center justify-center text-white/90">
+            /* Idle Luna Comic Bubble Icon - Crisp White */
+            <div className="relative z-10 flex items-center justify-center text-white/95">
               <LunaComicBubbleIcon size={22} />
             </div>
           )}
 
           {/* Unread Indicator Dot */}
           {lunaState === 'unread' && (
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0A84FF]" />
+            <span
+              className="absolute top-2 right-2 w-2 h-2 rounded-full"
+              style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
+            />
           )}
         </motion.button>
       )}

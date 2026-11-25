@@ -14,10 +14,10 @@ export function Badge({
   count,
   label,
   points = 12,
-  color = '#FF7A45',
+  color: _color,
   className = '',
 }: BadgeProps) {
-  // SVG scalloped star polygon
+  const resolvedColor = 'var(--app-accent-text, #5AC8FA)';
   const path =
     points === 12
       ? 'M12 2L14.5 4.5L18 4L18.5 7.5L22 9L20.5 12.5L22 16L18.5 17.5L18 21L14.5 20.5L12 23L9.5 20.5L6 21L5.5 17.5L2 16L3.5 12.5L2 9L5.5 7.5L6 4L9.5 4.5L12 2Z'
@@ -25,15 +25,13 @@ export function Badge({
 
   return (
     <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
+      initial={{ scale: 0.85, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={MOTION_SPRINGS.bouncy}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold select-none ${className}`}
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.14)',
-        color,
+        background: `linear-gradient(135deg, color-mix(in srgb, ${resolvedColor} 16%, #1B1B20) 0%, color-mix(in srgb, ${resolvedColor} 8%, #151519) 100%)`,
+        color: resolvedColor,
       }}
     >
       <svg

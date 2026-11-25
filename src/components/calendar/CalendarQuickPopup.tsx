@@ -106,7 +106,7 @@ export default function CalendarQuickPopup({
       onClose={onClose}
       title="Today's Schedule"
       subtitle={format(new Date(), 'EEEE, MMMM d')}
-      icon={<CalendarBlank size={18} weight="duotone" className="text-[#5E5CE6]" />}
+      icon={<CalendarBlank size={18} weight="duotone" style={{ color: 'var(--app-accent-text, #64D2FF)' }} />}
       maxWidth="max-w-md"
     >
       <div className="space-y-3.5 select-none text-left">
@@ -117,7 +117,7 @@ export default function CalendarQuickPopup({
               {totalTodayItems} item{totalTodayItems === 1 ? '' : 's'} today
             </span>
           </div>
-          <div className="text-[11px] text-white/50 font-mono">
+          <div className="text-[11px] text-white/55 font-mono">
             {format(new Date(), 'yyyy')}
           </div>
         </div>
@@ -129,13 +129,13 @@ export default function CalendarQuickPopup({
             className="p-3 rounded-2xl glass-tile space-y-2.5"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-white/70 uppercase tracking-wide">
+              <span className="text-[11px] font-bold text-white/75 uppercase tracking-wide">
                 Quick Add Event
               </span>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="text-white/40 hover:text-white"
+                className="text-white/50 hover:text-white"
               >
                 <X size={14} weight="bold" />
               </button>
@@ -146,7 +146,7 @@ export default function CalendarQuickPopup({
               value={quickTitle}
               onChange={(e) => setQuickTitle(e.target.value)}
               placeholder="Event title..."
-              className="w-full px-3 py-2 rounded-xl glass-flat text-xs text-white placeholder:text-white/30 focus:outline-none"
+              className="w-full px-3 py-2 rounded-xl glass-flat text-xs text-white placeholder:text-white/35 focus:outline-none"
             />
             <div className="flex items-center gap-2">
               <input
@@ -158,7 +158,7 @@ export default function CalendarQuickPopup({
               <select
                 value={quickLead}
                 onChange={(e) => setQuickLead(Number(e.target.value))}
-                className="px-2 py-1.5 rounded-xl glass-flat text-[11px] text-white/80 [color-scheme:dark] focus:outline-none"
+                className="px-2 py-1.5 rounded-xl glass-flat text-[11px] text-white/85 [color-scheme:dark] focus:outline-none"
                 title="Reminder lead time"
               >
                 <option value={0} className="bg-[#1C1C1E]">At event</option>
@@ -170,7 +170,8 @@ export default function CalendarQuickPopup({
               </select>
               <button
                 type="submit"
-                className="flex-1 py-1.5 rounded-xl bg-[#5E5CE6] text-white text-xs font-bold active:scale-95 transition-all cursor-pointer shadow-sm"
+                className="flex-1 py-1.5 rounded-xl text-white text-xs font-bold active:scale-95 transition-transform cursor-pointer shadow-sm"
+                style={{ background: 'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
               >
                 Save
               </button>
@@ -183,9 +184,9 @@ export default function CalendarQuickPopup({
               triggerHaptic('light');
               setIsAdding(true);
             }}
-            className="w-full py-2.5 px-3 rounded-2xl glass-tile flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white transition-all cursor-pointer"
+            className="w-full py-2.5 px-3 rounded-2xl glass-tile flex items-center justify-center gap-1.5 text-xs font-semibold text-white/90 hover:text-white transition-colors cursor-pointer"
           >
-            <Plus size={14} weight="bold" className="text-[#5E5CE6]" />
+            <Plus size={14} weight="bold" style={{ color: 'var(--app-accent-text, #64D2FF)' }} />
             <span>Add Event for Today</span>
           </button>
         )}
@@ -194,7 +195,10 @@ export default function CalendarQuickPopup({
         <div className="space-y-1.5 max-h-[340px] overflow-y-auto pr-0.5 scrollbar-none">
           {totalTodayItems === 0 && !isAdding && (
             <div className="py-7 px-4 text-center rounded-2xl glass-tile flex flex-col items-center justify-center space-y-1.5">
-              <div className="w-10 h-10 rounded-2xl glass-flat flex items-center justify-center text-[#5E5CE6] mb-0.5 shadow-sm">
+              <div
+                className="w-10 h-10 rounded-2xl glass-flat flex items-center justify-center mb-0.5 shadow-sm"
+                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              >
                 <CalendarBlank size={22} weight="duotone" />
               </div>
               <p className="text-[13px] font-bold text-white">No Events Today</p>
@@ -222,15 +226,15 @@ export default function CalendarQuickPopup({
                     {ev.isAllDay ? 'All-Day' : `${ev.startTime || '10:00'} – ${ev.endTime || '11:00'}`}
                   </span>
                   {ev.notificationLeadMinutes !== -1 && (
-                    <Bell size={12} weight="fill" className="text-[#FF9F0A]" />
+                    <Bell size={12} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                   )}
                 </div>
               </div>
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0"
                 style={{
-                  backgroundColor: `${ev.color || '#5E5CE6'}18`,
-                  color: ev.color || '#5E5CE6',
+                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                  color: 'var(--app-accent-text, #DE4B64)',
                 }}
               >
                 {ev.category}
@@ -248,9 +252,8 @@ export default function CalendarQuickPopup({
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <button
                   type="button"
-                  className={`shrink-0 transition-colors ${
-                    t.completed ? 'text-[#30D158]' : 'text-white/30 hover:text-white/60'
-                  }`}
+                  className="shrink-0 transition-colors"
+                  style={{ color: t.completed ? 'var(--app-accent-text, #64D2FF)' : 'rgba(255,255,255,0.38)' }}
                 >
                   {t.completed ? (
                     <CheckCircle size={18} weight="fill" />
@@ -261,17 +264,23 @@ export default function CalendarQuickPopup({
                 <div className="min-w-0">
                   <p
                     className={`text-xs font-medium truncate ${
-                      t.completed ? 'line-through text-white/40' : 'text-white'
+                      t.completed ? 'line-through text-white/45' : 'text-white'
                     }`}
                   >
                     {t.text}
                   </p>
                   {t.startTime && (
-                    <p className="text-[10.5px] text-white/40 font-mono">{t.startTime}</p>
+                    <p className="text-[10.5px] text-white/45 font-mono">{t.startTime}</p>
                   )}
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#0A84FF]/15 text-[#0A84FF] shrink-0 uppercase tracking-wider">
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
+                style={{
+                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  color: 'var(--app-accent-text, #64D2FF)',
+                }}
+              >
                 Task
               </span>
             </div>
@@ -284,17 +293,29 @@ export default function CalendarQuickPopup({
               className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-2.5"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-[#5E5CE6]/15 text-[#5E5CE6] flex items-center justify-center shrink-0">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                    color: 'var(--app-accent-text, #64D2FF)',
+                  }}
+                >
                   <GraduationCap size={15} weight="duotone" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-xs font-semibold text-white truncate">{c.subject}</h4>
-                  <p className="text-[11px] text-white/40 font-mono mt-0.5">
+                  <p className="text-[11px] text-white/45 font-mono mt-0.5">
                     {c.startTime} – {c.endTime} {c.room ? `• Room ${c.room}` : ''}
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#5E5CE6]/15 text-[#5E5CE6] shrink-0 uppercase tracking-wider">
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
+                style={{
+                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  color: 'var(--app-accent-text, #64D2FF)',
+                }}
+              >
                 Class
               </span>
             </div>
@@ -304,17 +325,29 @@ export default function CalendarQuickPopup({
           {todayWorkout && (
             <div className="p-2.5 rounded-2xl glass-tile flex items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-[#30D158]/15 text-[#30D158] flex items-center justify-center shrink-0">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                  style={{
+                    backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                    color: 'var(--app-accent-text, #64D2FF)',
+                  }}
+                >
                   <Barbell size={15} weight="duotone" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-xs font-semibold text-white truncate">
                     {todayWorkout.type} Workout
                   </h4>
-                  <p className="text-[11px] text-white/40 mt-0.5">Completed</p>
+                  <p className="text-[11px] text-white/45 mt-0.5">Completed</p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#30D158]/15 text-[#30D158] shrink-0 uppercase tracking-wider">
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
+                style={{
+                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  color: 'var(--app-accent-text, #64D2FF)',
+                }}
+              >
                 Done
               </span>
             </div>

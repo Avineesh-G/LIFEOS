@@ -39,7 +39,7 @@ import {
   Check,
 } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
-import { MODULE_TINTS, ModuleKey } from '../tokens/colors';
+import { getModuleTint, MODULE_TINTS, ModuleKey } from '../tokens/colors';
 import { auth } from '../../firebase';
 import { useUserProfile } from '../../utils/userProfileCache';
 import { CURRENT_VERSION_NAME } from '../../version';
@@ -149,7 +149,10 @@ export function MoreHubSheet({
           {/* User Avatar + Name + Caret */}
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
-              <div className="w-9 h-9 rounded-xl bg-[#2C2C2E] flex items-center justify-center font-bold text-white text-sm overflow-hidden border border-white/10 select-none">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm overflow-hidden select-none shadow-md"
+                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #3B82F6, #8B1E3F))' }}
+              >
                 {userProfile.photoURL ? (
                   <img
                     src={userProfile.photoURL}
@@ -160,8 +163,11 @@ export function MoreHubSheet({
                   <span>{userInitial}</span>
                 )}
               </div>
-              {/* Online Green Indicator Dot */}
-              <span className="w-2.5 h-2.5 rounded-full bg-[#30D158] ring-2 ring-[#121212] absolute -bottom-0.5 -right-0.5" />
+              {/* Online Indicator Dot */}
+              <span
+                className="w-2.5 h-2.5 rounded-full absolute -bottom-0.5 -right-0.5 shadow-sm"
+                style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
+              />
             </div>
 
             <div
@@ -207,21 +213,30 @@ export function MoreHubSheet({
                   onSelect(item);
                   onClose();
                 }}
-                className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/[0.06] active:bg-white/[0.10] transition-colors cursor-pointer select-none group"
+                className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/[0.06] active:bg-white/[0.10] transition-colors cursor-pointer select-none group"
               >
-                <div className="flex items-center gap-3.5 text-white/80 group-hover:text-white">
+                <div className="flex items-center gap-3 text-white/95 group-hover:text-white min-w-0">
                   <div
-                    className="text-[20px] shrink-0"
-                    style={{ color: MODULE_TINTS[item.tintKey] || '#0A84FF' }}
+                    className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[18px] shrink-0"
+                    style={{
+                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #DE4B64) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 6%, #17171B) 100%)',
+                      color: 'var(--app-accent-text, #DE4B64)',
+                    }}
                   >
                     {item.icon}
                   </div>
-                  <span className="text-[15px] font-medium tracking-tight">
+                  <span className="text-[15px] font-medium tracking-tight truncate">
                     {item.label}
                   </span>
                 </div>
                 {item.status && (
-                  <span className="text-[12px] text-white/40">
+                  <span
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.12))',
+                      color: 'var(--app-accent-text, #DE4B64)',
+                    }}
+                  >
                     {item.status}
                   </span>
                 )}
@@ -237,7 +252,13 @@ export function MoreHubSheet({
                   <span className="text-[13px] font-medium text-white/60 tracking-normal">
                     What's new & updates
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#30D158]/15 text-[#30D158] font-semibold">
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                    style={{
+                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                      color: 'var(--app-accent-text, #DE4B64)',
+                    }}
+                  >
                     v{CURRENT_VERSION_NAME}
                   </span>
                 </div>
@@ -255,15 +276,15 @@ export function MoreHubSheet({
                       triggerHaptic('selection');
                       setSelectedUpdate(card);
                     }}
-                    className="min-w-[150px] max-w-[170px] p-3 rounded-2xl glass-tile transition-all flex flex-col justify-between cursor-pointer select-none active:scale-98 h-[92px] border border-white/[0.06] hover:border-white/20 shrink-0"
+                    className="min-w-[158px] max-w-[178px] p-3 rounded-2xl glass-tile transition-transform flex flex-col justify-between cursor-pointer select-none active:scale-[0.98] h-[94px] shrink-0"
                   >
                     <div>
-                      <div className="flex items-center justify-between text-white/60 mb-1">
-                        <div className="flex items-center gap-1.5 text-[11px] font-medium truncate">
-                          <span className={card.colorClass}>{card.icon}</span>
+                      <div className="flex items-center justify-between text-white/75 mb-1">
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold truncate" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                          <span>{card.icon}</span>
                           <span className="truncate">{card.category}</span>
                         </div>
-                        <span className="text-[9.5px] text-white/40 shrink-0 font-medium ml-1">
+                        <span className="text-[9.5px] text-white/50 shrink-0 font-medium ml-1">
                           {card.dateTime}
                         </span>
                       </div>
@@ -273,8 +294,11 @@ export function MoreHubSheet({
                     </div>
 
                     {/* Primary Email displayed on each card */}
-                    <div className="flex items-center gap-1 text-[9.5px] text-white/40 truncate pt-1 border-t border-white/[0.04]">
-                      <EnvelopeSimple size={10} className="shrink-0 text-white/40" />
+                    <div
+                      className="flex items-center gap-1 text-[9.5px] text-white/55 truncate pt-1"
+                      style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}
+                    >
+                      <EnvelopeSimple size={10} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                       <span className="truncate">{card.contactEmails[0]}</span>
                     </div>
                   </div>
@@ -287,7 +311,10 @@ export function MoreHubSheet({
               {sections.map((section, sIdx) => (
                 <div key={section.title} className="flex flex-col gap-1">
                   {sIdx > 0 && <div className="h-[1px] bg-white/[0.05] my-1" />}
-                  <span className="text-[12px] font-semibold text-white/40 px-2.5 pt-1">
+                  <span
+                    className="text-[11.5px] uppercase tracking-wider font-semibold px-2.5 pt-1"
+                    style={{ color: 'color-mix(in srgb, var(--app-accent-text, #DE4B64) 42%, rgba(255,255,255,0.72))' }}
+                  >
                     {section.title}
                   </span>
 
@@ -301,12 +328,15 @@ export function MoreHubSheet({
                           onSelect(item);
                           onClose();
                         }}
-                        className="flex items-center justify-between px-2.5 py-2.5 rounded-xl hover:bg-white/[0.06] active:bg-white/[0.10] transition-colors cursor-pointer select-none group text-left"
+                        className="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-white/[0.06] active:bg-white/[0.09] transition-colors cursor-pointer select-none group text-left"
                       >
-                        <div className="flex items-center gap-3.5 text-white/90 group-hover:text-white transition-colors min-w-0">
+                        <div className="flex items-center gap-3 text-white/95 group-hover:text-white transition-colors min-w-0">
                           <div
-                            className="text-[20px] shrink-0"
-                            style={{ color: MODULE_TINTS[item.tintKey] || '#0A84FF' }}
+                            className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[18px] shrink-0"
+                            style={{
+                              background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #DE4B64) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 6%, #17171B) 100%)',
+                              color: 'var(--app-accent-text, #DE4B64)',
+                            }}
                           >
                             {item.icon}
                           </div>
@@ -316,7 +346,7 @@ export function MoreHubSheet({
                         </div>
 
                         {item.status && (
-                          <span className="text-[12px] text-white/40 shrink-0 pl-2">
+                          <span className="text-[12px] text-white/45 shrink-0 pl-2">
                             {item.status}
                           </span>
                         )}
@@ -337,11 +367,14 @@ export function MoreHubSheet({
             className="absolute inset-0 cursor-pointer"
             onClick={() => setSelectedUpdate(null)}
           />
-          <div className="relative w-full max-w-md max-h-[86vh] bg-[#161618] border border-white/10 rounded-3xl p-4 sm:p-5 flex flex-col shadow-[0_24px_64px_rgba(0,0,0,0.9)] overflow-hidden z-10">
+          <div className="relative w-full max-w-md max-h-[86vh] glass-sheet rounded-3xl p-4 sm:p-5 flex flex-col shadow-[0_24px_64px_rgba(0,0,0,0.9)] overflow-hidden z-10">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
+            <div className="flex items-center justify-between pb-3 shrink-0" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-white shrink-0">
+                <div
+                  className="w-9 h-9 rounded-xl glass-tile flex items-center justify-center shrink-0"
+                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                >
                   {selectedUpdate.icon}
                 </div>
                 <div className="min-w-0">
@@ -395,10 +428,10 @@ export function MoreHubSheet({
                     return (
                       <div
                         key={idx}
-                        className="flex items-start gap-2.5 p-2 rounded-xl bg-white/[0.03] border border-white/[0.05]"
+                        className="flex items-start gap-2.5 p-2.5 rounded-xl glass-flat"
                       >
-                        <div className="mt-0.5 shrink-0 text-[#0A84FF]">
-                          <Sparkle size={13} weight="fill" />
+                        <div className="mt-0.5 shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                          <CheckCircle size={14} weight="fill" />
                         </div>
                         <div className="text-[12px] text-white/85 leading-snug">
                           {heading && (
@@ -415,14 +448,14 @@ export function MoreHubSheet({
               </div>
 
               {/* Recommendations & Feedback Box with Contact Emails */}
-              <div className="p-3 rounded-2xl bg-[#0A84FF]/10 border border-[#0A84FF]/25 space-y-2.5">
-                <div className="flex items-center gap-1.5 text-[#0A84FF]">
+              <div className="p-3 rounded-2xl glass-tile space-y-2.5">
+                <div className="flex items-center gap-1.5" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                   <EnvelopeSimple size={15} weight="bold" />
                   <span className="text-[11.5px] font-semibold tracking-wide uppercase">
                     Recommendations & Feedback
                   </span>
                 </div>
-                <p className="text-[11.5px] text-white/70 leading-relaxed">
+                <p className="text-[11.5px] text-white/75 leading-relaxed">
                   Have a suggestion, new feature recommendation, or feedback on this update? Mail me directly:
                 </p>
 
@@ -431,12 +464,12 @@ export function MoreHubSheet({
                     const isCopied = copiedEmail === email;
 
                     return (
-                      <div key={email} className="flex flex-col gap-1.5 p-2 rounded-xl bg-black/50 border border-white/[0.08]">
+                      <div key={email} className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-black/45">
                         <div className="flex items-center justify-between">
                           <span className="text-[11.5px] font-mono font-medium text-white/90 select-all break-all">
                             {email}
                           </span>
-                          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-white/[0.08] text-white/50 shrink-0 ml-1">
+                          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-white/[0.08] text-white/55 shrink-0 ml-1">
                             Developer
                           </span>
                         </div>
@@ -451,12 +484,13 @@ export function MoreHubSheet({
                             }}
                             className="flex-1 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
-                            {isCopied ? <Check size={12} className="text-[#30D158]" /> : <Copy size={12} />}
+                            {isCopied ? <Check size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} /> : <Copy size={12} />}
                             <span>{isCopied ? 'Copied' : 'Copy Email'}</span>
                           </button>
                           <a
                             href={`mailto:${email}?subject=LifeOS%20Feature%20Recommendation%20-%20${encodeURIComponent(selectedUpdate.title)}`}
-                            className="flex-1 py-1 rounded-lg bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            className="flex-1 py-1 rounded-lg text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90 cursor-pointer"
+                            style={{ background: 'linear-gradient(135deg, var(--app-accent, #8B1E3F) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
                           >
                             <ArrowSquareOut size={12} weight="bold" />
                             <span>Send Mail</span>

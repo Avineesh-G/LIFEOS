@@ -6,6 +6,7 @@ export interface GlassSurfaceProps extends React.HTMLAttributes<HTMLDivElement> 
   tinted?: boolean;
   grain?: boolean;
   interactive?: boolean;
+  accent?: string;
   children?: React.ReactNode;
   className?: string;
 }
@@ -15,6 +16,7 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
   tinted = false,
   grain = false,
   interactive = false,
+  accent,
   children,
   className = '',
   style,
@@ -22,61 +24,51 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
 }, ref) => {
   const { isLite } = usePerformanceMode();
 
-  // Glass background levels: 1 = lowest (0.05 dark / 0.55 light), 2 = mid (0.08 dark / 0.70 light), 3 = high (0.12 dark / 0.82 light)
-  const bgClasses = {
-    1: 'bg-[var(--glass-1)] dark:bg-[rgba(255,255,255,0.05)] light:bg-[rgba(255,255,255,0.55)]',
-    2: 'bg-[var(--glass-2)] dark:bg-[rgba(255,255,255,0.08)] light:bg-[rgba(255,255,255,0.70)]',
-    3: 'bg-[var(--glass-3)] dark:bg-[rgba(255,255,255,0.12)] light:bg-[rgba(255,255,255,0.82)]',
-  }[level];
-
-  // Tint overlay style with active interface accent
-  const tintStyle: React.CSSProperties = tinted ? {
-    backgroundColor: 'rgba(var(--accent-rgb, 59, 130, 246), 0.08)',
-  } : {};
-
-  // Lite mode falls back to translucent flat background without blur
-  const backdropStyle: React.CSSProperties = isLite ? {
-    backdropFilter: 'none',
-    WebkitBackdropFilter: 'none',
-  } : {
-    backdropFilter: 'var(--glass-blur, blur(24px) saturate(140%))',
-    WebkitBackdropFilter: 'var(--glass-blur, blur(24px) saturate(140%))',
-  };
+  const surfaceClass = level === 3 ? 'glass-hero' : level === 2 ? 'glass-card' : 'glass-tile';
+  const tintVars = (tinted || accent)
+    ? ({
+        '--card-accent': accent || 'var(--app-accent, #8B1E3F)',
+        '--tile-accent': accent || 'var(--app-accent, #8B1E3F)',
+      } as React.CSSProperties)
+    : {};
 
   return (
     <div
       ref={ref}
       className={`
         relative overflow-hidden rounded-[28px]
-        border border-[var(--rim,rgba(255,255,255,0.08))]
-        shadow-md dark:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.45)] transition-all duration-200
-        ${bgClasses}
-        ${interactive ? 'active:scale-[0.98] hover:border-white/20 cursor-pointer touch-manipulation' : ''}
+        ${surfaceClass}
+        shadow-md dark:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.45)] transition-transform duration-150
+        ${interactive ? 'active:scale-[0.98] cursor-pointer touch-manipulation' : ''}
         ${className}
       `}
       style={{
-        ...backdropStyle,
-        ...tintStyle,
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+        ...tintVars,
         ...style,
       }}
       {...props}
     >
-      {/* Subtle top edge bevel highlight for 3D tactile glass depth */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+      {/* Subtle iOS Water Meniscus + Light Single-Hue Ambient Sheen */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-10 opacity-45"
+        style={{
+          background:
+            'radial-gradient(ellipse 90% 100% at 50% 0%, rgba(255,255,255,0.14) 0%, color-mix(in srgb, var(--tile-accent, var(--app-accent, #8B1E3F)) 14%, transparent) 55%, transparent 100%)',
+        }}
+      />
 
-      {/* Fine dotted grain overlay for extra tactile depth (Full performance mode only) */}
+      {/* Fine dotted grain overlay for tactile depth (Full performance mode only) */}
       {grain && !isLite && (
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04] mix-blend-overlay"
+          className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay"
           style={{
             backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 0)`,
             backgroundSize: '8px 8px',
           }}
         />
       )}
-      
-      {/* Subtle inner top highlight rim */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
       {children}
     </div>

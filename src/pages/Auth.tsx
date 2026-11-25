@@ -57,9 +57,12 @@ export default function Auth() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 selection:bg-[#0A84FF]/30">
-      {/* Subtle Atmospheric Glass Glow */}
-      <div className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-[#0A84FF]/20 via-[#BF5AF2]/20 to-[#FF375F]/20 blur-3xl pointer-events-none" />
+    <div className="relative min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
+      {/* Subtle Atmospheric Single-Hue Glow */}
+      <div
+        className="absolute w-72 h-72 rounded-full pointer-events-none opacity-25"
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #8B1E3F) 0%, transparent 72%)' }}
+      />
 
       {/* Top Branding */}
       <div className="relative z-10 flex flex-col items-center text-center mb-8 w-full max-w-sm">
@@ -124,7 +127,7 @@ export default function Auth() {
           </button>
 
           <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-white/40">
-            <ShieldCheck size={14} weight="bold" className="text-emerald-400" />
+            <ShieldCheck size={14} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
             <span>End-to-end encrypted partition</span>
           </div>
         </div>

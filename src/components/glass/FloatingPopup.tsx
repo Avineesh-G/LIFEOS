@@ -294,15 +294,16 @@ export default function FloatingPopup({
                 >
                   {cancelLabel}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('medium');
-                    onSave();
-                  }}
-                  disabled={saveDisabled || saveLoading}
-                  className="px-5 py-2.5 rounded-2xl bg-[#0A84FF] text-white text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all disabled:opacity-40"
-                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('medium');
+                      onSave();
+                    }}
+                    disabled={saveDisabled || saveLoading}
+                    className="px-5 py-2.5 rounded-2xl text-white text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-transform disabled:opacity-40"
+                    style={{ background: 'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
+                  >
                   {saveLoading ? (
                     <span>Saving...</span>
                   ) : (
@@ -319,32 +320,36 @@ export default function FloatingPopup({
           {/* Unsaved Changes Confirmation Modal (Inside Popup system) */}
           <AnimatePresence>
             {showDiscardConfirm && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/75 select-none">
                 <motion.div
                   initial={{ scale: 0.92, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.92, opacity: 0 }}
-                  className="w-full max-w-xs bg-[#1C1C1E] border border-amber-500/30 rounded-3xl p-4 space-y-3 text-white shadow-2xl"
+                  className="w-full max-w-xs glass-card rounded-3xl p-4 space-y-3 text-white shadow-2xl"
                 >
-                  <div className="flex items-center gap-2.5 text-amber-400">
+                  <div className="flex items-center gap-2.5" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>
                     <Warning size={20} weight="duotone" />
-                    <h3 className="text-sm font-bold">Discard Unsaved Changes?</h3>
+                    <h3 className="text-sm font-bold text-white">Discard Unsaved Changes?</h3>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-[rgba(235,235,245,0.72)] leading-relaxed">
                     You have unsaved edits in this form. If you close now, your changes will be lost.
                   </p>
                   <div className="grid grid-cols-2 gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setShowDiscardConfirm(false)}
-                      className="py-2.5 rounded-xl border border-white/20 text-xs font-bold text-white hover:bg-white/10 transition-colors"
+                      className="py-2.5 rounded-xl bg-white/[0.08] text-xs font-bold text-white hover:bg-white/[0.14] transition-colors"
                     >
                       Keep Editing
                     </button>
                     <button
                       type="button"
                       onClick={handleConfirmDiscard}
-                      className="py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors"
+                      className="py-2.5 rounded-xl text-white text-xs font-bold shadow-md transition-opacity hover:opacity-90"
+                      style={{
+                        backgroundImage:
+                          'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)',
+                      }}
                     >
                       Discard
                     </button>

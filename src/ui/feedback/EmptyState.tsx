@@ -17,7 +17,7 @@ export function EmptyState({
   description,
   actionLabel,
   onAction,
-  tint = '#0A84FF',
+  tint = '#8B1E3F',
   className = '',
 }: EmptyStateProps) {
   return (

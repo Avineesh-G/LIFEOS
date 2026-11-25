@@ -1,10 +1,10 @@
 {
-  "versionCode": 88,
-  "versionName": "3.4.11",
+  "versionCode": 89,
+  "versionName": "3.4.12",
   "releaseDate": "2026-11-25",
   "apkSize": "15.04 MB",
-  "apkSizeBytes": 15771219,
-  "releaseNotes": "LifeOS v3.4.11 (Build 88):\n• Zero-Lag Route Architecture: Removed dual-DOM route slide transitions and frozen outlets so every tab and page switches instantaneously without hanging or stuck views.\n• Zero-Blur Liquid Glass Optics: Eliminated residual GPU backdrop-filter and CSS blur passes across navigation dock, cards, and modals while fixing the dock droplet inner hairline.\n• Hardware-Aware Performance Engine: Added real-time RAM, CPU core, GPU, and storage tier classification with adaptive smoothness controls in Settings.\n• Non-Blocking Local Persistence: Replaced double synchronous full-state localStorage JSON writes on every tap with idle-batched writes and safe pagehide flushes.\n• Snappier Bottom Dock & Controls: Removed layoutId thrashing, blocking mode=\"wait\" exits, and artificial rAF tap delays across TabBar, Calendar, Timetable, and Gym.\n• Luna AI Full Upgrade (Phases 1-12): Provider-independent AI gateway, bounded conversation summaries, privacy-scoped note RAG, controllable user memory, validated actions, and 6 domain prompts.",
+  "apkSizeBytes": 15773109,
+  "releaseNotes": "LifeOS v3.4.12 (Build 89):\n• Royal Burgundy Single-Hue Theme: Fixed pink washout across M3 tones and set Royal Burgundy (#8B1E3F → #B52B4D) with subtle gradient depth across every interface, card, and pop-up while preserving iOS Liquid Blue as a preset.\n• Unified Theme Icons & Controls: Replaced stray blue, green, amber, and purple hardcoded icons, spinners, badges, AI logos, and custom interactive vectors across every interface and modal with active theme tokens.\n• What's New & Updater Visual Refresh: Replaced Gemini-style star glyphs in What's New updates and the In-App Updater modal with interface-matched Phosphor icons.\n• Pure iOS Water Liquid Glass Refinement: Preserved borderless meniscus water refraction, dock droplet glass sheen, and crisp white legibility on obsidian surfaces.",
   "apkUrl": "https://lifeos-gujjeti-avineeshs-projects.vercel.app/LifeOS.apk",
-  "sha256": "f5b60ed29dedcebff6ffee5f735ed640001284a16bb80613a65b242b21744497"
+  "sha256": "2b88770c8f6615681abbbfc2ffa8e57f4f3ecc6c2e2ed5b38301b4b8488513e7"
 }

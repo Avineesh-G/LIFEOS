@@ -1,7 +1,9 @@
 /**
- * LifeOS "LifeOS Black" Color Tokens
- * Liquid Glass Specification Section 4.1
+ * LifeOS "iOS Liquid Glass" + Unified M3 Single-Color Tokens
+ * All module keys resolve cleanly to the active unified M3 theme accent so
+ * every page follows one cohesive color with light ambient gradient finishes.
  */
+import { getActiveAccent } from '../../theme/themeColorManager';
 
 export interface ColorTokens {
   canvas: string;
@@ -18,14 +20,14 @@ export interface ColorTokens {
 
 export const DARK_COLORS: ColorTokens = {
   canvas: '#000000',
-  surface1: '#1C1C1E',
-  surface2: '#2C2C2E',
-  surface3: '#3A3A3C',
-  separator: '#38383A',
+  surface1: '#141416',
+  surface2: '#1C1C20',
+  surface3: '#26262C',
+  separator: 'rgba(255, 255, 255, 0.08)',
   text1: '#FFFFFF',
-  text2: 'rgba(240, 240, 245, 0.78)',
-  text3: 'rgba(235, 235, 245, 0.52)',
-  fillGlass: 'rgba(44, 44, 48, 0.60)',
+  text2: 'rgba(242, 242, 247, 0.78)',
+  text3: 'rgba(235, 235, 245, 0.56)',
+  fillGlass: 'rgba(28, 28, 34, 0.78)',
   danger: '#FF453A',
 };
 
@@ -65,35 +67,36 @@ export type ModuleKey =
   | 'calendar'
   | 'drive';
 
+const UNIFIED_VAR = 'var(--app-accent-text, var(--app-accent, #8B1E3F))';
+
 export const MODULE_TINTS: Record<ModuleKey, string> = {
-  home: '#0A84FF',        // Blue
-  calendar: '#5E5CE6',    // Indigo Apple Calendar
-  gym: '#FF453A',         // Coral red
-  nutrition: '#FF9F0A',   // Orange
-  study: '#64D2FF',       // Cyan
-  flow: '#64D2FF',        // Cyan
-  timetable: '#5E5CE6',   // Indigo
-  spending: '#30D158',    // Green
-  outing: '#40C8E0',      // Teal
-  shopping: '#FF375F',    // Pink
-  tasks: '#0A84FF',       // Blue
-  laundry: '#63E6E2',     // Mint
-  notes: '#FFD60A',       // Yellow
-  flashcards: '#BF5AF2',  // Purple
-  braindump: '#BF5AF2',   // Purple
-  transcriber: '#FF6B35', // Red-orange
-  vault: '#8E7CFF',       // Violet
-  history: '#AC8E68',     // Tan
-  streak: '#FF7A45',      // Flame
-  luna: '#BF5AF2',        // Luna base
-  drive: '#0A84FF',       // Blue
+  home: UNIFIED_VAR,
+  calendar: UNIFIED_VAR,
+  gym: UNIFIED_VAR,
+  nutrition: UNIFIED_VAR,
+  study: UNIFIED_VAR,
+  flow: UNIFIED_VAR,
+  timetable: UNIFIED_VAR,
+  spending: UNIFIED_VAR,
+  outing: UNIFIED_VAR,
+  shopping: UNIFIED_VAR,
+  tasks: UNIFIED_VAR,
+  laundry: UNIFIED_VAR,
+  notes: UNIFIED_VAR,
+  flashcards: UNIFIED_VAR,
+  braindump: UNIFIED_VAR,
+  transcriber: UNIFIED_VAR,
+  vault: UNIFIED_VAR,
+  history: UNIFIED_VAR,
+  streak: UNIFIED_VAR,
+  luna: UNIFIED_VAR,
+  drive: UNIFIED_VAR,
 };
 
-export const LUNA_GRADIENT = ['#0A84FF', '#BF5AF2', '#FF375F'];
+export const LUNA_GRADIENT = ['var(--app-accent, #8B1E3F)', 'var(--app-accent-end, #B52B4D)'];
 
-export function getModuleTint(key?: string | null, customAccent?: string): string {
-  if (!key) return customAccent || MODULE_TINTS.home;
-  const k = key.toLowerCase() as ModuleKey;
-  if (k === 'home' && customAccent) return customAccent;
-  return MODULE_TINTS[k] || customAccent || MODULE_TINTS.home;
+export function getModuleTint(_key?: string | null, customAccent?: string): string {
+  if (customAccent) return customAccent;
+  const active = getActiveAccent();
+  return active.tertiary || active.secondary || active.primary || '#8B1E3F';
 }

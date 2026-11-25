@@ -58,12 +58,12 @@ interface VaultProps {
 }
 
 const CATEGORY_CONFIG: Record<VaultCategory, { label: string; shortLabel: string; icon: any; color: string; bg: string }> = {
-  study: { label: 'Study & College', shortLabel: 'Study', icon: GraduationCap, color: 'text-[#0A84FF]', bg: 'bg-[#0A84FF]/15' },
-  social: { label: 'Social & Media', shortLabel: 'Social', icon: ShareNetwork, color: 'text-[#FF375F]', bg: 'bg-[#FF375F]/15' },
-  work: { label: 'Work & Projects', shortLabel: 'Work', icon: Briefcase, color: 'text-[#FF9F0A]', bg: 'bg-[#FF9F0A]/15' },
-  finance: { label: 'Banking & Pay', shortLabel: 'Finance', icon: CurrencyInr, color: 'text-[#30D158]', bg: 'bg-[#30D158]/15' },
-  personal: { label: 'Personal & Health', shortLabel: 'Personal', icon: Heart, color: 'text-[#FF453A]', bg: 'bg-[#FF453A]/15' },
-  other: { label: 'Other Accounts', shortLabel: 'Other', icon: Folder, color: 'text-[#40C8E0]', bg: 'bg-[#40C8E0]/15' },
+  study: { label: 'Study & College', shortLabel: 'Study', icon: GraduationCap, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
+  social: { label: 'Social & Media', shortLabel: 'Social', icon: ShareNetwork, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
+  work: { label: 'Work & Projects', shortLabel: 'Work', icon: Briefcase, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
+  finance: { label: 'Banking & Pay', shortLabel: 'Finance', icon: CurrencyInr, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
+  personal: { label: 'Personal & Health', shortLabel: 'Personal', icon: Heart, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
+  other: { label: 'Other Accounts', shortLabel: 'Other', icon: Folder, color: 'text-[var(--app-accent-text)]', bg: 'bg-[var(--app-accent-soft)]' },
 };
 
 const AUTO_LOCK_SECONDS = 90;
@@ -489,14 +489,20 @@ export default function Vault({ data, updateData }: VaultProps) {
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-sm rounded-3xl p-8 glass-card flex flex-col items-center space-y-5 shadow-2xl"
+            className="w-full max-w-sm rounded-3xl p-8 glass-hero flex flex-col items-center space-y-5 shadow-2xl"
           >
             {/* Biometric Holographic Scanner Icon */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full glass-card flex items-center justify-center text-[#8E7CFF]">
+              <div
+                className="w-24 h-24 rounded-full glass-tile flex items-center justify-center"
+                style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+              >
                 <Fingerprint size={48} weight="light" />
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-[#8E7CFF] text-black rounded-full p-1.5 shadow-md">
+              <div
+                className="absolute -bottom-1 -right-1 text-white rounded-full p-1.5 shadow-md"
+                style={{ background: 'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
+              >
                 <Lock size={14} weight="bold" />
               </div>
             </div>
@@ -505,7 +511,7 @@ export default function Vault({ data, updateData }: VaultProps) {
               <h2 className="text-xl font-bold text-white tracking-tight">
                 LifeOS Vault
               </h2>
-              <p className="text-xs text-[#8E8E93] max-w-xs leading-relaxed">
+              <p className="text-xs text-white/65 max-w-xs leading-relaxed">
                 Protected by device biometrics and screen lock · Zero knowledge AES-256
               </p>
             </div>
@@ -519,7 +525,6 @@ export default function Vault({ data, updateData }: VaultProps) {
 
             <Button
               variant="prominent"
-              tint="#8E7CFF"
               size="lg"
               icon={<Fingerprint size={20} weight="bold" />}
               onClick={() => handleDeviceUnlock(false)}
@@ -528,13 +533,13 @@ export default function Vault({ data, updateData }: VaultProps) {
               {isAuthenticating ? 'Verifying Lock...' : 'Unlock Vault'}
             </Button>
 
-            <div className="w-full pt-4 border-t border-white/[0.04] space-y-2 text-[11px] text-[#8E8E93]">
+            <div className="w-full pt-4 space-y-2 text-[11px] text-white/60">
               <div className="flex items-center justify-center gap-1.5">
-                <DeviceMobile size={13} className="text-[#8E7CFF]" />
+                <DeviceMobile size={13} style={{ color: 'var(--app-accent-text, #64D2FF)' }} />
                 <span>Hardware-backed device lock</span>
               </div>
               <div className="flex items-center justify-center gap-1.5">
-                <ShieldCheck size={13} className="text-[#8E7CFF]" />
+                <ShieldCheck size={13} style={{ color: 'var(--app-accent-text, #64D2FF)' }} />
                 <span>AES-256-GCM Zero Knowledge</span>
               </div>
             </div>
@@ -738,9 +743,15 @@ export default function Vault({ data, updateData }: VaultProps) {
                       </div>
                       <button
                         onClick={() => handleCopyUsername(item.id, item.usernameOrEmail)}
-                        className={`text-[11px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-lg transition-all ${
-                          isUserCopied ? 'text-[#30D158] bg-[#30D158]/15' : 'text-[#8E8E93] hover:text-white'
-                        }`}
+                        className="text-[11px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-lg transition-all text-[#8E8E93] hover:text-white"
+                        style={
+                          isUserCopied
+                            ? {
+                                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                                color: 'var(--app-accent-text, #DE4B64)',
+                              }
+                            : undefined
+                        }
                       >
                         {isUserCopied ? <Check size={12} /> : <Copy size={12} />}
                         <span>{isUserCopied ? 'Copied' : 'Copy'}</span>
@@ -751,9 +762,9 @@ export default function Vault({ data, updateData }: VaultProps) {
                   {/* Password Row */}
                   <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl glass-flat">
                     <div className="flex items-center gap-2 px-1 min-w-0 truncate font-mono text-xs">
-                      <Key size={14} className="text-[#8E7CFF] shrink-0" />
+                      <Key size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                       {isRevealed ? (
-                        <span className="font-semibold text-[#8E7CFF] tracking-wider truncate select-all">
+                        <span className="font-semibold tracking-wider truncate select-all" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                           {revealedPlain}
                         </span>
                       ) : (
@@ -765,7 +776,13 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {isRevealed && (
-                        <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#8E7CFF]/20 text-[#8E7CFF] animate-pulse">
+                        <span
+                          className="px-1.5 py-0.5 rounded-md text-[10px] font-bold animate-pulse"
+                          style={{
+                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                            color: 'var(--app-accent-text, #DE4B64)',
+                          }}
+                        >
                           {peekSecondsLeft}s
                         </span>
                       )}
@@ -774,9 +791,14 @@ export default function Vault({ data, updateData }: VaultProps) {
                         onClick={() => handleToggleReveal(item)}
                         className={`p-2 rounded-lg transition-all ${
                           isRevealed
-                            ? 'bg-[#8E7CFF] text-white'
+                            ? 'text-white shadow-sm'
                             : 'glass-flat text-[#8E8E93] hover:text-white'
                         }`}
+                        style={
+                          isRevealed
+                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                            : undefined
+                        }
                         title={isRevealed ? 'Hide' : 'Peek for 10s'}
                       >
                         {isRevealed ? <EyeSlash size={14} /> : <Eye size={14} />}
@@ -786,9 +808,14 @@ export default function Vault({ data, updateData }: VaultProps) {
                         onClick={() => handleCopyPassword(item)}
                         className={`p-2 rounded-lg transition-all ${
                           isPasswordCopied
-                            ? 'bg-[#30D158] text-white'
+                            ? 'text-white shadow-sm'
                             : 'glass-flat text-[#8E8E93] hover:text-white'
                         }`}
+                        style={
+                          isPasswordCopied
+                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                            : undefined
+                        }
                         title="Copy Password"
                       >
                         {isPasswordCopied ? <Check size={14} /> : <Copy size={14} />}

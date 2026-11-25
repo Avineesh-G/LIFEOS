@@ -585,14 +585,15 @@ Payload specifications:
             <button
               type="button"
               onClick={handleRunAiExtraction}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-[11px] active:scale-95 transition-all cursor-pointer touch-manipulation shadow-md"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-white font-semibold text-[11px] active:scale-95 transition-all cursor-pointer touch-manipulation shadow-md"
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
               title="AI Intelligence Extraction"
             >
               <Sparkle size={13} weight="fill" />
               <span>AI</span>
             </button>
 
-            <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-full p-1 gap-0.5">
+            <div className="flex items-center glass-flat rounded-full p-1 gap-0.5">
               {/* Share */}
               <button
                 type="button"
@@ -628,7 +629,7 @@ Payload specifications:
           <div className="flex-1 min-h-0 flex items-center justify-center p-2.5 overflow-hidden bg-black/50">
             {isLoadingContent ? (
               <div className="flex flex-col items-center gap-2 text-white/60">
-                <SpinnerGap size={28} className="animate-spin text-[#0A84FF]" />
+                <SpinnerGap size={28} className="animate-spin" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                 <span className="text-[13px]">Opening file...</span>
               </div>
             ) : isImage && (blobUrl || file.localCachedUri) ? (
@@ -666,7 +667,8 @@ Payload specifications:
                           const targetUrl = blobUrl || file.downloadUrl;
                           if (targetUrl) window.open(targetUrl, '_blank');
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                        style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                       >
                         <FilePdf size={16} weight="bold" />
                         <span>Open Document Reader</span>
@@ -690,8 +692,14 @@ Payload specifications:
                 <video controls src={blobUrl} className="max-w-full max-h-[72vh] rounded-2xl" />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-[#1C1C1E] border border-white/10 text-center max-w-xs mx-auto">
-                <div className="w-14 h-14 rounded-2xl bg-[#0A84FF]/20 flex items-center justify-center text-[#0A84FF] mb-3 border border-[#0A84FF]/30">
+              <div className="flex flex-col items-center justify-center p-6 rounded-3xl glass-card text-center max-w-xs mx-auto">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
+                  style={{
+                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                    color: 'var(--app-accent-text, #DE4B64)',
+                  }}
+                >
                   <FileText size={32} weight="duotone" />
                 </div>
                 <h3 className="text-[15px] font-bold text-white truncate max-w-full">{file.name}</h3>
@@ -704,7 +712,8 @@ Payload specifications:
                     const targetUrl = blobUrl || file.downloadUrl;
                     if (targetUrl) window.open(targetUrl, '_blank');
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0A84FF] text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                 >
                   <FileText size={16} weight="bold" />
                   <span>Open Document</span>
@@ -715,7 +724,7 @@ Payload specifications:
 
           {/* ── Dedicated Bottom Control Bar (Docked cleanly below viewport, zero clashing with PDF) ── */}
           <div
-            className="w-full shrink-0 bg-[#121316] border-t border-white/10 px-4 py-2.5 flex items-center justify-between z-30 select-none"
+            className="w-full shrink-0 bg-[#121316] border-t border-white/[0.06] px-4 py-2.5 flex items-center justify-between z-30 select-none"
             style={{
               paddingBottom: 'calc(max(var(--sab, 0px), env(safe-area-inset-bottom, 0px), 12px) + 4px)',
             }}
@@ -729,7 +738,8 @@ Payload specifications:
             <button
               type="button"
               onClick={handleRunAiExtraction}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0A84FF] hover:bg-[#0A84FF]/90 text-white font-semibold text-[12.5px] shadow-md shadow-[#0A84FF]/30 active:scale-95 transition-all cursor-pointer touch-manipulation"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-[12.5px] shadow-md active:scale-95 transition-all cursor-pointer touch-manipulation"
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
             >
               <Sparkle size={15} weight="fill" />
               <span>AI Document Analysis</span>
@@ -757,7 +767,7 @@ Payload specifications:
                     <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto -mt-1 mb-2.5" />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Sparkle size={18} weight="fill" className="text-[#0A84FF]" />
+                        <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                         <span className="text-[14px] font-bold text-white tracking-tight">
                           LifeOS AI Document Intelligence
                         </span>
@@ -780,8 +790,8 @@ Payload specifications:
                   <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
                     {/* Loading State */}
                     {isAiAnalyzing && (
-                      <div className="p-6 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex flex-col items-center justify-center text-center gap-3">
-                        <SpinnerGap size={30} className="animate-spin text-[#0A84FF]" />
+                      <div className="p-6 rounded-2xl glass-flat flex flex-col items-center justify-center text-center gap-3">
+                        <SpinnerGap size={30} className="animate-spin" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                         <div>
                           <p className="text-[13px] font-semibold text-white">Analyzing Content...</p>
                           <p className="text-[11px] text-white/50 mt-0.5">
@@ -896,7 +906,8 @@ Payload specifications:
                               onClose();
                               navigate(meta.route);
                             }}
-                            className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-[#30D158] hover:bg-[#30D158]/90 text-black font-bold text-[12.5px] active:scale-95 transition-all cursor-pointer shadow-md"
+                            className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-white font-bold text-[12.5px] active:scale-95 transition-all cursor-pointer shadow-md"
+                            style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                           >
                             <span>Open in {getModuleMeta(extractedData.module).name}</span>
                             <ArrowSquareOut size={15} weight="bold" />
@@ -906,7 +917,8 @@ Payload specifications:
                         <button
                           type="button"
                           onClick={handleApplyAiAction}
-                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#0A84FF] hover:bg-[#0A84FF]/90 active:scale-95 text-white font-bold text-[14px] transition-all cursor-pointer shadow-lg shadow-[#0A84FF]/25"
+                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl active:scale-95 text-white font-bold text-[14px] transition-all cursor-pointer shadow-lg"
+                          style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                         >
                           <Sparkle size={17} weight="fill" />
                           <span>Add to {getModuleMeta(extractedData.module).name}</span>

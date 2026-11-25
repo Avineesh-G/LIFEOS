@@ -84,18 +84,18 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
 
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-3 gap-2 my-4">
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-white font-mono">{sessions.length}</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Sessions</div>
         </div>
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
-          <div className="text-2xl font-black text-[#FF453A] font-mono">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
+          <div className="text-2xl font-black font-mono" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
             {bestWeight}
             <span className="text-xs ml-0.5 text-white/60">kg</span>
           </div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Best Weight</div>
         </div>
-        <div className="p-4 rounded-[22px] bg-[#1C1C1E] border border-white/8 text-center">
+        <div className="p-4 rounded-[22px] glass-tile text-center">
           <div className="text-2xl font-black text-white font-mono">{bestReps}</div>
           <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mt-0.5">Best Reps</div>
         </div>
@@ -107,7 +107,7 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
       </div>
 
       {sessions.length === 0 ? (
-        <div className="p-8 rounded-[28px] bg-[#1C1C1E] border border-white/8 text-center text-white/50 text-sm">
+        <div className="p-8 rounded-[28px] glass-card text-center text-white/50 text-sm">
           No recorded sets for {decodedName} yet.
         </div>
       ) : (

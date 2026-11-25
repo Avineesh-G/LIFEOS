@@ -1,7 +1,9 @@
 import {
   argbFromHex,
   hexFromArgb,
-  themeFromSourceColor,
+  Hct,
+  SchemeTonalSpot,
+  MaterialDynamicColors,
 } from '@material/material-color-utilities';
 
 import { getActiveAccent, type ThemeAccent } from './themeColorManager.ts';
@@ -21,15 +23,17 @@ export type AppSection =
   | 'outing'
   | 'shopping'
   | 'vault'
-  | 'notes';
+  | 'notes'
+  | 'ai';
 
 export function getSectionFromPathname(pathname: string): AppSection {
   const p = pathname.toLowerCase();
+  if (p.startsWith('/ai') || p.startsWith('/chat')) return 'ai';
   if (p.startsWith('/calendar')) return 'calendar';
   if (p.startsWith('/gym')) return 'gym';
   if (p.startsWith('/nutrition')) return 'nutrition';
   if (p.startsWith('/spending') || p.startsWith('/finance')) return 'finance';
-  if (p.startsWith('/study')) return 'study';
+  if (p.startsWith('/study') || p.startsWith('/drive')) return 'study';
   if (p.startsWith('/timetable')) return 'timetable';
   if (p.startsWith('/tasks')) return 'tasks';
   if (p.startsWith('/laundry')) return 'laundry';
@@ -39,9 +43,7 @@ export function getSectionFromPathname(pathname: string): AppSection {
   if (p.startsWith('/shopping')) return 'shopping';
   if (p.startsWith('/vault')) return 'vault';
   if (p.startsWith('/notes')) return 'notes';
-  if (p.startsWith('/flow')) return 'study';
-  if (p.startsWith('/recall')) return 'study';
-  if (p.startsWith('/transcribe')) return 'study';
+  if (p.startsWith('/flow') || p.startsWith('/recall') || p.startsWith('/transcribe')) return 'study';
   if (p.startsWith('/morning')) return 'home';
   if (p.startsWith('/brain-dump')) return 'notes';
   return 'home';
@@ -86,6 +88,9 @@ export interface M3ColorScheme {
   onSceneBg: string;
   accentBlob: string;
   blobPosition: BlobPosition;
+  moduleAccent: string;
+  moduleSecondary: string;
+  moduleTertiary: string;
 }
 
 export type BlobPosition = 'top-right' | 'bottom-left' | 'top-left' | 'bottom-right' | 'top-center';
@@ -106,6 +111,7 @@ export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   shopping: 'top-left',
   vault: 'top-center',
   notes: 'top-right',
+  ai: 'top-center',
 };
 
 export interface SectionM3Theme {
@@ -123,64 +129,71 @@ export function hexToRgb(hex: string): [number, number, number] {
   return [r, g, b];
 }
 
-export function blendHex(baseHex: string, tintHex: string, ratio: number = 0.05): string {
+export function blendHex(baseHex: string, tintHex: string, ratio: number = 0.03): string {
   const [r1, g1, b1] = hexToRgb(baseHex);
   const [r2, g2, b2] = hexToRgb(tintHex);
   const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
   const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
   const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+/**
+ * Single Unified Theme Accent across ALL sections (follows one color across the entire page/app).
+ */
+export function getHarmonizedModuleSeed(_section: AppSection, presetSeedHex: string): string {
+  return presetSeedHex;
 }
 
 export function getM3ThemeForSection(
   section: AppSection,
-  isDark: boolean,
+  _isDark: boolean,
   accentOverride?: ThemeAccent
 ): SectionM3Theme {
   const active = accentOverride || getActiveAccent();
-  const seedHex = active.primary;
-  const sourceArgb = argbFromHex(seedHex);
-  const theme = themeFromSourceColor(sourceArgb);
+  const presetSeedHex = active.primary;
+  const presetScheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(presetSeedHex)), true, 0.0);
 
-  const rawScheme = theme.schemes.dark;
-  const neutral = theme.palettes.neutral;
+  const moduleAccent = active.primary;
+  const moduleSecondary = active.secondary || hexFromArgb(MaterialDynamicColors.secondary.getArgb(presetScheme));
+  const moduleTertiary = active.tertiary || active.secondary || hexFromArgb(MaterialDynamicColors.tertiary.getArgb(presetScheme));
 
+  // Crisp pure iOS obsidian surfaces with only a feather-light 2%-4% ambient tonal whisper
   const sceneBg = '#000000';
   const onSceneBg = '#FFFFFF';
-
-  const surface = '#1C1C1E';
+  const surface = blendHex('#141416', moduleAccent, 0.025);
   const surfaceContainerLowest = '#000000';
-  const surfaceContainerLow = '#1C1C1E';
-  const surfaceContainer = '#2C2C2E';
-  const surfaceContainerHigh = '#3A3A3C';
-  const surfaceContainerHighest = '#48484A';
+  const surfaceContainerLow = blendHex('#141417', moduleAccent, 0.025);
+  const surfaceContainer = blendHex('#18181C', moduleAccent, 0.035);
+  const surfaceContainerHigh = blendHex('#1E1E24', moduleAccent, 0.045);
+  const surfaceContainerHighest = blendHex('#282830', moduleAccent, 0.055);
   const onSurface = '#FFFFFF';
 
-  const surfaceDim = '#121214';
-  const surfaceBright = '#2C2C2E';
+  const surfaceDim = '#101013';
+  const surfaceBright = surfaceContainerHigh;
 
   const scheme: M3ColorScheme = {
-    primary: hexFromArgb(rawScheme.primary),
-    onPrimary: hexFromArgb(rawScheme.onPrimary),
-    primaryContainer: hexFromArgb(rawScheme.primaryContainer),
-    onPrimaryContainer: hexFromArgb(rawScheme.onPrimaryContainer),
-    secondary: hexFromArgb(rawScheme.secondary),
-    onSecondary: hexFromArgb(rawScheme.onSecondary),
-    secondaryContainer: hexFromArgb(rawScheme.secondaryContainer),
-    onSecondaryContainer: hexFromArgb(rawScheme.onSecondaryContainer),
-    tertiary: hexFromArgb(rawScheme.tertiary),
-    onTertiary: hexFromArgb(rawScheme.onTertiary),
-    tertiaryContainer: hexFromArgb(rawScheme.tertiaryContainer),
-    onTertiaryContainer: hexFromArgb(rawScheme.onTertiaryContainer),
-    error: hexFromArgb(rawScheme.error),
-    onError: hexFromArgb(rawScheme.onError),
-    errorContainer: hexFromArgb(rawScheme.errorContainer),
-    onErrorContainer: hexFromArgb(rawScheme.onErrorContainer),
+    primary: moduleAccent,
+    onPrimary: hexFromArgb(MaterialDynamicColors.onPrimary.getArgb(presetScheme)),
+    primaryContainer: hexFromArgb(MaterialDynamicColors.primaryContainer.getArgb(presetScheme)),
+    onPrimaryContainer: hexFromArgb(MaterialDynamicColors.onPrimaryContainer.getArgb(presetScheme)),
+    secondary: moduleSecondary,
+    onSecondary: hexFromArgb(MaterialDynamicColors.onSecondary.getArgb(presetScheme)),
+    secondaryContainer: hexFromArgb(MaterialDynamicColors.secondaryContainer.getArgb(presetScheme)),
+    onSecondaryContainer: hexFromArgb(MaterialDynamicColors.onSecondaryContainer.getArgb(presetScheme)),
+    tertiary: moduleTertiary,
+    onTertiary: hexFromArgb(MaterialDynamicColors.onTertiary.getArgb(presetScheme)),
+    tertiaryContainer: hexFromArgb(MaterialDynamicColors.tertiaryContainer.getArgb(presetScheme)),
+    onTertiaryContainer: hexFromArgb(MaterialDynamicColors.onTertiaryContainer.getArgb(presetScheme)),
+    error: '#FF453A',
+    onError: '#FFFFFF',
+    errorContainer: 'rgba(255, 69, 58, 0.16)',
+    onErrorContainer: '#FFB4AF',
     surface,
     onSurface,
-    surfaceVariant: '#2C2C2E',
-    onSurfaceVariant: '#8E8E93',
+    surfaceVariant: surfaceContainerHigh,
+    onSurfaceVariant: 'rgba(240, 240, 245, 0.72)',
     surfaceDim,
     surfaceBright,
     surfaceContainerLowest,
@@ -188,22 +201,25 @@ export function getM3ThemeForSection(
     surfaceContainer,
     surfaceContainerHigh,
     surfaceContainerHighest,
-    outline: '#38383A',
-    outlineVariant: '#2C2C2E',
+    outline: 'rgba(255, 255, 255, 0.12)',
+    outlineVariant: 'rgba(255, 255, 255, 0.07)',
     inverseSurface: '#FFFFFF',
     inverseOnSurface: '#000000',
-    inversePrimary: hexFromArgb(rawScheme.inversePrimary),
+    inversePrimary: hexFromArgb(MaterialDynamicColors.inversePrimary.getArgb(presetScheme)),
     shadow: '#000000',
     scrim: '#000000',
     sceneBg,
     onSceneBg,
-    accentBlob: seedHex,
+    accentBlob: moduleAccent,
     blobPosition: SECTION_BLOB_POSITIONS[section] || 'top-right',
+    moduleAccent,
+    moduleSecondary,
+    moduleTertiary,
   };
 
   return {
     section,
-    seedHex,
+    seedHex: moduleAccent,
     isDark: true,
     scheme,
   };
@@ -212,11 +228,22 @@ export function getM3ThemeForSection(
 export function applyM3ThemeToDocument(scheme: M3ColorScheme): void {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
+  const [mr, mg, mb] = hexToRgb(scheme.moduleAccent);
 
   root.style.setProperty('--md-primary', scheme.primary);
   root.style.setProperty('--md-on-primary', scheme.onPrimary);
   root.style.setProperty('--md-primary-container', scheme.primaryContainer);
   root.style.setProperty('--md-on-primary-container', scheme.onPrimaryContainer);
+
+  root.style.setProperty('--md-secondary', scheme.secondary);
+  root.style.setProperty('--md-on-secondary', scheme.onSecondary);
+  root.style.setProperty('--md-secondary-container', scheme.secondaryContainer);
+  root.style.setProperty('--md-on-secondary-container', scheme.onSecondaryContainer);
+
+  root.style.setProperty('--md-tertiary', scheme.tertiary);
+  root.style.setProperty('--md-on-tertiary', scheme.onTertiary);
+  root.style.setProperty('--md-tertiary-container', scheme.tertiaryContainer);
+  root.style.setProperty('--md-on-tertiary-container', scheme.onTertiaryContainer);
 
   root.style.setProperty('--md-surface', scheme.surface);
   root.style.setProperty('--md-on-surface', scheme.onSurface);
@@ -234,17 +261,31 @@ export function applyM3ThemeToDocument(scheme: M3ColorScheme): void {
   root.style.setProperty('--scene-bg', scheme.sceneBg);
   root.style.setProperty('--on-scene-bg', scheme.onSceneBg);
   root.style.setProperty('--accent-blob', scheme.accentBlob);
+
+  // Unified single-hue accent tokens across all interfaces & sub-cards
+  root.style.setProperty('--module-accent', scheme.moduleAccent);
+  root.style.setProperty('--module-accent-rgb', `${mr}, ${mg}, ${mb}`);
+  root.style.setProperty('--module-secondary', scheme.moduleSecondary);
+  root.style.setProperty('--module-tertiary', scheme.moduleTertiary);
+  root.style.setProperty('--hero-accent', scheme.moduleAccent);
+  root.style.setProperty('--card-accent', scheme.moduleAccent);
+  root.style.setProperty('--tile-accent', scheme.moduleAccent);
+  root.style.setProperty('--pill-accent', scheme.moduleAccent);
+  root.style.setProperty(
+    '--module-gradient',
+    `linear-gradient(135deg, ${scheme.moduleAccent} 0%, ${scheme.moduleSecondary} 100%)`
+  );
 }
 
 export function getNavPillBg(_section: AppSection, isDark: boolean, _pathname?: string): string {
-  const accent = getActiveAccent();
-  const [r, g, b] = hexToRgb(accent.primary);
+  const active = getActiveAccent();
+  const [r, g, b] = hexToRgb(active.primary);
   return isDark
-    ? `rgba(${Math.round(r * 0.12 + 8)}, ${Math.round(g * 0.12 + 12)}, ${Math.round(b * 0.12 + 16)}, 0.88)`
+    ? `rgba(${Math.round(r * 0.05 + 16)}, ${Math.round(g * 0.05 + 16)}, ${Math.round(b * 0.05 + 20)}, 0.92)`
     : `rgba(255, 255, 255, 0.88)`;
 }
 
 export function getNavSquircleBg(_section: AppSection, isDark: boolean, _pathname?: string): string {
   const accent = getActiveAccent();
-  return isDark ? accent.primary : accent.darkText;
+  return isDark ? (accent.tertiary || accent.secondary || accent.primary) : accent.darkText;
 }

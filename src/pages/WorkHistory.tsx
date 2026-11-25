@@ -259,7 +259,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
         <div className="p-3.5 rounded-2xl glass-card flex items-center justify-between">
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-xl text-[#8E8E93] hover:text-white glass-flat active:scale-95 transition-transform"
+            className="p-2 rounded-xl hover:text-white glass-flat active:scale-95 transition-transform"
+            style={{ color: 'var(--app-accent-text, #64D2FF)' }}
             title="Previous Month"
           >
             <CaretLeft size={18} weight="bold" />
@@ -269,12 +270,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             <span className="text-sm font-semibold text-white block">
               {format(monthDate, 'MMMM yyyy')}
             </span>
-            <span className="text-[11px] text-[#8E8E93]">Monthly Archive</span>
+            <span className="text-[11px] text-white/60 font-medium">Monthly Archive</span>
           </div>
 
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-xl text-[#8E8E93] hover:text-white glass-flat active:scale-95 transition-transform"
+            className="p-2 rounded-xl hover:text-white glass-flat active:scale-95 transition-transform"
+            style={{ color: 'var(--app-accent-text, #64D2FF)' }}
             title="Next Month"
           >
             <CaretRight size={18} weight="bold" />
@@ -298,16 +300,16 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-2.5">
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Days Logged</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Days Logged</span>
                 <span className="text-xl font-bold text-white">{nutritionStats.daysLogged}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Avg / Day</span>
-                <span className="text-xl font-bold text-[#FF9F0A]">{nutritionStats.avgCals} kcal</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Avg / Day</span>
+                <span className="text-xl font-bold" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>{nutritionStats.avgCals} kcal</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Target Hit</span>
-                <span className="text-xl font-bold text-[#30D158]">{nutritionStats.targetHitPct}%</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Target Hit</span>
+                <span className="text-xl font-bold text-white">{nutritionStats.targetHitPct}%</span>
               </div>
             </div>
 
@@ -316,7 +318,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" className="text-[#FF9F0A]" />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Nutrition Coach</span>
                   </div>
                   <Button
@@ -353,7 +355,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                         {log.mealsEaten?.length || 0} meals logged
                       </span>
                     </div>
-                    <span className="text-base font-bold text-[#FF9F0A]">
+                    <span className="text-base font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                       {log.dailyTotal} kcal
                     </span>
                   </div>
@@ -361,7 +363,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<ForkKnife size={36} weight="light" className="text-[#FF9F0A]" />}
+                icon={<ForkKnife size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
                 title="No nutrition logs this month"
                 description="Logs will appear here once meals are recorded."
               />
@@ -374,15 +376,15 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Workouts</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Workouts</span>
                 <span className="text-xl font-bold text-white">{gymStats.totalWorkouts}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Sets</span>
-                <span className="text-xl font-bold text-[#FF453A]">{gymStats.totalSets}</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Total Sets</span>
+                <span className="text-xl font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{gymStats.totalSets}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Split</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Top Split</span>
                 <span className="text-sm font-bold text-white truncate block">{gymStats.topSplit}</span>
               </div>
             </div>
@@ -391,7 +393,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" className="text-[#FF453A]" />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Workout Coach</span>
                   </div>
                   <Button
@@ -427,13 +429,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                         {format(parseISO(log.date), 'MMM d')} · {log.exercises?.length || 0} exercises
                       </span>
                     </div>
-                    <Badge label={log.type} color="#8E8E93" />
+                    <Badge label={log.type} />
                   </div>
                 ))}
               </div>
             ) : (
               <EmptyState
-                icon={<Barbell size={36} weight="light" className="text-[#FF453A]" />}
+                icon={<Barbell size={36} weight="light" style={{ color: 'var(--app-accent-text, #64D2FF)' }} />}
                 title="No workouts this month"
                 description="Completed workout routines will be saved here."
               />
@@ -446,16 +448,16 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Tasks</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Total Tasks</span>
                 <span className="text-xl font-bold text-white">{todoStats.total}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Done</span>
-                <span className="text-xl font-bold text-[#30D158]">{todoStats.completed}</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Done</span>
+                <span className="text-xl font-bold text-white">{todoStats.completed}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Success Rate</span>
-                <span className="text-xl font-bold text-[#0A84FF]">{todoStats.rate}%</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Success Rate</span>
+                <span className="text-xl font-bold" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>{todoStats.rate}%</span>
               </div>
             </div>
 
@@ -476,14 +478,13 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                     </div>
                     <Badge
                       label={task.completed ? 'Completed' : 'Pending'}
-                      color={task.completed ? '#30D158' : '#8E8E93'}
                     />
                   </div>
                 ))}
               </div>
             ) : (
               <EmptyState
-                icon={<CheckSquare size={36} weight="light" className="text-[#0A84FF]" />}
+                icon={<CheckSquare size={36} weight="light" style={{ color: 'var(--app-accent-text, #64D2FF)' }} />}
                 title="No tasks recorded this month"
                 description="Tasks for this month will appear here."
               />
@@ -496,15 +497,15 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2.5">
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Total Spent</span>
-                <span className="text-lg font-bold text-[#30D158]">₹{spendingStats.total}</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Total Spent</span>
+                <span className="text-lg font-bold" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>₹{spendingStats.total}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Daily Avg</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Daily Avg</span>
                 <span className="text-lg font-bold text-white">₹{spendingStats.dailyAvg}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#8E8E93] block">Top Cat</span>
+                <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Top Cat</span>
                 <span className="text-xs font-bold text-white truncate block">{spendingStats.topCategory}</span>
               </div>
             </div>
@@ -513,7 +514,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" className="text-[#30D158]" />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Spending Coach</span>
                   </div>
                   <Button
@@ -555,7 +556,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<Wallet size={36} weight="light" className="text-[#30D158]" />}
+                icon={<Wallet size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
                 title="No expenses logged this month"
                 description="Recorded expenses will be archived here."
               />
@@ -586,7 +587,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<Notebook size={36} weight="light" className="text-[#BF5AF2]" />}
+                icon={<Notebook size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
                 title="No notes written this month"
                 description="Notes and Brain Dumps created in this month will appear here."
               />

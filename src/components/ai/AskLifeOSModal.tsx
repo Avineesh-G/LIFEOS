@@ -63,10 +63,10 @@ interface AskLifeOSModalProps {
 }
 
 export const SPEC_STARTER_CHIPS = [
-  { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" className="text-[#0A84FF]" />, tint: '#0A84FF' },
-  { id: 'notes_summary', label: 'What notes did I capture recently?', icon: <NotePencil size={16} weight="duotone" className="text-[#64D2FF]" />, tint: '#64D2FF' },
-  { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" className="text-[#FF453A]" />, tint: '#FF453A' },
-  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" className="text-[#30D158]" />, tint: '#30D158' },
+  { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'notes_summary', label: 'What notes did I capture recently?', icon: <NotePencil size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
 ];
 
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
@@ -725,7 +725,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
         {/* Offline Banner */}
         {!isOnline && (
-          <div className="mx-4 mb-2 px-3.5 py-2 rounded-2xl glass-tile flex items-center gap-2 text-[#FF9F0A] text-xs font-semibold font-sans-flex shrink-0">
+          <div className="mx-4 mb-2 px-3.5 py-2 rounded-2xl glass-tile flex items-center gap-2 text-xs font-semibold font-sans-flex shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
             <WifiSlash size={16} weight="bold" className="shrink-0" />
             <span className="text-white/80">You are offline. Luna AI requires internet access.</span>
           </div>
@@ -743,7 +743,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
                   {/* Clean Minimal Luna Orb */}
                   <div className="relative flex items-center justify-center my-1 text-white">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full glass-nav nav-rim-light shadow-xl flex items-center justify-center relative border border-white/10">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full glass-nav nav-rim-light shadow-xl flex items-center justify-center relative">
                       <LunaComicBubbleIcon size={34} />
                     </div>
                   </div>
@@ -763,7 +763,13 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider font-sans-flex">
                         Quick Start: Scan Notes
                       </span>
-                      <span className="text-[10px] text-[#BF5AF2] font-semibold font-sans-flex px-2 py-0.5 rounded-full bg-[#BF5AF2]/10 border border-[#BF5AF2]/20">
+                      <span
+                        className="text-[10px] font-semibold font-sans-flex px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                          color: 'var(--app-accent-text, #DE4B64)',
+                        }}
+                      >
                         Groq Vision (Max 3)
                       </span>
                     </div>
@@ -773,13 +779,19 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <button
                         type="button"
                         onClick={handleCaptureCamera}
-                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 border border-white/10 hover:border-[#0A84FF]/40 shadow-sm"
+                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 shadow-sm"
                       >
-                        <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-[#0A84FF]/20 text-[#0A84FF]">
+                        <div
+                          className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                          style={{
+                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                            color: 'var(--app-accent-text, #DE4B64)',
+                          }}
+                        >
                           <Camera size={16} weight="duotone" />
                         </div>
                         <div>
-                          <span className="text-[12px] font-bold text-white leading-tight block group-hover:text-[#0A84FF] font-sans-flex">
+                          <span className="text-[12px] font-bold text-white leading-tight block font-sans-flex">
                             {Capacitor.isNativePlatform() ? 'Take Photo' : 'Open Webcam'}
                           </span>
                           <span className="text-[10px] text-white/50 leading-tight block mt-0.5 font-sans-flex">
@@ -792,13 +804,19 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <button
                         type="button"
                         onClick={handlePickGallery}
-                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 border border-white/10 hover:border-[#BF5AF2]/40 shadow-sm"
+                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 shadow-sm"
                       >
-                        <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-[#BF5AF2]/20 text-[#BF5AF2]">
+                        <div
+                          className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                          style={{
+                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                            color: 'var(--app-accent-text, #DE4B64)',
+                          }}
+                        >
                           <ImageIcon size={16} weight="duotone" />
                         </div>
                         <div>
-                          <span className="text-[12px] font-bold text-white leading-tight block group-hover:text-[#BF5AF2] font-sans-flex">
+                          <span className="text-[12px] font-bold text-white leading-tight block font-sans-flex">
                             {Capacitor.isNativePlatform() ? 'Upload Photo' : 'Upload Images'}
                           </span>
                           <span className="text-[10px] text-white/50 leading-tight block mt-0.5 font-sans-flex">

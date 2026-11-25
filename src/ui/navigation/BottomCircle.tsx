@@ -13,7 +13,7 @@ export interface BottomCircleProps {
 }
 
 export function BottomCircle({
-  tint = '#0A84FF',
+  tint = '#8B1E3F',
   isCompact = false,
   onClick,
   icon,

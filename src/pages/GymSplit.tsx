@@ -40,10 +40,10 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   const workoutPlans: WorkoutPlan[] = data.workoutPlans && data.workoutPlans.length > 0
     ? data.workoutPlans
     : DAYS.map((d) => ({
-        day: d,
-        type: d === 'Mon' ? 'PUSH' : d === 'Tue' ? 'PULL' : d === 'Wed' ? 'LEGS' : d === 'Fri' ? 'UPPER' : d === 'Sat' ? 'LOWER' : 'REST',
-        exercises: [],
-      }));
+      day: d,
+      type: d === 'Mon' ? 'PUSH' : d === 'Tue' ? 'PULL' : d === 'Wed' ? 'LEGS' : d === 'Fri' ? 'UPPER' : d === 'Sat' ? 'LOWER' : 'REST',
+      exercises: [],
+    }));
 
   const currentPlan = workoutPlans.find((p) => p.day === selectedDay) || {
     day: selectedDay,
@@ -155,17 +155,19 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 triggerHaptic('selection');
                 setSelectedDay(day);
               }}
-              className={`py-2 px-1 rounded-[18px] flex flex-col items-center gap-0.5 transition-all cursor-pointer ${
+              className={`py-2 px-1 rounded-[18px] flex flex-col items-center gap-0.5 transition-colors cursor-pointer ${
                 isSelected
-                  ? 'glass-tile text-[#FF453A] font-bold shadow-sm'
+                  ? 'glass-tile font-bold shadow-sm'
                   : 'text-white/60 hover:text-white'
               }`}
+              style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
             >
               <span className="text-[11px] font-bold uppercase">{day}</span>
               <span
                 className={`text-[9px] font-semibold truncate w-full text-center ${
-                  isSelected ? 'text-[#FF453A]' : 'text-white/40'
+                  isSelected ? '' : 'text-white/40'
                 }`}
+                style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
               >
                 {type}
               </span>
@@ -184,11 +186,12 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                 key={preset}
                 type="button"
                 onClick={() => handleUpdateSplitType(preset)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                   isActive
-                    ? 'glass-tile text-[#FF453A] shadow-sm'
+                    ? 'glass-tile shadow-sm'
                     : 'glass-flat text-white/70 hover:text-white'
                 }`}
+                style={isActive ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
               >
                 {preset}
               </button>
@@ -226,7 +229,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         </div>
       ) : currentExercises.length === 0 ? (
         <div className="my-6 p-8 rounded-[28px] glass-card text-center space-y-3">
-          <Barbell size={32} weight="duotone" className="text-[#FF453A] mx-auto" />
+          <Barbell size={32} weight="duotone" className="mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
           <h3 className="text-base font-bold text-white">No exercises planned for {currentDaySplit}</h3>
           <p className="text-xs text-white/50 max-w-xs mx-auto leading-relaxed">
             Tap the button below to add target exercises, sets, and weights.
@@ -248,22 +251,22 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
               icon={<Barbell size={18} weight="duotone" />}
               iconTint="#FF453A"
               title={ex.name}
-              subtitle={`${ex.sets || 3} sets × ${ex.reps || 10} reps${
-                ex.weight ? ` • ${ex.weight} kg` : ''
-              }`}
-              trailing={
-                <button
-                  type="button"
-                  onClick={() => handleDeleteExercise(ex.id)}
-                  className="p-1.5 rounded-full text-white/30 hover:text-[#FF453A] transition-colors cursor-pointer"
-                >
-                  <Trash size={16} />
-                </button>
-              }
-              showSeparator={i < currentExercises.length - 1}
+              subtitle={`${ ex.sets || 3 } sets × ${ex.reps || 10} reps${
+          ex.weight ? ` • ${ex.weight} kg` : ''
+        }`}
+        trailing={
+          <button
+            type="button"
+            onClick={() => handleDeleteExercise(ex.id)}
+            className="p-1.5 rounded-full text-white/30 hover:text-[#FF453A] transition-colors cursor-pointer"
+          >
+            <Trash size={16} />
+          </button>
+        }
+        showSeparator={i < currentExercises.length - 1}
             />
           ))}
-        </GroupedList>
+      </GroupedList>
       )}
 
       {/* Toast Feedback */}

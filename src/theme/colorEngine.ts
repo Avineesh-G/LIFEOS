@@ -79,25 +79,30 @@ const RAW_WARNING_HEX = '#ED6C02';
 /**
  * Generates an M3ColorScheme object for a given seed hex and mode (isDark)
  */
-export function generateSchemeFromSeed(seedHex: string, isDark: boolean): M3ColorScheme {
+export function generateSchemeFromSeed(
+  seedHex: string,
+  isDark: boolean,
+  secondaryOverride?: string,
+  tertiaryOverride?: string
+): M3ColorScheme {
   const seedArgb = argbFromHex(seedHex);
   const sourceHct = Hct.fromInt(seedArgb);
   const scheme = new SchemeTonalSpot(sourceHct, isDark, 0.0);
 
-  // Dynamic colors resolution
-  const primary = hexFromArgb(MaterialDynamicColors.primary.getArgb(scheme));
-  const onPrimary = hexFromArgb(MaterialDynamicColors.onPrimary.getArgb(scheme));
+  // Preserve rich expressive brand tones instead of M3 Tone-80 pastel washouts (e.g. Burgundy -> pink)
+  const primary = seedHex;
+  const onPrimary = '#FFFFFF';
   const primaryContainer = hexFromArgb(MaterialDynamicColors.primaryContainer.getArgb(scheme));
   const onPrimaryContainer = hexFromArgb(MaterialDynamicColors.onPrimaryContainer.getArgb(scheme));
   const inversePrimary = hexFromArgb(MaterialDynamicColors.inversePrimary.getArgb(scheme));
 
-  const secondary = hexFromArgb(MaterialDynamicColors.secondary.getArgb(scheme));
-  const onSecondary = hexFromArgb(MaterialDynamicColors.onSecondary.getArgb(scheme));
+  const secondary = secondaryOverride || seedHex;
+  const onSecondary = '#FFFFFF';
   const secondaryContainer = hexFromArgb(MaterialDynamicColors.secondaryContainer.getArgb(scheme));
   const onSecondaryContainer = hexFromArgb(MaterialDynamicColors.onSecondaryContainer.getArgb(scheme));
 
-  const tertiary = hexFromArgb(MaterialDynamicColors.tertiary.getArgb(scheme));
-  const onTertiary = hexFromArgb(MaterialDynamicColors.onTertiary.getArgb(scheme));
+  const tertiary = tertiaryOverride || secondary;
+  const onTertiary = '#FFFFFF';
   const tertiaryContainer = hexFromArgb(MaterialDynamicColors.tertiaryContainer.getArgb(scheme));
   const onTertiaryContainer = hexFromArgb(MaterialDynamicColors.onTertiaryContainer.getArgb(scheme));
 
@@ -296,11 +301,11 @@ export function schemeToCssVariables(scheme: M3ColorScheme): Record<string, stri
     '--md-primary-rgb': `${pr}, ${pg}, ${pb}`,
     '--primary-rgb': `${pr}, ${pg}, ${pb}`,
     '--accent-rgb': `${pr}, ${pg}, ${pb}`,
-    '--accent-soft': `rgba(${pr}, ${pg}, ${pb}, 0.15)`,
-    '--accent-glow': `rgba(${pr}, ${pg}, ${pb}, 0.35)`,
+    '--accent-soft': `rgba(${pr}, ${pg}, ${pb}, 0.16)`,
+    '--accent-glow': `rgba(${pr}, ${pg}, ${pb}, 0.28)`,
     '--pill-active-bg': `rgba(${pr}, ${pg}, ${pb}, 0.18)`,
-    '--pill-active-text': scheme.primary,
-    '--accent-blob': scheme.primary,
+    '--pill-active-text': scheme.tertiary,
+    '--accent-blob': scheme.secondary,
     '--scene-bg': scheme.surface,
     '--on-scene-bg': scheme.onSurface,
     '--md-scene-bg': scheme.surface,
@@ -308,6 +313,7 @@ export function schemeToCssVariables(scheme: M3ColorScheme): Record<string, stri
     // Bridge legacy variables to unified single M3 theme
     '--accent': scheme.primary,
     '--accent-primary': scheme.primary,
+    '--accent-secondary': scheme.secondary,
     '--accent-container': scheme.primaryContainer,
     '--accent-on-container': scheme.onPrimaryContainer,
     '--bg-app': scheme.surface,
@@ -332,6 +338,6 @@ export function schemeToCssVariables(scheme: M3ColorScheme): Record<string, stri
 
 export function getSchemeForPalette(paletteId: string, isDark: boolean): M3ColorScheme {
   const palette = getPaletteById(paletteId);
-  return generateSchemeFromSeed(palette.seed, isDark);
+  return generateSchemeFromSeed(palette.seed, isDark, palette.secondarySeed, palette.tertiarySeed);
 }
 

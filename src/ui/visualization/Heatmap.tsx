@@ -13,7 +13,7 @@ export interface HeatmapProps {
 
 export function Heatmap({
   days,
-  color = '#64D2FF',
+  color = '#DE4B64',
   className = '',
 }: HeatmapProps) {
   // 5 levels of intensity

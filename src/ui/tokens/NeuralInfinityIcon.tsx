@@ -28,7 +28,7 @@ export function NeuralInfinityIcon({
       style={{ overflow: 'visible' }}
     >
       <defs>
-        {/* Left-to-Right Neural Gradient: Violet -> Cyan -> Amber */}
+        {/* Left-to-Right Unified Theme Gradient */}
         <linearGradient
           id={`neural-grad-${uniqueId}`}
           x1="2"
@@ -37,11 +37,9 @@ export function NeuralInfinityIcon({
           y2="16"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#C084FC" />
-          <stop offset="25%" stopColor="#A855F7" />
-          <stop offset="50%" stopColor="#38BDF8" />
-          <stop offset="75%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#FBBF24" />
+          <stop offset="0%" stopColor="var(--app-accent, #8B1E3F)" />
+          <stop offset="50%" stopColor="var(--app-accent-end, #B52B4D)" />
+          <stop offset="100%" stopColor="var(--app-accent-text, #DE4B64)" />
         </linearGradient>
 
         {/* Outer Glass Shell Rim Gradient */}
@@ -54,9 +52,8 @@ export function NeuralInfinityIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <stop offset="30%" stopColor="#E9D5FF" stopOpacity="0.6" />
-          <stop offset="70%" stopColor="#BAE6FD" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#FEF3C7" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="var(--app-accent-text, #DE4B64)" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.8" />
         </linearGradient>
 
         {/* Core Fiber Bright Highlights */}
@@ -69,8 +66,7 @@ export function NeuralInfinityIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="45%" stopColor="#67E8F9" />
-          <stop offset="75%" stopColor="#FDE68A" />
+          <stop offset="50%" stopColor="var(--app-accent-text, #DE4B64)" />
           <stop offset="100%" stopColor="#FFFFFF" />
         </linearGradient>
       </defs>
@@ -125,7 +121,7 @@ export function NeuralInfinityIcon({
 
       {/* ── Specular Center Crossroads Sparkle ── */}
       <circle cx="16" cy="16" r="1.5" fill="#FFFFFF" />
-      <circle cx="16" cy="16" r="3" fill="#38BDF8" opacity="0.4" />
+      <circle cx="16" cy="16" r="3" fill="var(--app-accent-text, #DE4B64)" opacity="0.4" />
     </svg>
   );
 }

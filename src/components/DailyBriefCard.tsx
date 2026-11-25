@@ -99,8 +99,8 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
               <span>{brief.timeWindow.availableMinutes}m window</span>
             </span>
           ) : brief.timeWindow.type === 'in_progress' ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wide bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10.5px] font-tag font-bold tracking-wide bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--app-accent-text)] animate-pulse" />
               <span>In Session</span>
             </span>
           ) : (
@@ -113,7 +113,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
         {/* Progress Micro-Signal */}
         {brief.progressSummary.hasActivity && (
           <div className="flex items-center gap-1 text-[11px] font-semibold text-[var(--md-on-surface-variant)] font-stat">
-            <CheckCircleRoundedIcon size={13} className="text-emerald-500 shrink-0" />
+            <CheckCircleRoundedIcon size={13} className="text-[var(--app-accent-text)] shrink-0" />
             <span>
               {brief.progressSummary.completedCount}/{brief.progressSummary.totalCount} tasks
               
@@ -242,7 +242,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
             <div className="flex items-center gap-2 min-w-0">
               <WarningAmberIcon
                 size={15}
-                className={brief.attention.severity === 'urgent' ? 'text-amber-500 shrink-0' : 'text-[var(--md-primary)] shrink-0'}
+                className="text-[var(--app-accent-text)] shrink-0"
               />
               <span className="text-xs font-medium truncate">
                 {brief.attention.text}

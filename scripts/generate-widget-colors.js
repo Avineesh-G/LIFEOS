@@ -26,6 +26,29 @@ const targetXmlPath = path.join(
   'widget_phase_colors.xml'
 );
 
+function toAndroidHexColor(color) {
+  if (typeof color !== 'string') return '#FFFFFF';
+  const trimmed = color.trim();
+  if (trimmed.startsWith('#')) return trimmed;
+  const match = trimmed.match(
+    /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i
+  );
+  if (!match) return trimmed;
+  const toHex = (n) =>
+    Math.max(0, Math.min(255, Math.round(Number(n))))
+      .toString(16)
+      .padStart(2, '0')
+      .toUpperCase();
+  const r = toHex(match[1]);
+  const g = toHex(match[2]);
+  const b = toHex(match[3]);
+  if (match[4] !== undefined) {
+    const a = toHex(Number(match[4]) * 255);
+    return `#${a}${r}${g}${b}`;
+  }
+  return `#${r}${g}${b}`;
+}
+
 async function generate() {
   console.log('🎨 [LifeOS Widget] Generating native widget phase colors from phaseSeedColors.ts...');
 
@@ -42,13 +65,13 @@ async function generate() {
     const { scheme } = m3Theme;
 
     xml += `    <!-- ${phase.toUpperCase()} PHASE (M3 Seed: ${m3Theme.seedHex}) -->\n`;
-    xml += `    <color name="${phase}_card_surface">${scheme.surfaceContainerLow}</color>\n`;
-    xml += `    <color name="${phase}_card_border">${scheme.outlineVariant}</color>\n`;
-    xml += `    <color name="${phase}_text_primary">${scheme.onSurface}</color>\n`;
-    xml += `    <color name="${phase}_text_secondary">${scheme.onSurfaceVariant}</color>\n`;
-    xml += `    <color name="${phase}_text_muted">${scheme.outline}</color>\n`;
-    xml += `    <color name="${phase}_accent">${scheme.primary}</color>\n`;
-    xml += `    <color name="${phase}_accent_contrast">${scheme.onPrimary}</color>\n\n`;
+    xml += `    <color name="${phase}_card_surface">${toAndroidHexColor(scheme.surfaceContainerLow)}</color>\n`;
+    xml += `    <color name="${phase}_card_border">${toAndroidHexColor(scheme.outlineVariant)}</color>\n`;
+    xml += `    <color name="${phase}_text_primary">${toAndroidHexColor(scheme.onSurface)}</color>\n`;
+    xml += `    <color name="${phase}_text_secondary">${toAndroidHexColor(scheme.onSurfaceVariant)}</color>\n`;
+    xml += `    <color name="${phase}_text_muted">${toAndroidHexColor(scheme.outline)}</color>\n`;
+    xml += `    <color name="${phase}_accent">${toAndroidHexColor(scheme.primary)}</color>\n`;
+    xml += `    <color name="${phase}_accent_contrast">${toAndroidHexColor(scheme.onPrimary)}</color>\n\n`;
   }
 
   xml += '</resources>\n';

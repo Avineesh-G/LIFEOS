@@ -226,7 +226,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
   };
 
   return (
-    <div className="w-full text-white selection:bg-[#30D158]/30">
+    <div className="w-full text-white">
       {/* ── Dynamic Large Title Header for Each Page ── */}
       <LargeTitleHeader
         title={currentTab === 'expenses' ? 'Spending' : 'Money Lent & Borrowed'}
@@ -286,21 +286,18 @@ export default function Spending({ data, updateData }: SpendingProps) {
           <>
             {/* 1. Hero Monthly Ledger Card */}
             <div className="w-full glass-hero p-5 rounded-[32px] flex flex-col gap-4 shadow-xl select-none relative overflow-hidden">
-              <div
-                className="absolute inset-0 pointer-events-none opacity-20"
-                style={{
-                  background: 'radial-gradient(ellipse at top left, #30D158 0%, transparent 70%)',
-                }}
-              />
 
               <div className="flex items-start justify-between relative z-10">
                 <div className="flex flex-col">
-                  <span className="text-xs font-semibold text-[rgba(235,235,245,0.60)]">
+                  <span className="text-xs font-semibold text-[rgba(235,235,245,0.68)]">
                     TOTAL MONTHLY SPEND
                   </span>
-                  <div className="text-4xl font-black text-[#30D158] tabular-nums tracking-tight mt-1">
+                  <div
+                    className="text-4xl font-black tabular-nums tracking-tight mt-1"
+                    style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+                  >
                     Rs {monthTotal}{' '}
-                    <span className="text-sm font-normal text-[rgba(235,235,245,0.40)]">
+                    <span className="text-sm font-normal text-[rgba(235,235,245,0.50)]">
                       / Rs {monthlyBudget}
                     </span>
                   </div>
@@ -327,7 +324,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
             {/* 2. Category Breakdown */}
             {categoryBreakdown.length > 0 && (
               <div className="w-full glass-card rounded-[26px] p-4 flex flex-col gap-3 select-none">
-                <span className="text-xs font-bold text-[rgba(235,235,245,0.60)] uppercase tracking-wider">
+                <span className="text-xs font-bold text-[rgba(235,235,245,0.68)] uppercase tracking-wider">
                   Category Breakdown
                 </span>
                 <div className="flex flex-col gap-2.5">
@@ -335,14 +332,13 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     <div key={cat}>
                       <div className="flex justify-between text-xs font-medium mb-1">
                         <span className="text-white font-semibold">{cat}</span>
-                        <span className="text-[rgba(235,235,245,0.60)] tabular-nums">
-                          Rs {amt} ({Math.round((amt / (monthTotal || 1)) * 100)}%)
+                        <span className="tabular-nums font-semibold" style={{ color: 'var(--app-accent-text, #64D2FF)' }}>
+                          Rs {amt} <span className="text-white/55 font-normal">({Math.round((amt / (monthTotal || 1)) * 100)}%)</span>
                         </span>
                       </div>
                       <ProgressBar
                         progress={amt / (monthTotal || 1)}
-                        height={4}
-                        color="#30D158"
+                        height={5}
                       />
                     </div>
                   ))}
@@ -401,12 +397,6 @@ export default function Spending({ data, updateData }: SpendingProps) {
           <>
             {/* 1. Hero Multi-Metric Summary Deck */}
             <div className="w-full glass-hero p-5 rounded-[32px] flex flex-col gap-4 shadow-xl select-none relative overflow-hidden">
-              <div
-                className="absolute inset-0 pointer-events-none opacity-20"
-                style={{
-                  background: 'radial-gradient(ellipse at top left, #38BDF8 0%, transparent 70%)',
-                }}
-              />
 
               {/* Main Headline Metric: Net Balance Position */}
               <div className="flex items-start justify-between relative z-10">
@@ -483,7 +473,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   {/* To Receive (Lent) */}
                   <div className="p-3 rounded-2xl glass-tile flex flex-col gap-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-[rgba(235,235,245,0.60)] uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-[rgba(235,235,245,0.68)] uppercase tracking-wider">
                         To Receive (Lent)
                       </span>
                       <div className="w-5 h-5 rounded-full bg-[#30D158]/20 text-[#30D158] flex items-center justify-center">
@@ -493,7 +483,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     <div className="text-xl font-black text-[#30D158] tabular-nums mt-0.5">
                       Rs {totalGivenPending}
                     </div>
-                    <span className="text-[10px] text-[rgba(235,235,245,0.45)]">
+                    <span className="text-[10px] text-[rgba(235,235,245,0.55)]">
                       {givenCount} pending loan{givenCount === 1 ? '' : 's'}
                     </span>
                   </div>
@@ -501,7 +491,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   {/* To Pay (Borrowed) */}
                   <div className="p-3 rounded-2xl glass-tile flex flex-col gap-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-[rgba(235,235,245,0.60)] uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-[rgba(235,235,245,0.68)] uppercase tracking-wider">
                         To Pay (Borrowed)
                       </span>
                       <div className="w-5 h-5 rounded-full bg-[#FF453A]/20 text-[#FF453A] flex items-center justify-center">
@@ -511,7 +501,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     <div className="text-xl font-black text-[#FF453A] tabular-nums mt-0.5">
                       Rs {totalBorrowedPending}
                     </div>
-                    <span className="text-[10px] text-[rgba(235,235,245,0.45)]">
+                    <span className="text-[10px] text-[rgba(235,235,245,0.55)]">
                       {borrowedCount} pending debt{borrowedCount === 1 ? '' : 's'}
                     </span>
                   </div>
@@ -532,9 +522,14 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     }}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                       lentDirectionFilter === dir
-                        ? 'bg-[#38BDF8] text-black font-bold shadow-sm'
-                        : 'glass-tile text-[rgba(235,235,245,0.60)] hover:text-white'
+                        ? 'text-white font-bold shadow-sm'
+                        : 'glass-tile text-[rgba(235,235,245,0.68)] hover:text-white'
                     }`}
+                    style={
+                      lentDirectionFilter === dir
+                        ? { background: 'linear-gradient(135deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)' }
+                        : undefined
+                    }
                   >
                     {dir === 'all'
                       ? 'All Flows'
@@ -556,9 +551,14 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     }}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                       lentStatusFilter === st
-                        ? 'bg-white/20 text-white font-bold'
-                        : 'glass-flat text-[rgba(235,235,245,0.45)] hover:text-white'
+                        ? 'droplet-active font-bold'
+                        : 'glass-flat text-[rgba(235,235,245,0.60)] hover:text-white'
                     }`}
+                    style={
+                      lentStatusFilter === st
+                        ? { color: 'var(--app-accent-text, #64D2FF)' }
+                        : undefined
+                    }
                   >
                     {st === 'all' ? 'All Status' : st === 'pending' ? 'Pending' : 'Settled / Returned'}
                   </button>
@@ -636,11 +636,11 @@ export default function Spending({ data, updateData }: SpendingProps) {
                               {isGiven ? '+' : '-'}Rs {item.amount}
                             </span>
                             <span
-                              className={`text-[9.5px] px-2 py-0.5 rounded-full font-semibold ${
-                                isReturned
-                                  ? 'bg-[#30D158]/20 text-[#30D158]'
-                                  : 'bg-[#FF9F0A]/20 text-[#FF9F0A]'
-                              }`}
+                              className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold"
+                              style={{
+                                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                                color: 'var(--app-accent-text, #DE4B64)',
+                              }}
                             >
                               {isReturned ? 'Settled' : 'Pending'}
                             </span>

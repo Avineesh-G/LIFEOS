@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck, Sparkle } from '../ui/tokens/icons';
+import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck, Lightning, Bell, Drop, Palette, SquaresFour, Brain } from '../ui/tokens/icons';
 import { CURRENT_VERSION_NAME } from '../version';
 
 export interface AppUpdate {
@@ -25,14 +25,34 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-12-royal-burgundy-unified-liquid-glass-icons',
+    category: 'Royal Burgundy, Liquid Glass & Unified Icons',
+    icon: React.createElement(Palette, { size: 18, weight: 'duotone' }),
+    title: 'Royal Burgundy Single-Hue Gradient, Unified Theme Icons & What’s New Icon Refresh',
+    dateTime: '25 Nov 2026, 06:50 PM',
+    fullDateTime: 'Wednesday, November 25, 2026 at 06:50:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[var(--app-accent-text)]',
+    summary:
+      'Refined the Material 3 + iOS Liquid Glass color architecture to follow one unified theme hue per page, eliminated dark-mode pink tone washouts in favor of Royal Burgundy (#8B1E3F → #B52B4D), unified every application icon, AI badge, and modal to the active theme color, and replaced Gemini-style What’s New icons with interface-matched logos.',
+    points: [
+      'Royal Burgundy Single-Hue Engine: Fixed M3 dark-mode Tone-80 pastel washouts so Burgundy stays true deep wine (#8B1E3F → #B52B4D) with crisp #FFFFFF card typography and iOS Liquid Blue kept available in Appearance presets.',
+      'Unified Icons Across All Interfaces: Aligned every icon, spinner, badge, animated vector, and custom modal accent across Home, Gym, Nutrition, Spending, Drive, Vault, Laundry, Calendar, Tasks, Shopping, Outings, Luna AI, and Settings to the active theme color.',
+      'Light Ambient Liquid Glass Finish: Preserved pure Apple iOS water droplet meniscus highlights, crystal dock droplet refraction, and feather-light 3%–8% ambient gradients without white card borders or GPU blur.',
+      'What’s New & Updater Icon Refresh: Replaced Gemini-like star icons in What’s New cards, release detail bullets, and the In-App Updater modal with icons matching each update’s interface and feature set.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-11-zero-lag-zero-blur-liquid-glass-luna-ai-upgrade',
     category: 'Zero-Lag Core, Liquid Glass & Luna AI',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Lightning, { size: 18, weight: 'duotone' }),
     title: 'Zero-Transition 120Hz Core, True Zero-Blur Liquid Glass, Hardware Tier Engine & Luna AI Upgrade',
     dateTime: '25 Nov 2026, 12:20 PM',
     fullDateTime: 'Wednesday, November 25, 2026 at 12:20:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    tag: 'v3.4.11',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major stability, smoothness, and AI intelligence release removing route transition freezes and GPU blur bottlenecks from the root, resolving the navigation dock droplet hairline and Nutrition tab stall, adding adaptive RAM/CPU/storage performance tiers, and upgrading Luna AI across all six LifeOS domains.',
     points: [
@@ -49,12 +69,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-10-laundry-notifications-deep-linking-test-suite-lent-card',
     category: 'Notifications Lifecycle, Deep-Linking & Spending Ledger',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Bell, { size: 18, weight: 'duotone' }),
     title: 'Complete Laundry Notifications Lifecycle, Direct Deep-Linking, Multi-Interface Test Suite & Redesigned Lending Ledger',
     dateTime: '24 Nov 2026, 06:45 PM',
     fullDateTime: 'Tuesday, November 24, 2026 at 06:45:00 PM IST',
     tag: 'v3.4.10',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major notifications and user experience update bringing an end-to-end Laundry notification lifecycle with daily dhobi checks, instant deep-linking on notification taps, a multi-interface test alert suite with 20-second cooldown in Settings, a redesigned Money Lent & Borrowed hero card with flow ratio bar, and 0ms liquid droplet navigation.',
     points: [
@@ -72,12 +92,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-9-drive-pdf-viewer-droplet-drag-instant-profile',
     category: 'Drive PDF AI, Fluid Droplet Drag & Zero-Lag Core',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(HardDrive, { size: 18, weight: 'duotone' }),
     title: 'Drive In-App PDF Viewing & AI Extraction, Fluid Droplet Drag Detents, Nutrition AI Layout & Instant Avatars',
     dateTime: '21 Nov 2026, 11:57 AM',
     fullDateTime: 'Saturday, November 21, 2026 at 11:57:00 AM IST',
     tag: 'v3.4.9',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major functionality and fluid experience update bringing native in-app PDF viewing and AI data extraction, ultra-responsive 120Hz liquid droplet navigation dragging, Nutrition AI badge layout perfection, 0ms instant profile pictures, and centered Luna chat experience.',
     points: [
@@ -94,12 +114,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-8-blank-page-fix-liquid-water-optics-crisp-haptics',
     category: 'Liquid Water Optics & Zero-Lag Core',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Drop, { size: 18, weight: 'duotone' }),
     title: 'Blank Page Root Fix, Complete Water Liquid Optics, Crisp Multi-Tier Haptics & Zero-Lag 120 FPS',
     dateTime: '18 Nov 2026, 09:55 AM',
     fullDateTime: 'Wednesday, November 18, 2026 at 09:55:00 AM IST',
     tag: 'v3.4.8',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major performance and stability update resolving interface blank page rendering, bringing complete physics-grounded water liquid optics, rock-solid container stability, crisp multi-tier linear resonant actuator (LRA) haptics, and locked 120 FPS navigation.',
     points: [
@@ -117,12 +137,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-7-liquid-glass-blur-matching-send-pod-rock-solid-cards',
     category: 'Liquid Glass Aesthetics & Core Stability',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Drop, { size: 18, weight: 'duotone' }),
     title: 'Liquid Glass Progressive Blur, Matching Send Pod, Rock-Solid Cards & Smooth Startup',
     dateTime: '17 Nov 2026, 02:45 PM',
     fullDateTime: 'Tuesday, November 17, 2026 at 02:45:00 PM IST',
     tag: 'v3.4.7',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major polish and performance release introducing GPU-accelerated Apple Liquid Glass progressive blur drops, precision 1:1 matching circular send pod, rock-solid container surfaces, seamless non-blocking startup transitions, and dedicated full-width quotation marquee.',
     points: [
@@ -141,12 +161,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-6-universal-google-flex-always-fresh-chat-oled-cards',
     category: 'Universal Typography & Core Architecture',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Palette, { size: 18, weight: 'duotone' }),
     title: 'Universal Google Sans Flex, Always-Fresh Chat & Borderless OLED Action Cards',
     dateTime: '17 Nov 2026, 12:20 PM',
     fullDateTime: 'Tuesday, November 17, 2026 at 12:20:00 PM IST',
     tag: 'v3.4.6',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Major milestone release delivering universal Google Sans Flex & Google Flex typography across all screens, an always-fresh chat launch architecture, WebKit-accelerated ambient blur shields, mobile-optimized single-glance tables, and seamless borderless OLED action proposal cards.',
     points: [
@@ -163,12 +183,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-5-action-proposal-card-borderless-oled',
     category: 'UI & Action Architecture',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(SquaresFour, { size: 18, weight: 'duotone' }),
     title: 'Borderless OLED Action Proposal Cards & Zero-Overflow Layout',
     dateTime: '17 Nov 2026, 11:00 AM',
     fullDateTime: 'Tuesday, November 17, 2026 at 11:00:00 AM IST',
     tag: 'v3.4.5',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Completely redesigned the AI Action Proposal cards to eliminate white border outlines, convert to seamless borderless OLED dark containers (#141418), and resolve title and badge text overflowing.',
     points: [
@@ -183,12 +203,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-4-always-fresh-new-chat-ambient-shield',
     category: 'AI & Intelligence Architecture',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Brain, { size: 18, weight: 'duotone' }),
     title: 'Always-Fresh New Chat Architecture & Ambient Collision Shield',
     dateTime: '17 Nov 2026, 10:00 AM',
     fullDateTime: 'Tuesday, November 17, 2026 at 10:00:00 AM IST',
     tag: 'v3.4.4',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Configured Luna AI to always open a fresh, clean chat session by default on launch while preserving all past conversation threads with executive topic headings in the Chat Threads drawer, reinforced with a WebKit-masked ambient blur shield.',
     points: [
@@ -204,12 +224,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-3-google-sans-flex-universal-typography-ai-drawer',
     category: 'Typography & Architecture',
-    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    icon: React.createElement(Palette, { size: 18, weight: 'duotone' }),
     title: 'Universal Google Sans Flex & Google Flex Typography System',
     dateTime: '17 Nov 2026, 09:50 AM',
     fullDateTime: 'Tuesday, November 17, 2026 at 09:50:00 AM IST',
     tag: 'v3.4.3',
-    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Universal deployment of Google Sans Flex & Google Flex across the entire LifeOS application, sub-interfaces, and pop-up dialogs with full variable font axes and subpixel clarity, paired with instant Gmail avatar integration and synchronized Groq API key configuration.',
     points: [
@@ -225,12 +245,12 @@ export const APP_UPDATES: AppUpdate[] = [
   {
     id: 'update-v3-4-2-top-tier-liquid-glass-typography-subinterfaces',
     category: 'Design & Visual Systems',
-    icon: React.createElement(Sparkle, { size: 13, weight: 'bold' }),
+    icon: React.createElement(Drop, { size: 13, weight: 'bold' }),
     title: 'Top-Tier Water Liquid Glass, Crisp Typography & Sub-Interface Architecture',
     dateTime: 'Nov 17 • 9:20 AM',
     fullDateTime: 'Tuesday, Nov 17, 2026 • 9:20 AM',
     tag: 'v3.4.3',
-    colorClass: 'text-[#0A84FF]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Flagship Tier-1 liquid glass specular meniscus engine, razor-sharp subpixel OpenType font calibration, seamless borderless OLED popups and drawers, and an executive ChatGPT mobile copilot interface.',
     points: [
       'Top-Tier Water Liquid Glass: Enhanced Tier-1 device surfaces with physics-grounded radial specular meniscus reflections, multi-stop volumetric light refraction, and pure OLED ambient drop shadows with zero GPU blur overhead.',
@@ -249,7 +269,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 16 • 12:15 AM',
     fullDateTime: 'Monday, Nov 16, 2026 • 12:15 AM',
     tag: 'v3.4.1',
-    colorClass: 'text-[#0A84FF]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Physics-grounded liquid glass specular meniscus engine with zero color banding, native-resolution vector text rendering, pure Apple iOS dark calendar typography, and mobile safe-area viewport alignment.',
     points: [
       'Pristine Liquid Glass Optics: Transitioned from multi-stop radial gradients to continuous linear specular sheens with inset 1px specular meniscus rim highlights, completely eliminating 8-bit color banding and dithering noise on dark OLED screens.',
@@ -269,7 +289,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 14 • 12:30 PM',
     fullDateTime: 'Saturday, Nov 14, 2026 • 12:30 PM',
     tag: 'v3.4.0',
-    colorClass: 'text-[#30D158]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Cross-tier GPU optimization eliminating dock backdrop blur, 100% hardware-accelerated split calorie ring, native GPU tab slider, mobile meal header spatial refinement, and ultra-deep OLED aesthetics.',
     points: [
       'Zero-Lag Fixed Navigation Compositor: Eliminated runtime backdrop-filter blur on the fixed bottom navigation capsule across all tiers, preventing continuous 60/120Hz GPU texture resampling and restoring butter-smooth scrolling.',
@@ -289,7 +309,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 14 • 09:15 AM',
     fullDateTime: 'Saturday, Nov 14, 2026 • 09:15 AM',
     tag: 'v3.3.9',
-    colorClass: 'text-[#FF9F0A]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Curved split-sector calorie architecture with 5 meal slots, fluid water droplet navigation bar animations, auto-expanding Luna AI chat textarea with full viewport table containment, borderless dark OLED cards, and automated hydration alerts.',
     points: [
       'Split Calorie Ring Architecture: Replaced simple calorie ring with 5 discrete curved sectors (Breakfast, Lunch, Snacks, Dinner, Night Canteen), displaying slot-colored arcs and curved radial calorie indicators along SVG sector paths.',
@@ -309,7 +329,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 12 • 08:00 PM',
     fullDateTime: 'Thursday, Nov 12, 2026 • 08:00 PM',
     tag: 'v3.3.8',
-    colorClass: 'text-[#5E5CE6]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Calendar status bar collision resolution with back button navigation, complete floating bottom navigation dock clearance, liquid water droplet styling, and non-truncating category filters.',
     points: [
       'Calendar Top Status Bar Clearance: Lowered Calendar top controls with native safe-area insets and integrated dedicated Back navigation button, preventing collision with phone punch-holes and status bar indicators.',
@@ -330,7 +350,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 12 • 12:30 PM',
     fullDateTime: 'Thursday, Nov 12, 2026 • 12:30 PM',
     tag: 'v3.3.7',
-    colorClass: 'text-[#5E5CE6]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Professional Apple/Google calendar suite, Liquid Design color typography, smart 30-min nutrition nudges, morning/evening gym alerts, and Outings glass redesign.',
     points: [
       'Apple & Google Calendar Engine: Multi-view calendar suite featuring full Month grid, 24-hour hourly Time Grid with live NOW indicator, and Agenda schedule feed.',
@@ -352,7 +372,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 8 • 01:30 PM',
     fullDateTime: 'Sunday, Nov 8, 2026 • 01:30 PM',
     tag: 'v3.3.6',
-    colorClass: 'text-[#30D158]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Airtight multi-tenant user data isolation, continuous Drive upload percentage ticker, burgundy folder color accents, and precision notification dispatch.',
     points: [
       'Zero Cross-User Sync: Complete tenant isolation across local cache, Firestore auto-healing, and Outings to guarantee strict privacy between different user accounts.',
@@ -372,7 +392,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 5 • 07:45 PM',
     fullDateTime: 'Thursday, Nov 5, 2026 • 07:45 PM',
     tag: 'v3.3.5',
-    colorClass: 'text-[#0A84FF]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Built-in 5.0 GB Drive & Docs cloud storage, in-reader AI intelligence that extracts and routes document receipts, and optimized native edge header layouts.',
     points: [
       'LifeOS Drive & Docs Hub: Fast local-first cloud storage with 5.0 GB quota, instant multi-file uploads, and cross-device QR transfer.',
@@ -390,7 +410,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 4 • 11:15 PM',
     fullDateTime: 'Wednesday, Nov 4, 2026 • 11:15 PM',
     tag: 'v3.3.4',
-    colorClass: 'text-[#0A84FF]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Universal automatic language analysis for microphone speech, zero-hallucination transcription, and multimodal notes vision in Luna AI.',
     points: [
       'Universal Automatic Voice Recognition: Luna AI automatically analyzes and detects the spoken human language (English, Telugu, Hindi, Tamil, Kannada, Marathi, Bengali, and all global languages) and transcribes with zero cross-language hallucination.',
@@ -408,7 +428,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Nov 4 • 9:30 PM',
     fullDateTime: 'Wednesday, Nov 4, 2026 • 09:30 PM',
     tag: 'v3.3.3',
-    colorClass: 'text-[#30D158]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Capture exam analysis notes, handwritten formulas, or lecture whiteboards directly in Luna AI with multimodal recognition.',
     points: [
       'Multimodal Photo Input: Snap live pictures or attach up to 3 note sheets from phone storage or laptop webcam.',
@@ -426,7 +446,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Oct 28 • 4:15 PM',
     fullDateTime: 'Wednesday, Oct 28, 2026 • 04:15 PM',
     tag: 'v3.3.2',
-    colorClass: 'text-[#0A84FF]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'AI-powered weekend trip generator tailored for student budgets and low-cost transit routes in LifeOS.',
     points: [
       'Smart Itinerary Architect: Generates timing, transit commute routes, and estimated expenses for weekend getaways.',
@@ -443,7 +463,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Oct 20 • 11:00 AM',
     fullDateTime: 'Tuesday, Oct 20, 2026 • 11:00 AM',
     tag: 'v3.3.1',
-    colorClass: 'text-[#BF5AF2]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Real-time class schedule planner with automatic reminders, venue room tracking, and rapid subject switching in LifeOS.',
     points: [
       'Dynamic Class Schedule: Daily and weekly timetable views tailored for university lectures and lab sessions.',
@@ -460,7 +480,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Oct 12 • 1:30 PM',
     fullDateTime: 'Monday, Oct 12, 2026 • 01:30 PM',
     tag: 'v3.3.0',
-    colorClass: 'text-[#FF9F0A]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Campus mess timetable sync with real-time calorie estimation and daily macronutrient tracking in LifeOS Nutrition.',
     points: [
       'November Campus Timetable: Live meal schedules for breakfast, lunch, snacks, and dinner rotations.',
@@ -477,7 +497,7 @@ export const APP_UPDATES: AppUpdate[] = [
     dateTime: 'Oct 05 • 6:45 PM',
     fullDateTime: 'Monday, Oct 05, 2026 • 06:45 PM',
     tag: 'v3.2.0',
-    colorClass: 'text-[#30D158]',
+    colorClass: 'text-[var(--app-accent-text)]',
     summary: 'Daily expense logging, budget monitoring, category insights, and offline-first finance management in LifeOS.',
     points: [
       'Rapid Expense Logging: Record food, travel, and miscellaneous spends in under 3 seconds with auto-categorization.',

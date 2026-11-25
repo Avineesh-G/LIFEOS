@@ -45,11 +45,10 @@ export const GlassSurface = forwardRef<HTMLDivElement, GlassSurfaceProps>(functi
       style={{
         ...(tint
           ? {
-              backgroundColor:
-                tier === 'tier-1'
-                  ? `rgba(28, 28, 30, 0.96)`
-                  : `color-mix(in srgb, ${tint} ${Math.round(tintOpacity * 100)}%, rgba(44,44,46,0.50))`,
-            }
+              '--card-accent': tint,
+              '--tile-accent': tint,
+              backgroundColor: `color-mix(in srgb, ${tint} ${Math.round(tintOpacity * 100)}%, #14141A)`,
+            } as React.CSSProperties
           : {}),
         ...style,
       }}

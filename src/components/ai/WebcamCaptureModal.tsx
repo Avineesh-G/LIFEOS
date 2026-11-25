@@ -131,12 +131,18 @@ export default function WebcamCaptureModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-md rounded-3xl bg-[#1C1C1E] border border-white/15 shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85">
+      <div className="relative w-full max-w-md rounded-3xl liquid-sheet shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#0A84FF]/20 text-[#0A84FF] flex items-center justify-center">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                color: 'var(--app-accent-text, #DE4B64)',
+              }}
+            >
               <Camera size={16} weight="bold" />
             </div>
             <div>
@@ -157,7 +163,7 @@ export default function WebcamCaptureModal({
         <div className="relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 bg-[#121214]">
-              <SpinnerGap size={28} className="animate-spin text-[#0A84FF]" />
+              <SpinnerGap size={28} className="animate-spin" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
               <span className="text-xs">Starting camera...</span>
             </div>
           )}
@@ -171,7 +177,8 @@ export default function WebcamCaptureModal({
                   onClose();
                   onFallbackToFile();
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#0A84FF] text-white hover:bg-[#0A84FF]/90 transition-all flex items-center gap-2 shadow"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all flex items-center gap-2 shadow"
+                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
               >
                 <Folder size={14} weight="bold" />
                 <span>Choose Image from Files Instead</span>

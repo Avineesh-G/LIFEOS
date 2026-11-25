@@ -14,7 +14,7 @@ export function Switch({
   checked,
   onChange,
   disabled = false,
-  activeColor = '#30D158',
+  activeColor: _activeColor,
   className = '',
 }: SwitchProps) {
   const [isPressed, setIsPressed] = useState(false);
@@ -44,7 +44,9 @@ export function Switch({
         disabled ? 'opacity-40 pointer-events-none' : ''
       } ${className}`}
       style={{
-        backgroundColor: checked ? activeColor : '#39393D',
+        background: checked
+          ? 'linear-gradient(135deg, var(--app-accent, #8B1E3F) 0%, var(--app-accent-end, #B52B4D) 100%)'
+          : '#323238',
       }}
     >
       <motion.div

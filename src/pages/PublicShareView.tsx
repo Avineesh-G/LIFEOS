@@ -63,25 +63,31 @@ export default function PublicShareView() {
   const getFileIcon = (filename: string, mime?: string) => {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) || mime?.startsWith('image/')) {
-      return <FileImage size={24} weight="duotone" className="text-[#30D158]" />;
+      return <FileImage size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
     }
     if (ext === 'pdf' || mime?.includes('pdf')) {
-      return <FilePdf size={24} weight="duotone" className="text-[#FF453A]" />;
+      return <FilePdf size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
     }
-    return <FileText size={24} weight="duotone" className="text-[#0A84FF]" />;
+    return <FileText size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col justify-between selection:bg-[#0A84FF]/30 font-sans">
+    <div className="min-h-screen bg-black text-white flex flex-col justify-between font-sans">
       {/* Top Navbar */}
       <header
-        className="w-full max-w-xl mx-auto px-4 pb-4 flex items-center justify-between border-b border-white/10"
+        className="w-full max-w-xl mx-auto px-4 pb-4 flex items-center justify-between border-b border-white/[0.06]"
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
         }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-[#0A84FF]/20 flex items-center justify-center text-[#0A84FF]">
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{
+              backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+              color: 'var(--app-accent-text, #DE4B64)',
+            }}
+          >
             <CloudArrowDown size={18} weight="duotone" />
           </div>
           <span className="text-[15px] font-bold tracking-tight text-white">
@@ -102,15 +108,18 @@ export default function PublicShareView() {
       {/* Main Content Card */}
       <main className="w-full max-w-md mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
         {loading ? (
-          <div className="p-8 rounded-3xl bg-[#1C1C1E] border border-white/10 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="w-10 h-10 border-2 border-[#0A84FF] border-t-transparent rounded-full animate-spin" />
+          <div className="p-8 rounded-3xl glass-card flex flex-col items-center justify-center text-center space-y-3">
+            <div
+              className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin"
+              style={{ borderColor: 'var(--app-accent-text, #DE4B64)', borderTopColor: 'transparent' }}
+            />
             <p className="text-[13px] text-white/60">Fetching shared document...</p>
           </div>
         ) : !record || record.isRevoked ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-8 rounded-3xl bg-[#1C1C1E] border border-red-500/20 text-center space-y-3"
+            className="p-8 rounded-3xl glass-card text-center space-y-3"
           >
             <div className="w-12 h-12 rounded-2xl bg-red-500/15 text-red-400 flex items-center justify-center mx-auto">
               <WarningCircle size={26} weight="duotone" />
@@ -126,19 +135,19 @@ export default function PublicShareView() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 sm:p-7 rounded-[32px] bg-[#1C1C1E] border border-white/10 space-y-5 shadow-2xl"
+            className="p-6 sm:p-7 rounded-[32px] glass-card space-y-5 shadow-2xl"
           >
             {/* Header info */}
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-white/[0.06] flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl glass-flat flex items-center justify-center shrink-0">
                 {record.type === 'folder' ? (
-                  <Folder size={28} weight="duotone" className="text-[#FF9F0A]" />
+                  <Folder size={28} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                 ) : (
                   getFileIcon(record.title, record.mimeType)
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#0A84FF]">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                   Shared via QR Link
                 </span>
                 <h1 className="text-[18px] font-bold text-white tracking-tight truncate mt-0.5">
@@ -156,7 +165,8 @@ export default function PublicShareView() {
                 <button
                   type="button"
                   onClick={() => triggerDirectDownload(record.downloadUrl, record.title, 'primary')}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-[#0A84FF] hover:bg-[#0A84FF]/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-semibold text-[14px] text-white shadow-lg shadow-[#0A84FF]/25 cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-semibold text-[14px] text-white shadow-lg cursor-pointer"
+                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
                 >
                   {downloadingId === 'primary' ? (
                     <>

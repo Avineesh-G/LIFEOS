@@ -23,7 +23,7 @@ export function Slider({
   max = 100,
   step = 1,
   onChange,
-  tint = '#0A84FF',
+  tint = '#8B1E3F',
   className = '',
   disabled = false,
 }: SliderProps) {

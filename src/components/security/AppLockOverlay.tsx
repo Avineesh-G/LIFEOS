@@ -69,14 +69,14 @@ export default function AppLockOverlay() {
 
   return (
     <div className="fixed inset-0 z-[99999] bg-[#000000]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 sm:p-8 select-none touch-none overflow-hidden font-sans">
-      {/* Ambient iOS 26 Glow */}
+      {/* Ambient Single-Hue Glow */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #0A84FF 0%, transparent 70%)', opacity: 0.18 }}
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #8B1E3F) 0%, transparent 70%)', opacity: 0.22 }}
       />
       <div
         className="absolute bottom-12 right-12 w-64 h-64 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #BF5AF2 0%, transparent 70%)', opacity: 0.14 }}
+        style={{ background: 'radial-gradient(circle, var(--app-accent-end, #B52B4D) 0%, transparent 70%)', opacity: 0.16 }}
       />
 
       <motion.div
@@ -88,7 +88,11 @@ export default function AppLockOverlay() {
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-          className="relative w-24 h-24 rounded-[30px] bg-[#0A84FF]/15 text-[#0A84FF] border border-[#0A84FF]/30 flex items-center justify-center shadow-2xl cursor-pointer active:scale-95 transition-transform"
+          className="relative w-24 h-24 rounded-[30px] glass-tile flex items-center justify-center shadow-2xl cursor-pointer active:scale-95 transition-transform"
+          style={{
+            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+            color: 'var(--app-accent-text, #DE4B64)',
+          }}
           onClick={triggerAuth}
         >
           <Fingerprint size={48} weight="duotone" />
@@ -124,7 +128,10 @@ export default function AppLockOverlay() {
           whileTap={{ scale: 0.96 }}
           onClick={triggerAuth}
           disabled={isAuthenticating}
-          className="w-full py-3.5 px-6 rounded-2xl bg-[#0A84FF] text-white font-semibold text-sm shadow-lg shadow-[#0A84FF]/25 hover:bg-[#0A84FF]/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+          className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+          style={{
+            background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+          }}
         >
           <Fingerprint size={18} weight="bold" />
           <span>{isAuthenticating ? 'Authenticating...' : 'Unlock with Device'}</span>

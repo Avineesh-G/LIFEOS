@@ -41,6 +41,7 @@ const SECTION_TO_HUB_FAMILY: Record<AppSection, HubFamily> = {
   timetable: 'study',
   tasks: 'home',
   laundry: 'home',
+  ai: 'home',
 };
 
 interface NavigationHubSheetProps {
@@ -519,7 +520,7 @@ export function NavigationHubSheet({
                     </h2>
                     <span className="text-[11px] text-[var(--text-secondary)] leading-none truncate mt-0.5">
                       {fixedNotice ? (
-                        <span className="text-amber-400 font-semibold">Home is fixed</span>
+                        <span className="font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>Home is fixed</span>
                       ) : (
                         `Tap a slot above, then a destination below`
                       )}

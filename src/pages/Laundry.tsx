@@ -135,8 +135,8 @@ export default function Laundry({ data, updateData }: LaundryProps) {
     });
 
     // Instant notification: bag handed over to dhobi + schedule daily pickup checks
-    sendInstantLaundryDispatchedNotification(totalClothesInNewBatch, newBatch.id).catch(() => {});
-    syncLaundryNotifications(updatedBatches).catch(() => {});
+    sendInstantLaundryDispatchedNotification(totalClothesInNewBatch, newBatch.id).catch(() => { });
+    syncLaundryNotifications(updatedBatches).catch(() => { });
 
     // Reset Form
     const resetCounts: Record<string, number> = {};
@@ -166,11 +166,11 @@ export default function Laundry({ data, updateData }: LaundryProps) {
     });
 
     if (nextStatus === 'received') {
-      sendInstantLaundryReceivedNotification(batch.id).catch(() => {});
+      sendInstantLaundryReceivedNotification(batch.id).catch(() => { });
     } else if (nextStatus === 'submitted') {
-      sendInstantLaundryDispatchedNotification(batch.totalClothes, batch.id).catch(() => {});
+      sendInstantLaundryDispatchedNotification(batch.totalClothes, batch.id).catch(() => { });
     }
-    syncLaundryNotifications(updatedBatches).catch(() => {});
+    syncLaundryNotifications(updatedBatches).catch(() => { });
   };
 
   const updateBatchReturnDate = async (batchId: string, newReturnDate: string) => {
@@ -193,7 +193,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
         await updateData({
           laundryBatches: updatedBatches,
         });
-        syncLaundryNotifications(updatedBatches).catch(() => {});
+        syncLaundryNotifications(updatedBatches).catch(() => { });
       },
     });
   };
@@ -233,7 +233,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
     await updateData({
       laundryBatches: updatedBatches,
     });
-    syncLaundryNotifications(updatedBatches).catch(() => {});
+    syncLaundryNotifications(updatedBatches).catch(() => { });
     setBatchToEdit(null);
   };
 
@@ -263,38 +263,47 @@ export default function Laundry({ data, updateData }: LaundryProps) {
         <div className="grid grid-cols-2 gap-3">
           <div className="glass-tile p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] font-semibold">
+              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.68)] font-semibold">
                 At Laundry
               </span>
               <InteractiveLaundryDrum status={clothesAtLaundry > 0 ? 'laundry' : 'received'} size={24} />
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold text-white tracking-tight leading-none">
+              <span
+                className="text-3xl font-bold tracking-tight leading-none tabular-nums"
+                style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+              >
                 {clothesAtLaundry}
               </span>
-              <span className="text-xs text-[rgba(235,235,245,0.50)]">clothes</span>
+              <span className="text-xs text-[rgba(235,235,245,0.58)]">clothes</span>
             </div>
-            <p className="text-[11px] text-[rgba(235,235,245,0.55)]">
+            <p className="text-[11px] text-[rgba(235,235,245,0.62)]">
               {activeBatches.length} active batch{activeBatches.length === 1 ? '' : 'es'}
             </p>
           </div>
 
           <div className="glass-tile p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.60)] font-semibold">
+              <span className="text-[11px] uppercase tracking-wider text-[rgba(235,235,245,0.68)] font-semibold">
                 Total Batches
               </span>
-              <div className="w-6 h-6 rounded-lg glass-flat text-[#BF5AF2] flex items-center justify-center">
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center"
+                style={{
+                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  color: 'var(--app-accent-text, #64D2FF)',
+                }}
+              >
                 <Package size={14} />
               </div>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-bold text-white tracking-tight leading-none">
+              <span className="text-3xl font-bold text-white tracking-tight leading-none tabular-nums">
                 {batches.length}
               </span>
-              <span className="text-xs text-[rgba(235,235,245,0.50)]">logged</span>
+              <span className="text-xs text-[rgba(235,235,245,0.58)]">logged</span>
             </div>
-            <p className="text-[11px] text-[rgba(235,235,245,0.55)]">
+            <p className="text-[11px] text-[rgba(235,235,245,0.62)]">
               {batches.filter(b => b.status === 'received').length} returned safely
             </p>
           </div>
@@ -314,7 +323,6 @@ export default function Laundry({ data, updateData }: LaundryProps) {
             const isSubmitted = batch.status === 'submitted';
 
             const badgeLabel = isReturned ? 'Received' : isSubmitted ? 'At Laundry' : 'Pending';
-            const badgeColor = isReturned ? '#30D158' : isSubmitted ? '#63E6E2' : '#FF9F0A';
 
             return (
               <div
@@ -333,13 +341,13 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                         onClick={() => toggleBatchStatus(batch)}
                         className="cursor-pointer"
                       >
-                        <Badge label={badgeLabel} color={badgeColor} />
+                        <Badge label={badgeLabel} />
                       </button>
 
                       {!isReturned && (
                         <button
                           onClick={() => openEditModal(batch)}
-                          className="p-1 rounded-lg text-[rgba(235,235,245,0.50)] hover:text-[#63E6E2] hover:bg-white/10 transition-colors cursor-pointer"
+                          className="p-1 rounded-lg text-[rgba(235,235,245,0.50)] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                           title="Edit batch"
                         >
                           <PencilSimple size={14} />
@@ -349,12 +357,12 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
                     <div className="flex items-center gap-3 text-xs text-[rgba(235,235,245,0.60)] font-medium flex-wrap">
                       <span className="inline-flex items-center gap-1">
-                        <CalendarBlank size={12} className="text-[#63E6E2]" />
+                        <CalendarBlank size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                         Submitted: <strong className="text-white font-medium">{batch.submitDate}</strong>
                       </span>
 
                       <span className="inline-flex items-center gap-1">
-                        <Clock size={12} className="text-[#BF5AF2]" />
+                        <Clock size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
                         Return: <strong className="text-white font-medium">{batch.returnDate || 'Pending'}</strong>
                       </span>
                     </div>
@@ -379,7 +387,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium glass-flat text-white"
                     >
                       <span className="text-[rgba(235,235,245,0.60)]">{item.category}:</span>
-                      <strong className="text-[#63E6E2]">{item.count}</strong>
+                      <strong style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{item.count}</strong>
                     </span>
                   ))}
                 </div>
@@ -437,12 +445,11 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
           {batches.length === 0 && (
             <EmptyState
-              icon={<TShirt size={36} weight="light" className="text-[#63E6E2]" />}
+              icon={<TShirt size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
               title="No laundry batches yet"
               description="Log your clothes count when giving them to laundry to track submission and return dates accurately."
               actionLabel="Log First Batch"
               onAction={() => setShowAddModal(true)}
-              tint="#63E6E2"
             />
           )}
         </div>

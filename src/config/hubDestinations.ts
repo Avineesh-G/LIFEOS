@@ -238,6 +238,7 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   timetable: 'Timetable',
   tasks: 'To-Do Tasks',
   laundry: 'Laundry',
+  ai: 'Luna AI',
 };
 
 export function getDestinationById(id: string): HubDestination | undefined {

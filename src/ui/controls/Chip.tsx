@@ -17,11 +17,14 @@ export function Chip({
   label,
   selected = false,
   onSelect,
-  tint = '#0A84FF',
+  tint: _tint,
   icon,
   className = '',
   size = 'md',
 }: ChipProps) {
+  const accentText = 'var(--app-accent-text, #64D2FF)';
+  const accentPrimary = 'var(--app-accent, #0A84FF)';
+
   const handleClick = () => {
     triggerHaptic('selection');
     if (onSelect) onSelect();
@@ -36,13 +39,13 @@ export function Chip({
       transition={{ type: 'spring', stiffness: 520, damping: 40 }}
       onClick={handleClick}
       className={`inline-flex items-center gap-1.5 rounded-full font-medium select-none cursor-pointer transition-colors ${heightClass} ${
-        selected ? '' : 'glass-flat text-[rgba(240,240,245,0.72)] hover:text-white'
+        selected ? 'text-white' : 'glass-flat text-[rgba(240,240,245,0.78)] hover:text-white'
       } ${className}`}
       style={
         selected
           ? {
-              backgroundColor: `color-mix(in srgb, ${tint} 22%, transparent)`,
-              color: tint,
+              background: `linear-gradient(135deg, color-mix(in srgb, ${accentPrimary} 20%, #1D1D24) 0%, color-mix(in srgb, ${accentText} 10%, #17171C) 100%)`,
+              color: accentText,
             }
           : undefined
       }
@@ -50,7 +53,7 @@ export function Chip({
       {selected ? (
         <CheckCircle size={size === 'sm' ? 14 : 16} weight="fill" className="shrink-0" />
       ) : (
-        icon && <span className="shrink-0">{icon}</span>
+        icon && <span className="shrink-0" style={{ color: accentText }}>{icon}</span>
       )}
       <span className="truncate">{label}</span>
     </motion.button>

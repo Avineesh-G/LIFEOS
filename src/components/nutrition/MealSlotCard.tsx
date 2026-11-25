@@ -59,7 +59,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
         isSkipped ? 'droplet-card opacity-65' : 'glass-card'
       }`}
       style={{
-        borderLeftColor: isSelected ? slotConfig.color : undefined,
+        borderLeftColor: isSelected ? 'var(--app-accent-text, #64D2FF)' : undefined,
         borderLeftWidth: isSelected ? '3px' : undefined,
         borderLeftStyle: isSelected ? 'solid' : undefined,
       }}
@@ -70,8 +70,8 @@ export const MealSlotCard = React.memo(function MealSlotCard({
           <div
             className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
             style={{
-              backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : `${slotConfig.color}22`,
-              color: isSkipped ? 'rgba(255, 255, 255, 0.4)' : slotConfig.color,
+              backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+              color: isSkipped ? 'rgba(255, 255, 255, 0.45)' : 'var(--app-accent-text, #64D2FF)',
             }}
           >
             {slotConfig.icon}
@@ -125,18 +125,22 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                 triggerHaptic('light');
                 onOpenCustomLog(slotConfig.slot);
               }}
-              className="inline-flex items-center rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 active:bg-[#FF9F0A]/30 active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
+              className="inline-flex items-center rounded-full active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                color: 'var(--app-accent-text, #64D2FF)',
+              }}
               title="Log Food with AI"
             >
               {slotCalories > 0 && (
                 <>
-                  <span className="px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold tabular-nums tracking-tight">
+                  <span className="px-2.5 py-1 text-[11px] font-bold tabular-nums tracking-tight">
                     {slotCalories} kcal
                   </span>
-                  <span className="w-[1px] h-3 bg-[#FF9F0A]/30" />
+                  <span className="w-[1px] h-3 bg-white/15" />
                 </>
               )}
-              <span className="flex items-center gap-1 px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold">
+              <span className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold">
                 <LunaComicBubbleIcon size={12} color="currentColor" />
                 <span>Log</span>
               </span>
@@ -164,19 +168,26 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                   onClick={() => onToggleMessItem(slotConfig.slot, item.name, item.estCalories)}
                   className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-transform select-none cursor-pointer active:scale-95 ${
                     isItemSelected
-                      ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
+                      ? 'text-white font-semibold shadow-md'
                       : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
                   }`}
+                  style={
+                    isItemSelected
+                      ? {
+                          background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                        }
+                      : undefined
+                  }
                 >
                   <span>{item.name}</span>
                   {isItemSelected && portion > 1 && (
-                    <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-black text-[10px] font-bold">
+                    <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-white text-[10px] font-bold">
                       {portion}x
                     </span>
                   )}
                   <span
                     className={`text-[10.5px] tabular-nums ${
-                      isItemSelected ? 'text-black/75 font-semibold' : 'text-white/40'
+                      isItemSelected ? 'text-white/85 font-semibold' : 'text-white/40'
                     }`}
                   >
                     {isItemSelected ? item.estCalories * portion : item.estCalories} kcal
@@ -232,7 +243,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                     </button>
                   </div>
 
-                  <span className="text-[#FF9F0A] font-bold tabular-nums min-w-[56px] text-right">
+                  <span className="font-bold tabular-nums min-w-[56px] text-right" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                     {item.calories * (item.portion || 1)} kcal
                   </span>
 

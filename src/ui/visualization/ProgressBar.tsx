@@ -12,8 +12,8 @@ export interface ProgressBarProps {
 export function ProgressBar({
   progress,
   height = 8,
-  color = '#0A84FF',
-  trackColor = '#2C2C2E',
+  color: _color,
+  trackColor = 'rgba(255, 255, 255, 0.08)',
   className = '',
 }: ProgressBarProps) {
   const clamped = Math.min(1, Math.max(0, progress));
@@ -28,7 +28,9 @@ export function ProgressBar({
     >
       <motion.div
         className="h-full rounded-full"
-        style={{ backgroundColor: color }}
+        style={{
+          background: 'linear-gradient(90deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)',
+        }}
         initial={{ width: 0 }}
         animate={{ width: `${clamped * 100}%` }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}

@@ -69,7 +69,7 @@ export default function InteractiveWaterGlass({
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-cyan-500/70 dark:text-cyan-400/80"
+          className="text-[var(--app-accent-text)] opacity-80"
         />
 
         {/* Liquid Layer inside clip */}
@@ -80,7 +80,7 @@ export default function InteractiveWaterGlass({
             y={22 - (19 * fillRatio)}
             width="16"
             height={20}
-            className="fill-cyan-500/50 dark:fill-cyan-400/60"
+            className="fill-current text-[var(--app-accent-end)] opacity-55"
             animate={{
               y: 22 - (19 * fillRatio),
               rotate: isSloshing ? [0, -6, 5, -2, 0] : 0,

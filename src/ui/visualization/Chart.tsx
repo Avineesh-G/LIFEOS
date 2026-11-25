@@ -25,7 +25,7 @@ export interface ChartProps {
 
 export function Chart({
   data,
-  color = '#0A84FF',
+  color = '#8B1E3F',
   height = 180,
   unit = '',
   className = '',

@@ -113,11 +113,10 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
   };
 
   return (
-    <div className="w-full text-white pb-2 selection:bg-[#FF375F]/30">
+    <div className="w-full text-white pb-2">
       <LargeTitleHeader
         title="Shopping"
         subtitle="Checklists, store runs · Saved templates"
-        tint="#FF375F"
         actions={
           <button
             onClick={() => {
@@ -126,7 +125,8 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
               setNewListName('');
               setShowNewModal(true);
             }}
-            className="p-2 rounded-full glass-flat text-[#FF375F] active:scale-95 transition-transform"
+            className="p-2 rounded-full glass-flat active:scale-95 transition-transform"
+            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
             title="New List"
           >
             <Plus size={20} weight="bold" />
@@ -139,12 +139,11 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {allLists.length === 0 && (
           <div className="space-y-6">
             <EmptyState
-              icon={<ShoppingBag size={36} weight="light" className="text-[#FF375F]" />}
+              icon={<ShoppingBag size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
               title="No Shopping Lists Yet"
               description="Create a checklist for your next store run or weekend outing, or tap a starter template below."
               actionLabel="Create List"
               onAction={() => setShowNewModal(true)}
-              tint="#FF375F"
             />
 
             <div className="space-y-3">
@@ -159,8 +158,8 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                     className="p-4 rounded-2xl glass-card hover:bg-white/[0.08] transition-all text-left group active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-1 mb-2">
-                      <Badge label={starter.category} color="#8E8E93" />
-                      <ArrowRight size={14} className="text-[#8E8E93] group-hover:text-[#FF375F] transition-colors" />
+                      <Badge label={starter.category} />
+                      <ArrowRight size={14} className="text-white/50 group-hover:text-white transition-colors" />
                     </div>
                     <p className="text-sm font-semibold text-white leading-tight">
                       {starter.name}
@@ -179,7 +178,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {activeLists.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 px-1">
-              <ListChecks size={18} weight="bold" className="text-[#FF375F]" />
+              <ListChecks size={18} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
                 Active Lists · {activeLists.length}
               </h2>
@@ -188,7 +187,6 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {activeLists.map((list) => {
                 const { checkedCount, totalCount, percent } = calculateListProgress(list);
-                const isAllDone = totalCount > 0 && checkedCount === totalCount;
 
                 return (
                   <div
@@ -229,14 +227,13 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                         <span className="text-[#8E8E93]">
                           {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
                         </span>
-                        <span className={`font-semibold ${isAllDone ? 'text-[#30D158]' : 'text-[#FF375F]'}`}>
+                        <span className="font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
                           {percent}%
                         </span>
                       </div>
 
                       <ProgressBar
                         progress={percent / 100}
-                        color={isAllDone ? '#30D158' : '#FF375F'}
                         height={6}
                       />
                     </div>
@@ -251,7 +248,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {templates.length > 0 && (
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-2 px-1">
-              <Stack size={18} weight="bold" className="text-[#BF5AF2]" />
+              <Stack size={18} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
                 Saved Templates · {templates.length}
               </h2>
@@ -269,7 +266,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge label="TEMPLATE" color="#BF5AF2" />
+                          <Badge label="TEMPLATE" />
                           <span className="text-xs text-[#8E8E93]">
                             {itemCount} {itemCount === 1 ? 'item' : 'items'}
                           </span>

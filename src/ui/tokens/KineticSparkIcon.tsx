@@ -38,10 +38,9 @@ export function KineticSparkIcon({
           fy="50%"
         >
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="25%" stopColor="#67E8F9" />
-          <stop offset="60%" stopColor="#38BDF8" />
-          <stop offset="85%" stopColor="#818CF8" />
-          <stop offset="100%" stopColor="#C084FC" />
+          <stop offset="30%" stopColor="var(--app-accent-text, #DE4B64)" />
+          <stop offset="68%" stopColor="var(--app-accent-end, #B52B4D)" />
+          <stop offset="100%" stopColor="var(--app-accent, #8B1E3F)" />
         </radialGradient>
 
         {/* Polished Chrome Specular Rim Gradient */}
@@ -54,10 +53,9 @@ export function KineticSparkIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="25%" stopColor="#BAE6FD" />
-          <stop offset="50%" stopColor="#38BDF8" />
-          <stop offset="75%" stopColor="#C084FC" />
-          <stop offset="100%" stopColor="#E0E7FF" />
+          <stop offset="35%" stopColor="var(--app-accent-text, #DE4B64)" />
+          <stop offset="70%" stopColor="var(--app-accent-end, #B52B4D)" />
+          <stop offset="100%" stopColor="#FFFFFF" />
         </linearGradient>
 
         {/* Subtle Inner Ray */}
@@ -70,7 +68,7 @@ export function KineticSparkIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <stop offset="50%" stopColor="#38BDF8" stopOpacity="0.4" />
+          <stop offset="50%" stopColor="var(--app-accent-text, #DE4B64)" stopOpacity="0.45" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.9" />
         </linearGradient>
       </defs>

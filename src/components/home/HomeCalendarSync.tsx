@@ -224,14 +224,17 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
           className="flex items-center gap-2 cursor-pointer group active:scale-[0.99] transition-transform touch-manipulation"
           title="Open today's event schedule"
         >
-          <div className="w-8 h-8 rounded-xl glass-tile text-[#5E5CE6] flex items-center justify-center transition-colors shadow-sm">
+          <div
+            className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center transition-colors shadow-sm"
+            style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+          >
             <CalendarDots size={18} weight="duotone" />
           </div>
           <div>
-            <h2 className="text-[17px] font-bold text-white tracking-tight leading-none group-hover:text-[#A5A3FF] transition-colors">
+            <h2 className="text-[17px] font-bold text-white tracking-tight leading-none transition-colors">
               Synced Schedule & Calendar
             </h2>
-            <p className="text-[11.5px] text-[rgba(235,235,245,0.55)] mt-0.5">
+            <p className="text-[11.5px] text-[rgba(235,235,245,0.62)] mt-0.5">
               Tap to view today's events & schedule
             </p>
           </div>
@@ -242,7 +245,11 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
             <button
               type="button"
               onClick={handleGoToday}
-              className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-[11px] font-semibold text-white/80 hover:text-white active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold active:scale-95 transition-transform cursor-pointer"
+              style={{
+                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                color: 'var(--app-accent-text, #64D2FF)',
+              }}
             >
               Today
             </button>
@@ -262,16 +269,18 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-all cursor-pointer"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:text-white active:scale-90 transition-transform cursor-pointer"
+              style={{ color: 'var(--app-accent-text, #64D2FF)' }}
               aria-label="Previous Month"
             >
               <CaretLeft size={14} weight="bold" />
             </button>
-            <div className="w-[1px] h-3 bg-white/10" />
+            <div className="w-[1px] h-3 bg-white/15" />
             <button
               type="button"
               onClick={handleNextMonth}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-all cursor-pointer"
+              className="w-7 h-7 rounded-full flex items-center justify-center hover:text-white active:scale-90 transition-transform cursor-pointer"
+              style={{ color: 'var(--app-accent-text, #64D2FF)' }}
               aria-label="Next Month"
             >
               <CaretRight size={14} weight="bold" />
@@ -284,7 +293,13 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => (
             <span
               key={idx}
-              className="text-[11px] font-bold text-[rgba(235,235,245,0.40)] uppercase"
+              className="text-[11px] font-bold uppercase"
+              style={{
+                color:
+                  idx >= 5
+                    ? 'color-mix(in srgb, var(--app-accent-text, #64D2FF) 55%, rgba(235,235,245,0.65))'
+                    : 'rgba(235,235,245,0.48)',
+              }}
             >
               {day}
             </span>
@@ -323,28 +338,36 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   !isCurrentMonth ? 'opacity-25' : 'opacity-100'
                 }`}
               >
-                {/* Active Day Liquid Droplet Indicator (Zero-Layout CSS) */}
+                {/* Active Day Liquid Droplet Indicator (Crystal Glass + Unified Theme Accent) */}
                 {isSelected && (
                   <div
                     aria-hidden="true"
                     className="absolute inset-0 rounded-2xl -z-10"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(40, 40, 48, 0.95) 100%)',
+                      background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, color-mix(in srgb, var(--app-accent, #0A84FF) 20%, rgba(28, 28, 34, 0.96)) 100%)',
                       border: 'none',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.55)',
                     }}
                   />
                 )}
+                {!isSelected && isCurrentDay && (
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0.5 rounded-2xl -z-10"
+                    style={{ backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.12))' }}
+                  />
+                )}
 
-                {/* Day Number: Pure iOS Typography (No Circular Badges) */}
+                {/* Day Number: Crisp Readable Typography */}
                 <span
                   className={`text-[13px] tabular-nums leading-none ${
                     isCurrentDay
-                      ? 'text-[#0A84FF] font-black'
+                      ? 'font-black'
                       : isSelected
                       ? 'text-white font-bold'
-                      : 'text-[rgba(235,235,245,0.85)] font-semibold'
+                      : 'text-[rgba(235,235,245,0.88)] font-semibold'
                   }`}
+                  style={isCurrentDay ? { color: 'var(--app-accent-text, #64D2FF)' } : undefined}
                 >
                   {format(day, 'd')}
                 </span>
@@ -403,7 +426,8 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               triggerHaptic('light');
               setIsAddingTask((prev) => !prev);
             }}
-            className="px-3 py-1.5 rounded-full glass-nav nav-rim-light flex items-center gap-1.5 text-[12px] font-semibold text-[#0A84FF] active:scale-95 transition-all"
+            className="px-3 py-1.5 rounded-full glass-nav nav-rim-light flex items-center gap-1.5 text-[12px] font-semibold active:scale-95 transition-all"
+            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
           >
             <Plus size={14} weight="bold" />
             <span>Add Task</span>
@@ -427,11 +451,14 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                 placeholder={`New task for ${format(selectedDate, 'MMM d')}...`}
                 value={newTaskText}
                 onChange={(e) => setNewTaskText(e.target.value)}
-                className="flex-1 h-9 px-3.5 rounded-xl bg-white/[0.08] text-[13.5px] text-white placeholder-[rgba(235,235,245,0.35)] focus:outline-none focus:ring-1 focus:ring-[#0A84FF]"
+                className="flex-1 h-9 px-3.5 rounded-xl bg-white/[0.08] text-[13.5px] text-white placeholder-[rgba(235,235,245,0.35)] focus:outline-none"
               />
               <button
                 type="submit"
-                className="h-9 px-4 rounded-xl bg-[#0A84FF] text-white text-[12.5px] font-bold active:scale-95 transition-all"
+                className="h-9 px-4 rounded-xl text-white text-[12.5px] font-bold active:scale-95 transition-all shadow-sm"
+                style={{
+                  background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                }}
               >
                 Save
               </button>
@@ -491,9 +518,8 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   <div className="text-lg mt-0.5">
                     <CheckCircle
                       weight={t.completed ? 'fill' : 'regular'}
-                      className={
-                        t.completed ? 'text-[#30D158]' : 'text-[rgba(235,235,245,0.40)]'
-                      }
+                      style={t.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                      className={t.completed ? '' : 'text-[rgba(235,235,245,0.40)]'}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -512,7 +538,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                       </div>
                     )}
                   </div>
-                  <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat text-[#0A84FF] shrink-0">
+                  <span
+                    className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     Task
                   </span>
                 </div>
@@ -525,7 +554,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 select-none"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl glass-tile text-[#5E5CE6] flex items-center justify-center shrink-0">
+                    <div
+                      className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    >
                       <GraduationCap size={18} weight="duotone" />
                     </div>
                     <div>
@@ -541,7 +573,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat text-[#5E5CE6] shrink-0">
+                  <span
+                    className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     Class
                   </span>
                 </div>
@@ -551,7 +586,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               {selectedDayWorkout && (
                 <div className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 select-none">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl glass-tile text-[#FF9F0A] flex items-center justify-center shrink-0">
+                    <div
+                      className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    >
                       <Barbell size={18} weight="duotone" />
                     </div>
                     <div>
@@ -564,11 +602,8 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                     </div>
                   </div>
                   <span
-                    className={`text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0 ${
-                      selectedDayWorkout.isDone
-                        ? 'text-[#30D158]'
-                        : 'text-[#FF9F0A]'
-                    }`}
+                    className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
                   >
                     Gym
                   </span>
@@ -582,7 +617,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 select-none"
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl glass-tile text-[#30D158] flex items-center justify-center shrink-0">
+                    <div
+                      className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
+                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    >
                       <MapPin size={18} weight="duotone" />
                     </div>
                     <div>
@@ -594,7 +632,10 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat text-[#30D158] shrink-0">
+                  <span
+                    className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
+                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  >
                     Outing
                   </span>
                 </div>

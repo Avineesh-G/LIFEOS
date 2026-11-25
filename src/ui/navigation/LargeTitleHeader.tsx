@@ -17,18 +17,15 @@ export interface LargeTitleHeaderProps {
 }
 
 /**
- * Liquid Glass v2 Large Title Header (Section 4.1):
- * - Height 44 below safe area top inset + 8. Single row toolbar.
- * - Leading 40px glass circle with back CaretLeft.
- * - Large title sits directly under toolbar (12px gap) with subtitle above it in text-2.
- * - On scroll, title collapses into the toolbar center (17px semibold).
+ * Pure iOS Liquid Glass Large Title Header + Unified Single Theme Color
+ * Letters stay crisp pure white so text never blends or hides against dark surfaces.
  */
 export function LargeTitleHeader({
   title,
   subtitle,
   onBack,
   actions,
-  tint = '#0A84FF',
+  tint: _tint,
   className = '',
   showBack = true,
 }: LargeTitleHeaderProps) {
@@ -54,16 +51,20 @@ export function LargeTitleHeader({
     }
   };
 
+  const accentText = 'var(--app-accent-text, #5AC8FA)';
+  const accentPrimary = 'var(--app-accent, #0A84FF)';
+
   return (
     <div className={`w-full select-none ${className}`}>
       {/* ── 1. Top Toolbar (Sticky, Single Row) ── */}
       <header
         className={`sticky top-0 z-30 w-full transition-colors duration-200 ${
-          isScrolled ? 'bg-black/95 shadow-[0_10px_24px_rgba(0,0,0,0.85)]' : 'bg-transparent'
+          isScrolled ? 'shadow-[0_10px_24px_rgba(0,0,0,0.85)]' : 'bg-transparent'
         }`}
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
           paddingBottom: '8px',
+          background: isScrolled ? 'rgba(0, 0, 0, 0.92)' : undefined,
         }}
       >
         <Toolbar
@@ -73,6 +74,7 @@ export function LargeTitleHeader({
                 <ToolbarButton
                   icon={<CaretLeft size={20} weight="bold" />}
                   label="Back"
+                  tint={accentText}
                   onClick={handleBackClick}
                 />
               </ToolbarGroup>
@@ -87,20 +89,35 @@ export function LargeTitleHeader({
                 y: isScrolled ? 0 : 6,
               }}
               transition={{ duration: 0.16 }}
-              className="text-inline-title text-white tracking-tight truncate text-center"
+              className="text-inline-title text-white tracking-tight truncate text-center flex items-center gap-1.5"
             >
-              {title}
+              <span
+                className="w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: accentText }}
+              />
+              <span className="truncate">{title}</span>
             </motion.div>
           }
           trailing={actions || undefined}
         />
       </header>
 
-      {/* ── 2. Large Title Block (12px Gap Below Toolbar) ── */}
+      {/* ── 2. Large Title Block (Crisp Pure White + Delicate Theme Indicator) ── */}
       <div className="px-1.5 pt-2 pb-3">
         {subtitle && (
-          <div className="text-sub font-medium text-white/70 mb-1">
-            {subtitle}
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{
+                background: `linear-gradient(135deg, ${accentPrimary}, ${accentText})`,
+              }}
+            />
+            <div
+              className="text-sub font-medium truncate"
+              style={{ color: `color-mix(in srgb, ${accentText} 45%, rgba(242, 242, 247, 0.85))` }}
+            >
+              {subtitle}
+            </div>
           </div>
         )}
         <h1 className="text-large-title text-white tracking-[-0.02em]">

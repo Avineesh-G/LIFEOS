@@ -4,23 +4,11 @@ import { getDailyQuotesStream, QuoteItem } from '../../data/quotes';
 
 interface HomeStreakQuotesCardProps {}
 
-// Map quote categories to crisp, vibrant luminescent colors (words have high-contrast color, category name is never mentioned)
-const CATEGORY_TINTS: Record<string, string> = {
-  money: '#34D399',         // Vibrant Emerald Mint (Finance & Wealth)
-  study: '#38BDF8',         // Crisp Sky Blue (Knowledge & Learning)
-  character: '#FBBF24',     // Warm Amber Gold (Discipline & Mindset)
-  life: '#C084FC',          // Amethyst Purple (Wisdom & Purpose)
-  social: '#6EE7B7',        // Light Aqua Green (Health & Relationships)
-  communication: '#FB7185', // Coral Rose (Voice & Motivation)
-};
-
 const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
-  // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)
   const quotes: QuoteItem[] = useMemo(() => {
     return getDailyQuotesStream(new Date(), 10);
   }, []);
 
-  // Duplicate the list for seamless infinite loop marquee animation
   const marqueeItems = useMemo(() => [...quotes, ...quotes], [quotes]);
 
   return (
@@ -30,15 +18,21 @@ const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: Ho
         boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.75)',
       }}
     >
-      {/* ── Left: Refined Inspirational Quotes Emblem ── */}
-      <div className="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 text-[#FF9F0A] shadow-sm select-none">
+      {/* ── Left: Single Theme Inspirational Quotes Emblem ── */}
+      <div
+        className="shrink-0 flex items-center justify-center w-7 h-7 rounded-xl shadow-sm select-none"
+        style={{
+          background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #64D2FF) 18%, #1C1C22) 0%, color-mix(in srgb, var(--app-accent, #0A84FF) 8%, #151519) 100%)',
+          color: 'var(--app-accent-text, #64D2FF)',
+        }}
+      >
         <Quotes size={16} weight="duotone" />
       </div>
 
       {/* ── Clean Specular Vertical Divider ── */}
       <div className="w-[1px] h-5 bg-gradient-to-b from-white/20 via-white/10 to-transparent shrink-0 select-none" />
 
-      {/* ── Right: Flowing Marquee of Quotes (GPU-Friendly Edge Fades, Non-Stop Continuous Flow) ── */}
+      {/* ── Right: Flowing Marquee of Quotes (High-Legibility Single-Hue Theme Finish) ── */}
       <div
         className="relative flex-1 overflow-hidden min-w-0 pointer-events-none"
         aria-label="Daily Inspirational Quotes Stream"
@@ -48,40 +42,34 @@ const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: Ho
         <div className="absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-[#141416] to-transparent pointer-events-none z-10" />
 
         <div className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap">
-          {marqueeItems.map((item, idx) => {
-            const tint = CATEGORY_TINTS[item.category] || '#FBBF24';
-            return (
-              <div
-                key={`${item.id}-${idx}`}
-                className="inline-flex items-center gap-2 text-[13px] tracking-normal font-medium leading-none"
+          {marqueeItems.map((item, idx) => (
+            <div
+              key={`${item.id}-${idx}`}
+              className="inline-flex items-center gap-2 text-[13px] tracking-normal font-medium leading-none"
+            >
+              <span
+                className="font-semibold tracking-normal"
+                style={{ color: 'color-mix(in srgb, var(--app-accent-text, #64D2FF) 55%, #FFFFFF)' }}
               >
-                <span
-                  className="font-semibold tracking-normal"
-                  style={{
-                    color: tint,
-                    textShadow: `0 0 12px ${tint}33`,
-                  }}
-                >
-                  "{item.quote}"
-                </span>
-                <span className="text-white/35 select-none mx-0.5 font-bold">
-                  —
-                </span>
-                <strong className="font-extrabold text-white tracking-wide text-[12.5px] uppercase">
-                  {item.author}
-                </strong>
+                "{item.quote}"
+              </span>
+              <span className="text-white/40 select-none mx-0.5 font-bold">
+                —
+              </span>
+              <strong className="font-bold text-white/90 tracking-wide text-[12px] uppercase">
+                {item.author}
+              </strong>
 
-                {/* Specular glowing spacer dot between quotes */}
-                <span
-                  className="w-1.5 h-1.5 rounded-full ml-10 select-none shrink-0"
-                  style={{
-                    backgroundColor: tint,
-                    boxShadow: `0 0 8px ${tint}`,
-                  }}
-                />
-              </div>
-            );
-          })}
+              {/* Subtle glowing spacer dot matching theme accent */}
+              <span
+                className="w-1.5 h-1.5 rounded-full ml-10 select-none shrink-0"
+                style={{
+                  backgroundColor: 'var(--app-accent-text, #64D2FF)',
+                  opacity: 0.75,
+                }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -99,7 +99,7 @@ export default function InteractiveClock({
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className="text-indigo-500 dark:text-indigo-400 transition-[stroke-dashoffset] duration-500"
+            className="text-[var(--app-accent-text)] transition-[stroke-dashoffset] duration-500"
             style={{
               transform: 'rotate(-90deg)',
               transformOrigin: '50% 50%',
@@ -147,7 +147,7 @@ export default function InteractiveClock({
           stroke="currentColor"
           strokeWidth={strokeWidth * 0.9}
           strokeLinecap="round"
-          className="text-indigo-600 dark:text-indigo-400"
+          className="text-[var(--app-accent-text)]"
           animate={{ rotate: isRunning ? activeRotation : 120 }}
           transition={{ ease: 'linear' }}
           style={{ transformOrigin: '50% 50%' }}

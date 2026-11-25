@@ -73,18 +73,9 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
     }
   }, [deleteDialog.isOpen, deleteDialog.stage]);
 
-  // Resolves color for a given section ID, defaulting to current CSS --md-primary
-  const resolveSectionColor = useCallback((section?: string) => {
-    if (section && PALETTE[section]?.seed) {
-      return PALETTE[section].seed;
-    }
-    if (section && section === 'tasks') return '#059669';
-    if (section && section === 'timetable') return '#D97706';
-    if (section && section === 'spending') return '#15803D';
-    if (section && (section === 'outings' || section === 'outing')) return '#8C500A';
-    if (section && section === 'notes') return '#8436E9';
-    if (section && section === 'drive') return '#0A84FF';
-    return '#8436E9';
+  // Resolves color to unified active theme accent
+  const resolveSectionColor = useCallback((_section?: string) => {
+    return 'var(--app-accent, #8B1E3F)';
   }, []);
 
   // 1. Confirm Delete Flow
@@ -210,13 +201,13 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-              className="w-full max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden relative select-none"
+              className="w-full max-w-sm rounded-[28px] glass-sheet shadow-2xl p-6 sm:p-7 overflow-hidden relative select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {deleteDialog.stage === 'confirm' ? (
                 /* Confirmation Stage: "Are you sure?" with clean Phosphor Trash Icon */
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400">
+                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 flex items-center justify-center text-rose-400">
                     <Trash size={28} weight="duotone" />
                   </div>
 
@@ -230,7 +221,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                         "{deleteDialog.options.itemName}"
                       </p>
                     )}
-                    <p className="text-[13px] text-white/60 leading-relaxed pt-1">
+                    <p className="text-[13px] text-white/70 leading-relaxed pt-1">
                       {deleteDialog.options.message ||
                         'Are you sure? This item will be permanently removed and cannot be recovered.'}
                     </p>
@@ -241,14 +232,14 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                     <button
                       type="button"
                       onClick={handleCancelDelete}
-                      className="py-3 px-4 rounded-2xl bg-white/[0.06] hover:bg-white/10 text-white/80 font-semibold text-[13px] border border-white/10 transition-all active:scale-95 touch-manipulation cursor-pointer"
+                      className="py-3 px-4 rounded-2xl glass-flat text-white/90 font-semibold text-[13px] transition-transform active:scale-95 touch-manipulation cursor-pointer"
                     >
                       {deleteDialog.options.cancelLabel || 'Cancel'}
                     </button>
                     <button
                       type="button"
                       onClick={handleExecuteDelete}
-                      className="py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-[13px] shadow-lg shadow-rose-500/30 transition-all active:scale-95 touch-manipulation cursor-pointer"
+                      className="py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-[13px] shadow-lg shadow-rose-500/30 transition-transform active:scale-95 touch-manipulation cursor-pointer"
                     >
                       {deleteDialog.options.confirmLabel || 'Delete'}
                     </button>
@@ -262,7 +253,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center justify-center py-4 space-y-3"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400">
+                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 flex items-center justify-center text-rose-400">
                     <Trash size={28} weight="fill" />
                   </div>
                   <div className="text-center space-y-1">
@@ -296,18 +287,22 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: 8 }}
               transition={{ type: 'spring', stiffness: 440, damping: 28 }}
-              className="w-full max-w-xs sm:max-w-sm rounded-[28px] bg-[#1C1C1E] border border-white/10 shadow-2xl p-6 sm:p-7 overflow-hidden relative flex flex-col items-center justify-center text-center space-y-3.5"
+              className="w-full max-w-xs sm:max-w-sm rounded-[28px] glass-sheet shadow-2xl p-6 sm:p-7 overflow-hidden relative flex flex-col items-center justify-center text-center space-y-3.5"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Centered Phosphor Icon */}
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                  feedback.type === 'deleted'
-                    ? 'bg-rose-500/15 border border-rose-500/25 text-rose-400'
-                    : feedback.type === 'saved'
-                    ? 'bg-[#30D158]/15 border border-[#30D158]/25 text-[#30D158]'
-                    : 'bg-[#0A84FF]/15 border border-[#0A84FF]/25 text-[#0A84FF]'
-                }`}
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{
+                  backgroundColor:
+                    feedback.type === 'deleted'
+                      ? 'rgba(255, 69, 58, 0.16)'
+                      : 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  color:
+                    feedback.type === 'deleted'
+                      ? '#FF453A'
+                      : 'var(--app-accent-text, #64D2FF)',
+                }}
               >
                 {feedback.type === 'deleted' ? (
                   <Trash size={28} weight="duotone" />
@@ -324,7 +319,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                   {feedback.title}
                 </h4>
                 {feedback.message && (
-                  <p className="text-[13px] text-white/60 font-normal leading-relaxed max-w-[240px] mx-auto">
+                  <p className="text-[13px] text-white/70 font-normal leading-relaxed max-w-[240px] mx-auto">
                     {feedback.message}
                   </p>
                 )}
@@ -333,13 +328,13 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
               {/* Progress timer bar */}
               <div className="w-20 h-1 rounded-full bg-white/10 overflow-hidden mt-1">
                 <motion.div
-                  className={`h-full rounded-full ${
-                    feedback.type === 'deleted'
-                      ? 'bg-rose-500'
-                      : feedback.type === 'saved'
-                      ? 'bg-[#30D158]'
-                      : 'bg-[#0A84FF]'
-                  }`}
+                  className="h-full rounded-full"
+                  style={{
+                    background:
+                      feedback.type === 'deleted'
+                        ? '#FF453A'
+                        : 'linear-gradient(90deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)',
+                  }}
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 1.35, ease: 'linear' }}

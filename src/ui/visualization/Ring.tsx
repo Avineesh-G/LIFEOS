@@ -15,8 +15,8 @@ export function Ring({
   progress,
   size = 64,
   strokeWidth = 6,
-  color = '#FF9F0A',
-  trackColor = '#2C2C2E',
+  color: _color,
+  trackColor = 'rgba(255, 255, 255, 0.10)',
   children,
   className = '',
 }: RingProps) {
@@ -24,6 +24,7 @@ export function Ring({
   const circumference = 2 * Math.PI * radius;
   const clampedProgress = Math.min(1, Math.max(0, progress));
   const strokeDashoffset = circumference - clampedProgress * circumference;
+  const ringStroke = 'var(--app-accent-text, #64D2FF)';
 
   return (
     <div
@@ -37,7 +38,6 @@ export function Ring({
         shapeRendering="geometricPrecision"
         className="rotate-[-90deg]"
       >
-        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -47,12 +47,11 @@ export function Ring({
           shapeRendering="geometricPrecision"
           fill="transparent"
         />
-        {/* Animated Progress */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={color}
+          stroke={ringStroke}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeLinecap="round"
