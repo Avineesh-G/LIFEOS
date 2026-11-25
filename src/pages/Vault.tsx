@@ -747,8 +747,8 @@ export default function Vault({ data, updateData }: VaultProps) {
                         style={
                           isUserCopied
                             ? {
-                                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                                color: 'var(--app-accent-text, #DE4B64)',
+                                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                                color: 'var(--app-accent-text, #D29B7E)',
                               }
                             : undefined
                         }
@@ -762,9 +762,9 @@ export default function Vault({ data, updateData }: VaultProps) {
                   {/* Password Row */}
                   <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl glass-flat">
                     <div className="flex items-center gap-2 px-1 min-w-0 truncate font-mono text-xs">
-                      <Key size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                      <Key size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                       {isRevealed ? (
-                        <span className="font-semibold tracking-wider truncate select-all" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                        <span className="font-semibold tracking-wider truncate select-all" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           {revealedPlain}
                         </span>
                       ) : (
@@ -779,8 +779,8 @@ export default function Vault({ data, updateData }: VaultProps) {
                         <span
                           className="px-1.5 py-0.5 rounded-md text-[10px] font-bold animate-pulse"
                           style={{
-                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                            color: 'var(--app-accent-text, #DE4B64)',
+                            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                            color: 'var(--app-accent-text, #D29B7E)',
                           }}
                         >
                           {peekSecondsLeft}s
@@ -796,7 +796,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                         }`}
                         style={
                           isRevealed
-                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                             : undefined
                         }
                         title={isRevealed ? 'Hide' : 'Peek for 10s'}
@@ -813,7 +813,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                         }`}
                         style={
                           isPasswordCopied
-                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                            ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                             : undefined
                         }
                         title="Copy Password"

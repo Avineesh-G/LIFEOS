@@ -14,6 +14,7 @@ export const LAUNDRY_CHANNEL_ID = 'lifeos_laundry';
 export const NOTIFICATION_ICON = 'ic_stat_lifeos';
 export const NOTIFICATION_COLOR = '#6366F1';
 export const STUDY_TIMER_NOTIF_ID = 88888;
+export const FOCUS_COMPLETE_NOTIF_ID = 88889;
 
 let channelCreated = false;
 
@@ -1057,6 +1058,48 @@ export async function cancelStudyTimerNotification(): Promise<void> {
     });
   } catch (err) {
     console.warn('[Notifications] Failed to cancel study timer notification:', err);
+  }
+}
+
+export async function scheduleFocusCompleteNotification(
+  title: string,
+  targetEndMs: number
+): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  if (targetEndMs <= Date.now() + 1000) return;
+  try {
+    await ensureNotificationChannels();
+    await LocalNotifications.cancel({ notifications: [{ id: FOCUS_COMPLETE_NOTIF_ID }] }).catch(() => {});
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: FOCUS_COMPLETE_NOTIF_ID,
+          title,
+          body: 'Tap to log your session or start your recovery break.',
+          channelId: TASKS_CHANNEL_ID,
+          smallIcon: NOTIFICATION_ICON,
+          iconColor: NOTIFICATION_COLOR,
+          schedule: { at: new Date(targetEndMs), allowWhileIdle: true },
+          extra: {
+            type: 'focus_complete',
+            route: '/focus',
+          },
+        },
+      ],
+    });
+  } catch (err) {
+    console.warn('[Notifications] Failed to schedule focus completion notification:', err);
+  }
+}
+
+export async function cancelFocusCompleteNotification(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await LocalNotifications.cancel({
+      notifications: [{ id: FOCUS_COMPLETE_NOTIF_ID }],
+    });
+  } catch (err) {
+    console.warn('[Notifications] Failed to cancel focus completion notification:', err);
   }
 }
 

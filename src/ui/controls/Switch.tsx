@@ -45,7 +45,7 @@ export function Switch({
       } ${className}`}
       style={{
         background: checked
-          ? 'linear-gradient(135deg, var(--app-accent, #8B1E3F) 0%, var(--app-accent-end, #B52B4D) 100%)'
+          ? 'linear-gradient(135deg, var(--app-accent, #7B4B36) 0%, var(--app-accent-end, #A46D52) 100%)'
           : '#323238',
       }}
     >

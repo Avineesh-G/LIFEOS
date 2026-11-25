@@ -124,9 +124,9 @@ export default function Tasks({ data, updateData }: TasksProps) {
   };
 
   const priorityColor = (p?: string) => {
-    if (p === 'high') return 'var(--app-accent-text, #DE4B64)';
-    if (p === 'medium') return 'var(--app-accent-end, #B52B4D)';
-    return 'var(--app-accent, #8B1E3F)';
+    if (p === 'high') return 'var(--app-accent-text, #D29B7E)';
+    if (p === 'medium') return 'var(--app-accent-end, #A46D52)';
+    return 'var(--app-accent, #7B4B36)';
   };
 
   return (
@@ -195,7 +195,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                           key: 'restore',
                           label: 'Restore',
                           icon: <Check size={18} weight="bold" />,
-                          color: 'var(--app-accent, #8B1E3F)',
+                          color: 'var(--app-accent, #7B4B36)',
                           onClick: () => handleRestoreTaskToToday(task),
                         },
                         {
@@ -211,7 +211,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                           key: 'toggle',
                           label: 'Done',
                           icon: <Check size={18} weight="bold" />,
-                          color: 'var(--app-accent, #8B1E3F)',
+                          color: 'var(--app-accent, #7B4B36)',
                           onClick: () => handleToggleTask(task),
                         },
                         {
@@ -228,7 +228,7 @@ export default function Tasks({ data, updateData }: TasksProps) {
                   icon={
                     <CheckCircle
                       weight={task.completed ? 'fill' : 'regular'}
-                      style={task.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                      style={task.completed ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                       className={task.completed ? '' : 'text-[rgba(235,235,245,0.40)]'}
                     />
                   }

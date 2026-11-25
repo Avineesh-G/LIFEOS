@@ -39,26 +39,18 @@ function purgeLegacyKeys() {
 }
 
 /**
- * Loads saved theme config or default
+ * Always returns the fixed Warm Brown dark theme config (color adaptation removed).
  */
 export function loadSavedTheme(): ThemeConfig {
   purgeLegacyKeys();
-  try {
-    const raw = localStorage.getItem(THEME_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.paletteId && parsed.mode) {
-        return {
-          paletteId: parsed.paletteId,
-          mode: parsed.mode,
-        };
-      }
-    }
-  } catch {}
-  return {
+  const fixed: ThemeConfig = {
     paletteId: DEFAULT_PALETTE_ID,
     mode: DEFAULT_THEME_MODE,
   };
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(fixed));
+  } catch {}
+  return fixed;
 }
 
 /**
@@ -134,8 +126,11 @@ export function getActiveTheme(): ThemeConfig {
 /**
  * Saves and applies a new theme configuration across the app
  */
-export function saveAndApplyTheme(config: ThemeConfig): void {
-  currentConfig = { ...config };
+export function saveAndApplyTheme(_config: ThemeConfig): void {
+  currentConfig = {
+    paletteId: DEFAULT_PALETTE_ID,
+    mode: DEFAULT_THEME_MODE,
+  };
   try {
     localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(currentConfig));
   } catch {}

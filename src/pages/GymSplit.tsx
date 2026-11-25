@@ -160,14 +160,14 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                   ? 'glass-tile font-bold shadow-sm'
                   : 'text-white/60 hover:text-white'
               }`}
-              style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+              style={isSelected ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
             >
               <span className="text-[11px] font-bold uppercase">{day}</span>
               <span
                 className={`text-[9px] font-semibold truncate w-full text-center ${
                   isSelected ? '' : 'text-white/40'
                 }`}
-                style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                style={isSelected ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
               >
                 {type}
               </span>
@@ -191,7 +191,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
                     ? 'glass-tile shadow-sm'
                     : 'glass-flat text-white/70 hover:text-white'
                 }`}
-                style={isActive ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                style={isActive ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
               >
                 {preset}
               </button>
@@ -229,7 +229,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
         </div>
       ) : currentExercises.length === 0 ? (
         <div className="my-6 p-8 rounded-[28px] glass-card text-center space-y-3">
-          <Barbell size={32} weight="duotone" className="mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+          <Barbell size={32} weight="duotone" className="mx-auto" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
           <h3 className="text-base font-bold text-white">No exercises planned for {currentDaySplit}</h3>
           <p className="text-xs text-white/50 max-w-xs mx-auto leading-relaxed">
             Tap the button below to add target exercises, sets, and weights.

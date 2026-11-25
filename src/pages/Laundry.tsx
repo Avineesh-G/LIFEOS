@@ -290,7 +290,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
               <div
                 className="w-6 h-6 rounded-lg flex items-center justify-center"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color: 'var(--app-accent-text, #64D2FF)',
                 }}
               >
@@ -357,12 +357,12 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
                     <div className="flex items-center gap-3 text-xs text-[rgba(235,235,245,0.60)] font-medium flex-wrap">
                       <span className="inline-flex items-center gap-1">
-                        <CalendarBlank size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                        <CalendarBlank size={12} style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                         Submitted: <strong className="text-white font-medium">{batch.submitDate}</strong>
                       </span>
 
                       <span className="inline-flex items-center gap-1">
-                        <Clock size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                        <Clock size={12} style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                         Return: <strong className="text-white font-medium">{batch.returnDate || 'Pending'}</strong>
                       </span>
                     </div>
@@ -387,7 +387,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium glass-flat text-white"
                     >
                       <span className="text-[rgba(235,235,245,0.60)]">{item.category}:</span>
-                      <strong style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{item.count}</strong>
+                      <strong style={{ color: 'var(--app-accent-text, #D29B7E)' }}>{item.count}</strong>
                     </span>
                   ))}
                 </div>
@@ -445,7 +445,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
 
           {batches.length === 0 && (
             <EmptyState
-              icon={<TShirt size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
+              icon={<TShirt size={36} weight="light" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />}
               title="No laundry batches yet"
               description="Log your clothes count when giving them to laundry to track submission and return dates accurately."
               actionLabel="Log First Batch"

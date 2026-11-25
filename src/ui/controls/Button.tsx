@@ -24,9 +24,9 @@ export function Button({
   onClick,
   ...props
 }: ButtonProps) {
-  const accentPrimary = 'var(--app-accent, #8B1E3F)';
-  const accentEnd = 'var(--app-accent-end, #B52B4D)';
-  const accentText = 'var(--app-accent-text, #DE4B64)';
+  const accentPrimary = 'var(--app-accent, #7B4B36)';
+  const accentEnd = 'var(--app-accent-end, #A46D52)';
+  const accentText = 'var(--app-accent-text, #D29B7E)';
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;

@@ -26,8 +26,8 @@ export default function M3WavyProgressBar({
   className = '',
   width = 240,
   height = 28,
-  activeColor = 'var(--app-accent, #8B1E3F)',
-  secondaryColor = 'var(--app-accent-end, #B52B4D)',
+  activeColor = 'var(--app-accent, #7B4B36)',
+  secondaryColor = 'var(--app-accent-end, #A46D52)',
 }: M3WavyProgressBarProps) {
   const clampedProgress = Math.max(0, Math.min(100, progress));
   const rawId = useId();

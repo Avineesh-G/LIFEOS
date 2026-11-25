@@ -72,14 +72,14 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
         <div className="relative z-10 flex items-center gap-2.5 shrink-0">
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full text-white shadow-md group-hover:scale-105 transition-transform"
-            style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+            style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
           >
             <Mic size={15} strokeWidth={2.2} />
           </div>
 
           <div
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5"
-            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <AudioWaveform size={16} className="animate-pulse" />
           </div>
@@ -107,7 +107,7 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
             >
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-medium text-sm" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                  <div className="flex items-center gap-2 font-medium text-sm" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                     <Sparkles size={16} />
                     <span>Luna Intelligence</span>
                   </div>

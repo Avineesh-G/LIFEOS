@@ -638,8 +638,8 @@ export default function Spending({ data, updateData }: SpendingProps) {
                             <span
                               className="text-[9.5px] px-2 py-0.5 rounded-full font-semibold"
                               style={{
-                                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                                color: 'var(--app-accent-text, #DE4B64)',
+                                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                                color: 'var(--app-accent-text, #D29B7E)',
                               }}
                             >
                               {isReturned ? 'Settled' : 'Pending'}

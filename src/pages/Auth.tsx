@@ -61,7 +61,7 @@ export default function Auth() {
       {/* Subtle Atmospheric Single-Hue Glow */}
       <div
         className="absolute w-72 h-72 rounded-full pointer-events-none opacity-25"
-        style={{ background: 'radial-gradient(circle, var(--app-accent, #8B1E3F) 0%, transparent 72%)' }}
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #7B4B36) 0%, transparent 72%)' }}
       />
 
       {/* Top Branding */}
@@ -127,7 +127,7 @@ export default function Auth() {
           </button>
 
           <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-white/40">
-            <ShieldCheck size={14} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+            <ShieldCheck size={14} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
             <span>End-to-end encrypted partition</span>
           </div>
         </div>

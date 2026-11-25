@@ -180,7 +180,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   style={
                     active
                       ? {
-                          backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                          backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                           boxShadow: '0 8px 24px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12)',
                         }
                       : undefined

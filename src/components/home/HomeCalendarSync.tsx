@@ -247,7 +247,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               onClick={handleGoToday}
               className="px-2.5 py-1 rounded-full text-[11px] font-bold active:scale-95 transition-transform cursor-pointer"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                 color: 'var(--app-accent-text, #64D2FF)',
               }}
             >
@@ -427,7 +427,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               setIsAddingTask((prev) => !prev);
             }}
             className="px-3 py-1.5 rounded-full glass-nav nav-rim-light flex items-center gap-1.5 text-[12px] font-semibold active:scale-95 transition-all"
-            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <Plus size={14} weight="bold" />
             <span>Add Task</span>
@@ -457,7 +457,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                 type="submit"
                 className="h-9 px-4 rounded-xl text-white text-[12.5px] font-bold active:scale-95 transition-all shadow-sm"
                 style={{
-                  background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                  background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                 }}
               >
                 Save
@@ -518,7 +518,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   <div className="text-lg mt-0.5">
                     <CheckCircle
                       weight={t.completed ? 'fill' : 'regular'}
-                      style={t.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                      style={t.completed ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                       className={t.completed ? '' : 'text-[rgba(235,235,245,0.40)]'}
                     />
                   </div>
@@ -540,7 +540,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   </div>
                   <span
                     className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     Task
                   </span>
@@ -556,7 +556,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <GraduationCap size={18} weight="duotone" />
                     </div>
@@ -575,7 +575,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   </div>
                   <span
                     className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     Class
                   </span>
@@ -588,7 +588,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <Barbell size={18} weight="duotone" />
                     </div>
@@ -603,7 +603,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   </div>
                   <span
                     className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     Gym
                   </span>
@@ -619,7 +619,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <MapPin size={18} weight="duotone" />
                     </div>
@@ -634,7 +634,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   </div>
                   <span
                     className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full glass-flat shrink-0"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     Outing
                   </span>

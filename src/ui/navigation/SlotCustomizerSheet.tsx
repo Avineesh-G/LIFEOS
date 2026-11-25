@@ -39,38 +39,27 @@ export function SlotCustomizerSheet({
   const currentItem = ALL_HUB_ITEMS.find((i) => i.id === currentSlotId);
   const otherItem = ALL_HUB_ITEMS.find((i) => i.id === otherSlotId);
 
-  // Group items by category
+  // Group items by the work they do, with sections and items sorted alphabetically (A–Z)
   const categorizedSections = useMemo(() => {
     const itemMap = new Map<string, HubItem & { route: string }>();
     ALL_HUB_ITEMS.forEach((it) => itemMap.set(it.id, it));
 
-    const planItems = ['tasks', 'timetable', 'laundry', 'drive']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem & { route: string } => !!i);
-
-    const captureItems = ['notes']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem & { route: string } => !!i);
-
-    const healthItems = ['gym', 'nutrition']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem & { route: string } => !!i);
-
-    const moneyItems = ['spending', 'shopping', 'outings']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem & { route: string } => !!i);
-
-    const systemItems = ['history', 'settings']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem & { route: string } => !!i);
+    const buildSortedSection = (title: string, ids: string[]) => ({
+      title,
+      items: ids
+        .map((id) => itemMap.get(id))
+        .filter((i): i is HubItem & { route: string } => !!i)
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    });
 
     return [
-      { title: 'Health & Fitness (Default Quick Slots)', items: healthItems },
-      { title: 'Plan & Routines', items: planItems },
-      { title: 'Notes & Capture', items: captureItems },
-      { title: 'Finances & Life', items: moneyItems },
-      { title: 'Security & System', items: systemItems },
-    ];
+      buildSortedSection('Finance & Money', ['outings', 'shopping', 'spending']),
+      buildSortedSection('Health & Wellness', ['gym', 'nutrition']),
+      buildSortedSection('Intelligence & Study', ['decisions', 'focus', 'notes']),
+      buildSortedSection('Personal & Travel', ['journal', 'circle', 'laundry', 'trips']),
+      buildSortedSection('Planning & Work', ['calendar', 'drive', 'projects', 'timetable', 'tasks']),
+      buildSortedSection('System & History', ['settings', 'history']),
+    ].sort((a, b) => a.title.localeCompare(b.title));
   }, []);
 
   const filteredItems = useMemo(() => {
@@ -78,7 +67,7 @@ export function SlotCustomizerSheet({
     const q = search.toLowerCase();
     return ALL_HUB_ITEMS.filter(
       (item) => item.label.toLowerCase().includes(q) || item.id.toLowerCase().includes(q)
-    );
+    ).sort((a, b) => a.label.localeCompare(b.label));
   }, [search]);
 
   const handleSelect = (itemId: string) => {
@@ -144,7 +133,7 @@ export function SlotCustomizerSheet({
                   ? 'glass-tile shadow-sm'
                   : 'glass-flat text-white/60'
               }`}
-              style={targetSlotIdx === 0 ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+              style={targetSlotIdx === 0 ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
             >
               <span className="text-base shrink-0">
                 {targetSlotIdx === 0 ? currentItem?.icon : otherItem?.icon}
@@ -153,7 +142,7 @@ export function SlotCustomizerSheet({
                 {targetSlotIdx === 0 ? currentItem?.label.split(' ')[0] : otherItem?.label.split(' ')[0]}
               </span>
               {targetSlotIdx === 0 && (
-                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
               )}
             </div>
 
@@ -164,7 +153,7 @@ export function SlotCustomizerSheet({
                   ? 'glass-tile shadow-sm'
                   : 'glass-flat text-white/60'
               }`}
-              style={targetSlotIdx === 1 ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+              style={targetSlotIdx === 1 ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
             >
               <span className="text-base shrink-0">
                 {targetSlotIdx === 1 ? currentItem?.icon : otherItem?.icon}
@@ -173,13 +162,13 @@ export function SlotCustomizerSheet({
                 {targetSlotIdx === 1 ? currentItem?.label.split(' ')[0] : otherItem?.label.split(' ')[0]}
               </span>
               {targetSlotIdx === 1 && (
-                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
               )}
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11.5px] text-white/50 px-1">
-            <LockKey size={13} weight="duotone" className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+            <LockKey size={13} weight="duotone" className="shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
             <span>Home is locked as your primary interface. Slot 1 and Slot 2 can be swapped with any interface.</span>
           </div>
         </div>
@@ -226,7 +215,7 @@ export function SlotCustomizerSheet({
                   </div>
 
                   {isCurrent ? (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                       <Check size={16} weight="bold" />
                       <span>Current</span>
                     </div>
@@ -278,7 +267,7 @@ export function SlotCustomizerSheet({
                         </div>
 
                         {isCurrent ? (
-                          <div className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full glass-flat" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                          <div className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full glass-flat" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                             <Check size={14} weight="bold" />
                             <span>Active in Slot {targetSlotIdx + 1}</span>
                           </div>

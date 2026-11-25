@@ -35,6 +35,12 @@ import Drive from './pages/Drive';
 import PublicShareView from './pages/PublicShareView';
 import CalendarPage from './pages/CalendarPage';
 import LunaChatPage from './pages/LunaChatPage';
+import Focus from './pages/Focus';
+import Journal from './pages/Journal';
+import Circle from './pages/Circle';
+import Projects from './pages/Projects';
+import Trips from './pages/Trips';
+import Decisions from './pages/Decisions';
 const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
@@ -150,6 +156,12 @@ function MainContent({
     { path: '/settings/interface-colors', element: <RouteErrorBoundary routeName="Appearance & Theme"><ThemeSettings /></RouteErrorBoundary> },
     { path: '/notes', element: <RouteErrorBoundary routeName="Notes & Ideas"><Notes data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/notes/:id', element: <RouteErrorBoundary routeName="Notes & Ideas Editor"><Notes data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/focus', element: <RouteErrorBoundary routeName="Focus Studio"><Focus data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/journal', element: <RouteErrorBoundary routeName="Daily Journal"><Journal data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/circle', element: <RouteErrorBoundary routeName="Inner Circle"><Circle data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/projects', element: <RouteErrorBoundary routeName="Projects"><Projects data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/trips', element: <RouteErrorBoundary routeName="Trips & Packing"><Trips data={data} updateData={updateData} /></RouteErrorBoundary> },
+    { path: '/decisions', element: <RouteErrorBoundary routeName="Decisions"><Decisions data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/drive', element: <RouteErrorBoundary routeName="Drive & Docs"><Drive data={data} updateData={updateData} /></RouteErrorBoundary> },
     { path: '/share/:shareId', element: <RouteErrorBoundary routeName="Shared Document"><PublicShareView /></RouteErrorBoundary> },
     { path: '/kit', element: <RouteErrorBoundary routeName="UI Kit Preview"><Suspense fallback={<PageLoadingFallback />}><KitPreview /></Suspense></RouteErrorBoundary> },

@@ -197,7 +197,7 @@ export default function CalendarQuickPopup({
             <div className="py-7 px-4 text-center rounded-2xl glass-tile flex flex-col items-center justify-center space-y-1.5">
               <div
                 className="w-10 h-10 rounded-2xl glass-flat flex items-center justify-center mb-0.5 shadow-sm"
-                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 <CalendarBlank size={22} weight="duotone" />
               </div>
@@ -226,15 +226,15 @@ export default function CalendarQuickPopup({
                     {ev.isAllDay ? 'All-Day' : `${ev.startTime || '10:00'} – ${ev.endTime || '11:00'}`}
                   </span>
                   {ev.notificationLeadMinutes !== -1 && (
-                    <Bell size={12} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <Bell size={12} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                   )}
                 </div>
               </div>
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 {ev.category}
@@ -277,7 +277,7 @@ export default function CalendarQuickPopup({
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color: 'var(--app-accent-text, #64D2FF)',
                 }}
               >
@@ -296,7 +296,7 @@ export default function CalendarQuickPopup({
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                     color: 'var(--app-accent-text, #64D2FF)',
                   }}
                 >
@@ -312,7 +312,7 @@ export default function CalendarQuickPopup({
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color: 'var(--app-accent-text, #64D2FF)',
                 }}
               >
@@ -328,7 +328,7 @@ export default function CalendarQuickPopup({
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                     color: 'var(--app-accent-text, #64D2FF)',
                   }}
                 >
@@ -344,7 +344,7 @@ export default function CalendarQuickPopup({
               <span
                 className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color: 'var(--app-accent-text, #64D2FF)',
                 }}
               >

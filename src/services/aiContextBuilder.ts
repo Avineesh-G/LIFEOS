@@ -1,8 +1,17 @@
 import type { AppData, NoteItem } from '../types.ts';
-import { getLetAiReadData, getSectionPermissions, isNoteExcludedFromAi, redactSensitiveInformation } from '../utils/aiSecurity.ts';
+import {
+  getLetAiReadData,
+  getSectionPermissions,
+  isJournalEntryExcludedFromAi,
+  isNoteExcludedFromAi,
+  redactSensitiveInformation,
+} from '../utils/aiSecurity.ts';
 import { getAggregatedUsageSummary } from './aiUsageTracker.ts';
 import { getStoredLocation } from '../utils/geolocation.ts';
 import { format } from 'date-fns';
+import { getProjectMetrics } from '../utils/projectHelpers.ts';
+import { computeOptionScores } from '../utils/decisionMath.ts';
+import { getCatchUpStatus, getDaysUntilBirthday, getPersonFinanceSummary } from '../utils/circleHelpers.ts';
 
 /**
  * Builds a compact, targeted context summary of the user's LifeOS data.
@@ -116,6 +125,123 @@ export function buildTargetedAiContext(query: string, data: AppData): string {
     const allItems = lists.flatMap(l => l.items || []);
     const pendingItems = allItems.filter(i => !i.checked);
     contextBlocks.push(`Shopping List Pending (${pendingItems.length}): ${pendingItems.map((i: any) => i.name).join(', ') || 'Empty'}`);
+  }
+
+  // 10. Projects & Milestones (if permitted & relevant)
+  if (
+    perms.projects !== false &&
+    (isGeneralQuery ||
+      /\b(project|milestone|blocker|build|hackathon|deadline|roadmap|focus)\b/.test(lowerQuery))
+  ) {
+    const activeProjects = (data.projects || []).filter((p) => p.status === 'active');
+    if (activeProjects.length > 0) {
+      const summaries = activeProjects.slice(0, 4).map((p) => {
+        const m = getProjectMetrics(p, data.studySessions || []);
+        const nextStr = m.nextMilestoneTitle ? ` | next: "${m.nextMilestoneTitle}"` : '';
+        const blockerStr = p.blockerNote?.trim() ? ` | blocker: ${p.blockerNote.trim().slice(0, 60)}` : '';
+        return `"${p.title}" (${Math.round(m.progressRatio * 100)}%, ${m.doneMilestones}/${m.totalMilestones} milestones, ${m.focusMinutes}m focus${nextStr}${blockerStr})`;
+      });
+      contextBlocks.push(`Active Projects (${activeProjects.length}): ${summaries.join('; ')}`);
+    }
+  }
+
+  // 11. Focus Studio Summary (if permitted & relevant)
+  if (
+    perms.focus !== false &&
+    (isGeneralQuery || /\b(focus|pomodoro|deep work|study|session|timer|hours)\b/.test(lowerQuery))
+  ) {
+    const todayKey = format(new Date(), 'yyyy-MM-dd');
+    const sessions = data.studySessions || [];
+    const todayFocusMins = sessions
+      .filter((s) => s.date === todayKey)
+      .reduce((sum, s) => sum + (Number(s.duration) || 0), 0);
+    const recentStr = sessions
+      .slice(0, 3)
+      .map((s) => `${s.subject} (${s.duration}m on ${s.date})`)
+      .join(', ');
+    contextBlocks.push(`Focus Studio: ${todayFocusMins}m focused today. Recent sessions: ${recentStr || 'None'}`);
+  }
+
+  // 12. Daily Journal (if permitted & relevant, strictly excluding hideFromAi entries)
+  if (
+    perms.journal !== false &&
+    (isGeneralQuery || /\b(journal|mood|energy|reflect|reflection|win|wins|gratitude|yesterday|day)\b/.test(lowerQuery))
+  ) {
+    const visibleEntries = (data.journalEntries || [])
+      .filter((e) => !isJournalEntryExcludedFromAi(e))
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 3);
+    if (visibleEntries.length > 0) {
+      const lines = visibleEntries.map((e) => {
+        const parts: string[] = [e.date];
+        if (e.morningEnergy) parts.push(`energy ${e.morningEnergy}/5`);
+        if (e.nightMood) parts.push(`mood ${e.nightMood}/5`);
+        if (e.morningFocusTheme?.trim()) parts.push(`theme "${e.morningFocusTheme.trim().slice(0, 50)}"`);
+        if (e.wins && e.wins.length > 0) parts.push(`${e.wins.length} wins`);
+        return parts.join(', ');
+      });
+      contextBlocks.push(`Recent Journal Entries (${visibleEntries.length}): ${lines.join(' | ')}`);
+    }
+  }
+
+  // 13. Inner Circle CRM (if permitted & relevant — phone numbers strictly omitted)
+  if (
+    perms.circle !== false &&
+    (isGeneralQuery || /\b(circle|friend|family|birthday|gift|catch up|catchup|owe|owed|lent|balance)\b/.test(lowerQuery))
+  ) {
+    const contacts = data.circleContacts || [];
+    if (contacts.length > 0) {
+      const dueOrUpcoming = contacts
+        .map((p) => {
+          const bday = getDaysUntilBirthday(p.birthday);
+          const cu = getCatchUpStatus(p);
+          const fin = getPersonFinanceSummary(p, data.moneyLent || [], null);
+          return { p, bday, cu, fin };
+        })
+        .filter((x) => (x.bday !== null && x.bday <= 14) || x.cu.isDue || x.fin.totalNetRupees !== 0)
+        .slice(0, 5);
+      if (dueOrUpcoming.length > 0) {
+        const lines = dueOrUpcoming.map(({ p, bday, cu, fin }) => {
+          const tags: string[] = [p.relation];
+          if (bday !== null && bday <= 14) tags.push(bday === 0 ? 'bday today' : `bday in ${bday}d`);
+          if (cu.isDue) tags.push('catch-up due');
+          if (fin.moneyLentNetRupees !== 0) tags.push(`loan net Rs ${fin.moneyLentNetRupees}`);
+          return `${p.name} (${tags.join(', ')})`;
+        });
+        contextBlocks.push(`Inner Circle Attention (${contacts.length} contacts): ${lines.join('; ')}`);
+      }
+    }
+  }
+
+  // 14. Trips & Smart Packing (if permitted & relevant — bookingRef/PNR strictly omitted)
+  if (
+    perms.trips !== false &&
+    (isGeneralQuery || /\b(trip|travel|pack|packing|bag|luggage|hostel|home|flight|train|hackathon)\b/.test(lowerQuery))
+  ) {
+    const upcomingTrips = (data.trips || []).filter((t) => !t.isCompleted).slice(0, 3);
+    if (upcomingTrips.length > 0) {
+      const lines = upcomingTrips.map((t) => {
+        const packed = t.packingItems.filter((i) => i.packed).length;
+        return `"${t.title}"${t.destination ? ` -> ${t.destination}` : ''} on ${t.departureDate} (${packed}/${t.packingItems.length} packed)`;
+      });
+      contextBlocks.push(`Upcoming Trips (${upcomingTrips.length}): ${lines.join('; ')}`);
+    }
+  }
+
+  // 15. Decision Workbench (if permitted & relevant)
+  if (
+    perms.decisions !== false &&
+    (isGeneralQuery || /\b(decision|decide|choose|option|pros|cons|tradeoff|trade-off|matrix|review)\b/.test(lowerQuery))
+  ) {
+    const activeDecisions = (data.decisions || []).filter((d) => d.status !== 'revisited').slice(0, 4);
+    if (activeDecisions.length > 0) {
+      const lines = activeDecisions.map((d) => {
+        const ranked = computeOptionScores(d);
+        const top = ranked[0] ? `leader "${ranked[0].title}" (${ranked[0].percentage}%)` : 'no scores';
+        return `"${d.question}" [${d.status}, ${top}]`;
+      });
+      contextBlocks.push(`Decisions (${activeDecisions.length}): ${lines.join('; ')}`);
+    }
   }
 
   const rawSummary = contextBlocks.join('\n');

@@ -35,37 +35,37 @@ export const OUTING_CATEGORIES: CategoryMeta[] = [
   {
     label: 'Food',
     icon: Utensils,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
   {
     label: 'Transport',
     icon: Car,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
   {
     label: 'Tickets & fun',
     icon: Ticket,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
   {
     label: 'Shopping',
     icon: ShoppingBag,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
   {
     label: 'Stay',
     icon: Hotel,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
   {
     label: 'Other',
     icon: Compass,
-    color: 'var(--app-accent-text, #DE4B64)',
+    color: 'var(--app-accent-text, #D29B7E)',
     badgeClass: 'bg-[var(--app-accent-soft)] text-[var(--app-accent-text)]',
   },
 ];

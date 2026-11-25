@@ -9,7 +9,13 @@ export type AiActionType =
   | 'ADD_MULTIPLE_SHOPPING_ITEMS'
   | 'CREATE_OUTING'
   | 'ADD_EXPENSE'
-  | 'ADD_NOTE';
+  | 'ADD_NOTE'
+  | 'CREATE_PROJECT'
+  | 'ADD_PROJECT_MILESTONE'
+  | 'CREATE_TRIP'
+  | 'ADD_PACKING_ITEMS'
+  | 'CREATE_DECISION'
+  | 'LOG_CIRCLE_CATCHUP';
 
 export interface AiActionProposal {
   id: string;
@@ -32,6 +38,12 @@ const ALLOWLISTED_ACTIONS = new Set<AiActionType>([
   'CREATE_OUTING',
   'ADD_EXPENSE',
   'ADD_NOTE',
+  'CREATE_PROJECT',
+  'ADD_PROJECT_MILESTONE',
+  'CREATE_TRIP',
+  'ADD_PACKING_ITEMS',
+  'CREATE_DECISION',
+  'LOG_CIRCLE_CATCHUP',
 ]);
 
 export function isAllowListedAction(type: string): boolean {
@@ -98,6 +110,46 @@ export function validateToolArguments(
     case 'CREATE_OUTING':
     case 'LOG_WORKOUT':
       return { valid: true };
+    case 'CREATE_PROJECT': {
+      const title = p.title as unknown;
+      if (typeof title !== 'string' || !title.trim()) {
+        return { valid: false, error: 'CREATE_PROJECT requires a non-empty title.' };
+      }
+      return { valid: true };
+    }
+    case 'ADD_PROJECT_MILESTONE': {
+      const ms = (p.milestone || p.title) as unknown;
+      const proj = (p.projectTitle || p.projectId) as unknown;
+      if (typeof ms !== 'string' || !ms.trim() || typeof proj !== 'string' || !proj.trim()) {
+        return { valid: false, error: 'ADD_PROJECT_MILESTONE requires milestone title and projectTitle.' };
+      }
+      return { valid: true };
+    }
+    case 'CREATE_TRIP': {
+      const title = (p.title || p.destination) as unknown;
+      if (typeof title !== 'string' || !title.trim()) {
+        return { valid: false, error: 'CREATE_TRIP requires title or destination.' };
+      }
+      return { valid: true };
+    }
+    case 'ADD_PACKING_ITEMS': {
+      if (!Array.isArray(p.items) || p.items.length === 0) {
+        return { valid: false, error: 'ADD_PACKING_ITEMS requires non-empty items array.' };
+      }
+      return { valid: true };
+    }
+    case 'CREATE_DECISION': {
+      if (typeof p.question !== 'string' || !p.question.trim()) {
+        return { valid: false, error: 'CREATE_DECISION requires a decision question.' };
+      }
+      return { valid: true };
+    }
+    case 'LOG_CIRCLE_CATCHUP': {
+      if (typeof p.name !== 'string' || !p.name.trim()) {
+        return { valid: false, error: 'LOG_CIRCLE_CATCHUP requires a contact name.' };
+      }
+      return { valid: true };
+    }
     default:
       return { valid: false, error: 'Action type is not allowlisted.' };
   }
@@ -144,6 +196,18 @@ export function buildActionTitle(parsed: any): string {
       return `Log Workout: ${p.type || 'Session'}`;
     case 'ADD_NOTE':
       return `Create Note: ${p.title || 'Untitled Note'}`;
+    case 'CREATE_PROJECT':
+      return `Create Project: ${p.title || 'New Project'}`;
+    case 'ADD_PROJECT_MILESTONE':
+      return `Add Milestone: ${p.milestone || p.title || 'Milestone'}`;
+    case 'CREATE_TRIP':
+      return `Plan Trip: ${p.title || p.destination || 'Trip'}`;
+    case 'ADD_PACKING_ITEMS':
+      return `Add Packing Items (${Array.isArray(p.items) ? p.items.length : 0})`;
+    case 'CREATE_DECISION':
+      return `New Decision Matrix: ${p.question || 'Decision'}`;
+    case 'LOG_CIRCLE_CATCHUP':
+      return `Log Catch-Up: ${p.name || 'Contact'}`;
     default:
       return 'Proposed Action';
   }
@@ -188,6 +252,22 @@ export function buildActionDescription(parsed: any): string {
       const preview = p.content ? (p.content.length > 60 ? p.content.slice(0, 57) + '...' : p.content) : 'Empty note';
       return `Note: ${preview}`;
     }
+    case 'CREATE_PROJECT':
+      return `${p.category || 'build'} project${Array.isArray(p.milestones) ? ` • ${p.milestones.length} milestones` : ''}`;
+    case 'ADD_PROJECT_MILESTONE':
+      return `Target Project: ${p.projectTitle || p.projectId || 'Project'}`;
+    case 'CREATE_TRIP':
+      return `${p.destination || 'Destination'} • ${p.departureDate || 'Upcoming'}`;
+    case 'ADD_PACKING_ITEMS': {
+      const list = Array.isArray(p.items)
+        ? p.items.map((x: any) => (typeof x === 'string' ? x : x?.name)).filter(Boolean).slice(0, 4).join(', ')
+        : '';
+      return `Bag Checklist: ${list}`;
+    }
+    case 'CREATE_DECISION':
+      return `${Array.isArray(p.options) ? p.options.length : 2} options • Weighted matrix`;
+    case 'LOG_CIRCLE_CATCHUP':
+      return `${p.type || 'message'}${p.note ? ` • ${p.note}` : ''}`;
     default:
       return '';
   }
@@ -202,7 +282,7 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
   let cleanText = text;
 
   const actionRegex =
-    /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|UPDATE_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*```/gi;
+    /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|UPDATE_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|CREATE_PROJECT|ADD_PROJECT_MILESTONE|CREATE_TRIP|ADD_PACKING_ITEMS|CREATE_DECISION|LOG_CIRCLE_CATCHUP)"[\s\S]*?(?:\}|\]))\s*```/gi;
   let match;
 
   while ((match = actionRegex.exec(text)) !== null) {
@@ -237,7 +317,7 @@ export function extractAiActionProposals(text: string): { cleanText: string; pro
 
   if (proposals.length === 0) {
     const rawJsonRegex =
-      /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|UPDATE_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*$/i;
+      /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|UPDATE_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE|CREATE_PROJECT|ADD_PROJECT_MILESTONE|CREATE_TRIP|ADD_PACKING_ITEMS|CREATE_DECISION|LOG_CIRCLE_CATCHUP)"[\s\S]*?(?:\}|\]))\s*$/i;
     const rawMatch = rawJsonRegex.exec(cleanText);
     if (rawMatch) {
       try {

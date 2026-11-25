@@ -139,8 +139,8 @@ export default function WebcamCaptureModal({
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                color: 'var(--app-accent-text, #DE4B64)',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               <Camera size={16} weight="bold" />
@@ -163,7 +163,7 @@ export default function WebcamCaptureModal({
         <div className="relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70 bg-[#121214]">
-              <SpinnerGap size={28} className="animate-spin" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+              <SpinnerGap size={28} className="animate-spin" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
               <span className="text-xs">Starting camera...</span>
             </div>
           )}
@@ -178,7 +178,7 @@ export default function WebcamCaptureModal({
                   onFallbackToFile();
                 }}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all flex items-center gap-2 shadow"
-                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
               >
                 <Folder size={14} weight="bold" />
                 <span>Choose Image from Files Instead</span>

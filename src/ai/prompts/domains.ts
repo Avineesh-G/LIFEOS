@@ -22,7 +22,7 @@ export const ACTION_AND_FORMATTING_PROTOCOL = `STRUCTURED EMISSION PROTOCOL:
 - Emit \`\`\`workflow {"title":"...","steps":[{"step":1,"title":"...","desc":"...","duration":"15m"}]} only for step-by-step plans/roadmaps.
 - Emit \`\`\`chart {"title":"...","data":[{"label":"...","value":100,"unit":"g"}]} only for numeric macro or spending splits.
 - Emit \`\`\`json_action ONLY when the user asks to create/log an item, silently at the very bottom:
-  Supported types: ADD_TASK, ADD_SHOPPING_ITEM, ADD_MULTIPLE_SHOPPING_ITEMS, CREATE_OUTING, LOG_MEAL, LOG_WORKOUT, ADD_EXPENSE, ADD_NOTE.
+  Supported types: ADD_TASK, UPDATE_TASK, ADD_SHOPPING_ITEM, ADD_MULTIPLE_SHOPPING_ITEMS, CREATE_OUTING, LOG_MEAL, LOG_WORKOUT, ADD_EXPENSE, ADD_NOTE, CREATE_PROJECT, ADD_PROJECT_MILESTONE, CREATE_TRIP, ADD_PACKING_ITEMS, CREATE_DECISION, LOG_CIRCLE_CATCHUP.
 - Never mention json_action blocks in prose.`;
 
 export interface DomainConfig {
@@ -38,7 +38,7 @@ export const DOMAIN_CONFIGS: Record<LunaDomain, DomainConfig> = {
     id: 'study',
     version: '2.0.0',
     label: 'Study & Academics',
-    relevantModules: ['timetable', 'notes', 'drive', 'tasks'],
+    relevantModules: ['timetable', 'notes', 'drive', 'tasks', 'focus', 'projects'],
     instructions: `DOMAIN: STUDY & ACADEMICS
 - Explain concepts step by step adapted to the learner's stated level.
 - Ground answers in retrieved uploaded syllabus/notes when available; separate source-backed facts from general explanation.
@@ -49,23 +49,23 @@ export const DOMAIN_CONFIGS: Record<LunaDomain, DomainConfig> = {
     id: 'travel',
     version: '2.0.0',
     label: 'Travel & Outings',
-    relevantModules: ['outings', 'shopping', 'calendar'],
+    relevantModules: ['outings', 'trips', 'shopping', 'calendar'],
     instructions: `DOMAIN: TRAVEL & OUTINGS
 - Ask for missing destination, dates, budget, or traveller constraints when needed.
 - Ground recommendations in the user's base city from <user_data_context> when available.
 - Clearly label estimated fares, timings, and budget figures as estimates.
 - Never claim a booking or reservation was made without a confirmed result.
-- When proposing a saved plan, offer a CREATE_OUTING json_action block at the bottom.`,
+- When proposing a saved plan or packing checklist, offer CREATE_OUTING, CREATE_TRIP, or ADD_PACKING_ITEMS json_action blocks at the bottom.`,
   },
   todo: {
     id: 'todo',
     version: '2.0.0',
     label: 'Tasks & Scheduling',
-    relevantModules: ['tasks', 'calendar', 'timetable', 'laundry'],
+    relevantModules: ['tasks', 'projects', 'focus', 'journal', 'calendar', 'timetable', 'laundry'],
     instructions: `DOMAIN: TO-DO TASKS & SCHEDULE
-- Use only actual tasks, deadlines, and classes from <user_data_context>.
+- Use only actual tasks, project milestones, focus history, and classes from <user_data_context>.
 - Prioritize by due date, urgency, and user constraints.
-- Convert natural language requests into structured ADD_TASK proposals; never claim completion before user confirmation.`,
+- Convert natural language requests into structured ADD_TASK, CREATE_PROJECT, or ADD_PROJECT_MILESTONE proposals; never claim completion before user confirmation.`,
   },
   workout: {
     id: 'workout',
@@ -81,7 +81,7 @@ export const DOMAIN_CONFIGS: Record<LunaDomain, DomainConfig> = {
     id: 'budget',
     version: '2.0.0',
     label: 'Budget & Finance',
-    relevantModules: ['spending', 'outings', 'shopping'],
+    relevantModules: ['spending', 'outings', 'shopping', 'circle', 'decisions'],
     instructions: `DOMAIN: BUDGET & PERSONAL FINANCE
 - Rely strictly on actual expense and lending records in <user_data_context>.
 - Keep currency (INR / Rs) and date ranges explicit.
@@ -92,9 +92,10 @@ export const DOMAIN_CONFIGS: Record<LunaDomain, DomainConfig> = {
     id: 'general',
     version: '2.0.0',
     label: 'General Assistant',
-    relevantModules: ['home', 'settings'],
+    relevantModules: ['home', 'journal', 'circle', 'decisions', 'settings'],
     instructions: `DOMAIN: GENERAL ASSISTANT
 - Answer everyday questions directly without forcing domain templates unnecessarily.
+- Help compare trade-offs neutrally when asked about Decisions without dictating life choices.
 - Provide clear navigation guidance when the user asks how a LifeOS feature works.`,
   },
 };
@@ -109,24 +110,33 @@ export function classifyDomain(query: string, pathname: string): LunaDomain {
   if (/\b(workout|gym|push|pull|legs|bicep|tricep|chest|squat|deadlift|sets|reps|calorie|protein|macro|diet|meal|mess|nutrition|breakfast|lunch|dinner)\b/.test(q)) {
     return 'workout';
   }
-  if (/\b(study|exam|syllabus|revision|lecture|notes|pdf|chapter|quiz|concept|subnet|algorithm|formula)\b/.test(q)) {
+  if (/\b(study|exam|syllabus|revision|lecture|notes|pdf|chapter|quiz|concept|subnet|algorithm|formula|focus|pomodoro|deep work)\b/.test(q)) {
     return 'study';
   }
-  if (/\b(trip|travel|outing|weekend|itinerary|metro|bus|cab|cafe|place|visit|hotel|flight|train)\b/.test(q)) {
+  if (/\b(trip|travel|outing|packing|pack|suitcase|luggage|hostel return|weekend|itinerary|metro|bus|cab|cafe|place|visit|hotel|flight|train)\b/.test(q)) {
     return 'travel';
   }
   if (/\b(budget|money|rupee|rs|cost)\b/.test(q)) {
     return 'budget';
   }
-  if (/\b(task|todo|to-do|remind|deadline|due|schedule|timetable|class|laundry|pending|priority)\b/.test(q)) {
+  if (/\b(task|todo|to-do|remind|deadline|due|schedule|timetable|class|laundry|pending|priority|project|milestone|blocker)\b/.test(q)) {
     return 'todo';
   }
 
-  if (path.startsWith('/outings')) return 'travel';
+  if (path.startsWith('/outings') || path.startsWith('/trips')) return 'travel';
   if (path.startsWith('/spending')) return 'budget';
   if (path.startsWith('/gym') || path.startsWith('/nutrition')) return 'workout';
-  if (path.startsWith('/notes') || path.startsWith('/drive')) return 'study';
-  if (path.startsWith('/tasks') || path.startsWith('/timetable') || path.startsWith('/calendar') || path.startsWith('/laundry')) return 'todo';
+  if (path.startsWith('/notes') || path.startsWith('/drive') || path.startsWith('/focus')) return 'study';
+  if (
+    path.startsWith('/tasks') ||
+    path.startsWith('/timetable') ||
+    path.startsWith('/calendar') ||
+    path.startsWith('/laundry') ||
+    path.startsWith('/projects')
+  ) {
+    return 'todo';
+  }
+  if (path.startsWith('/circle') && /\b(owe|owed|balance|iou|money)\b/.test(q)) return 'budget';
 
   return 'general';
 }

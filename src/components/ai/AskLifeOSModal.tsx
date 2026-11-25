@@ -29,6 +29,12 @@ import {
   ImageIcon,
   Globe,
   CaretDown,
+  RocketLaunch,
+  HourglassMedium,
+  BookBookmark,
+  UsersThree,
+  SuitcaseRolling,
+  Scales,
 } from '../../ui/tokens/icons';
 import { Capacitor } from '@capacitor/core';
 import WebcamCaptureModal from './WebcamCaptureModal';
@@ -63,11 +69,53 @@ interface AskLifeOSModalProps {
 }
 
 export const SPEC_STARTER_CHIPS = [
-  { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
-  { id: 'notes_summary', label: 'What notes did I capture recently?', icon: <NotePencil size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
-  { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
-  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'tasks_today', label: 'What are my top tasks today?', icon: <CheckSquare size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'notes_summary', label: 'What notes did I capture recently?', icon: <NotePencil size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'gym_split', label: 'What workout is scheduled today?', icon: <Barbell size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />, tint: 'var(--app-accent-text)' },
+  { id: 'budget_status', label: 'Am I within my daily spending limit?', icon: <Wallet size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />, tint: 'var(--app-accent-text)' },
 ];
+
+function getContextualStarterChips(pathname: string) {
+  const path = (pathname || '/').toLowerCase();
+  const iconStyle = { color: 'var(--app-accent-text, #D29B7E)' };
+  if (path.startsWith('/projects')) {
+    return [
+      { id: 'proj_next', label: 'Which project milestone should I tackle next?', icon: <RocketLaunch size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 'proj_block', label: 'Create a project plan for my next goal', icon: <CheckSquare size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  if (path.startsWith('/focus')) {
+    return [
+      { id: 'focus_pick', label: 'What should I spend a 50m deep work block on?', icon: <HourglassMedium size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 'focus_stats', label: 'Summarize my recent study & focus sessions', icon: <NotePencil size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  if (path.startsWith('/journal')) {
+    return [
+      { id: 'j_pulse', label: 'What patterns stand out in my recent journal?', icon: <BookBookmark size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 'j_plan', label: 'Help me prioritize tomorrow from open tasks', icon: <CheckSquare size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  if (path.startsWith('/circle')) {
+    return [
+      { id: 'c_due', label: 'Who in my Inner Circle needs a catch-up or gift?', icon: <UsersThree size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 'c_bal', label: 'Summarize pending balances across friends', icon: <Wallet size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  if (path.startsWith('/trips')) {
+    return [
+      { id: 't_audit', label: 'What packing items might I forget for my next trip?', icon: <SuitcaseRolling size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 't_new', label: 'Plan a packing checklist for a weekend trip', icon: <CheckSquare size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  if (path.startsWith('/decisions')) {
+    return [
+      { id: 'd_audit', label: 'Help me weigh trade-offs for my open decision', icon: <Scales size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+      { id: 'd_new', label: 'Build a decision matrix for choosing an offer', icon: <NotePencil size={16} weight="duotone" style={iconStyle} />, tint: 'var(--app-accent-text)' },
+    ];
+  }
+  return SPEC_STARTER_CHIPS;
+}
 
 export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: AskLifeOSModalProps) {
   const location = useLocation();
@@ -725,7 +773,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
         {/* Offline Banner */}
         {!isOnline && (
-          <div className="mx-4 mb-2 px-3.5 py-2 rounded-2xl glass-tile flex items-center gap-2 text-xs font-semibold font-sans-flex shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+          <div className="mx-4 mb-2 px-3.5 py-2 rounded-2xl glass-tile flex items-center gap-2 text-xs font-semibold font-sans-flex shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
             <WifiSlash size={16} weight="bold" className="shrink-0" />
             <span className="text-white/80">You are offline. Luna AI requires internet access.</span>
           </div>
@@ -766,8 +814,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <span
                         className="text-[10px] font-semibold font-sans-flex px-2 py-0.5 rounded-full"
                         style={{
-                          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                          color: 'var(--app-accent-text, #DE4B64)',
+                          backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                          color: 'var(--app-accent-text, #D29B7E)',
                         }}
                       >
                         Groq Vision (Max 3)
@@ -784,8 +832,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                           style={{
-                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                            color: 'var(--app-accent-text, #DE4B64)',
+                            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                            color: 'var(--app-accent-text, #D29B7E)',
                           }}
                         >
                           <Camera size={16} weight="duotone" />
@@ -809,8 +857,8 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                           style={{
-                            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                            color: 'var(--app-accent-text, #DE4B64)',
+                            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                            color: 'var(--app-accent-text, #D29B7E)',
                           }}
                         >
                           <ImageIcon size={16} weight="duotone" />
@@ -836,7 +884,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      {SPEC_STARTER_CHIPS.map((chip) => (
+                      {getContextualStarterChips(location.pathname).map((chip) => (
                         <button
                           key={chip.id}
                           type="button"

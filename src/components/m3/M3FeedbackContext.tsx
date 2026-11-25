@@ -75,7 +75,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
 
   // Resolves color to unified active theme accent
   const resolveSectionColor = useCallback((_section?: string) => {
-    return 'var(--app-accent, #8B1E3F)';
+    return 'var(--app-accent, #7B4B36)';
   }, []);
 
   // 1. Confirm Delete Flow
@@ -297,7 +297,7 @@ export function M3FeedbackProvider({ children }: { children: React.ReactNode }) 
                   backgroundColor:
                     feedback.type === 'deleted'
                       ? 'rgba(255, 69, 58, 0.16)'
-                      : 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                      : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color:
                     feedback.type === 'deleted'
                       ? '#FF453A'

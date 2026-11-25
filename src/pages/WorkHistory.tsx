@@ -318,7 +318,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Nutrition Coach</span>
                   </div>
                   <Button
@@ -355,7 +355,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                         {log.mealsEaten?.length || 0} meals logged
                       </span>
                     </div>
-                    <span className="text-base font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                    <span className="text-base font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                       {log.dailyTotal} kcal
                     </span>
                   </div>
@@ -363,7 +363,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<ForkKnife size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
+                icon={<ForkKnife size={36} weight="light" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />}
                 title="No nutrition logs this month"
                 description="Logs will appear here once meals are recorded."
               />
@@ -381,7 +381,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Total Sets</span>
-                <span className="text-xl font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{gymStats.totalSets}</span>
+                <span className="text-xl font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>{gymStats.totalSets}</span>
               </div>
               <div className="p-3.5 rounded-2xl glass-tile space-y-1">
                 <span className="text-[10px] uppercase tracking-wider text-white/60 font-semibold block">Top Split</span>
@@ -393,7 +393,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Workout Coach</span>
                   </div>
                   <Button
@@ -514,7 +514,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               <div className="p-4 rounded-2xl glass-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <Sparkle size={18} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span className="text-sm font-semibold text-white">Monthly Spending Coach</span>
                   </div>
                   <Button
@@ -556,7 +556,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<Wallet size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
+                icon={<Wallet size={36} weight="light" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />}
                 title="No expenses logged this month"
                 description="Recorded expenses will be archived here."
               />
@@ -587,7 +587,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
               </div>
             ) : (
               <EmptyState
-                icon={<Notebook size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
+                icon={<Notebook size={36} weight="light" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />}
                 title="No notes written this month"
                 description="Notes and Brain Dumps created in this month will appear here."
               />

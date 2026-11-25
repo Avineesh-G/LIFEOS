@@ -29,7 +29,7 @@
     position: relative;
     background:
       radial-gradient(ellipse 105% 46% at 50% -14%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.016) 55%, transparent 82%),
-      radial-gradient(ellipse 85% 42% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4.5%, transparent) 0%, transparent 72%),
+      radial-gradient(ellipse 85% 42% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4.5%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
         rgba(255, 255, 255, 0.048) 0%,
         rgba(255, 255, 255, 0.01) 28%,
@@ -50,7 +50,7 @@
     position: relative;
     background:
       radial-gradient(ellipse 100% 45% at 50% -14%, rgba(255, 255, 255, 0.075) 0%, transparent 80%),
-      radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 72%),
+      radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
         rgba(255, 255, 255, 0.04) 0%,
         rgba(255, 255, 255, 0.008) 35%,
@@ -69,7 +69,7 @@
     position: relative;
     background:
       radial-gradient(ellipse 108% 46% at 50% -12%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.015) 55%, transparent 82%),
-      radial-gradient(ellipse 85% 40% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5.5%, transparent) 0%, transparent 72%),
+      radial-gradient(ellipse 85% 40% at 50% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5.5%, transparent) 0%, transparent 72%),
       linear-gradient(180deg,
         rgba(255, 255, 255, 0.05) 0%,
         rgba(255, 255, 255, 0.008) 25%,
@@ -92,7 +92,7 @@
   html:not(.tier-1) .floating-shell {
     background:
       radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.07) 0%, transparent 80%),
-      radial-gradient(ellipse 80% 40% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3.5%, transparent) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 40% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3.5%, transparent) 0%, transparent 70%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(20, 20, 24, 0.98) 100%),
       #141416 !important;
     backdrop-filter: none !important;
@@ -123,7 +123,7 @@
     border-radius: 9999px;
   }
   .custom-table-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--md-primary, #8B1E3F);
+    background: var(--md-primary, #7B4B36);
   }
 
   *, *::before, *::after {
@@ -224,7 +224,7 @@
 
   .input-field:focus-visible {
     outline: none;
-    border-color: var(--md-primary, #8B1E3F);
+    border-color: var(--md-primary, #7B4B36);
     box-shadow: 0 0 0 2px rgba(var(--md-primary-rgb, 139, 30, 63), 0.25);
   }
 

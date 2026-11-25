@@ -85,7 +85,7 @@ interface ModuleConfig {
 }
 
 const THEME_PALETTES = [
-  { id: 'burgundy', name: 'Burgundy', primary: '#8B1E3F', secondary: '#B82E58', darkText: '#5A0B22' },
+  { id: 'burgundy', name: 'Burgundy', primary: '#7B4B36', secondary: '#B82E58', darkText: '#5A0B22' },
   { id: 'deep-navy', name: 'Deep Navy', primary: '#183B5B', secondary: '#2C5784', darkText: '#0E2338' },
   { id: 'emerald', name: 'Emerald', primary: '#087F5B', secondary: '#12B886', darkText: '#05523A' },
   { id: 'plum', name: 'Plum', primary: '#6A1B6D', secondary: '#9C27B0', darkText: '#451047' },
@@ -104,7 +104,7 @@ const MODULES: ModuleConfig[] = [
     shortName: 'Home',
     tagline: 'Ambient Circadian Lighting & Unified Daily Feed',
     category: 'Core System',
-    accent: '#8B1E3F',
+    accent: '#7B4B36',
     accentTint: '#B82E58',
     icon: Compass,
     bulletPoints: [
@@ -344,7 +344,7 @@ const MODULES: ModuleConfig[] = [
     shortName: 'Theming',
     tagline: '10 Curated Palettes & True OLED Pure Black',
     category: 'Personalization',
-    accent: '#8B1E3F',
+    accent: '#7B4B36',
     accentTint: '#B82E58',
     icon: Palette,
     bulletPoints: [

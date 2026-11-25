@@ -19,7 +19,7 @@ export function AppShell({
   tabs,
   activeTabKey,
   onTabChange,
-  activeModuleTint = '#8B1E3F',
+  activeModuleTint = '#7B4B36',
   onQuickAddClick,
   onAiClick,
   hideNav = false,

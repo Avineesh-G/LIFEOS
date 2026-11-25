@@ -28,7 +28,7 @@ export function ListRow({
   className = '',
 }: ListRowProps) {
   const isClickable = Boolean(onClick);
-  const effectiveTint = destructive ? '#FF453A' : 'var(--app-accent-text, #DE4B64)';
+  const effectiveTint = destructive ? '#FF453A' : 'var(--app-accent-text, #D29B7E)';
 
   const handleClick = () => {
     if (!isClickable) return;

@@ -11,6 +11,10 @@ import {
   Barbell,
   Wallet,
   NotePencil,
+  RocketLaunch,
+  SuitcaseRolling,
+  Scales,
+  UsersThree,
 } from '../../ui/tokens/icons';
 import { AiActionProposal, executeConfirmedAiAction } from '../../services/aiActionEngine';
 import { triggerHaptic } from '../../utils/haptics';
@@ -34,7 +38,7 @@ export default function ActionConfirmationCard({
   );
 
   const getActionIcon = () => {
-    const iconProps = { size: 16, weight: 'duotone' as const, style: { color: 'var(--app-accent-text, #DE4B64)' } };
+    const iconProps = { size: 16, weight: 'duotone' as const, style: { color: 'var(--app-accent-text, #D29B7E)' } };
     switch (proposal.type) {
       case 'ADD_TASK':
         return <CheckSquare {...iconProps} />;
@@ -51,8 +55,18 @@ export default function ActionConfirmationCard({
         return <ForkKnife {...iconProps} />;
       case 'LOG_WORKOUT':
         return <Barbell {...iconProps} />;
+      case 'CREATE_PROJECT':
+      case 'ADD_PROJECT_MILESTONE':
+        return <RocketLaunch {...iconProps} />;
+      case 'CREATE_TRIP':
+      case 'ADD_PACKING_ITEMS':
+        return <SuitcaseRolling {...iconProps} />;
+      case 'CREATE_DECISION':
+        return <Scales {...iconProps} />;
+      case 'LOG_CIRCLE_CATCHUP':
+        return <UsersThree {...iconProps} />;
       default:
-        return <Sparkle size={16} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
+        return <Sparkle size={16} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />;
     }
   };
 
@@ -95,8 +109,8 @@ export default function ActionConfirmationCard({
       <div
         className="w-full max-w-full p-3 rounded-2xl border-none text-xs font-semibold flex items-center gap-2 shadow-sm"
         style={{
-          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-          color: 'var(--app-accent-text, #DE4B64)',
+          backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+          color: 'var(--app-accent-text, #D29B7E)',
         }}
       >
         <Check size={16} weight="bold" className="shrink-0" />
@@ -122,8 +136,8 @@ export default function ActionConfirmationCard({
         <span
           className="text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0 shadow-sm self-start mt-0.5"
           style={{
-            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-            color: 'var(--app-accent-text, #DE4B64)',
+            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+            color: 'var(--app-accent-text, #D29B7E)',
           }}
         >
           Proposal

@@ -21,7 +21,7 @@
   /* Pure iOS Water Meniscus + 4% whisper-light theme ambient gradient */
   background:
     radial-gradient(ellipse 110% 48% at 50% -14%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.018) 54%, transparent 82%),
-    radial-gradient(ellipse 90% 44% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5%, transparent) 0%, transparent 74%),
+    radial-gradient(ellipse 90% 44% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5%, transparent) 0%, transparent 74%),
     radial-gradient(ellipse 80% 35% at 50% 108%, rgba(0, 0, 0, 0.45) 0%, transparent 75%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.05) 0%,
@@ -43,8 +43,8 @@
   border-radius: 28px;
   background:
     radial-gradient(ellipse 115% 52% at 50% -12%, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 55%, transparent 84%),
-    radial-gradient(ellipse 85% 48% at 12% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 8%, transparent) 0%, transparent 72%),
-    radial-gradient(ellipse 80% 44% at 88% 106%, color-mix(in srgb, var(--app-accent-end, #B52B4D) 6%, transparent) 0%, transparent 76%),
+    radial-gradient(ellipse 85% 48% at 12% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 8%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 80% 44% at 88% 106%, color-mix(in srgb, var(--app-accent-end, #A46D52) 6%, transparent) 0%, transparent 76%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.06) 0%,
       rgba(255, 255, 255, 0.012) 32%,
@@ -66,7 +66,7 @@
   border-radius: 18px;
   background:
     radial-gradient(ellipse 105% 48% at 50% -14%, rgba(255, 255, 255, 0.082) 0%, rgba(255, 255, 255, 0.014) 55%, transparent 82%),
-    radial-gradient(ellipse 85% 42% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 85% 42% at 20% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4%, transparent) 0%, transparent 72%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.044) 0%,
       rgba(255, 255, 255, 0.008) 36%,
@@ -90,8 +90,8 @@
   background:
     radial-gradient(ellipse 95% 58% at 50% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 78%),
     linear-gradient(180deg,
-      color-mix(in srgb, var(--app-accent, #8B1E3F) 18%, rgba(255, 255, 255, 0.08)) 0%,
-      color-mix(in srgb, var(--app-accent-end, #B52B4D) 10%, #22222A) 100%
+      color-mix(in srgb, var(--app-accent, #7B4B36) 18%, rgba(255, 255, 255, 0.08)) 0%,
+      color-mix(in srgb, var(--app-accent-end, #A46D52) 10%, #22222A) 100%
     ) !important;
   border: none !important;
   box-shadow:
@@ -105,7 +105,7 @@
   border-radius: 22px;
   background:
     radial-gradient(ellipse 100% 42% at 50% -14%, rgba(255, 255, 255, 0.068) 0%, transparent 80%),
-    radial-gradient(ellipse 80% 35% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3.5%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 35% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3.5%, transparent) 0%, transparent 70%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.038) 0%,
       rgba(255, 255, 255, 0.006) 35%,
@@ -122,7 +122,7 @@
 .glass-flat {
   background:
     radial-gradient(ellipse 100% 50% at 50% -15%, rgba(255, 255, 255, 0.055) 0%, transparent 78%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.034) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 2.5%, #18181C) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.034) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 2.5%, #18181C) 100%),
     #18181C;
   border-radius: 16px;
   border: none !important;
@@ -136,7 +136,7 @@
   overflow: hidden;
   background:
     radial-gradient(ellipse 110% 45% at 50% -10%, rgba(255, 255, 255, 0.088) 0%, rgba(255, 255, 255, 0.015) 55%, transparent 82%),
-    radial-gradient(ellipse 85% 40% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5.5%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 85% 40% at 50% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5.5%, transparent) 0%, transparent 72%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.05) 0%,
       rgba(255, 255, 255, 0.008) 26%,
@@ -152,7 +152,7 @@
 .glass-nav {
   background:
     radial-gradient(ellipse 105% 60% at 50% -18%, rgba(255, 255, 255, 0.105) 0%, rgba(255, 255, 255, 0.018) 58%, transparent 85%),
-    radial-gradient(ellipse 90% 44% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5%, transparent) 0%, transparent 74%),
+    radial-gradient(ellipse 90% 44% at 50% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5%, transparent) 0%, transparent 74%),
     radial-gradient(ellipse 85% 40% at 50% 112%, rgba(0, 0, 0, 0.55) 0%, transparent 78%),
     linear-gradient(180deg,
       rgba(255, 255, 255, 0.045) 0%,
@@ -170,7 +170,7 @@
 .glass-grouped-toolbar {
   background:
     radial-gradient(ellipse 100% 50% at 50% -15%, rgba(255, 255, 255, 0.068) 0%, transparent 80%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3%, #18181C) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3%, #18181C) 100%),
     #18181C;
   border: none !important;
   box-shadow:
@@ -199,7 +199,7 @@
 .water-reflection {
   background:
     radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.012) 60%, transparent 85%),
-    radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4%, transparent) 0%, transparent 72%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(20, 20, 24, 0.98) 100%),
     #141416;
 }
@@ -208,7 +208,7 @@
 .glass-tier-1 {
   background:
     radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.088) 0%, transparent 85%),
-    radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 80% 40% at 20% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4%, transparent) 0%, transparent 72%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.048) 0%, rgba(20, 20, 24, 0.98) 100%),
     #141416;
   box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.85);
@@ -218,7 +218,7 @@
 .glass-tier-2 {
   background:
     radial-gradient(ellipse 85% 45% at 50% -5%, rgba(255, 255, 255, 0.068) 0%, transparent 85%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3%, #141418) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3%, #141418) 100%),
     #141416;
   box-shadow: 0 10px 28px -6px rgba(0, 0, 0, 0.75);
   border: none !important;
@@ -226,7 +226,7 @@
 
 .glass-tier-3 {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 2.5%, #17171B) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 2.5%, #17171B) 100%),
     #17171B;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
   border: none !important;
@@ -246,7 +246,7 @@
 .tier-3 .glass-tile,
 .tier-3 .droplet-tile {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3%, #18181B) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3%, #18181B) 100%),
     #18181B !important;
   border: none !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7) !important;
@@ -287,7 +287,7 @@
   -webkit-backdrop-filter: none !important;
   background:
     radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255, 255, 255, 0.068) 0%, transparent 80%),
-    radial-gradient(ellipse 80% 40% at 18% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3.5%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 80% 40% at 18% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3.5%, transparent) 0%, transparent 72%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.038) 0%, rgba(22, 22, 26, 0.98) 100%),
     #17171B !important;
   border: none !important;
@@ -315,7 +315,7 @@
 .tier-1 .droplet-card {
   background:
     radial-gradient(ellipse 108% 52% at 50% -10%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.018) 54%, transparent 82%),
-    radial-gradient(ellipse 85% 42% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 85% 42% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5%, transparent) 0%, transparent 72%),
     radial-gradient(ellipse 80% 35% at 50% 108%, rgba(0, 0, 0, 0.45) 0%, transparent 75%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.008) 30%, rgba(18, 18, 22, 0.98) 100%),
     #141416 !important;
@@ -328,8 +328,8 @@
 .tier-1 .glass-hero {
   background:
     radial-gradient(ellipse 115% 56% at 50% -12%, rgba(255, 255, 255, 0.115) 0%, rgba(255, 255, 255, 0.02) 56%, transparent 86%),
-    radial-gradient(ellipse 85% 46% at 14% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 8%, transparent) 0%, transparent 74%),
-    radial-gradient(ellipse 80% 42% at 88% 106%, color-mix(in srgb, var(--app-accent-end, #B52B4D) 5.5%, transparent) 0%, transparent 76%),
+    radial-gradient(ellipse 85% 46% at 14% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 8%, transparent) 0%, transparent 74%),
+    radial-gradient(ellipse 80% 42% at 88% 106%, color-mix(in srgb, var(--app-accent-end, #A46D52) 5.5%, transparent) 0%, transparent 76%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.062) 0%, rgba(255, 255, 255, 0.012) 32%, rgba(20, 20, 24, 0.98) 100%),
     #151518 !important;
   box-shadow:
@@ -342,7 +342,7 @@
 .tier-1 .droplet-tile {
   background:
     radial-gradient(ellipse 98% 48% at 50% -12%, rgba(255, 255, 255, 0.085) 0%, transparent 80%),
-    radial-gradient(ellipse 80% 38% at 20% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 4%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 38% at 20% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 4%, transparent) 0%, transparent 70%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.008) 38%, rgba(23, 23, 27, 0.98) 100%),
     #19191D !important;
   box-shadow:
@@ -354,7 +354,7 @@
 .tier-1 .glass-row {
   background:
     radial-gradient(ellipse 95% 48% at 50% -12%, rgba(255, 255, 255, 0.07) 0%, transparent 80%),
-    radial-gradient(ellipse 80% 35% at 15% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 3.5%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 35% at 15% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 3.5%, transparent) 0%, transparent 70%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.042) 0%, rgba(20, 20, 24, 0.98) 100%),
     #16161A !important;
   box-shadow:
@@ -366,7 +366,7 @@
 .tier-1 .liquid-sheet {
   background:
     radial-gradient(ellipse 105% 52% at 50% -10%, rgba(255, 255, 255, 0.09) 0%, transparent 76%),
-    radial-gradient(ellipse 85% 38% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5.5%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 85% 38% at 50% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5.5%, transparent) 0%, transparent 72%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.010) 25%, rgba(16, 16, 20, 0.99) 100%),
     #121216 !important;
   box-shadow:
@@ -379,7 +379,7 @@
   -webkit-backdrop-filter: none !important;
   background:
     radial-gradient(ellipse 105% 60% at 50% -18%, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.02) 58%, transparent 85%),
-    radial-gradient(ellipse 90% 42% at 50% 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 5%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 90% 42% at 50% 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 5%, transparent) 0%, transparent 72%),
     radial-gradient(ellipse 85% 40% at 50% 112%, rgba(0, 0, 0, 0.55) 0%, transparent 78%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.048) 0%, rgba(16, 16, 20, 0.98) 100%),
     #141416 !important;

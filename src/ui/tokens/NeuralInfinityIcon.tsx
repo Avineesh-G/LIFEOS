@@ -37,9 +37,9 @@ export function NeuralInfinityIcon({
           y2="16"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="var(--app-accent, #8B1E3F)" />
-          <stop offset="50%" stopColor="var(--app-accent-end, #B52B4D)" />
-          <stop offset="100%" stopColor="var(--app-accent-text, #DE4B64)" />
+          <stop offset="0%" stopColor="var(--app-accent, #7B4B36)" />
+          <stop offset="50%" stopColor="var(--app-accent-end, #A46D52)" />
+          <stop offset="100%" stopColor="var(--app-accent-text, #D29B7E)" />
         </linearGradient>
 
         {/* Outer Glass Shell Rim Gradient */}
@@ -52,7 +52,7 @@ export function NeuralInfinityIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <stop offset="50%" stopColor="var(--app-accent-text, #DE4B64)" stopOpacity="0.55" />
+          <stop offset="50%" stopColor="var(--app-accent-text, #D29B7E)" stopOpacity="0.55" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.8" />
         </linearGradient>
 
@@ -66,7 +66,7 @@ export function NeuralInfinityIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="50%" stopColor="var(--app-accent-text, #DE4B64)" />
+          <stop offset="50%" stopColor="var(--app-accent-text, #D29B7E)" />
           <stop offset="100%" stopColor="#FFFFFF" />
         </linearGradient>
       </defs>
@@ -121,7 +121,7 @@ export function NeuralInfinityIcon({
 
       {/* ── Specular Center Crossroads Sparkle ── */}
       <circle cx="16" cy="16" r="1.5" fill="#FFFFFF" />
-      <circle cx="16" cy="16" r="3" fill="var(--app-accent-text, #DE4B64)" opacity="0.4" />
+      <circle cx="16" cy="16" r="3" fill="var(--app-accent-text, #D29B7E)" opacity="0.4" />
     </svg>
   );
 }

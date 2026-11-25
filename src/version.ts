@@ -8,12 +8,12 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 89,
-  versionName: '3.4.12',
+  versionCode: 90,
+  versionName: '3.4.13',
   releaseDate: '2026-11-25',
   apkSize: '15.04 MB',
-  apkSizeBytes: 15771219,
-  releaseNotes: "LifeOS v3.4.12 (Build 89):\n• Royal Burgundy Single-Hue Theme: Fixed pink washout across M3 tones and set Royal Burgundy (#8B1E3F → #B52B4D) with subtle gradient depth across every interface, card, and pop-up while preserving iOS Liquid Blue as a preset.\n• Unified Theme Icons & Controls: Replaced stray blue, green, amber, and purple hardcoded icons, spinners, badges, AI logos, and custom interactive vectors across Home, Gym, Nutrition, Spending, Drive, Vault, Laundry, Calendar, Tasks, Shopping, Outings, Luna AI, Settings, and modals with active theme tokens.\n• What's New & Updater Visual Refresh: Replaced Gemini-style star glyphs in What's New updates and the In-App Updater modal with interface-matched Phosphor icons and unified theme styling.\n• Pure iOS Water Liquid Glass Refinement: Preserved borderless meniscus water refraction, dock droplet glass sheen, and crisp white legibility on obsidian surfaces.",
+  apkSizeBytes: 15773109,
+  releaseNotes: "LifeOS v3.4.13 (Build 90):\n• Fixed Warm Brown Single-Hue Theme: Removed color adaptation from Settings and locked the entire app to Warm Brown (#7B4B36 → #A46D52, sand accent #D29B7E) across every interface, icon, and widget.\n• Six New Liquid Glass Interfaces: Added Focus Studio (/focus), Daily Journal & Wind-Down (/journal with 7-day week strip & task rollover), Inner Circle CRM (/circle), Projects & Milestones (/projects), Trips & Smart Packing (/trips), and Decision Workbench (/decisions).\n• Luna AI Co-Pilot & Privacy Hardening: Connected Luna AI across all 6 new interfaces with privacy/PII redaction (hideFromAi journal lock, phone/PNR scrubbing), confirmed tool actions, and contextual starter chips.\n• Alphabetical More Hub Organization: Grouped More Hub and bottom-dock slot customization by domain work and sorted sections & interfaces A–Z.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

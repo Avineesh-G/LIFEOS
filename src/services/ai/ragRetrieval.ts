@@ -1,12 +1,16 @@
-import { isNoteExcludedFromAi, redactSensitiveInformation } from '../../utils/aiSecurity.ts';
-import type { AppData, NoteItem, DriveFile } from '../../types.ts';
+import {
+  isJournalEntryExcludedFromAi,
+  isNoteExcludedFromAi,
+  redactSensitiveInformation,
+} from '../../utils/aiSecurity.ts';
+import type { AppData, NoteItem, DriveFile, JournalEntry, ProjectItem } from '../../types.ts';
 import type { LunaCitation } from './responseSchema.ts';
 
 export interface DocumentChunk {
   id: string;
   docId: string;
   sourceName: string;
-  sourceType: 'note' | 'drive';
+  sourceType: 'note' | 'drive' | 'journal' | 'project';
   section: string;
   text: string;
   updatedAt?: string;
@@ -22,7 +26,7 @@ export interface RetrievedChunk extends DocumentChunk {
 export function chunkTextDocument(
   docId: string,
   sourceName: string,
-  sourceType: 'note' | 'drive',
+  sourceType: 'note' | 'drive' | 'journal' | 'project',
   rawText: string,
   updatedAt?: string,
   chunkSize: number = 420
@@ -142,6 +146,54 @@ export function retrieveRelevantKnowledge(
         'drive',
         `${file.name || ''}\n${textBody}`,
         file.updatedAt || file.createdAt
+      )
+    );
+  }
+
+  // 3. Unhidden Journal Entries
+  const journalEntries = Array.isArray(data.journalEntries) ? data.journalEntries : [];
+  for (const entry of journalEntries as JournalEntry[]) {
+    if (isJournalEntryExcludedFromAi(entry)) continue;
+    const textBody = [
+      entry.morningFocusTheme,
+      entry.morningNote,
+      ...(entry.wins || []),
+      entry.gratitude,
+      entry.improve,
+      entry.brainDump,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    if (!textBody.trim()) continue;
+    allChunks.push(
+      ...chunkTextDocument(
+        entry.id,
+        `Journal ${entry.date}`,
+        'journal',
+        textBody,
+        entry.updatedAt
+      )
+    );
+  }
+
+  // 4. Projects & Milestones
+  const projects = Array.isArray(data.projects) ? data.projects : [];
+  for (const proj of projects as ProjectItem[]) {
+    const textBody = [
+      proj.description,
+      proj.blockerNote ? `Blocker: ${proj.blockerNote}` : '',
+      ...(proj.milestones || []).map((m) => `${m.completed ? '[Done]' : '[Pending]'} ${m.title}`),
+    ]
+      .filter(Boolean)
+      .join('\n');
+    if (!textBody.trim()) continue;
+    allChunks.push(
+      ...chunkTextDocument(
+        proj.id,
+        `Project: ${proj.title}`,
+        'project',
+        textBody,
+        proj.updatedAt
       )
     );
   }

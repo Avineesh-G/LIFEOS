@@ -150,7 +150,7 @@ export default function OutingDetailPage() {
       : startDateStr;
 
   const statusLabel = activeOuting.status ? activeOuting.status.charAt(0).toUpperCase() + activeOuting.status.slice(1) : 'Planned';
-  const statusColor = activeOuting.status === 'completed' ? '#8E8E93' : 'var(--app-accent-text, #DE4B64)';
+  const statusColor = activeOuting.status === 'completed' ? '#8E8E93' : 'var(--app-accent-text, #D29B7E)';
 
   const budgetPaise = activeOuting.budget || 0;
   const budgetProgress = budgetPaise > 0 ? Math.min(1, (activeSummary?.totalCost || 0) / budgetPaise) : 0;

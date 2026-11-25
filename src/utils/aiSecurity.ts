@@ -1,6 +1,6 @@
 import { Preferences } from '@capacitor/preferences';
 import { GROQ_CONFIG } from '../config/ai.ts';
-import type { NoteItem } from '../types.ts';
+import type { JournalEntry, NoteItem } from '../types.ts';
 
 export interface AiSectionPermissions {
   gym: boolean;
@@ -14,6 +14,12 @@ export interface AiSectionPermissions {
   shopping: boolean;
   laundry?: boolean;
   history?: boolean;
+  focus?: boolean;
+  journal?: boolean;
+  circle?: boolean;
+  projects?: boolean;
+  trips?: boolean;
+  decisions?: boolean;
   readonly vault: false; // Always excluded, strictly immutable
 }
 
@@ -29,6 +35,12 @@ export const DEFAULT_SECTION_PERMISSIONS: AiSectionPermissions = {
   shopping: true,
   laundry: true,
   history: true,
+  focus: true,
+  journal: true,
+  circle: true,
+  projects: true,
+  trips: true,
+  decisions: true,
   vault: false,
 };
 
@@ -209,8 +221,16 @@ export function isNoteExcludedFromAi(note: NoteItem): boolean {
 }
 
 /**
+ * Checks whether a Daily Journal entry is excluded from AI context & RAG.
+ */
+export function isJournalEntryExcludedFromAi(entry?: JournalEntry | null): boolean {
+  if (!entry) return true;
+  return Boolean(entry.hideFromAi);
+}
+
+/**
  * Redaction layer that strips API keys, passwords, PINs, OTPs, credit cards, bank accounts,
- * and government IDs from any text leaving the device to Groq.
+ * phone numbers, booking PNRs, and government IDs from any text leaving the device to Groq.
  */
 export function redactSensitiveInformation(text: string): string {
   if (!text) return '';
@@ -226,7 +246,12 @@ export function redactSensitiveInformation(text: string): string {
   // 3. OTP codes & PINs (e.g. OTP: 123456, PIN: 4321, code: 987654)
   redacted = redacted.replace(/\b(otp|pin|verification code|security code)\s*[:=]\s*\d{4,8}\b/gi, '$1: [REDACTED_CODE]');
 
-  // 4. Credit / Debit card numbers (13-19 digits, space/dash separated)
+  // 4. Booking / PNR references & labelled phone numbers
+  redacted = redacted.replace(/\b(pnr|booking\s*ref|ticket\s*no|confirmation)\s*#?\s*[:=]?\s*[A-Z0-9-]{5,18}\b/gi, '$1: [REDACTED_BOOKING_REF]');
+  redacted = redacted.replace(/\b(phone|tel|mobile|cell|call)\s*[:=]?\s*(?:\+?\d{1,3}[\s.-]?)?\d{7,12}\b/gi, '$1: [REDACTED_PHONE]');
+  redacted = redacted.replace(/\+\d{1,3}[\s.-]?\d{8,12}\b/g, '[REDACTED_PHONE]');
+
+  // 5. Credit / Debit card numbers (13-19 digits, space/dash separated)
   redacted = redacted.replace(/\b(?:\d[ -]*?){13,19}\b/g, (match) => {
     const raw = match.replace(/[\s-]/g, '');
     if (raw.length >= 13 && raw.length <= 19 && /^\d+$/.test(raw)) {
@@ -235,12 +260,12 @@ export function redactSensitiveInformation(text: string): string {
     return match;
   });
 
-  // 5. Government IDs (Aadhaar 12-digit, PAN 10-char, SSN 9-digit)
+  // 6. Government IDs (Aadhaar 12-digit, PAN 10-char, SSN 9-digit)
   redacted = redacted.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, '[REDACTED_GOVT_ID]');
   redacted = redacted.replace(/\b[A-Z]{5}\d{4}[A-Z]{1}\b/gi, '[REDACTED_PAN_ID]');
   redacted = redacted.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED_SSN]');
 
-  // 6. Bank Account Numbers (9-18 digits labelled account/acct/bank)
+  // 7. Bank Account Numbers (9-18 digits labelled account/acct/bank)
   redacted = redacted.replace(/\b(account|acct|bank|a\/c)\s*#?\s*[:=]?\s*\d{9,18}\b/gi, '$1: [REDACTED_ACCOUNT_NO]');
 
   return redacted;

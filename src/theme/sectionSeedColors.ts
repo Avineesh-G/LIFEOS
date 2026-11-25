@@ -24,11 +24,23 @@ export type AppSection =
   | 'shopping'
   | 'vault'
   | 'notes'
+  | 'focus'
+  | 'journal'
+  | 'circle'
+  | 'projects'
+  | 'trips'
+  | 'decisions'
   | 'ai';
 
 export function getSectionFromPathname(pathname: string): AppSection {
   const p = pathname.toLowerCase();
   if (p.startsWith('/ai') || p.startsWith('/chat')) return 'ai';
+  if (p.startsWith('/focus')) return 'focus';
+  if (p.startsWith('/journal')) return 'journal';
+  if (p.startsWith('/circle')) return 'circle';
+  if (p.startsWith('/projects')) return 'projects';
+  if (p.startsWith('/trips')) return 'trips';
+  if (p.startsWith('/decisions')) return 'decisions';
   if (p.startsWith('/calendar')) return 'calendar';
   if (p.startsWith('/gym')) return 'gym';
   if (p.startsWith('/nutrition')) return 'nutrition';
@@ -111,6 +123,12 @@ export const SECTION_BLOB_POSITIONS: Record<AppSection, BlobPosition> = {
   shopping: 'top-left',
   vault: 'top-center',
   notes: 'top-right',
+  focus: 'top-center',
+  journal: 'top-left',
+  circle: 'bottom-right',
+  projects: 'top-right',
+  trips: 'bottom-left',
+  decisions: 'top-center',
   ai: 'top-center',
 };
 

@@ -19,7 +19,7 @@ export function PullToRefresh({
   onRefresh,
   children,
   threshold = 64,
-  tint = '#8B1E3F',
+  tint = '#7B4B36',
   className = '',
 }: PullToRefreshProps) {
   const [refreshing, setRefreshing] = useState(false);

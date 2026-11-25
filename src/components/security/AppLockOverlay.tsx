@@ -72,11 +72,11 @@ export default function AppLockOverlay() {
       {/* Ambient Single-Hue Glow */}
       <div
         className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, var(--app-accent, #8B1E3F) 0%, transparent 70%)', opacity: 0.22 }}
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #7B4B36) 0%, transparent 70%)', opacity: 0.22 }}
       />
       <div
         className="absolute bottom-12 right-12 w-64 h-64 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, var(--app-accent-end, #B52B4D) 0%, transparent 70%)', opacity: 0.16 }}
+        style={{ background: 'radial-gradient(circle, var(--app-accent-end, #A46D52) 0%, transparent 70%)', opacity: 0.16 }}
       />
 
       <motion.div
@@ -90,8 +90,8 @@ export default function AppLockOverlay() {
           transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
           className="relative w-24 h-24 rounded-[30px] glass-tile flex items-center justify-center shadow-2xl cursor-pointer active:scale-95 transition-transform"
           style={{
-            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-            color: 'var(--app-accent-text, #DE4B64)',
+            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+            color: 'var(--app-accent-text, #D29B7E)',
           }}
           onClick={triggerAuth}
         >
@@ -130,7 +130,7 @@ export default function AppLockOverlay() {
           disabled={isAuthenticating}
           className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
           style={{
-            background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+            background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
           }}
         >
           <Fingerprint size={18} weight="bold" />

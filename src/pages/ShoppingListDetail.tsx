@@ -294,12 +294,12 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                       if (e.key === 'Escape') setIsRenaming(false);
                     }}
                     className="w-full text-xl font-bold text-white bg-transparent border-b focus:outline-none pb-0.5"
-                    style={{ borderColor: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ borderColor: 'var(--app-accent-text, #D29B7E)' }}
                   />
                   <button
                     onClick={handleSaveRename}
                     className="p-1.5 rounded-lg text-white"
-                    style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                    style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                   >
                     <Check size={16} />
                   </button>
@@ -476,7 +476,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
                         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                         onClick={() => handleToggleItem(item.id)}
                       >
-                        <CheckCircle size={22} weight="fill" className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                        <CheckCircle size={22} weight="fill" className="shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
 
                         <div className="flex-1 min-w-0">
                           <span className="text-sm font-medium line-through text-[#8E8E93] block truncate">

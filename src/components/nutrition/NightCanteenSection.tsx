@@ -146,8 +146,8 @@ export default function NightCanteenSection({
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                color: 'var(--app-accent-text, #DE4B64)',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               <Moon size={16} />
@@ -165,8 +165,8 @@ export default function NightCanteenSection({
             <div
               className="flex items-center gap-1 px-3 py-1.5 rounded-xl font-mono font-bold text-sm"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                color: 'var(--app-accent-text, #DE4B64)',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               <IndianRupee size={14} />
@@ -179,7 +179,7 @@ export default function NightCanteenSection({
       {/* ── Quick Canteen Picks Chips ── */}
       <div>
         <p className="text-[11px] font-mono text-muted-light dark:text-muted-dark mb-1.5 flex items-center gap-1.5">
-          <Sparkles size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+          <Sparkles size={12} style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
           <span>Popular Canteen Picks:</span>
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -205,8 +205,8 @@ export default function NightCanteenSection({
                 style={
                   isSelected
                     ? {
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                        color: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                        color: 'var(--app-accent-text, #D29B7E)',
                       }
                     : undefined
                 }
@@ -292,7 +292,7 @@ export default function NightCanteenSection({
                 }`}
                 style={
                   isSelected
-                    ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                    ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                     : undefined
                 }
               >
@@ -316,7 +316,7 @@ export default function NightCanteenSection({
                 setDietFilter('All');
               }}
               className="text-xs font-semibold mt-2 hover:underline"
-              style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              style={{ color: 'var(--app-accent-text, #D29B7E)' }}
             >
               Reset Filters
             </button>
@@ -334,7 +334,7 @@ export default function NightCanteenSection({
                     ? 'glass-tile shadow-xs'
                     : 'glass-flat'
                 }`}
-                style={isSelected ? { backgroundColor: 'var(--app-accent-whisper, rgba(181, 43, 77, 0.08))' } : undefined}
+                style={isSelected ? { backgroundColor: 'var(--app-accent-whisper, rgba(164, 109, 82, 0.08))' } : undefined}
               >
                 <div className="flex items-center justify-between gap-3">
                   <button
@@ -350,7 +350,7 @@ export default function NightCanteenSection({
                       }`}
                       style={
                         isSelected
-                          ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                          ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                           : undefined
                       }
                     >

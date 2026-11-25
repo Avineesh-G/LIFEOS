@@ -27,6 +27,12 @@ import {
   Gear,
   LockKey,
   HardDrive,
+  HourglassMedium,
+  BookBookmark,
+  UsersThree,
+  RocketLaunch,
+  SuitcaseRolling,
+  Scales,
 } from '../ui/tokens/icons';
 import { LunaComicBubbleIcon } from '../ui/tokens/icons';
 import { TabBar, TabItem } from '../ui/navigation/TabBar';
@@ -71,7 +77,11 @@ export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   { id: 'drive', label: 'Drive & Docs', route: '/drive', icon: <HardDrive size={24} weight="duotone" />, tintKey: 'drive' },
 
   // Learn & Focus
+  { id: 'projects', label: 'Projects', route: '/projects', icon: <RocketLaunch size={24} weight="duotone" />, tintKey: 'projects' },
+  { id: 'focus', label: 'Focus Studio', route: '/focus', icon: <HourglassMedium size={24} weight="duotone" />, tintKey: 'focus' },
   { id: 'notes', label: 'Notes & Ideas', route: '/notes', icon: <NotePencil size={24} weight="duotone" />, tintKey: 'notes' },
+  { id: 'journal', label: 'Daily Journal', route: '/journal', icon: <BookBookmark size={24} weight="duotone" />, tintKey: 'journal' },
+  { id: 'decisions', label: 'Decisions', route: '/decisions', icon: <Scales size={24} weight="duotone" />, tintKey: 'decisions' },
 
   // Health & Fitness
   { id: 'gym', label: 'Gym', route: '/gym', icon: <Barbell size={24} weight="duotone" />, tintKey: 'gym' },
@@ -81,6 +91,8 @@ export const ALL_HUB_ITEMS: (HubItem & { route: string })[] = [
   { id: 'spending', label: 'Spending', route: '/spending', icon: <Wallet size={24} weight="duotone" />, tintKey: 'spending' },
   { id: 'shopping', label: 'Shopping Lists', route: '/shopping', icon: <ShoppingCart size={24} weight="duotone" />, tintKey: 'shopping' },
   { id: 'outings', label: 'Outing Splitter', route: '/outings', icon: <Receipt size={24} weight="duotone" />, tintKey: 'outing' },
+  { id: 'trips', label: 'Trips & Packing', route: '/trips', icon: <SuitcaseRolling size={24} weight="duotone" />, tintKey: 'trips' },
+  { id: 'circle', label: 'Inner Circle', route: '/circle', icon: <UsersThree size={24} weight="duotone" />, tintKey: 'circle' },
 
   // Security & System
   { id: 'history', label: 'Work History', route: '/history', icon: <ClockCounterClockwise size={24} weight="duotone" />, tintKey: 'history' },
@@ -455,7 +467,7 @@ export default function Layout({
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center text-white font-bold text-sm"
-                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
+                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36, #A46D52))' }}
                 >
                   {userProfile.displayName ? userProfile.displayName[0].toUpperCase() : 'U'}
                 </div>
@@ -475,8 +487,8 @@ export default function Layout({
                 }}
                 className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer relative"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
                 title="Calendar & Timeline"
                 aria-label="Calendar & Timeline"
@@ -493,7 +505,7 @@ export default function Layout({
                 disabled={isReloading}
                 className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform cursor-pointer disabled:opacity-50"
                 style={{
-                  color: isReloading ? 'var(--app-accent-text, #DE4B64)' : 'rgba(255, 255, 255, 0.85)',
+                  color: isReloading ? 'var(--app-accent-text, #D29B7E)' : 'rgba(255, 255, 255, 0.85)',
                 }}
                 title="Sync & Reload"
                 aria-label="Sync & Reload"
@@ -596,7 +608,7 @@ export default function Layout({
             className="fixed bottom-20 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
           >
             <div className="px-4 py-2.5 rounded-2xl glass-nav nav-rim-light shadow-2xl flex items-center gap-2.5 bg-[#1C1C20]/95 text-white text-xs font-semibold">
-              <LockKey size={16} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+              <LockKey size={16} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
               <span>Home interface is locked as your primary dashboard</span>
             </div>
           </motion.div>

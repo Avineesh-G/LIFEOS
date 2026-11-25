@@ -63,12 +63,12 @@ export default function PublicShareView() {
   const getFileIcon = (filename: string, mime?: string) => {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) || mime?.startsWith('image/')) {
-      return <FileImage size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
+      return <FileImage size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />;
     }
     if (ext === 'pdf' || mime?.includes('pdf')) {
-      return <FilePdf size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
+      return <FilePdf size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />;
     }
-    return <FileText size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />;
+    return <FileText size={24} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />;
   };
 
   return (
@@ -84,8 +84,8 @@ export default function PublicShareView() {
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center"
             style={{
-              backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-              color: 'var(--app-accent-text, #DE4B64)',
+              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+              color: 'var(--app-accent-text, #D29B7E)',
             }}
           >
             <CloudArrowDown size={18} weight="duotone" />
@@ -111,7 +111,7 @@ export default function PublicShareView() {
           <div className="p-8 rounded-3xl glass-card flex flex-col items-center justify-center text-center space-y-3">
             <div
               className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin"
-              style={{ borderColor: 'var(--app-accent-text, #DE4B64)', borderTopColor: 'transparent' }}
+              style={{ borderColor: 'var(--app-accent-text, #D29B7E)', borderTopColor: 'transparent' }}
             />
             <p className="text-[13px] text-white/60">Fetching shared document...</p>
           </div>
@@ -141,13 +141,13 @@ export default function PublicShareView() {
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl glass-flat flex items-center justify-center shrink-0">
                 {record.type === 'folder' ? (
-                  <Folder size={28} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                  <Folder size={28} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                 ) : (
                   getFileIcon(record.title, record.mimeType)
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <span className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                <span className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   Shared via QR Link
                 </span>
                 <h1 className="text-[18px] font-bold text-white tracking-tight truncate mt-0.5">
@@ -166,7 +166,7 @@ export default function PublicShareView() {
                   type="button"
                   onClick={() => triggerDirectDownload(record.downloadUrl, record.title, 'primary')}
                   className="w-full py-3.5 px-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-semibold text-[14px] text-white shadow-lg cursor-pointer"
-                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                  style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                 >
                   {downloadingId === 'primary' ? (
                     <>

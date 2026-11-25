@@ -18,7 +18,7 @@ const DEFAULT_DATA: AppData = {
   timetable: [],
   tasks: [],
   reviews: [],
-  settings: { theme: 'system', accentColor: '#6366F1', navPinned: ['gym', 'nutrition'], interfaceColors: {}, performanceMode: 'auto', reduceBlurEffects: false },
+  settings: { theme: 'system', accentColor: '#7B4B36', navPinned: ['gym', 'nutrition'], interfaceColors: {}, performanceMode: 'auto', reduceBlurEffects: false },
   profile: null,
   menuMonths: [],
   nutritionLogs: [],
@@ -32,6 +32,11 @@ const DEFAULT_DATA: AppData = {
   moneyLent: [],
   aiChatHistory: [],
   calendarEvents: [],
+  journalEntries: [],
+  circleContacts: [],
+  projects: [],
+  trips: [],
+  decisions: [],
 };
 
 function cleanForFirestore(obj: any): any {
@@ -216,6 +221,195 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
         : ['gym', 'nutrition'],
   };
 
+  merged.journalEntries = Array.isArray(merged.journalEntries)
+    ? merged.journalEntries.map((entry: any) => ({
+        id: entry?.id || `journal_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        date: entry?.date || new Date().toISOString().slice(0, 10),
+        morningEnergy:
+          typeof entry?.morningEnergy === 'number' && entry.morningEnergy >= 1 && entry.morningEnergy <= 5
+            ? (entry.morningEnergy as 1 | 2 | 3 | 4 | 5)
+            : undefined,
+        morningFocusTheme: entry?.morningFocusTheme || '',
+        morningPriorityTaskIds: Array.isArray(entry?.morningPriorityTaskIds)
+          ? entry.morningPriorityTaskIds.filter((id: any) => typeof id === 'string')
+          : [],
+        morningNote: entry?.morningNote || '',
+        nightMood:
+          typeof entry?.nightMood === 'number' && entry.nightMood >= 1 && entry.nightMood <= 5
+            ? (entry.nightMood as 1 | 2 | 3 | 4 | 5)
+            : undefined,
+        wins: Array.isArray(entry?.wins) ? entry.wins.filter((w: any) => typeof w === 'string') : [],
+        gratitude: entry?.gratitude || '',
+        improve: entry?.improve || '',
+        brainDump: entry?.brainDump || '',
+        rolledOverAt: entry?.rolledOverAt || undefined,
+        hideFromAi: Boolean(entry?.hideFromAi),
+        createdAt: entry?.createdAt || new Date().toISOString(),
+        updatedAt: entry?.updatedAt || new Date().toISOString(),
+      }))
+    : [];
+
+  merged.circleContacts = Array.isArray(merged.circleContacts)
+    ? merged.circleContacts.map((person: any) => ({
+        id: person?.id || `circle_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        name: person?.name || 'Unnamed',
+        relation:
+          person?.relation === 'family' ||
+          person?.relation === 'friend' ||
+          person?.relation === 'college' ||
+          person?.relation === 'work'
+            ? person.relation
+            : 'other',
+        phone: person?.phone || undefined,
+        birthday: person?.birthday || undefined,
+        catchUpIntervalDays:
+          typeof person?.catchUpIntervalDays === 'number' ? person.catchUpIntervalDays : 14,
+        lastContactedDate: person?.lastContactedDate || undefined,
+        giftIdeas: Array.isArray(person?.giftIdeas)
+          ? person.giftIdeas.map((g: any) => ({
+              id: g?.id || `gift_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              text: String(g?.text || ''),
+              gifted: Boolean(g?.gifted),
+            }))
+          : [],
+        notes: person?.notes || '',
+        linkedMoneyLentName: person?.linkedMoneyLentName || undefined,
+        linkedOutingPersonId: person?.linkedOutingPersonId || undefined,
+        interactions: Array.isArray(person?.interactions)
+          ? person.interactions.map((ix: any) => ({
+              id: ix?.id || `ix_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              date: ix?.date || new Date().toISOString().slice(0, 10),
+              type: ix?.type === 'call' || ix?.type === 'meetup' ? ix.type : 'message',
+              note: ix?.note || undefined,
+            }))
+          : [],
+        createdAt: person?.createdAt || new Date().toISOString(),
+        updatedAt: person?.updatedAt || new Date().toISOString(),
+      }))
+    : [];
+
+  merged.projects = Array.isArray(merged.projects)
+    ? merged.projects.map((p: any) => ({
+        id: p?.id || `proj_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        title: p?.title || 'Untitled Project',
+        category:
+          p?.category === 'build' ||
+          p?.category === 'academic' ||
+          p?.category === 'career' ||
+          p?.category === 'personal'
+            ? p.category
+            : 'other',
+        status:
+          p?.status === 'paused' || p?.status === 'completed' || p?.status === 'archived'
+            ? p.status
+            : 'active',
+        targetDate: p?.targetDate || undefined,
+        description: p?.description || '',
+        blockerNote: p?.blockerNote || '',
+        milestones: Array.isArray(p?.milestones)
+          ? p.milestones.map((m: any) => ({
+              id: m?.id || `ms_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              title: String(m?.title || ''),
+              completed: Boolean(m?.completed),
+              dueDate: m?.dueDate || undefined,
+              pushedTaskId: m?.pushedTaskId || undefined,
+            }))
+          : [],
+        linkedDriveFileIds: Array.isArray(p?.linkedDriveFileIds)
+          ? p.linkedDriveFileIds.filter((id: any) => typeof id === 'string')
+          : [],
+        createdAt: p?.createdAt || new Date().toISOString(),
+        updatedAt: p?.updatedAt || new Date().toISOString(),
+      }))
+    : [];
+
+  merged.trips = Array.isArray(merged.trips)
+    ? merged.trips.map((t: any) => ({
+        id: t?.id || `trip_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        title: t?.title || 'Untitled Trip',
+        destination: t?.destination || '',
+        category:
+          t?.category === 'home' ||
+          t?.category === 'hostel' ||
+          t?.category === 'weekend' ||
+          t?.category === 'hackathon' ||
+          t?.category === 'interview'
+            ? t.category
+            : 'other',
+        departureDate: t?.departureDate || new Date().toISOString().slice(0, 10),
+        returnDate: t?.returnDate || undefined,
+        bookingRef: t?.bookingRef || '',
+        notes: t?.notes || '',
+        packingItems: Array.isArray(t?.packingItems)
+          ? t.packingItems.map((it: any) => ({
+              id: it?.id || `pack_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              name: String(it?.name || ''),
+              group:
+                it?.group === 'documents' ||
+                it?.group === 'tech' ||
+                it?.group === 'clothing'
+                  ? it.group
+                  : 'essentials',
+              packed: Boolean(it?.packed),
+              quantity: it?.quantity || undefined,
+            }))
+          : [],
+        linkedOutingId: t?.linkedOutingId || undefined,
+        isCompleted: Boolean(t?.isCompleted),
+        createdAt: t?.createdAt || new Date().toISOString(),
+        updatedAt: t?.updatedAt || new Date().toISOString(),
+      }))
+    : [];
+
+  merged.decisions = Array.isArray(merged.decisions)
+    ? merged.decisions.map((d: any) => ({
+        id: d?.id || `dec_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        question: d?.question || 'Untitled Decision',
+        category:
+          d?.category === 'career' ||
+          d?.category === 'finance' ||
+          d?.category === 'tech' ||
+          d?.category === 'study'
+            ? d.category
+            : 'life',
+        status:
+          d?.status === 'decided' || d?.status === 'revisited' ? d.status : 'open',
+        criteria: Array.isArray(d?.criteria)
+          ? d.criteria.map((c: any) => ({
+              id: c?.id || `crit_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              label: String(c?.label || 'Criterion'),
+              weight:
+                typeof c?.weight === 'number' && c.weight >= 1 && c.weight <= 5
+                  ? (c.weight as 1 | 2 | 3 | 4 | 5)
+                  : 3,
+            }))
+          : [],
+        options: Array.isArray(d?.options)
+          ? d.options.map((o: any) => ({
+              id: o?.id || `opt_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              title: String(o?.title || 'Option'),
+              scores: o?.scores && typeof o.scores === 'object' ? o.scores : {},
+              pros: Array.isArray(o?.pros) ? o.pros.filter((x: any) => typeof x === 'string') : [],
+              cons: Array.isArray(o?.cons) ? o.cons.filter((x: any) => typeof x === 'string') : [],
+            }))
+          : [],
+        expectedOutcome: d?.expectedOutcome || '',
+        chosenOptionId: d?.chosenOptionId || undefined,
+        decidedAt: d?.decidedAt || undefined,
+        revisitDate: d?.revisitDate || undefined,
+        calendarEventId: d?.calendarEventId || undefined,
+        actualOutcome: d?.actualOutcome || '',
+        verdict:
+          d?.verdict === 'right_call' ||
+          d?.verdict === 'mixed' ||
+          d?.verdict === 'lesson_learned'
+            ? d.verdict
+            : undefined,
+        createdAt: d?.createdAt || new Date().toISOString(),
+        updatedAt: d?.updatedAt || new Date().toISOString(),
+      }))
+    : [];
+
   return merged;
 }
 
@@ -255,7 +449,7 @@ export async function exportData(uid: string): Promise<string> {
   return JSON.stringify(data, null, 2);
 }
 
-export const DATA_SCHEMA_VERSION = 2;
+export const DATA_SCHEMA_VERSION = 4;
 
 export function migrateAppData(data: any): AppData {
   if (!data || typeof data !== 'object') return DEFAULT_DATA;
@@ -269,6 +463,19 @@ export function migrateAppData(data: any): AppData {
     if (!Array.isArray(migrated.vaultItems)) migrated.vaultItems = [];
     if (!Array.isArray(migrated.laundryBatches)) migrated.laundryBatches = [];
     if (!Array.isArray(migrated.notes)) migrated.notes = [];
+  }
+
+  if (version < 3) {
+    migrated._schemaVersion = 3;
+    if (!Array.isArray(migrated.journalEntries)) migrated.journalEntries = [];
+    if (!Array.isArray(migrated.circleContacts)) migrated.circleContacts = [];
+  }
+
+  if (version < 4) {
+    migrated._schemaVersion = 4;
+    if (!Array.isArray(migrated.projects)) migrated.projects = [];
+    if (!Array.isArray(migrated.trips)) migrated.trips = [];
+    if (!Array.isArray(migrated.decisions)) migrated.decisions = [];
   }
 
   return sanitizeAppData(migrated);

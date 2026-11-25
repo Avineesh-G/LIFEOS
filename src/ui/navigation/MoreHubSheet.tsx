@@ -96,46 +96,37 @@ export function MoreHubSheet({
   // App Updates & New Features list from central data source
   const appUpdates = APP_UPDATES;
 
-  // Clean categorized sections for all 18 LifeOS interfaces
+  // Categorized by the work each interface does, with sections & items sorted alphabetically (A–Z)
   const sections: NavSection[] = useMemo(() => {
-    const planItems = ['calendar', 'tasks', 'timetable', 'laundry', 'drive']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem => !!i);
-
-    const captureItems = ['ai', 'notes']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem => !!i);
-
-    const healthItems = ['gym', 'nutrition']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem => !!i);
-
-    const moneyItems = ['spending', 'shopping', 'outings']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem => !!i);
-
-    const systemItems = ['history', 'settings']
-      .map((id) => itemMap.get(id))
-      .filter((i): i is HubItem => !!i);
+    const buildSortedSection = (title: string, ids: string[]): NavSection => ({
+      title,
+      items: ids
+        .map((id) => itemMap.get(id))
+        .filter((i): i is HubItem => !!i)
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    });
 
     return [
-      { title: 'Plan & Operations', items: planItems },
-      { title: 'Intelligence & Notes', items: captureItems },
-      { title: 'Health & Fitness', items: healthItems },
-      { title: 'Finances & Life', items: moneyItems },
-      { title: 'Security & System', items: systemItems },
-    ];
+      buildSortedSection('Finance & Money', ['outings', 'shopping', 'spending']),
+      buildSortedSection('Health & Wellness', ['gym', 'nutrition']),
+      buildSortedSection('Intelligence & Study', ['decisions', 'focus', 'ai', 'notes']),
+      buildSortedSection('Personal & Travel', ['journal', 'circle', 'laundry', 'trips']),
+      buildSortedSection('Planning & Work', ['calendar', 'drive', 'projects', 'timetable', 'tasks']),
+      buildSortedSection('System & History', ['settings', 'history']),
+    ].sort((a, b) => a.title.localeCompare(b.title));
   }, [itemMap]);
 
-  // Filtered search results across all modules
+  // Filtered search results across all modules (sorted alphabetically)
   const filteredModules = useMemo(() => {
     if (!search.trim()) return [];
     const query = search.toLowerCase();
-    return items.filter(
-      (item) =>
-        item.label.toLowerCase().includes(query) ||
-        (item.status && item.status.toLowerCase().includes(query))
-    );
+    return items
+      .filter(
+        (item) =>
+          item.label.toLowerCase().includes(query) ||
+          (item.status && item.status.toLowerCase().includes(query))
+      )
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [items, search]);
 
   return (
@@ -151,7 +142,7 @@ export function MoreHubSheet({
             <div className="relative shrink-0">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm overflow-hidden select-none shadow-md"
-                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #3B82F6, #8B1E3F))' }}
+                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #3B82F6, #7B4B36))' }}
               >
                 {userProfile.photoURL ? (
                   <img
@@ -166,7 +157,7 @@ export function MoreHubSheet({
               {/* Online Indicator Dot */}
               <span
                 className="w-2.5 h-2.5 rounded-full absolute -bottom-0.5 -right-0.5 shadow-sm"
-                style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }}
               />
             </div>
 
@@ -219,8 +210,8 @@ export function MoreHubSheet({
                   <div
                     className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[18px] shrink-0"
                     style={{
-                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #DE4B64) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 6%, #17171B) 100%)',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #D29B7E) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 6%, #17171B) 100%)',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     {item.icon}
@@ -234,7 +225,7 @@ export function MoreHubSheet({
                     className="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0"
                     style={{
                       backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.12))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     {item.status}
@@ -255,8 +246,8 @@ export function MoreHubSheet({
                   <span
                     className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     v{CURRENT_VERSION_NAME}
@@ -280,7 +271,7 @@ export function MoreHubSheet({
                   >
                     <div>
                       <div className="flex items-center justify-between text-white/75 mb-1">
-                        <div className="flex items-center gap-1.5 text-[11px] font-semibold truncate" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold truncate" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           <span>{card.icon}</span>
                           <span className="truncate">{card.category}</span>
                         </div>
@@ -298,7 +289,7 @@ export function MoreHubSheet({
                       className="flex items-center gap-1 text-[9.5px] text-white/55 truncate pt-1"
                       style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}
                     >
-                      <EnvelopeSimple size={10} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                      <EnvelopeSimple size={10} className="shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                       <span className="truncate">{card.contactEmails[0]}</span>
                     </div>
                   </div>
@@ -313,7 +304,7 @@ export function MoreHubSheet({
                   {sIdx > 0 && <div className="h-[1px] bg-white/[0.05] my-1" />}
                   <span
                     className="text-[11.5px] uppercase tracking-wider font-semibold px-2.5 pt-1"
-                    style={{ color: 'color-mix(in srgb, var(--app-accent-text, #DE4B64) 42%, rgba(255,255,255,0.72))' }}
+                    style={{ color: 'color-mix(in srgb, var(--app-accent-text, #D29B7E) 42%, rgba(255,255,255,0.72))' }}
                   >
                     {section.title}
                   </span>
@@ -334,8 +325,8 @@ export function MoreHubSheet({
                           <div
                             className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[18px] shrink-0"
                             style={{
-                              background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #DE4B64) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #8B1E3F) 6%, #17171B) 100%)',
-                              color: 'var(--app-accent-text, #DE4B64)',
+                              background: 'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #D29B7E) 15%, #1D1D23) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 6%, #17171B) 100%)',
+                              color: 'var(--app-accent-text, #D29B7E)',
                             }}
                           >
                             {item.icon}
@@ -373,7 +364,7 @@ export function MoreHubSheet({
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
                   className="w-9 h-9 rounded-xl glass-tile flex items-center justify-center shrink-0"
-                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   {selectedUpdate.icon}
                 </div>
@@ -430,7 +421,7 @@ export function MoreHubSheet({
                         key={idx}
                         className="flex items-start gap-2.5 p-2.5 rounded-xl glass-flat"
                       >
-                        <div className="mt-0.5 shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                        <div className="mt-0.5 shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           <CheckCircle size={14} weight="fill" />
                         </div>
                         <div className="text-[12px] text-white/85 leading-snug">
@@ -449,7 +440,7 @@ export function MoreHubSheet({
 
               {/* Recommendations & Feedback Box with Contact Emails */}
               <div className="p-3 rounded-2xl glass-tile space-y-2.5">
-                <div className="flex items-center gap-1.5" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                <div className="flex items-center gap-1.5" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <EnvelopeSimple size={15} weight="bold" />
                   <span className="text-[11.5px] font-semibold tracking-wide uppercase">
                     Recommendations & Feedback
@@ -484,13 +475,13 @@ export function MoreHubSheet({
                             }}
                             className="flex-1 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
-                            {isCopied ? <Check size={12} style={{ color: 'var(--app-accent-text, #DE4B64)' }} /> : <Copy size={12} />}
+                            {isCopied ? <Check size={12} style={{ color: 'var(--app-accent-text, #D29B7E)' }} /> : <Copy size={12} />}
                             <span>{isCopied ? 'Copied' : 'Copy Email'}</span>
                           </button>
                           <a
                             href={`mailto:${email}?subject=LifeOS%20Feature%20Recommendation%20-%20${encodeURIComponent(selectedUpdate.title)}`}
                             className="flex-1 py-1 rounded-lg text-[11px] font-medium text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90 cursor-pointer"
-                            style={{ background: 'linear-gradient(135deg, var(--app-accent, #8B1E3F) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
+                            style={{ background: 'linear-gradient(135deg, var(--app-accent, #7B4B36) 0%, var(--app-accent-end, #5AC8FA) 100%)' }}
                           >
                             <ArrowSquareOut size={12} weight="bold" />
                             <span>Send Mail</span>

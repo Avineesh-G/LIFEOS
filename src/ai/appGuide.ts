@@ -285,11 +285,10 @@ export const APP_GUIDE_DATA: Record<string, InterfaceGuide> = {
     id: 'settings',
     name: 'Settings & System Preferences',
     routes: ['/settings'],
-    purpose: 'Central control panel for notifications, appearance, performance, security, body targets, AI configuration, backups, and reset.',
+    purpose: 'Central control panel for notifications, performance, security, body targets, AI configuration, backups, and reset.',
     mainFeatures: [
       'Notifications & Reminders: System alerts & lead time selection (5m, 10m, 15m, 20m)',
-      'Appearance & Theme: Light Mode / Dark Mode toggle',
-      'Interface Colors: Personalize tonal accent colors',
+      'Fixed Warm Brown Theme across all interfaces',
       'Performance Mode: Auto / Full / Lite toggle',
       'Reduce Blur Effects: Replaces glass blurs with crisp translucent surfaces',
       'Navigation Bar Haptics: Tactile feedback slider (0% - 100%)',
@@ -300,25 +299,125 @@ export const APP_GUIDE_DATA: Record<string, InterfaceGuide> = {
       'Account & Reset: Sign Out & Reset All Data options',
     ],
     commonActions: [
-      { action: 'Change app theme', steps: 'Go to Settings > Appearance & Theme > Toggle Light Mode / Dark Mode.' },
-      { action: 'Change app color', steps: 'Go to Settings > Interface Colors (or tap "Personalize") to open color selection.' },
       { action: 'Set Groq API Key', steps: 'Go to Settings > AI Coach Integration > Enter key in "Groq API Key (Mode A)" > Tap Save.' },
       { action: 'Enable Reduce Blur Effects', steps: 'Go to Settings > Performance Mode > Toggle "Reduce blur effects".' },
       { action: 'Check for app updates', steps: 'Go to Settings > Scroll to bottom > Tap "Check for App Update".' },
     ],
   },
 
-  interfaceColors: {
-    id: 'interface-colors',
-    name: 'Interface Colors Personalization',
-    routes: ['/settings/interface-colors'],
-    purpose: 'Single teal/cyan color accent system matching Android 17 Gemini Intelligence design language.',
+  focus: {
+    id: 'focus',
+    name: 'Focus Studio',
+    routes: ['/focus'],
+    purpose: 'Distraction-free Pomodoro and deep work timer anchored to To-Do Tasks and Timetable subjects with wall-clock persistence and History logging.',
     mainFeatures: [
-      'Single Unified Accent System: Teal/Cyan default accent (#2DD4BF)',
-      'App Color Picker: Recolors all glass surfaces, glow cards, and navigation accents consistently',
+      'Presets for Classic 25/5, Deep 50/10, Sprint 90/20, and Custom 5-180 min steppers',
+      'Direct linking to pending To-Do tasks or Timetable subjects',
+      'Drift-free background wall-clock countdown and native completion alerts',
+      'Quick thought / distraction capture during active blocks and break timer launch',
     ],
     commonActions: [
-      { action: 'Change app accent color', steps: 'Navigate to Settings > Interface Colors > Select color swatch or enter custom hex code.' },
+      { action: 'Start a deep work block', steps: 'Open Focus Studio > Pick a preset and optional Task > Tap Start Focus.' },
+      { action: 'Save session & complete task', steps: 'When the block finishes (or tap Finish), review notes and tap Save & Break or Save & Finish.' },
+    ],
+  },
+
+  journal: {
+    id: 'journal',
+    name: 'Daily Journal & Wind-Down',
+    routes: ['/journal'],
+    purpose: 'Calm 60-second Morning Reset and Night Wind-Down reflection linked to daily stats and unfinished task rollover.',
+    mainFeatures: [
+      'Time-aware Morning Reset (energy rating, focus theme, top 3 task priorities) and Night Wind-Down (mood rating, 3 wins, gratitude, brain-dump)',
+      'Automatic Today in Numbers card pulling completed tasks, focus minutes, workouts, and logged calories',
+      'One-tap rollover for unfinished tasks to tomorrow',
+      'Private Hide from Luna AI switch and searchable reflection timeline',
+    ],
+    commonActions: [
+      { action: 'Log Morning Reset', steps: 'Open Daily Journal > Morning tab > Pick energy, theme, and top 3 priorities > Tap Save Morning Reset.' },
+      { action: 'Roll over unfinished tasks', steps: 'In Night tab > Tap Roll Over next to unfinished tasks to shift them cleanly to tomorrow.' },
+    ],
+  },
+
+  circle: {
+    id: 'circle',
+    name: 'Inner Circle & Personal CRM',
+    routes: ['/circle'],
+    purpose: 'Private relationship manager for close friends and family tracking birthdays, catch-up cadence, gift ideas, and unified balances from Spending and Outing Splitter.',
+    mainFeatures: [
+      'Needs Care Now strip surfacing upcoming birthdays and overdue catch-ups',
+      'One-tap Call, Meetup, or Message catch-up logging with conversation notes',
+      'Live balance aggregation matching pending Money Lent and Outing Splitter settlements',
+      'Year-round gift ideas checklist per person',
+    ],
+    commonActions: [
+      { action: 'Log a catch-up', steps: 'Open Inner Circle > Tap a person or Needs Care card > Tap Call, Met Up, or Texted.' },
+      { action: 'Check shared balances', steps: 'Open any contact sheet to view casual loans and outing balances or filter by Balances.' },
+    ],
+  },
+
+  projects: {
+    id: 'projects',
+    name: 'Projects & Milestones',
+    routes: ['/projects'],
+    purpose: 'Multi-step goal and milestone workspace connecting project progress, Focus Studio hours, Drive documents, and Today tasks.',
+    mainFeatures: [
+      'Milestone checklists with instant next-action highlights and progress bars',
+      'Push any milestone directly to To-Do Tasks',
+      'One-tap Focus launch attributing deep-work minutes to linkedProjectId',
+      'Link reference files from Drive & Docs and track current blockers',
+    ],
+    commonActions: [
+      { action: 'Start Focus on a project', steps: 'Open Projects > Tap Focus on the next milestone or inside the project sheet.' },
+      { action: 'Push milestone to tasks', steps: 'Open a project > Tap + Task next to any pending milestone.' },
+    ],
+  },
+
+  trips: {
+    id: 'trips',
+    name: 'Trips & Smart Packing',
+    routes: ['/trips'],
+    purpose: 'Travel readiness workspace with reusable packing checklists, PNR/booking notes, and Outing Splitter integration.',
+    mainFeatures: [
+      'Pre-filled packing templates for Hostel Return, Home Break, Hackathon, and Weekend Trip',
+      'Grouped checklists (Documents & IDs, Tech & Chargers, Clothing, Essentials & Meds)',
+      'One-tap Unpack All reset for recurring hostel/home travel',
+      'Seamless Split button creating or opening a linked Outing Expense group',
+    ],
+    commonActions: [
+      { action: 'Plan a trip from template', steps: 'Open Trips & Packing > Tap Plan > Pick trip type and template > Save Trip.' },
+      { action: 'Split trip expenses', steps: 'Tap Split on a trip card or inside its sheet to launch Outing Splitter.' },
+    ],
+  },
+
+  decisions: {
+    id: 'decisions',
+    name: 'Decision Workbench',
+    routes: ['/decisions'],
+    purpose: 'Weighted pros/cons comparison matrix for major choices with scheduled 30/90/180-day outcome reviews synced to Calendar.',
+    mainFeatures: [
+      'Weighted criteria scoring matrix (1-5 weights & 1-5 option ratings) with live ranking',
+      'Side-by-side Pros & Cons per option and expected outcome hypothesis',
+      'Revisit schedule syncing reminder events into Calendar',
+      'Outcome review card to log actual results and verdict',
+    ],
+    commonActions: [
+      { action: 'Compare two options', steps: 'Open Decisions > Tap New > Enter question and options > Score criteria inside the matrix.' },
+      { action: 'Schedule outcome review', steps: 'Choose an option > Select 30d/90d/180d horizon > Tap Commit.' },
+    ],
+  },
+
+  interfaceColors: {
+    id: 'interface-colors',
+    name: 'Warm Brown Theme Status',
+    routes: ['/settings/interface-colors'],
+    purpose: 'Fixed Warm Brown single-hue Liquid Glass design system applied consistently across every interface.',
+    mainFeatures: [
+      'Fixed Warm Brown Palette (#7B4B36 -> #A46D52, sand highlight #D29B7E)',
+      'Zero color adaptation overhead across glass surfaces, cards, icons, and navigation pills',
+    ],
+    commonActions: [
+      { action: 'Adjust ambient glow', steps: 'Navigate to Settings or Appearance > Choose Off, Subtle, or Ambient glow intensity.' },
     ],
   },
 };
@@ -336,6 +435,12 @@ export function getInterfaceIdFromPath(pathname: string): string {
   if (cleanPath.startsWith('/tasks')) return 'tasks';
   if (cleanPath.startsWith('/timetable')) return 'timetable';
   if (cleanPath.startsWith('/notes')) return 'notes';
+  if (cleanPath.startsWith('/focus')) return 'focus';
+  if (cleanPath.startsWith('/journal')) return 'journal';
+  if (cleanPath.startsWith('/circle')) return 'circle';
+  if (cleanPath.startsWith('/projects')) return 'projects';
+  if (cleanPath.startsWith('/trips')) return 'trips';
+  if (cleanPath.startsWith('/decisions')) return 'decisions';
   if (cleanPath.startsWith('/drive')) return 'drive';
   if (cleanPath.startsWith('/vault')) return 'vault';
   if (cleanPath.startsWith('/shopping')) return 'shopping';

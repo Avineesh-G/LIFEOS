@@ -96,14 +96,14 @@ const AI_MODELS = [
     name: 'Luna 2.0 Pro',
     desc: 'GPT-OSS 120B • High-reasoning intelligence for deep analysis & planning',
     tag: 'Primary',
-    icon: <Brain size={18} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <Brain size={18} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
   },
   {
     id: CHAT_FALLBACKS[0],
     name: 'Luna 2.0 Fast',
     desc: 'GPT-OSS 20B • Instant speed for daily tasks & summaries',
     tag: 'Fast',
-    icon: <Lightning size={18} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <Lightning size={18} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
   },
 ];
 
@@ -113,28 +113,28 @@ const PROMPT_STARTERS = [
     id: 'tasks_today',
     title: 'Daily Priorities',
     subtitle: 'What tasks and timetable classes do I have today?',
-    icon: <CheckSquare size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <CheckSquare size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
     query: 'What are my top priorities, classes, and pending tasks scheduled for today?',
   },
   {
     id: 'workout_routine',
     title: 'Workout Split',
     subtitle: 'Plan today exercise sets, reps, and target muscles',
-    icon: <Barbell size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <Barbell size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
     query: 'What workout is scheduled for me today? Provide a step-by-step workout routine with exercises and target sets.',
   },
   {
     id: 'budget_overview',
     title: 'Financial Health',
     subtitle: 'Analyze recent spending and budget limits',
-    icon: <Wallet size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <Wallet size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
     query: 'Analyze my spending trends and let me know if I am within my safe daily budget limit.',
   },
   {
     id: 'study_roadmap',
     title: 'Study Roadmap',
     subtitle: 'Create a 4-step focused revision workflow',
-    icon: <NotePencil size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />,
+    icon: <NotePencil size={17} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />,
     query: 'Create a focused 4-step study workflow for my upcoming exams and revision topics.',
   },
 ];
@@ -1002,8 +1002,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
               <div
                 className="w-5 h-5 rounded-[6px] flex items-center justify-center shrink-0"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 <LunaComicBubbleIcon size={13} />
@@ -1014,7 +1014,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 </span>
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
+                  style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }}
                   title="Online & Ready"
                 />
               </div>
@@ -1028,7 +1028,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
               type="button"
               onClick={handleStartNewChat}
               className="w-9 h-9 rounded-full glass-tile flex items-center justify-center hover:text-white active:scale-90 transition-all cursor-pointer touch-manipulation shrink-0"
-              style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               aria-label="Start New Chat"
               title="Start New Chat"
             >
@@ -1069,8 +1069,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   <div
                     className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     <LunaComicBubbleIcon size={16} />
@@ -1101,8 +1101,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   <div
                     className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     <Plus size={15} weight="bold" />
@@ -1215,7 +1215,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 >
                   <div
                     className="relative w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0"
-                    style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                    style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                   >
                     {userProfile.photoURL ? (
                       <img
@@ -1240,7 +1240,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                       <Key size={11} weight="bold" className="text-white/40 transition-colors shrink-0" />
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
                       <span className="text-[10px] text-white/40 font-medium truncate">{activeModelDisplay}</span>
                     </div>
                   </div>
@@ -1330,7 +1330,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                       {isSelected && (
                         <div
                           className="w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0"
-                          style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                          style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                         >
                           <Check size={12} weight="bold" />
                         </div>
@@ -1358,8 +1358,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     <div
                       className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                       style={{
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                        color: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                        color: 'var(--app-accent-text, #D29B7E)',
                       }}
                     >
                       <Key size={14} weight="bold" />
@@ -1411,8 +1411,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     <div
                       className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm shrink-0"
                       style={{
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                        color: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                        color: 'var(--app-accent-text, #D29B7E)',
                       }}
                     >
                       <Key size={17} weight="bold" />
@@ -1441,7 +1441,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     <span
                       className="w-2 h-2 rounded-full"
                       style={{
-                        backgroundColor: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-text, #D29B7E)',
                       }}
                     />
                     <span className="text-xs font-semibold text-white/90">
@@ -1502,7 +1502,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     onClick={() => handleSaveApiKey(apiKeyInput)}
                     className="flex-1 py-2.5 rounded-2xl text-white text-xs font-bold active:scale-95 transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 touch-manipulation shadow-lg"
                     style={{
-                      background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                      background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                     }}
                   >
                     {apiKeySaveSuccess ? (
@@ -1537,7 +1537,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
             <div className="relative mb-4 flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
               <div
                 className="absolute inset-0 rounded-[28px] blur-2xl scale-125 opacity-25"
-                style={{ backgroundColor: 'var(--app-accent, #8B1E3F)' }}
+                style={{ backgroundColor: 'var(--app-accent, #7B4B36)' }}
               />
               <div
                 className="w-16 h-16 rounded-[20px] flex items-center justify-center text-white shadow-2xl relative border-none"
@@ -1546,7 +1546,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, rgba(20,20,24,0.98) 100%)',
                   boxShadow:
                     '0 20px 40px -10px rgba(0, 0, 0, 0.95)',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 <LunaComicBubbleIcon size={34} />
@@ -1560,7 +1560,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
 
             {/* Intelligence Status Pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-tile text-[11.5px] font-semibold text-white/60 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
               <span>Ask about workouts, schedule, budget, or studies</span>
             </div>
           </div>
@@ -1598,7 +1598,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     /* Assistant Message Stream (Full Width with Avatar) */
                     <div className="w-full text-left space-y-2">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-7 h-7 rounded-xl glass-tile flex items-center justify-center shadow-sm shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                        <div className="w-7 h-7 rounded-xl glass-tile flex items-center justify-center shadow-sm shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           <LunaComicBubbleIcon size={15} />
                         </div>
                         <span className="text-xs font-bold text-white/90">Luna</span>
@@ -1612,15 +1612,15 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                             {isGenerating && messages[messages.length - 1]?.id === msg.id && (
                               <span
                                 className="inline-block w-1.5 h-3.5 ml-1 animate-pulse align-middle rounded-sm"
-                                style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }}
+                                style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }}
                               />
                             )}
                           </div>
                         ) : isGenerating ? (
                           <div className="flex items-center gap-1.5 py-1 text-white/50">
-                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
-                            <span className="w-1.5 h-1.5 rounded-full animate-pulse opacity-70 [animation-delay:150ms]" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
-                            <span className="w-1.5 h-1.5 rounded-full animate-pulse opacity-40 [animation-delay:300ms]" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+                            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
+                            <span className="w-1.5 h-1.5 rounded-full animate-pulse opacity-70 [animation-delay:150ms]" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
+                            <span className="w-1.5 h-1.5 rounded-full animate-pulse opacity-40 [animation-delay:300ms]" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
                           </div>
                         ) : null}
                       </div>
@@ -1650,7 +1650,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                             title="Copy response"
                           >
                             {copiedId === msg.id ? (
-                              <Check size={14} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                              <Check size={14} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                             ) : (
                               <Copy size={14} weight="bold" />
                             )}
@@ -1659,7 +1659,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                             type="button"
                             onClick={() => handleToggleSpeak(msg.id, msg.content)}
                             className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer hover:text-white"
-                            style={speakingMsgId === msg.id ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                            style={speakingMsgId === msg.id ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                             title="Read aloud"
                           >
                             <SpeakerHigh size={14} weight="bold" />
@@ -1703,8 +1703,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     }
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     <ArrowClockwise size={13} weight="bold" />
@@ -1723,15 +1723,15 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.18 }}
                   className="flex items-center gap-2 pl-1 pt-1.5 text-xs font-semibold"
-                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
                     className="w-5 h-5 rounded-[6px] flex items-center justify-center shrink-0"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     <LunaComicBubbleIcon size={14} />
@@ -1752,8 +1752,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     <div
                       className="w-5 h-5 rounded-[6px] flex items-center justify-center shrink-0"
                       style={{
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                        color: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                        color: 'var(--app-accent-text, #D29B7E)',
                       }}
                       title="Luna Ready"
                     >
@@ -1849,7 +1849,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   onClick={handleCameraCapture}
                   className="px-3 py-2 rounded-xl text-xs font-bold text-white/90 hover:text-white hover:bg-white/10 flex items-center gap-2.5 cursor-pointer"
                 >
-                  <Camera size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                  <Camera size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                   <span>Take Photo</span>
                 </button>
                 <button
@@ -1857,7 +1857,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   onClick={handleGalleryPick}
                   className="px-3 py-2 rounded-xl text-xs font-bold text-white/90 hover:text-white hover:bg-white/10 flex items-center gap-2.5 cursor-pointer"
                 >
-                  <Images size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                  <Images size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                   <span>Photo Gallery</span>
                 </button>
               </motion.div>
@@ -1967,7 +1967,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
               }`}
               style={
                 !isGenerating && (inputQuery.trim().length > 0 || attachedImages.length > 0)
-                  ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                  ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                   : undefined
               }
               title={isGenerating ? 'Stop generating' : 'Send message'}

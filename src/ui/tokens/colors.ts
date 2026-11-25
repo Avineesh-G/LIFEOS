@@ -65,9 +65,15 @@ export type ModuleKey =
   | 'streak'
   | 'luna'
   | 'calendar'
-  | 'drive';
+  | 'drive'
+  | 'focus'
+  | 'journal'
+  | 'circle'
+  | 'projects'
+  | 'trips'
+  | 'decisions';
 
-const UNIFIED_VAR = 'var(--app-accent-text, var(--app-accent, #8B1E3F))';
+const UNIFIED_VAR = 'var(--app-accent-text, var(--app-accent, #7B4B36))';
 
 export const MODULE_TINTS: Record<ModuleKey, string> = {
   home: UNIFIED_VAR,
@@ -91,12 +97,18 @@ export const MODULE_TINTS: Record<ModuleKey, string> = {
   streak: UNIFIED_VAR,
   luna: UNIFIED_VAR,
   drive: UNIFIED_VAR,
+  focus: UNIFIED_VAR,
+  journal: UNIFIED_VAR,
+  circle: UNIFIED_VAR,
+  projects: UNIFIED_VAR,
+  trips: UNIFIED_VAR,
+  decisions: UNIFIED_VAR,
 };
 
-export const LUNA_GRADIENT = ['var(--app-accent, #8B1E3F)', 'var(--app-accent-end, #B52B4D)'];
+export const LUNA_GRADIENT = ['var(--app-accent, #7B4B36)', 'var(--app-accent-end, #A46D52)'];
 
 export function getModuleTint(_key?: string | null, customAccent?: string): string {
   if (customAccent) return customAccent;
   const active = getActiveAccent();
-  return active.tertiary || active.secondary || active.primary || '#8B1E3F';
+  return active.tertiary || active.secondary || active.primary || '#7B4B36';
 }

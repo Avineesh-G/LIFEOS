@@ -474,7 +474,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           <span
             className="text-[12px] font-bold px-3 py-1.5 rounded-full tabular-nums glass-flat"
             style={{
-              backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
               color: 'var(--app-accent-text, #64D2FF)',
             }}
           >
@@ -532,7 +532,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             <div
               className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                 color: 'var(--app-accent-text, #64D2FF)',
               }}
             >
@@ -550,7 +550,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           <span
             className="px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0"
             style={{
-              backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
               color: 'var(--app-accent-text, #64D2FF)',
             }}
           >
@@ -634,7 +634,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   }`}
                   style={
                     customName.toLowerCase().includes(chip.toLowerCase())
-                      ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                      ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                       : undefined
                   }
                 >
@@ -653,8 +653,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <span
                 className="flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 <LunaComicBubbleIcon size={12} color="currentColor" variant="filled" />
@@ -674,8 +674,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             <div
               className="flex items-center gap-2 p-2.5 rounded-xl text-xs font-semibold animate-pulse"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                color: 'var(--app-accent-text, #DE4B64)',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               <LunaComicBubbleIcon size={14} color="currentColor" className="animate-spin" />
@@ -687,10 +687,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {multiItemEstimate && multiItemEstimate.items.length > 1 && !isAiAnalyzing && (
             <div
               className="flex flex-col gap-1.5 p-3 rounded-2xl glass-flat"
-              style={{ backgroundColor: 'var(--app-accent-whisper, rgba(181, 43, 77, 0.08))' }}
+              style={{ backgroundColor: 'var(--app-accent-whisper, rgba(164, 109, 82, 0.08))' }}
             >
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <LunaComicBubbleIcon size={13} color="currentColor" />
                   AI Detected {multiItemEstimate.items.length} Items:
                 </span>
@@ -705,7 +705,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     className="px-2.5 py-1 rounded-full bg-white/10 text-[11px] text-white/90 font-medium"
                   >
                     {it.detectedPortion}× {it.name}{' '}
-                    <span className="font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>({it.totalCalories} kcal)</span>
+                    <span className="font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>({it.totalCalories} kcal)</span>
                   </span>
                 ))}
               </div>
@@ -716,7 +716,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {aiEstimate && !multiItemEstimate && !isAiAnalyzing && (
             <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] ">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <LunaComicBubbleIcon size={13} color="currentColor" />
                   {aiEstimate.name}
                 </span>
@@ -732,13 +732,13 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 {aiEstimate.macros && (
                   <div className="flex items-center gap-2 text-[11px] text-white/80 font-mono">
                     <span>
-                      <span style={{ color: 'var(--app-accent-text, #DE4B64)' }}>P:</span> {aiEstimate.macros.protein}g
+                      <span style={{ color: 'var(--app-accent-text, #D29B7E)' }}>P:</span> {aiEstimate.macros.protein}g
                     </span>
                     <span>
-                      <span style={{ color: 'var(--app-accent-text, #DE4B64)' }}>C:</span> {aiEstimate.macros.carbs}g
+                      <span style={{ color: 'var(--app-accent-text, #D29B7E)' }}>C:</span> {aiEstimate.macros.carbs}g
                     </span>
                     <span>
-                      <span style={{ color: 'var(--app-accent-text, #DE4B64)' }}>F:</span> {aiEstimate.macros.fats}g
+                      <span style={{ color: 'var(--app-accent-text, #D29B7E)' }}>F:</span> {aiEstimate.macros.fats}g
                     </span>
                   </div>
                 )}
@@ -773,7 +773,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     }`}
                     style={
                       customPortion === q
-                        ? { background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }
+                        ? { background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }
                         : undefined
                     }
                   >
@@ -819,8 +819,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               <div
                 className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-0.5 rounded-full shrink-0 select-none border-none"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 <Sparkle size={10} weight="fill" />
@@ -838,7 +838,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {/* Live Calorie Total Preview */}
           <div
             className="p-3.5 rounded-2xl flex items-center justify-between"
-            style={{ backgroundColor: 'var(--app-accent-whisper, rgba(181, 43, 77, 0.08))' }}
+            style={{ backgroundColor: 'var(--app-accent-whisper, rgba(164, 109, 82, 0.08))' }}
           >
             <div className="flex flex-col">
               <span className="text-xs font-semibold text-white/90">
@@ -850,7 +850,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                   : `${customPortion} ${aiEstimate?.unit || 'portion(s)'} × ${parseInt(customCalories, 10) || 0} kcal`}
               </span>
             </div>
-            <span className="text-base font-extrabold tabular-nums" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+            <span className="text-base font-extrabold tabular-nums" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
               {multiItemEstimate
                 ? multiItemEstimate.totalCalories
                 : customPortion * (parseInt(customCalories, 10) || 0)}{' '}

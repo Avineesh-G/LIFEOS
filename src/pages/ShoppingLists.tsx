@@ -126,7 +126,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
               setShowNewModal(true);
             }}
             className="p-2 rounded-full glass-flat active:scale-95 transition-transform"
-            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
             title="New List"
           >
             <Plus size={20} weight="bold" />
@@ -139,7 +139,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {allLists.length === 0 && (
           <div className="space-y-6">
             <EmptyState
-              icon={<ShoppingBag size={36} weight="light" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />}
+              icon={<ShoppingBag size={36} weight="light" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />}
               title="No Shopping Lists Yet"
               description="Create a checklist for your next store run or weekend outing, or tap a starter template below."
               actionLabel="Create List"
@@ -178,7 +178,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {activeLists.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 px-1">
-              <ListChecks size={18} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+              <ListChecks size={18} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
                 Active Lists · {activeLists.length}
               </h2>
@@ -227,7 +227,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                         <span className="text-[#8E8E93]">
                           {totalCount === 0 ? 'No items yet' : `${checkedCount}/${totalCount} checked`}
                         </span>
-                        <span className="font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                        <span className="font-semibold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           {percent}%
                         </span>
                       </div>
@@ -248,7 +248,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
         {templates.length > 0 && (
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-2 px-1">
-              <Stack size={18} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+              <Stack size={18} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8E93]">
                 Saved Templates · {templates.length}
               </h2>

@@ -27,8 +27,8 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
   const surfaceClass = level === 3 ? 'glass-hero' : level === 2 ? 'glass-card' : 'glass-tile';
   const tintVars = (tinted || accent)
     ? ({
-        '--card-accent': accent || 'var(--app-accent, #8B1E3F)',
-        '--tile-accent': accent || 'var(--app-accent, #8B1E3F)',
+        '--card-accent': accent || 'var(--app-accent, #7B4B36)',
+        '--tile-accent': accent || 'var(--app-accent, #7B4B36)',
       } as React.CSSProperties)
     : {};
 
@@ -55,7 +55,7 @@ export const GlassSurface = React.forwardRef<HTMLDivElement, GlassSurfaceProps>(
         className="pointer-events-none absolute inset-x-0 top-0 h-10 opacity-45"
         style={{
           background:
-            'radial-gradient(ellipse 90% 100% at 50% 0%, rgba(255,255,255,0.14) 0%, color-mix(in srgb, var(--tile-accent, var(--app-accent, #8B1E3F)) 14%, transparent) 55%, transparent 100%)',
+            'radial-gradient(ellipse 90% 100% at 50% 0%, rgba(255,255,255,0.14) 0%, color-mix(in srgb, var(--tile-accent, var(--app-accent, #7B4B36)) 14%, transparent) 55%, transparent 100%)',
         }}
       />
 

@@ -403,7 +403,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                 className="flex items-center gap-1 px-2.5 py-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all text-[12px] font-semibold cursor-pointer"
                 title="Create New Folder"
               >
-                <FolderSimplePlus size={15} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                <FolderSimplePlus size={15} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                 <span className="hidden sm:inline">Folder</span>
               </button>
 
@@ -416,7 +416,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                 disabled={isQuotaFull || isUploading}
                 className="flex items-center gap-1.5 px-3 py-1 rounded-full active:scale-95 transition-all text-[12px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer touch-manipulation"
                 style={{
-                  background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                  background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                 }}
               >
                 <CloudArrowUp size={15} weight="bold" />
@@ -447,7 +447,7 @@ export default function Drive({ data, updateData }: DriveProps) {
       <div className="p-4 sm:p-5 rounded-3xl glass-card mb-4 space-y-3">
         <div className="flex items-center justify-between text-[13px]">
           <div className="flex items-center gap-2">
-            <HardDrive size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+            <HardDrive size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
             <span className="font-bold text-white tracking-tight">Storage Capacity</span>
           </div>
           <span className="font-semibold text-white/60 font-stat">
@@ -463,7 +463,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               width: `${Math.max(1, usedPercent)}%`,
               background: usedPercent >= 95
                 ? '#FF453A'
-                : 'var(--preset-gradient, linear-gradient(90deg, #8B1E3F 0%, #B52B4D 100%))',
+                : 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
             }}
           />
         </div>
@@ -472,15 +472,15 @@ export default function Drive({ data, updateData }: DriveProps) {
         <div className="flex items-center justify-between text-[11px] text-white/50 pt-1 flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
               Docs: {formatStorageSize(categoryStats.docs)}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent-end, #B52B4D)' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent-end, #A46D52)' }} />
               Images: {formatStorageSize(categoryStats.images)}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent, #8B1E3F)' }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--app-accent, #7B4B36)' }} />
               Media: {formatStorageSize(categoryStats.media)}
             </span>
           </div>
@@ -505,20 +505,20 @@ export default function Drive({ data, updateData }: DriveProps) {
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="p-3.5 rounded-2xl glass-tile mb-4 shadow-lg"
-          style={{ backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))' }}
+          style={{ backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))' }}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div
                 className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin shrink-0"
-                style={{ borderColor: 'var(--app-accent-text, #DE4B64)', borderTopColor: 'transparent' }}
+                style={{ borderColor: 'var(--app-accent-text, #D29B7E)', borderTopColor: 'transparent' }}
               />
               <div className="min-w-0 flex-1">
                 <p className="text-[12.5px] font-semibold text-white truncate">
                   Uploading {uploadingFileName}...
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[12px] font-bold tabular-nums" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                  <span className="text-[12px] font-bold tabular-nums" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                     {uploadPercent}%
                   </span>
                   <span className="text-[11px] text-white/60">
@@ -553,7 +553,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               className="h-full transition-all duration-150 ease-out rounded-full"
               style={{
                 width: `${Math.min(100, Math.max(0, uploadPercent))}%`,
-                background: 'var(--preset-gradient, linear-gradient(90deg, #8B1E3F 0%, #B52B4D 100%))',
+                background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
               }}
             />
           </div>
@@ -619,7 +619,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               setCurrentFolderId(null);
             }}
             className="flex items-center gap-1 hover:underline font-medium cursor-pointer"
-            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <CaretLeft size={16} weight="bold" />
             <span>All Files</span>
@@ -710,7 +710,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   setIsUploadSheetOpen(true);
                 }}
                 className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold text-white shadow-md active:scale-95 transition-all touch-manipulation cursor-pointer"
-                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+                style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
               >
                 <CloudArrowUp size={16} weight="bold" />
                 <span>Upload Document</span>
@@ -723,7 +723,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               const parentFolder = file.folderId
                 ? allFolders.find((f: DriveFolder) => f.id === file.folderId)
                 : currentFolder;
-              const fileAccent = 'var(--app-accent-text, #DE4B64)';
+              const fileAccent = 'var(--app-accent-text, #D29B7E)';
 
               return (
                 <div
@@ -738,7 +738,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-all"
                       style={{
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                       }}
                     >
                       {getFileIcon(file, fileAccent)}
@@ -757,8 +757,8 @@ export default function Drive({ data, updateData }: DriveProps) {
                           <span
                             className="px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide"
                             style={{
-                              backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                              color: 'var(--app-accent-text, #DE4B64)',
+                              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                              color: 'var(--app-accent-text, #D29B7E)',
                             }}
                           >
                             {parentFolder.name}
@@ -776,7 +776,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                       onClick={() => handleOpenFile(file)}
                       title="Open in Reader Mode"
                       className="p-2 rounded-xl hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <BookOpen size={18} weight="bold" />
                     </button>
@@ -947,8 +947,8 @@ export default function Drive({ data, updateData }: DriveProps) {
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                    color: 'var(--app-accent-text, #DE4B64)',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                    color: 'var(--app-accent-text, #D29B7E)',
                   }}
                 >
                   <Camera size={22} weight="duotone" />
@@ -972,8 +972,8 @@ export default function Drive({ data, updateData }: DriveProps) {
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                    color: 'var(--app-accent-text, #DE4B64)',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                    color: 'var(--app-accent-text, #D29B7E)',
                   }}
                 >
                   <ImageIcon size={22} weight="duotone" />
@@ -997,8 +997,8 @@ export default function Drive({ data, updateData }: DriveProps) {
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                    color: 'var(--app-accent-text, #DE4B64)',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                    color: 'var(--app-accent-text, #D29B7E)',
                   }}
                 >
                   <FileText size={22} weight="duotone" />

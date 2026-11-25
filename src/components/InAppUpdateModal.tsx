@@ -304,7 +304,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             <div className="flex items-center gap-3.5">
               <div
                 className="w-12 h-12 rounded-2xl glass-tile flex items-center justify-center shrink-0"
-                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 {hasUpdate ? (
                   <DownloadSimple size={24} weight="duotone" />
@@ -320,7 +320,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   </h3>
                   <span
                     className="text-[11px] font-semibold px-2 py-0.5 rounded-full glass-flat"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     v{hasUpdate ? (remoteVersion?.versionName || 'New') : CURRENT_VERSION_NAME}
                   </span>
@@ -359,7 +359,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                   <div
                     className="w-7 h-7 rounded-full glass-flat flex items-center justify-center"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     <ArrowRight size={14} weight="bold" />
                   </div>
@@ -367,13 +367,13 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   <div className="flex flex-col items-end gap-0.5">
                     <span
                       className="text-[11px] font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       Latest
                     </span>
                     <span
                       className="text-sm font-bold"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       v{remoteVersion?.versionName || CURRENT_VERSION_NAME}
                     </span>
@@ -382,7 +382,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-white/50">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <DownloadSimple size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <DownloadSimple size={14} className="shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     Download Size
                   </span>
                   <span className="font-semibold text-white/80">
@@ -392,7 +392,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               </div>
             ) : (
               <div className="p-4 rounded-2xl glass-tile flex items-center justify-between">
-                <div className="flex items-center gap-2.5" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                <div className="flex items-center gap-2.5" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <ShieldCheck size={20} weight="fill" className="shrink-0" />
                   <span className="text-xs font-semibold text-white/90">
                     Version {CURRENT_VERSION_NAME} (Build {CURRENT_VERSION_CODE})
@@ -400,7 +400,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 </div>
                 <span
                   className="text-[10px] font-bold px-2 py-0.5 rounded-full glass-flat uppercase tracking-wider"
-                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   Latest
                 </span>
@@ -410,7 +410,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             {/* Status Views */}
             {status === 'checking' ? (
               <div className="py-6 text-center space-y-3">
-                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                 <div>
                   <h4 className="text-sm font-semibold text-white">Checking for Updates...</h4>
                   <p className="text-xs text-white/50 mt-0.5">Connecting to LifeOS release server</p>
@@ -421,12 +421,12 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 <div className="flex items-start gap-3">
                   <div
                     className="w-8 h-8 rounded-xl glass-flat flex items-center justify-center shrink-0"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     <DeviceMobile size={18} weight="bold" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>Permission Required</h4>
+                    <h4 className="text-xs font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>Permission Required</h4>
                     <p className="text-xs text-white/70 mt-1 leading-relaxed">
                       LifeOS needs permission to install its own updates. You'll only need to grant this once.
                     </p>
@@ -436,7 +436,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 <button
                   onClick={handleGrantPermission}
                   className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
-                  style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                  style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   <ShieldCheck size={16} weight="bold" />
                   <span>Grant Permission</span>
@@ -447,7 +447,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                 {statusNotice && (
                   <div
                     className="p-2.5 rounded-2xl glass-tile text-xs flex items-center gap-2"
-                    style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                   >
                     <ArrowClockwise size={14} className="animate-spin shrink-0" />
                     <span>{statusNotice}</span>
@@ -456,10 +456,10 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <DownloadSimple size={16} className="animate-bounce" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <DownloadSimple size={16} className="animate-bounce" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span className="text-xs font-medium text-white/90">Downloading LifeOS.apk</span>
                   </div>
-                  <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                  <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                     {progress >= 0 ? `${progress}%` : 'Connecting...'}
                   </span>
                 </div>
@@ -470,7 +470,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     className="h-full rounded-full transition-all duration-300"
                     style={{
                       width: `${Math.max(0, Math.min(100, progress))}%`,
-                      background: 'var(--preset-gradient, linear-gradient(90deg, #8B1E3F 0%, #B52B4D 100%))',
+                      background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
                     }}
                   />
                 </div>
@@ -484,8 +484,8 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               </div>
             ) : status === 'installing' ? (
               <div className="p-5 rounded-2xl glass-tile text-center space-y-2 py-5">
-                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
-                <h4 className="text-sm font-semibold" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>Launching Package Installer...</h4>
+                <CircleNotch size={32} weight="bold" className="animate-spin mx-auto" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
+                <h4 className="text-sm font-semibold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>Launching Package Installer...</h4>
                 <p className="text-xs text-white/50">Tap "Update" on the system prompt appearing on your screen.</p>
               </div>
             ) : status === 'error' ? (
@@ -512,7 +512,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
               <div className="space-y-3">
                 <div className="text-xs text-white/70 leading-relaxed max-h-32 overflow-y-auto pr-1 space-y-1">
                   <div className="text-white font-semibold flex items-center gap-1.5">
-                    <CheckCircle size={14} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <CheckCircle size={14} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span>What's New in this Build:</span>
                   </div>
                   <p className="text-[11px] text-white/50 leading-relaxed pl-5">
@@ -526,7 +526,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   className="flex items-center justify-between p-2.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <GithubLogo size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                    <GithubLogo size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                     <span className="font-medium text-[11.5px]">GitHub: Avineesh-G/LIFEOS</span>
                   </div>
                   <ArrowRight size={12} weight="bold" className="text-white/40" />
@@ -543,7 +543,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-all cursor-pointer"
                 >
-                  <GithubLogo size={15} weight="duotone" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                  <GithubLogo size={15} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                   <span className="text-[11px]">View on GitHub</span>
                 </a>
               </div>
@@ -566,7 +566,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                       onClick={handleStartUpdate}
                       className="flex-[2] py-3 px-4 rounded-2xl text-white text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
                       style={{
-                        background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                        background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                       }}
                     >
                       <DownloadSimple size={16} weight="bold" />
@@ -587,7 +587,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                       type="button"
                       onClick={handleDismiss}
                       className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                      style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                      style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <CheckCircle size={16} weight="bold" />
                       <span>Got It</span>

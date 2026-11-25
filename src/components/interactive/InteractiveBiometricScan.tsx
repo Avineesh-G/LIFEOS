@@ -61,8 +61,8 @@ export default function InteractiveBiometricScan({
           transition={{ duration: 0.45, ease: 'easeInOut' }}
           className="absolute inset-x-0 h-0.5 pointer-events-none z-20"
           style={{
-            backgroundColor: 'var(--app-accent-text, #DE4B64)',
-            boxShadow: '0 0 8px var(--app-accent-end, #B52B4D)',
+            backgroundColor: 'var(--app-accent-text, #D29B7E)',
+            boxShadow: '0 0 8px var(--app-accent-end, #A46D52)',
           }}
         />
       )}

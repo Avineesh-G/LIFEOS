@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck, Lightning, Bell, Drop, Palette, SquaresFour, Brain } from '../ui/tokens/icons';
+import { Camera, Compass, Microphone, ForkKnife, CalendarCheck, Wallet, HardDrive, ShieldCheck, Lightning, Bell, Drop, Palette, SquaresFour, Brain, RocketLaunch } from '../ui/tokens/icons';
 import { CURRENT_VERSION_NAME } from '../version';
 
 export interface AppUpdate {
@@ -25,13 +25,33 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-13-new-interfaces-luna-copilot-warm-brown',
+    category: '6 New Interfaces, Luna Co-Pilot & Warm Brown',
+    icon: React.createElement(RocketLaunch, { size: 18, weight: 'duotone' }),
+    title: '6 New LifeOS Interfaces, Luna AI Co-Pilot, A–Z Hub & Fixed Warm Brown Theme',
+    dateTime: '25 Nov 2026, 10:30 PM',
+    fullDateTime: 'Wednesday, November 25, 2026 at 10:30:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[var(--app-accent-text)]',
+    summary:
+      'Expanded LifeOS with six deeply integrated workspaces (Focus Studio, Daily Journal, Inner Circle, Projects & Milestones, Trips & Packing, and Decision Workbench), connected Luna AI Co-Pilot across every workflow, sorted More Hub sections A–Z, and locked the entire theme to Fixed Warm Brown.',
+    points: [
+      'Fixed Warm Brown Theme: Removed color adaptation from Settings and standardized all interfaces, gradients, icons, and Android widget colors on Warm Brown (#7B4B36 → #A46D52, sand highlight #D29B7E).',
+      'Focus Studio, Projects & Decisions: Drift-free Pomodoro/deep-work timer linked to Tasks and Projects (/focus), milestone roadmaps with Focus time tracking (/projects), and weighted Decision Workbench matrices with Calendar revisit reminders (/decisions).',
+      'Daily Journal, Inner Circle & Trips: Fluid 7-day week switcher with lossless draft switching and unfinished task rollover (/journal), relationship & shared IOU CRM (/circle), and smart packing templates bridged to Outing Splitter (/trips).',
+      'Luna AI Co-Pilot & Alphabetical More Hub: In-page AI helpers, 6 new confirmed tool actions with strict privacy/PII redaction, and A–Z alphabetical ordering inside each More Hub domain.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-12-royal-burgundy-unified-liquid-glass-icons',
     category: 'Royal Burgundy, Liquid Glass & Unified Icons',
     icon: React.createElement(Palette, { size: 18, weight: 'duotone' }),
     title: 'Royal Burgundy Single-Hue Gradient, Unified Theme Icons & What’s New Icon Refresh',
     dateTime: '25 Nov 2026, 06:50 PM',
     fullDateTime: 'Wednesday, November 25, 2026 at 06:50:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.12',
     colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Refined the Material 3 + iOS Liquid Glass color architecture to follow one unified theme hue per page, eliminated dark-mode pink tone washouts in favor of Royal Burgundy (#8B1E3F → #B52B4D), unified every application icon, AI badge, and modal to the active theme color, and replaced Gemini-style What’s New icons with interface-matched logos.',

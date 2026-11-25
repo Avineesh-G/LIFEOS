@@ -12,6 +12,12 @@ import {
   Brain,
   Mic,
   HardDrive as HardDriveIcon,
+  Timer as TimerIcon,
+  BookOpen as BookOpenIcon,
+  Users as UsersIcon,
+  Rocket as RocketIcon,
+  Luggage as LuggageIcon,
+  Scale as ScaleIcon,
 } from 'lucide-react';
 import {
   HomeAppLogoIcon,
@@ -41,7 +47,13 @@ export type DestinationId =
   | 'vault'
   | 'settings'
   | 'notes'
-  | 'drive';
+  | 'drive'
+  | 'focus'
+  | 'journal'
+  | 'circle'
+  | 'projects'
+  | 'trips'
+  | 'decisions';
 
 export interface HubDestination {
   id: DestinationId;
@@ -100,6 +112,54 @@ export const DESTINATIONS: HubDestination[] = [
     icon: NotebookPen,
     family: 'notes',
     matchRoutes: ['/notes'],
+  },
+  {
+    id: 'focus',
+    label: 'Focus Studio',
+    route: '/focus',
+    icon: TimerIcon,
+    family: 'study',
+    matchRoutes: ['/focus'],
+  },
+  {
+    id: 'journal',
+    label: 'Daily Journal',
+    route: '/journal',
+    icon: BookOpenIcon,
+    family: 'home',
+    matchRoutes: ['/journal'],
+  },
+  {
+    id: 'circle',
+    label: 'Inner Circle',
+    route: '/circle',
+    icon: UsersIcon,
+    family: 'home',
+    matchRoutes: ['/circle'],
+  },
+  {
+    id: 'projects',
+    label: 'Projects',
+    route: '/projects',
+    icon: RocketIcon,
+    family: 'study',
+    matchRoutes: ['/projects'],
+  },
+  {
+    id: 'trips',
+    label: 'Trips & Packing',
+    route: '/trips',
+    icon: LuggageIcon,
+    family: 'outing',
+    matchRoutes: ['/trips'],
+  },
+  {
+    id: 'decisions',
+    label: 'Decisions',
+    route: '/decisions',
+    icon: ScaleIcon,
+    family: 'notes',
+    matchRoutes: ['/decisions'],
   },
 
   // ── 2. Daily Operations & Planning ──
@@ -235,6 +295,12 @@ export const HUB_SECTION_NAMES: Record<AppSection, string> = {
   shopping: 'Shopping Lists',
   vault: 'Vault',
   notes: 'Notes & Ideas',
+  focus: 'Focus Studio',
+  journal: 'Daily Journal',
+  circle: 'Inner Circle',
+  projects: 'Projects',
+  trips: 'Trips & Packing',
+  decisions: 'Decisions',
   timetable: 'Timetable',
   tasks: 'To-Do Tasks',
   laundry: 'Laundry',

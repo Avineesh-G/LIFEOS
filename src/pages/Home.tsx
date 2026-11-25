@@ -279,7 +279,7 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 onClick={handleQuickAddWater}
                 className="px-2.5 py-1 rounded-full text-[10.5px] font-bold active:scale-95 transition-transform"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                   color: 'var(--app-accent-text, #64D2FF)',
                 }}
                 title="Add 250ml"

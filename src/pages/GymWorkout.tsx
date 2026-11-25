@@ -248,7 +248,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col items-center gap-2 p-4 rounded-[28px] glass-card w-full"
           >
-            <div className="text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+            <div className="text-xs font-bold tracking-wider uppercase" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
               Rest Timer
             </div>
             <Ring
@@ -314,7 +314,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
                 subtitle={`${ex.sets} sets • ${ex.weight} kg`}
                 trailing={
                   completedCount >= ex.sets ? (
-                    <span className="font-bold text-xs" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>DONE</span>
+                    <span className="font-bold text-xs" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>DONE</span>
                   ) : (
                     `${completedCount}/${ex.sets}`
                   )

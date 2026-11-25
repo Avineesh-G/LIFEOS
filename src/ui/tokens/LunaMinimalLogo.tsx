@@ -45,9 +45,9 @@ export function MinimalRadiantSparkIcon({
           y2="28"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="var(--app-accent-text, #DE4B64)" />
-          <stop offset="55%" stopColor="var(--app-accent-end, #B52B4D)" />
-          <stop offset="100%" stopColor="var(--app-accent, #8B1E3F)" />
+          <stop offset="0%" stopColor="var(--app-accent-text, #D29B7E)" />
+          <stop offset="55%" stopColor="var(--app-accent-end, #A46D52)" />
+          <stop offset="100%" stopColor="var(--app-accent, #7B4B36)" />
         </linearGradient>
         <radialGradient
           id={`spark-core-${uniqueId}`}
@@ -57,8 +57,8 @@ export function MinimalRadiantSparkIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-          <stop offset="60%" stopColor="var(--app-accent-text, #DE4B64)" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="var(--app-accent, #8B1E3F)" stopOpacity="0" />
+          <stop offset="60%" stopColor="var(--app-accent-text, #D29B7E)" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="var(--app-accent, #7B4B36)" stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -109,8 +109,8 @@ export function MinimalOrbitalRingsIcon({
           y2="24"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="var(--app-accent-text, #DE4B64)" />
-          <stop offset="100%" stopColor="var(--app-accent, #8B1E3F)" />
+          <stop offset="0%" stopColor="var(--app-accent-text, #D29B7E)" />
+          <stop offset="100%" stopColor="var(--app-accent, #7B4B36)" />
         </linearGradient>
         <linearGradient
           id={`orbit-grad-2-${uniqueId}`}
@@ -121,7 +121,7 @@ export function MinimalOrbitalRingsIcon({
           gradientUnits="userSpaceOnUse"
         >
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="var(--app-accent-end, #B52B4D)" />
+          <stop offset="100%" stopColor="var(--app-accent-end, #A46D52)" />
         </linearGradient>
       </defs>
 
@@ -151,7 +151,7 @@ export function MinimalOrbitalRingsIcon({
 
       {/* Luminous Nucleus */}
       <circle cx="16" cy="16" r="2.5" fill="#FFFFFF" />
-      <circle cx="16" cy="16" r="4.5" stroke="var(--app-accent-text, #DE4B64)" strokeWidth="0.75" strokeOpacity="0.6" />
+      <circle cx="16" cy="16" r="4.5" stroke="var(--app-accent-text, #D29B7E)" strokeWidth="0.75" strokeOpacity="0.6" />
     </svg>
   );
 }
@@ -190,9 +190,9 @@ export function MinimalLunaHaloIcon({
           y2="28"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="var(--app-accent-text, #DE4B64)" />
-          <stop offset="55%" stopColor="var(--app-accent-end, #B52B4D)" />
-          <stop offset="100%" stopColor="var(--app-accent, #8B1E3F)" />
+          <stop offset="0%" stopColor="var(--app-accent-text, #D29B7E)" />
+          <stop offset="55%" stopColor="var(--app-accent-end, #A46D52)" />
+          <stop offset="100%" stopColor="var(--app-accent, #7B4B36)" />
         </linearGradient>
       </defs>
 

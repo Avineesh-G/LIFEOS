@@ -70,7 +70,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
           <div
             className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
             style={{
-              backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+              backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
               color: isSkipped ? 'rgba(255, 255, 255, 0.45)' : 'var(--app-accent-text, #64D2FF)',
             }}
           >
@@ -127,7 +127,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
               }}
               className="inline-flex items-center rounded-full active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                 color: 'var(--app-accent-text, #64D2FF)',
               }}
               title="Log Food with AI"
@@ -174,7 +174,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                   style={
                     isItemSelected
                       ? {
-                          background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))',
+                          background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                         }
                       : undefined
                   }
@@ -243,7 +243,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                     </button>
                   </div>
 
-                  <span className="font-bold tabular-nums min-w-[56px] text-right" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                  <span className="font-bold tabular-nums min-w-[56px] text-right" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                     {item.calories * (item.portion || 1)} kcal
                   </span>
 

@@ -1,3 +1,5 @@
+export type FocusMode = 'pomodoro' | 'deep' | 'sprint' | 'custom' | 'stopwatch';
+
 export interface StudySession {
   id: string;
   subject: string;
@@ -7,6 +9,146 @@ export interface StudySession {
   duration: number;
   notes?: string;
   doubts?: string; // Add doubts feature (up to 10,000 words)
+  mode?: FocusMode;
+  linkedTaskId?: string;
+  linkedProjectId?: string;
+  distractionsLogged?: number;
+  completedAt?: string;
+}
+
+export type ProjectStatus = 'active' | 'paused' | 'completed' | 'archived';
+
+export interface ProjectMilestone {
+  id: string;
+  title: string;
+  completed: boolean;
+  dueDate?: string;
+  pushedTaskId?: string;
+}
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  category: 'build' | 'academic' | 'career' | 'personal' | 'other';
+  status: ProjectStatus;
+  targetDate?: string; // 'yyyy-MM-dd'
+  description?: string;
+  blockerNote?: string;
+  milestones: ProjectMilestone[];
+  linkedDriveFileIds?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TripCategory = 'home' | 'hostel' | 'weekend' | 'hackathon' | 'interview' | 'other';
+export type PackingGroup = 'documents' | 'tech' | 'clothing' | 'essentials';
+
+export interface TripPackingItem {
+  id: string;
+  name: string;
+  group: PackingGroup;
+  packed: boolean;
+  quantity?: string;
+}
+
+export interface TripPlan {
+  id: string;
+  title: string;
+  destination?: string;
+  category: TripCategory;
+  departureDate: string; // 'yyyy-MM-dd'
+  returnDate?: string;
+  bookingRef?: string;
+  notes?: string;
+  packingItems: TripPackingItem[];
+  linkedOutingId?: string;
+  isCompleted?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type DecisionStatus = 'open' | 'decided' | 'revisited';
+
+export interface DecisionCriterion {
+  id: string;
+  label: string;
+  weight: 1 | 2 | 3 | 4 | 5;
+}
+
+export interface DecisionOption {
+  id: string;
+  title: string;
+  scores: Record<string, 1 | 2 | 3 | 4 | 5>;
+  pros: string[];
+  cons: string[];
+}
+
+export interface DecisionRecord {
+  id: string;
+  question: string;
+  category: 'career' | 'finance' | 'tech' | 'study' | 'life';
+  status: DecisionStatus;
+  criteria: DecisionCriterion[];
+  options: DecisionOption[];
+  expectedOutcome?: string;
+  chosenOptionId?: string;
+  decidedAt?: string;
+  revisitDate?: string; // 'yyyy-MM-dd'
+  calendarEventId?: string;
+  actualOutcome?: string;
+  verdict?: 'right_call' | 'mixed' | 'lesson_learned';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JournalEntry {
+  id: string;
+  date: string; // 'yyyy-MM-dd'
+  morningEnergy?: 1 | 2 | 3 | 4 | 5;
+  morningFocusTheme?: string;
+  morningPriorityTaskIds?: string[];
+  morningNote?: string;
+  nightMood?: 1 | 2 | 3 | 4 | 5;
+  wins?: string[];
+  gratitude?: string;
+  improve?: string;
+  brainDump?: string;
+  rolledOverAt?: string;
+  hideFromAi?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CircleRelation = 'family' | 'friend' | 'college' | 'work' | 'other';
+
+export interface CircleInteraction {
+  id: string;
+  date: string; // 'yyyy-MM-dd'
+  type: 'call' | 'meetup' | 'message';
+  note?: string;
+}
+
+export interface CircleGiftIdea {
+  id: string;
+  text: string;
+  gifted?: boolean;
+}
+
+export interface CirclePerson {
+  id: string;
+  name: string;
+  relation: CircleRelation;
+  phone?: string;
+  birthday?: string; // 'MM-DD' or 'YYYY-MM-DD'
+  catchUpIntervalDays?: number; // 0 = off, 7, 14, 30, 60
+  lastContactedDate?: string; // 'yyyy-MM-dd'
+  giftIdeas?: CircleGiftIdea[];
+  notes?: string;
+  linkedMoneyLentName?: string;
+  linkedOutingPersonId?: string;
+  interactions?: CircleInteraction[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Exercise {
@@ -267,6 +409,21 @@ export interface AppData {
 
   // Calendar Module
   calendarEvents?: CalendarEvent[];
+
+  // Journal & Wind-Down Module
+  journalEntries?: JournalEntry[];
+
+  // Inner Circle CRM Module
+  circleContacts?: CirclePerson[];
+
+  // Projects & Milestones Module
+  projects?: ProjectItem[];
+
+  // Trips & Smart Packing Module
+  trips?: TripPlan[];
+
+  // Decision Workbench Module
+  decisions?: DecisionRecord[];
 }
 
 export type CalendarCategory = 'general' | 'study' | 'gym' | 'work' | 'personal' | 'meeting' | 'outing';

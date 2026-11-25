@@ -22,7 +22,7 @@ export function Stepper({
   step = 1,
   onChange,
   unit = '',
-  tint = '#8B1E3F',
+  tint = '#7B4B36',
   size = 'md',
   className = '',
 }: StepperProps) {

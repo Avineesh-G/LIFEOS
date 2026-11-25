@@ -16,11 +16,9 @@ import {
   User,
   Lightning,
   Clock,
-  Palette,
   LunaComicBubbleIcon,
 } from '../ui/tokens/icons';
 import { useDeviceTier } from '../hooks/useDeviceTier';
-import { useM3Theme } from '../theme/ThemeContext';
 import { LargeTitleHeader } from '../ui/navigation/LargeTitleHeader';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
@@ -66,7 +64,6 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const deviceTier = useDeviceTier();
-  const { activePalette } = useM3Theme();
 
   // Notifications
   const [hasNotifications, setHasNotifications] = useState(true);
@@ -185,15 +182,15 @@ export default function Settings({
   const currentUser = { ...auth.currentUser, photoURL: userProfile.photoURL || auth.currentUser?.photoURL, displayName: userProfile.displayName || auth.currentUser?.displayName, email: userProfile.email || auth.currentUser?.email };
 
   return (
-    <div className="w-full flex flex-col pb-2 selection:bg-[#8B1E3F]/30">
+    <div className="w-full flex flex-col pb-2 selection:bg-[#7B4B36]/30">
       {/* toast/toast + header icons */}
       <LargeTitleHeader
         title="Settings"
         subtitle={`LifeOS v${CURRENT_VERSION_NAME} · Build ${CURRENT_VERSION_CODE}`}
-        tint={activePalette.secondarySeed}
+        tint="#A46D52"
       />
 
-      {/* User Profile Card (Pure iOS Glass + Unified Theme Accent) */}
+      {/* User Profile Card (Pure iOS Glass + Unified Warm Brown Accent) */}
       <div className="px-1 mb-3">
         <div className="w-full p-4 rounded-[26px] glass-hero flex items-center gap-3.5 shadow-sm">
           {currentUser?.photoURL ? (
@@ -205,7 +202,7 @@ export default function Settings({
           ) : (
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md"
-              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36, #A46D52))' }}
             >
               {currentUser?.displayName ? currentUser.displayName[0].toUpperCase() : <User size={22} weight="bold" />}
             </div>
@@ -218,35 +215,8 @@ export default function Settings({
               {currentUser?.email || 'Offline Local Storage'}
             </p>
           </div>
-          <span
-            className="text-[10.5px] font-bold px-2.5 py-1 rounded-full shrink-0"
-            style={{
-              backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
-              color: 'var(--app-accent-text, #DE4B64)',
-            }}
-          >
-            {activePalette.name}
-          </span>
         </div>
       </div>
-
-      {/* ── Appearance & M3 Color Studio ── */}
-      <GroupedList header="APPEARANCE & M3 COLORS">
-        <ListRow
-          icon={<Palette size={18} weight="duotone" />}
-          title="UI Preset & M3 Palette"
-          subtitle={`${activePalette.name} · Unified iOS glass & subtle gradient`}
-          trailing={
-            <span
-              className="w-4 h-4 rounded-full shadow-sm"
-              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F, #B52B4D))' }}
-            />
-          }
-          showChevron
-          onClick={() => navigate('/settings/appearance')}
-          showSeparator={false}
-        />
-      </GroupedList>
 
       {/* ── Hardware Performance & Adaptive Tier ── */}
       <GroupedList
@@ -260,10 +230,10 @@ export default function Settings({
           subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay}`}
           trailing={
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
               <span
                 className="text-xs font-semibold glass-flat px-2.5 py-1 rounded-full"
-                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 {deviceTier.userOverride === 'auto' ? 'Auto-Optimized' : `Tier ${deviceTier.tier} Active`}
               </span>
@@ -273,7 +243,7 @@ export default function Settings({
 
         <ListRow
           icon={<SlidersHorizontal size={18} weight="duotone" />}
-          iconTint="#8B1E3F"
+          iconTint="#7B4B36"
           title="Performance Tier"
           subtitle={
             deviceTier.tier === 1
@@ -310,7 +280,7 @@ export default function Settings({
                         ? 'droplet-active font-extrabold'
                         : 'glass-flat text-white/55 hover:text-white'
                     }`}
-                    style={isSelected ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                    style={isSelected ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                   >
                     {opt.label}
                   </button>
@@ -339,7 +309,7 @@ export default function Settings({
                       ? 'droplet-active'
                       : 'glass-flat text-white/55 hover:text-white'
                   }`}
-                  style={hapticLevel === lvl ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                  style={hapticLevel === lvl ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                 >
                   {lvl}
                 </button>
@@ -383,8 +353,8 @@ export default function Settings({
             <span
               className="font-semibold text-xs px-2.5 py-0.5 rounded-full"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(10, 132, 255, 0.14))',
-                color: 'var(--app-accent-text, #DE4B64)',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               -20m / +1m
@@ -393,7 +363,7 @@ export default function Settings({
         />
         <ListRow
           icon={<Sparkle size={18} weight="duotone" />}
-          iconTint="#DE4B64"
+          iconTint="#D29B7E"
           title={testAlertCooldown > 0 ? `Send Test Alert (${testAlertCooldown}s)` : 'Send Test Alert'}
           subtitle={
             testAlertCooldown > 0
@@ -492,7 +462,7 @@ export default function Settings({
         />
         <ListRow
           icon={<HardDrive size={18} weight="duotone" />}
-          iconTint="#DE4B64"
+          iconTint="#D29B7E"
           title="Restore Backup"
           subtitle="Import from backup file"
           trailing={
@@ -549,7 +519,7 @@ export default function Settings({
       {/* Toast Feedback */}
       {backupFeedback && (
         <div className="fixed bottom-24 inset-x-4 max-w-sm mx-auto p-3 rounded-2xl glass-card text-white font-semibold text-xs shadow-2xl flex items-center justify-center gap-2 z-50">
-          <Check size={16} weight="bold" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+          <Check size={16} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
           <span>{backupFeedback}</span>
         </div>
       )}
@@ -584,7 +554,7 @@ export default function Settings({
           <div className="p-3.5 rounded-2xl glass-card flex items-center gap-3.5 shadow-lg">
             <div
               className="w-12 h-12 rounded-2xl glass-tile shrink-0 shadow-md flex items-center justify-center"
-              style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+              style={{ color: 'var(--app-accent-text, #D29B7E)' }}
             >
               <LunaComicBubbleIcon size={26} />
             </div>
@@ -594,8 +564,8 @@ export default function Settings({
                 <span
                   className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                    color: 'var(--app-accent-text, #DE4B64)',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                    color: 'var(--app-accent-text, #D29B7E)',
                   }}
                 >
                   {groqKey ? 'Direct Key' : 'Proxy Mode'}

@@ -542,7 +542,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             type="button"
             onClick={() => setIsSearchOpen((prev) => !prev)}
             className="w-8 h-8 rounded-full glass-tile flex items-center justify-center transition-all cursor-pointer active:scale-90 text-white/60 hover:text-white"
-            style={isSearchOpen ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+            style={isSearchOpen ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
             title="Search calendar"
           >
             <MagnifyingGlass size={16} weight="bold" />
@@ -552,7 +552,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             type="button"
             onClick={() => handleOpenCreateModal()}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full glass-nav nav-rim-light active:scale-95 hover:text-white text-xs font-bold transition-all cursor-pointer shadow-sm"
-            style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <Plus size={14} weight="bold" />
             <span>New</span>
@@ -684,7 +684,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                             ? 'text-white/85 font-semibold'
                             : 'text-white/25 font-normal'
                         }`}
-                        style={isTodayDay ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                        style={isTodayDay ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                       >
                         {format(day, 'd')}
                       </span>
@@ -722,8 +722,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                   <span
                     className="text-[11px] font-bold px-2 py-0.5 rounded-full"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     Today
@@ -734,7 +734,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                 type="button"
                 onClick={() => handleOpenCreateModal()}
                 className="text-xs font-bold hover:text-white flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
-                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 <Plus size={14} weight="bold" />
                 <span>Add Item</span>
@@ -793,7 +793,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                           className={`shrink-0 transition-colors ${
                             t.completed ? '' : 'text-white/30 hover:text-white/60'
                           }`}
-                          style={t.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                          style={t.completed ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                         >
                           {t.completed ? (
                             <CheckCircle size={18} weight="fill" />
@@ -812,8 +812,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                       <span
                         className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
                         style={{
-                          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                          color: 'var(--app-accent-text, #DE4B64)',
+                          backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                          color: 'var(--app-accent-text, #D29B7E)',
                         }}
                       >
                         Task
@@ -829,12 +829,12 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
                           className="w-7 h-7 rounded-lg glass-flat flex items-center justify-center shrink-0"
-                          style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                          style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                         >
                           <GraduationCap size={16} weight="duotone" />
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-xs font-bold truncate" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{cls.subject}</h4>
+                          <h4 className="text-xs font-bold truncate" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>{cls.subject}</h4>
                           <p className="text-[11px] text-white/50 font-mono mt-0.5">
                             {cls.startTime} – {cls.endTime} {cls.room ? `• Room ${cls.room}` : ''}
                           </p>
@@ -843,8 +843,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                       <span
                         className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
                         style={{
-                          backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                          color: 'var(--app-accent-text, #DE4B64)',
+                          backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                          color: 'var(--app-accent-text, #D29B7E)',
                         }}
                       >
                         Class
@@ -890,7 +890,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                         ? 'text-white font-bold'
                         : 'text-white/80 font-medium'
                     }`}
-                    style={isTodayDay ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                    style={isTodayDay ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                   >
                     {format(day, 'd')}
                   </span>
@@ -914,8 +914,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     <span
                       className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                       style={{
-                        backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                        color: 'var(--app-accent-text, #DE4B64)',
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                        color: 'var(--app-accent-text, #D29B7E)',
                       }}
                     >
                       Today
@@ -997,7 +997,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                           className="p-2 rounded-xl glass-tile flex items-center justify-between gap-2"
                         >
                           <div className="min-w-0">
-                            <h4 className="text-xs font-bold truncate" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>{cls.subject}</h4>
+                            <h4 className="text-xs font-bold truncate" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>{cls.subject}</h4>
                             <p className="text-[10px] text-white/50 font-mono">
                               {cls.startTime} – {cls.endTime}
                             </p>
@@ -1005,8 +1005,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                           <span
                             className="text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase"
                             style={{
-                              backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                              color: 'var(--app-accent-text, #DE4B64)',
+                              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                              color: 'var(--app-accent-text, #D29B7E)',
                             }}
                           >
                             Class
@@ -1033,8 +1033,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                   <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                     style={{
-                      backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                      color: 'var(--app-accent-text, #DE4B64)',
+                      backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                      color: 'var(--app-accent-text, #D29B7E)',
                     }}
                   >
                     Today
@@ -1086,7 +1086,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                       {ev.isAllDay ? 'All-Day' : `${ev.startTime || '10:00'} – ${ev.endTime || '11:00'}`}
                     </span>
                     {ev.notificationLeadMinutes !== -1 && (
-                      <span className="flex items-center gap-1" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+                      <span className="flex items-center gap-1" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                         <Bell size={11} weight="fill" />
                         {ev.notificationLeadMinutes}m
                       </span>
@@ -1106,7 +1106,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                   <button
                     type="button"
                     className={`shrink-0 ${t.completed ? '' : 'text-white/30'}`}
-                    style={t.completed ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                    style={t.completed ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
                   >
                     {t.completed ? <CheckCircle size={18} weight="fill" /> : <Circle size={18} weight="bold" />}
                   </button>
@@ -1117,8 +1117,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                 <span
                   className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 uppercase"
                   style={{
-                    backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                    color: 'var(--app-accent-text, #DE4B64)',
+                    backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                    color: 'var(--app-accent-text, #D29B7E)',
                   }}
                 >
                   To-Do
@@ -1141,7 +1141,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center"
-                style={{ color: 'var(--app-accent-text, #DE4B64)' }}
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 <CalendarBlank size={17} weight="duotone" />
               </div>
@@ -1168,7 +1168,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
           {/* Title */}
           <div>
             <label className="block text-[11px] font-semibold text-white/70 mb-1">
-              Event Title <span style={{ color: 'var(--app-accent-text, #DE4B64)' }}>*</span>
+              Event Title <span style={{ color: 'var(--app-accent-text, #D29B7E)' }}>*</span>
             </label>
             <input
               type="text"
@@ -1306,7 +1306,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               type="button"
               onClick={handleSaveEvent}
               className="flex-[2] py-3 rounded-xl text-xs font-bold text-white active:scale-95 transition-all shadow-lg cursor-pointer text-center"
-              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #8B1E3F 0%, #B52B4D 100%))' }}
+              style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
             >
               {editingEventId ? 'Update Event' : 'Save Event'}
             </button>

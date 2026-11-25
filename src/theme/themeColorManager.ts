@@ -68,9 +68,9 @@ export const MIGRATION_VERSION_KEY = 'lifeos_color_migration_v1_done';
 
 export function hexToRgbTuple(hex: string): [number, number, number] {
   const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16) || 139;
-  const g = parseInt(clean.substring(2, 4), 16) || 30;
-  const b = parseInt(clean.substring(4, 6), 16) || 63;
+  const r = parseInt(clean.substring(0, 2), 16) || 123;
+  const g = parseInt(clean.substring(2, 4), 16) || 75;
+  const b = parseInt(clean.substring(4, 6), 16) || 54;
   return [r, g, b];
 }
 
@@ -93,42 +93,24 @@ let activeAccent: ThemeAccent = DEFAULT_ACCENT;
 if (typeof window !== 'undefined') {
   migrateLegacyThemeStorage();
   try {
-    const m3Raw = localStorage.getItem('lifeos_m3_theme_config');
-    if (m3Raw) {
-      const m3Parsed = JSON.parse(m3Raw);
-      const found = PRESET_ACCENTS.find((a) => a.id === m3Parsed?.paletteId);
-      if (found) activeAccent = found;
-    } else {
-      const cached = localStorage.getItem(THEME_ACCENT_STORAGE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const found = PRESET_ACCENTS.find((a) => a.id === parsed?.id);
-        if (found) activeAccent = found;
-      }
-    }
+    // Enforce fixed Warm Brown palette across all sessions
+    localStorage.setItem(THEME_ACCENT_STORAGE_KEY, JSON.stringify(DEFAULT_ACCENT));
   } catch {}
 }
 
 export function getActiveAccent(): ThemeAccent {
-  return activeAccent;
+  return DEFAULT_ACCENT;
 }
 
-export function setActiveAccent(accent: ThemeAccent): void {
-  const resolved = PRESET_ACCENTS.find((a) => a.id === accent.id) || {
-    ...accent,
-    ...(() => {
-      const tones = buildLegibleM3Tones(accent.primary, accent.secondary, accent.tertiary);
-      return { primary: tones.primaryTone, secondary: tones.endTone, tertiary: tones.textTone };
-    })(),
-  };
-  activeAccent = resolved;
+export function setActiveAccent(_accent: ThemeAccent): void {
+  activeAccent = DEFAULT_ACCENT;
   try {
-    localStorage.setItem(THEME_ACCENT_STORAGE_KEY, JSON.stringify(resolved));
+    localStorage.setItem(THEME_ACCENT_STORAGE_KEY, JSON.stringify(DEFAULT_ACCENT));
   } catch {}
-  Preferences.set({ key: THEME_ACCENT_STORAGE_KEY, value: JSON.stringify(resolved) }).catch(() => {});
-  applyUnifiedThemeToDocument(resolved, true);
+  Preferences.set({ key: THEME_ACCENT_STORAGE_KEY, value: JSON.stringify(DEFAULT_ACCENT) }).catch(() => {});
+  applyUnifiedThemeToDocument(DEFAULT_ACCENT, true);
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('lifeos:theme-accent-changed', { detail: resolved }));
+    window.dispatchEvent(new CustomEvent('lifeos:theme-accent-changed', { detail: DEFAULT_ACCENT }));
   }
 }
 

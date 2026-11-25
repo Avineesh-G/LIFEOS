@@ -126,8 +126,8 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
             onClick={handleCopy}
             className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg font-bold text-[10.5px] transition-all active:scale-95"
             style={{
-              backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-              color: 'var(--app-accent-text, #DE4B64)',
+              backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+              color: 'var(--app-accent-text, #D29B7E)',
             }}
             title="Copy to clipboard"
           >
@@ -174,7 +174,7 @@ const InteractiveChecklist: React.FC<{ items: Array<{ id: string; text: string; 
           >
             <div className="mt-0.5 shrink-0">
               {isChecked ? (
-                <CheckSquare size={16} weight="fill" style={{ color: 'var(--app-accent-text, #DE4B64)' }} />
+                <CheckSquare size={16} weight="fill" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
               ) : (
                 <Square size={16} className="text-white/40" />
               )}
@@ -319,7 +319,7 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
     <div className="my-3.5 w-full rounded-[24px] glass-card p-4 text-left font-sans select-none shadow-xl border-none">
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.08]">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0 shadow-inner" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+          <div className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shrink-0 shadow-inner" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
             <Lightning size={17} weight="duotone" />
           </div>
           <div className="min-w-0">
@@ -334,8 +334,8 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
         <span
           className="text-[10px] font-bold px-2.5 py-0.5 rounded-full shrink-0 uppercase tracking-wider"
           style={{
-            backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-            color: 'var(--app-accent-text, #DE4B64)',
+            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+            color: 'var(--app-accent-text, #D29B7E)',
           }}
         >
           Workflow
@@ -347,7 +347,7 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
           className="h-full transition-all duration-300 rounded-full"
           style={{
             width: `${progressPercent}%`,
-            background: 'var(--preset-gradient, linear-gradient(90deg, #8B1E3F 0%, #B52B4D 100%))',
+            background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
           }}
         />
       </div>
@@ -367,7 +367,7 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
               <button
                 type="button"
                 className="mt-0.5 shrink-0 transition-colors text-white/40 hover:text-white"
-                style={isDone ? { color: 'var(--app-accent-text, #DE4B64)' } : undefined}
+                style={isDone ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
               >
                 {isDone ? <CheckCircle size={19} weight="fill" /> : <Circle size={19} weight="bold" />}
               </button>
@@ -417,7 +417,7 @@ const InteractiveChartCard: React.FC<{ data: ChartData }> = ({ data }) => {
     <div className="my-3 w-full rounded-[22px] glass-card p-3.5 sm:p-4 text-left font-sans select-none shadow-xl">
       <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/[0.08]">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg glass-tile flex items-center justify-center" style={{ color: 'var(--app-accent-text, #DE4B64)' }}>
+          <div className="w-7 h-7 rounded-lg glass-tile flex items-center justify-center" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
             <ChartBar size={16} weight="duotone" />
           </div>
           <h4 className="text-xs sm:text-sm font-bold text-white tracking-tight">{data.title || 'Data Breakdown'}</h4>
@@ -428,7 +428,7 @@ const InteractiveChartCard: React.FC<{ data: ChartData }> = ({ data }) => {
         {items.map((item, idx) => {
           const val = Number(item.value) || 0;
           const percent = Math.min(100, Math.round((val / total) * 100));
-          const color = item.color || (idx % 2 === 0 ? 'var(--app-accent, #8B1E3F)' : 'var(--app-accent-end, #B52B4D)');
+          const color = item.color || (idx % 2 === 0 ? 'var(--app-accent, #7B4B36)' : 'var(--app-accent-end, #A46D52)');
           return (
             <div key={idx} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
@@ -491,7 +491,7 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
             <ul key={`bullets-${segIdx}-${keyIdx}`} className="space-y-1.5 my-1.5 pl-0.5 font-sans w-full min-w-0">
               {currentBullets.map((bullet, bIdx) => (
                 <li key={bIdx} className="flex items-start gap-2 leading-relaxed text-xs sm:text-sm w-full min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'var(--app-accent-text, #DE4B64)' }} />
+                  <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
                   <div className="flex-1 min-w-0 break-words [overflow-wrap:anywhere]">
                     {parseInlineContent(bullet, isUser)}
                   </div>
@@ -587,8 +587,8 @@ export const FormattedAiMessage: React.FC<FormattedAiMessageProps> = ({ content,
               <span
                 className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5"
                 style={{
-                  backgroundColor: 'var(--app-accent-soft, rgba(181, 43, 77, 0.14))',
-                  color: 'var(--app-accent-text, #DE4B64)',
+                  backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                  color: 'var(--app-accent-text, #D29B7E)',
                 }}
               >
                 {stepNum}
