@@ -15,6 +15,11 @@ export interface PerformanceMetrics {
   cores: number;
   gpuRenderer: string;
   cleanGpu: string;
+  storageQuotaMb: number | null;
+  storageUsedMb: number | null;
+  storageFreeMb: number | null;
+  storageFreeDisplay: string;
+  isLowStorage: boolean;
   userOverride: DeviceTier | 'auto';
   isLowPower: boolean;
   canBlur: boolean;
@@ -154,6 +159,11 @@ export function detectDeviceTier(): PerformanceMetrics {
     cores,
     gpuRenderer: rawGpu,
     cleanGpu,
+    storageQuotaMb: null,
+    storageUsedMb: null,
+    storageFreeMb: null,
+    storageFreeDisplay: 'Checking...',
+    isLowStorage: false,
     userOverride,
     isLowPower: false,
     canBlur: tier === 1,
@@ -163,17 +173,62 @@ export function detectDeviceTier(): PerformanceMetrics {
   cachedMetrics = metrics;
   applyTierToDom(metrics);
   monitorBattery(metrics);
+  probeDeviceStorage(metrics);
 
   return metrics;
 }
 
 function applyTierToDom(metrics: PerformanceMetrics) {
+  if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  root.classList.remove('tier-1', 'tier-2', 'tier-3', 'perf-low-power');
+  root.classList.remove('tier-1', 'tier-2', 'tier-3', 'perf-low-power', 'perf-low-storage');
   root.classList.add(`tier-${metrics.tier}`);
   if (metrics.isLowPower) {
     root.classList.add('perf-low-power');
   }
+  if (metrics.isLowStorage) {
+    root.classList.add('perf-low-storage');
+  }
+}
+
+async function probeDeviceStorage(currentMetrics: PerformanceMetrics) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.estimate === 'function') {
+      const estimate = await navigator.storage.estimate();
+      const quotaBytes = estimate.quota || 0;
+      const usageBytes = estimate.usage || 0;
+      if (quotaBytes > 0) {
+        const quotaMb = Math.round(quotaBytes / (1024 * 1024));
+        const usedMb = Math.round(usageBytes / (1024 * 1024));
+        const freeMb = Math.max(0, quotaMb - usedMb);
+        const freeDisplay = freeMb >= 1024 ? `${(freeMb / 1024).toFixed(1)} GB free` : `${freeMb} MB free`;
+        const usageRatio = usageBytes / quotaBytes;
+        const lowStorage = freeMb < 250 || usageRatio > 0.88;
+
+        currentMetrics.storageQuotaMb = quotaMb;
+        currentMetrics.storageUsedMb = usedMb;
+        currentMetrics.storageFreeMb = freeMb;
+        currentMetrics.storageFreeDisplay = freeDisplay;
+        currentMetrics.isLowStorage = lowStorage;
+
+        // If device is under storage pressure in auto mode, step down Tier 1 -> Tier 2 to prevent disk I/O stalls
+        if (lowStorage && currentMetrics.userOverride === 'auto' && currentMetrics.tier === 1) {
+          currentMetrics.tier = 2;
+          currentMetrics.canBlur = false;
+        }
+
+        applyTierToDom(currentMetrics);
+        listeners.forEach((cb) => cb({ ...currentMetrics }));
+        return;
+      }
+    }
+  } catch {}
+  currentMetrics.storageFreeDisplay = 'Standard Storage';
+}
+
+export function shouldTrimCaches(): boolean {
+  const m = cachedMetrics ?? detectDeviceTier();
+  return m.isLowStorage || m.tier === 3 || m.isLowPower;
 }
 
 async function monitorBattery(currentMetrics: PerformanceMetrics) {

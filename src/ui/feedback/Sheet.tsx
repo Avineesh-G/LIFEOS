@@ -80,7 +80,6 @@ export function Sheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={MOTION_SPRINGS.sheet}
-            style={{ willChange: 'transform' }}
             className={`relative mx-2 mb-2 rounded-[32px] ${heightStyle} liquid-sheet flex flex-col overflow-hidden z-10 ${className}`}
           >
             {/* Grabber Handle */}
@@ -108,7 +107,7 @@ export function Sheet({
 
             {/* Optional Sticky Action Footer */}
             {footer && (
-              <div className="px-5 py-3 bg-[#1C1C20]/95 shrink-0 border-t border-white/[0.06]">
+              <div className="px-5 py-3 bg-[#16161A]/95 shrink-0">
                 {footer}
               </div>
             )}

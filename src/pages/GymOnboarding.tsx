@@ -147,7 +147,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
         <span className="label-mono font-bold text-xs text-muted-light dark:text-muted-dark w-12 text-right">{step}/{totalSteps}</span>
       </motion.div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
 
         {/* ── STEP 1: Fitness Goal ── */}
         {step === 1 && (
@@ -676,7 +676,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
       <motion.button
         variants={item}
         onClick={handleNext}
-        className="btn-pill w-full py-4 text-sm font-semibold tracking-widest flex items-center justify-center gap-2 shadow-md active:scale-[0.985] transition-all"
+        className="btn-pill w-full py-4 text-sm font-semibold tracking-widest flex items-center justify-center gap-2 shadow-md active:scale-[0.985] transition-transform"
       >
         {step === totalSteps ? 'START MY PLAN' : 'CONTINUE'}
         {step < totalSteps && <ChevronRight size={16} />}

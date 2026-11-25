@@ -312,29 +312,27 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
             const hasWorkout = syncEntry?.hasWorkout;
 
             return (
-              <motion.button
+              <button
                 key={dateStr}
                 type="button"
-                whileTap={{ scale: 0.92 }}
                 onClick={() => {
                   triggerHaptic('selection');
                   setSelectedDate(day);
                 }}
-                className={`relative flex flex-col items-center justify-center h-10 rounded-2xl transition-all cursor-pointer select-none ${
+                className={`relative flex flex-col items-center justify-center h-10 rounded-2xl transition-transform duration-100 active:scale-[0.92] cursor-pointer select-none ${
                   !isCurrentMonth ? 'opacity-25' : 'opacity-100'
                 }`}
               >
-                {/* Active Day Liquid Droplet Indicator */}
+                {/* Active Day Liquid Droplet Indicator (Zero-Layout CSS) */}
                 {isSelected && (
-                  <motion.div
-                    layoutId="calendar-selected-thumb"
+                  <div
+                    aria-hidden="true"
                     className="absolute inset-0 rounded-2xl -z-10"
                     style={{
                       background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(40, 40, 48, 0.95) 100%)',
                       border: 'none',
-                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 12px rgba(0, 0, 0, 0.55)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.55)',
                     }}
-                    transition={MOTION_SPRINGS.snappy}
                   />
                 )}
 
@@ -361,7 +359,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                   {hasOutings && <span className="w-1.5 h-1.5 rounded-full bg-[#30D158] shrink-0" />}
                   {hasWorkout && <span className="w-1.5 h-1.5 rounded-full bg-[#FF9F0A] shrink-0" />}
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>

@@ -1,48 +1,21 @@
 import { ALLOWED_CHAT_MODELS } from '../config/aiModels.ts';
+import { executeAIRequest } from '../services/ai/aiGateway.ts';
+import type { AIMessage } from '../services/ai/types.ts';
 
 // ── Load Groq API key from Vercel / .env or user settings in Settings page ──
 export const GEMINI_API_KEY: string = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) || '';
 // ──────────────────────────────────────────────────────────────────────────
 
-async function callGeminiDirect(prompt: string, apiKey: string, expectJson: boolean = false): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: expectJson ? 0.1 : 0.7,
-        ...(expectJson ? { responseMimeType: 'application/json' } : {})
-      }
-    })
-  });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Gemini API Error: ${res.status} - ${txt}`);
-  }
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  if (!text) throw new Error('Empty response from Gemini');
-  return text.trim();
-}
-
 export async function callGroq(prompt: string, apiKey: string, maxTokens = 500, expectJson: boolean = false, isPdf: boolean = false): Promise<string> {
   let activeKey = (apiKey && apiKey.trim()) || GEMINI_API_KEY;
-  if (!activeKey) throw new Error('NO_API_KEY');
   activeKey = activeKey.replace(/^["']|["']$/g, '').trim();
   if (!activeKey) throw new Error('NO_API_KEY');
-  
+
   if (isPdf) {
     throw new Error('Groq API does not support direct PDF uploads. Please use the "Paste Text" option below.');
   }
 
-  // Automatic provider routing: if user entered a Google Gemini API Key
-  if (activeKey.startsWith('AIza')) {
-    return await callGeminiDirect(prompt, activeKey, expectJson);
-  }
-
-  const messages: { role: string; content: string }[] = [];
+  const messages: AIMessage[] = [];
   if (expectJson) {
     messages.push({
       role: 'system',
@@ -51,80 +24,16 @@ export async function callGroq(prompt: string, apiKey: string, maxTokens = 500, 
   }
   messages.push({ role: 'user', content: prompt });
 
-  const tryCall = async (model: string, keyToUse: string) => {
-    const payload: any = {
-      model,
-      messages,
-      max_completion_tokens: Math.max(maxTokens, 1024),
-      temperature: expectJson ? 0.1 : 0.7,
-      ...(expectJson ? { response_format: { type: 'json_object' } } : {})
-    };
-    if (model.includes('gpt-oss')) {
-      payload.reasoning_effort = 'low';
-    }
-    return await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${keyToUse}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-  };
+  const response = await executeAIRequest({
+    messages,
+    apiKey: activeKey,
+    candidateModels: activeKey.startsWith('AIza') ? undefined : [...ALLOWED_CHAT_MODELS],
+    maxTokens: Math.max(maxTokens, 1024),
+    temperature: expectJson ? 0.1 : 0.7,
+    responseFormat: expectJson ? 'json' : 'text',
+  });
 
-  const MODELS = [...ALLOWED_CHAT_MODELS];
-
-  let response: Response = null!;
-  let lastError = '';
-
-  for (let i = 0; i < MODELS.length; i++) {
-    try {
-      response = await tryCall(MODELS[i], activeKey);
-      if (response.ok) break; // success — stop waterfall
-
-      if (response.status === 401 && activeKey !== GEMINI_API_KEY && GEMINI_API_KEY) {
-        // Custom key rejected — retry same model with default key
-        activeKey = GEMINI_API_KEY;
-        response = await tryCall(MODELS[i], activeKey);
-        if (response.ok) break;
-      }
-
-      if (response.status === 429 || response.status === 503 || response.status === 404) {
-        // Rate limited or model unavailable — immediately try next model without waiting
-        lastError = `Model ${MODELS[i]} returned status ${response.status}`;
-        console.warn(`[AI] ${lastError}, switching to next model...`);
-        if (i < MODELS.length - 1) {
-          continue;
-        }
-      }
-
-      // Other error — try next model if available
-      if (i < MODELS.length - 1) {
-        continue;
-      }
-      break;
-    } catch (netErr: any) {
-      if (i < MODELS.length - 1) {
-        continue;
-      }
-      throw new Error(`Network error communicating with AI: ${netErr.message}`);
-    }
-  }
-
-  if (!response || !response.ok) {
-    const errorData = response ? await response.text() : 'No response';
-    throw new Error(`AI API Error: ${response ? response.status : 'Offline'} - ${errorData}`);
-  }
-
-  const data = await response.json();
-  let text = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning;
-  
-  if (!text) throw new Error(`Empty response from AI`);
-
-  // Strip any reasoning / think tags from modern LLMs
-  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-
-  return text;
+  return response.text;
 }
 
 export async function parseMenuPdf(base64Data: string, apiKey: string = GEMINI_API_KEY): Promise<string> {

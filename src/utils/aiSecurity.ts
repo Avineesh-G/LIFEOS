@@ -98,14 +98,12 @@ export function getGroqApiKey(): string {
   return '';
 }
 
-export async function setGroqApiKey(key: string, updateDataFn?: (patch: any) => Promise<any>): Promise<void> {
+export async function setGroqApiKey(key: string, _updateDataFn?: (patch: any) => Promise<any>): Promise<void> {
   cachedApiKey = key.trim();
   try {
     await Preferences.set({ key: GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, value: cachedApiKey });
     localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.GROQ_API_KEY, cachedApiKey);
-    if (updateDataFn) {
-      await updateDataFn({ geminiApiKey: cachedApiKey });
-    }
+    // Security Phase 1: Do not persist plaintext BYOK keys into Firestore cloud documents
   } catch {}
 }
 

@@ -77,99 +77,70 @@ import { detectDeviceTier } from './performanceEngine';
 // ─── Unified Continuous Spatial Flow Page Transitions ───────────────────────────
 
 /**
- * Ultra-Smooth Unified Spatial Flow Transition (Decoupled & Hardware-Accelerated)
- * 16px/12px hardware displacement and quartic deceleration (Apple ease-out)
- * ensures 120 FPS buttery execution with zero frame drops or stuck states.
+ * Page Transitions Disabled (Zero-Lag Root Fix):
+ * Horizontal route sliding & AnimatePresence dual-mounting caused frame drops
+ * and stuck routes on mobile WebView. All route variants now render instantaneously.
  */
 export const UNIFIED_SPATIAL_FLOW = {
-  initial: (direction: number = 1) => ({
-    x: direction > 0 ? 16 : -16,
-    opacity: 0,
-  }),
+  initial: { x: 0, opacity: 1 },
   animate: {
     x: 0,
     opacity: 1,
-    transition: {
-      x: { duration: 0.14, ease: [0.16, 1, 0.3, 1] as const },
-      opacity: { duration: 0.12, ease: [0.16, 1, 0.3, 1] as const },
-    },
-  },
-  exit: (direction: number = 1) => ({
-    x: direction > 0 ? -12 : 12,
-    opacity: 0,
-    transition: {
-      x: { duration: 0.08, ease: [0.4, 0, 1, 1] as const },
-      opacity: { duration: 0.07, ease: 'linear' as const },
-    },
-  }),
-};
-
-/** Reduced-motion and Tier 3 (Budget): Instant opacity-only fade */
-export const PAGE_VARIANTS_REDUCED = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 1,
-    transition: { duration: 0.05, ease: 'linear' as const },
+    transition: { duration: 0 },
   },
   exit: {
-    opacity: 0,
-    transition: { duration: 0.04, ease: 'linear' as const },
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0 },
+  },
+};
+
+/** Tier 2 (Mid-Range / Balanced): Instant route switch */
+export const TIER2_SPATIAL_FLOW = {
+  initial: { x: 0, opacity: 1 },
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0 },
+  },
+  exit: {
+    opacity: 1,
+    transition: { duration: 0 },
+  },
+};
+
+/** Reduced-motion and Tier 3: Instant switch */
+export const PAGE_VARIANTS_REDUCED = {
+  initial: { opacity: 1 },
+  animate: {
+    opacity: 1,
+    transition: { duration: 0 },
+  },
+  exit: {
+    opacity: 1,
+    transition: { duration: 0 },
   },
 };
 
 /**
- * Triggers a page navigation wrapped in the native View Transitions API if supported,
- * ensuring zero JavaScript thread blocking and native 120 FPS compositor execution.
+ * Triggers a direct route navigation (View Transition animations disabled
+ * to eliminate main-thread snapshot stalls on Android WebView).
  */
 export function navigateWithViewTransition(
   navigate: (path: string, options?: any) => void,
   to: string,
   options?: any
 ) {
-  if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-    (document as any).startViewTransition(() => {
-      navigate(to, options);
-    });
-  } else {
-    navigate(to, options);
-  }
+  navigate(to, options);
 }
 
 /**
- * Returns the unified Spatial Flow motion props based on direction and hardware tier.
- * Pass directly as spread props to a <motion.div>.
+ * Returns zero-cost instant page props (route transitions disabled globally).
  */
-export function getPageMotionProps(reducedMotion: boolean, direction: number = 1) {
-  if (reducedMotion) {
-    return {
-      custom: direction,
-      variants: PAGE_VARIANTS_REDUCED,
-      initial: 'initial',
-      animate: 'animate',
-      exit: 'exit',
-    };
-  }
-
-  let tier = 2;
-  try {
-    tier = detectDeviceTier().tier;
-  } catch {}
-
-  // Tier 3: Budget phone fallback (zero-slide, instant opacity)
-  if (tier === 3) {
-    return {
-      custom: direction,
-      variants: PAGE_VARIANTS_REDUCED,
-      initial: 'initial',
-      animate: 'animate',
-      exit: 'exit',
-    };
-  }
-
-  // Tiers 1 and 2: Unified silky-smooth continuous spatial flow across all interfaces
+export function getPageMotionProps(_reducedMotion: boolean, direction: number = 1) {
   return {
     custom: direction,
-    variants: UNIFIED_SPATIAL_FLOW,
+    variants: PAGE_VARIANTS_REDUCED,
     initial: 'initial',
     animate: 'animate',
     exit: 'exit',

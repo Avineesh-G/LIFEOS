@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, startTransition } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, startTransition } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -289,7 +289,7 @@ export default function Layout({
     },
   ], [slot2Item, slot3Item, navigate]);
 
-  const handleTabChange = (key: string) => {
+  const handleTabChange = useCallback((key: string) => {
     if (key === 'home') {
       if (pathname === '/' || pathname === '') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -301,7 +301,7 @@ export default function Layout({
     } else if (key === slot3Item.id) {
       navigate(slot3Item.route);
     }
-  };
+  }, [pathname, slot2Item.id, slot2Item.route, slot3Item.id, slot3Item.route, navigate]);
 
   const handleCustomizeSlot = (slotKey: string) => {
     triggerHaptic('medium');

@@ -90,7 +90,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
-      const saved = localStorage.getItem(GROQ_CONFIG.STORAGE_KEYS.CHAT_HISTORY);
+      const saved = localStorage.getItem('lifeos_modal_chat_history');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -160,10 +160,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     }
   }, [isOpen, activeTab]);
 
-  // Persist messages to LocalStorage
+  // Persist modal messages to isolated LocalStorage key
   useEffect(() => {
     try {
-      localStorage.setItem(GROQ_CONFIG.STORAGE_KEYS.CHAT_HISTORY, JSON.stringify(messages));
+      localStorage.setItem('lifeos_modal_chat_history', JSON.stringify(messages));
     } catch {}
   }, [messages]);
 
@@ -231,7 +231,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
     setActiveSessionId(null);
     setActiveTab('chat');
     try {
-      localStorage.removeItem(GROQ_CONFIG.STORAGE_KEYS.CHAT_HISTORY);
+      localStorage.removeItem('lifeos_modal_chat_history');
     } catch {}
     setTimeout(() => inputRef.current?.focus(), 100);
   };
@@ -434,6 +434,10 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
           scheduleTokenUpdate(token);
         },
         (fullText: string) => {
+          if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
           accumulatedResponse = fullText;
           const { proposals } = extractAiActionProposals(accumulatedResponse);
           if (proposals.length > 0) {
@@ -443,17 +447,30 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
             }));
           }
 
-          const finalMessages = newMessages.map((m) =>
-            m.id === assistantMessageId ? { ...m, content: accumulatedResponse } : m
-          );
+          const assistantMsg: ChatMessage = {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: accumulatedResponse,
+            timestamp: new Date().toISOString(),
+          };
+          const finalMessages = [...newMessages, assistantMsg];
 
+          setMessages(finalMessages);
           const updatedSessionId = persistSessionToHistory(finalMessages, activeSessionId);
           setActiveSessionId(updatedSessionId);
         },
         (err: Error) => {
+          if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
           setErrorMessage(err.message || 'Unable to generate response.');
         },
-        abortControllerRef.current.signal
+        abortControllerRef.current.signal,
+        {
+          userId: auth.currentUser?.uid,
+          appData: data,
+        }
       );
     } catch (err: any) {
       if (err.name === 'AbortError') {

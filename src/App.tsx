@@ -1,10 +1,7 @@
 import { clearAllOutingsData } from './features/outings/storage/outingsIdb';
 import { clearUserProfileCache } from './utils/userProfileCache';
-import React, { useEffect, useLayoutEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useReducedMotion, getPageMotionProps } from './utils/motionConfig';
-import { getNavigationDirection } from './utils/navigationDirection';
 import { App as CapApp } from '@capacitor/app';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
@@ -76,7 +73,6 @@ function MainContent({
   resetAllData?: () => Promise<void>;
   onSignOut?: () => Promise<void> | void;
 }) {
-  const prefersReducedMotion = useReducedMotion();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -121,13 +117,9 @@ function MainContent({
     ];
   }, [data?.settings?.navPinned]);
 
-  // Clean, instant, reliable page presentation (zero blank screens)
-
-  // Non-blocking scroll reset post-paint (eliminates synchronous layout reflow)
+  // Non-blocking scroll reset post-paint (instant zero-transition route switch)
   useEffect(() => {
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-    });
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
   const routeElements = useRoutes([
@@ -523,9 +515,8 @@ function App() {
           <AppLockOverlay />
           <InAppUpdateModal />
           <div
-            className="w-full min-h-screen bg-black transition-[filter,opacity] duration-200 ease-out"
+            className="w-full min-h-screen bg-black"
             style={{
-              filter: isLocked ? 'blur(36px) saturate(40%)' : undefined,
               opacity: isLocked ? 0.2 : 1,
               pointerEvents: isLocked ? 'none' : 'auto',
             }}

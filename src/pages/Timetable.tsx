@@ -42,10 +42,20 @@ export default function Timetable({ data, updateData }: TimetableProps) {
     return DAYS.map((_, idx) => addDays(monday, idx));
   }, []);
 
+  // Defer background timetable notification sync so page entry never competes with UI frames
   useEffect(() => {
-    if (data?.timetable) {
-      syncTimetableNotifications(data.timetable, data.settings?.notificationLeadMinutes || 10);
-    }
+    if (!data?.timetable) return;
+    const lead = data.settings?.notificationLeadMinutes || 10;
+    const timer = setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          syncTimetableNotifications(data.timetable, lead).catch(() => {});
+        }, { timeout: 2500 });
+      } else {
+        syncTimetableNotifications(data.timetable, lead).catch(() => {});
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
   }, [data?.timetable, data?.settings?.notificationLeadMinutes]);
 
   const activeDayName = DAYS[activeDayIndex];
@@ -89,7 +99,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
   const handleStartTimer = (block: TimetableBlock) => {
     triggerHaptic('selection');
-    navigate(`/study/timer?subject=${encodeURIComponent(block.subject)}`);
+    navigate(`/tasks?subject=${encodeURIComponent(block.subject)}`);
   };
 
   return (
@@ -126,17 +136,10 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                   triggerHaptic('selection');
                   setActiveDayIndex(idx);
                 }}
-                className={`relative flex flex-col items-center justify-center py-2 rounded-full transition-all cursor-pointer ${
-                  isSelected ? 'text-white' : 'text-[rgba(235,235,245,0.60)] hover:text-white'
+                className={`relative flex flex-col items-center justify-center py-2 rounded-full transition-colors cursor-pointer ${
+                  isSelected ? 'text-white bg-[#5E5CE6] shadow-md shadow-[#5E5CE6]/30' : 'text-[rgba(235,235,245,0.60)] hover:text-white'
                 }`}
               >
-                {isSelected && (
-                  <motion.div
-                    layoutId="timetable-day-indicator"
-                    className="absolute inset-0 bg-[#5E5CE6] rounded-full -z-10 shadow-md shadow-[#5E5CE6]/30"
-                    transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-                  />
-                )}
                 <span className="text-[10px] font-bold uppercase">{SHORT_DAYS[idx]}</span>
                 <span className={`text-xs font-bold mt-0.5 ${isCur && !isSelected ? 'text-[#5E5CE6]' : ''}`}>
                   {format(weekDates[idx], 'd')}
@@ -165,7 +168,7 @@ export default function Timetable({ data, updateData }: TimetableProps) {
                 <motion.div
                   key={block.id}
                   whileTap={{ scale: 0.985 }}
-                  className={`w-full rounded-[24px] p-4 flex items-center justify-between gap-3 transition-all ${
+                  className={`w-full rounded-[24px] p-4 flex items-center justify-between gap-3 transition-colors ${
                     active
                       ? 'glass-card bg-[#5E5CE6]/25 shadow-lg shadow-[#5E5CE6]/15'
                       : 'glass-card'

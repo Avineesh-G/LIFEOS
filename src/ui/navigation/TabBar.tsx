@@ -45,7 +45,6 @@ export function TabBar({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffsetPx, setDragOffsetPx] = useState(0);
   const [dragHoverIndex, setDragHoverIndex] = useState<number | null>(null);
-  const [isDropletMoving, setIsDropletMoving] = useState(false);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const longPressTimerRef = useRef<any>(null);
@@ -65,18 +64,6 @@ export function TabBar({
   const activeIndex = Math.max(0, rawActiveIndex);
   const currentKey = optimisticKey || activeKey;
 
-  const prevIndexRef = useRef(activeIndex);
-
-  // Fluid Droplet motion trigger on active tab changes
-  useEffect(() => {
-    if (prevIndexRef.current !== activeIndex) {
-      setIsDropletMoving(true);
-      prevIndexRef.current = activeIndex;
-      const t = setTimeout(() => setIsDropletMoving(false), 240);
-      return () => clearTimeout(t);
-    }
-  }, [activeIndex]);
-
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
@@ -85,6 +72,14 @@ export function TabBar({
       }
     };
   }, []);
+
+  // Instant synchronous transition dispatch (no artificial rAF delay, zero route animation stall)
+  const dispatchNavigation = useCallback((targetKey: string) => {
+    setOptimisticKey(targetKey);
+    startTransition(() => {
+      onChange(targetKey);
+    });
+  }, [onChange]);
 
   const calculateSlotFromCoord = useCallback((clientX: number): { index: number; offsetPx: number } => {
     if (!trackRef.current) return { index: activeIndex, offsetPx: 0 };
@@ -182,15 +177,14 @@ export function TabBar({
       suppressClickRef.current = true;
       setTimeout(() => {
         suppressClickRef.current = false;
-      }, 300);
+      }, 80);
 
       if (clientX !== undefined) {
         const { index } = calculateSlotFromCoord(clientX);
         triggerHaptic('save');
         const targetTab = items[index];
         if (targetTab) {
-          setOptimisticKey(targetTab.key);
-          onChange(targetTab.key);
+          dispatchNavigation(targetTab.key);
         }
       }
     }
@@ -206,11 +200,12 @@ export function TabBar({
       return;
     }
     triggerHaptic('medium');
-    setOptimisticKey(tab.key);
-    onChange(tab.key);
+    dispatchNavigation(tab.key);
   };
 
   const tabWidthPercent = 100 / Math.max(1, items.length);
+  const activeTabItem = items[activeIndex];
+  const activeTint = activeTabItem?.tint || '#0A84FF';
 
   return (
     <div className={`relative flex items-center justify-center pointer-events-auto select-none gap-2.5 ${className}`}>
@@ -250,9 +245,9 @@ export function TabBar({
         )}
       </AnimatePresence>
 
-      {/* ── High-Intensity Liquid Glass Navigation Capsule with Fluid Drag Tracking ── */}
+      {/* ── High-Intensity Water Liquid Glass Navigation Capsule with Fluid Drag Tracking ── */}
       <div
-        className="h-[52px] px-2.5 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center min-w-[210px] max-w-[275px] touch-none cursor-pointer"
+        className="h-[52px] px-2.5 rounded-full glass-nav shadow-2xl flex items-center min-w-[210px] max-w-[275px] touch-none cursor-pointer"
         onMouseMove={(e) => isDraggingRef.current && handlePointerMove(e.clientX, e.clientY)}
         onMouseUp={(e) => handlePointerEnd(e.clientX)}
         onMouseLeave={() => isDraggingRef.current && handlePointerEnd()}
@@ -268,39 +263,29 @@ export function TabBar({
       >
         {/* Navigation Slots (Home, Slot 2, Slot 3) */}
         <div ref={trackRef} className="flex-1 flex items-center relative h-[42px]">
-          {/* Fluid Hold & Drag Droplet Pill with Liquid Physics */}
+          {/* Realistic Water Liquid Droplet Pill (Zero white lines, pure GPU transform kinematics) */}
           <div
-            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 will-change-transform"
+            className="absolute top-0 bottom-0 pointer-events-none rounded-full z-0 overflow-hidden"
             style={{
               width: `${tabWidthPercent}%`,
               opacity: hasValidActiveTab ? 1 : 0,
+              willChange: isDragging ? 'transform' : 'auto',
               transform: isDragging
-                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.08, 0.92)`
-                : `translate3d(${activeIndex * 100}%, 0, 0) ${isDropletMoving ? 'scale(1.14, 0.90)' : 'scale(1, 1)'}`,
+                ? `translate3d(${dragOffsetPx}px, 0, 0) scale(1.06, 0.93)`
+                : `translate3d(${activeIndex * 100}%, 0, 0) scale(1, 1)`,
               transition: isDragging
                 ? 'none'
-                : 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.18s ease',
-              background: isDragging
-                ? 'radial-gradient(ellipse 95% 70% at 50% 0%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.10) 65%, transparent 95%), rgba(255, 255, 255, 0.16)'
-                : isDropletMoving
-                  ? 'radial-gradient(ellipse 92% 65% at 50% 0%, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 60%, transparent 90%), rgba(255, 255, 255, 0.12)'
-                  : 'radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 60%, transparent 90%), rgba(255, 255, 255, 0.10)',
-              boxShadow: isDragging
-                ? '0 8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.35)'
-                : isDropletMoving
-                  ? '0 6px 18px rgba(0, 0, 0, 0.70), inset 0 1px 1.5px rgba(255, 255, 255, 0.28)'
-                  : '0 4px 14px rgba(0, 0, 0, 0.60), inset 0 1px 1px rgba(255, 255, 255, 0.22)',
+                : 'transform 0.16s cubic-bezier(0.2, 0, 0, 1)',
+              background: `radial-gradient(ellipse 88% 58% at 50% 16%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 52%, transparent 82%), radial-gradient(ellipse 92% 68% at 50% 84%, color-mix(in srgb, ${activeTint} 15%, rgba(255, 255, 255, 0.04)) 0%, transparent 78%), rgba(255, 255, 255, 0.09)`,
+              boxShadow: '0 6px 18px rgba(0, 0, 0, 0.72), 0 2px 6px rgba(0, 0, 0, 0.55)',
             }}
           >
-            {/* Liquid Surface Meniscus Refraction Highlight */}
-            <div className="absolute inset-x-2 top-0.5 h-[1.5px] rounded-full bg-gradient-to-r from-transparent via-white/45 to-transparent" />
-            {/* Internal Liquid Droplet Ambient Glow */}
+            {/* Volumetric Water Dome Caustic Glow (soft curved optics, zero sharp horizontal line) */}
             <div
-              className="absolute inset-0 rounded-full opacity-60 pointer-events-none transition-opacity duration-200"
+              className="absolute inset-0 rounded-full pointer-events-none"
               style={{
-                background: isDropletMoving
-                  ? 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255, 255, 255, 0.24) 0%, transparent 80%)'
-                  : 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 70%)',
+                background:
+                  'radial-gradient(ellipse 72% 42% at 50% 24%, rgba(255, 255, 255, 0.12) 0%, transparent 75%), radial-gradient(ellipse 85% 45% at 50% 92%, rgba(0, 0, 0, 0.28) 0%, transparent 75%)',
               }}
             />
           </div>
@@ -361,7 +346,7 @@ export function TabBar({
             triggerHaptic('ai');
             onAiClick();
           }}
-          className="relative h-[52px] w-[52px] rounded-full glass-nav nav-rim-light shadow-2xl flex items-center justify-center cursor-pointer select-none shrink-0"
+          className="relative h-[52px] w-[52px] rounded-full glass-nav shadow-2xl flex items-center justify-center cursor-pointer select-none shrink-0"
         >
           {/* Thinking Rotating Ring */}
           {lunaState === 'thinking' && (
@@ -393,7 +378,7 @@ export function TabBar({
 
           {/* Unread Indicator Dot */}
           {lunaState === 'unread' && (
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-white ring-2 ring-black" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0A84FF]" />
           )}
         </motion.button>
       )}

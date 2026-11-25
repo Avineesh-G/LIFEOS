@@ -25,13 +25,35 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v3-4-11-zero-lag-zero-blur-liquid-glass-luna-ai-upgrade',
+    category: 'Zero-Lag Core, Liquid Glass & Luna AI',
+    icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
+    title: 'Zero-Transition 120Hz Core, True Zero-Blur Liquid Glass, Hardware Tier Engine & Luna AI Upgrade',
+    dateTime: '25 Nov 2026, 12:20 PM',
+    fullDateTime: 'Wednesday, November 25, 2026 at 12:20:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
+    summary:
+      'Major stability, smoothness, and AI intelligence release removing route transition freezes and GPU blur bottlenecks from the root, resolving the navigation dock droplet hairline and Nutrition tab stall, adding adaptive RAM/CPU/storage performance tiers, and upgrading Luna AI across all six LifeOS domains.',
+    points: [
+      'Zero-Lag Route Switching: Removed dual-DOM AnimatePresence route transitions and frozen outlets so switching between Home, Gym, Nutrition, Finance, and sub-pages is instantaneous with zero stuck views.',
+      'True Zero-Blur Liquid Glass & Dock Fix: Removed white inner droplet border line and eliminated hidden CSS backdrop-filter/blur passes that throttled Android WebView frame rates.',
+      'Hardware-Aware Smoothness Engine: Automatically adapts animation budgets and glass complexity to device RAM, CPU cores, GPU, and storage pressure with manual controls in Settings.',
+      'Non-Blocking Tap & Persistence Path: Replaced synchronous double localStorage full-state serialization on every tap with idle-batched caching and safe pagehide flush.',
+      'Refined Dock, Calendar & Module Workflows: Removed shared-layout layoutId thrashing, blocking exit transitions, and artificial rAF delays across TabBar, Home Calendar, Timetable, Nutrition, and Gym.',
+      'Luna AI End-to-End Upgrade: Added provider-independent gateway fallback, bounded conversation summaries, privacy-filtered note RAG retrieval, controllable AI memory, and strict action validation.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v3-4-10-laundry-notifications-deep-linking-test-suite-lent-card',
     category: 'Notifications Lifecycle, Deep-Linking & Spending Ledger',
     icon: React.createElement(Sparkle, { size: 18, weight: 'duotone', className: 'text-[#0A84FF]' }),
     title: 'Complete Laundry Notifications Lifecycle, Direct Deep-Linking, Multi-Interface Test Suite & Redesigned Lending Ledger',
     dateTime: '24 Nov 2026, 06:45 PM',
     fullDateTime: 'Tuesday, November 24, 2026 at 06:45:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v3.4.10',
     colorClass: 'from-[#0A84FF]/25 via-[#0A84FF]/10 to-transparent text-[#0A84FF] border-[#0A84FF]/30',
     summary:
       'Major notifications and user experience update bringing an end-to-end Laundry notification lifecycle with daily dhobi checks, instant deep-linking on notification taps, a multi-interface test alert suite with 20-second cooldown in Settings, a redesigned Money Lent & Borrowed hero card with flow ratio bar, and 0ms liquid droplet navigation.',

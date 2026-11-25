@@ -116,3 +116,26 @@ See `AGENTS.md` Performance Rules section.
 - All buttons must have `touch-action: manipulation`
 - `navigate()` inside sheets must use `startTransition`
 - Every new animation must be profiled on 4× CPU throttle before merge
+
+---
+
+## Anti-Lag & Zero-Page-Transition Engineering Checklist (Strict Future Rules)
+
+> Added after Root-Cause Audit (Zero-Transition Fix): eliminates dual-DOM route freezes, layout thrashing, GPU blur passes, and synchronous main-thread JSON serialization stalls.
+
+| Category | Forbidden Pattern (Causes Lag / Stuck Routes) | Required Pattern (Zero-Lag Standard) |
+|---|---|---|
+| Route Switching | `<AnimatePresence>` wrapping `<Routes>` / `useRoutes(...)` or `FrozenRouteOutlet` | Direct `{routeElements}` render with instant `window.scrollTo(0, 0)` |
+| Shared Element Transitions | Framer Motion `layoutId="..."` across tabs, calendars, or pills | Instant conditional background color / CSS `transform` highlight |
+| Blocking Exit Animations | `<AnimatePresence mode="wait">` on wizards/sheets/tabs | `<AnimatePresence mode="popLayout">` or plain conditional JSX |
+| Layout Reflow CSS | `transition-all` or animating `height`/`width`/`box-shadow`/`filter` | `transition-colors` or `transition-transform` (GPU compositor only) |
+| GPU Blur Layers | `backdrop-filter: blur(...)`, `filter: blur(...)`, or non-zero `--blur` vars | Radial gradients + translucent dark fills (`--blur: 0px`, `none`) |
+| Main-Thread Storage | Synchronous `localStorage.setItem(key, JSON.stringify(fullData))` on every tap | Debounced idle write (`180ms` + `requestIdleCallback`) with `pagehide` flush |
+| Bottom Dock Input | Deferring tab `onChange` inside `requestAnimationFrame` or >100ms click lock | Immediate `onChange` dispatch + fast ≤80ms swipe guard + CSS `transform` pill slide |
+| Dead Routes / Links | Navigating to unmounted routes (`/study/timer` without `<Route>`) | Verify every `navigate(...)` target exists in `App.tsx` route table |
+
+### Pre-Merge Mandatory Static Audit Commands (PowerShell)
+1. Confirm zero `AnimatePresence` around routes in `src/App.tsx`.
+2. Confirm zero `layoutId=` or `mode="wait"` across `src/`: `Select-String -Path src\**\*.tsx,src\*.tsx -Pattern 'mode="wait"|layoutId='`
+3. Confirm zero `backdrop-filter: blur` or `filter: blur` (except `AppLockOverlay.tsx`): `Select-String -Path src\**\*.css,src\**\*.ts,src\**\*.tsx -Pattern 'backdrop-filter:\s*blur|filter:\s*blur'`
+4. Run full verification: `npx tsc --noEmit; npm run build; npm run check:emojis; npm run check:palette`

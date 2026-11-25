@@ -216,13 +216,13 @@ export default function Settings({
       {/* ── Hardware Performance & Adaptive Tier ── */}
       <GroupedList
         header="HARDWARE PERFORMANCE & COMPATIBILITY"
-        footer={`Auto-detected: ${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.tier === 1 ? 'Tier 1: High Fidelity (Full Liquid Glass)' : deviceTier.tier === 2 ? 'Tier 2: Balanced Standard (4px Blur)' : 'Tier 3: Max Fluidity (Zero-Blur GPU)'}`}
+        footer={`Auto-detected: ${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay} · ${deviceTier.tier === 1 ? 'Tier 1: High Fidelity (Full Water Liquid Glass)' : deviceTier.tier === 2 ? 'Tier 2: Balanced Fluidity (Zero-Blur Specular)' : 'Tier 3: Max Speed (Minimal Overhead)'}`}
       >
         <ListRow
           icon={<Lightning size={18} weight="duotone" />}
           iconTint="#FFD60A"
           title="Hardware Profile"
-          subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu}`}
+          subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay}`}
           trailing={
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#30D158] animate-pulse" />
@@ -239,10 +239,10 @@ export default function Settings({
           title="Performance Tier"
           subtitle={
             deviceTier.tier === 1
-              ? 'Tier 1: High Fidelity (Flagship · 8GB+ RAM · Full Blur)'
+              ? 'Tier 1: High Fidelity (8GB+ RAM · Full Liquid Optics & Flow)'
               : deviceTier.tier === 2
-              ? 'Tier 2: Balanced Standard (Mid-Range · 6GB RAM · 4px Blur)'
-              : 'Tier 3: Max Fluidity (Budget · ≤4GB RAM · 0px Blur)'
+              ? 'Tier 2: Balanced Fluidity (Mid-Range · Lean Specular Glass)'
+              : 'Tier 3: Max Speed (Budget/Low Storage · Instant Transitions)'
           }
           trailing={
             <div className="flex items-center gap-1">

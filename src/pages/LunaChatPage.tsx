@@ -81,7 +81,7 @@ import { useUserProfile } from '../utils/userProfileCache';
 import { getGroqApiKey, setGroqApiKey } from '../utils/aiSecurity';
 import { navigateBack } from '../utils/backNavigation';
 import { GROQ_CONFIG } from '../config/ai';
-import { CHAT_PRIMARY } from '../config/aiModels';
+import { CHAT_PRIMARY, CHAT_FALLBACKS, ALLOWED_CHAT_MODELS, RETIRED_MODELS } from '../config/aiModels';
 import type { AppData, AiChatSession } from '../types';
 
 interface LunaChatPageProps {
@@ -89,21 +89,21 @@ interface LunaChatPageProps {
   updateData: (partial: Partial<AppData>) => Promise<any>;
 }
 
-// Model Selection Options
+// Model Selection Options (Derived from central verified registry in aiModels.ts)
 const AI_MODELS = [
   {
-    id: 'llama-3.3-70b-versatile',
-    name: 'Luna 2.0 Fast',
-    desc: 'Llama 3.3 70B • Real-time speed for daily tasks & summaries',
-    tag: 'Default',
-    icon: <Lightning size={18} weight="duotone" className="text-[#0A84FF]" />,
+    id: CHAT_PRIMARY,
+    name: 'Luna 2.0 Pro',
+    desc: 'GPT-OSS 120B • High-reasoning intelligence for deep analysis & planning',
+    tag: 'Primary',
+    icon: <Brain size={18} weight="duotone" className="text-[#BF5AF2]" />,
   },
   {
-    id: 'deepseek-r1-distill-llama-70b',
-    name: 'Luna 2.0 Reasoning',
-    desc: 'DeepSeek R1 • Advanced step-by-step logic & problem solving',
-    tag: 'Deep Think',
-    icon: <Brain size={18} weight="duotone" className="text-[#BF5AF2]" />,
+    id: CHAT_FALLBACKS[0],
+    name: 'Luna 2.0 Fast',
+    desc: 'GPT-OSS 20B • Instant speed for daily tasks & summaries',
+    tag: 'Fast',
+    icon: <Lightning size={18} weight="duotone" className="text-[#0A84FF]" />,
   },
 ];
 
@@ -307,25 +307,22 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaveSuccess, setApiKeySaveSuccess] = useState(false);
 
-  // Automatically sync API key from application settings on load or when settings update
+  // Hydrate API key cleanly into device-local secure storage (do not re-upload plaintext key to Firestore)
   useEffect(() => {
     const currentCached = getGroqApiKey();
-    const settingsKey = (data?.geminiApiKey || '').trim();
-    if (settingsKey && !currentCached) {
-      setGroqApiKey(settingsKey, updateData);
-      setApiKeyInput(settingsKey);
+    const legacySettingsKey = (data?.geminiApiKey || '').trim();
+    if (legacySettingsKey && !currentCached) {
+      setGroqApiKey(legacySettingsKey);
+      setApiKeyInput(legacySettingsKey);
     } else if (currentCached) {
       setApiKeyInput(currentCached);
     }
-  }, [data?.geminiApiKey, updateData]);
+  }, [data?.geminiApiKey]);
 
-  // Handle Save API key with immediate two-way synchronization
+  // Handle Save API key strictly in device storage (Preferences/localStorage)
   const handleSaveApiKey = async (newKey: string) => {
     const trimmed = newKey.trim();
-    await setGroqApiKey(trimmed, updateData);
-    if (updateData) {
-      await updateData({ geminiApiKey: trimmed });
-    }
+    await setGroqApiKey(trimmed);
     setApiKeyInput(trimmed);
     setApiKeySaveSuccess(true);
     triggerHaptic('success');
@@ -335,12 +332,21 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
     }, 700);
   };
 
-  // Active Model State
+  // Active Model State (automatically purges stale/retired model IDs)
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     try {
-      return localStorage.getItem('lifeos_active_luna_model') || 'llama-3.3-70b-versatile';
+      const saved = localStorage.getItem('lifeos_active_luna_model');
+      if (
+        saved &&
+        (ALLOWED_CHAT_MODELS as readonly string[]).includes(saved) &&
+        !(RETIRED_MODELS as readonly string[]).includes(saved)
+      ) {
+        return saved;
+      }
+      localStorage.setItem('lifeos_active_luna_model', CHAT_PRIMARY);
+      return CHAT_PRIMARY;
     } catch {
-      return 'llama-3.3-70b-versatile';
+      return CHAT_PRIMARY;
     }
   });
   const [isModelSheetOpen, setIsModelSheetOpen] = useState(false);
@@ -878,7 +884,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
             persistSessionToHistory(partialMessages, activeSessionId);
           }
         },
-        abortControllerRef.current.signal
+        abortControllerRef.current.signal,
+        { preferredModel: selectedModel, userId: auth.currentUser?.uid, appData: data }
       );
     } catch (err: any) {
       if (err?.name === 'AbortError') {

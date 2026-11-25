@@ -48,24 +48,72 @@ export function useData(user: User | null) {
 
   // Keep a ref to current data to avoid stale closures in optimistic updates
   const dataRef = useRef<AppData>(data);
+  const cacheWriteTimerRef = useRef<any>(null);
 
-  // Tenant-isolated cache persistence: strictly write to cache ONLY if data belongs to active user
+  // Schedule non-blocking cache serialization so taps & navigation never stall on JSON.stringify
+  const scheduleLocalCacheWrite = useCallback((uid: string, payload: AppData) => {
+    if (cacheWriteTimerRef.current) {
+      clearTimeout(cacheWriteTimerRef.current);
+    }
+    cacheWriteTimerRef.current = setTimeout(() => {
+      cacheWriteTimerRef.current = null;
+      const write = () => {
+        if (activeUidRef.current !== uid) return;
+        const ownerUid = (payload as any)._ownerUid;
+        if (ownerUid && ownerUid !== uid) return;
+        try {
+          const dataWithOwner = { ...payload, _ownerUid: uid };
+          localStorage.setItem(CACHE_KEY_PREFIX + uid, JSON.stringify(dataWithOwner));
+        } catch {
+          // quota exceeded or private mode
+        }
+      };
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(write, { timeout: 1000 });
+      } else {
+        write();
+      }
+    }, 180);
+  }, []);
+
+  // Flush pending cache write cleanly when backgrounding/unloading
+  useEffect(() => {
+    const flushNow = () => {
+      if (cacheWriteTimerRef.current && user?.uid && activeUidRef.current === user.uid && dataRef.current) {
+        clearTimeout(cacheWriteTimerRef.current);
+        cacheWriteTimerRef.current = null;
+        try {
+          localStorage.setItem(
+            CACHE_KEY_PREFIX + user.uid,
+            JSON.stringify({ ...dataRef.current, _ownerUid: user.uid })
+          );
+        } catch {}
+      }
+    };
+    const onVisChange = () => {
+      if (document.hidden) flushNow();
+    };
+    window.addEventListener('pagehide', flushNow);
+    document.addEventListener('visibilitychange', onVisChange);
+    return () => {
+      flushNow();
+      window.removeEventListener('pagehide', flushNow);
+      document.removeEventListener('visibilitychange', onVisChange);
+    };
+  }, [user?.uid]);
+
+  // Tenant-isolated ref sync + deferred cache write (zero synchronous main-thread stall)
   useEffect(() => {
     dataRef.current = data;
     if (user && user.uid && activeUidRef.current === user.uid) {
       const ownerUid = (data as any)._ownerUid;
       if (!ownerUid || ownerUid === user.uid) {
-        try {
-          const dataWithOwner = { ...data, _ownerUid: user.uid };
-          localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(dataWithOwner));
-        } catch {
-          // quota exceeded or private mode
-        }
+        scheduleLocalCacheWrite(user.uid, data);
       } else {
         console.warn('[LifeOS Tenant Isolation] Refused to cache data belonging to another user:', ownerUid);
       }
     }
-  }, [data, user]);
+  }, [data, user, scheduleLocalCacheWrite]);
 
   // Tenant switch handler: immediately purge and re-hydrate whenever user account changes
   useEffect(() => {
@@ -393,16 +441,9 @@ export function useData(user: User | null) {
     const optimistic = sanitizeAppData({ ...current, ...partial });
     (optimistic as any)._ownerUid = user.uid;
 
-    // 1. Instantly update React state
+    // 1. Instantly update React state (cache persisted asynchronously via scheduleLocalCacheWrite)
     setData(optimistic);
     dataRef.current = optimistic;
-
-    // 2. Persist to localStorage immediately
-    try {
-      localStorage.setItem(CACHE_KEY_PREFIX + user.uid, JSON.stringify(optimistic));
-    } catch {
-      // ignore
-    }
 
     // 3. Save to Firestore in background without blocking caller
     saveData(user.uid, partial)

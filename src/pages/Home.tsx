@@ -1,5 +1,5 @@
 import { auth } from '../firebase';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -71,6 +71,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     };
   }, [data.workoutLogs, data.workoutPlans, todayStr, dayOfWeek]);
 
+  const [waterVersion, setWaterVersion] = useState(0);
+
   // Calories & Water
   const nutritionToday = useMemo(() => {
     const log = (data.nutritionLogs || []).find((n) => n.date === todayStr);
@@ -87,10 +89,10 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
       percent: Math.min(1, cals / target),
       waterLiters: water.toFixed(1),
     };
-  }, [data.nutritionLogs, data.profile, todayStr]);
+  }, [data.nutritionLogs, data.profile, todayStr, waterVersion]);
 
-  // Quick add water
-  const handleQuickAddWater = (e: React.MouseEvent) => {
+  // Quick add water with instant optimistic UI refresh
+  const handleQuickAddWater = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     triggerHaptic('light');
     const current = parseFloat(nutritionToday.waterLiters);
@@ -98,7 +100,8 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
     try {
       localStorage.setItem(`lifeos_water_${auth.currentUser?.uid || 'guest'}_${todayStr}`, next.toString());
     } catch {}
-  };
+    setWaterVersion((v) => v + 1);
+  }, [nutritionToday.waterLiters, todayStr]);
 
   // Tasks top 3
   const topTasks = useMemo(() => {

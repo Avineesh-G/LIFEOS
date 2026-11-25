@@ -1,5 +1,4 @@
-import React, { useId } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { triggerHaptic } from '../utils/haptics';
 
 export interface SegmentedOption<T extends string = string> {
@@ -21,12 +20,9 @@ export interface SegmentedTogglePillProps<T extends string = string> {
 }
 
 /**
- * Material 3 Expressive Segmented Toggle Pill Group
- * One wide pill container housing 2-5 segments with an active segment highlighted solid
- * via spring-physics layout transition. High-contrast colors guaranteed in both light and dark themes.
+ * Material 3 Expressive Segmented Toggle Pill Group (Zero-Layout CSS).
  */
 export default function SegmentedTogglePill<T extends string = string>({
-  id,
   options,
   value,
   onChange,
@@ -35,9 +31,6 @@ export default function SegmentedTogglePill<T extends string = string>({
   fullWidth = false,
   activeColor,
 }: SegmentedTogglePillProps<T>) {
-  const generatedId = useId();
-  const pillLayoutId = id || `segmentedActivePill_${generatedId.replace(/:/g, '')}`;
-
   const sizeClasses = {
     sm: 'py-1.5 px-3 text-xs',
     md: 'py-2 px-4 text-xs sm:text-sm',
@@ -66,29 +59,19 @@ export default function SegmentedTogglePill<T extends string = string>({
                 onChange(opt.value);
               }
             }}
-            className={`relative flex items-center justify-center gap-1.5 rounded-full font-medium transition-colors duration-200 focus:outline-none z-10 active:scale-95 ${sizeClasses} ${
+            style={
+              isSelected
+                ? { backgroundColor: activeColor || 'var(--md-primary, #15803D)' }
+                : undefined
+            }
+            className={`relative flex items-center justify-center gap-1.5 rounded-full font-medium transition-colors duration-150 focus:outline-none z-10 active:scale-95 ${sizeClasses} ${
               isFullWidth ? 'flex-1 min-w-0 text-center' : ''
             } ${
               isSelected
-                ? 'text-white font-bold'
+                ? 'text-white font-bold shadow-sm'
                 : 'text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            {isSelected && (
-              <motion.div
-                layoutId={pillLayoutId}
-                className="absolute inset-0 rounded-full shadow-sm"
-                style={{
-                  backgroundColor: activeColor || 'var(--md-primary, #15803D)',
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 450,
-                  damping: 32,
-                  mass: 0.8,
-                }}
-              />
-            )}
 
             {opt.icon && (
               <span className="relative z-10 shrink-0 flex items-center">

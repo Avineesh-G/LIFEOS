@@ -1,30 +1,23 @@
-import { auth } from '../firebase';
-import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useCallback, startTransition } from 'react';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { LunaComicBubbleIcon } from '../ui/tokens/LunaComicBubbleIcon';
 import { SplitCalorieCircle, type MealSlotCalorieData } from '../components/nutrition/SplitCalorieCircle';
+import { MealSlotCard, type MealSlotConfig } from '../components/nutrition/MealSlotCard';
 import {
   LargeTitleHeader,
   ProgressBar,
   Sheet,
   TextField,
   Button,
-  MOTION_SPRINGS,
   Sun,
   Moon,
   Plus,
   Minus,
-  Check,
-  Trash,
   Drop,
   Sparkle,
-  XCircle,
-  Prohibit,
 } from '../ui';
 import {
   analyzeFoodWithAi,
@@ -40,15 +33,7 @@ interface NutritionProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
-const MEAL_SLOTS: {
-  slot: MealSlot;
-  label: string;
-  shortLabel: string;
-  icon: React.ReactNode;
-  time: string;
-  color: string;
-  estBudget: number;
-}[] = [
+const MEAL_SLOTS: MealSlotConfig[] = [
   { slot: 'breakfast', label: 'Breakfast', shortLabel: 'BRK', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM', color: '#FF9F0A', estBudget: 500 },
   { slot: 'lunch', label: 'Lunch', shortLabel: 'LUNCH', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM', color: '#30D158', estBudget: 750 },
   { slot: 'snacks', label: 'Snacks', shortLabel: 'SNACK', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM', color: '#64D2FF', estBudget: 250 },
@@ -65,12 +50,29 @@ const NIGHT_CANTEEN_PRESETS = [
 ];
 
 export default function Nutrition({ data, updateData }: NutritionProps) {
-  const navigate = useNavigate();
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const dayOfMonth = new Date().getDate();
+  const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+  const dayOfMonth = useMemo(() => new Date().getDate(), []);
 
   // Selected meal slot for highlight/focus
   const [selectedSlot, setSelectedSlot] = useState<MealSlot | null>(null);
+
+  // Progressive slot hydration: mount first 2 slots immediately (< 6ms commit),
+  // then mount remaining slots on next animation frame so the dock droplet never stalls
+  const [visibleSlotCount, setVisibleSlotCount] = useState(2);
+  useEffect(() => {
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (!cancelled) {
+        startTransition(() => {
+          setVisibleSlotCount(MEAL_SLOTS.length);
+        });
+      }
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   // Active day's nutrition log
   const todayLog = useMemo(() => {
@@ -112,14 +114,17 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     });
   }, [todayLog.mealsEaten]);
 
-  // Smoothly scrolls to a meal slot card in the diary
-  const handleSelectSlot = (slot: MealSlot) => {
+  // Ensure all slots are visible and smoothly scroll to a meal slot card
+  const handleSelectSlot = useCallback((slot: MealSlot) => {
+    setVisibleSlotCount(MEAL_SLOTS.length);
     setSelectedSlot((prev) => (prev === slot ? null : slot));
-    const targetEl = document.getElementById(`meal-slot-${slot}`);
-    if (targetEl) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
+    requestAnimationFrame(() => {
+      const targetEl = document.getElementById(`meal-slot-${slot}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, []);
 
 
 
@@ -228,123 +233,124 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     };
   }, [customName, customPortion]);
 
-  // Toggle or select a mess item directly from the meals diary
-  const handleToggleMessItem = async (slot: MealSlot, itemName: string, estCalories: number) => {
-    const currentMeals = [...(todayLog.mealsEaten || [])];
-    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
-
-    // If slot is marked as skipped, it is permanently locked
-    if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
-      triggerHaptic('error');
-      return;
-    }
-
-    triggerHaptic('selection');
-
-    if (slotIndex >= 0) {
-      const existingItemIndex = currentMeals[slotIndex].items.findIndex(
-        (it) => it.name.toLowerCase() === itemName.toLowerCase()
+  const commitMealsUpdate = useCallback(
+    async (currentMeals: NutritionLog['mealsEaten']) => {
+      const newDailyTotal = currentMeals.reduce(
+        (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
+        0
       );
 
-      if (existingItemIndex >= 0) {
-        // Deselect / remove
-        currentMeals[slotIndex].items.splice(existingItemIndex, 1);
-      } else {
-        // Select / add with 1 portion
-        currentMeals[slotIndex].items.push({
-          id: `item_${Date.now()}_${Math.random()}`,
-          name: itemName,
-          calories: estCalories,
-          portion: 1,
-          isExtra: false,
-        });
+      const updatedLog: NutritionLog = {
+        ...todayLog,
+        dailyTotal: newDailyTotal,
+        mealsEaten: currentMeals,
+        isSaved: true,
+      };
+
+      const updatedLogs = [
+        updatedLog,
+        ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
+      ];
+      await updateData({ nutritionLogs: updatedLogs });
+    },
+    [todayLog, data.nutritionLogs, todayStr, updateData]
+  );
+
+  // Toggle or select a mess item directly from the meals diary
+  const handleToggleMessItem = useCallback(
+    async (slot: MealSlot, itemName: string, estCalories: number) => {
+      const currentMeals = (todayLog.mealsEaten || []).map((m) => ({
+        ...m,
+        items: [...m.items],
+      }));
+      const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+
+      if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+        triggerHaptic('error');
+        return;
       }
-    } else {
-      // First item in this slot
-      currentMeals.push({
-        slot,
-        items: [
-          {
+
+      triggerHaptic('selection');
+
+      if (slotIndex >= 0) {
+        const existingItemIndex = currentMeals[slotIndex].items.findIndex(
+          (it) => it.name.toLowerCase() === itemName.toLowerCase()
+        );
+
+        if (existingItemIndex >= 0) {
+          currentMeals[slotIndex].items.splice(existingItemIndex, 1);
+        } else {
+          currentMeals[slotIndex].items.push({
             id: `item_${Date.now()}_${Math.random()}`,
             name: itemName,
             calories: estCalories,
             portion: 1,
             isExtra: false,
-          },
-        ],
-      });
-    }
+          });
+        }
+      } else {
+        currentMeals.push({
+          slot,
+          items: [
+            {
+              id: `item_${Date.now()}_${Math.random()}`,
+              name: itemName,
+              calories: estCalories,
+              portion: 1,
+              isExtra: false,
+            },
+          ],
+        });
+      }
 
-    const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
-      0
-    );
+      await commitMealsUpdate(currentMeals);
+    },
+    [todayLog.mealsEaten, commitMealsUpdate]
+  );
 
-    const updatedLog: NutritionLog = {
-      ...todayLog,
-      dailyTotal: newDailyTotal,
-      mealsEaten: currentMeals,
-      isSaved: true,
-    };
+  // Adjust portion quantity for any logged food item
+  const handleUpdateItemPortion = useCallback(
+    async (slot: MealSlot, itemId: string, delta: number) => {
+      let currentMeals = (todayLog.mealsEaten || []).map((m) => ({
+        ...m,
+        items: [...m.items],
+      }));
+      const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+      if (slotIndex < 0 || currentMeals[slotIndex].isSkipped) return;
+      triggerHaptic('selection');
 
-    const updatedLogs = [
-      updatedLog,
-      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
-    ];
-    await updateData({ nutritionLogs: updatedLogs });
-  };
+      const itemIndex = currentMeals[slotIndex].items.findIndex((it) => it.id === itemId);
+      if (itemIndex < 0) return;
 
-  // Adjust portion quantity for any logged food item (e.g., 2 chapatis -> 4 chapatis)
-  const handleUpdateItemPortion = async (slot: MealSlot, itemId: string, delta: number) => {
-    let currentMeals = [...(todayLog.mealsEaten || [])];
-    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
-    if (slotIndex < 0 || currentMeals[slotIndex].isSkipped) return;
-    triggerHaptic('selection');
+      const currentItem = currentMeals[slotIndex].items[itemIndex];
+      const nextPortion = Math.max(0, Math.round(((currentItem.portion || 1) + delta) * 10) / 10);
 
-    const itemIndex = currentMeals[slotIndex].items.findIndex((it) => it.id === itemId);
-    if (itemIndex < 0) return;
+      if (nextPortion <= 0) {
+        currentMeals[slotIndex].items.splice(itemIndex, 1);
+      } else {
+        currentMeals[slotIndex].items[itemIndex] = {
+          ...currentItem,
+          portion: nextPortion,
+        };
+      }
 
-    const currentItem = currentMeals[slotIndex].items[itemIndex];
-    const nextPortion = Math.max(0, Math.round(((currentItem.portion || 1) + delta) * 10) / 10);
+      if (currentMeals[slotIndex].items.length === 0) {
+        currentMeals = currentMeals.filter((m) => m.slot !== slot);
+      }
 
-    if (nextPortion <= 0) {
-      // Remove item
-      currentMeals[slotIndex].items.splice(itemIndex, 1);
-    } else {
-      currentMeals[slotIndex].items[itemIndex] = {
-        ...currentItem,
-        portion: nextPortion,
-      };
-    }
-
-    if (currentMeals[slotIndex].items.length === 0) {
-      currentMeals = currentMeals.filter((m) => m.slot !== slot);
-    }
-
-    const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
-      0
-    );
-
-    const updatedLog: NutritionLog = {
-      ...todayLog,
-      dailyTotal: newDailyTotal,
-      mealsEaten: currentMeals,
-      isSaved: true,
-    };
-
-    const updatedLogs = [
-      updatedLog,
-      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
-    ];
-    await updateData({ nutritionLogs: updatedLogs });
-  };
+      await commitMealsUpdate(currentMeals);
+    },
+    [todayLog.mealsEaten, commitMealsUpdate]
+  );
 
   // Add a custom extra food item with portion multiplier (AI Auto-Implemented)
   const handleLogCustomFood = async () => {
     if (!customName.trim()) return;
 
-    const currentMeals = [...(todayLog.mealsEaten || [])];
+    const currentMeals = (todayLog.mealsEaten || []).map((m) => ({
+      ...m,
+      items: [...m.items],
+    }));
     const slotIndex = currentMeals.findIndex((m) => m.slot === customSlot);
 
     if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
@@ -356,7 +362,6 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     triggerHaptic('success');
 
     if (multiItemEstimate && multiItemEstimate.items.length > 1) {
-      // Multiple items detected by AI
       const newItems: MealItemLog[] = multiItemEstimate.items.map((it, idx) => ({
         id: `item_${Date.now()}_${idx}`,
         name: it.name,
@@ -389,23 +394,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }
     }
 
-    const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
-      0
-    );
-
-    const updatedLog: NutritionLog = {
-      ...todayLog,
-      dailyTotal: newDailyTotal,
-      mealsEaten: currentMeals,
-      isSaved: true,
-    };
-
-    const updatedLogs = [
-      updatedLog,
-      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
-    ];
-    await updateData({ nutritionLogs: updatedLogs });
+    await commitMealsUpdate(currentMeals);
 
     setCustomName('');
     setCustomCalories('');
@@ -416,80 +405,64 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   };
 
   // Remove an item from the meal slot
-  const handleRemoveItem = async (slot: MealSlot, itemId: string) => {
-    const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot);
-    if (slotLog?.isSkipped) return;
-    triggerHaptic('light');
-    let currentMeals = (todayLog.mealsEaten || []).map((m) => {
-      if (m.slot === slot) {
-        return {
-          ...m,
-          items: m.items.filter((it) => it.id !== itemId),
-        };
-      }
-      return m;
-    }).filter((m) => m.items.length > 0);
+  const handleRemoveItem = useCallback(
+    async (slot: MealSlot, itemId: string) => {
+      const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot);
+      if (slotLog?.isSkipped) return;
+      triggerHaptic('light');
+      const currentMeals = (todayLog.mealsEaten || [])
+        .map((m) => {
+          if (m.slot === slot) {
+            return {
+              ...m,
+              items: m.items.filter((it) => it.id !== itemId),
+            };
+          }
+          return m;
+        })
+        .filter((m) => m.items.length > 0);
 
-    const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
-      0
-    );
-
-    const updatedLog: NutritionLog = {
-      ...todayLog,
-      dailyTotal: newDailyTotal,
-      mealsEaten: currentMeals,
-      isSaved: true,
-    };
-
-    const updatedLogs = [
-      updatedLog,
-      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
-    ];
-    await updateData({ nutritionLogs: updatedLogs });
-  };
+      await commitMealsUpdate(currentMeals);
+    },
+    [todayLog.mealsEaten, commitMealsUpdate]
+  );
 
   // Mark meal as skipped (permanent, locked once confirmed)
-  const handleToggleSkipMeal = async (slot: MealSlot) => {
-    const currentMeals = [...(todayLog.mealsEaten || [])];
-    const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
+  const handleToggleSkipMeal = useCallback(
+    async (slot: MealSlot) => {
+      const currentMeals = (todayLog.mealsEaten || []).map((m) => ({
+        ...m,
+        items: [...m.items],
+      }));
+      const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
 
-    // If already skipped, do not allow re-editing or un-skipping
-    if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
-      triggerHaptic('error');
-      return;
-    }
+      if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+        triggerHaptic('error');
+        return;
+      }
 
-    triggerHaptic('medium');
-    if (slotIndex >= 0) {
-      currentMeals[slotIndex].isSkipped = true;
-      currentMeals[slotIndex].items = [];
-    } else {
-      currentMeals.push({
-        slot,
-        items: [],
-        isSkipped: true,
-      });
-    }
+      triggerHaptic('medium');
+      if (slotIndex >= 0) {
+        currentMeals[slotIndex].isSkipped = true;
+        currentMeals[slotIndex].items = [];
+      } else {
+        currentMeals.push({
+          slot,
+          items: [],
+          isSkipped: true,
+        });
+      }
 
-    const newDailyTotal = currentMeals.reduce(
-      (sum, m) => sum + m.items.reduce((iSum, it) => iSum + it.calories * (it.portion || 1), 0),
-      0
-    );
+      await commitMealsUpdate(currentMeals);
+    },
+    [todayLog.mealsEaten, commitMealsUpdate]
+  );
 
-    const updatedLog: NutritionLog = {
-      ...todayLog,
-      dailyTotal: newDailyTotal,
-      mealsEaten: currentMeals,
-      isSaved: true,
-    };
-
-    const updatedLogs = [
-      updatedLog,
-      ...(data.nutritionLogs || []).filter((n) => n.date !== todayStr),
-    ];
-    await updateData({ nutritionLogs: updatedLogs });
-  };
+  const handleOpenCustomLog = useCallback((slot: MealSlot) => {
+    setCustomSlot(slot);
+    setCustomPortion(1);
+    setIsAddCustomOpen(true);
+  }, []);
 
   return (
     <div className="w-full text-white selection:bg-[#FF9F0A]/30">
@@ -566,7 +539,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               </span>
             </div>
           </div>
-          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#64D2FF]/15 text-[#64D2FF] border border-[#64D2FF]/25 shrink-0">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#64D2FF]/15 text-[#64D2FF] shrink-0">
             Every 30m
           </span>
         </div>
@@ -582,236 +555,26 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             </span>
           </div>
 
-          {MEAL_SLOTS.map((slot) => {
-            const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
+          {MEAL_SLOTS.slice(0, visibleSlotCount).map((slotConfig) => {
+            const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slotConfig.slot);
             const isSkipped = Boolean(slotLog?.isSkipped);
             const slotItems = isSkipped ? [] : slotLog?.items || [];
-            const slotCalories = slotItems.reduce(
-              (s, it) => s + it.calories * (it.portion || 1),
-              0
-            );
-
-            const messItems = messItemsBySlot[slot.slot] || [];
-            const loggedItemMap = new Map<string, MealItemLog>();
-            slotItems.forEach((it) => {
-              loggedItemMap.set(it.name.toLowerCase().trim(), it);
-            });
-
-            const isSelected = selectedSlot === slot.slot;
+            const messItems = messItemsBySlot[slotConfig.slot] || [];
 
             return (
-              <div
-                key={slot.slot}
-                id={`meal-slot-${slot.slot}`}
-                className={`p-4 flex flex-col gap-3 transition-all duration-200 ${
-                  isSkipped
-                    ? 'droplet-card opacity-65'
-                    : isSelected
-                    ? 'glass-card shadow-lg'
-                    : 'glass-card'
-                }`}
-                style={{
-                  borderLeftColor: isSelected ? slot.color : undefined,
-                  borderLeftWidth: isSelected ? '3px' : undefined,
-                  borderLeftStyle: isSelected ? 'solid' : undefined,
-                }}
-              >
-                {/* Header Row */}
-                <div className="flex items-center justify-between gap-2 pb-1">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div
-                      className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
-                      style={{
-                        backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : `${slot.color}22`,
-                        color: isSkipped ? 'rgba(255, 255, 255, 0.4)' : slot.color,
-                      }}
-                    >
-                      {slot.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className={`text-[15px] font-bold tracking-tight truncate ${
-                          isSkipped ? 'text-white/60 line-through' : 'text-white'
-                        }`}>
-                          {slot.label}
-                        </h3>
-                        {isSkipped && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[9.5px] font-bold bg-[#FF453A]/15 text-[#FF453A] uppercase tracking-wider shrink-0">
-                            Skipped
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[11px] text-[rgba(235,235,245,0.50)] whitespace-nowrap block">
-                        {slot.time}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {/* Meal Skipped Action / Permanently Locked Status */}
-                    {isSkipped ? (
-                      <div
-                        className="px-2 py-1 rounded-full text-[10.5px] font-semibold flex items-center gap-1 bg-[#FF453A]/15 text-[#FF453A] select-none cursor-default"
-                        title="Meal recorded as skipped"
-                      >
-                        <Prohibit size={12} weight="bold" />
-                        <span>Skipped</span>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleToggleSkipMeal(slot.slot)}
-                        className="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all flex items-center gap-1 active:scale-95 cursor-pointer select-none bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white touch-manipulation"
-                        title="Mark Meal as Skipped"
-                      >
-                        <Prohibit size={12} weight="bold" />
-                        <span>Skip</span>
-                      </button>
-                    )}
-
-                    {!isSkipped && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic('light');
-                          setCustomSlot(slot.slot);
-                          setCustomPortion(1);
-                          setIsAddCustomOpen(true);
-                        }}
-                        className="inline-flex items-center rounded-full bg-[#FF9F0A]/15 hover:bg-[#FF9F0A]/25 active:bg-[#FF9F0A]/30 active:scale-[0.97] transition-all cursor-pointer touch-manipulation select-none"
-                        title="Log Food with AI"
-                      >
-                        {slotCalories > 0 && (
-                          <>
-                            <span className="px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold tabular-nums tracking-tight">
-                              {slotCalories} kcal
-                            </span>
-                            <span className="w-[1px] h-3 bg-[#FF9F0A]/30" />
-                          </>
-                        )}
-                        <span className="flex items-center gap-1 px-2.5 py-1 text-[#FF9F0A] text-[11px] font-bold">
-                          <LunaComicBubbleIcon size={12} color="currentColor" />
-                          <span>Log</span>
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Direct Mess Menu Selectable Pills with Portion Badges */}
-                {!isSkipped && messItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
-                      Mess Menu Items:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {messItems.map((item, idx) => {
-                        const logged = loggedItemMap.get(item.name.toLowerCase().trim());
-                        const isSelected = !!logged;
-                        const portion = logged?.portion || 1;
-
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => handleToggleMessItem(slot.slot, item.name, item.estCalories)}
-                            className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-all select-none cursor-pointer active:scale-95 ${
-                              isSelected
-                                ? 'bg-[#FF9F0A] text-black font-semibold shadow-md shadow-[#FF9F0A]/20'
-                                : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
-                            }`}
-                          >
-                            <span>{item.name}</span>
-                            {isSelected && portion > 1 && (
-                              <span className="px-1.5 py-0.2 rounded-md bg-black/20 text-black text-[10px] font-bold">
-                                {portion}x
-                              </span>
-                            )}
-                            <span className={`text-[10.5px] tabular-nums ${isSelected ? 'text-black/75 font-semibold' : 'text-white/40'}`}>
-                              {isSelected ? item.estCalories * portion : item.estCalories} kcal
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Logged Foods List with Interactive Quantity / Portion Stepper */}
-                {slotItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-2 border-t border-white/[0.04]">
-                    <span className="text-[11px] font-semibold text-[rgba(235,235,245,0.45)]">
-                      Logged Food Items & Portions:
-                    </span>
-                    <div className="flex flex-col gap-1.5">
-                      {slotItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between px-3 py-2 rounded-[14px] glass-flat text-xs"
-                        >
-                          <div className="flex flex-col min-w-0 pr-2">
-                            <span className="text-white/95 font-semibold truncate">
-                              {item.name}
-                            </span>
-                            <span className="text-[10.5px] text-[rgba(235,235,245,0.50)]">
-                              {item.calories} kcal/serving
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            {/* Quantity Stepper [- quantity +] */}
-                            <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5 border border-white/10">
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, -1)}
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
-                                title="Decrease Quantity"
-                              >
-                                <Minus size={11} weight="bold" />
-                              </button>
-                              <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
-                                {item.portion || 1}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleUpdateItemPortion(slot.slot, item.id, 1)}
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-all cursor-pointer"
-                                title="Increase Quantity"
-                              >
-                                <Plus size={11} weight="bold" />
-                              </button>
-                            </div>
-
-                            {/* Total Computed Item Calories */}
-                            <span className="text-[#FF9F0A] font-bold tabular-nums min-w-[56px] text-right">
-                              {item.calories * (item.portion || 1)} kcal
-                            </span>
-
-                            {/* Quick Delete */}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveItem(slot.slot, item.id)}
-                              className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
-                              title="Delete food"
-                            >
-                              <Trash size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {/* Skipped Message State (Permanently Locked) */}
-                {isSkipped && (
-                  <div className="py-2.5 px-3 rounded-[16px] bg-[#FF453A]/10 border border-[#FF453A]/20 flex items-center gap-2 text-xs select-none">
-                    <Prohibit size={14} className="text-[#FF453A] shrink-0" weight="bold" />
-                    <span className="text-white/80 font-medium">
-                      Meal recorded as skipped (0 kcal). This entry is permanently locked.
-                    </span>
-                  </div>
-                )}
-              </div>
+              <MealSlotCard
+                key={slotConfig.slot}
+                slotConfig={slotConfig}
+                isSkipped={isSkipped}
+                slotItems={slotItems}
+                messItems={messItems}
+                isSelected={selectedSlot === slotConfig.slot}
+                onToggleSkip={handleToggleSkipMeal}
+                onOpenCustomLog={handleOpenCustomLog}
+                onToggleMessItem={handleToggleMessItem}
+                onUpdatePortion={handleUpdateItemPortion}
+                onRemoveItem={handleRemoveItem}
+              />
             );
           })}
         </div>
@@ -880,7 +643,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
           {/* AI Analysis Status / Insights Card */}
           {isAiAnalyzing && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 text-[#FF9F0A] text-xs font-semibold animate-pulse">
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] text-xs font-semibold animate-pulse">
               <LunaComicBubbleIcon size={14} color="#FF9F0A" className="animate-spin" />
               <span>AI is analyzing food ingredients and calculating calories...</span>
             </div>
@@ -888,7 +651,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
           {/* Multi-Item AI Detection Card */}
           {multiItemEstimate && multiItemEstimate.items.length > 1 && !isAiAnalyzing && (
-            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/25">
+            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-[#FF9F0A]/10 ">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
                   <LunaComicBubbleIcon size={13} color="#FF9F0A" />
@@ -914,7 +677,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
           {/* Single Item AI Estimate Card */}
           {aiEstimate && !multiItemEstimate && !isAiAnalyzing && (
-            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] ">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold text-[#FF9F0A]">
                   <LunaComicBubbleIcon size={13} color="#FF9F0A" />
@@ -1025,7 +788,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           </div>
 
           {/* Live Calorie Total Preview */}
-          <div className="p-3.5 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-between">
+          <div className="p-3.5 rounded-2xl bg-[#FF9F0A]/10 flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-xs font-semibold text-white/90">
                 Total Calories Auto-Applied:

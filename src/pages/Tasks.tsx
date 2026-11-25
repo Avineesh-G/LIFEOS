@@ -38,10 +38,20 @@ export default function Tasks({ data, updateData }: TasksProps) {
 
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
+  // Defer background task notification sync so page entry animation completes at 120Hz
   useEffect(() => {
-    if (data?.tasks) {
-      syncTaskNotifications(data.tasks, data.settings?.notificationLeadMinutes || 10);
-    }
+    if (!data?.tasks) return;
+    const lead = data.settings?.notificationLeadMinutes || 10;
+    const timer = setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(() => {
+          syncTaskNotifications(data.tasks, lead).catch(() => {});
+        }, { timeout: 2500 });
+      } else {
+        syncTaskNotifications(data.tasks, lead).catch(() => {});
+      }
+    }, 1200);
+    return () => clearTimeout(timer);
   }, [data?.tasks, data?.settings?.notificationLeadMinutes]);
 
   const counts = useMemo(() => {

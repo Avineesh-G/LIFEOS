@@ -44,6 +44,16 @@ Violations cause jank, input delay, or battery drain on physical Android devices
   (already applied globally in `index.css`). Do not remove this rule.
 - **`navigate()` inside sheets or modals** must be wrapped in `startTransition(...)`. This marks
   the new route render as low-priority so sheet close animations complete without stalling.
+- **Zero Page Transitions on Routes**: Do NOT wrap `useRoutes(...)` or `<Routes>` in
+  `<AnimatePresence>` or clone-frozen route wrappers (`FrozenRouteOutlet`). Page switching must
+  be instantaneous (`duration: 0`) so dual-DOM mounting cannot stall Android WebView or freeze
+  touch input.
+- **No Framer Motion `layoutId` or `transition-all`**: Never use shared-layout `layoutId`
+  (causes synchronous `getBoundingClientRect` layout measurements) or `transition-all` on cards,
+  calendar cells, or pills. Use `transition-colors` / `transition-transform` with static styling.
+- **Non-Blocking Local Persistence**: Never run synchronous `JSON.stringify(fullAppData)` inside
+  react event handlers or `useEffect` on every state tick. Batch writes via `requestIdleCallback`
+  / debounced scheduler with `pagehide` synchronous flush (see `src/hooks/useData.ts`).
 - **MutationObserver on `document.body`**: Do not add MutationObservers with `subtree: true`.
   They fire synchronously on every DOM mutation on the main thread. Use custom events instead:
   - `window.dispatchEvent(new Event('lifeos-subinterface-open'))` to signal sub-interface open

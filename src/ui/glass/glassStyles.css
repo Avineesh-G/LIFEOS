@@ -18,17 +18,18 @@
   position: relative;
   overflow: hidden;
   border-radius: 24px;
-  /* Pristine continuous liquid water meniscus reflection: top specular highlight + deep OLED body */
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.055) 0%, 
-      rgba(255, 255, 255, 0.010) 26%, 
-      rgba(20, 20, 24, 0.98) 100%
+  /* Realistic volumetric water meniscus optics: curved dome refraction + deep OLED body */
+  background:
+    radial-gradient(ellipse 110% 46% at 50% -14%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.015) 55%, transparent 82%),
+    radial-gradient(ellipse 80% 35% at 50% 108%, rgba(0, 0, 0, 0.42) 0%, transparent 75%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.048) 0%,
+      rgba(255, 255, 255, 0.008) 30%,
+      rgba(18, 18, 22, 0.98) 100%
     ),
     #141416;
   border: none !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+  box-shadow:
     0 16px 40px -8px rgba(0, 0, 0, 0.85),
     0 4px 12px -2px rgba(0, 0, 0, 0.60);
   /* Main cards remain rock-solid without whole-card deformation */
@@ -40,16 +41,17 @@
   position: relative;
   overflow: hidden;
   border-radius: 28px;
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.065) 0%, 
-      rgba(255, 255, 255, 0.014) 28%, 
-      rgba(22, 22, 26, 0.98) 100%
+  background:
+    radial-gradient(ellipse 115% 52% at 50% -12%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.018) 55%, transparent 84%),
+    radial-gradient(ellipse 90% 40% at 50% 105%, color-mix(in srgb, var(--hero-accent, #0A84FF) 10%, transparent) 0%, transparent 76%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.058) 0%,
+      rgba(255, 255, 255, 0.012) 32%,
+      rgba(20, 20, 24, 0.98) 100%
     ),
     #161618;
   border: none !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+  box-shadow:
     0 20px 48px -10px rgba(0, 0, 0, 0.92),
     0 6px 16px -2px rgba(0, 0, 0, 0.65);
   /* Main hero stays rock-solid without whole-card deformation */
@@ -62,19 +64,19 @@
   position: relative;
   overflow: hidden;
   border-radius: 18px;
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.045) 0%, 
-      rgba(255, 255, 255, 0.008) 32%, 
-      rgba(26, 26, 30, 0.98) 100%
+  background:
+    radial-gradient(ellipse 105% 48% at 50% -14%, rgba(255, 255, 255, 0.075) 0%, rgba(255, 255, 255, 0.012) 55%, transparent 82%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.042) 0%,
+      rgba(255, 255, 255, 0.008) 34%,
+      rgba(24, 24, 28, 0.98) 100%
     ),
     #1A1A1E;
   border: none !important;
-  box-shadow: 
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
-    0 6px 20px -4px rgba(0, 0, 0, 0.70),
-    0 2px 6px -1px rgba(0, 0, 0, 0.40);
-  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease;
+  box-shadow:
+    0 6px 20px -4px rgba(0, 0, 0, 0.72),
+    0 2px 6px -1px rgba(0, 0, 0, 0.42);
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
 }
 
 .glass-tile:active,
@@ -84,13 +86,13 @@
 
 /* ── Active / Selected Water Droplet State ── */
 .droplet-active {
-  background: 
-    linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(36, 36, 44, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 95% 55% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 78%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(34, 34, 42, 0.98) 100%),
     #24242C !important;
   border: none !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 8px 22px rgba(0, 0, 0, 0.65) !important;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.68) !important;
 }
 
 /* ── Row Group Container: Water Droplet Meniscus Effect (.glass-row) ── */
@@ -98,24 +100,25 @@
   position: relative;
   overflow: hidden;
   border-radius: 22px;
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.038) 0%, 
-      rgba(255, 255, 255, 0.006) 35%, 
-      rgba(22, 22, 26, 0.98) 100%
+  background:
+    radial-gradient(ellipse 100% 42% at 50% -14%, rgba(255, 255, 255, 0.06) 0%, transparent 80%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.036) 0%,
+      rgba(255, 255, 255, 0.006) 35%,
+      rgba(20, 20, 24, 0.98) 100%
     ),
     #16161A;
   border: none !important;
-  box-shadow: 
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.07),
+  box-shadow:
     0 10px 28px -6px rgba(0, 0, 0, 0.80),
     0 3px 8px -2px rgba(0, 0, 0, 0.50);
 }
 
 /* ── Flat Sub-Card / Nested Droplet Item (.glass-flat) ── */
 .glass-flat {
-  background: 
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(24, 24, 28, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -15%, rgba(255, 255, 255, 0.05) 0%, transparent 78%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.032) 0%, rgba(24, 24, 28, 0.98) 100%),
     #18181C;
   border-radius: 16px;
   border: none !important;
@@ -127,48 +130,49 @@
 .liquid-sheet {
   position: relative;
   overflow: hidden;
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.050) 0%, 
-      rgba(255, 255, 255, 0.008) 25%, 
-      rgba(20, 20, 24, 0.99) 100%
+  background:
+    radial-gradient(ellipse 110% 45% at 50% -10%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.014) 55%, transparent 82%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.048) 0%,
+      rgba(255, 255, 255, 0.008) 25%,
+      rgba(18, 18, 22, 0.99) 100%
     ),
     #141416;
   border: none !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+  box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.95);
 }
 
 /* ── Floating Navigation Capsule (.glass-nav) ── */
 .glass-nav {
-  background: 
-    linear-gradient(180deg, 
-      rgba(255, 255, 255, 0.045) 0%, 
-      rgba(255, 255, 255, 0.008) 40%, 
-      rgba(20, 20, 24, 0.98) 100%
+  background:
+    radial-gradient(ellipse 105% 60% at 50% -18%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.016) 58%, transparent 85%),
+    radial-gradient(ellipse 85% 40% at 50% 112%, rgba(0, 0, 0, 0.55) 0%, transparent 78%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.042) 0%,
+      rgba(255, 255, 255, 0.008) 42%,
+      rgba(16, 16, 20, 0.98) 100%
     ),
     #141416;
   border: none !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 18px 44px -8px rgba(0, 0, 0, 0.95);
   position: relative;
 }
 
 /* ── Grouped Toolbar Capsule (.glass-grouped-toolbar) ── */
 .glass-grouped-toolbar {
-  background: 
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.008) 40%, #18181C 100%),
+  background:
+    radial-gradient(ellipse 100% 50% at 50% -15%, rgba(255, 255, 255, 0.06) 0%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.036) 0%, rgba(255, 255, 255, 0.008) 40%, #18181C 100%),
     #18181C;
   border: none !important;
-  box-shadow: 
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.08),
+  box-shadow:
     0 8px 24px -4px rgba(0, 0, 0, 0.75);
   position: relative;
 }
 
-/* ── Water Droplet Top Refraction Rim Light & Specular Gleam ── */
+/* ── Water Droplet Soft Caustic Refraction (Zero hard white lines) ── */
 .nav-rim-light,
 .specular-rim {
   position: relative;
@@ -178,13 +182,11 @@
 .specular-rim::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 50%, transparent 100%);
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 85% 32% at 50% 0%, rgba(255, 255, 255, 0.07) 0%, transparent 72%);
   pointer-events: none;
-  z-index: 10;
+  z-index: 1;
 }
 
 /* ── Universal Water Liquid Reflection Utility ── */
@@ -301,27 +303,27 @@
   background-color: rgba(0, 0, 0, 0.75) !important;
 }
 
-/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pristine Water Liquid Glass, Specular Meniscus & Zero Dock Blur) */
+/* TIER 1 ONLY: Flagship / Top-Tier Devices (Pristine Water Liquid Glass, Soft Volumetric Caustics) */
 .tier-1 .glass-card,
 .tier-1 .droplet-card {
-  background: 
-    radial-gradient(ellipse 95% 55% at 50% -8%, rgba(255, 255, 255, 0.085) 0%, rgba(255, 255, 255, 0.012) 50%, transparent 80%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.008) 30%, rgba(20, 20, 24, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 105% 52% at 50% -10%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.015) 52%, transparent 82%),
+    radial-gradient(ellipse 80% 35% at 50% 108%, rgba(0, 0, 0, 0.45) 0%, transparent 75%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.008) 30%, rgba(18, 18, 22, 0.98) 100%),
     #141416 !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+  box-shadow:
     0 20px 48px -10px rgba(0, 0, 0, 0.95),
     0 6px 16px -4px rgba(0, 0, 0, 0.65) !important;
   border: none !important;
 }
 
 .tier-1 .glass-hero {
-  background: 
-    radial-gradient(ellipse 95% 60% at 50% -10%, rgba(255, 255, 255, 0.095) 0%, rgba(255, 255, 255, 0.016) 55%, transparent 85%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.012) 32%, rgba(22, 22, 26, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 110% 56% at 50% -12%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.018) 56%, transparent 86%),
+    radial-gradient(ellipse 90% 42% at 50% 106%, color-mix(in srgb, var(--hero-accent, #0A84FF) 12%, transparent) 0%, transparent 78%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.062) 0%, rgba(255, 255, 255, 0.012) 32%, rgba(20, 20, 24, 0.98) 100%),
     #161618 !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+  box-shadow:
     0 24px 56px -12px rgba(0, 0, 0, 0.96),
     0 8px 20px -4px rgba(0, 0, 0, 0.70) !important;
   border: none !important;
@@ -329,36 +331,33 @@
 
 .tier-1 .glass-tile,
 .tier-1 .droplet-tile {
-  background: 
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255, 255, 255, 0.065) 0%, transparent 80%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.008) 38%, rgba(26, 26, 30, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 98% 48% at 50% -12%, rgba(255, 255, 255, 0.075) 0%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.008) 38%, rgba(24, 24, 28, 0.98) 100%),
     #1A1A1E !important;
-  box-shadow: 
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
+  box-shadow:
     0 10px 28px -4px rgba(0, 0, 0, 0.80),
     0 3px 8px -1px rgba(0, 0, 0, 0.45) !important;
   border: none !important;
 }
 
 .tier-1 .glass-row {
-  background: 
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255, 255, 255, 0.06) 0%, transparent 80%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.042) 0%, rgba(22, 22, 26, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 95% 48% at 50% -12%, rgba(255, 255, 255, 0.065) 0%, transparent 80%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.042) 0%, rgba(20, 20, 24, 0.98) 100%),
     #16161A !important;
-  box-shadow: 
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.09),
+  box-shadow:
     0 12px 32px -6px rgba(0, 0, 0, 0.82) !important;
   border: none !important;
 }
 
 .tier-1 .glass-sheet,
 .tier-1 .liquid-sheet {
-  background: 
-    radial-gradient(ellipse 95% 55% at 50% -8%, rgba(255, 255, 255, 0.08) 0%, transparent 75%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.010) 25%, rgba(18, 18, 22, 0.99) 100%),
+  background:
+    radial-gradient(ellipse 105% 52% at 50% -10%, rgba(255, 255, 255, 0.085) 0%, transparent 76%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.052) 0%, rgba(255, 255, 255, 0.010) 25%, rgba(16, 16, 20, 0.99) 100%),
     #121216 !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+  box-shadow:
     0 28px 72px rgba(0, 0, 0, 0.96) !important;
   border: none !important;
 }
@@ -366,13 +365,13 @@
 .tier-1 .glass-nav {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: 
-    radial-gradient(ellipse 90% 60% at 50% -20%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.018) 60%, transparent 85%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(20, 20, 24, 0.98) 100%),
+  background:
+    radial-gradient(ellipse 105% 60% at 50% -18%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.018) 58%, transparent 85%),
+    radial-gradient(ellipse 85% 40% at 50% 112%, rgba(0, 0, 0, 0.55) 0%, transparent 78%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.048) 0%, rgba(16, 16, 20, 0.98) 100%),
     #141416 !important;
   border: none !important;
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+  box-shadow:
     0 18px 44px -8px rgba(0, 0, 0, 0.95) !important;
 }
 

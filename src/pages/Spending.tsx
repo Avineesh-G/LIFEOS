@@ -57,30 +57,32 @@ export default function Spending({ data, updateData }: SpendingProps) {
   const [lentStatusFilter, setLentStatusFilter] = useState<'all' | 'pending' | 'returned'>('all');
   const [lentDirectionFilter, setLentDirectionFilter] = useState<'all' | 'given' | 'borrowed'>('all');
 
-  // Month stats for Expenses
+  // Single-pass month & today stats for Expenses
   const { monthExpenses, monthTotal, todayTotal, categoryBreakdown } = useMemo(() => {
     const nowDate = new Date();
     const start = startOfMonth(nowDate);
     const end = endOfMonth(nowDate);
     const todayStr = format(nowDate, 'yyyy-MM-dd');
 
-    const mExpenses = (data.expenses || []).filter((e) => {
-      try {
-        return isWithinInterval(parseISO(e.date), { start, end });
-      } catch {
-        return false;
-      }
-    });
-
-    const mTotal = mExpenses.reduce((sum, e) => sum + e.amount, 0);
-    const tTotal = (data.expenses || [])
-      .filter((e) => e.date === todayStr)
-      .reduce((sum, e) => sum + e.amount, 0);
-
+    const mExpenses: Expense[] = [];
+    let mTotal = 0;
+    let tTotal = 0;
     const catTotals: Record<string, number> = {};
-    mExpenses.forEach((e) => {
-      catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
-    });
+
+    for (const e of data.expenses || []) {
+      if (e.date === todayStr) {
+        tTotal += e.amount;
+      }
+      try {
+        if (isWithinInterval(parseISO(e.date), { start, end })) {
+          mExpenses.push(e);
+          mTotal += e.amount;
+          catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+        }
+      } catch {
+        // skip malformed dates
+      }
+    }
 
     const breakdown = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
 

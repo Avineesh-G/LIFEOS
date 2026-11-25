@@ -1,211 +1,23 @@
-import { getLetAiMakeChanges } from '../utils/aiSecurity';
 import type { Task, ShoppingList, ShoppingItem, NoteItem } from '../types';
 import { createShoppingList, generateShoppingId } from '../utils/shoppingStorage';
 import { saveOuting } from '../features/outings/storage/outingsIdb';
 import { DEFAULT_ME_PERSON } from '../features/outings/constants';
 import type { Outing } from '../features/outings/types';
+import {
+  extractAiActionProposals,
+  isAllowListedAction,
+  validateToolArguments,
+  type AiActionProposal,
+  type AiActionType,
+} from './ai/toolRegistry.ts';
 
-export type AiActionType = 
-  | 'ADD_TASK' 
-  | 'LOG_MEAL' 
-  | 'LOG_WORKOUT' 
-  | 'ADD_SHOPPING_ITEM'
-  | 'ADD_MULTIPLE_SHOPPING_ITEMS'
-  | 'CREATE_OUTING'
-  | 'ADD_EXPENSE'
-  | 'ADD_NOTE';
-
-export interface AiActionProposal {
-  id: string;
-  type: AiActionType;
-  title: string;
-  description: string;
-  payload: Record<string, any>;
-  confirmed: boolean;
-  executed: boolean;
-}
-
-/**
- * Robust JSON parser with automatic error-correction for model outputs:
- * - Handles trailing commas
- * - Handles unclosed closing braces
- * - Handles array of action proposals
- */
-function cleanAndParseJsonAction(raw: string): any {
-  if (!raw) return null;
-  const trimmed = raw.trim();
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    let sanitized = trimmed;
-    // 1. Remove trailing commas before closing braces/brackets
-    sanitized = sanitized.replace(/,\s*([}\]])/g, '$1');
-    try {
-      return JSON.parse(sanitized);
-    } catch {
-      // 2. Try closing brace if missing
-      if (sanitized.startsWith('{') && !sanitized.endsWith('}')) {
-        try {
-          return JSON.parse(sanitized + '}');
-        } catch {}
-      }
-      return null;
-    }
-  }
-}
-
-export function extractAiActionProposals(text: string): { cleanText: string; proposals: AiActionProposal[] } {
-  if (!getLetAiMakeChanges()) {
-    return { cleanText: text, proposals: [] };
-  }
-
-  const proposals: AiActionProposal[] = [];
-  let cleanText = text;
-
-  // 1. Match standard markdown fenced action blocks (```json_action, ```json, ```action)
-  const actionRegex = /```(?:json_action|json|action)?\s*([\s\S]*?(?:\{|\[)[\s\S]*?"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*```/gi;
-  let match;
-
-  while ((match = actionRegex.exec(text)) !== null) {
-    try {
-      const rawJson = match[1];
-      const parsed = cleanAndParseJsonAction(rawJson);
-      const items = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
-
-      for (const item of items) {
-        if (item && typeof item.type === 'string' && isAllowListedAction(item.type.toUpperCase())) {
-          const type = item.type.toUpperCase() as AiActionType;
-          const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-          proposals.push({
-            id,
-            type,
-            title: buildActionTitle({ ...item, type }),
-            description: buildActionDescription({ ...item, type }),
-            payload: item.payload || {},
-            confirmed: false,
-            executed: false,
-          });
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to parse AI action proposal JSON:', err);
-    }
-  }
-
-  cleanText = cleanText.replace(actionRegex, '').trim();
-
-  // 2. Fallback: match un-fenced JSON at the end of the text
-  if (proposals.length === 0) {
-    const rawJsonRegex = /((?:\{|\[)\s*"type"\s*:\s*"(?:ADD_TASK|ADD_EXPENSE|ADD_SHOPPING_ITEM|ADD_MULTIPLE_SHOPPING_ITEMS|CREATE_OUTING|LOG_MEAL|LOG_WORKOUT|ADD_NOTE)"[\s\S]*?(?:\}|\]))\s*$/i;
-    const rawMatch = rawJsonRegex.exec(cleanText);
-    if (rawMatch) {
-      try {
-        const parsed = cleanAndParseJsonAction(rawMatch[1]);
-        const items = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
-
-        for (const item of items) {
-          if (item && typeof item.type === 'string' && isAllowListedAction(item.type.toUpperCase())) {
-            const type = item.type.toUpperCase() as AiActionType;
-            const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-            proposals.push({
-              id,
-              type,
-              title: buildActionTitle({ ...item, type }),
-              description: buildActionDescription({ ...item, type }),
-              payload: item.payload || {},
-              confirmed: false,
-              executed: false,
-            });
-          }
-        }
-        cleanText = cleanText.replace(rawJsonRegex, '').trim();
-      } catch (err) {
-        console.warn('Failed to parse fallback AI action JSON:', err);
-      }
-    }
-  }
-
-  return { cleanText, proposals };
-}
-
-function isAllowListedAction(type: string): boolean {
-  return [
-    'ADD_TASK', 
-    'LOG_MEAL', 
-    'LOG_WORKOUT', 
-    'ADD_SHOPPING_ITEM', 
-    'ADD_MULTIPLE_SHOPPING_ITEMS',
-    'CREATE_OUTING',
-    'ADD_EXPENSE',
-    'ADD_NOTE',
-    ].includes(type);
-}
-
-function buildActionTitle(parsed: any): string {
-  const p = parsed.payload || {};
-  switch (parsed.type) {
-    case 'ADD_TASK':
-      return `Add Task: ${p.text || p.title || 'New Task'}`;
-    case 'ADD_EXPENSE':
-      return `Log Expense: ₹${p.amount || 0} (${p.category || 'General'})`;
-    case 'ADD_SHOPPING_ITEM':
-      return `Add to Shopping: ${p.name || 'Item'}`;
-    case 'ADD_MULTIPLE_SHOPPING_ITEMS':
-      return `Create Shopping List: ${p.listName || 'Outing Checklist'} (${p.items?.length || 0} items)`;
-    case 'CREATE_OUTING':
-      return `Plan Outing: ${p.name || 'Weekend Outing'}`;
-    case 'LOG_MEAL':
-      return `Log Meal: ${p.name || 'Meal'} (${p.calories || 0} kcal)`;
-    case 'LOG_WORKOUT':
-      return `Log Workout: ${p.type || 'Session'}`;
-    case 'ADD_NOTE':
-      return `Create Note: ${p.title || 'Untitled Note'}`;
-    default:
-      return 'Proposed Action';
-  }
-}
-
-function buildActionDescription(parsed: any): string {
-  const p = parsed.payload || {};
-  switch (parsed.type) {
-    case 'ADD_TASK': {
-      const due = p.dueDate || p.date || 'Today';
-      const timeStr = p.startTime ? ` at ${p.startTime}` : '';
-      const prio = p.priority ? ` • Priority: ${p.priority}` : '';
-      return `Due: ${due}${timeStr}${prio}`;
-    }
-    case 'ADD_EXPENSE': {
-      const cat = p.category ? `Category: ${p.category}` : 'General';
-      const note = p.note ? ` • Note: ${p.note}` : '';
-      const date = p.date ? ` • Date: ${p.date}` : '';
-      return `${cat}${note}${date}`;
-    }
-    case 'ADD_SHOPPING_ITEM':
-      return `Item: "${p.name || 'Item'}" ${p.quantity ? `(${p.quantity})` : ''} ${p.estimatedCost ? `• Est: ₹${p.estimatedCost}` : ''}`;
-    case 'ADD_MULTIPLE_SHOPPING_ITEMS': {
-      const itemsList = Array.isArray(p.items) 
-        ? p.items.map((i: any) => typeof i === 'string' ? i : i.name).slice(0, 4).join(', ') 
-        : '';
-      return `Items: ${itemsList}${p.items && p.items.length > 4 ? ` + ${p.items.length - 4} more` : ''}`;
-    }
-    case 'CREATE_OUTING': {
-      const date = p.startDate || p.date || 'Upcoming';
-      const place = p.place ? ` @ ${p.place}` : '';
-      const budget = p.budget ? ` • Budget: ₹${p.budget}` : '';
-      return `Date: ${date}${place}${budget}`;
-    }
-    case 'LOG_MEAL':
-      return `Calories: ${p.calories || 0} kcal • Protein: ${p.protein || 0}g • Type: ${p.mealType || 'General'}`;
-    case 'LOG_WORKOUT':
-      return `Duration: ${p.durationMinutes || 30} mins • Notes: ${p.notes || 'None'}`;
-    case 'ADD_NOTE': {
-      const preview = p.content ? (p.content.length > 60 ? p.content.slice(0, 57) + '...' : p.content) : 'Empty note';
-      return `Note: ${preview}`;
-    }
-    default:
-      return '';
-  }
-}
+export {
+  extractAiActionProposals,
+  isAllowListedAction,
+  validateToolArguments,
+  type AiActionProposal,
+  type AiActionType,
+};
 
 /**
  * Safely executes a confirmed action proposal using LifeOS data mutation routines.
@@ -216,13 +28,18 @@ export async function executeConfirmedAiAction(
   currentData: any
 ): Promise<{ success: boolean; message: string; undoPayload?: any }> {
   const p = proposal.payload;
+  const validation = validateToolArguments(proposal.type, p);
+  if (!validation.valid) {
+    return { success: false, message: validation.error || 'Invalid action arguments.' };
+  }
+
   try {
     switch (proposal.type) {
       case 'ADD_TASK': {
         const todayStr = new Date().toISOString().split('T')[0];
         const newTask: Task = {
           id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          text: p.text || p.title || 'New Task',
+          text: String(p.text || p.title || 'New Task').trim(),
           subtask: p.subtask || '',
           completed: false,
           date: p.dueDate || p.date || todayStr,
@@ -234,10 +51,38 @@ export async function executeConfirmedAiAction(
         const existingTasks = Array.isArray(currentData.tasks) ? currentData.tasks : [];
         const updatedTasks = [newTask, ...existingTasks];
         await updateData({ tasks: updatedTasks });
-        return { 
-          success: true, 
-          message: `Task "${newTask.text}" successfully added to To-Do Tasks.`, 
-          undoPayload: { tasks: existingTasks } 
+        return {
+          success: true,
+          message: `Task "${newTask.text}" successfully added to To-Do Tasks.`,
+          undoPayload: { tasks: existingTasks },
+        };
+      }
+
+      case 'UPDATE_TASK': {
+        const existingTasks: Task[] = Array.isArray(currentData.tasks) ? currentData.tasks : [];
+        const targetIdx = existingTasks.findIndex(
+          (t) =>
+            (typeof p.id === 'string' && t.id === p.id) ||
+            (typeof p.text === 'string' && t.text.toLowerCase() === p.text.toLowerCase())
+        );
+        if (targetIdx === -1) {
+          return { success: false, message: 'Matching task was not found in your To-Do list.' };
+        }
+        const updatedTasks = existingTasks.map((t, idx) =>
+          idx === targetIdx
+            ? {
+                ...t,
+                ...(typeof p.completed === 'boolean' ? { completed: p.completed } : {}),
+                ...(typeof p.newText === 'string' ? { text: p.newText.trim() } : {}),
+                ...(typeof p.dueDate === 'string' ? { dueDate: p.dueDate, date: p.dueDate } : {}),
+              }
+            : t
+        );
+        await updateData({ tasks: updatedTasks });
+        return {
+          success: true,
+          message: `Updated task "${existingTasks[targetIdx].text}".`,
+          undoPayload: { tasks: existingTasks },
         };
       }
 
@@ -280,16 +125,16 @@ export async function executeConfirmedAiAction(
           updatedLists = [newList];
         } else {
           const targetIndex = 0;
-          updatedLists = existingLists.map((l, idx) => 
+          updatedLists = existingLists.map((l, idx) =>
             idx === targetIndex ? { ...l, items: [newItem, ...l.items], updatedAt: new Date().toISOString() } : l
           );
         }
 
         await updateData({ shoppingLists: updatedLists });
-        return { 
-          success: true, 
-          message: `Added "${newItem.name}" to shopping list.`, 
-          undoPayload: { shoppingLists: existingLists } 
+        return {
+          success: true,
+          message: `Added "${newItem.name}" to shopping list.`,
+          undoPayload: { shoppingLists: existingLists },
         };
       }
 
@@ -297,7 +142,7 @@ export async function executeConfirmedAiAction(
         const existingLists: ShoppingList[] = Array.isArray(currentData.shoppingLists) ? currentData.shoppingLists : [];
         const listName = p.listName || 'Outing Preparation Checklist';
         const rawItems = Array.isArray(p.items) ? p.items : [];
-        
+
         const shoppingItems: ShoppingItem[] = rawItems.map((item: any) => ({
           id: generateShoppingId('item'),
           name: typeof item === 'string' ? item : item.name || 'Item',
@@ -310,17 +155,17 @@ export async function executeConfirmedAiAction(
         const updatedLists = [newList, ...existingLists];
 
         await updateData({ shoppingLists: updatedLists });
-        return { 
-          success: true, 
-          message: `Created shopping checklist "${listName}" with ${shoppingItems.length} items.`, 
-          undoPayload: { shoppingLists: existingLists } 
+        return {
+          success: true,
+          message: `Created shopping checklist "${listName}" with ${shoppingItems.length} items.`,
+          undoPayload: { shoppingLists: existingLists },
         };
       }
 
       case 'CREATE_OUTING': {
         const todayStr = new Date().toISOString().split('T')[0];
         const outingBudgetPaise = p.budget ? Math.round(Number(p.budget) * 100) : 0;
-        
+
         const newOuting: Outing = {
           id: `outing_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
           name: p.name || p.title || 'Weekend Outing',
@@ -343,9 +188,9 @@ export async function executeConfirmedAiAction(
           console.warn('Could not write outing to IDB directly:', idbErr);
         }
 
-        return { 
-          success: true, 
-          message: `Outing "${newOuting.name}" added to Outings planner.` 
+        return {
+          success: true,
+          message: `Outing "${newOuting.name}" added to Outings planner.`,
         };
       }
 
@@ -364,7 +209,7 @@ export async function executeConfirmedAiAction(
         return {
           success: true,
           message: `Logged ₹${newExpense.amount} (${newExpense.category}) in Spending.`,
-          undoPayload: { expenses: existingExpenses }
+          undoPayload: { expenses: existingExpenses },
         };
       }
 
@@ -380,10 +225,10 @@ export async function executeConfirmedAiAction(
         const existingLogs = Array.isArray(currentData.nutritionLogs) ? currentData.nutritionLogs : [];
         const updatedLogs = [newMeal, ...existingLogs];
         await updateData({ nutritionLogs: updatedLogs });
-        return { 
-          success: true, 
-          message: `Logged "${newMeal.name}" (${newMeal.calories} kcal).`, 
-          undoPayload: { nutritionLogs: existingLogs } 
+        return {
+          success: true,
+          message: `Logged "${newMeal.name}" (${newMeal.calories} kcal).`,
+          undoPayload: { nutritionLogs: existingLogs },
         };
       }
 
@@ -395,14 +240,19 @@ export async function executeConfirmedAiAction(
           durationMinutes: Number(p.durationMinutes) || 30,
           notes: p.notes || 'AI logged session',
           exercises: [],
+          isSaved: true,
         };
-        const existingWorkouts = Array.isArray(currentData.workouts) ? currentData.workouts : [];
+        const existingWorkouts = Array.isArray(currentData.workoutLogs)
+          ? currentData.workoutLogs
+          : Array.isArray(currentData.workouts)
+          ? currentData.workouts
+          : [];
         const updatedWorkouts = [newWorkout, ...existingWorkouts];
-        await updateData({ workouts: updatedWorkouts });
-        return { 
-          success: true, 
-          message: `Workout "${newWorkout.type}" logged.`, 
-          undoPayload: { workouts: existingWorkouts } 
+        await updateData({ workoutLogs: updatedWorkouts });
+        return {
+          success: true,
+          message: `Workout "${newWorkout.type}" logged.`,
+          undoPayload: { workoutLogs: existingWorkouts },
         };
       }
 

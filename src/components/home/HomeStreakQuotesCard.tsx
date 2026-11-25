@@ -14,7 +14,7 @@ const CATEGORY_TINTS: Record<string, string> = {
   communication: '#FB7185', // Coral Rose (Voice & Motivation)
 };
 
-export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
+const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
   // Deterministically fetch today's unique pool of quotes (guaranteed not to repeat on the same date)
   const quotes: QuoteItem[] = useMemo(() => {
     return getDailyQuotesStream(new Date(), 10);
@@ -86,4 +86,6 @@ export default function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps =
       </div>
     </div>
   );
-}
+});
+
+export default HomeStreakQuotesCard;

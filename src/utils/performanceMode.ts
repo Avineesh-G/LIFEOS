@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Preferences } from '@capacitor/preferences';
+import { detectDeviceTier } from './performanceEngine';
 
 export type PerformanceMode = 'auto' | 'full' | 'lite';
 
@@ -64,10 +65,15 @@ function notifyPerfChange() {
 
 export function isLowEndDevice(): boolean {
   if (typeof window === 'undefined') return false;
-  const nav = window.navigator as any;
-  if (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) return true;
-  if (nav.deviceMemory && nav.deviceMemory <= 4) return true;
-  return false;
+  try {
+    const metrics = detectDeviceTier();
+    return metrics.tier === 3 || metrics.isLowStorage || metrics.isLowPower;
+  } catch {
+    const nav = window.navigator as any;
+    if (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4) return true;
+    if (nav.deviceMemory && nav.deviceMemory <= 4) return true;
+    return false;
+  }
 }
 
 export function isAutoLiteDevice(): boolean {
@@ -131,15 +137,12 @@ export function applyPerformanceMode(mode: PerformanceMode = currentPerfMode): v
 
   if (effective === 'lite' || reduceBlur) {
     root.classList.add('perf-lite', 'reduce-blur');
-    root.style.setProperty('--blur', '0px');
-    root.style.setProperty('--glass-blur', 'none');
-    root.style.setProperty('--card-backdrop-blur', 'none');
   } else {
     root.classList.remove('perf-lite', 'reduce-blur');
-    root.style.setProperty('--blur', '24px');
-    root.style.setProperty('--glass-blur', 'blur(24px) saturate(140%)');
-    root.style.setProperty('--card-backdrop-blur', 'blur(24px)');
   }
+  root.style.setProperty('--blur', '0px');
+  root.style.setProperty('--glass-blur', 'none');
+  root.style.setProperty('--card-backdrop-blur', 'none');
 }
 
 export function applyPerfToDocument() {
