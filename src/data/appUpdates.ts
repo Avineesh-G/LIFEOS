@@ -25,12 +25,12 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
-    id: 'update-v3-4-13-new-interfaces-luna-copilot-warm-brown',
-    category: '6 New Interfaces, Luna Co-Pilot & Warm Brown',
+    id: 'update-v4-0-0-new-interfaces-luna-copilot-warm-brown',
+    category: 'LifeOS 4.0: 6 New Interfaces, Luna Co-Pilot & Warm Brown',
     icon: React.createElement(RocketLaunch, { size: 18, weight: 'duotone' }),
-    title: '6 New LifeOS Interfaces, Luna AI Co-Pilot, A–Z Hub & Fixed Warm Brown Theme',
-    dateTime: '25 Nov 2026, 10:30 PM',
-    fullDateTime: 'Wednesday, November 25, 2026 at 10:30:00 PM IST',
+    title: 'LifeOS v4.0: 6 New Interfaces, Luna AI Co-Pilot, A–Z Hub & Fixed Warm Brown Theme',
+    dateTime: '27 Nov 2026, 01:25 AM',
+    fullDateTime: 'Friday, November 27, 2026 at 01:25:00 AM IST',
     tag: `v${CURRENT_VERSION_NAME} • Latest`,
     colorClass: 'text-[var(--app-accent-text)]',
     summary:
