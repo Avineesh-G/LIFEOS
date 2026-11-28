@@ -25,13 +25,32 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v4-2-0-top-header-scrim-meal-card-mobile-polish',
+    category: 'Top Header Fade & Nutrition Mobile Layout',
+    icon: React.createElement(ForkKnife, { size: 18, weight: 'duotone' }),
+    title: 'LifeOS v4.2.0: Progressive Top Header Fade & Refined Mobile Nutrition Meal Cards',
+    dateTime: '28 Nov 2026, 10:06 PM',
+    fullDateTime: 'Saturday, November 28, 2026 at 10:06:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[var(--app-accent-text)]',
+    summary:
+      'Fixed status-bar content bleed behind top floating headers with a progressive 8-stop OLED edge gradient and rearranged Nutrition meal cards and logged food rows for crisp, untruncated mobile typography.',
+    points: [
+      'Top Header Progressive Scrim: Replaced the top gradient token with a smooth 8-stop OLED mask (.capsule-header-scrim) extending beneath CapsuleHeader and Luna Chat so scrolling cards fade naturally below the status bar.',
+      'Full Meal Titles & Two-Tier Card Header: Arranged MealSlotCard headers cleanly so Breakfast, Lunch, and Night Canteen never clip to Bre... or Lun..., paired with a dedicated kcal/protein summary and AI Log bar.',
+      'Spacious Logged Food Rows & Section Spacing: Redesigned logged food items into a balanced two-row layout with full names, kcal + g P totals, single-line per-serving rates, and well-spaced section titles and mess menu pills.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v4-1-0-capsule-header-nutrition-ai-protein-hardware-tiers',
     category: 'Capsule Headers, Nutrition AI Protein & Zero-Lag Mobile',
     icon: React.createElement(Lightning, { size: 18, weight: 'duotone' }),
     title: 'LifeOS v4.1.0: Unified Capsule Headers, AI Meal Protein, Native Hardware Engine & 120Hz Polish',
     dateTime: '28 Nov 2026, 09:45 PM',
     fullDateTime: 'Saturday, November 28, 2026 at 09:45:00 PM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v4.1.0',
     colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Refined every mobile and desktop workspace with a unified floating CapsuleHeader, upgraded Nutrition with Warm Brown calorie arcs, Skip-lock protection, and AI-estimated protein across mess & outside foods, added native Android hardware telemetry with system-managed performance tiers, and eliminated mobile overflow and transition hitches across all 22 routes.',

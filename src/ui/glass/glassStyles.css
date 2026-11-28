@@ -388,8 +388,27 @@
 }
 
 /* ── Apple Liquid Glass Progressive Ambient Scrim Drop ── */
-.scroll-edge-top {
-  display: none !important;
+.scroll-edge-top,
+.capsule-header-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -24px;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.99) 0%,
+    rgba(0, 0, 0, 0.96) 24%,
+    rgba(0, 0, 0, 0.90) 44%,
+    rgba(0, 0, 0, 0.74) 62%,
+    rgba(0, 0, 0, 0.50) 76%,
+    rgba(0, 0, 0, 0.24) 88%,
+    rgba(0, 0, 0, 0.06) 95%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .scroll-edge-bottom {

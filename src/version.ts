@@ -8,11 +8,11 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 94,
-  versionName: '4.1.0',
+  versionCode: 95,
+  versionName: '4.2.0',
   releaseDate: '2026-11-28',
-  apkSize: '15.1 MB',
-  releaseNotes: "LifeOS v4.1.0 (4.1.0 · Build 94):\n• Unified Floating Capsule Header: Added centered interface CapsuleHeader with quick Back/Directory and Sync/Reload controls seamlessly matched across Home, primary, and sub-interfaces.\n• Nutrition Engine Upgrade: Warm Brown 5-arc calorie ring with crisp text contrast, Skip lock whenever a meal item is logged, AI-computed per-item protein (g P) across mess & outside meals, and lazy-loaded mess menu.\n• Accurate Hardware & System-Managed Performance Tiers: Native Android DeviceHardware plugin reporting real device model, RAM, CPU cores, GPU, and storage with read-only Auto-Selected T1/T2/T3 tiers.\n• Zero-Lag 120Hz Mobile Smoothness: Removed layout animations, transition-all, and blurs; added routePrefetch pre-warming and 2-phase hydration with 0px mobile overflow across all 22 routes.",
+  apkSize: '15.15 MB',
+  releaseNotes: "LifeOS v4.2.0 (4.2.0 · Build 95):\n• Top Header Progressive Scrim: Fixed top header status-bar bleeding across CapsuleHeader and Luna Chat with a smooth 8-stop OLED edge fade that dissolves scrolling cards cleanly beneath the floating pill.\n• Meal Card Mobile Arrangement: Rearranged MealSlotCard headers into a balanced two-tier layout so full meal names (Breakfast, Lunch, Night Canteen) never truncate, with a dedicated summary & AI Log bar.\n• Cleaner Logged Food Cards: Expanded each logged meal row into a spacious two-row layout showing full food titles, kcal & protein (g P) totals, per-serving stats, and portion steppers without cramped ellipsis.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

@@ -688,11 +688,11 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
         {/* ── 3. Integrated Meals Diary (glass-card per meal) ── */}
         <div className="flex flex-col gap-3 pt-1">
-          <div className="flex items-center justify-between px-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 px-1">
             <span className="text-section-header">
               Today's Meals Diary & Mess Menu
             </span>
-            <span className="text-[11px] text-[rgba(235,235,245,0.50)]">
+            <span className="text-[11px] text-[rgba(235,235,245,0.50)] shrink-0">
               Adjust portions & items
             </span>
           </div>

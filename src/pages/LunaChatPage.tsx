@@ -954,8 +954,8 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 48px) + 8px)',
         }}
       >
-        {/* Soft Ambient Vignette Shield to prevent message overlap with device status bar */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black via-black/85 to-transparent pointer-events-none" />
+        {/* Multi-stop top progressive OLED scrim to prevent scrolled messages overlapping device status bar */}
+        <div className="capsule-header-scrim pointer-events-none" aria-hidden="true" />
 
         {/* Floating Capsule Toolbar */}
         <div className="relative mx-3.5 h-[52px] px-2 rounded-full glass-nav nav-rim-light shadow-2xl flex items-center justify-between pointer-events-auto">

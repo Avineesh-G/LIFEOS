@@ -87,109 +87,123 @@ export const MealSlotCard = React.memo(function MealSlotCard({
           : undefined
       }
     >
-      {/* Header Row */}
-      <div className="flex items-center justify-between gap-2 pb-1">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div
-            className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
-            style={{
-              backgroundColor: isSkipped
-                ? 'rgba(255, 255, 255, 0.08)'
-                : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-              color: isSkipped
-                ? 'rgba(255, 255, 255, 0.45)'
-                : 'var(--app-accent-text, #D29B7E)',
-            }}
-          >
-            {slotConfig.icon}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3
-                className={`text-[15px] font-bold tracking-tight truncate ${
-                  isSkipped ? 'text-white/60 line-through' : 'text-white'
-                }`}
-              >
-                {slotConfig.label}
-              </h3>
-              {isSkipped && (
-                <span className="px-1.5 py-0.5 rounded-full text-[9.5px] font-bold bg-[#FF453A]/15 text-[#FF453A] uppercase tracking-wider shrink-0">
-                  Skipped
-                </span>
-              )}
+      {/* Header Row — balanced two-tier layout so full meal name & actions never collide or truncate on 360px phones */}
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div
+              className="w-9 h-9 rounded-[11px] flex items-center justify-center shrink-0 transition-colors"
+              style={{
+                backgroundColor: isSkipped
+                  ? 'rgba(255, 255, 255, 0.08)'
+                  : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                color: isSkipped
+                  ? 'rgba(255, 255, 255, 0.45)'
+                  : 'var(--app-accent-text, #D29B7E)',
+              }}
+            >
+              {slotConfig.icon}
             </div>
-            <span className="text-[11px] text-[rgba(235,235,245,0.50)] whitespace-nowrap block">
-              {slotConfig.time}
-            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3
+                  className={`text-[15.5px] font-bold tracking-tight leading-tight ${
+                    isSkipped ? 'text-white/60 line-through' : 'text-white'
+                  }`}
+                >
+                  {slotConfig.label}
+                </h3>
+                {isSkipped && (
+                  <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-[#FF453A]/15 text-[#FF453A] uppercase tracking-wider shrink-0">
+                    Skipped
+                  </span>
+                )}
+              </div>
+              <span className="text-[11.5px] text-[rgba(235,235,245,0.52)] leading-tight mt-0.5 block">
+                {slotConfig.time}
+              </span>
+            </div>
+          </div>
+
+          <div className="shrink-0">
+            {isSkipped ? (
+              <div
+                className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-[#FF453A]/15 text-[#FF453A] select-none cursor-default"
+                title="Meal recorded as skipped"
+              >
+                <Prohibit size={12} weight="bold" />
+                <span>Skipped</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={hasLoggedItems}
+                aria-disabled={hasLoggedItems}
+                onClick={() => {
+                  if (hasLoggedItems) {
+                    triggerHaptic('error');
+                    return;
+                  }
+                  onToggleSkip(slotConfig.slot);
+                }}
+                className={`px-3 py-1.5 rounded-full text-[11.5px] font-semibold transition-colors flex items-center gap-1.5 select-none touch-manipulation ${
+                  hasLoggedItems
+                    ? 'bg-white/[0.04] text-white/30 cursor-not-allowed opacity-60'
+                    : 'active:scale-95 cursor-pointer bg-white/[0.07] hover:bg-white/[0.12] text-white/70 hover:text-white'
+                }`}
+                title={
+                  hasLoggedItems
+                    ? 'Cannot skip: meal already has logged food items'
+                    : 'Mark Meal as Skipped'
+                }
+              >
+                <Prohibit size={12} weight="bold" />
+                <span>Skip</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {isSkipped ? (
-            <div
-              className="px-2 py-1 rounded-full text-[10.5px] font-semibold flex items-center gap-1 bg-[#FF453A]/15 text-[#FF453A] select-none cursor-default"
-              title="Meal recorded as skipped"
-            >
-              <Prohibit size={12} weight="bold" />
-              <span>Skipped</span>
+        {/* Clean Summary + AI Log Action Bar */}
+        {!isSkipped && (
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-[14px] bg-white/[0.04]">
+            <div className="flex items-center gap-1.5 min-w-0 text-[12px] tabular-nums">
+              {slotCalories > 0 ? (
+                <>
+                  <span className="font-bold text-white">{slotCalories} kcal</span>
+                  <span className="text-white/35">·</span>
+                  <span
+                    className="font-bold"
+                    style={{ color: 'var(--app-accent-text, #D29B7E)' }}
+                  >
+                    {slotProtein}g P
+                  </span>
+                </>
+              ) : (
+                <span className="text-[11.5px] text-white/45 font-medium">
+                  Tap mess items below or log outside food
+                </span>
+              )}
             </div>
-          ) : (
-            <button
-              type="button"
-              disabled={hasLoggedItems}
-              aria-disabled={hasLoggedItems}
-              onClick={() => {
-                if (hasLoggedItems) {
-                  triggerHaptic('error');
-                  return;
-                }
-                onToggleSkip(slotConfig.slot);
-              }}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors flex items-center gap-1 select-none touch-manipulation ${
-                hasLoggedItems
-                  ? 'bg-white/[0.04] text-white/30 cursor-not-allowed opacity-60'
-                  : 'active:scale-95 cursor-pointer bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white'
-              }`}
-              title={
-                hasLoggedItems
-                  ? 'Cannot skip: meal already has logged food items'
-                  : 'Mark Meal as Skipped'
-              }
-            >
-              <Prohibit size={12} weight="bold" />
-              <span>Skip</span>
-            </button>
-          )}
 
-          {!isSkipped && (
             <button
               type="button"
               onClick={() => {
                 triggerHaptic('light');
                 onOpenCustomLog(slotConfig.slot);
               }}
-              className="inline-flex items-center rounded-full active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11.5px] font-bold shrink-0 active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
               style={{
-                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+                backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.16))',
                 color: 'var(--app-accent-text, #D29B7E)',
               }}
               title="Log Outside / Custom Food with AI"
             >
-              {slotCalories > 0 && (
-                <>
-                  <span className="px-2.5 py-1 text-[11px] font-bold tabular-nums tracking-tight">
-                    {slotCalories} kcal · {slotProtein}g P
-                  </span>
-                  <span className="w-[1px] h-3 bg-white/15" />
-                </>
-              )}
-              <span className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold">
-                <LunaComicBubbleIcon size={12} color="currentColor" />
-                <span>Log</span>
-              </span>
+              <LunaComicBubbleIcon size={12} color="currentColor" />
+              <span>Log</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Direct Mess Menu Selectable Pills with Portion Badges */}
@@ -217,7 +231,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                   onClick={() =>
                     onToggleMessItem(slotConfig.slot, item.name, item.estCalories, unitProtein)
                   }
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-transform select-none cursor-pointer active:scale-95 ${
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 text-left transition-transform select-none cursor-pointer active:scale-95 ${
                     isItemSelected
                       ? 'text-white font-semibold shadow-md'
                       : 'bg-white/[0.055] text-white/80 hover:text-white hover:bg-white/[0.09]'
@@ -230,14 +244,14 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                       : undefined
                   }
                 >
-                  <span>{item.name}</span>
+                  <span className="leading-snug">{item.name}</span>
                   {isItemSelected && portion > 1 && (
-                    <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-white text-[10px] font-bold">
+                    <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-white text-[10px] font-bold shrink-0">
                       {portion}x
                     </span>
                   )}
                   <span
-                    className={`text-[10.5px] tabular-nums ${
+                    className={`text-[10.5px] tabular-nums whitespace-nowrap shrink-0 ${
                       isItemSelected ? 'text-white/90 font-semibold' : 'text-white/45'
                     }`}
                   >
@@ -267,16 +281,17 @@ export const MealSlotCard = React.memo(function MealSlotCard({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-white/[0.045] text-xs"
+                  className="flex flex-col gap-2 px-3 py-2.5 rounded-[14px] bg-white/[0.045] text-xs"
                 >
-                  <div className="flex flex-col min-w-0 pr-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-white/95 font-semibold truncate">
+                  {/* Top row: full item title + total kcal & protein + delete */}
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[12.5px] text-white/95 font-semibold leading-snug break-words">
                         {item.name}
                       </span>
                       {item.isExtra && (
                         <span
-                          className="px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0"
+                          className="ml-1.5 inline-flex align-middle px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
                           style={{
                             backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.16))',
                             color: 'var(--app-accent-text, #D29B7E)',
@@ -286,18 +301,45 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                         </span>
                       )}
                     </div>
-                    <span className="text-[10.5px] text-[rgba(235,235,245,0.52)] tabular-nums">
-                      {item.calories} kcal · {unitProtein}g P / serving
-                    </span>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex flex-col items-end">
+                        <span className="font-bold tabular-nums text-white text-[12.5px] leading-tight whitespace-nowrap">
+                          {Math.round(item.calories * (item.portion || 1))} kcal
+                        </span>
+                        <span
+                          className="text-[10.5px] font-bold tabular-nums leading-tight whitespace-nowrap"
+                          style={{ color: 'var(--app-accent-text, #D29B7E)' }}
+                        >
+                          {totalProtein}g P
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => onRemoveItem(slotConfig.slot, item.id)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center bg-white/[0.05] text-white/45 hover:text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors cursor-pointer touch-manipulation"
+                        title="Delete food"
+                        aria-label={`Delete ${item.name}`}
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5">
+                  {/* Bottom row: per-serving breakdown + portion stepper */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <span className="text-[11px] text-[rgba(235,235,245,0.52)] tabular-nums truncate">
+                      {item.calories} kcal · {unitProtein}g P / serving
+                    </span>
+
+                    <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => onUpdatePortion(slotConfig.slot, item.id, -1)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer touch-manipulation"
                         title="Decrease Quantity"
+                        aria-label={`Decrease ${item.name} quantity`}
                       >
                         <Minus size={11} weight="bold" />
                       </button>
@@ -307,33 +349,13 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                       <button
                         type="button"
                         onClick={() => onUpdatePortion(slotConfig.slot, item.id, 1)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer touch-manipulation"
                         title="Increase Quantity"
+                        aria-label={`Increase ${item.name} quantity`}
                       >
                         <Plus size={11} weight="bold" />
                       </button>
                     </div>
-
-                    <div className="flex flex-col items-end min-w-[60px]">
-                      <span className="font-bold tabular-nums text-white leading-tight">
-                        {Math.round(item.calories * (item.portion || 1))} kcal
-                      </span>
-                      <span
-                        className="text-[10.5px] font-bold tabular-nums leading-tight"
-                        style={{ color: 'var(--app-accent-text, #D29B7E)' }}
-                      >
-                        {totalProtein}g P
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onRemoveItem(slotConfig.slot, item.id)}
-                      className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
-                      title="Delete food"
-                    >
-                      <Trash size={14} />
-                    </button>
                   </div>
                 </div>
               );

@@ -31,9 +31,9 @@ export function CapsuleHeader({
         paddingRight: 'max(var(--sar, 0px), env(safe-area-inset-right, 0px), 14px)',
       }}
     >
-      {/* Full-header ambient vignette so scrolling cards fade cleanly beneath the floating pill on all notch heights */}
+      {/* Multi-stop top progressive OLED scrim (strong mask across status bar/notch, feathers cleanly beneath floating pill) */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-black via-black/82 to-transparent pointer-events-none"
+        className="capsule-header-scrim pointer-events-none"
         aria-hidden="true"
       />
 
