@@ -196,7 +196,7 @@ export function SlotCustomizerSheet({
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(item.id)}
-                  className={`flex items-center justify-between px-3.5 py-3 rounded-2xl transition-all cursor-pointer select-none text-left ${
+                  className={`flex items-center justify-between px-3.5 py-3 rounded-2xl transition-[transform,opacity,background-color,color] cursor-pointer select-none text-left ${
                     isCurrent
                       ? 'glass-tile'
                       : 'hover:bg-white/[0.06] active:bg-white/[0.10]'
@@ -248,7 +248,7 @@ export function SlotCustomizerSheet({
                         key={item.id}
                         type="button"
                         onClick={() => handleSelect(item.id)}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-2xl transition-all cursor-pointer select-none text-left ${
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-2xl transition-[transform,opacity,background-color,color] cursor-pointer select-none text-left ${
                           isCurrent
                             ? 'glass-tile'
                             : 'hover:bg-white/[0.06] active:bg-white/[0.10]'

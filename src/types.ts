@@ -297,6 +297,7 @@ export type PortionSize = 0.5 | 1 | 1.5 | 2;
 export interface MenuItem {
   name: string;
   estCalories: number;
+  estProtein?: number;
   diet?: 'veg' | 'non-veg' | null;
 }
 
@@ -325,6 +326,9 @@ export interface MealItemLog {
   id: string; // unique ID for editing extra items
   name: string;
   calories: number; // base calories for 1 portion
+  protein?: number; // base protein grams for 1 portion
+  carbs?: number;
+  fats?: number;
   portion: number; // e.g., 0.5, 1, 2
   isExtra: boolean; // true if added via "Ate something else?"
 }

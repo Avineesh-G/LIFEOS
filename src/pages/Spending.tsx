@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, startTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
 import type { AppData, Expense, MoneyLentItem } from '../types';
@@ -56,6 +56,21 @@ export default function Spending({ data, updateData }: SpendingProps) {
   const [lentNote, setLentNote] = useState('');
   const [lentStatusFilter, setLentStatusFilter] = useState<'all' | 'pending' | 'returned'>('all');
   const [lentDirectionFilter, setLentDirectionFilter] = useState<'all' | 'given' | 'borrowed'>('all');
+
+  // Two-phase progressive hydration: hero budget/flow cards render immediately, lists mount smoothly after dock settles
+  const [showTransactionLists, setShowTransactionLists] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (!cancelled) {
+        startTransition(() => setShowTransactionLists(true));
+      }
+    }, 160);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, []);
 
   // Single-pass month & today stats for Expenses
   const { monthExpenses, monthTotal, todayTotal, categoryBreakdown } = useMemo(() => {
@@ -346,8 +361,8 @@ export default function Spending({ data, updateData }: SpendingProps) {
               </div>
             )}
 
-            {/* 3. Transaction History */}
-            {(data.expenses || []).length === 0 ? (
+            {/* 3. Transaction History (Deferred past initial route commit) */}
+            {showTransactionLists && ((data.expenses || []).length === 0 ? (
               <EmptyState
                 icon={<Wallet weight="bold" />}
                 title="No Expenses Logged"
@@ -388,7 +403,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   </SwipeActions>
                 ))}
               </GroupedList>
-            )}
+            ))}
           </>
         ) : (
           /* ══════════════════════════════════════════════════════════════════ */
@@ -444,26 +459,16 @@ export default function Spending({ data, updateData }: SpendingProps) {
 
               {/* Flow Split Visual Ratio Bar & Details */}
               <div className="flex flex-col gap-2 pt-1 relative z-10">
-                {/* Visual Ratio Bar */}
-                <div className="h-1.5 w-full rounded-full bg-white/10 flex overflow-hidden">
+                {/* Visual Ratio Bar (GPU scaleX, zero width reflow) */}
+                <div className="h-1.5 w-full rounded-full bg-[#FF453A] relative overflow-hidden">
                   <div
-                    className="h-full bg-[#30D158] transition-all duration-300"
+                    className="h-full w-full bg-[#30D158] transition-transform duration-300 origin-left"
                     style={{
-                      width: `${
+                      transform: `scaleX(${
                         totalGivenPending + totalBorrowedPending > 0
-                          ? (totalGivenPending / (totalGivenPending + totalBorrowedPending)) * 100
-                          : 50
-                      }%`,
-                    }}
-                  />
-                  <div
-                    className="h-full bg-[#FF453A] transition-all duration-300"
-                    style={{
-                      width: `${
-                        totalGivenPending + totalBorrowedPending > 0
-                          ? (totalBorrowedPending / (totalGivenPending + totalBorrowedPending)) * 100
-                          : 50
-                      }%`,
+                          ? totalGivenPending / (totalGivenPending + totalBorrowedPending)
+                          : 0.5
+                      })`,
                     }}
                   />
                 </div>
@@ -695,7 +700,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                     triggerHaptic('selection');
                     setExpenseCategory(cat);
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-[transform,opacity,background-color,color] cursor-pointer ${
                     expenseCategory === cat
                       ? 'glass-tile text-[#30D158] font-bold shadow-sm'
                       : 'glass-flat text-[rgba(235,235,245,0.60)] hover:text-white'
@@ -743,7 +748,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   triggerHaptic('selection');
                   setLentType('given');
                 }}
-                className={`py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
+                className={`py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold transition-[transform,opacity,background-color,color] cursor-pointer ${
                   lentType === 'given'
                     ? 'bg-[#30D158]/20 text-[#30D158] shadow-sm'
                     : 'glass-tile text-[rgba(235,235,245,0.60)]'
@@ -759,7 +764,7 @@ export default function Spending({ data, updateData }: SpendingProps) {
                   triggerHaptic('selection');
                   setLentType('borrowed');
                 }}
-                className={`py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
+                className={`py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 text-xs font-bold transition-[transform,opacity,background-color,color] cursor-pointer ${
                   lentType === 'borrowed'
                     ? 'bg-[#FF453A]/20 text-[#FF453A] shadow-sm'
                     : 'glass-tile text-[rgba(235,235,245,0.60)]'

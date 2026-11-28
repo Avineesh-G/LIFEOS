@@ -40,6 +40,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WidgetUpdaterPlugin.class);
         registerPlugin(ThemeBridgePlugin.class);
         registerPlugin(SyncManagerPlugin.class);
+        registerPlugin(DeviceHardwarePlugin.class);
         super.onCreate(savedInstanceState);
 
         // Schedule background update checks so users get update alerts without opening the app

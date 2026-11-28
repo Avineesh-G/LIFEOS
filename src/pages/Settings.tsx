@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -64,6 +64,21 @@ export default function Settings({
 }: SettingsProps) {
   const navigate = useNavigate();
   const deviceTier = useDeviceTier();
+
+  // Two-phase progressive mount so initial navigation renders profile & top cards in <6ms
+  const [showLowerSections, setShowLowerSections] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (!cancelled) {
+        startTransition(() => setShowLowerSections(true));
+      }
+    }, 180);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, []);
 
   // Notifications
   const [hasNotifications, setHasNotifications] = useState(true);
@@ -221,75 +236,175 @@ export default function Settings({
       {/* ── Hardware Performance & Adaptive Tier ── */}
       <GroupedList
         header="HARDWARE PERFORMANCE & COMPATIBILITY"
-        footer={`Auto-detected: ${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay} · ${deviceTier.tier === 1 ? 'Tier 1: High Fidelity (Full Water Liquid Glass)' : deviceTier.tier === 2 ? 'Tier 2: Balanced Fluidity (Zero-Blur Specular)' : 'Tier 3: Max Speed (Minimal Overhead)'}`}
+        footer={
+          deviceTier.isLowPower
+            ? 'Battery saver active (≤20%): smoothly stepped down rendering tier to preserve frame pacing.'
+            : deviceTier.isLowStorage
+            ? 'Low free storage detected: cache trimming active to prevent I/O stutter.'
+            : `All tiers run zero-blur GPU compositor transitions, startTransition route isolation, and layout/paint containment.`
+        }
       >
-        <ListRow
-          icon={<Lightning size={18} weight="duotone" />}
-          iconTint="#FFD60A"
-          title="Hardware Profile"
-          subtitle={`${deviceTier.ramDisplay} · ${deviceTier.cores} Cores · ${deviceTier.cleanGpu} · ${deviceTier.storageFreeDisplay}`}
-          trailing={
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }} />
+        {/* 1. Accurate Device & Hardware Profile */}
+        <div className="px-4 py-3.5 space-y-2.5">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+                style={{
+                  background:
+                    'linear-gradient(135deg, color-mix(in srgb, #FFD60A 16%, #1D1D22) 0%, color-mix(in srgb, #FFD60A 7%, #17171B) 100%)',
+                  color: '#FFD60A',
+                }}
+              >
+                <Lightning size={18} weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white leading-tight truncate">
+                  {deviceTier.deviceModel}
+                </div>
+                <div className="text-[11.5px] text-white/55 leading-tight mt-0.5 truncate">
+                  {deviceTier.isExactHardware ? 'Verified Device Hardware' : 'Hardware Profile'}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
               <span
-                className="text-xs font-semibold glass-flat px-2.5 py-1 rounded-full"
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: 'var(--app-accent-text, #D29B7E)' }}
+              />
+              <span
+                className="text-[11px] font-semibold glass-flat px-2.5 py-1 rounded-full whitespace-nowrap"
                 style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
-                {deviceTier.userOverride === 'auto' ? 'Auto-Optimized' : `Tier ${deviceTier.tier} Active`}
+                Auto-Selected
               </span>
             </div>
-          }
-        />
+          </div>
 
-        <ListRow
-          icon={<SlidersHorizontal size={18} weight="duotone" />}
-          iconTint="#7B4B36"
-          title="Performance Tier"
-          subtitle={
-            deviceTier.tier === 1
-              ? 'Tier 1: High Fidelity (8GB+ RAM · Full Liquid Optics & Flow)'
-              : deviceTier.tier === 2
-              ? 'Tier 2: Balanced Fluidity (Mid-Range · Lean Specular Glass)'
-              : 'Tier 3: Max Speed (Budget/Low Storage · Instant Transitions)'
-          }
-          trailing={
-            <div className="flex items-center gap-1">
-              {(
-                [
-                  { id: 'auto' as const, label: 'Auto' },
-                  { id: 1 as const, label: 'T1' },
-                  { id: 2 as const, label: 'T2' },
-                  { id: 3 as const, label: 'T3' },
-                ]
-              ).map((opt) => {
-                const isSelected =
-                  opt.id === 'auto'
-                    ? deviceTier.userOverride === 'auto'
-                    : deviceTier.userOverride === opt.id ||
-                      (deviceTier.userOverride === 'auto' && deviceTier.tier === opt.id);
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => {
-                      triggerHaptic('selection');
-                      deviceTier.setTier(opt.id);
-                    }}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase transition-colors cursor-pointer ${
-                      isSelected
-                        ? 'droplet-active font-extrabold'
-                        : 'glass-flat text-white/55 hover:text-white'
-                    }`}
-                    style={isSelected ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
+          <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+            <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] flex items-center justify-between gap-2">
+              <span className="text-[11px] text-white/50">RAM</span>
+              <span className="text-[11.5px] font-bold text-white tabular-nums">{deviceTier.ramDisplay}</span>
             </div>
-          }
-          showSeparator={false}
-        />
+            <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] flex items-center justify-between gap-2">
+              <span className="text-[11px] text-white/50">CPU</span>
+              <span className="text-[11.5px] font-bold text-white tabular-nums">{deviceTier.cores} Cores</span>
+            </div>
+            <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] flex items-center justify-between gap-2">
+              <span className="text-[11px] text-white/50 shrink-0">GPU</span>
+              <span className="text-[11.5px] font-semibold text-white truncate">{deviceTier.cleanGpu}</span>
+            </div>
+            <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] flex items-center justify-between gap-2">
+              <span className="text-[11px] text-white/50 shrink-0">Storage</span>
+              <span className="text-[11.5px] font-bold text-white tabular-nums truncate">{deviceTier.storageFreeDisplay}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="h-[1px] bg-white/[0.06] mx-4" />
+
+        {/* 2. Read-Only System-Managed Performance Tier List */}
+        <div className="px-4 py-3.5 space-y-2.5 select-none">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
+                style={{
+                  background:
+                    'linear-gradient(135deg, color-mix(in srgb, var(--app-accent-text, #D29B7E) 16%, #1D1D22) 0%, color-mix(in srgb, var(--app-accent, #7B4B36) 7%, #17171B) 100%)',
+                  color: 'var(--app-accent-text, #D29B7E)',
+                }}
+              >
+                <SlidersHorizontal size={18} weight="duotone" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white leading-tight">
+                  Performance Tier
+                </div>
+                <div className="text-[11.5px] text-white/55 leading-tight mt-0.5">
+                  Automatically chosen from your device capability
+                </div>
+              </div>
+            </div>
+
+            <span
+              className="px-2.5 py-1 rounded-full text-[10.5px] font-bold uppercase tracking-wide droplet-active shrink-0"
+              style={{ color: 'var(--app-accent-text, #D29B7E)' }}
+            >
+              System Auto
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            {[
+              {
+                tier: 1 as const,
+                badge: 'T1',
+                name: 'High Fidelity',
+                target: '8GB+ RAM · 8+ Cores',
+                detail: 'Dual-pass specular OLED surfaces, full Warm Brown depth & 120Hz spring physics.',
+              },
+              {
+                tier: 2 as const,
+                badge: 'T2',
+                name: 'Balanced Fluidity',
+                target: '6GB RAM · Mid-Range',
+                detail: 'Streamlined single-pass OLED gradients & low-overhead GPU fades.',
+              },
+              {
+                tier: 3 as const,
+                badge: 'T3',
+                name: 'Max Speed',
+                target: '≤4GB RAM · Battery Saver',
+                detail: 'Flat solid OLED cards, paused background marquees (perf-lite) & lowest frame time.',
+              },
+            ].map((item) => {
+              const isActive = deviceTier.tier === item.tier;
+              return (
+                <div
+                  key={item.tier}
+                  className={`w-full text-left px-3 py-2.5 rounded-2xl flex items-start justify-between gap-2.5 ${
+                    isActive ? 'droplet-active' : 'bg-white/[0.03] opacity-65'
+                  }`}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className="text-[11px] font-extrabold px-1.5 py-0.5 rounded-md tabular-nums"
+                        style={{
+                          backgroundColor: isActive
+                            ? 'var(--app-accent-soft, rgba(164, 109, 82, 0.22))'
+                            : 'rgba(255, 255, 255, 0.08)',
+                          color: isActive ? 'var(--app-accent-text, #D29B7E)' : 'rgba(255, 255, 255, 0.65)',
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                      <span className="text-[13px] font-bold text-white">{item.name}</span>
+                      <span className="text-[10.5px] text-white/45 font-medium">{item.target}</span>
+                    </div>
+                    <p className="text-[11px] text-white/60 leading-snug mt-1">
+                      {item.detail}
+                    </p>
+                  </div>
+
+                  {isActive && (
+                    <span
+                      className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 mt-0.5"
+                      style={{
+                        backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.16))',
+                        color: 'var(--app-accent-text, #D29B7E)',
+                      }}
+                    >
+                      Active
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </GroupedList>
 
       {/* ── System Preferences ── */}
@@ -320,7 +435,9 @@ export default function Settings({
         />
       </GroupedList>
 
-      {/* ── Notifications ── */}
+      {/* ── Notifications & Lower Settings Groups (Deferred past route transition) ── */}
+      {showLowerSections && (
+      <>
       <GroupedList
         header="NOTIFICATIONS"
         footer="LifeOS uses high-precision exact alarms with wakeful locks for Timetable, Tasks, Gym, and 30-min Hydration reminders. Keep device battery settings on 'Unrestricted' for 100% on-time delivery."
@@ -515,6 +632,8 @@ export default function Settings({
           showSeparator={false}
         />
       </GroupedList>
+      </>
+      )}
 
       {/* Toast Feedback */}
       {backupFeedback && (

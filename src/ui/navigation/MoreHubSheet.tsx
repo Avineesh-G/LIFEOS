@@ -39,6 +39,7 @@ import {
   Check,
 } from '../tokens/icons';
 import { triggerHaptic } from '../../utils/haptics';
+import { prefetchRoute } from '../../utils/routePrefetch';
 import { getModuleTint, MODULE_TINTS, ModuleKey } from '../tokens/colors';
 import { auth } from '../../firebase';
 import { useUserProfile } from '../../utils/userProfileCache';
@@ -199,6 +200,7 @@ export function MoreHubSheet({
               <button
                 key={item.id}
                 type="button"
+                onPointerDown={() => item.route && prefetchRoute(item.route)}
                 onClick={() => {
                   triggerHaptic('selection');
                   onSelect(item);
@@ -314,6 +316,7 @@ export function MoreHubSheet({
                       <button
                         key={item.id}
                         type="button"
+                        onPointerDown={() => item.route && prefetchRoute(item.route)}
                         onClick={() => {
                           triggerHaptic('selection');
                           onSelect(item);

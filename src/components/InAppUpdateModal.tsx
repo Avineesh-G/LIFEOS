@@ -334,7 +334,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
             {status !== 'downloading' && status !== 'installing' && (
               <button
                 onClick={handleDismiss}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white glass-flat active:scale-95 transition-all shrink-0 cursor-pointer"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white glass-flat active:scale-95 transition-[transform,opacity,background-color,color] shrink-0 cursor-pointer"
                 aria-label="Close"
               >
                 <X size={16} weight="bold" />
@@ -435,7 +435,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <button
                   onClick={handleGrantPermission}
-                  className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
+                  className="w-full py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-[transform,opacity,background-color,color] cursor-pointer"
                   style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   <ShieldCheck size={16} weight="bold" />
@@ -464,12 +464,12 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   </span>
                 </div>
 
-                {/* Glass Progress Bar */}
+                {/* Glass Progress Bar (GPU scaleX, zero width reflow) */}
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-all duration-300"
+                    className="h-full w-full rounded-full transition-transform duration-300 origin-left"
                     style={{
-                      width: `${Math.max(0, Math.min(100, progress))}%`,
+                      transform: `scaleX(${Math.max(0, Math.min(1, progress / 100))})`,
                       background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
                     }}
                   />
@@ -502,7 +502,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
 
                 <button
                   onClick={handleStartUpdate}
-                  className="w-full py-2.5 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF453A] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] text-[#FF453A] text-xs font-bold active:scale-98 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <ArrowClockwise size={14} weight="bold" />
                   <span>Retry Download</span>
@@ -523,7 +523,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   href={OFFICIAL_DEVELOPER_GITHUB}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-all cursor-pointer"
+                  className="flex items-center justify-between p-2.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/80 hover:text-white transition-[transform,opacity,background-color,color] cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <GithubLogo size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
@@ -541,7 +541,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                   href={OFFICIAL_DEVELOPER_GITHUB}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl glass-flat hover:bg-white/[0.08] text-xs text-white/70 hover:text-white transition-[transform,opacity,background-color,color] cursor-pointer"
                 >
                   <GithubLogo size={15} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
                   <span className="text-[11px]">View on GitHub</span>
@@ -557,14 +557,14 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleDismiss}
-                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-all text-center active:scale-98 cursor-pointer"
+                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-[transform,opacity,background-color,color] text-center active:scale-98 cursor-pointer"
                     >
                       Later
                     </button>
                     <button
                       type="button"
                       onClick={handleStartUpdate}
-                      className="flex-[2] py-3 px-4 rounded-2xl text-white text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                      className="flex-[2] py-3 px-4 rounded-2xl text-white text-xs font-bold active:scale-98 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-2 cursor-pointer shadow-lg"
                       style={{
                         background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                       }}
@@ -578,7 +578,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleCheckAgain}
-                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
+                      className="flex-1 py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.10] text-white/70 hover:text-white text-xs font-medium transition-[transform,opacity,background-color,color] flex items-center justify-center gap-1.5 active:scale-98 cursor-pointer"
                     >
                       <ArrowClockwise size={14} weight="bold" />
                       <span>Check Again</span>
@@ -586,7 +586,7 @@ export default function InAppUpdateModal({ forceOpen = false, onClose }: InAppUp
                     <button
                       type="button"
                       onClick={handleDismiss}
-                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-xs font-bold active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-[2] py-3 px-4 rounded-2xl glass-tile hover:bg-white/[0.14] text-xs font-bold active:scale-98 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-2 cursor-pointer"
                       style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <CheckCircle size={16} weight="bold" />

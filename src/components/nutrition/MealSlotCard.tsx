@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { MealSlot, MealItemLog } from '../../types';
 import { triggerHaptic } from '../../utils/haptics';
+import { resolveItemProteinLocal } from '../../utils/aiNutrition';
 import { LunaComicBubbleIcon } from '../../ui/tokens/LunaComicBubbleIcon';
 import { Plus, Minus, Trash, Prohibit } from '../../ui';
 
@@ -11,6 +12,7 @@ export interface MealSlotConfig {
   icon: React.ReactNode;
   time: string;
   color: string;
+  textColor?: string;
   estBudget: number;
 }
 
@@ -18,11 +20,12 @@ export interface MealSlotCardProps {
   slotConfig: MealSlotConfig;
   isSkipped: boolean;
   slotItems: MealItemLog[];
-  messItems: { name: string; estCalories: number }[];
+  messItems: { name: string; estCalories: number; estProtein?: number }[];
+  proteinMap?: Record<string, number>;
   isSelected: boolean;
   onToggleSkip: (slot: MealSlot) => void;
   onOpenCustomLog: (slot: MealSlot) => void;
-  onToggleMessItem: (slot: MealSlot, itemName: string, estCalories: number) => void;
+  onToggleMessItem: (slot: MealSlot, itemName: string, estCalories: number, estProtein?: number) => void;
   onUpdatePortion: (slot: MealSlot, itemId: string, delta: number) => void;
   onRemoveItem: (slot: MealSlot, itemId: string) => void;
 }
@@ -32,6 +35,7 @@ export const MealSlotCard = React.memo(function MealSlotCard({
   isSkipped,
   slotItems,
   messItems,
+  proteinMap,
   isSelected,
   onToggleSkip,
   onOpenCustomLog,
@@ -39,9 +43,25 @@ export const MealSlotCard = React.memo(function MealSlotCard({
   onUpdatePortion,
   onRemoveItem,
 }: MealSlotCardProps) {
+  const hasLoggedItems = slotItems.length > 0;
+
   const slotCalories = useMemo(
     () => slotItems.reduce((s, it) => s + it.calories * (it.portion || 1), 0),
     [slotItems]
+  );
+
+  const slotProtein = useMemo(
+    () =>
+      Math.round(
+        slotItems.reduce((s, it) => {
+          const perServingProtein =
+            it.protein !== undefined
+              ? it.protein
+              : resolveItemProteinLocal(it.name, it.calories, proteinMap);
+          return s + perServingProtein * (it.portion || 1);
+        }, 0) * 10
+      ) / 10,
+    [slotItems, proteinMap]
   );
 
   const loggedItemMap = useMemo(() => {
@@ -58,11 +78,14 @@ export const MealSlotCard = React.memo(function MealSlotCard({
       className={`p-4 flex flex-col gap-3 transition-opacity duration-200 ${
         isSkipped ? 'droplet-card opacity-65' : 'glass-card'
       }`}
-      style={{
-        borderLeftColor: isSelected ? 'var(--app-accent-text, #64D2FF)' : undefined,
-        borderLeftWidth: isSelected ? '3px' : undefined,
-        borderLeftStyle: isSelected ? 'solid' : undefined,
-      }}
+      style={
+        isSelected
+          ? {
+              background:
+                'linear-gradient(135deg, rgba(164, 109, 82, 0.16) 0%, rgba(28, 28, 30, 0.92) 72%)',
+            }
+          : undefined
+      }
     >
       {/* Header Row */}
       <div className="flex items-center justify-between gap-2 pb-1">
@@ -70,8 +93,12 @@ export const MealSlotCard = React.memo(function MealSlotCard({
           <div
             className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
             style={{
-              backgroundColor: isSkipped ? 'rgba(255, 255, 255, 0.08)' : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-              color: isSkipped ? 'rgba(255, 255, 255, 0.45)' : 'var(--app-accent-text, #64D2FF)',
+              backgroundColor: isSkipped
+                ? 'rgba(255, 255, 255, 0.08)'
+                : 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
+              color: isSkipped
+                ? 'rgba(255, 255, 255, 0.45)'
+                : 'var(--app-accent-text, #D29B7E)',
             }}
           >
             {slotConfig.icon}
@@ -109,9 +136,25 @@ export const MealSlotCard = React.memo(function MealSlotCard({
           ) : (
             <button
               type="button"
-              onClick={() => onToggleSkip(slotConfig.slot)}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors flex items-center gap-1 active:scale-95 cursor-pointer select-none bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white touch-manipulation"
-              title="Mark Meal as Skipped"
+              disabled={hasLoggedItems}
+              aria-disabled={hasLoggedItems}
+              onClick={() => {
+                if (hasLoggedItems) {
+                  triggerHaptic('error');
+                  return;
+                }
+                onToggleSkip(slotConfig.slot);
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors flex items-center gap-1 select-none touch-manipulation ${
+                hasLoggedItems
+                  ? 'bg-white/[0.04] text-white/30 cursor-not-allowed opacity-60'
+                  : 'active:scale-95 cursor-pointer bg-white/[0.06] hover:bg-white/[0.12] text-white/60 hover:text-white'
+              }`}
+              title={
+                hasLoggedItems
+                  ? 'Cannot skip: meal already has logged food items'
+                  : 'Mark Meal as Skipped'
+              }
             >
               <Prohibit size={12} weight="bold" />
               <span>Skip</span>
@@ -128,14 +171,14 @@ export const MealSlotCard = React.memo(function MealSlotCard({
               className="inline-flex items-center rounded-full active:scale-[0.97] transition-transform cursor-pointer touch-manipulation select-none"
               style={{
                 backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-                color: 'var(--app-accent-text, #64D2FF)',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
-              title="Log Food with AI"
+              title="Log Outside / Custom Food with AI"
             >
               {slotCalories > 0 && (
                 <>
                   <span className="px-2.5 py-1 text-[11px] font-bold tabular-nums tracking-tight">
-                    {slotCalories} kcal
+                    {slotCalories} kcal · {slotProtein}g P
                   </span>
                   <span className="w-[1px] h-3 bg-white/15" />
                 </>
@@ -160,16 +203,24 @@ export const MealSlotCard = React.memo(function MealSlotCard({
               const logged = loggedItemMap.get(item.name.toLowerCase().trim());
               const isItemSelected = !!logged;
               const portion = logged?.portion || 1;
+              const unitProtein =
+                item.estProtein !== undefined
+                  ? item.estProtein
+                  : resolveItemProteinLocal(item.name, item.estCalories, proteinMap);
+              const displayProtein =
+                Math.round((isItemSelected ? unitProtein * portion : unitProtein) * 10) / 10;
 
               return (
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => onToggleMessItem(slotConfig.slot, item.name, item.estCalories)}
+                  onClick={() =>
+                    onToggleMessItem(slotConfig.slot, item.name, item.estCalories, unitProtein)
+                  }
                   className={`px-3 py-1.5 rounded-full text-[12px] font-medium flex items-center gap-1.5 transition-transform select-none cursor-pointer active:scale-95 ${
                     isItemSelected
                       ? 'text-white font-semibold shadow-md'
-                      : 'glass-flat text-white/80 hover:text-white hover:bg-white/[0.08]'
+                      : 'bg-white/[0.055] text-white/80 hover:text-white hover:bg-white/[0.09]'
                   }`}
                   style={
                     isItemSelected
@@ -187,10 +238,10 @@ export const MealSlotCard = React.memo(function MealSlotCard({
                   )}
                   <span
                     className={`text-[10.5px] tabular-nums ${
-                      isItemSelected ? 'text-white/85 font-semibold' : 'text-white/40'
+                      isItemSelected ? 'text-white/90 font-semibold' : 'text-white/45'
                     }`}
                   >
-                    {isItemSelected ? item.estCalories * portion : item.estCalories} kcal
+                    {isItemSelected ? Math.round(item.estCalories * portion) : item.estCalories} kcal · {displayProtein}g P
                   </span>
                 </button>
               );
@@ -206,58 +257,87 @@ export const MealSlotCard = React.memo(function MealSlotCard({
             Logged Food Items & Portions:
           </span>
           <div className="flex flex-col gap-1.5">
-            {slotItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between px-3 py-2 rounded-[14px] glass-flat text-xs"
-              >
-                <div className="flex flex-col min-w-0 pr-2">
-                  <span className="text-white/95 font-semibold truncate">
-                    {item.name}
-                  </span>
-                  <span className="text-[10.5px] text-[rgba(235,235,245,0.50)]">
-                    {item.calories} kcal/serving
-                  </span>
-                </div>
+            {slotItems.map((item) => {
+              const unitProtein =
+                item.protein !== undefined
+                  ? item.protein
+                  : resolveItemProteinLocal(item.name, item.calories, proteinMap);
+              const totalProtein = Math.round(unitProtein * (item.portion || 1) * 10) / 10;
 
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5">
-                    <button
-                      type="button"
-                      onClick={() => onUpdatePortion(slotConfig.slot, item.id, -1)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
-                      title="Decrease Quantity"
-                    >
-                      <Minus size={11} weight="bold" />
-                    </button>
-                    <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
-                      {item.portion || 1}
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between px-3 py-2 rounded-[14px] bg-white/[0.045] text-xs"
+                >
+                  <div className="flex flex-col min-w-0 pr-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-white/95 font-semibold truncate">
+                        {item.name}
+                      </span>
+                      {item.isExtra && (
+                        <span
+                          className="px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0"
+                          style={{
+                            backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.16))',
+                            color: 'var(--app-accent-text, #D29B7E)',
+                          }}
+                        >
+                          Outside
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10.5px] text-[rgba(235,235,245,0.52)] tabular-nums">
+                      {item.calories} kcal · {unitProtein}g P / serving
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => onUpdatePortion(slotConfig.slot, item.id, 1)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
-                      title="Increase Quantity"
-                    >
-                      <Plus size={11} weight="bold" />
-                    </button>
                   </div>
 
-                  <span className="font-bold tabular-nums min-w-[56px] text-right" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
-                    {item.calories * (item.portion || 1)} kcal
-                  </span>
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-0.5">
+                      <button
+                        type="button"
+                        onClick={() => onUpdatePortion(slotConfig.slot, item.id, -1)}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
+                        title="Decrease Quantity"
+                      >
+                        <Minus size={11} weight="bold" />
+                      </button>
+                      <span className="w-6 text-center font-bold text-white text-[12px] tabular-nums">
+                        {item.portion || 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onUpdatePortion(slotConfig.slot, item.id, 1)}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/15 active:scale-90 transition-transform cursor-pointer"
+                        title="Increase Quantity"
+                      >
+                        <Plus size={11} weight="bold" />
+                      </button>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => onRemoveItem(slotConfig.slot, item.id)}
-                    className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
-                    title="Delete food"
-                  >
-                    <Trash size={14} />
-                  </button>
+                    <div className="flex flex-col items-end min-w-[60px]">
+                      <span className="font-bold tabular-nums text-white leading-tight">
+                        {Math.round(item.calories * (item.portion || 1))} kcal
+                      </span>
+                      <span
+                        className="text-[10.5px] font-bold tabular-nums leading-tight"
+                        style={{ color: 'var(--app-accent-text, #D29B7E)' }}
+                      >
+                        {totalProtein}g P
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => onRemoveItem(slotConfig.slot, item.id)}
+                      className="text-white/40 hover:text-[#FF453A] p-1 transition-colors cursor-pointer"
+                      title="Delete food"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -28,7 +28,7 @@ export const GlassPill = React.forwardRef<HTMLButtonElement, GlassPillProps>(({
       transition={{ type: 'spring', stiffness: 350, damping: 25 }}
       className={`
         relative inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium
-        transition-all duration-200 touch-manipulation select-none outline-none
+        transition-[transform,opacity,background-color,color] duration-200 touch-manipulation select-none outline-none
         border border-[var(--rim,rgba(255,255,255,0.10))]
         ${active 
           ? 'bg-[var(--accent-soft,rgba(var(--accent-rgb),0.2))] text-[var(--accent-text,#38BDF8)] border-[var(--accent,rgba(59,130,246,0.5))] shadow-sm' 

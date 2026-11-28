@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  CaretLeft,
   Plus,
   Trash,
   Barbell,
   Check,
   Flame,
 } from '../ui/tokens/icons';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { Button } from '../ui/controls/Button';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
 import { TextField } from '../ui/controls/TextField';
 import { Sheet } from '../ui/feedback/Sheet';
 import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
 import type { AppData, WorkoutPlan, Exercise } from '../types';
 
 interface GymSplitProps {
@@ -27,7 +23,6 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const SPLIT_PRESETS = ['PUSH', 'PULL', 'LEGS', 'UPPER', 'LOWER', 'CARDIO', 'REST'];
 
 export default function GymSplit({ data, updateData }: GymSplitProps) {
-  const navigate = useNavigate();
 
   const [selectedDay, setSelectedDay] = useState('Mon');
   const [exerciseModalOpen, setExerciseModalOpen] = useState(false);
@@ -118,28 +113,7 @@ export default function GymSplit({ data, updateData }: GymSplitProps) {
   };
 
   return (
-    <div className="w-full flex flex-col pb-4">
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={() => handleAppBack(navigate)}
-              />
-            </ToolbarGroup>
-          }
-          center={<span className="font-bold text-white text-base">Weekly Split</span>}
-        />
-      </header>
-
+    <div className="w-full flex flex-col pb-4 pt-1">
       {/* Day Selector Pill Bar */}
       <div className="grid grid-cols-7 gap-1 p-1 glass-card rounded-[22px] my-3">
         {DAYS.map((day) => {

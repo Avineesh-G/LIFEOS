@@ -39,7 +39,7 @@ export const SuggestionChip = React.forwardRef<HTMLButtonElement, SuggestionChip
         group relative flex items-center gap-3 overflow-hidden rounded-[22px] px-4 py-3 text-left
         border border-white/20 dark:border-white/20
         bg-white/10 dark:bg-white/10 hover:bg-accent/20 text-white
-        transition-all duration-200 touch-manipulation outline-none select-none
+        transition-[transform,opacity,background-color,color] duration-200 touch-manipulation outline-none select-none
         ${active ? 'border-[var(--accent)] bg-[rgba(var(--accent-rgb),0.12)]' : ''}
         ${className}
       `}

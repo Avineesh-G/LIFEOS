@@ -44,7 +44,7 @@ export function AskLifeOSPill({ onAsk, onClick, className = '' }: AskLifeOSPillP
           rounded-full px-4 py-3.5 sm:px-5 sm:py-4
           glass-nav nav-rim-light
           border-none
-          shadow-lg transition-all duration-300 touch-manipulation outline-none select-none
+          shadow-lg transition-[transform,opacity,background-color,color] duration-300 touch-manipulation outline-none select-none
         "
       >
         {/* Soft inner teal glow */}

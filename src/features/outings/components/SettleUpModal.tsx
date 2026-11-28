@@ -237,7 +237,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                         setPartialPaymentTarget(payment);
                         setPartialAmountInput((payment.amount / 100).toString());
                       }}
-                      className="px-3 py-1 rounded-full text-[11px] font-bold text-white/70 hover:text-white active:scale-95 transition-all"
+                      className="px-3 py-1 rounded-full text-[11px] font-bold text-white/70 hover:text-white active:scale-95 transition-[transform,opacity,background-color,color]"
                     >
                       Partial...
                     </button>
@@ -246,7 +246,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                       onClick={() =>
                         handleMarkPayment(payment.fromPersonId, payment.toPersonId, payment.amount)
                       }
-                      className="px-3.5 py-1 rounded-full text-xs font-bold bg-accent text-white shadow-xs active:scale-95 transition-all flex items-center gap-1"
+                      className="px-3.5 py-1 rounded-full text-xs font-bold bg-accent text-white shadow-xs active:scale-95 transition-[transform,opacity,background-color,color] flex items-center gap-1"
                     >
                       <CheckCircle weight="fill" size={13} />
                       <span>Mark Paid</span>
@@ -289,7 +289,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                     );
                   }
                 }}
-                className="px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-bold active:scale-95 transition-all"
+                className="px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-bold active:scale-95 transition-[transform,opacity,background-color,color]"
               >
                 Record
               </button>
@@ -336,7 +336,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
                       triggerHaptic('selection');
                       deleteSettlement(set.id);
                     }}
-                    className="p-1 rounded-lg text-white/70 hover:text-rose-500 active:scale-90 transition-all ml-2 shrink-0"
+                    className="p-1 rounded-lg text-white/70 hover:text-rose-500 active:scale-90 transition-[transform,opacity,background-color,color] ml-2 shrink-0"
                     title="Undo settlement"
                   >
                     <ArrowUUpLeft weight="bold" size={13} />
@@ -352,7 +352,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
           <button
             type="button"
             onClick={handleCopyRecap}
-            className="flex-1 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-xs font-bold text-white hover:bg-black/[0.06] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-xs font-bold text-white hover:bg-black/[0.06] active:scale-95 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-1.5 cursor-pointer"
           >
             {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
             <span>{copied ? 'Copied to Clipboard!' : 'Copy Recap'}</span>
@@ -361,7 +361,7 @@ export function SettleUpModal({ isOpen, onClose, outing, summary }: SettleUpModa
           <button
             type="button"
             onClick={handleShareRecap}
-            className="flex-1 py-3 rounded-2xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 py-3 rounded-2xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <ShareNetwork weight="duotone" size={14} />
             <span>Share Recap</span>

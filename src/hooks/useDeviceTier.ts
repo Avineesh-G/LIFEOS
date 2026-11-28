@@ -3,13 +3,9 @@ import {
   detectDeviceTier,
   subscribeToPerformanceMetrics,
   PerformanceMetrics,
-  setDeviceTierOverride,
-  DeviceTier,
 } from '../utils/performanceEngine';
 
-export function useDeviceTier(): PerformanceMetrics & {
-  setTier: (tier: DeviceTier | 'auto') => void;
-} {
+export function useDeviceTier(): PerformanceMetrics {
   const [metrics, setMetrics] = useState<PerformanceMetrics>(() => detectDeviceTier());
 
   useEffect(() => {
@@ -18,10 +14,7 @@ export function useDeviceTier(): PerformanceMetrics & {
     });
   }, []);
 
-  return {
-    ...metrics,
-    setTier: setDeviceTierOverride,
-  };
+  return metrics;
 }
 
 export default useDeviceTier;

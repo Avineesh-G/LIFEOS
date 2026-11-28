@@ -107,7 +107,7 @@ export default function VictoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-full mt-6 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-accent via-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-accent/25 hover:shadow-accent/40 active:scale-98 transition-all flex items-center justify-center gap-2"
+            className="w-full mt-6 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-accent via-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-accent/25 hover:shadow-accent/40 active:scale-98 transition-[transform,opacity,background-color,color] flex items-center justify-center gap-2"
           >
             <span>Continue</span>
             <ArrowRight size={14} />

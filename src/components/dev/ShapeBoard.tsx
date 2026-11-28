@@ -61,7 +61,7 @@ export default function ShapeBoard() {
                 <button
                   key={sz}
                   onClick={() => setSelectedSize(sz)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-[transform,opacity,background-color,color] ${
                     selectedSize === sz
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'opacity-70 hover:opacity-100'
@@ -74,7 +74,7 @@ export default function ShapeBoard() {
 
             <button
               onClick={() => setIsDark((prev) => !prev)}
-              className="p-2.5 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:opacity-80 active:scale-95 transition-all"
+              className="p-2.5 rounded-full bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:opacity-80 active:scale-95 transition-[transform,opacity,background-color,color]"
               aria-label="Toggle theme"
             >
               {isDark ? <Sun size={18} /> : <Moon size={18} />}

@@ -5,7 +5,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-  CaretLeft,
   MapPin,
   CalendarBlank,
   Users,
@@ -29,9 +28,7 @@ import { AddExpenseSheet } from '../components/AddExpenseSheet';
 import { ManualEntrySheet } from '../components/ManualEntrySheet';
 import { SettleUpModal } from '../components/SettleUpModal';
 import { triggerHaptic } from '../../../utils/haptics';
-import { handleAppBack } from '../../../utils/backNavigation';
 import { useM3Feedback } from '../../../components/m3/M3FeedbackContext';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../../../ui/navigation/Toolbar';
 import { Segmented } from '../../../ui/controls/Segmented';
 import { Button } from '../../../ui/controls/Button';
 import { Badge } from '../../../ui/controls/Badge';
@@ -157,82 +154,56 @@ export default function OutingDetailPage() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-4">
-      {/* ── Top Navigation Bar ── */}
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={() => handleAppBack(navigate)}
-              />
-            </ToolbarGroup>
-          }
-        center={
-          <span className="text-sm font-semibold text-white truncate max-w-[180px]">
-            {activeOuting.name}
-          </span>
-        }
-        trailing={
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                setIsSettleOpen(true);
-              }}
-              className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-              title="Settle"
-            >
-              <Scales size={20} />
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                setIsEditOutingOpen(true);
-              }}
-              className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-              title="Edit"
-            >
-              <PencilSimple size={20} />
-            </button>
-            <button
-              onClick={() => {
-                confirmDelete({
-                  title: 'Delete Outing?',
-                  itemName: activeOuting.name,
-                  message: 'All associated expenses, receipts, and split balances will be deleted.',
-                  section: 'outings',
-                  onConfirm: async () => {
-                    deleteOuting(activeOuting.id);
-                    navigate('/outings');
-                  },
-                });
-              }}
-              className="p-2 rounded-lg text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
-              title="Delete"
-            >
-              <Trash size={20} />
-            </button>
-          </div>
-        }
-      />
-      </header>
-
-      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
-        {/* ── Outing Title & Metadata ── */}
+      <div className="max-w-xl mx-auto px-1 pt-2 space-y-4">
+        {/* ── Outing Title & Quick Actions ── */}
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-white leading-tight">
-              {activeOuting.name}
-            </h1>
-            <Badge label={statusLabel} color={statusColor} />
+            <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+              <h1 className="text-2xl font-bold tracking-tight text-white leading-tight truncate">
+                {activeOuting.name}
+              </h1>
+              <Badge label={statusLabel} color={statusColor} />
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsSettleOpen(true);
+                }}
+                className="w-8 h-8 rounded-full glass-tile text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+                title="Settle"
+              >
+                <Scales size={17} />
+              </button>
+              <button
+                onClick={() => {
+                  triggerHaptic('light');
+                  setIsEditOutingOpen(true);
+                }}
+                className="w-8 h-8 rounded-full glass-tile text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+                title="Edit"
+              >
+                <PencilSimple size={17} />
+              </button>
+              <button
+                onClick={() => {
+                  confirmDelete({
+                    title: 'Delete Outing?',
+                    itemName: activeOuting.name,
+                    message: 'All associated expenses, receipts, and split balances will be deleted.',
+                    section: 'outings',
+                    onConfirm: async () => {
+                      deleteOuting(activeOuting.id);
+                      navigate('/outings');
+                    },
+                  });
+                }}
+                className="w-8 h-8 rounded-full glass-tile text-[#FF453A] hover:bg-[#FF453A]/10 flex items-center justify-center transition-colors cursor-pointer"
+                title="Delete"
+              >
+                <Trash size={17} />
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs text-[#8E8E93] font-medium">

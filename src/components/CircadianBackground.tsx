@@ -60,23 +60,21 @@ export default function CircadianBackground() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
-      {/* ── Dynamic Frosted Caustic Light 1 (Top Left) ── */}
+      {/* ── Pre-softened Radial Ambient Glows (Zero filter: blur GPU passes) ── */}
       <div
-        className={`absolute -top-32 -left-28 w-[460px] h-[460px] rounded-full ${circadian.orb1Class} blur-[120px] sm:blur-[140px] transform-gpu will-change-transform animate-ambient-drift-1`}
+        className="absolute -top-32 -left-28 w-[460px] h-[460px] rounded-full opacity-25 animate-ambient-drift-1"
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #7B4B36) 0%, transparent 72%)' }}
       />
 
-      {/* ── Dynamic Frosted Caustic Light 2 (Mid Right) ── */}
       <div
-        className={`absolute top-1/4 -right-32 w-[440px] h-[440px] rounded-full ${circadian.orb2Class} blur-[120px] sm:blur-[140px] transform-gpu will-change-transform animate-ambient-drift-2`}
+        className="absolute top-1/4 -right-32 w-[440px] h-[440px] rounded-full opacity-20 animate-ambient-drift-2"
+        style={{ background: 'radial-gradient(circle, var(--app-accent-end, #A46D52) 0%, transparent 72%)' }}
       />
 
-      {/* ── Dynamic Frosted Caustic Light 3 (Bottom Center) ── */}
       <div
-        className={`absolute -bottom-36 left-1/4 w-[420px] h-[420px] rounded-full ${circadian.orb3Class} blur-[130px] sm:blur-[150px] transform-gpu will-change-transform animate-ambient-drift-3`}
+        className="absolute -bottom-36 left-1/4 w-[420px] h-[420px] rounded-full opacity-15 animate-ambient-drift-3"
+        style={{ background: 'radial-gradient(circle, var(--app-accent, #7B4B36) 0%, transparent 72%)' }}
       />
-
-      {/* ── Ultra-Subtle Frosted Film Overlay for Tactile Glass Contrast ── */}
-      <div className="absolute inset-0 bg-white/[0.02] dark:bg-black/[0.04] backdrop-contrast-[1.02]" />
     </div>
   );
 }

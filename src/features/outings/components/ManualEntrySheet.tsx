@@ -212,7 +212,7 @@ export function ManualEntrySheet({
                   setMode(m);
                   setError(null);
                 }}
-                className={`py-2 px-1.5 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                className={`py-2 px-1.5 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1 transition-[transform,opacity,background-color,color] ${
                   active
                     ? `${cfg.bgColor} ${cfg.color} ${cfg.borderColor} border shadow-sm`
                     : 'text-white/70'
@@ -289,7 +289,7 @@ export function ManualEntrySheet({
                         triggerHaptic('selection');
                         setSelectedPersonId(p.id);
                       }}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-[transform,opacity,background-color,color] ${
                         active
                           ? 'bg-accent text-white border-accent shadow-xs'
                           : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
@@ -357,7 +357,7 @@ export function ManualEntrySheet({
             type="button"
             onClick={handleSave}
             disabled={amountPaise <= 0 || isSaving || ((mode === 'lend' || mode === 'received') && !selectedPersonId)}
-            className={`w-full py-3.5 rounded-2xl font-bold text-sm shadow-md active:scale-95 disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2 ${
+            className={`w-full py-3.5 rounded-2xl font-bold text-sm shadow-md active:scale-95 disabled:opacity-50 transition-[transform,opacity,background-color,color] cursor-pointer flex items-center justify-center gap-2 ${
               mode === 'shopping'
                 ? 'bg-indigo-600 text-white shadow-indigo-500/25'
                 : mode === 'lend'

@@ -177,7 +177,7 @@ export default function WebcamCaptureModal({
                   onClose();
                   onFallbackToFile();
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all flex items-center gap-2 shadow"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-[transform,opacity,background-color,color] flex items-center gap-2 shadow"
                 style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
               >
                 <Folder size={14} weight="bold" />

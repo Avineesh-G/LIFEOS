@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -67,7 +67,9 @@ export default function Gym({ data, updateData }: GymProps) {
 
   const handleStartWorkout = () => {
     triggerHaptic('save');
-    navigate('/gym/workout');
+    startTransition(() => {
+      navigate('/gym/workout');
+    });
   };
 
   return (
@@ -87,7 +89,9 @@ export default function Gym({ data, updateData }: GymProps) {
             size="sm"
             onClick={() => {
               triggerHaptic('nav');
-              navigate('/gym/split');
+              startTransition(() => {
+                navigate('/gym/split');
+              });
             }}
             icon={<SlidersHorizontal size={15} weight="bold" />}
           >
@@ -191,7 +195,7 @@ export default function Gym({ data, updateData }: GymProps) {
             title="Rest Day"
             description="No exercises planned for this day. Rest and recover."
             actionLabel="Customize Split"
-            onAction={() => navigate('/gym/split')}
+            onAction={() => startTransition(() => { navigate('/gym/split'); })}
             tint="#FF453A"
           />
         ) : (
@@ -207,12 +211,14 @@ export default function Gym({ data, updateData }: GymProps) {
                     key: 'history',
                     label: 'Exercise History',
                     onClick: () =>
-                      navigate(`/gym/history/${encodeURIComponent(ex.name)}`),
+                      startTransition(() => {
+                        navigate(`/gym/history/${encodeURIComponent(ex.name)}`);
+                      }),
                   },
                   {
                     key: 'edit',
                     label: 'Edit Exercise',
-                    onClick: () => navigate('/gym/split'),
+                    onClick: () => startTransition(() => { navigate('/gym/split'); }),
                   },
                 ]}
               >
@@ -226,7 +232,9 @@ export default function Gym({ data, updateData }: GymProps) {
                   trailing={`${ex.sets} × ${ex.reps}`}
                   showChevron
                   onClick={() =>
-                    navigate(`/gym/history/${encodeURIComponent(ex.name)}`)
+                    startTransition(() => {
+                      navigate(`/gym/history/${encodeURIComponent(ex.name)}`);
+                    })
                   }
                 />
               </ContextMenu>
@@ -286,7 +294,9 @@ export default function Gym({ data, updateData }: GymProps) {
             size="sm"
             onClick={() => {
               triggerHaptic('nav');
-              navigate('/gym/split');
+              startTransition(() => {
+                navigate('/gym/split');
+              });
             }}
           >
             Review

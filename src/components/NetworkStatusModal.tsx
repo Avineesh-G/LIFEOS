@@ -105,7 +105,7 @@ export default function NetworkStatusModal() {
                     triggerHaptic('light');
                     setShowModal(false);
                   }}
-                  className="w-full py-3.5 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-[14px] active:scale-98 transition-all cursor-pointer select-none"
+                  className="w-full py-3.5 px-4 rounded-2xl glass-tile hover:bg-white/[0.12] active:bg-white/[0.18] font-bold text-[14px] active:scale-98 transition-[transform,opacity,background-color,color] cursor-pointer select-none"
                   style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                 >
                   Continue in Offline Mode

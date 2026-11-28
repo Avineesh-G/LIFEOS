@@ -47,16 +47,20 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
 
   const handlePrimaryAction = useCallback(() => {
     triggerHaptic('medium');
-    const { actionRoute, actionContext } = brief.recommendation;
+    const { actionRoute } = brief.recommendation;
 
     if (actionRoute) {
-      navigate(actionRoute);
+      React.startTransition(() => {
+        navigate(actionRoute);
+      });
     }
   }, [brief.recommendation, navigate]);
 
   const handleAction = useCallback((route: string) => {
     triggerHaptic('light');
-    navigate(route);
+    React.startTransition(() => {
+      navigate(route);
+    });
   }, [navigate]);
 
   // Helper to get module icon
@@ -81,7 +85,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
   return (
     <motion.div
       layout
-      className="rounded-[32px] p-5 sm:p-6 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] m3-elevation-1 relative overflow-hidden select-none transition-all duration-300 space-y-4"
+      className="rounded-[32px] p-5 sm:p-6 bg-[var(--md-surface-container)] border border-[var(--md-outline-variant)] m3-elevation-1 relative overflow-hidden select-none transition-[transform,opacity,background-color,color] duration-300 space-y-4"
     >
       {/* ── Top Header Row: M3 Chip & Dynamic Window Status ── */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -165,7 +169,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
             {/* Primary Action Button */}
             <button
               onClick={handlePrimaryAction}
-              className="py-2 px-4 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-95 transition-all select-none shadow-none cursor-pointer"
+              className="py-2 px-4 rounded-full bg-[var(--md-primary)] text-[var(--md-on-primary)] text-xs font-bold flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-95 transition-[transform,opacity,background-color,color] select-none shadow-none cursor-pointer"
             >
               {brief.recommendation.type === 'focus_task' ? (
                 <PlayArrowRoundedIcon size={14} className="fill-current shrink-0" />
@@ -180,7 +184,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
             {/* Secondary Action */}
             <button
               onClick={() => handleAction(brief.recommendation.type === 'focus_task' ? '/tasks' : brief.recommendation.actionRoute)}
-              className="py-2 px-3 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all select-none cursor-pointer"
+              className="py-2 px-3 rounded-full bg-[var(--md-surface-container)] text-[var(--md-on-surface)] hover:bg-[var(--md-surface-container-highest)] border border-[var(--md-outline-variant)] text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-[transform,opacity,background-color,color] select-none cursor-pointer"
             >
               <span className="text-[11px]">
                 {brief.recommendation.module === 'gym' ? 'Split' : brief.recommendation.module === 'shopping' ? 'Lists' : 'Details'}
@@ -202,7 +206,7 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
               <button
                 key={s.id}
                 onClick={() => handleAction(s.actionRoute)}
-                className="p-2 sm:p-2.5 rounded-[18px] bg-[var(--md-surface-container-low)] hover:bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] flex items-center gap-2 transition-all cursor-pointer bouncy-tap text-left min-w-0"
+                className="p-2 sm:p-2.5 rounded-[18px] bg-[var(--md-surface-container-low)] hover:bg-[var(--md-surface-container-high)] border border-[var(--md-outline-variant)] flex items-center gap-2 transition-[transform,opacity,background-color,color] cursor-pointer bouncy-tap text-left min-w-0"
               >
                 <div className="w-6 h-6 rounded-full bg-[var(--md-surface-container-highest)] flex items-center justify-center text-[var(--md-primary)] shrink-0">
                   {getModuleIcon(s.module, 13)}
@@ -227,14 +231,17 @@ export default function DailyBriefCard({ data }: DailyBriefCardProps) {
       <AnimatePresence>
         {brief.attention && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, scaleY: 0.9 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            exit={{ opacity: 0, scaleY: 0.9 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            style={{ transformOrigin: 'top' }}
             onClick={() => {
               if (brief.attention?.actionRoute) {
                 triggerHaptic('light');
-                navigate(brief.attention.actionRoute);
+                React.startTransition(() => {
+                  navigate(brief.attention!.actionRoute!);
+                });
               }
             }}
             className="flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-[18px] bg-[var(--md-error-container)]/25 border border-[var(--md-error-container)]/50 text-[var(--md-on-surface)] cursor-pointer active:scale-[0.99] transition-transform"

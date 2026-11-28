@@ -1,46 +1,48 @@
 import { clearAllOutingsData } from './features/outings/storage/outingsIdb';
 import { clearUserProfileCache } from './utils/userProfileCache';
-import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef, startTransition, Suspense, lazy } from 'react';
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
 import { useTheme } from './hooks/useTheme';
 import { useData } from './hooks/useData';
 import Layout, { ALL_HUB_ITEMS } from './components/Layout';
 import Home from './pages/Home';
-import PageLoadingFallback from './components/common/PageLoadingFallback';
-
-// Direct eager imports for instant zero-latency page switching (no chunk download delay, no blank screens)
 import Gym from './pages/Gym';
-import GymWorkout from './pages/GymWorkout';
-import GymSplit from './pages/GymSplit';
-import GymExerciseHistory from './pages/GymExerciseHistory';
-import GymOnboarding from './pages/GymOnboarding';
 import Nutrition from './pages/Nutrition';
-import Spending from './pages/Spending';
-import ShoppingLists from './pages/ShoppingLists';
-import ShoppingListDetail from './pages/ShoppingListDetail';
-import Timetable from './pages/Timetable';
-import Tasks from './pages/Tasks';
-import Laundry from './pages/Laundry';
-import WorkHistory from './pages/WorkHistory';
-import SettingsPage from './pages/Settings';
-import DownloadPage from './pages/DownloadPage';
-import Auth from './pages/Auth';
-import DevShapes from './pages/DevShapes';
-import OutingsListPage from './features/outings/pages/OutingsListPage';
-import OutingDetailPage from './features/outings/pages/OutingDetailPage';
-import ThemeSettings from './pages/ThemeSettings';
-import Notes from './pages/Notes';
-import Drive from './pages/Drive';
-import PublicShareView from './pages/PublicShareView';
-import CalendarPage from './pages/CalendarPage';
-import LunaChatPage from './pages/LunaChatPage';
-import Focus from './pages/Focus';
-import Journal from './pages/Journal';
-import Circle from './pages/Circle';
-import Projects from './pages/Projects';
-import Trips from './pages/Trips';
-import Decisions from './pages/Decisions';
+import PageLoadingFallback from './components/common/PageLoadingFallback';
+import { scheduleIdleRoutePrefetch } from './utils/routePrefetch';
+
+// Core primary tabs (Home, Gym, Nutrition) remain eager for 0ms navigation;
+// Secondary & heavy interfaces lazy-load with idle + pointerDown pre-warming for fast startup AND instant transitions.
+const GymWorkout = lazy(() => import('./pages/GymWorkout'));
+const GymSplit = lazy(() => import('./pages/GymSplit'));
+const GymExerciseHistory = lazy(() => import('./pages/GymExerciseHistory'));
+const GymOnboarding = lazy(() => import('./pages/GymOnboarding'));
+const Spending = lazy(() => import('./pages/Spending'));
+const ShoppingLists = lazy(() => import('./pages/ShoppingLists'));
+const ShoppingListDetail = lazy(() => import('./pages/ShoppingListDetail'));
+const Timetable = lazy(() => import('./pages/Timetable'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const Laundry = lazy(() => import('./pages/Laundry'));
+const WorkHistory = lazy(() => import('./pages/WorkHistory'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const DownloadPage = lazy(() => import('./pages/DownloadPage'));
+const Auth = lazy(() => import('./pages/Auth'));
+const DevShapes = lazy(() => import('./pages/DevShapes'));
+const OutingsListPage = lazy(() => import('./features/outings/pages/OutingsListPage'));
+const OutingDetailPage = lazy(() => import('./features/outings/pages/OutingDetailPage'));
+const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
+const Notes = lazy(() => import('./pages/Notes'));
+const Drive = lazy(() => import('./pages/Drive'));
+const PublicShareView = lazy(() => import('./pages/PublicShareView'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const LunaChatPage = lazy(() => import('./pages/LunaChatPage'));
+const Focus = lazy(() => import('./pages/Focus'));
+const Journal = lazy(() => import('./pages/Journal'));
+const Circle = lazy(() => import('./pages/Circle'));
+const Projects = lazy(() => import('./pages/Projects'));
+const Trips = lazy(() => import('./pages/Trips'));
+const Decisions = lazy(() => import('./pages/Decisions'));
 const KitPreview = lazy(() => import('./ui/kit/KitPreview'));
 
 import { OutingsProvider } from './features/outings/context/OutingsContext';
@@ -66,7 +68,7 @@ import { checkNotificationPermission, requestAndSyncNotifications, syncAllNotifi
 import { scheduleWidgetSync } from './utils/widgetBridge';
 import { triggerTopDismissible, handleRootBackPress, recordNavigation, handleAppBack } from './utils/backNavigation';
 
-function MainContent({
+const MainContent = React.memo(function MainContent({
   data,
   refresh,
   updateData,
@@ -83,7 +85,6 @@ function MainContent({
   const navigate = useNavigate();
 
   // Direct Interface Deep Linking on Notification Taps
-  // When a user taps ANY notification banner or shade item, immediately route to that specific module interface
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
@@ -92,7 +93,9 @@ function MainContent({
       (action) => {
         const route = action?.notification?.extra?.route;
         if (route && typeof route === 'string') {
-          navigate(route);
+          startTransition(() => {
+            navigate(route);
+          });
         }
       }
     );
@@ -208,7 +211,7 @@ function MainContent({
       </Suspense>
     </div>
   );
-}
+});
 
 function App() {
   const { transitionMode, setTransitionMode } = useTheme();
@@ -323,6 +326,15 @@ function App() {
     recordNavigation(location.pathname);
   }, [location.pathname]);
 
+  // Idle background warm-up for secondary route chunks so transitions fire with 0ms chunk wait
+  useEffect(() => {
+    return scheduleIdleRoutePrefetch();
+  }, []);
+
+  // Keep latest data in a ref so native appStateChange/visibility listeners never churn on state updates
+  const latestDataRef = useRef(data);
+  latestDataRef.current = data;
+
   // Hardware / System Back Button: LIFO overlays -> Speed dial -> Sequential Path Memory -> Root Double-Tap Exit
   useEffect(() => {
     let backListener: any;
@@ -353,21 +365,23 @@ function App() {
           if (event?.url) {
             const raw = event.url.replace(/^lifeos:\/\//i, '').trim();
             const clean = (raw.startsWith('/') ? raw.slice(1) : raw).split('?')[0].toLowerCase();
-            if (clean.startsWith('notes')) {
-              navigate('/notes');
-            } else if (clean.startsWith('gym/workout')) {
-              navigate('/gym/workout');
-            } else if (clean.startsWith('gym')) {
-              navigate('/gym');
-            } else if (clean.startsWith('tasks')) {
-              navigate('/tasks');
-            } else if (clean.startsWith('shopping')) {
-              navigate('/shopping');
-            } else if (clean === 'home' || clean === '' || clean === 'progress') {
-              navigate('/');
-            } else {
-              navigate('/' + clean);
-            }
+            startTransition(() => {
+              if (clean.startsWith('notes')) {
+                navigate('/notes');
+              } else if (clean.startsWith('gym/workout')) {
+                navigate('/gym/workout');
+              } else if (clean.startsWith('gym')) {
+                navigate('/gym');
+              } else if (clean.startsWith('tasks')) {
+                navigate('/tasks');
+              } else if (clean.startsWith('shopping')) {
+                navigate('/shopping');
+              } else if (clean === 'home' || clean === '' || clean === 'progress') {
+                navigate('/');
+              } else {
+                navigate('/' + clean);
+              }
+            });
           }
         });
       } catch {}
@@ -394,21 +408,26 @@ function App() {
     });
   };
 
-  // Background auto-lock & Cooldown: handle app minimize & resume
+  // Background auto-lock & Cooldown: handle app minimize & resume (mounted once, zero listener re-registration)
   useEffect(() => {
     let stateListener: any;
+    const onForeground = () => {
+      handleAppForegrounded();
+      triggerCompositorWakeup();
+      const current = latestDataRef.current;
+      if (current) {
+        scheduleWidgetSync(current, 500);
+        syncAllNotifications(current).catch(() => {});
+      }
+    };
+
     const registerStateListener = async () => {
       try {
         stateListener = await CapApp.addListener('appStateChange', (state) => {
           if (!state.isActive) {
             handleAppBackgrounded();
           } else {
-            handleAppForegrounded();
-            triggerCompositorWakeup();
-            if (data) {
-              scheduleWidgetSync(data, 500);
-              syncAllNotifications(data).catch(() => {});
-            }
+            onForeground();
           }
         });
       } catch {}
@@ -419,12 +438,7 @@ function App() {
       if (document.hidden) {
         handleAppBackgrounded();
       } else {
-        handleAppForegrounded();
-        triggerCompositorWakeup();
-        if (data) {
-          scheduleWidgetSync(data, 500);
-          syncAllNotifications(data).catch(() => {});
-        }
+        onForeground();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -435,7 +449,7 @@ function App() {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [data]);
+  }, []);
 
   const [isLocked, setIsLocked] = useState(() => isAppLocked());
 

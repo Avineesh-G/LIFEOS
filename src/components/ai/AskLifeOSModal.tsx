@@ -739,7 +739,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 setActiveTab('chat');
                 setTimeout(() => inputRef.current?.focus(), 100);
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-[transform,opacity,background-color,color] cursor-pointer ${
                 activeTab === 'chat'
                   ? 'bg-white/[0.14] text-white shadow-sm'
                   : 'text-white/60 hover:text-white'
@@ -754,7 +754,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                 triggerHaptic('light');
                 setActiveTab('history');
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold font-sans-flex transition-[transform,opacity,background-color,color] cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-white/[0.14] text-white shadow-sm'
                   : 'text-white/60 hover:text-white'
@@ -827,7 +827,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <button
                         type="button"
                         onClick={handleCaptureCamera}
-                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 shadow-sm"
+                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-[transform,opacity,background-color,color] cursor-pointer h-24 shadow-sm"
                       >
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
@@ -852,7 +852,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       <button
                         type="button"
                         onClick={handlePickGallery}
-                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-24 shadow-sm"
+                        className="glass-tile p-3 text-left flex flex-col justify-between rounded-2xl group active:scale-[0.97] transition-[transform,opacity,background-color,color] cursor-pointer h-24 shadow-sm"
                       >
                         <div
                           className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
@@ -889,7 +889,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                           key={chip.id}
                           type="button"
                           onClick={() => handleSendQuery(chip.label)}
-                          className="glass-tile p-3 text-left flex flex-col justify-between gap-2 rounded-2xl group active:scale-[0.97] transition-all cursor-pointer h-22"
+                          className="glass-tile p-3 text-left flex flex-col justify-between gap-2 rounded-2xl group active:scale-[0.97] transition-[transform,opacity,background-color,color] cursor-pointer h-22"
                         >
                           <div
                             className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
@@ -1131,7 +1131,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   onClick={handleToggleVoiceRecord}
                   disabled={isGenerating || transcribing}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer mb-0.5 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-[transform,opacity,background-color,color] shrink-0 cursor-pointer mb-0.5 ${
                     isRecording
                       ? 'bg-red-500 text-white animate-pulse'
                       : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20'
@@ -1159,7 +1159,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                       setIsImageMenuOpen((prev) => !prev);
                     }}
                     disabled={isGenerating || pickingImage}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-[transform,opacity,background-color,color] shrink-0 cursor-pointer ${
                       attachedImages.length >= 3
                         ? 'bg-white/5 text-white/20 cursor-not-allowed'
                         : isImageMenuOpen
@@ -1207,7 +1207,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   type="button"
                   onClick={() => handleSendQuery()}
                   disabled={(!inputQuery.trim() && attachedImages.length === 0) || isGenerating}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 mb-0.5 ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-[transform,opacity,background-color,color] shrink-0 mb-0.5 ${
                     (inputQuery.trim() || attachedImages.length > 0) && !isGenerating
                       ? 'bg-gradient-to-tr from-[#0A84FF] to-[#BF5AF2] text-white shadow-md active:scale-95 cursor-pointer'
                       : 'bg-white/5 text-white/30 cursor-not-allowed'
@@ -1254,7 +1254,7 @@ export default function AskLifeOSModal({ isOpen, onClose, data, updateData }: As
                   <div
                     key={session.id}
                     onClick={() => handleReopenSession(session)}
-                    className="p-3.5 rounded-[22px] glass-tile active:scale-[0.98] transition-all flex items-center justify-between cursor-pointer group"
+                    className="p-3.5 rounded-[22px] glass-tile active:scale-[0.98] transition-[transform,opacity,background-color,color] flex items-center justify-between cursor-pointer group"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
                       <div className="w-9 h-9 rounded-2xl glass-flat text-[#BF5AF2] flex items-center justify-center shrink-0">

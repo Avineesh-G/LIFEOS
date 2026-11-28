@@ -27,12 +27,13 @@ export function ProgressBar({
       }}
     >
       <motion.div
-        className="h-full rounded-full"
+        className="h-full w-full rounded-full"
         style={{
-          background: 'linear-gradient(90deg, var(--app-accent, #0A84FF) 0%, var(--app-accent-end, #5AC8FA) 100%)',
+          transformOrigin: 'left',
+          background: 'linear-gradient(90deg, var(--app-accent, #7B4B36) 0%, var(--app-accent-end, #A46D52) 100%)',
         }}
-        initial={{ width: 0 }}
-        animate={{ width: `${clamped * 100}%` }}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: clamped }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       />
     </div>

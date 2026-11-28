@@ -6,7 +6,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  CaretLeft,
   ShieldCheck,
   Lock,
   Key,
@@ -44,7 +43,6 @@ import {
   evaluatePasswordStrength,
   GeneratorOptions
 } from '../utils/cryptoVault';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { SearchPill } from '../ui/navigation/SearchPill';
 import { Button } from '../ui/controls/Button';
 import { Sheet } from '../ui/feedback/Sheet';
@@ -467,24 +465,7 @@ export default function Vault({ data, updateData }: VaultProps) {
   // ── Locked State View ─────────────────────────────────────────────────────
   if (!isUnlocked) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col selection:bg-[#8E7CFF]/30">
-        <header
-          className="w-full px-4"
-          style={{
-            paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-            paddingBottom: '8px',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate('/settings')}
-              className="w-10 h-10 rounded-full glass-flat text-white active:scale-95 transition-transform flex items-center justify-center cursor-pointer"
-              title="Back to Settings"
-            >
-              <CaretLeft size={20} weight="bold" />
-            </button>
-          </div>
-        </header>
+      <div className="min-h-[calc(100vh-92px)] bg-black text-white flex flex-col selection:bg-[#8E7CFF]/30">
         <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
@@ -552,54 +533,35 @@ export default function Vault({ data, updateData }: VaultProps) {
   // ── Unlocked Main Vault View ──────────────────────────────────────────────
   return (
     <div className="w-full text-white pb-6 selection:bg-[#8E7CFF]/30">
-      {/* ── Top Navigation Bar ── */}
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 shadow-[0_10px_24px_rgba(0,0,0,0.85)]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Lock Vault"
-                onClick={() => handleLockVault('Vault locked')}
-              />
-            </ToolbarGroup>
-          }
-          center={
-            <div className="flex flex-col items-center">
-              <span className="text-sm font-semibold text-white">Encrypted Vault</span>
-              <span className="text-[10px] text-[#8E7CFF] font-mono">
-                Auto-locks in {lockCountdown}s
-              </span>
-            </div>
-          }
-          trailing={
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={handleOpenGenerator}
-                className="w-9 h-9 rounded-full glass-flat text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
-                title="Password Generator"
-              >
-                <Sparkle size={18} />
-              </button>
-              <button
-                onClick={openAddModal}
-                className="w-9 h-9 rounded-full bg-[#8E7CFF]/20 text-[#8E7CFF] hover:bg-[#8E7CFF]/30 flex items-center justify-center transition-colors cursor-pointer"
-                title="Add Password"
-              >
-                <Plus size={18} weight="bold" />
-              </button>
-            </div>
-          }
-        />
-      </header>
-
-      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
+      <div className="max-w-xl mx-auto px-1 pt-2 space-y-4">
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-[11px] font-mono text-[var(--app-accent-text,#D29B7E)]">
+            Auto-locks in {lockCountdown}s
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleOpenGenerator}
+              className="w-9 h-9 rounded-full glass-tile text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+              title="Password Generator"
+            >
+              <Sparkle size={18} />
+            </button>
+            <button
+              onClick={openAddModal}
+              className="w-9 h-9 rounded-full glass-tile text-[var(--app-accent-text,#D29B7E)] hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer"
+              title="Add Password"
+            >
+              <Plus size={18} weight="bold" />
+            </button>
+            <button
+              onClick={() => handleLockVault('Vault locked')}
+              className="w-9 h-9 rounded-full glass-tile text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Lock Vault"
+            >
+              <Lock size={16} weight="bold" />
+            </button>
+          </div>
+        </div>
         {/* Search */}
         <SearchPill
           value={searchQuery}
@@ -614,7 +576,7 @@ export default function Vault({ data, updateData }: VaultProps) {
               triggerHaptic('selection');
               setSelectedCategory('all');
             }}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-[transform,opacity,background-color,color] ${
               selectedCategory === 'all'
                 ? 'bg-[#8E7CFF] text-white shadow-sm'
                 : 'glass-flat text-[#8E8E93] hover:text-white'
@@ -633,7 +595,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                   triggerHaptic('selection');
                   setSelectedCategory(cat);
                 }}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-[transform,opacity,background-color,color] ${
                   active
                     ? 'bg-[#8E7CFF] text-white shadow-sm'
                     : 'glass-flat text-[#8E8E93] hover:text-white'
@@ -743,7 +705,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       </div>
                       <button
                         onClick={() => handleCopyUsername(item.id, item.usernameOrEmail)}
-                        className="text-[11px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-lg transition-all text-[#8E8E93] hover:text-white"
+                        className="text-[11px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-lg transition-[transform,opacity,background-color,color] text-[#8E8E93] hover:text-white"
                         style={
                           isUserCopied
                             ? {
@@ -789,7 +751,7 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                       <button
                         onClick={() => handleToggleReveal(item)}
-                        className={`p-2 rounded-lg transition-all ${
+                        className={`p-2 rounded-lg transition-[transform,opacity,background-color,color] ${
                           isRevealed
                             ? 'text-white shadow-sm'
                             : 'glass-flat text-[#8E8E93] hover:text-white'
@@ -806,7 +768,7 @@ export default function Vault({ data, updateData }: VaultProps) {
 
                       <button
                         onClick={() => handleCopyPassword(item)}
-                        className={`p-2 rounded-lg transition-all ${
+                        className={`p-2 rounded-lg transition-[transform,opacity,background-color,color] ${
                           isPasswordCopied
                             ? 'text-white shadow-sm'
                             : 'glass-flat text-[#8E8E93] hover:text-white'
@@ -864,7 +826,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                       triggerHaptic('light');
                       setModalForm({ ...modalForm, category: cat });
                     }}
-                    className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-semibold transition-[transform,opacity,background-color,color] ${
                       active
                         ? 'bg-[#8E7CFF] text-white shadow-sm'
                         : 'glass-flat text-[#8E8E93]'
@@ -1016,7 +978,7 @@ export default function Vault({ data, updateData }: VaultProps) {
                     setGenOptions(updated);
                     setGeneratedPassword(generateSecurePassword(updated));
                   }}
-                  className={`p-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between ${
+                  className={`p-2.5 rounded-xl text-xs font-semibold transition-[transform,opacity,background-color,color] flex items-center justify-between ${
                     active
                       ? 'bg-[#8E7CFF]/20 text-[#8E7CFF]'
                       : 'glass-flat text-[#8E8E93]'

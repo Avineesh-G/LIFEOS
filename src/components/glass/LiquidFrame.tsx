@@ -22,7 +22,7 @@ export const LiquidFrame = React.forwardRef<HTMLDivElement, LiquidFrameProps>(({
       className={`
         relative overflow-hidden rounded-[32px] p-5 sm:p-6
         bg-[var(--glass-2)] dark:bg-[rgba(5,11,13,0.85)] light:bg-[rgba(255,255,255,0.75)]
-        shadow-xl dark:shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)] transition-all duration-300
+        shadow-xl dark:shadow-[0_16px_40px_-10px_rgba(0,0,0,0.6)] transition-[transform,opacity,background-color,color] duration-300
         border-none outline-none ring-0 focus:outline-none focus:ring-0
         ${className}
       `}

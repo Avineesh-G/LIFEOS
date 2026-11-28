@@ -128,7 +128,7 @@ export default function AppLockOverlay() {
           whileTap={{ scale: 0.96 }}
           onClick={triggerAuth}
           disabled={isAuthenticating}
-          className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+          className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.98] transition-[transform,opacity,background-color,color] flex items-center justify-center gap-2.5 cursor-pointer"
           style={{
             background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
           }}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -94,15 +94,25 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
       setStep(step + 1);
     } else {
       updateData({});
-      navigate('/gym');
+      startTransition(() => { navigate('/gym'); });
     }
   };
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     triggerHaptic(10);
-    if (step > 1) setStep(step - 1);
+    if (step > 1) setStep((s) => s - 1);
     else handleAppBack(navigate);
-  };
+  }, [step, navigate]);
+
+  useEffect(() => {
+    if (step <= 1) return;
+    const onHeaderBack = (e: Event) => {
+      e.preventDefault();
+      handleBack();
+    };
+    window.addEventListener('lifeos-header-back', onHeaderBack);
+    return () => window.removeEventListener('lifeos-header-back', onHeaderBack);
+  }, [step, handleBack]);
 
   const stepVariant = {
     initial: { opacity: 0, x: 24 },
@@ -117,15 +127,11 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
       {/* Header & Progress Bar */}
       <motion.div
         variants={item}
-        className="flex items-center justify-between"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
+        className="flex items-center justify-between pt-2 pb-1"
       >
         <button
           onClick={handleBack}
-          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-all shadow-sm"
+          className="w-10 h-10 rounded-full bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark flex items-center justify-center hover:opacity-80 active:scale-95 transition-[transform,opacity,background-color,color] shadow-sm"
         >
           <ArrowLeft size={18} />
         </button>
@@ -135,7 +141,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+              className={`h-1.5 flex-1 rounded-full transition-[transform,opacity,background-color,color] duration-300 ${
                 i + 1 <= step
                   ? 'bg-primary-light dark:bg-primary-dark'
                   : 'bg-border-light dark:border-border-dark'
@@ -166,7 +172,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                   <button
                     key={g.id}
                     onClick={() => { triggerHaptic(12); setGoal(g.id as 'weight_loss' | 'muscle_build'); }}
-                    className={`card p-5 text-center flex flex-col items-center justify-between h-52 transition-all duration-150 active:scale-[0.97] ${
+                    className={`card p-5 text-center flex flex-col items-center justify-between h-52 transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.97] ${
                       sel ? 'border-primary-light dark:border-primary-dark ring-1 ring-primary-light dark:ring-primary-dark shadow-sm' : 'hover:border-secondary-light dark:hover:border-secondary-dark'
                     }`}
                   >
@@ -177,7 +183,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                       <h3 className="font-bold text-base text-primary-light dark:text-primary-dark">{g.title}</h3>
                       <p className="text-[11px] text-muted-light dark:text-muted-dark mt-1 leading-snug">{g.desc}</p>
                     </div>
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-[transform,opacity,background-color,color] ${
                       sel ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark'
                           : 'border-border-light dark:border-border-dark'
                     }`}>
@@ -206,7 +212,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                 <button
                   key={u}
                   onClick={() => { triggerHaptic(10); setUnit(u); }}
-                  className={`px-5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  className={`px-5 py-1.5 rounded-full text-xs font-bold transition-[transform,opacity,background-color,color] ${
                     unit === u
                       ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light'
                       : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark text-muted-light dark:text-muted-dark'
@@ -276,7 +282,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                 <button
                   key={u}
                   onClick={() => { triggerHaptic(10); setUnit(u); }}
-                  className={`px-5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  className={`px-5 py-1.5 rounded-full text-xs font-bold transition-[transform,opacity,background-color,color] ${
                     unit === u
                       ? 'bg-primary-light dark:bg-primary-dark text-primary-dark dark:text-primary-light'
                       : 'bg-bg-light dark:bg-bg-dark border border-border-light dark:border-border-dark text-muted-light dark:text-muted-dark'
@@ -371,14 +377,14 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                   <button
                     key={opt.id}
                     onClick={() => { triggerHaptic(12); setPace(opt.id); }}
-                    className={`w-full text-left transition-all duration-150 active:scale-[0.985] flex rounded-2xl border overflow-hidden ${
+                    className={`w-full text-left transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.985] flex rounded-2xl border overflow-hidden ${
                       sel
                         ? 'border-primary-light dark:border-primary-dark shadow-sm'
                         : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-secondary-light dark:hover:border-secondary-dark'
                     }`}
                   >
                     {/* Left accent strip */}
-                    <div className={`w-1 flex-shrink-0 transition-all duration-150 ${sel ? 'bg-primary-light dark:bg-primary-dark' : 'bg-transparent'}`} />
+                    <div className={`w-1 flex-shrink-0 transition-[transform,opacity,background-color,color] duration-150 ${sel ? 'bg-primary-light dark:bg-primary-dark' : 'bg-transparent'}`} />
                     <div className="flex-1 p-5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -387,7 +393,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                           </div>
                           <span className="font-bold text-base text-primary-light dark:text-primary-dark">{opt.title}</span>
                         </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-[transform,opacity,background-color,color] ${
                           sel ? 'bg-primary-light dark:bg-primary-dark border-primary-light dark:border-primary-dark' : 'border-border-light dark:border-border-dark'
                         }`}>
                           {sel && <Check size={10} strokeWidth={3} className="text-primary-dark dark:text-primary-light" />}
@@ -419,7 +425,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                   <button
                     key={inj.id}
                     onClick={() => { triggerHaptic(12); setSelectedInjury(inj.id); }}
-                    className={`card p-4 text-left relative transition-all duration-150 active:scale-[0.97] flex flex-col justify-between h-36 ${
+                    className={`card p-4 text-left relative transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.97] flex flex-col justify-between h-36 ${
                       sel ? 'border-primary-light dark:border-primary-dark ring-1 ring-primary-light dark:ring-primary-dark shadow-sm' : 'hover:border-secondary-light dark:hover:border-secondary-dark'
                     }`}
                   >
@@ -531,7 +537,7 @@ export default function GymOnboarding({ updateData }: GymOnboardingProps) {
                   <button
                     key={eq.id}
                     onClick={() => { triggerHaptic(12); setEquipment(eq.id); }}
-                    className={`w-full card p-5 text-left flex items-center justify-between transition-all duration-150 active:scale-[0.985] ${
+                    className={`w-full card p-5 text-left flex items-center justify-between transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.985] ${
                       sel ? 'border-primary-light dark:border-primary-dark ring-1 ring-primary-light dark:ring-primary-dark shadow-sm' : 'hover:border-secondary-light dark:hover:border-secondary-dark'
                     }`}
                   >

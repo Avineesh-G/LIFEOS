@@ -175,7 +175,7 @@ export function ExpenseList({
                         triggerHaptic('selection');
                         onDeleteExpense(exp.id);
                       }}
-                      className="p-1.5 rounded-full text-white/70 hover:text-rose-500 active:scale-90 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      className="p-1.5 rounded-full text-white/70 hover:text-rose-500 active:scale-90 transition-[transform,opacity,background-color,color] opacity-0 group-hover:opacity-100 focus:opacity-100"
                       title="Delete expense"
                     >
                       <Trash weight="duotone" size={14} />

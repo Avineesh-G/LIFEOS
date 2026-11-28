@@ -5,7 +5,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  CaretLeft,
   Plus,
   Trash,
   BookmarkSimple,
@@ -20,14 +19,12 @@ import {
 } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
 import { useM3Feedback } from '../components/m3/M3FeedbackContext';
 import {
   generateShoppingId,
   duplicateAsTemplate,
   calculateListProgress,
 } from '../utils/shoppingStorage';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { Button } from '../ui/controls/Button';
 import { TextField } from '../ui/controls/TextField';
 import { ProgressBar } from '../ui/visualization/ProgressBar';
@@ -92,7 +89,7 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 text-center space-y-4">
         <h2 className="text-lg font-bold text-white">List Not Found</h2>
         <p className="text-xs text-[#8E8E93]">This shopping list may have been removed.</p>
-        <Button variant="glass" onClick={() => navigate('/shopping')}>
+        <Button variant="glass" onClick={() => React.startTransition(() => { navigate('/shopping'); })}>
           Back to Shopping Lists
         </Button>
       </div>
@@ -219,61 +216,37 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
 
   return (
     <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#FF375F]/30">
-      {/* ── Top Navigation Bar ── */}
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={() => handleAppBack(navigate)}
-              />
-            </ToolbarGroup>
-          }
-          center={
-            <span className="text-sm font-semibold text-white truncate max-w-[180px]">
-              {currentList.name}
-            </span>
-          }
-        trailing={
-          <div className="flex items-center gap-1">
-            {!currentList.isTemplate && (
-              <button
-                onClick={() => {
-                  triggerHaptic('light');
-                  setTemplateName(`${currentList.name} (Template)`);
-                  setShowSaveTemplateModal(true);
-                }}
-                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-                title="Save Template"
-              >
-                <BookmarkSimple size={20} />
-              </button>
-            )}
-            {completedItems.length > 0 && (
-              <button
-                onClick={handleClearChecked}
-                className="p-2 rounded-lg text-[#FF453A] hover:bg-[#FF453A]/10 transition-colors"
-                title="Clear Done"
-              >
-                <ArrowCounterClockwise size={20} />
-              </button>
-            )}
-          </div>
-        }
-      />
-    </header>
-
-      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
+      <div className="max-w-xl mx-auto px-4 pt-2 space-y-4">
         {/* ── Title & Progress Card ── */}
         <div className="p-4 rounded-2xl glass-card space-y-3">
+          {(!currentList.isTemplate || completedItems.length > 0) && (
+            <div className="flex items-center justify-end gap-1.5 pb-1">
+              {!currentList.isTemplate && (
+                <button
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setTemplateName(`${currentList.name} (Template)`);
+                    setShowSaveTemplateModal(true);
+                  }}
+                  className="px-2.5 py-1.5 rounded-full glass-tile text-xs font-semibold text-white/80 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Save Template"
+                >
+                  <BookmarkSimple size={15} />
+                  <span>Save Template</span>
+                </button>
+              )}
+              {completedItems.length > 0 && (
+                <button
+                  onClick={handleClearChecked}
+                  className="px-2.5 py-1.5 rounded-full bg-[#FF453A]/15 text-[#FF453A] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Clear Done"
+                >
+                  <ArrowCounterClockwise size={15} />
+                  <span>Clear Done</span>
+                </button>
+              )}
+            </div>
+          )}
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               {currentList.isTemplate && (
@@ -458,18 +431,20 @@ export default function ShoppingListDetail({ data, updateData }: ShoppingListDet
             <AnimatePresence initial={false}>
               {showCompletedSection && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
+                  initial={{ opacity: 0, scaleY: 0.92 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  exit={{ opacity: 0, scaleY: 0.92 }}
+                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ transformOrigin: 'top' }}
                   className="space-y-2 overflow-hidden"
                 >
                   {completedItems.map((item) => (
                     <motion.div
                       key={item.id}
-                      layout
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
+                      transition={{ duration: 0.14 }}
                       className="p-3.5 rounded-2xl glass-flat opacity-60 flex items-center justify-between gap-3 select-none"
                     >
                       <div

@@ -175,7 +175,7 @@ export function ReceiptViewerModal({
             type="button"
             onClick={handleZoomOut}
             disabled={zoomLevel <= 1}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-[transform,opacity,background-color,color] cursor-pointer"
           >
             <MagnifyingGlassMinus weight="bold" size={18} />
           </button>
@@ -183,7 +183,7 @@ export function ReceiptViewerModal({
             type="button"
             onClick={handleZoomIn}
             disabled={zoomLevel >= 3}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-[transform,opacity,background-color,color] cursor-pointer"
           >
             <MagnifyingGlassPlus weight="bold" size={18} />
           </button>
@@ -202,7 +202,7 @@ export function ReceiptViewerModal({
                 },
               });
             }}
-            className="p-2 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 active:scale-95 transition-all cursor-pointer"
+            className="p-2 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
             title="Delete receipt"
           >
             <Trash weight="duotone" size={18} />
@@ -212,7 +212,7 @@ export function ReceiptViewerModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -252,7 +252,7 @@ export function ReceiptViewerModal({
                 onClose();
                 onNavigateToExpense(parentExpense);
               }}
-              className="px-3 py-1.5 rounded-full bg-accent text-white font-bold flex items-center gap-1 active:scale-95 transition-all"
+              className="px-3 py-1.5 rounded-full bg-accent text-white font-bold flex items-center gap-1 active:scale-95 transition-[transform,opacity,background-color,color]"
             >
               <span>View Expense</span>
               <ArrowSquareOut weight="bold" size={12} />

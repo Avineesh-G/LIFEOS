@@ -66,8 +66,6 @@ import {
   ArrowRight,
 } from '@phosphor-icons/react';
 import { triggerHaptic } from '../utils/haptics';
-import { useNavigate } from 'react-router-dom';
-import { navigateBack } from '../utils/backNavigation';
 import { Sheet } from '../ui';
 import type {
   AppData,
@@ -111,7 +109,6 @@ const NOTIFICATION_LEAD_OPTIONS = [
 const TIMELINE_HOURS = Array.from({ length: 17 }, (_, i) => i + 7);
 
 export default function CalendarPage({ data, updateData }: CalendarPageProps) {
-  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'timeline' | 'schedule'>('month');
@@ -137,6 +134,21 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
   const [formError, setFormError] = useState<string | null>(null);
 
   const timelineScrollRef = useRef<HTMLDivElement>(null);
+
+  // Two-phase progressive mount so Month Grid renders immediately without below-the-fold agenda lag
+  const [showAgendaPanel, setShowAgendaPanel] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      if (!cancelled) {
+        React.startTransition(() => setShowAgendaPanel(true));
+      }
+    }, 160);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, []);
 
   const selectedDateStr = useMemo(() => format(selectedDate, 'yyyy-MM-dd'), [selectedDate]);
   const selectedDayName = useMemo(() => format(selectedDate, 'EEEE'), [selectedDate]);
@@ -414,30 +426,14 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
 
   return (
     <div
-      className="w-full text-white selection:bg-[#5E5CE6]/30 pb-28 sm:pb-32 select-none font-sans"
-      style={{
-        paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 52px) + 12px)',
-      }}
+      className="w-full text-white selection:bg-[#7B4B36]/30 pb-28 sm:pb-32 pt-1 select-none font-sans"
     >
-      {/* ── 1. Compact Liquid Glass Month & Navigation Header ── */}
+      {/* ── 1. Compact Liquid Glass Month & Navigation Strip ── */}
       <div className="glass-card px-4 py-3 rounded-[24px] mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <button
-            type="button"
-            onClick={() => {
-              triggerHaptic('light');
-              navigateBack(navigate);
-            }}
-            className="w-8 h-8 rounded-full glass-tile flex items-center justify-center hover:text-white active:scale-90 transition-transform cursor-pointer touch-manipulation shrink-0"
-            style={{ color: 'var(--app-accent-text, #64D2FF)' }}
-            aria-label="Back"
-            title="Back"
-          >
-            <CaretLeft size={16} weight="bold" />
-          </button>
+        <div className="flex items-center gap-2.5 min-w-0">
           <div
             className="w-8 h-8 rounded-xl glass-tile flex items-center justify-center shadow-sm shrink-0"
-            style={{ color: 'var(--app-accent-text, #64D2FF)' }}
+            style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <CalendarBlank size={18} weight="duotone" />
           </div>
@@ -496,7 +492,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               triggerHaptic('selection');
               setViewMode('month');
             }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-[transform,opacity,background-color,color] cursor-pointer ${
               viewMode === 'month'
                 ? 'glass-nav text-white shadow-sm'
                 : 'text-white/50 hover:text-white/80'
@@ -511,7 +507,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               triggerHaptic('selection');
               setViewMode('timeline');
             }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-[transform,opacity,background-color,color] cursor-pointer ${
               viewMode === 'timeline'
                 ? 'glass-nav text-white shadow-sm'
                 : 'text-white/50 hover:text-white/80'
@@ -526,7 +522,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               triggerHaptic('selection');
               setViewMode('schedule');
             }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-[transform,opacity,background-color,color] cursor-pointer ${
               viewMode === 'schedule'
                 ? 'glass-nav text-white shadow-sm'
                 : 'text-white/50 hover:text-white/80'
@@ -541,7 +537,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
           <button
             type="button"
             onClick={() => setIsSearchOpen((prev) => !prev)}
-            className="w-8 h-8 rounded-full glass-tile flex items-center justify-center transition-all cursor-pointer active:scale-90 text-white/60 hover:text-white"
+            className="w-8 h-8 rounded-full glass-tile flex items-center justify-center transition-[transform,opacity,background-color,color] cursor-pointer active:scale-90 text-white/60 hover:text-white"
             style={isSearchOpen ? { color: 'var(--app-accent-text, #D29B7E)' } : undefined}
             title="Search calendar"
           >
@@ -551,7 +547,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
           <button
             type="button"
             onClick={() => handleOpenCreateModal()}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full glass-nav nav-rim-light active:scale-95 hover:text-white text-xs font-bold transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full glass-nav nav-rim-light active:scale-95 hover:text-white text-xs font-bold transition-[transform,opacity,background-color,color] cursor-pointer shadow-sm"
             style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <Plus size={14} weight="bold" />
@@ -594,7 +590,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             triggerHaptic('selection');
             setCategoryFilter('all');
           }}
-          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer select-none ${
+          className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-[transform,opacity,background-color,color] cursor-pointer select-none ${
             categoryFilter === 'all'
               ? 'glass-nav text-white shadow-sm'
               : 'glass-tile text-white/60 hover:text-white'
@@ -612,7 +608,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                 triggerHaptic('selection');
                 setCategoryFilter(cat.key);
               }}
-              className={`px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer select-none flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 transition-[transform,opacity,background-color,color] cursor-pointer select-none flex items-center gap-1.5 ${
                 isSelected
                   ? 'glass-nav text-white shadow-sm'
                   : 'glass-tile text-white/70 hover:text-white'
@@ -664,7 +660,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     key={day.toISOString()}
                     type="button"
                     onClick={() => handleSelectDay(day)}
-                    className={`relative flex flex-col items-center justify-between h-[46px] sm:h-[50px] p-1.5 rounded-[15px] transition-all cursor-pointer select-none touch-manipulation ${
+                    className={`relative flex flex-col items-center justify-between h-[46px] sm:h-[50px] p-1.5 rounded-[15px] transition-[transform,opacity,background-color,color] cursor-pointer select-none touch-manipulation ${
                       isSelected
                         ? 'droplet-active shadow-sm'
                         : inCurrentMonth
@@ -711,7 +707,8 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             </div>
           </div>
 
-          {/* ── Selected Day Summary Agenda (Immediately Below Month Grid) ── */}
+          {/* ── Selected Day Summary Agenda (Deferred past initial route commit) ── */}
+          {showAgendaPanel && (
           <div className="glass-card p-3.5 sm:p-4 rounded-[24px] space-y-2.5">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
@@ -733,7 +730,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               <button
                 type="button"
                 onClick={() => handleOpenCreateModal()}
-                className="text-xs font-bold hover:text-white flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                className="text-xs font-bold hover:text-white flex items-center gap-1 cursor-pointer active:scale-95 transition-[transform,opacity,background-color,color]"
                 style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               >
                 <Plus size={14} weight="bold" />
@@ -752,7 +749,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     <div
                       key={ev.id}
                       onClick={() => handleOpenEditModal(ev)}
-                      className="p-3 rounded-2xl glass-tile flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-all"
+                      className="p-3 rounded-2xl glass-tile lifeos-contain-item flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition-[transform,opacity,background-color,color]"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
@@ -785,7 +782,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     <div
                       key={t.id}
                       onClick={() => handleToggleTask(t.id)}
-                      className="p-3 rounded-2xl glass-tile flex items-center justify-between gap-3 cursor-pointer select-none active:scale-[0.99] transition-all"
+                      className="p-3 rounded-2xl glass-tile flex items-center justify-between gap-3 cursor-pointer select-none active:scale-[0.99] transition-[transform,opacity,background-color,color]"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <button
@@ -855,6 +852,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               )}
             </div>
           </div>
+          )}
         </div>
       )}
 
@@ -875,7 +873,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                   key={day.toISOString()}
                   type="button"
                   onClick={() => handleSelectDay(day)}
-                  className={`py-1.5 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  className={`py-1.5 rounded-xl flex flex-col items-center justify-center transition-[transform,opacity,background-color,color] cursor-pointer ${
                     isSelected ? 'droplet-active shadow-sm' : 'hover:bg-white/[0.05]'
                   }`}
                 >
@@ -1258,7 +1256,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
                     triggerHaptic('selection');
                     setSelectedCategory(cat.key);
                   }}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-[transform,opacity,background-color,color] cursor-pointer ${
                     selectedCategory === cat.key ? 'glass-nav text-white shadow-sm' : 'glass-flat text-white/70'
                   }`}
                   style={{ color: selectedCategory === cat.key ? '#FFFFFF' : cat.color }}
@@ -1287,7 +1285,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
               <button
                 type="button"
                 onClick={() => handleDeleteEvent(editingEventId)}
-                className="p-3 rounded-xl bg-rose-500/15 text-rose-400 active:scale-95 transition-all cursor-pointer"
+                className="p-3 rounded-xl bg-rose-500/15 text-rose-400 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                 title="Delete Event"
               >
                 <Trash size={16} weight="bold" />
@@ -1297,7 +1295,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             <button
               type="button"
               onClick={() => setIsEventModalOpen(false)}
-              className="flex-1 py-3 rounded-xl glass-tile text-xs font-bold text-white/80 active:scale-95 transition-all cursor-pointer text-center"
+              className="flex-1 py-3 rounded-xl glass-tile text-xs font-bold text-white/80 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer text-center"
             >
               Cancel
             </button>
@@ -1305,7 +1303,7 @@ export default function CalendarPage({ data, updateData }: CalendarPageProps) {
             <button
               type="button"
               onClick={handleSaveEvent}
-              className="flex-[2] py-3 rounded-xl text-xs font-bold text-white active:scale-95 transition-all shadow-lg cursor-pointer text-center"
+              className="flex-[2] py-3 rounded-xl text-xs font-bold text-white active:scale-95 transition-[transform,opacity,background-color,color] shadow-lg cursor-pointer text-center"
               style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
             >
               {editingEventId ? 'Update Event' : 'Save Event'}

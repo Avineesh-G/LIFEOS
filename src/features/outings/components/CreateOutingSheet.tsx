@@ -158,7 +158,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white/70 hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white/70 hover:text-white flex items-center justify-center active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -181,7 +181,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Goa Trip, Weekend Movies, Dinner with Friends"
-            className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-all font-sans"
+            className="w-full px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-[transform,opacity,background-color,color] font-sans"
             autoFocus={!outingToEdit}
           />
         </div>
@@ -198,7 +198,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
               value={place}
               onChange={(e) => setPlace(e.target.value)}
               placeholder="e.g. North Goa, PVR Cinemas, Downtown Cafe"
-              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-all font-sans"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#FB7185]/60 focus:ring-1 focus:ring-[#FB7185]/30 transition-[transform,opacity,background-color,color] font-sans"
             />
           </div>
         </div>
@@ -214,7 +214,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-all font-sans"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-[transform,opacity,background-color,color] font-sans"
             />
           </div>
 
@@ -228,7 +228,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
               value={endDate}
               min={startDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-all font-sans"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-white/[0.04] border border-white/10 text-xs text-white [color-scheme:dark] focus:outline-none focus:border-[#FB7185]/60 transition-[transform,opacity,background-color,color] font-sans"
             />
           </div>
         </div>
@@ -263,7 +263,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                   triggerHaptic('selection');
                   setBudgetBasis('myShare');
                 }}
-                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                className={`py-2 text-xs font-bold rounded-lg transition-[transform,opacity,background-color,color] cursor-pointer ${
                   budgetBasis === 'myShare'
                     ? 'bg-white/[0.10] border border-white/15 text-[#FB7185] shadow-sm'
                     : 'text-white/50 hover:text-white'
@@ -277,7 +277,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                   triggerHaptic('selection');
                   setBudgetBasis('totalCost');
                 }}
-                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                className={`py-2 text-xs font-bold rounded-lg transition-[transform,opacity,background-color,color] cursor-pointer ${
                   budgetBasis === 'totalCost'
                     ? 'bg-white/[0.10] border border-white/15 text-[#FB7185] shadow-sm'
                     : 'text-white/50 hover:text-white'
@@ -318,7 +318,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                     key={p.id}
                     type="button"
                     onClick={() => togglePerson(p.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-[transform,opacity,background-color,color] cursor-pointer flex items-center gap-1.5 ${
                       selected
                         ? 'bg-white/[0.08] border-[#FB7185]/60 text-[#FB7185] font-bold shadow-sm'
                         : 'bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20 hover:text-white'
@@ -350,7 +350,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
               type="button"
               onClick={handleAddCustomPerson}
               disabled={!newPersonName.trim()}
-              className="px-3.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-[#FB7185]/40 text-[#FB7185] text-xs font-bold flex items-center gap-1 active:scale-95 disabled:opacity-40 transition-all cursor-pointer shadow-sm"
+              className="px-3.5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-[#FB7185]/40 text-[#FB7185] text-xs font-bold flex items-center gap-1 active:scale-95 disabled:opacity-40 transition-[transform,opacity,background-color,color] cursor-pointer shadow-sm"
             >
               <Plus size={14} weight="bold" />
               <span>Add</span>
@@ -373,7 +373,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
                     triggerHaptic('selection');
                     setStatus(s);
                   }}
-                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                  className={`py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-[transform,opacity,background-color,color] cursor-pointer ${
                     status === s
                       ? 'bg-white/[0.10] text-[#FB7185] border-[#FB7185]/60 shadow-sm'
                       : 'bg-white/[0.03] border-white/10 text-white/50 hover:text-white'
@@ -406,7 +406,7 @@ export function CreateOutingSheet({ isOpen, onClose, outingToEdit }: CreateOutin
           <button
             type="button"
             onClick={handleSave}
-            className="w-full py-3.5 rounded-2xl bg-white/[0.10] hover:bg-white/[0.16] border border-[#FB7185]/50 text-[#FB7185] font-bold text-sm shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-2xl bg-white/[0.10] hover:bg-white/[0.16] border border-[#FB7185]/50 text-[#FB7185] font-bold text-sm shadow-md active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer flex items-center justify-center gap-2"
           >
             <span>{outingToEdit ? 'Save Changes' : 'Create Outing'}</span>
           </button>

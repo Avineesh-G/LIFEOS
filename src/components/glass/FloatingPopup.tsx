@@ -265,7 +265,7 @@ export default function FloatingPopup({
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-all shrink-0"
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-[transform,opacity,background-color,color] shrink-0"
                   aria-label="Close dialog"
                 >
                   <X size={16} />
@@ -290,7 +290,7 @@ export default function FloatingPopup({
                 <button
                   type="button"
                   onClick={handleAttemptClose}
-                  className="px-4 py-2.5 rounded-2xl bg-white/10 text-xs font-bold text-white/80 hover:text-white hover:opacity-90 active:scale-95 transition-all"
+                  className="px-4 py-2.5 rounded-2xl bg-white/10 text-xs font-bold text-white/80 hover:text-white hover:opacity-90 active:scale-95 transition-[transform,opacity,background-color,color]"
                 >
                   {cancelLabel}
                 </button>

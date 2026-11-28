@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
+import { prefetchRoute } from '../../utils/routePrefetch';
 import { LunaComicBubbleIcon } from '../tokens/icons';
 import { MOTION_SPRINGS } from '../tokens/motion';
 
 export interface TabItem {
   key: string;
   label: string;
+  route?: string;
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
   tint?: string;
@@ -299,8 +301,12 @@ export function TabBar({
                 key={tab.key}
                 type="button"
                 aria-label={tab.label}
-                onMouseDown={(e) => handlePointerStart(e.clientX, e.clientY, tab)}
+                onMouseDown={(e) => {
+                  if (tab.route) prefetchRoute(tab.route);
+                  handlePointerStart(e.clientX, e.clientY, tab);
+                }}
                 onTouchStart={(e) => {
+                  if (tab.route) prefetchRoute(tab.route);
                   const t = e.touches[0];
                   if (t) handlePointerStart(t.clientX, t.clientY, tab);
                 }}
@@ -346,6 +352,7 @@ export function TabBar({
           whileTap={{ scale: 0.92 }}
           whileHover={{ scale: 1.04 }}
           transition={MOTION_SPRINGS.bouncy}
+          onPointerDown={() => prefetchRoute('/ai')}
           onClick={() => {
             triggerHaptic('ai');
             onAiClick();

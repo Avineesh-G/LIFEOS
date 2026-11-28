@@ -585,25 +585,25 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       }}
     >
       
-      {/* ── Ambient Radial Atmosphere Glow ── */}
+      {/* ── Ambient Radial Atmosphere Glow (Pre-softened radial gradients, zero blur passes) ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div 
-          className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[1000px] h-[650px] rounded-full blur-[140px] opacity-30 transition-all duration-700"
+        <div
+          className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[1000px] h-[650px] rounded-full opacity-28 transition-opacity duration-700"
           style={{
-            background: `radial-gradient(circle, ${selectedAccent.primary} 0%, rgba(139, 30, 63, 0.4) 40%, transparent 75%)`,
+            background: `radial-gradient(circle, ${selectedAccent.primary} 0%, rgba(139, 30, 63, 0.35) 36%, transparent 70%)`,
           }}
         />
-        <div 
-          className="absolute top-[65%] right-[-10%] w-[650px] h-[650px] rounded-full blur-[160px] opacity-20"
-          style={{ 
-            background: `radial-gradient(circle, ${selectedAccent.secondary} 0%, rgba(20, 20, 25, 0.8) 50%, transparent 70%)` 
+        <div
+          className="absolute top-[65%] right-[-10%] w-[650px] h-[650px] rounded-full opacity-18"
+          style={{
+            background: `radial-gradient(circle, ${selectedAccent.secondary} 0%, rgba(20, 20, 25, 0.65) 45%, transparent 70%)`,
           }}
         />
       </div>
 
-      {/* ── Top Navigation Bar: Liquid Glass Bar ── */}
+      {/* ── Top Navigation Bar: Solid Translucent OLED Header (zero GPU blur) ── */}
       <header
-        className="sticky top-0 z-50 border-b border-white/[0.08] dark:border-white/[0.08] bg-white/80 dark:bg-[#000000]/80 backdrop-blur-xl px-4 sm:px-8 pb-3.5 transition-all"
+        className="sticky top-0 z-50 border-b border-white/[0.08] dark:border-white/[0.08] bg-white/95 dark:bg-[#000000]/94 px-4 sm:px-8 pb-3.5 transition-colors"
         style={{
           paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
         }}
@@ -665,14 +665,14 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:scale-105 transition-all"
+              className="w-10 h-10 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:scale-105 transition-[transform,opacity,background-color,color]"
             >
               {isDarkLocal ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             <a
               href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-zinc-300 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 text-xs font-bold hover:border-zinc-500 transition-all"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-zinc-300 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 text-xs font-bold hover:border-zinc-500 transition-[transform,opacity,background-color,color]"
             >
               <Eye size={14} style={{ color: selectedAccent.secondary }} />
               <span>Launch Web App</span>
@@ -681,7 +681,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <a
               href={manifest.apkUrl}
               download="LifeOS.apk"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-extrabold text-xs sm:text-sm shadow-lg hover:scale-105 active:scale-95 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-extrabold text-xs sm:text-sm shadow-lg hover:scale-105 active:scale-95 transition-[transform,opacity,background-color,color]"
               style={{
                 backgroundColor: selectedAccent.primary,
                 boxShadow: `0 8px 24px -4px ${selectedAccent.primary}60`,
@@ -754,7 +754,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
           <a
             href={manifest.apkUrl}
             download="LifeOS.apk"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl hover:scale-105 active:scale-95 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl hover:scale-105 active:scale-95 transition-[transform,opacity,background-color,color]"
             style={{
               backgroundColor: selectedAccent.primary,
               boxShadow: `0 12px 32px -4px ${selectedAccent.primary}60`,
@@ -766,7 +766,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
           <button
             onClick={() => setShowQrModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:scale-105 transition-all shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 font-bold text-sm text-zinc-800 dark:text-zinc-200 hover:scale-105 transition-[transform,opacity,background-color,color] shadow-sm"
           >
             <QrCode size={18} style={{ color: selectedAccent.secondary }} />
             <span>Scan Mobile QR</span>
@@ -774,7 +774,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
           <button
             onClick={copyLink}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-white transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-white transition-[transform,opacity,background-color,color]"
           >
             <Share2 size={16} />
             <span>{copiedLink ? 'Link Copied!' : 'Share'}</span>
@@ -811,10 +811,10 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             borderColor: `${selectedAccent.primary}40`,
           }}
         >
-          {/* Subtle Ambient Halo */}
-          <div 
-            className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-25"
-            style={{ backgroundColor: selectedAccent.primary }}
+          {/* Subtle Ambient Halo (Pre-softened radial gradient, zero filter: blur) */}
+          <div
+            className="absolute -top-10 -right-10 w-80 h-80 rounded-full pointer-events-none opacity-22"
+            style={{ background: `radial-gradient(circle, ${selectedAccent.primary} 0%, transparent 72%)` }}
           />
 
           {/* Section Header */}
@@ -860,7 +860,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 <button
                   key={idx}
                   onClick={() => handleSelectLunaPrompt(idx)}
-                  className={`p-3 rounded-2xl text-left border text-xs font-bold transition-all ${
+                  className={`p-3 rounded-2xl text-left border text-xs font-bold transition-[transform,opacity,background-color,color] ${
                     activeLunaIndex === idx
                       ? 'text-white shadow-md'
                       : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-500'
@@ -915,7 +915,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <button
               type="submit"
               disabled={isLunaGenerating}
-              className="px-5 py-3 rounded-2xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 transition-all shadow-md disabled:opacity-50"
+              className="px-5 py-3 rounded-2xl text-white font-bold text-xs flex items-center gap-1.5 shrink-0 transition-[transform,opacity,background-color,color] shadow-md disabled:opacity-50"
               style={{
                 backgroundColor: selectedAccent.primary,
               }}
@@ -961,7 +961,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
               <button
                 key={m.id}
                 onClick={() => setActiveModule(m.id)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold shrink-0 transition-all ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold shrink-0 transition-[transform,opacity,background-color,color] ${
                   isSel
                     ? 'text-white shadow-lg scale-105'
                     : 'bg-zinc-200/70 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-500/40 border border-transparent'
@@ -1123,7 +1123,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                           <div 
                             key={set.id}
                             onClick={() => toggleGymSet(set.id)}
-                            className={`p-2 rounded-xl border flex items-center justify-between text-[11px] cursor-pointer transition-all ${
+                            className={`p-2 rounded-xl border flex items-center justify-between text-[11px] cursor-pointer transition-[transform,opacity,background-color,color] ${
                               set.done ? 'bg-rose-500/15 border-rose-500/40 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-400'
                             }`}
                           >
@@ -1175,7 +1175,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                           <div 
                             key={task.id}
                             onClick={() => toggleTask(task.id)}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between text-[11px] cursor-pointer transition-all ${
+                            className={`p-2.5 rounded-xl border flex items-center justify-between text-[11px] cursor-pointer transition-[transform,opacity,background-color,color] ${
                               task.done ? 'bg-purple-950/20 border-purple-500/40 opacity-60 line-through' : 'bg-zinc-900 border-zinc-800'
                             }`}
                           >
@@ -1260,7 +1260,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
         {/* Feature Cards Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
           
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
               <Compass size={20} />
             </div>
@@ -1270,7 +1270,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             </p>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
               <Dumbbell size={20} />
             </div>
@@ -1280,7 +1280,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             </p>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
               <Utensils size={20} />
             </div>
@@ -1290,7 +1290,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             </p>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
               <BookOpen size={20} />
             </div>
@@ -1300,7 +1300,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             </p>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
               <Lock size={20} />
             </div>
@@ -1310,7 +1310,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             </p>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-all">
+          <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-3 shadow-sm hover:border-zinc-700 transition-[transform,opacity,background-color,color]">
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
               <Wallet size={20} />
             </div>
@@ -1347,7 +1347,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 <div
                   key={key}
                   onClick={() => toggleSub(key)}
-                  className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                  className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer transition-[transform,opacity,background-color,color] ${
                     s.checked ? 'bg-zinc-800/80 border-emerald-500/40 text-white' : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-500'
                   }`}
                 >
@@ -1376,7 +1376,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
                 <a
                   href={manifest.apkUrl}
                   download="LifeOS.apk"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition-all"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition-[transform,opacity,background-color,color]"
                 >
                   <Download size={14} />
                   <span>Download LifeOS Free</span>
@@ -1479,7 +1479,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       {/* ── Final Call to Action ── */}
       <section className="relative z-10 py-16 px-4 sm:px-6 max-w-4xl mx-auto text-center space-y-6">
         <div 
-          className="p-8 sm:p-12 rounded-[40px] border shadow-2xl backdrop-blur-xl space-y-6"
+          className="p-8 sm:p-12 rounded-[40px] border shadow-2xl space-y-6"
           style={{
             backgroundColor: isDarkLocal ? '#090B10' : '#FFFFFF',
             borderColor: `${selectedAccent.primary}40`,
@@ -1507,7 +1507,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
             <a
               href={manifest.apkUrl}
               download="LifeOS.apk"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl transition-all hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl text-white font-black text-base shadow-xl transition-[transform,opacity,background-color,color] hover:scale-105 active:scale-95"
               style={{
                 backgroundColor: selectedAccent.primary,
                 boxShadow: `0 10px 28px -4px ${selectedAccent.primary}60`,
@@ -1519,7 +1519,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
 
             <button
               onClick={() => setShowQrModal(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 font-bold text-sm hover:border-zinc-500 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 font-bold text-sm hover:border-zinc-500 transition-[transform,opacity,background-color,color]"
             >
               <QrCode size={16} style={{ color: selectedAccent.secondary }} />
               <span>Mobile QR Code</span>
@@ -1546,7 +1546,7 @@ export default function DownloadPage({ theme = 'dark', setTheme }: DownloadPageP
       {/* ── Mobile QR Code Modal ── */}
       <AnimatePresence>
         {showQrModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/88">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

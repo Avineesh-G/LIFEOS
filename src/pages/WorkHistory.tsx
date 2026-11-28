@@ -16,9 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import { format, parseISO } from 'date-fns';
 import { triggerHaptic } from '../utils/haptics';
-import { handleAppBack } from '../utils/backNavigation';
 import { getHistoryAnalysis, getGymHistoryAnalysis, getSpendingHistoryAnalysis } from '../utils/geminiCoach';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
 import { Segmented } from '../ui/controls/Segmented';
 import { Button } from '../ui/controls/Button';
 import { Badge } from '../ui/controls/Badge';
@@ -228,33 +226,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
 
   return (
     <div className="min-h-screen bg-black text-white pb-4 selection:bg-[#AC8E68]/30">
-      {/* ── Top Navigation Bar ── */}
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={() => handleAppBack(navigate)}
-              />
-            </ToolbarGroup>
-          }
-          center={
-            <span className="text-sm font-semibold text-white">
-              History Timeline
-            </span>
-          }
-        />
-      </header>
-
-      <div className="max-w-xl mx-auto px-4 pt-4 space-y-4">
+      <div className="max-w-xl mx-auto px-1 pt-2 space-y-4">
         {/* ── Month Selector ── */}
         <div className="p-3.5 rounded-2xl glass-card flex items-center justify-between">
           <button
@@ -345,7 +317,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyNutritionLogs.slice(0, visibleCount).map((log) => (
                   <div
                     key={log.date}
-                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card lifeos-contain-item flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">
@@ -419,7 +391,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyGymLogs.slice(0, visibleCount).map((log: WorkoutLog) => (
                   <div
                     key={log.id}
-                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card lifeos-contain-item flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">
@@ -466,7 +438,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyTasks.slice(0, visibleCount).map((task) => (
                   <div
                     key={task.id}
-                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between gap-3"
+                    className="p-3.5 rounded-2xl glass-card lifeos-contain-item flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0 flex-1">
                       <span className={`text-sm font-medium block truncate ${task.completed ? 'line-through text-[#8E8E93]' : 'text-white'}`}>
@@ -540,7 +512,7 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyExpenses.slice(0, visibleCount).map((exp) => (
                   <div
                     key={exp.id}
-                    className="p-3.5 rounded-2xl glass-card flex items-center justify-between"
+                    className="p-3.5 rounded-2xl glass-card lifeos-contain-item flex items-center justify-between"
                   >
                     <div>
                       <span className="text-sm font-semibold text-white block">{exp.note || exp.category}</span>
@@ -577,8 +549,8 @@ export default function WorkHistory({ data }: WorkHistoryProps) {
                 {monthlyNotes.slice(0, visibleCount).map((note) => (
                   <div
                     key={note.id}
-                    onClick={() => navigate('/notes')}
-                    className="p-3.5 rounded-2xl glass-card hover:bg-white/[0.08] transition-colors cursor-pointer"
+                    onClick={() => React.startTransition(() => { navigate('/notes'); })}
+                    className="p-3.5 rounded-2xl glass-card lifeos-contain-item hover:bg-white/[0.08] transition-colors cursor-pointer"
                   >
                     <span className="text-sm font-semibold text-white block truncate">{note.title || 'Untitled Note'}</span>
                     <p className="text-xs text-[#8E8E93] line-clamp-2 mt-1">{note.content}</p>

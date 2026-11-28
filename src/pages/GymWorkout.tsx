@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { AppData, WorkoutLog } from '../types';
 import { triggerHaptic } from '../utils/haptics';
 import { triggerConfettiBurst } from '../utils/confetti';
-import { handleAppBack } from '../utils/backNavigation';
 import {
-  LargeTitleHeader,
   Button,
   Stepper,
   Ring,
@@ -21,7 +19,6 @@ import {
   Play,
   Pause,
   ArrowClockwise,
-  CaretLeft,
 } from '../ui';
 
 interface GymWorkoutProps {
@@ -163,35 +160,21 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
   };
 
   return (
-    <div className="w-full min-h-screen bg-black text-white flex flex-col justify-between p-4 selection:bg-[#FF453A]/30">
-      {/* Top Header */}
-      <header
-        className="w-full flex items-center justify-between"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => handleAppBack(navigate)}
-          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:bg-white/20 cursor-pointer"
-        >
-          <CaretLeft size={20} weight="bold" />
-        </button>
-
-        <span className="text-sm font-bold text-[rgba(235,235,245,0.60)]">
-          LIVE WORKOUT HUD
+    <div className="w-full min-h-[calc(100vh-92px)] bg-black text-white flex flex-col justify-between p-4 pt-2 selection:bg-[#FF453A]/30">
+      {/* Exercises Drawer Quick Row */}
+      <div className="w-full flex items-center justify-between pt-1">
+        <span className="text-xs font-bold uppercase tracking-wider text-[rgba(235,235,245,0.55)]">
+          Live Workout HUD
         </span>
-
         <button
           type="button"
           onClick={() => setIsListSheetOpen(true)}
-          className="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold text-white active:bg-white/20 cursor-pointer"
+          className="px-3 py-1.5 rounded-full glass-tile text-xs font-bold text-white active:scale-95 transition-transform cursor-pointer"
+          style={{ color: 'var(--app-accent-text, #D29B7E)' }}
         >
           Exercises ({currentExIndex + 1}/{activePlan.exercises.length || 1})
         </button>
-      </header>
+      </div>
 
       {/* Center Immersive HUD Display */}
       <div className="flex-1 flex flex-col items-center justify-center gap-6 py-6 select-none max-w-sm mx-auto w-full">
@@ -333,7 +316,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
       {/* Workout Complete Summary Sheet */}
       <Sheet
         isOpen={isSummaryOpen}
-        onClose={() => navigate('/gym')}
+        onClose={() => startTransition(() => { navigate('/gym'); })}
         detent="half"
         title="Workout Complete!"
       >
@@ -348,7 +331,7 @@ export default function GymWorkout({ data, updateData }: GymWorkoutProps) {
               variant="prominent"
               tint="#FF453A"
               className="w-full"
-              onClick={() => navigate('/gym')}
+              onClick={() => startTransition(() => { navigate('/gym'); })}
             >
               Return to Gym Hub
             </Button>

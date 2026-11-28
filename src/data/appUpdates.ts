@@ -25,13 +25,33 @@ export const OFFICIAL_DEVELOPER_GITHUB = 'https://github.com/Avineesh-G/LIFEOS';
 
 export const APP_UPDATES: AppUpdate[] = [
   {
+    id: 'update-v4-1-0-capsule-header-nutrition-ai-protein-hardware-tiers',
+    category: 'Capsule Headers, Nutrition AI Protein & Zero-Lag Mobile',
+    icon: React.createElement(Lightning, { size: 18, weight: 'duotone' }),
+    title: 'LifeOS v4.1.0: Unified Capsule Headers, AI Meal Protein, Native Hardware Engine & 120Hz Polish',
+    dateTime: '28 Nov 2026, 09:45 PM',
+    fullDateTime: 'Saturday, November 28, 2026 at 09:45:00 PM IST',
+    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    colorClass: 'text-[var(--app-accent-text)]',
+    summary:
+      'Refined every mobile and desktop workspace with a unified floating CapsuleHeader, upgraded Nutrition with Warm Brown calorie arcs, Skip-lock protection, and AI-estimated protein across mess & outside foods, added native Android hardware telemetry with system-managed performance tiers, and eliminated mobile overflow and transition hitches across all 22 routes.',
+    points: [
+      'Unified Floating CapsuleHeader: Centered interface titles matched to the active palette with Back/Directory navigation and Sync/Reload buttons aligned across Home, Gym, Nutrition, Spending, Focus, Circle, Settings, and sub-pages.',
+      'Nutrition Ring, Skip Lock & AI Protein: Redesigned SplitCalorieCircle in high-contrast Warm Brown arcs, prevented accidental Skip when meals are logged, added AI-computed protein (g P) across mess & outside meals, and lazy-loaded messMenu for faster route entry.',
+      'Accurate Native Hardware & Read-Only Auto-Selected Tiers: Added native Android DeviceHardwarePlugin (model, RAM, cores, GPU, free storage) and transitioned Performance Tiers to automatic system selection.',
+      'Zero-Lag 120Hz Mobile Smoothness: Removed hidden permanent GPU layers and mobile horizontal overflows (/focus, /circle) and pre-warmed Nutrition & primary routes via idle routePrefetch.',
+    ],
+    contactEmails: OFFICIAL_DEVELOPER_EMAILS,
+    developerGithub: OFFICIAL_DEVELOPER_GITHUB,
+  },
+  {
     id: 'update-v4-0-0-new-interfaces-luna-copilot-warm-brown',
     category: 'LifeOS 4.0: 6 New Interfaces, Luna Co-Pilot & Warm Brown',
     icon: React.createElement(RocketLaunch, { size: 18, weight: 'duotone' }),
     title: 'LifeOS v4.0: 6 New Interfaces, Luna AI Co-Pilot, A–Z Hub & Fixed Warm Brown Theme',
     dateTime: '27 Nov 2026, 01:25 AM',
     fullDateTime: 'Friday, November 27, 2026 at 01:25:00 AM IST',
-    tag: `v${CURRENT_VERSION_NAME} • Latest`,
+    tag: 'v4.0.0',
     colorClass: 'text-[var(--app-accent-text)]',
     summary:
       'Expanded LifeOS with six deeply integrated workspaces (Focus Studio, Daily Journal, Inner Circle, Projects & Milestones, Trips & Packing, and Decision Workbench), connected Luna AI Co-Pilot across every workflow, sorted More Hub sections A–Z, and locked the entire theme to Fixed Warm Brown.',

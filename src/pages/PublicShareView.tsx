@@ -97,7 +97,7 @@ export default function PublicShareView() {
 
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => React.startTransition(() => { navigate('/'); })}
           className="text-[12px] font-medium text-white/50 hover:text-white flex items-center gap-1 transition-colors"
         >
           <House size={14} weight="bold" />
@@ -165,7 +165,7 @@ export default function PublicShareView() {
                 <button
                   type="button"
                   onClick={() => triggerDirectDownload(record.downloadUrl, record.title, 'primary')}
-                  className="w-full py-3.5 px-4 rounded-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-semibold text-[14px] text-white shadow-lg cursor-pointer"
+                  className="w-full py-3.5 px-4 rounded-2xl active:scale-[0.98] transition-[transform,opacity,background-color,color] flex items-center justify-center gap-2 font-semibold text-[14px] text-white shadow-lg cursor-pointer"
                   style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                 >
                   {downloadingId === 'primary' ? (

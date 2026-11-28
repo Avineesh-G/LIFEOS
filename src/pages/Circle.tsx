@@ -219,7 +219,7 @@ export default function Circle({ data, updateData }: CircleProps) {
   };
 
   return (
-    <div className="pb-28 px-4 max-w-2xl mx-auto">
+    <div className="pb-28 px-4 w-full max-w-2xl mx-auto">
       <LargeTitleHeader
         title="Inner Circle"
         subtitle="Birthdays, catch-ups & unified balances"

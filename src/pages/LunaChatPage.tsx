@@ -967,7 +967,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 triggerHaptic('light');
                 navigateBack(navigate);
               }}
-              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-all cursor-pointer touch-manipulation shrink-0"
+              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation shrink-0"
               aria-label="Back"
               title="Back"
             >
@@ -980,7 +980,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 triggerHaptic('light');
                 setIsHistoryDrawerOpen(true);
               }}
-              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-all cursor-pointer touch-manipulation shrink-0"
+              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation shrink-0"
               aria-label="Chat Threads"
               title="Chat Threads"
             >
@@ -996,7 +996,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 triggerHaptic('selection');
                 setIsModelSheetOpen(true);
               }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-tile hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer select-none touch-manipulation shadow-sm group"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-tile hover:bg-white/[0.08] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer select-none touch-manipulation shadow-sm group"
               aria-label="Select Intelligence Model"
             >
               <div
@@ -1027,7 +1027,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
             <button
               type="button"
               onClick={handleStartNewChat}
-              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center hover:text-white active:scale-90 transition-all cursor-pointer touch-manipulation shrink-0"
+              className="w-9 h-9 rounded-full glass-tile flex items-center justify-center hover:text-white active:scale-90 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation shrink-0"
               style={{ color: 'var(--app-accent-text, #D29B7E)' }}
               aria-label="Start New Chat"
               title="Start New Chat"
@@ -1084,7 +1084,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                 <button
                   type="button"
                   onClick={() => setIsHistoryDrawerOpen(false)}
-                  className="w-8 h-8 rounded-full glass-tile flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all cursor-pointer touch-manipulation shrink-0"
+                  className="w-8 h-8 rounded-full glass-tile flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation shrink-0"
                   aria-label="Close Drawer"
                 >
                   <X size={15} weight="bold" />
@@ -1095,7 +1095,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
               <button
                 type="button"
                 onClick={handleStartNewChat}
-                className="w-full mt-2 p-3 rounded-2xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-all flex items-center justify-between shadow-lg cursor-pointer group touch-manipulation text-left"
+                className="w-full mt-2 p-3 rounded-2xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-[transform,opacity,background-color,color] flex items-center justify-between shadow-lg cursor-pointer group touch-manipulation text-left"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
@@ -1168,7 +1168,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                           <div
                             key={session.id}
                             onClick={() => handleReopenSession(session)}
-                            className={`group relative p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-2.5 touch-manipulation ${
+                            className={`group relative p-2.5 rounded-xl transition-[transform,opacity,background-color,color] cursor-pointer flex items-center justify-between gap-2.5 touch-manipulation ${
                               isCurrent ? 'droplet-active shadow-md' : 'glass-tile hover:bg-white/[0.06]'
                             }`}
                           >
@@ -1186,7 +1186,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                             <button
                               type="button"
                               onClick={(e) => handleDeleteSession(session.id, e)}
-                              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-all touch-manipulation shrink-0"
+                              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-[transform,opacity,background-color,color] touch-manipulation shrink-0"
                               title="Delete thread"
                             >
                               <Trash size={14} weight="bold" />
@@ -1210,7 +1210,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     setApiKeySaveSuccess(false);
                     setIsApiKeyModalOpen(true);
                   }}
-                  className="flex items-center gap-2.5 min-w-0 text-left p-1 -ml-1 rounded-2xl hover:bg-white/5 active:scale-[0.98] transition-all cursor-pointer group flex-1 touch-manipulation"
+                  className="flex items-center gap-2.5 min-w-0 text-left p-1 -ml-1 rounded-2xl hover:bg-white/5 active:scale-[0.98] transition-[transform,opacity,background-color,color] cursor-pointer group flex-1 touch-manipulation"
                   title="Configure Groq AI API Key"
                 >
                   <div
@@ -1309,7 +1309,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                         } catch {}
                         setIsModelSheetOpen(false);
                       }}
-                      className={`p-3.5 rounded-2xl transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      className={`p-3.5 rounded-2xl transition-[transform,opacity,background-color,color] cursor-pointer flex items-center justify-between gap-3 ${
                         isSelected ? 'droplet-active shadow-md' : 'glass-tile'
                       }`}
                     >
@@ -1458,7 +1458,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   <label className="text-[11px] font-semibold text-white/60 uppercase tracking-wider block">
                     API Key
                   </label>
-                  <div className="relative flex items-center rounded-2xl bg-white/[0.06] px-3.5 py-2.5 text-xs transition-all">
+                  <div className="relative flex items-center rounded-2xl bg-white/[0.06] px-3.5 py-2.5 text-xs transition-[transform,opacity,background-color,color]">
                     <input
                       type={showApiKey ? 'text' : 'password'}
                       value={apiKeyInput}
@@ -1492,7 +1492,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     <button
                       type="button"
                       onClick={() => handleSaveApiKey('')}
-                      className="flex-1 py-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/15 text-white/60 hover:text-rose-300 text-xs font-semibold transition-all cursor-pointer text-center touch-manipulation"
+                      className="flex-1 py-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/15 text-white/60 hover:text-rose-300 text-xs font-semibold transition-[transform,opacity,background-color,color] cursor-pointer text-center touch-manipulation"
                     >
                       Clear Key
                     </button>
@@ -1500,7 +1500,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   <button
                     type="button"
                     onClick={() => handleSaveApiKey(apiKeyInput)}
-                    className="flex-1 py-2.5 rounded-2xl text-white text-xs font-bold active:scale-95 transition-all cursor-pointer text-center flex items-center justify-center gap-1.5 touch-manipulation shadow-lg"
+                    className="flex-1 py-2.5 rounded-2xl text-white text-xs font-bold active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer text-center flex items-center justify-center gap-1.5 touch-manipulation shadow-lg"
                     style={{
                       background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                     }}
@@ -1596,7 +1596,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     </div>
                   ) : (
                     /* Assistant Message Stream (Full Width with Avatar) */
-                    <div className="w-full text-left space-y-2">
+                    <div className="w-full text-left space-y-2 lifeos-contain-item">
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-7 h-7 rounded-xl glass-tile flex items-center justify-center shadow-sm shrink-0" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                           <LunaComicBubbleIcon size={15} />
@@ -1701,7 +1701,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                         messages.slice(0, -1)
                       )
                     }
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                     style={{
                       backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                       color: 'var(--app-accent-text, #D29B7E)',
@@ -1817,7 +1817,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                     key={item.id}
                     type="button"
                     onClick={() => handleSendQuery(item.query)}
-                    className="p-2 rounded-xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2 text-left border-none shadow-md touch-manipulation select-none"
+                    className="p-2 rounded-xl glass-card hover:bg-white/[0.08] active:scale-[0.98] transition-[transform,opacity,background-color,color] cursor-pointer flex items-center gap-2 text-left border-none shadow-md touch-manipulation select-none"
                   >
                     <div className="w-6 h-6 rounded-md glass-tile flex items-center justify-center shrink-0 shadow-sm text-white">
                       {item.icon}
@@ -1903,7 +1903,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   triggerHaptic('medium');
                   setIsAttachMenuOpen((prev) => !prev);
                 }}
-                className="w-[38px] h-[38px] rounded-full glass-tile flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-all cursor-pointer shrink-0"
+                className="w-[38px] h-[38px] rounded-full glass-tile flex items-center justify-center text-white/70 hover:text-white active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer shrink-0"
                 title="Attach photo"
                 aria-label="Attach photo"
               >
@@ -1933,7 +1933,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
               <button
                 type="button"
                 onClick={handleToggleVoiceRecord}
-                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-[transform,opacity,background-color,color] cursor-pointer shrink-0 ${
                   isRecording
                     ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)]'
                     : 'glass-tile text-white/70 hover:text-white active:scale-95'
@@ -1958,7 +1958,7 @@ export default function LunaChatPage({ data, updateData }: LunaChatPageProps) {
                   handleSendQuery();
                 }
               }}
-              className={`w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all shrink-0 select-none shadow-xl ${
+              className={`w-[50px] h-[50px] rounded-full flex items-center justify-center transition-[transform,opacity,background-color,color] shrink-0 select-none shadow-xl ${
                 isGenerating
                   ? 'bg-white/20 text-white hover:bg-white/30 active:scale-95 shadow-[0_0_14px_rgba(255,255,255,0.25)] cursor-pointer'
                   : inputQuery.trim().length > 0 || attachedImages.length > 0

@@ -197,7 +197,7 @@ export default function NightCanteenSection({
                   triggerHaptic('light');
                   onToggleItem(itemName, estCals);
                 }}
-                className={`text-xs px-2.5 py-1 rounded-xl transition-all flex items-center gap-1.5 ${
+                className={`text-xs px-2.5 py-1 rounded-xl transition-[transform,opacity,background-color,color] flex items-center gap-1.5 ${
                   isSelected
                     ? 'font-semibold shadow-sm'
                     : 'glass-flat text-secondary-light dark:text-secondary-dark'
@@ -255,7 +255,7 @@ export default function NightCanteenSection({
                   triggerHaptic('light');
                   setDietFilter(tab);
                 }}
-                className={`px-3 py-1 rounded-lg font-medium transition-all text-xs flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded-lg font-medium transition-[transform,opacity,background-color,color] text-xs flex items-center gap-1.5 ${
                   dietFilter === tab
                     ? 'bg-surface-light dark:bg-surface-dark shadow-xs font-semibold text-primary-light dark:text-primary-dark'
                     : 'text-muted-light dark:text-muted-dark hover:text-secondary-light dark:hover:text-secondary-dark'
@@ -285,7 +285,7 @@ export default function NightCanteenSection({
                   triggerHaptic('light');
                   setSelectedCategory(cat);
                 }}
-                className={`text-xs px-2.5 py-1 rounded-xl whitespace-nowrap transition-all flex-shrink-0 ${
+                className={`text-xs px-2.5 py-1 rounded-xl whitespace-nowrap transition-[transform,opacity,background-color,color] flex-shrink-0 ${
                   isSelected
                     ? 'text-white font-semibold shadow-xs'
                     : 'glass-flat text-secondary-light dark:text-secondary-dark'
@@ -329,7 +329,7 @@ export default function NightCanteenSection({
             return (
               <div
                 key={item.id}
-                className={`w-full flex flex-col p-3 rounded-2xl transition-all ${
+                className={`w-full flex flex-col p-3 rounded-2xl transition-[transform,opacity,background-color,color] ${
                   isSelected
                     ? 'glass-tile shadow-xs'
                     : 'glass-flat'

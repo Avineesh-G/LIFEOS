@@ -131,7 +131,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
           1. Body Metrics & Weight Target
         </label>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-all">
+          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-[transform,opacity,background-color,color]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
               Age (Years)
             </label>
@@ -145,7 +145,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
             />
           </div>
 
-          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-all">
+          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-[transform,opacity,background-color,color]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
               Height (cm)
             </label>
@@ -159,7 +159,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
             />
           </div>
 
-          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-all">
+          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-[transform,opacity,background-color,color]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
               Present Weight
             </label>
@@ -177,7 +177,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
             </div>
           </div>
 
-          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-all">
+          <div className="bg-black/[0.025] dark:bg-white/[0.04] p-3.5 rounded-[20px] border border-border-light dark:border-border-dark focus-within:border-accent/60 transition-[transform,opacity,background-color,color]">
             <label className="text-[10px] font-bold uppercase tracking-wider text-secondary-light dark:text-secondary-dark block mb-1 font-mono">
               Goal Weight
             </label>
@@ -218,7 +218,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
                 onClick={() => {
                   setFitnessGoal(goal.id);
                 }}
-                className={`p-3.5 rounded-[20px] text-left border transition-all duration-150 active:scale-[0.98] relative flex flex-col justify-between ${
+                className={`p-3.5 rounded-[20px] text-left border transition-[transform,opacity,background-color,color] duration-150 active:scale-[0.98] relative flex flex-col justify-between ${
                   isSelected
                     ? 'bg-accent/15 dark:bg-accent/25 border-accent shadow-sm'
                     : 'bg-black/[0.02] dark:bg-white/[0.035] border-border-light dark:border-border-dark hover:border-accent/40'
@@ -274,7 +274,7 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
                 key={g}
                 type="button"
                 onClick={() => setGender(g)}
-                className={`py-2.5 px-3 text-xs font-bold rounded-full border transition-all active:scale-[0.97] capitalize font-sans ${
+                className={`py-2.5 px-3 text-xs font-bold rounded-full border transition-[transform,opacity,background-color,color] active:scale-[0.97] capitalize font-sans ${
                   isSelected 
                     ? 'bg-[#6750A4] text-white dark:bg-[#D0BCFF] dark:text-[#21005D] border-transparent shadow-sm' 
                     : 'bg-black/[0.025] dark:bg-white/[0.035] border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark hover:border-accent/40'
@@ -355,14 +355,14 @@ export default function BodyProfileForm({ initialProfile, onSave, onCancel }: Bo
           <button 
             type="button" 
             onClick={onCancel}
-            className="flex-1 py-3.5 rounded-full border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-bold text-xs sm:text-sm active:scale-[0.97] transition-all hover:bg-black/5 dark:hover:bg-white/5"
+            className="flex-1 py-3.5 rounded-full border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark font-bold text-xs sm:text-sm active:scale-[0.97] transition-[transform,opacity,background-color,color] hover:bg-black/5 dark:hover:bg-white/5"
           >
             Cancel
           </button>
         )}
         <button 
           type="submit"
-          className={`flex-1 py-3.5 rounded-full font-bold text-xs sm:text-sm active:scale-[0.97] transition-all shadow-sm flex items-center justify-center gap-2 ${
+          className={`flex-1 py-3.5 rounded-full font-bold text-xs sm:text-sm active:scale-[0.97] transition-[transform,opacity,background-color,color] shadow-sm flex items-center justify-center gap-2 ${
             isSaved 
               ? 'bg-[#146C3E] dark:bg-[#A6EDC2] text-white dark:text-[#19261E]' 
               : 'bg-[#6750A4] dark:bg-[#D0BCFF] text-white dark:text-[#21005D] hover:opacity-95'

@@ -20,6 +20,7 @@ export interface NutritionEstimate {
 export interface MultiItemEstimate {
   items: NutritionEstimate[];
   totalCalories: number;
+  totalProtein: number;
 }
 
 /**
@@ -146,6 +147,71 @@ const FOOD_DATABASE: FoodDbItem[] = [
  * Cache for AI estimation results to avoid repeated API requests
  */
 const MEMORY_CACHE = new Map<string, NutritionEstimate>();
+const MACRO_CACHE_STORAGE_KEY = 'lifeos_ai_food_macros_v1';
+
+interface CachedMacroEntry {
+  protein: number;
+  calories: number;
+  source: 'ai' | 'database';
+  updatedAt: number;
+}
+
+let inMemoryMacroStore: Record<string, CachedMacroEntry> | null = null;
+
+function normalizeFoodKey(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function readMacroStore(): Record<string, CachedMacroEntry> {
+  if (inMemoryMacroStore) return inMemoryMacroStore;
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(MACRO_CACHE_STORAGE_KEY) : null;
+    inMemoryMacroStore = raw ? (JSON.parse(raw) as Record<string, CachedMacroEntry>) : {};
+  } catch {
+    inMemoryMacroStore = {};
+  }
+  return inMemoryMacroStore;
+}
+
+function writeMacroEntries(entries: Record<string, CachedMacroEntry>) {
+  const store = readMacroStore();
+  Object.assign(store, entries);
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(MACRO_CACHE_STORAGE_KEY, JSON.stringify(store));
+    }
+  } catch {
+    // Ignore storage quota issues
+  }
+}
+
+export function getInitialAiProteinMap(): Record<string, number> {
+  const store = readMacroStore();
+  const map: Record<string, number> = {};
+  for (const [k, entry] of Object.entries(store)) {
+    if (entry && typeof entry.protein === 'number') {
+      map[k] = entry.protein;
+    }
+  }
+  return map;
+}
+
+export function resolveItemProteinLocal(foodName: string, estCalories?: number, aiMap?: Record<string, number>): number {
+  const key = normalizeFoodKey(foodName);
+  if (aiMap && typeof aiMap[key] === 'number') {
+    return aiMap[key];
+  }
+  const store = readMacroStore();
+  if (store[key] && typeof store[key].protein === 'number') {
+    return store[key].protein;
+  }
+  const dbMatch = matchLocalFoodDatabase(foodName, 1);
+  if (dbMatch?.macros?.protein !== undefined) {
+    return Math.round(dbMatch.macros.protein * 10) / 10;
+  }
+  // Light fallback before AI batch finishes (~4.5g per 100 kcal heuristic)
+  return Math.round(((estCalories || 150) * 0.042) * 10) / 10;
+}
 
 /**
  * Word to number helper for natural phrasing like "two chapatis" or "half bowl dal"
@@ -285,7 +351,8 @@ export function matchLocalFoodDatabase(inputFood: string, explicitPortion = 1): 
  */
 export async function analyzeFoodWithAi(
   rawFoodInput: string,
-  userSelectedPortion: number = 1
+  userSelectedPortion: number = 1,
+  preferOnlineAi: boolean = false
 ): Promise<NutritionEstimate> {
   const trimmed = rawFoodInput.trim();
   if (!trimmed) {
@@ -295,6 +362,7 @@ export async function analyzeFoodWithAi(
       detectedPortion: userSelectedPortion,
       unit: 'serving',
       totalCalories: 100 * userSelectedPortion,
+      macros: { protein: 4, carbs: 14, fats: 3 },
       source: 'fallback',
       confidence: 'estimated',
     };
@@ -302,27 +370,29 @@ export async function analyzeFoodWithAi(
 
   const { portion: extractedPortion, cleanName } = extractPortionFromText(trimmed);
   const effectivePortion = extractedPortion !== null ? extractedPortion : userSelectedPortion;
-  const cacheKey = `${cleanName.toLowerCase()}_${effectivePortion}`;
+  const cacheKey = `${cleanName.toLowerCase()}_${effectivePortion}_${preferOnlineAi ? 'ai' : 'std'}`;
 
   // 1. Check in-memory cache
   if (MEMORY_CACHE.has(cacheKey)) {
     return MEMORY_CACHE.get(cacheKey)!;
   }
 
-  // 2. Check Local Database (Instant)
-  const localMatch = matchLocalFoodDatabase(trimmed, effectivePortion);
-  if (localMatch) {
-    MEMORY_CACHE.set(cacheKey, localMatch);
-    return localMatch;
+  const activeKey = getGroqApiKey() || GEMINI_API_KEY;
+
+  // 2. Check Local Database first unless preferOnlineAi is requested with an active AI key
+  if (!preferOnlineAi || !activeKey) {
+    const localMatch = matchLocalFoodDatabase(trimmed, effectivePortion);
+    if (localMatch) {
+      MEMORY_CACHE.set(cacheKey, localMatch);
+      return localMatch;
+    }
   }
 
   // 3. Online AI analysis via Groq / Gemini API
-  const activeKey = getGroqApiKey() || GEMINI_API_KEY;
-
   if (activeKey) {
     try {
-      const prompt = `You are a certified sports nutritionist and expert Indian/international food calorie analyzer.
-Analyze this food input: "${trimmed}"
+      const prompt = `You are a certified sports nutritionist and expert Indian/international food calorie and protein analyzer.
+Analyze this food input (may be campus mess or outside restaurant food): "${trimmed}"
 Quantity/Portion eaten: ${effectivePortion}
 
 Return ONLY a valid JSON object with NO extra text or markdown:
@@ -336,7 +406,8 @@ Return ONLY a valid JSON object with NO extra text or markdown:
   "carbs": 8,
   "fats": 18,
   "explanation": "Brief 1-sentence breakdown"
-}`;
+}
+Note: "protein", "carbs", and "fats" MUST be grams for 1 single serving (per serving), accurately reflecting realistic Indian & outside restaurant nutrition.`;
 
       const rawAiText = await callGroq(prompt, activeKey, 450, true);
       // Clean possible markdown fences
@@ -346,6 +417,7 @@ Return ONLY a valid JSON object with NO extra text or markdown:
       const perServing = Math.max(10, parseInt(parsed.caloriesPerServing, 10) || 150);
       const portion = Math.max(0.25, parseFloat(parsed.detectedPortion) || effectivePortion);
       const total = Math.round(perServing * portion);
+      const proteinPerServing = Math.max(0, Math.round((parseFloat(parsed.protein) || 0) * 10) / 10);
 
       const aiEstimate: NutritionEstimate = {
         name: parsed.name || cleanName,
@@ -354,7 +426,7 @@ Return ONLY a valid JSON object with NO extra text or markdown:
         unit: parsed.unit || 'serving',
         totalCalories: total,
         macros: {
-          protein: Math.round((parseFloat(parsed.protein) || 0) * 10) / 10,
+          protein: proteinPerServing,
           carbs: Math.round((parseFloat(parsed.carbs) || 0) * 10) / 10,
           fats: Math.round((parseFloat(parsed.fats) || 0) * 10) / 10,
         },
@@ -363,25 +435,44 @@ Return ONLY a valid JSON object with NO extra text or markdown:
         explanation: parsed.explanation || `AI estimated based on standard ingredients`,
       };
 
+      writeMacroEntries({
+        [normalizeFoodKey(aiEstimate.name)]: {
+          protein: proteinPerServing,
+          calories: perServing,
+          source: 'ai',
+          updatedAt: Date.now(),
+        },
+        [normalizeFoodKey(cleanName)]: {
+          protein: proteinPerServing,
+          calories: perServing,
+          source: 'ai',
+          updatedAt: Date.now(),
+        },
+      });
+
       MEMORY_CACHE.set(cacheKey, aiEstimate);
       return aiEstimate;
     } catch (err) {
-      console.warn('[Nutrition AI] Online analysis failed, falling back to heuristic:', err);
+      console.warn('[Nutrition AI] Online analysis failed, falling back cleanly:', err);
+      const localFallback = matchLocalFoodDatabase(trimmed, effectivePortion);
+      if (localFallback) {
+        MEMORY_CACHE.set(cacheKey, localFallback);
+        return localFallback;
+      }
     }
   }
 
   // 4. Intelligent Heuristic Fallback
-  // If user enters unknown food without network, provide a reasonable estimate (180 kcal/serving)
   const fallbackEstimate: NutritionEstimate = {
     name: cleanName,
     caloriesPerServing: 180,
     detectedPortion: effectivePortion,
     unit: 'serving',
     totalCalories: Math.round(180 * effectivePortion),
-    macros: { protein: 6, carbs: 24, fats: 6 },
+    macros: { protein: 7, carbs: 22, fats: 6 },
     source: 'fallback',
     confidence: 'estimated',
-    explanation: 'Standard meal portion estimate (~180 kcal)',
+    explanation: 'Standard meal portion estimate (~180 kcal · ~7g protein)',
   };
 
   MEMORY_CACHE.set(cacheKey, fallbackEstimate);
@@ -389,10 +480,85 @@ Return ONLY a valid JSON object with NO extra text or markdown:
 }
 
 /**
+ * Batch AI estimator for mess menu items & logged foods.
+ * Resolves exact AI protein grams in a single compact call and caches persistently in localStorage.
+ */
+export async function estimateFoodBatchWithAi(
+  items: { name: string; estCalories?: number }[]
+): Promise<Record<string, number>> {
+  const store = readMacroStore();
+  const missing: { name: string; estCalories?: number }[] = [];
+  const seenMissing = new Set<string>();
+
+  for (const item of items) {
+    const key = normalizeFoodKey(item.name);
+    if (!key) continue;
+    if (store[key]?.source === 'ai') continue;
+    if (!seenMissing.has(key)) {
+      seenMissing.add(key);
+      missing.push(item);
+    }
+  }
+
+  const activeKey = getGroqApiKey() || GEMINI_API_KEY;
+  if (missing.length > 0 && activeKey) {
+    try {
+      const listLines = missing
+        .slice(0, 48)
+        .map((it, idx) => `${idx + 1}. "${it.name}" (~${it.estCalories || 150} kcal)`)
+        .join('\n');
+
+      const prompt = `You are a sports nutritionist specializing in Indian mess meals & campus snacks.
+For each item below, estimate realistic protein grams per 1 standard serving matching the approximate calorie count shown.
+
+Items:
+${listLines}
+
+Return ONLY a valid JSON object mapping each exact item name (verbatim string key) to its protein grams number (1 decimal max), with no markdown or commentary. Example:
+{"White Rice": 3.5, "Paneer Butter Masala": 14, "Boiled Egg": 6.5}`;
+
+      const raw = await callGroq(prompt, activeKey, 900, true);
+      const cleanJson = raw.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const parsed = JSON.parse(cleanJson) as Record<string, unknown>;
+
+      if (parsed && typeof parsed === 'object') {
+        const toSave: Record<string, CachedMacroEntry> = {};
+        const now = Date.now();
+        for (const item of missing) {
+          const norm = normalizeFoodKey(item.name);
+          const rawVal =
+            parsed[item.name] ??
+            Object.entries(parsed).find(([k]) => normalizeFoodKey(k) === norm)?.[1];
+          const numVal = typeof rawVal === 'number' ? rawVal : parseFloat(String(rawVal ?? ''));
+          if (!isNaN(numVal) && numVal >= 0 && numVal <= 120) {
+            toSave[norm] = {
+              protein: Math.round(numVal * 10) / 10,
+              calories: item.estCalories || 150,
+              source: 'ai',
+              updatedAt: now,
+            };
+          }
+        }
+        if (Object.keys(toSave).length > 0) {
+          writeMacroEntries(toSave);
+        }
+      }
+    } catch (err) {
+      console.warn('[Nutrition AI Batch] Failed to batch-estimate protein:', err);
+    }
+  }
+
+  return getInitialAiProteinMap();
+}
+
+/**
  * Checks if raw text contains multiple food items (e.g., "2 rotis, dal and curd" or "dosa and coffee")
  * and analyzes all components together.
  */
-export async function parseMultiFoodItems(text: string): Promise<MultiItemEstimate | null> {
+export async function parseMultiFoodItems(
+  text: string,
+  preferOnlineAi: boolean = false
+): Promise<MultiItemEstimate | null> {
   const trimmed = text.trim();
   if (!trimmed) return null;
 
@@ -408,16 +574,20 @@ export async function parseMultiFoodItems(text: string): Promise<MultiItemEstima
 
   const items: NutritionEstimate[] = [];
   let totalCalories = 0;
+  let totalProtein = 0;
 
   for (const part of rawParts) {
-    const estimate = await analyzeFoodWithAi(part, 1);
+    const estimate = await analyzeFoodWithAi(part, 1, preferOnlineAi);
     items.push(estimate);
     totalCalories += estimate.totalCalories;
+    const perServingProtein = estimate.macros?.protein || 0;
+    totalProtein += perServingProtein * (estimate.detectedPortion || 1);
   }
 
   return {
     items,
     totalCalories,
+    totalProtein: Math.round(totalProtein * 10) / 10,
   };
 }
 

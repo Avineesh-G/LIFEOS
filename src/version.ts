@@ -8,12 +8,11 @@ export interface AppVersionConfig {
 }
 
 export const APP_VERSION: AppVersionConfig = {
-  versionCode: 93,
-  versionName: '4.0.0',
-  releaseDate: '2026-11-27',
-  apkSize: '15.09 MB',
-  apkSizeBytes: 15821844,
-  releaseNotes: "LifeOS v4.0 (4.0.0 · Build 93):\n• Fixed Warm Brown Single-Hue Theme: Removed color adaptation from Settings and locked the entire app to Warm Brown (#7B4B36 → #A46D52, sand accent #D29B7E) across every interface, icon, and widget.\n• Six New Liquid Glass Interfaces: Added Focus Studio (/focus), Daily Journal & Wind-Down (/journal with 7-day week strip & task rollover), Inner Circle CRM (/circle), Projects & Milestones (/projects), Trips & Smart Packing (/trips), and Decision Workbench (/decisions).\n• Luna AI Co-Pilot & Privacy Hardening: Connected Luna AI across all 6 new interfaces with privacy/PII redaction (hideFromAi journal lock, phone/PNR scrubbing), confirmed tool actions, and contextual starter chips.\n• Alphabetical More Hub Organization: Grouped More Hub and bottom-dock slot customization by domain work and sorted sections & interfaces A–Z.",
+  versionCode: 94,
+  versionName: '4.1.0',
+  releaseDate: '2026-11-28',
+  apkSize: '15.1 MB',
+  releaseNotes: "LifeOS v4.1.0 (4.1.0 · Build 94):\n• Unified Floating Capsule Header: Added centered interface CapsuleHeader with quick Back/Directory and Sync/Reload controls seamlessly matched across Home, primary, and sub-interfaces.\n• Nutrition Engine Upgrade: Warm Brown 5-arc calorie ring with crisp text contrast, Skip lock whenever a meal item is logged, AI-computed per-item protein (g P) across mess & outside meals, and lazy-loaded mess menu.\n• Accurate Hardware & System-Managed Performance Tiers: Native Android DeviceHardware plugin reporting real device model, RAM, CPU cores, GPU, and storage with read-only Auto-Selected T1/T2/T3 tiers.\n• Zero-Lag 120Hz Mobile Smoothness: Removed layout animations, transition-all, and blurs; added routePrefetch pre-warming and 2-phase hydration with 0px mobile overflow across all 22 routes.",
 };
 
 export const CURRENT_VERSION_CODE = APP_VERSION.versionCode;

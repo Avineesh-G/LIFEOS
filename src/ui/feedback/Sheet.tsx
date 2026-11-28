@@ -60,7 +60,10 @@ export function Sheet({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[99999] flex flex-col justify-end pointer-events-auto">
+        <div
+          className="fixed inset-0 z-[99999] flex flex-col justify-end"
+          style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
+        >
           {/* Dimmed Deep Backdrop Overlay */}
           <motion.div
             initial={{ opacity: 0 }}

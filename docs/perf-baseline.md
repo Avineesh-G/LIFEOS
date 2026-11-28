@@ -139,3 +139,24 @@ See `AGENTS.md` Performance Rules section.
 2. Confirm zero `layoutId=` or `mode="wait"` across `src/`: `Select-String -Path src\**\*.tsx,src\*.tsx -Pattern 'mode="wait"|layoutId='`
 3. Confirm zero `backdrop-filter: blur` or `filter: blur` (except `AppLockOverlay.tsx`): `Select-String -Path src\**\*.css,src\**\*.ts,src\**\*.tsx -Pattern 'backdrop-filter:\s*blur|filter:\s*blur'`
 4. Run full verification: `npx tsc --noEmit; npm run build; npm run check:emojis; npm run check:palette`
+
+---
+
+## v4.0.0 Smoothness & Interface Architecture Audit (2026-11-28)
+
+### Static Guard & Production Bundle Verification (Measured)
+- `transition-all` / `transition: all`: **0** occurrences across `src/`
+- `height: 0 → 'auto'` layout accordions: **0** occurrences across `src/` (converted to GPU `scaleY + opacity`)
+- `backdrop-blur` / `filter: blur(...)`: **0** occurrences in JSX/TSX; `backdrop-filter: none !important` on all `.glass-*` surfaces
+- `layoutId` / `mode="wait"`: **0** occurrences across `src/`
+- `npm run build` (`vite v8.2.2`, 7629 modules): **Passed in 10.03s**
+  - Entry chunk `index`: `399.81 kB` (`107.64 kB` gzip)
+  - Offloaded lazy chunks: `quotes` (`153.97 kB`), `messMenu` (`57.89 kB`), `DownloadPage` (`55.85 kB`), `OutingDetailPage` (`51.97 kB`), `Drive` (`47.75 kB`), `LunaChatPage` (`45.09 kB`), `AskLifeOSModal` (`35.42 kB`), `GymOnboarding` (`32.16 kB`), `CalendarPage` (`29.77 kB`), `Focus` (`22.91 kB`), `Journal` (`22.73 kB`)
+- `npm run check:palette`: **Passed** (all 8 contrast & Delta-E rules)
+- `npm run check:emojis`: **Passed** (zero emojis in `src/`)
+
+### Architectural Optimizations Implemented
+- **Non-Blocking Transitions**: `startTransition(...)` navigation + `prefetchRoute(...)` touch (`onPointerDown` / `onTouchStart`) and idle `requestIdleCallback` chunk pre-warming (`src/utils/routePrefetch.ts`).
+- **Mount-on-First-Open Modals & Two-Phase Hydration**: Heavy modals in `Layout.tsx` mount lazily on first user open; lower sections/lists in `Nutrition`, `Spending`, `Settings`, and `CalendarPage` defer past initial route paint via `startTransition`.
+- **Compositor & Paint Isolation**: 2-pass specular gradients in `glassStyles.css`, `contain: layout style paint` on `.glass-card` / `.droplet-card` / `ListRow`, `.lifeos-contain-item` (`content-visibility: auto`) on long scrollable lists, and `latestDataRef` listener stabilization in `App.tsx`.
+- **Live Device Profiling**: Pending next Android APK install (`adb shell dumpsys gfxinfo` / `chrome://inspect`).

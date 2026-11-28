@@ -157,7 +157,7 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleCancel}
           disabled={loading}
-          className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer touch-manipulation"
+          className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-[transform,opacity,background-color,color] flex items-center gap-1.5 cursor-pointer touch-manipulation"
         >
           <X size={13} weight="bold" />
           <span>Dismiss</span>
@@ -167,7 +167,7 @@ export default function ActionConfirmationCard({
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-black hover:bg-white/90 active:scale-95 transition-all shadow-[0_2px_12px_rgba(255,255,255,0.2)] flex items-center gap-1.5 cursor-pointer touch-manipulation"
+          className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-black hover:bg-white/90 active:scale-95 transition-[transform,opacity,background-color,color] shadow-[0_2px_12px_rgba(255,255,255,0.2)] flex items-center gap-1.5 cursor-pointer touch-manipulation"
         >
           {loading ? (
             <SpinnerGap size={13} className="animate-spin" />

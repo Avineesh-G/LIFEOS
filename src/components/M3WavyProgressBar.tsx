@@ -86,7 +86,6 @@ export default function M3WavyProgressBar({
         }
         .m3-wave-track-${safeId} {
           animation: m3Ripple_${safeId} 3.2s linear infinite;
-          will-change: transform;
         }
       `}</style>
 

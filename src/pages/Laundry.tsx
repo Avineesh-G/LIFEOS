@@ -250,7 +250,7 @@ export default function Laundry({ data, updateData }: LaundryProps) {
               triggerHaptic('light');
               setShowAddModal(true);
             }}
-            className="p-2 rounded-full glass-flat text-[#63E6E2] active:scale-95 transition-all"
+            className="p-2 rounded-full glass-flat text-[#63E6E2] active:scale-95 transition-[transform,opacity,background-color,color]"
             title="Log Batch"
           >
             <Plus size={20} weight="bold" />
@@ -392,13 +392,15 @@ export default function Laundry({ data, updateData }: LaundryProps) {
                   ))}
                 </div>
 
-                {/* Expanded Details */}
+                {/* Expanded Details (GPU-composited scaleY + opacity, zero layout reflow) */}
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
+                      initial={{ opacity: 0, scaleY: 0.9 }}
+                      animate={{ opacity: 1, scaleY: 1 }}
+                      exit={{ opacity: 0, scaleY: 0.9 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ transformOrigin: 'top' }}
                       className="pt-3 border-t border-white/[0.08] space-y-3 overflow-hidden"
                     >
                       <div>

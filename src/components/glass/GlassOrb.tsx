@@ -27,7 +27,7 @@ export const GlassOrb = React.forwardRef<HTMLButtonElement, GlassOrbProps>(({
         group relative flex h-12 w-12 items-center justify-center rounded-2xl
         border border-[var(--rim,rgba(255,255,255,0.15))]
         bg-[var(--glass-3)] text-primary
-        shadow-md transition-all duration-300 touch-manipulation outline-none
+        shadow-md transition-[transform,opacity,background-color,color] duration-300 touch-manipulation outline-none
         ${active ? 'bg-[rgba(var(--app-accent-rgb),0.22)] text-[var(--app-accent-text,#D29B7E)]' : ''}
         ${className}
       `}

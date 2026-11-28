@@ -550,7 +550,7 @@ Payload specifications:
               triggerHaptic('light');
               onClose();
             }}
-            className="w-10 h-10 rounded-full bg-white/[0.08] hover:bg-white/[0.14] active:scale-95 flex items-center justify-center text-white/90 transition-all cursor-pointer touch-manipulation border border-white/10 shrink-0"
+            className="w-10 h-10 rounded-full bg-white/[0.08] hover:bg-white/[0.14] active:scale-95 flex items-center justify-center text-white/90 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation border border-white/10 shrink-0"
             aria-label="Back"
           >
             <CaretLeft size={20} weight="bold" />
@@ -585,7 +585,7 @@ Payload specifications:
             <button
               type="button"
               onClick={handleRunAiExtraction}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-white font-semibold text-[11px] active:scale-95 transition-all cursor-pointer touch-manipulation shadow-md"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-white font-semibold text-[11px] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation shadow-md"
               style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
               title="AI Intelligence Extraction"
             >
@@ -598,7 +598,7 @@ Payload specifications:
               <button
                 type="button"
                 onClick={handleNativeShare}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation"
                 title="Share"
                 aria-label="Share"
               >
@@ -613,7 +613,7 @@ Payload specifications:
                     triggerHaptic('medium');
                     onDeleteFile(file);
                   }}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation"
                   title="Delete"
                   aria-label="Delete"
                 >
@@ -667,7 +667,7 @@ Payload specifications:
                           const targetUrl = blobUrl || file.downloadUrl;
                           if (targetUrl) window.open(targetUrl, '_blank');
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-[transform,opacity,background-color,color] shadow-md cursor-pointer touch-manipulation"
                         style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                       >
                         <FilePdf size={16} weight="bold" />
@@ -712,7 +712,7 @@ Payload specifications:
                     const targetUrl = blobUrl || file.downloadUrl;
                     if (targetUrl) window.open(targetUrl, '_blank');
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-all shadow-md cursor-pointer touch-manipulation"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-[13px] font-semibold active:scale-95 transition-[transform,opacity,background-color,color] shadow-md cursor-pointer touch-manipulation"
                   style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                 >
                   <FileText size={16} weight="bold" />
@@ -738,7 +738,7 @@ Payload specifications:
             <button
               type="button"
               onClick={handleRunAiExtraction}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-[12.5px] shadow-md active:scale-95 transition-all cursor-pointer touch-manipulation"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-[12.5px] shadow-md active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer touch-manipulation"
               style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
             >
               <Sparkle size={15} weight="fill" />
@@ -775,7 +775,7 @@ Payload specifications:
                       <button
                         type="button"
                         onClick={() => setIsAiPanelOpen(false)}
-                        className="p-1 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                        className="p-1 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-[transform,opacity,background-color,color] cursor-pointer"
                         aria-label="Close Inspector"
                       >
                         <X size={16} weight="bold" />
@@ -906,7 +906,7 @@ Payload specifications:
                               onClose();
                               navigate(meta.route);
                             }}
-                            className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-white font-bold text-[12.5px] active:scale-95 transition-all cursor-pointer shadow-md"
+                            className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl text-white font-bold text-[12.5px] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer shadow-md"
                             style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                           >
                             <span>Open in {getModuleMeta(extractedData.module).name}</span>
@@ -917,7 +917,7 @@ Payload specifications:
                         <button
                           type="button"
                           onClick={handleApplyAiAction}
-                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl active:scale-95 text-white font-bold text-[14px] transition-all cursor-pointer shadow-lg"
+                          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl active:scale-95 text-white font-bold text-[14px] transition-[transform,opacity,background-color,color] cursor-pointer shadow-lg"
                           style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
                         >
                           <Sparkle size={17} weight="fill" />

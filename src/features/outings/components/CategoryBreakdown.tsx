@@ -61,7 +61,7 @@ export function CategoryBreakdown({ expenses, totalCost }: CategoryBreakdownProp
                 backgroundColor: meta?.color || '#A21CAF',
               }}
               title={`${catName}: ${formatPaiseToRupees(amount)}`}
-              className="h-full transition-all duration-300"
+              className="h-full transition-[transform,opacity,background-color,color] duration-300"
             />
           );
         })}

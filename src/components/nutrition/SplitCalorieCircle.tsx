@@ -8,6 +8,7 @@ export interface MealSlotCalorieData {
   shortLabel: string;
   time: string;
   color: string;
+  textColor?: string;
   calories: number;
   isSkipped: boolean;
   estBudget: number;
@@ -207,12 +208,12 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = React.memo(
                 <path
                   d={arcPath}
                   fill="none"
-                  stroke={slot.isSkipped ? 'rgba(255, 69, 58, 0.14)' : `${slot.color}20`}
+                  stroke={slot.isSkipped ? 'rgba(255, 69, 58, 0.14)' : `${slot.color}34`}
                   strokeWidth={strokeWidth}
                   style={{ strokeLinecap: 'butt', strokeLinejoin: 'miter' }}
                 />
 
-                {/* Active Colored Arc (Hardware-Accelerated native SVG stroke) */}
+                {/* Active Warm-Brown Arc (Hardware-Accelerated native SVG stroke) */}
                 {hasCalories && (
                   <path
                     d={arcPath}
@@ -231,35 +232,39 @@ export const SplitCalorieCircle: React.FC<SplitCalorieCircleProps> = React.memo(
                     stroke="#FF453A"
                     strokeWidth={strokeWidth}
                     strokeDasharray="4 5"
-                    opacity={0.35}
+                    opacity={0.38}
                     style={{ strokeLinecap: 'butt', strokeLinejoin: 'miter' }}
                   />
                 )}
 
-                {/* Curved Calorie Text curving along the circular arc of that segment */}
+                {/* Crisp Curved Calorie Text with native vector halo (no CSS filter blur) */}
                 <text
-                  fontSize={9.5}
+                  fontSize={9.75}
                   fontWeight={800}
-                  letterSpacing={0.4}
+                  letterSpacing={0.35}
                   dominantBaseline="central"
+                  stroke="rgba(10, 6, 4, 0.92)"
+                  strokeWidth={2.2}
+                  strokeLinejoin="round"
+                  paintOrder="stroke"
                   className="select-none pointer-events-none"
-                  style={{
-                    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.95))',
-                  }}
                 >
                   <textPath
                     href={`#text-path-${slot.slot}`}
                     startOffset="50%"
                     textAnchor="middle"
                   >
-                    <tspan fill={slot.color} fontWeight={900}>
+                    <tspan
+                      fill={slot.isSkipped ? '#FF6961' : (slot.textColor || slot.color)}
+                      fontWeight={900}
+                    >
                       {slot.shortLabel}
                     </tspan>
-                    <tspan fill="rgba(255, 255, 255, 0.65)" fontWeight={700}>
+                    <tspan fill="rgba(255, 255, 255, 0.72)" fontWeight={700}>
                       {' · '}
                     </tspan>
                     <tspan
-                      fill="#FFFFFF"
+                      fill={slot.isSkipped ? '#FF6961' : '#FFFFFF'}
                       fontWeight={900}
                     >
                       {slot.isSkipped ? 'SKIP' : `${slot.calories} cal`}

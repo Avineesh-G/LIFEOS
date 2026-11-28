@@ -115,7 +115,7 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
           <button
             type="button"
             onClick={handleShare}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10.5px] font-semibold transition-all active:scale-95"
+            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[10.5px] font-semibold transition-[transform,opacity,background-color,color] active:scale-95"
             title="Share"
           >
             <ShareNetwork size={12} />
@@ -124,7 +124,7 @@ const CodeBlockWithCopy: React.FC<{ code: string }> = ({ code }) => {
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg font-bold text-[10.5px] transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg font-bold text-[10.5px] transition-[transform,opacity,background-color,color] active:scale-95"
             style={{
               backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
               color: 'var(--app-accent-text, #D29B7E)',
@@ -166,7 +166,7 @@ const InteractiveChecklist: React.FC<{ items: Array<{ id: string; text: string; 
             key={item.id}
             type="button"
             onClick={() => toggleItem(item.id)}
-            className={`w-full flex items-start gap-2.5 p-2 rounded-xl text-left transition-all ${
+            className={`w-full flex items-start gap-2.5 p-2 rounded-xl text-left transition-[transform,opacity,background-color,color] ${
               isChecked
                 ? 'bg-white/5 opacity-50'
                 : 'bg-white/5 hover:bg-white/10'
@@ -344,7 +344,7 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
 
       <div className="w-full h-2 bg-white/[0.06] rounded-full overflow-hidden mb-3.5">
         <div
-          className="h-full transition-all duration-300 rounded-full"
+          className="h-full transition-[transform,opacity,background-color,color] duration-300 rounded-full"
           style={{
             width: `${progressPercent}%`,
             background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
@@ -360,7 +360,7 @@ const InteractiveWorkflowCard: React.FC<{ data: WorkflowData }> = ({ data }) => 
             <div
               key={stepKey}
               onClick={() => toggleStep(stepKey)}
-              className={`p-3 rounded-[16px] transition-all cursor-pointer flex items-start gap-3 border-none ${
+              className={`p-3 rounded-[16px] transition-[transform,opacity,background-color,color] cursor-pointer flex items-start gap-3 border-none ${
                 isDone ? 'bg-white/[0.025] opacity-60' : 'glass-tile hover:bg-white/[0.06]'
               }`}
             >
@@ -437,7 +437,7 @@ const InteractiveChartCard: React.FC<{ data: ChartData }> = ({ data }) => {
               </div>
               <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-300"
+                  className="h-full rounded-full transition-[transform,opacity,background-color,color] duration-300"
                   style={{ width: `${percent}%`, backgroundColor: color }}
                 />
               </div>

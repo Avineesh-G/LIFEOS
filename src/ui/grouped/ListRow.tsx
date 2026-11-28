@@ -37,7 +37,7 @@ export function ListRow({
   };
 
   return (
-    <div className="relative w-full group">
+    <div className="relative w-full group contain-paint">
       <div
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}

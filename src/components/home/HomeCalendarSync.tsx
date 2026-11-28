@@ -426,7 +426,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               triggerHaptic('light');
               setIsAddingTask((prev) => !prev);
             }}
-            className="px-3 py-1.5 rounded-full glass-nav nav-rim-light flex items-center gap-1.5 text-[12px] font-semibold active:scale-95 transition-all"
+            className="px-3 py-1.5 rounded-full glass-nav nav-rim-light flex items-center gap-1.5 text-[12px] font-semibold active:scale-95 transition-[transform,opacity,background-color,color]"
             style={{ color: 'var(--app-accent-text, #D29B7E)' }}
           >
             <Plus size={14} weight="bold" />
@@ -455,7 +455,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
               />
               <button
                 type="submit"
-                className="h-9 px-4 rounded-xl text-white text-[12.5px] font-bold active:scale-95 transition-all shadow-sm"
+                className="h-9 px-4 rounded-xl text-white text-[12.5px] font-bold active:scale-95 transition-[transform,opacity,background-color,color] shadow-sm"
                 style={{
                   background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                 }}
@@ -479,7 +479,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                 <div
                   key={ev.id}
                   onClick={() => navigate('/calendar')}
-                  className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#202024] active:scale-[0.99] transition-all select-none"
+                  className="p-3 rounded-2xl bg-[#18181A] flex items-center justify-between gap-3 cursor-pointer hover:bg-[#202024] active:scale-[0.99] transition-[transform,opacity,background-color,color] select-none"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
@@ -513,7 +513,7 @@ export function HomeCalendarSync({ data, updateData }: HomeCalendarSyncProps) {
                 <div
                   key={t.id}
                   onClick={() => handleToggleTask(t.id)}
-                  className="p-3 rounded-2xl bg-[#18181A] flex items-start gap-3 cursor-pointer hover:bg-[#202024] active:scale-[0.99] transition-all select-none"
+                  className="p-3 rounded-2xl bg-[#18181A] flex items-start gap-3 cursor-pointer hover:bg-[#202024] active:scale-[0.99] transition-[transform,opacity,background-color,color] select-none"
                 >
                   <div className="text-lg mt-0.5">
                     <CheckCircle

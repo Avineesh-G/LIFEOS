@@ -501,7 +501,7 @@ export function NavigationHubSheet({
                         setIsEditMode(true);
                         setSelectedSlot(1);
                       }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] active:scale-95 transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-full flex items-center justify-center border border-[var(--md-outline-variant)] bg-[var(--md-surface-container)] text-[var(--md-on-surface-variant)] hover:text-[var(--md-on-surface)] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                       aria-label="Edit navigation"
                       title="Edit navigation"
                     >
@@ -542,7 +542,7 @@ export function NavigationHubSheet({
                         onResetNav();
                         setAnnouncement('Navigation reset to defaults');
                       }}
-                      className="px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-all cursor-pointer"
+                      className="px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                       aria-label="Reset to default slots"
                     >
                       Reset
@@ -555,7 +555,7 @@ export function NavigationHubSheet({
                         setIsEditMode(false);
                         onExitEditMode?.();
                       }}
-                      className="px-3.5 py-1 rounded-full text-xs font-semibold text-white shadow-xs active:scale-95 transition-all cursor-pointer"
+                      className="px-3.5 py-1 rounded-full text-xs font-semibold text-white shadow-xs active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                       style={{ backgroundColor: activeSeed }}
                       aria-label="Done editing"
                     >
@@ -623,7 +623,7 @@ export function NavigationHubSheet({
                         triggerHaptic('light');
                         setSelectedSlot(1);
                       }}
-                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-all ${
+                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-[transform,opacity,background-color,color] ${
                         selectedSlot === 1
                           ? 'ring-2 ring-offset-2 scale-105 shadow-md'
                           : 'opacity-70 hover:opacity-100'
@@ -659,7 +659,7 @@ export function NavigationHubSheet({
                         triggerHaptic('light');
                         setSelectedSlot(2);
                       }}
-                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-all ${
+                      className={`relative w-[38px] h-[38px] rounded-full flex items-center justify-center select-none focus:outline-none cursor-pointer transition-[transform,opacity,background-color,color] ${
                         selectedSlot === 2
                           ? 'ring-2 ring-offset-2 scale-105 shadow-md'
                           : 'opacity-70 hover:opacity-100'

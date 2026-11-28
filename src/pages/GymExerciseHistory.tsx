@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { CaretLeft, Barbell, TrendUp } from '../ui/tokens/icons';
-import { Toolbar, ToolbarGroup, ToolbarButton } from '../ui/navigation/Toolbar';
+import { useParams } from 'react-router-dom';
+import { Barbell, TrendUp } from '../ui/tokens/icons';
 import { GroupedList } from '../ui/grouped/GroupedList';
 import { ListRow } from '../ui/grouped/ListRow';
 import { format } from 'date-fns';
-import { handleAppBack } from '../utils/backNavigation';
 import type { AppData } from '../types';
 
 interface GymExerciseHistoryProps {
@@ -15,7 +13,6 @@ interface GymExerciseHistoryProps {
 const PAGE_SIZE = 15;
 
 export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
-  const navigate = useNavigate();
   const { exerciseName } = useParams();
   const decodedName = decodeURIComponent(exerciseName || '');
 
@@ -60,27 +57,13 @@ export default function GymExerciseHistory({ data }: GymExerciseHistoryProps) {
   const bestReps = Math.max(...sessions.map((s) => s.bestSet?.reps || 0), 0);
 
   return (
-    <div className="w-full flex flex-col pb-4">
-      <header
-        className="sticky top-0 z-30 w-full bg-black/95 border-b border-white/[0.06]"
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-        }}
-      >
-        <Toolbar
-          leading={
-            <ToolbarGroup>
-              <ToolbarButton
-                icon={<CaretLeft size={20} weight="bold" />}
-                label="Back"
-                onClick={() => handleAppBack(navigate)}
-              />
-            </ToolbarGroup>
-          }
-          center={<span className="font-bold text-white text-base truncate max-w-[200px]">{decodedName}</span>}
-        />
-      </header>
+    <div className="w-full flex flex-col pb-4 pt-1">
+      <div className="px-1 pt-1 pb-2 flex items-center gap-2">
+        <Barbell size={16} weight="duotone" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
+        <h2 className="text-lg font-extrabold text-white tracking-tight truncate">
+          {decodedName}
+        </h2>
+      </div>
 
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-3 gap-2 my-4">

@@ -24,7 +24,7 @@ export const GlowCard = React.forwardRef<HTMLDivElement, GlowCardProps>(({
       className={`
         relative overflow-hidden rounded-[30px] p-4 sm:p-5
         bg-[#050B0D]/90 dark:bg-[#050B0D]/90 light:bg-white/80
-        transition-all duration-300
+        transition-[transform,opacity,background-color,color] duration-300
         ${className}
       `}
       style={{

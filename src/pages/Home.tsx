@@ -1,5 +1,5 @@
 import { auth } from '../firebase';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -28,6 +28,7 @@ import { HomeCalendarSync } from '../components/home/HomeCalendarSync';
 import HomeStreakQuotesCard from '../components/home/HomeStreakQuotesCard';
 import { CheckSquare, NotePencil, Receipt } from '../ui/tokens/icons';
 import { useUserProfile } from '../utils/userProfileCache';
+import { prefetchRoute } from '../utils/routePrefetch';
 
 interface HomeProps {
   data: AppData;
@@ -163,7 +164,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div
             onClick={() => {
               triggerHaptic('medium');
-              navigate('/nutrition');
+              startTransition(() => {
+                navigate('/nutrition');
+              });
             }}
             className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
@@ -184,9 +187,12 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
 
           {/* Tile B: Spending */}
           <div
+            onPointerDown={() => prefetchRoute('/spending')}
             onClick={() => {
               triggerHaptic('medium');
-              navigate('/spending');
+              startTransition(() => {
+                navigate('/spending');
+              });
             }}
             className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
@@ -217,7 +223,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div
             onClick={() => {
               triggerHaptic('medium');
-              navigate('/gym');
+              startTransition(() => {
+                navigate('/gym');
+              });
             }}
             className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer select-none"
           >
@@ -250,7 +258,9 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
           <div
             onClick={() => {
               triggerHaptic('medium');
-              navigate('/nutrition');
+              startTransition(() => {
+                navigate('/nutrition');
+              });
             }}
             className="glass-tile p-4 flex flex-col justify-between h-[124px] cursor-pointer group select-none"
           >
@@ -316,7 +326,12 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
                 Add new task
               </span>
             }
-            onClick={() => navigate('/tasks')}
+            onClick={() => {
+              prefetchRoute('/tasks');
+              startTransition(() => {
+                navigate('/tasks');
+              });
+            }}
             showSeparator={false}
           />
         </GroupedList>
@@ -335,9 +350,12 @@ export default function Home({ data, refresh, updateData }: HomeProps) {
             ].map((hub) => (
               <button
                 key={hub.route}
+                onPointerDown={() => prefetchRoute(hub.route)}
                 onClick={() => {
                   triggerHaptic('nav');
-                  navigate(hub.route);
+                  startTransition(() => {
+                    navigate(hub.route);
+                  });
                 }}
                 className="glass-tile p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer"
               >

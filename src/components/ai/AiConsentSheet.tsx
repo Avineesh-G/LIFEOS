@@ -58,14 +58,14 @@ export default function AiConsentSheet({ isOpen, onAccept, onClose }: AiConsentS
           <button
             type="button"
             onClick={onClose}
-            className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark text-xs font-bold hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+            className="py-3 rounded-2xl border border-border-light dark:border-border-dark text-secondary-light dark:text-secondary-dark text-xs font-bold hover:bg-black/5 dark:hover:bg-white/5 transition-[transform,opacity,background-color,color]"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleAgree}
-            className="py-3 rounded-2xl btn-primary text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            className="py-3 rounded-2xl btn-primary text-xs font-bold shadow-md flex items-center justify-center gap-1.5 active:scale-95 transition-[transform,opacity,background-color,color]"
           >
             <Check size={15} />
             <span>I Agree & Continue</span>

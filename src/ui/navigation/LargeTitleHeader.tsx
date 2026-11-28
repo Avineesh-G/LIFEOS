@@ -1,10 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Toolbar, ToolbarGroup, ToolbarButton } from './Toolbar';
-import { CaretLeft } from '../tokens/icons';
+import React, { useEffect, useRef } from 'react';
 import { triggerHaptic } from '../../utils/haptics';
-import { navigateBack } from '../../utils/backNavigation';
 
 export interface LargeTitleHeaderProps {
   title: string;
@@ -17,8 +12,8 @@ export interface LargeTitleHeaderProps {
 }
 
 /**
- * Pure iOS Liquid Glass Large Title Header + Unified Single Theme Color
- * Letters stay crisp pure white so text never blends or hides against dark surfaces.
+ * Page Title & Action Row rendered directly beneath the global Floating Capsule Header.
+ * Keeps large heading, Warm Brown accent subtitle indicator, and page-specific action buttons aligned cleanly.
  */
 export function LargeTitleHeader({
   title,
@@ -27,102 +22,53 @@ export function LargeTitleHeader({
   actions,
   tint: _tint,
   className = '',
-  showBack = true,
+  showBack: _showBack = true,
 }: LargeTitleHeaderProps) {
-  const navigate = useNavigate();
-  const [isScrolled, setIsScrolled] = useState(false);
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
 
+  // Intercept global capsule header Back presses when a page defines custom back logic (e.g. closing folders/modals)
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      setIsScrolled(scrollY > 28);
+    if (!onBack) return;
+    const handleGlobalBack = (e: Event) => {
+      if (onBackRef.current) {
+        e.preventDefault();
+        triggerHaptic('light');
+        onBackRef.current();
+      }
     };
+    window.addEventListener('lifeos-header-back', handleGlobalBack);
+    return () => window.removeEventListener('lifeos-header-back', handleGlobalBack);
+  }, [Boolean(onBack)]);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleBackClick = () => {
-    triggerHaptic('light');
-    if (onBack) {
-      onBack();
-    } else {
-      navigateBack(navigate);
-    }
-  };
-
-  const accentText = 'var(--app-accent-text, #5AC8FA)';
-  const accentPrimary = 'var(--app-accent, #0A84FF)';
+  const accentText = 'var(--app-accent-text, #D29B7E)';
+  const accentPrimary = 'var(--app-accent, #7B4B36)';
 
   return (
     <div className={`w-full select-none ${className}`}>
-      {/* ── 1. Top Toolbar (Sticky, Single Row) ── */}
-      <header
-        className={`sticky top-0 z-30 w-full transition-colors duration-200 ${
-          isScrolled ? 'shadow-[0_10px_24px_rgba(0,0,0,0.85)]' : 'bg-transparent'
-        }`}
-        style={{
-          paddingTop: 'calc(max(var(--sat, 0px), env(safe-area-inset-top, 0px), 24px) + 8px)',
-          paddingBottom: '8px',
-          background: isScrolled ? 'rgba(0, 0, 0, 0.92)' : undefined,
-        }}
-      >
-        <Toolbar
-          leading={
-            showBack ? (
-              <ToolbarGroup>
-                <ToolbarButton
-                  icon={<CaretLeft size={20} weight="bold" />}
-                  label="Back"
-                  tint={accentText}
-                  onClick={handleBackClick}
-                />
-              </ToolbarGroup>
-            ) : (
-              <div className="w-10" />
-            )
-          }
-          center={
-            <motion.div
-              animate={{
-                opacity: isScrolled ? 1 : 0,
-                y: isScrolled ? 0 : 6,
-              }}
-              transition={{ duration: 0.16 }}
-              className="text-inline-title text-white tracking-tight truncate text-center flex items-center gap-1.5"
-            >
+      <div className="px-1.5 pt-1.5 pb-3 flex items-end justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {subtitle && (
+            <div className="flex items-center gap-2 mb-1">
               <span
                 className="w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ backgroundColor: accentText }}
+                style={{
+                  background: `linear-gradient(135deg, ${accentPrimary}, ${accentText})`,
+                }}
               />
-              <span className="truncate">{title}</span>
-            </motion.div>
-          }
-          trailing={actions || undefined}
-        />
-      </header>
-
-      {/* ── 2. Large Title Block (Crisp Pure White + Delicate Theme Indicator) ── */}
-      <div className="px-1.5 pt-2 pb-3">
-        {subtitle && (
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{
-                background: `linear-gradient(135deg, ${accentPrimary}, ${accentText})`,
-              }}
-            />
-            <div
-              className="text-sub font-medium truncate"
-              style={{ color: `color-mix(in srgb, ${accentText} 45%, rgba(242, 242, 247, 0.85))` }}
-            >
-              {subtitle}
+              <div
+                className="text-sub font-medium truncate"
+                style={{ color: `color-mix(in srgb, ${accentText} 55%, rgba(242, 242, 247, 0.85))` }}
+              >
+                {subtitle}
+              </div>
             </div>
-          </div>
-        )}
-        <h1 className="text-large-title text-white tracking-[-0.02em]">
-          {title}
-        </h1>
+          )}
+          <h1 className="text-large-title text-white tracking-[-0.02em] leading-tight">
+            {title}
+          </h1>
+        </div>
+        {actions && <div className="shrink-0 flex items-center pb-0.5">{actions}</div>}
       </div>
     </div>
   );

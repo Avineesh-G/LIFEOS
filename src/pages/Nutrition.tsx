@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback, startTransition } from 'react';
 import { format } from 'date-fns';
 import type { AppData, MealSlot, NutritionLog, MealItemLog } from '../types';
+import type { MonthlyMenu } from '../data/messMenu';
 import { triggerHaptic } from '../utils/haptics';
-import { MONTHLY_MESS_MENU } from '../data/messMenu';
 import { LunaComicBubbleIcon } from '../ui/tokens/LunaComicBubbleIcon';
 import { SplitCalorieCircle, type MealSlotCalorieData } from '../components/nutrition/SplitCalorieCircle';
 import { MealSlotCard, type MealSlotConfig } from '../components/nutrition/MealSlotCard';
@@ -24,6 +24,9 @@ import {
   matchLocalFoodDatabase,
   extractPortionFromText,
   parseMultiFoodItems,
+  getInitialAiProteinMap,
+  resolveItemProteinLocal,
+  estimateFoodBatchWithAi,
   NutritionEstimate,
   MultiItemEstimate,
 } from '../utils/aiNutrition';
@@ -33,12 +36,16 @@ interface NutritionProps {
   updateData: (partial: Partial<AppData>) => Promise<AppData>;
 }
 
+// Cached dynamically loaded mess menu so repeat visits are instant without bundling cost on first route commit
+let cachedMonthlyMessMenu: MonthlyMenu[] | null = null;
+const EMPTY_MEAL_ITEMS: MealItemLog[] = [];
+
 const MEAL_SLOTS: MealSlotConfig[] = [
-  { slot: 'breakfast', label: 'Breakfast', shortLabel: 'BRK', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM', color: '#FF9F0A', estBudget: 500 },
-  { slot: 'lunch', label: 'Lunch', shortLabel: 'LUNCH', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM', color: '#30D158', estBudget: 750 },
-  { slot: 'snacks', label: 'Snacks', shortLabel: 'SNACK', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM', color: '#64D2FF', estBudget: 250 },
-  { slot: 'dinner', label: 'Dinner', shortLabel: 'DINNER', icon: <Moon size={18} weight="bold" />, time: '7:15–9:30 PM', color: '#BF5AF2', estBudget: 700 },
-  { slot: 'nightCanteen', label: 'Night Canteen', shortLabel: 'NIGHT', icon: <Moon size={18} weight="bold" />, time: '10:30 PM–12:30 AM', color: '#FF375F', estBudget: 300 },
+  { slot: 'breakfast', label: 'Breakfast', shortLabel: 'BRK', icon: <Sun size={18} weight="bold" />, time: '7:30–9:45 AM', color: '#7B4B36', textColor: '#E8B89E', estBudget: 500 },
+  { slot: 'lunch', label: 'Lunch', shortLabel: 'LUNCH', icon: <Sun size={18} weight="bold" />, time: '12:15–2:45 PM', color: '#8C5841', textColor: '#D29B7E', estBudget: 750 },
+  { slot: 'snacks', label: 'Snacks', shortLabel: 'SNACK', icon: <Sun size={18} weight="bold" />, time: '4:15–6:15 PM', color: '#A46D52', textColor: '#F2CEBA', estBudget: 250 },
+  { slot: 'dinner', label: 'Dinner', shortLabel: 'DINNER', icon: <Moon size={18} weight="bold" />, time: '7:15–9:30 PM', color: '#6B3F2D', textColor: '#DCA88E', estBudget: 700 },
+  { slot: 'nightCanteen', label: 'Night Canteen', shortLabel: 'NIGHT', icon: <Moon size={18} weight="bold" />, time: '10:30 PM–12:30 AM', color: '#945C44', textColor: '#ECC1AB', estBudget: 300 },
 ];
 
 const NIGHT_CANTEEN_PRESETS = [
@@ -56,21 +63,43 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
   // Selected meal slot for highlight/focus
   const [selectedSlot, setSelectedSlot] = useState<MealSlot | null>(null);
 
+  // Lazy-load the 5,800-line mess menu dataset after first route paint to keep Home -> Nutrition transition instant
+  const [monthlyMessMenu, setMonthlyMessMenu] = useState<MonthlyMenu[]>(() => cachedMonthlyMessMenu || []);
+  useEffect(() => {
+    if (cachedMonthlyMessMenu) return;
+    let cancelled = false;
+    import('../data/messMenu')
+      .then((mod) => {
+        cachedMonthlyMessMenu = mod.MONTHLY_MESS_MENU;
+        if (!cancelled) {
+          startTransition(() => {
+            setMonthlyMessMenu(mod.MONTHLY_MESS_MENU);
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to lazy-load mess menu:', err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Progressive slot hydration: mount first 2 slots immediately (< 6ms commit),
-  // then mount remaining slots on next animation frame so the dock droplet never stalls
+  // then mount remaining slots after the 220ms dock droplet slide settles
   const [visibleSlotCount, setVisibleSlotCount] = useState(2);
   useEffect(() => {
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       if (!cancelled) {
         startTransition(() => {
           setVisibleSlotCount(MEAL_SLOTS.length);
         });
       }
-    });
+    }, 240);
     return () => {
       cancelled = true;
-      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -96,7 +125,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     return MEAL_SLOTS.map((slot) => {
       const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slot.slot);
       const isSkipped = Boolean(slotLog?.isSkipped);
-      const slotItems = isSkipped ? [] : slotLog?.items || [];
+      const slotItems = isSkipped ? EMPTY_MEAL_ITEMS : slotLog?.items || EMPTY_MEAL_ITEMS;
       const calories = slotItems.reduce(
         (sum, it) => sum + it.calories * (it.portion || 1),
         0
@@ -107,6 +136,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         shortLabel: slot.shortLabel,
         time: slot.time,
         color: slot.color,
+        textColor: slot.textColor,
         calories,
         isSkipped,
         estBudget: slot.estBudget,
@@ -126,15 +156,13 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     });
   }, []);
 
-
-
   // Today's mess menu items mapped by meal slot
   const todayMess = useMemo(() => {
-    return MONTHLY_MESS_MENU.find((m) => m.date === dayOfMonth) || MONTHLY_MESS_MENU[0];
-  }, [dayOfMonth]);
+    return monthlyMessMenu.find((m) => m.date === dayOfMonth) || monthlyMessMenu[0];
+  }, [monthlyMessMenu, dayOfMonth]);
 
   const messItemsBySlot = useMemo(() => {
-    const map: Record<string, { name: string; estCalories: number }[]> = {
+    const map: Record<string, { name: string; estCalories: number; estProtein?: number }[]> = {
       breakfast: [],
       lunch: [],
       snacks: [],
@@ -151,11 +179,73 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     return map;
   }, [todayMess]);
 
-  // Custom Food / AI Food Logging State
+  // AI Protein Cache & Batch Resolver (resolves protein via Groq AI + persistent cache for all items)
+  const [aiProteinMap, setAiProteinMap] = useState<Record<string, number>>(() => getInitialAiProteinMap());
+
+  useEffect(() => {
+    const allItemsToResolve: { name: string; estCalories?: number }[] = [
+      ...NIGHT_CANTEEN_PRESETS,
+      ...(todayMess?.meals || []).flatMap((m) => m.items),
+      ...(todayLog.mealsEaten || []).flatMap((m) =>
+        m.isSkipped
+          ? []
+          : m.items
+              .filter((it) => it.protein === undefined)
+              .map((it) => ({ name: it.name, estCalories: it.calories }))
+      ),
+    ];
+
+    if (allItemsToResolve.length === 0) return;
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      estimateFoodBatchWithAi(allItemsToResolve)
+        .then((resolved) => {
+          if (cancelled || Object.keys(resolved).length === 0) return;
+          setAiProteinMap((prev) => ({ ...prev, ...resolved }));
+        })
+        .catch(() => {});
+    }, 320);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [todayMess, todayLog.mealsEaten]);
+
+  // Real summed daily macros (uses AI/logged protein per item instead of flat calorie % ratio)
+  const macroTotals = useMemo(() => {
+    let protein = 0;
+    let carbs = 0;
+    let fats = 0;
+
+    for (const slotLog of todayLog.mealsEaten || []) {
+      if (slotLog.isSkipped) continue;
+      for (const it of slotLog.items || EMPTY_MEAL_ITEMS) {
+        const portion = it.portion || 1;
+        const unitProtein =
+          it.protein !== undefined
+            ? it.protein
+            : resolveItemProteinLocal(it.name, it.calories, aiProteinMap);
+        protein += unitProtein * portion;
+        carbs += (it.carbs !== undefined ? it.carbs : it.calories * 0.12) * portion;
+        fats += (it.fats !== undefined ? it.fats : it.calories * 0.03) * portion;
+      }
+    }
+
+    return {
+      protein: Math.round(protein),
+      carbs: Math.round(carbs),
+      fats: Math.round(fats),
+    };
+  }, [todayLog.mealsEaten, aiProteinMap]);
+
+  // Custom Food / Outside Food AI Logging State
   const [isAddCustomOpen, setIsAddCustomOpen] = useState(false);
   const [customSlot, setCustomSlot] = useState<MealSlot>('lunch');
   const [customName, setCustomName] = useState('');
   const [customCalories, setCustomCalories] = useState('');
+  const [customProtein, setCustomProtein] = useState('');
   const [customPortion, setCustomPortion] = useState(1);
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [aiEstimate, setAiEstimate] = useState<NutritionEstimate | null>(null);
@@ -166,6 +256,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     if (!isAddCustomOpen) {
       setCustomName('');
       setCustomCalories('');
+      setCustomProtein('');
       setCustomPortion(1);
       setAiEstimate(null);
       setMultiItemEstimate(null);
@@ -173,53 +264,62 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     }
   }, [isAddCustomOpen]);
 
-  // Synchronous immediate local lookup + debounced AI calorie estimation
+  // Synchronous immediate local lookup + debounced online AI calorie & protein estimation
   useEffect(() => {
     const trimmed = customName.trim();
     if (!trimmed) {
       setAiEstimate(null);
       setMultiItemEstimate(null);
       setCustomCalories('');
+      setCustomProtein('');
       setIsAiAnalyzing(false);
       return;
     }
 
     // 1. Auto-extract portion if mentioned in food name (e.g. "3 rotis", "2 eggs")
     const { portion: extractedPortion } = extractPortionFromText(trimmed);
+    const effectivePortion = extractedPortion !== null ? extractedPortion : customPortion;
     if (extractedPortion !== null && extractedPortion !== customPortion) {
       setCustomPortion(extractedPortion);
     }
 
-    // 2. Instant 0ms database lookup to populate calories immediately
-    const instantMatch = matchLocalFoodDatabase(trimmed, extractedPortion !== null ? extractedPortion : customPortion);
+    // 2. Instant 0ms database lookup to populate calories and protein immediately
+    const instantMatch = matchLocalFoodDatabase(trimmed, effectivePortion);
     if (instantMatch) {
       setCustomCalories(instantMatch.caloriesPerServing.toString());
+      if (instantMatch.macros) {
+        setCustomProtein(instantMatch.macros.protein.toString());
+      }
       setAiEstimate(instantMatch);
     }
 
-    // 3. Debounced AI Analysis for unknown/complex foods or multi-item sentences
+    // 3. Debounced AI Analysis (prefers online Groq AI so outside meals get accurate kcal & protein)
     let isCancelled = false;
     setIsAiAnalyzing(true);
 
     const timer = setTimeout(async () => {
       try {
-        // Check for multiple items first (e.g. "2 rotis and 1 bowl dal")
-        const multi = await parseMultiFoodItems(trimmed);
+        const multi = await parseMultiFoodItems(trimmed, true);
         if (isCancelled) return;
         if (multi && multi.items.length > 1) {
           setMultiItemEstimate(multi);
           setAiEstimate(null);
           setCustomCalories(multi.totalCalories.toString());
+          setCustomProtein(multi.totalProtein.toString());
           setIsAiAnalyzing(false);
           return;
         } else {
           setMultiItemEstimate(null);
         }
 
-        const estimate = await analyzeFoodWithAi(trimmed, customPortion);
+        const estimate = await analyzeFoodWithAi(trimmed, effectivePortion, true);
         if (isCancelled) return;
         setAiEstimate(estimate);
         setCustomCalories(estimate.caloriesPerServing.toString());
+        const estProtein =
+          estimate.macros?.protein ??
+          resolveItemProteinLocal(estimate.name, estimate.caloriesPerServing, aiProteinMap);
+        setCustomProtein(estProtein.toString());
       } catch (err) {
         console.warn('AI Food analysis error:', err);
       } finally {
@@ -231,7 +331,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       isCancelled = true;
       clearTimeout(timer);
     };
-  }, [customName, customPortion]);
+  }, [customName, customPortion, aiProteinMap]);
 
   const commitMealsUpdate = useCallback(
     async (currentMeals: NutritionLog['mealsEaten']) => {
@@ -258,7 +358,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
   // Toggle or select a mess item directly from the meals diary
   const handleToggleMessItem = useCallback(
-    async (slot: MealSlot, itemName: string, estCalories: number) => {
+    async (slot: MealSlot, itemName: string, estCalories: number, estProtein?: number) => {
       const currentMeals = (todayLog.mealsEaten || []).map((m) => ({
         ...m,
         items: [...m.items],
@@ -269,6 +369,11 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         triggerHaptic('error');
         return;
       }
+
+      const resolvedProtein =
+        estProtein !== undefined
+          ? estProtein
+          : resolveItemProteinLocal(itemName, estCalories, aiProteinMap);
 
       triggerHaptic('selection');
 
@@ -284,6 +389,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             id: `item_${Date.now()}_${Math.random()}`,
             name: itemName,
             calories: estCalories,
+            protein: resolvedProtein,
             portion: 1,
             isExtra: false,
           });
@@ -296,6 +402,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               id: `item_${Date.now()}_${Math.random()}`,
               name: itemName,
               calories: estCalories,
+              protein: resolvedProtein,
               portion: 1,
               isExtra: false,
             },
@@ -305,7 +412,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
       await commitMealsUpdate(currentMeals);
     },
-    [todayLog.mealsEaten, commitMealsUpdate]
+    [todayLog.mealsEaten, aiProteinMap, commitMealsUpdate]
   );
 
   // Adjust portion quantity for any logged food item
@@ -362,13 +469,21 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     triggerHaptic('success');
 
     if (multiItemEstimate && multiItemEstimate.items.length > 1) {
-      const newItems: MealItemLog[] = multiItemEstimate.items.map((it, idx) => ({
-        id: `item_${Date.now()}_${idx}`,
-        name: it.name,
-        calories: it.caloriesPerServing,
-        portion: it.detectedPortion || 1,
-        isExtra: true,
-      }));
+      const newItems: MealItemLog[] = multiItemEstimate.items.map((it, idx) => {
+        const itemProtein =
+          it.macros?.protein ??
+          resolveItemProteinLocal(it.name, it.caloriesPerServing, aiProteinMap);
+        return {
+          id: `item_${Date.now()}_${idx}`,
+          name: it.name,
+          calories: it.caloriesPerServing,
+          protein: Math.round(itemProtein * 10) / 10,
+          carbs: it.macros?.carbs,
+          fats: it.macros?.fats,
+          portion: it.detectedPortion || 1,
+          isExtra: true,
+        };
+      });
 
       if (slotIndex >= 0) {
         currentMeals[slotIndex].items.push(...newItems);
@@ -376,13 +491,22 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
         currentMeals.push({ slot: customSlot, items: newItems });
       }
     } else {
+      const finalName = (customName.trim() || aiEstimate?.name || 'Food item').trim();
       const caloriesNum = parseInt(customCalories, 10) || (aiEstimate?.caloriesPerServing ?? 100);
+      const parsedProtein = parseFloat(customProtein);
+      const proteinNum = !Number.isNaN(parsedProtein)
+        ? Math.max(0, parsedProtein)
+        : aiEstimate?.macros?.protein ??
+          resolveItemProteinLocal(finalName, caloriesNum, aiProteinMap);
       const portionNum = Math.max(0.5, customPortion || 1);
 
       const newItem: MealItemLog = {
         id: `item_${Date.now()}`,
-        name: (customName.trim() || aiEstimate?.name || 'Food item').trim(),
+        name: finalName,
         calories: caloriesNum,
+        protein: Math.round(proteinNum * 10) / 10,
+        carbs: aiEstimate?.macros?.carbs,
+        fats: aiEstimate?.macros?.fats,
         portion: portionNum,
         isExtra: true,
       };
@@ -398,6 +522,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
 
     setCustomName('');
     setCustomCalories('');
+    setCustomProtein('');
     setCustomPortion(1);
     setAiEstimate(null);
     setMultiItemEstimate(null);
@@ -427,7 +552,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
     [todayLog.mealsEaten, commitMealsUpdate]
   );
 
-  // Mark meal as skipped (permanent, locked once confirmed)
+  // Mark meal as skipped (blocked if food items are already entered in this meal slot)
   const handleToggleSkipMeal = useCallback(
     async (slot: MealSlot) => {
       const currentMeals = (todayLog.mealsEaten || []).map((m) => ({
@@ -436,7 +561,10 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
       }));
       const slotIndex = currentMeals.findIndex((m) => m.slot === slot);
 
-      if (slotIndex >= 0 && currentMeals[slotIndex].isSkipped) {
+      if (
+        slotIndex >= 0 &&
+        (currentMeals[slotIndex].isSkipped || currentMeals[slotIndex].items.length > 0)
+      ) {
         triggerHaptic('error');
         return;
       }
@@ -475,7 +603,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             className="text-[12px] font-bold px-3 py-1.5 rounded-full tabular-nums glass-flat"
             style={{
               backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-              color: 'var(--app-accent-text, #64D2FF)',
+              color: 'var(--app-accent-text, #D29B7E)',
             }}
           >
             {caloriesRemaining} kcal left
@@ -498,29 +626,29 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             />
           </div>
 
-          {/* Macro Breakdown (Unified Single-Hue Glass Tiles + High Contrast White Values) */}
+          {/* Macro Breakdown (Real AI Summed Protein & Macros) */}
           <div className="grid grid-cols-3 gap-2.5 w-full pt-2">
             <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-white tabular-nums">
-                {Math.round(caloriesEaten * 0.06)} / 140g
+                {macroTotals.protein} / 140g
               </span>
-              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.06) / 140)} height={4} />
+              <ProgressBar progress={Math.min(1, macroTotals.protein / 140)} height={4} />
               <span className="text-[11px] text-[rgba(235,235,245,0.65)] font-medium">Protein</span>
             </div>
 
             <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-white tabular-nums">
-                {Math.round(caloriesEaten * 0.12)} / 220g
+                {macroTotals.carbs} / 220g
               </span>
-              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.12) / 220)} height={4} />
+              <ProgressBar progress={Math.min(1, macroTotals.carbs / 220)} height={4} />
               <span className="text-[11px] text-[rgba(235,235,245,0.65)] font-medium">Carbs</span>
             </div>
 
             <div className="droplet-tile flex flex-col items-center gap-1.5 p-2.5">
               <span className="text-[12px] font-bold text-white tabular-nums">
-                {Math.round(caloriesEaten * 0.03)} / 60g
+                {macroTotals.fats} / 60g
               </span>
-              <ProgressBar progress={Math.min(1, (caloriesEaten * 0.03) / 60)} height={4} />
+              <ProgressBar progress={Math.min(1, macroTotals.fats / 60)} height={4} />
               <span className="text-[11px] text-[rgba(235,235,245,0.65)] font-medium">Fats</span>
             </div>
           </div>
@@ -533,7 +661,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               className="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0"
               style={{
                 backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-                color: 'var(--app-accent-text, #64D2FF)',
+                color: 'var(--app-accent-text, #D29B7E)',
               }}
             >
               <Drop size={22} weight="fill" />
@@ -551,7 +679,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             className="px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0"
             style={{
               backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
-              color: 'var(--app-accent-text, #64D2FF)',
+              color: 'var(--app-accent-text, #D29B7E)',
             }}
           >
             Every 30m
@@ -572,7 +700,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
           {MEAL_SLOTS.slice(0, visibleSlotCount).map((slotConfig) => {
             const slotLog = (todayLog.mealsEaten || []).find((m) => m.slot === slotConfig.slot);
             const isSkipped = Boolean(slotLog?.isSkipped);
-            const slotItems = isSkipped ? [] : slotLog?.items || [];
+            const slotItems = isSkipped ? EMPTY_MEAL_ITEMS : slotLog?.items || EMPTY_MEAL_ITEMS;
             const messItems = messItemsBySlot[slotConfig.slot] || [];
 
             return (
@@ -582,6 +710,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 isSkipped={isSkipped}
                 slotItems={slotItems}
                 messItems={messItems}
+                proteinMap={aiProteinMap}
                 isSelected={selectedSlot === slotConfig.slot}
                 onToggleSkip={handleToggleSkipMeal}
                 onOpenCustomLog={handleOpenCustomLog}
@@ -627,7 +756,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                     triggerHaptic('selection');
                     setCustomName(chip);
                   }}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
                     customName.toLowerCase().includes(chip.toLowerCase())
                       ? 'text-white font-semibold shadow-sm'
                       : 'glass-flat text-white/80 hover:text-white hover:bg-white/10'
@@ -689,32 +818,39 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
               className="flex flex-col gap-1.5 p-3 rounded-2xl glass-flat"
               style={{ backgroundColor: 'var(--app-accent-whisper, rgba(164, 109, 82, 0.08))' }}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <LunaComicBubbleIcon size={13} color="currentColor" />
                   AI Detected {multiItemEstimate.items.length} Items:
                 </span>
                 <span className="text-xs font-extrabold text-white tabular-nums">
-                  {multiItemEstimate.totalCalories} kcal total
+                  {multiItemEstimate.totalCalories} kcal · {multiItemEstimate.totalProtein}g P
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {multiItemEstimate.items.map((it, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-1 rounded-full bg-white/10 text-[11px] text-white/90 font-medium"
-                  >
-                    {it.detectedPortion}× {it.name}{' '}
-                    <span className="font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>({it.totalCalories} kcal)</span>
-                  </span>
-                ))}
+                {multiItemEstimate.items.map((it, idx) => {
+                  const itProtein =
+                    it.macros?.protein ??
+                    resolveItemProteinLocal(it.name, it.caloriesPerServing, aiProteinMap);
+                  return (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 rounded-full bg-white/10 text-[11px] text-white/90 font-medium"
+                    >
+                      {it.detectedPortion}× {it.name}{' '}
+                      <span className="font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
+                        ({it.totalCalories} kcal · {Math.round(itProtein * it.detectedPortion * 10) / 10}g P)
+                      </span>
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* Single Item AI Estimate Card */}
           {aiEstimate && !multiItemEstimate && !isAiAnalyzing && (
-            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04] ">
+            <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/[0.04]">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
                   <LunaComicBubbleIcon size={13} color="currentColor" />
@@ -725,8 +861,8 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 </span>
               </div>
               <div className="flex items-center justify-between pt-0.5">
-                <span className="text-sm font-extrabold text-white">
-                  ~{aiEstimate.caloriesPerServing} kcal{' '}
+                <span className="text-sm font-extrabold text-white tabular-nums">
+                  ~{aiEstimate.caloriesPerServing} kcal · {aiEstimate.macros?.protein ?? resolveItemProteinLocal(aiEstimate.name, aiEstimate.caloriesPerServing, aiProteinMap)}g P{' '}
                   <span className="text-xs text-white/50 font-normal">/ {aiEstimate.unit}</span>
                 </span>
                 {aiEstimate.macros && (
@@ -753,7 +889,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 Quantity / Portions Eaten
               </label>
               <span className="text-[10.5px] text-[rgba(235,235,245,0.45)]">
-                User enters quantity · AI computes calories
+                AI computes kcal & protein
               </span>
             </div>
             <div className="flex items-center justify-between glass-flat p-2 rounded-2xl">
@@ -766,7 +902,7 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                       triggerHaptic('selection');
                       setCustomPortion(q);
                     }}
-                    className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                    className={`w-8 h-8 rounded-full text-xs font-bold transition-colors cursor-pointer ${
                       customPortion === q
                         ? 'text-white shadow-md'
                         : 'bg-white/10 text-white/80 hover:bg-white/15'
@@ -810,11 +946,11 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
             </div>
           </div>
 
-          {/* Estimated Calories (Auto-Applied by AI) */}
+          {/* Estimated Calories & Protein (Auto-Applied by AI) */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2">
               <label className="text-[12px] font-semibold text-[rgba(235,235,245,0.85)]">
-                Calories per serving (kcal)
+                Nutrition per serving (kcal & protein)
               </label>
               <div
                 className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2.5 py-0.5 rounded-full shrink-0 select-none border-none"
@@ -827,50 +963,69 @@ export default function Nutrition({ data, updateData }: NutritionProps) {
                 <span>Auto-Applied by AI</span>
               </div>
             </div>
-            <TextField
-              type="number"
-              placeholder="e.g. 250 (Auto-calculated by AI)"
-              value={customCalories}
-              onChange={(e) => setCustomCalories(e.target.value)}
-            />
+            <div className="grid grid-cols-2 gap-2.5">
+              <TextField
+                type="number"
+                placeholder="Calories (kcal)"
+                value={customCalories}
+                onChange={(e) => setCustomCalories(e.target.value)}
+              />
+              <TextField
+                type="number"
+                step="0.5"
+                placeholder="Protein (g)"
+                value={customProtein}
+                onChange={(e) => setCustomProtein(e.target.value)}
+              />
+            </div>
           </div>
 
-          {/* Live Calorie Total Preview */}
+          {/* Live Calorie & Protein Total Preview */}
           <div
-            className="p-3.5 rounded-2xl flex items-center justify-between"
+            className="p-3.5 rounded-2xl flex items-center justify-between gap-2"
             style={{ backgroundColor: 'var(--app-accent-whisper, rgba(164, 109, 82, 0.08))' }}
           >
             <div className="flex flex-col">
               <span className="text-xs font-semibold text-white/90">
-                Total Calories Auto-Applied:
+                Total Auto-Applied:
               </span>
               <span className="text-[11px] text-white/50">
                 {multiItemEstimate
                   ? `${multiItemEstimate.items.length} detected items combined`
-                  : `${customPortion} ${aiEstimate?.unit || 'portion(s)'} × ${parseInt(customCalories, 10) || 0} kcal`}
+                  : `${customPortion} ${aiEstimate?.unit || 'portion(s)'} × ${parseInt(customCalories, 10) || 0} kcal · ${parseFloat(customProtein) || 0}g P`}
               </span>
             </div>
-            <span className="text-base font-extrabold tabular-nums" style={{ color: 'var(--app-accent-text, #D29B7E)' }}>
-              {multiItemEstimate
-                ? multiItemEstimate.totalCalories
-                : customPortion * (parseInt(customCalories, 10) || 0)}{' '}
-              kcal
-            </span>
+            <div className="flex flex-col items-end shrink-0">
+              <span className="text-base font-extrabold tabular-nums text-white leading-tight">
+                {multiItemEstimate
+                  ? multiItemEstimate.totalCalories
+                  : Math.round(customPortion * (parseInt(customCalories, 10) || 0))}{' '}
+                kcal
+              </span>
+              <span
+                className="text-xs font-bold tabular-nums leading-tight"
+                style={{ color: 'var(--app-accent-text, #D29B7E)' }}
+              >
+                {multiItemEstimate
+                  ? multiItemEstimate.totalProtein
+                  : Math.round(customPortion * (parseFloat(customProtein) || 0) * 10) / 10}
+                g protein
+              </span>
+            </div>
           </div>
 
           <div className="pt-1">
             <Button
               variant="prominent"
-              tint="#FF9F0A"
               className="w-full"
               disabled={!customName.trim() || (!customCalories && !multiItemEstimate)}
               onClick={handleLogCustomFood}
             >
               Log {multiItemEstimate ? `${multiItemEstimate.items.length} Items` : 'Food'} (
               {multiItemEstimate
-                ? multiItemEstimate.totalCalories
-                : customPortion * (parseInt(customCalories, 10) || 0)}{' '}
-              kcal)
+                ? `${multiItemEstimate.totalCalories} kcal · ${multiItemEstimate.totalProtein}g P`
+                : `${Math.round(customPortion * (parseInt(customCalories, 10) || 0))} kcal · ${Math.round(customPortion * (parseFloat(customProtein) || 0) * 10) / 10}g P`}
+              )
             </Button>
           </div>
         </div>

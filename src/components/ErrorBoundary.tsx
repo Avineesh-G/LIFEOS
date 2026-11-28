@@ -87,7 +87,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="px-4 py-2.5 rounded-full text-xs font-bold border border-red-500/30 text-red-600 dark:text-red-300 hover:bg-red-500/10 active:scale-95 transition-all inline-flex items-center gap-2"
+                className="px-4 py-2.5 rounded-full text-xs font-bold border border-red-500/30 text-red-600 dark:text-red-300 hover:bg-red-500/10 active:scale-95 transition-[transform,opacity,background-color,color] inline-flex items-center gap-2"
               >
                 <RotateCcw size={14} />
                 Try again
@@ -96,7 +96,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <button
                 type="button"
                 onClick={this.handleReload}
-                className="px-5 py-2.5 rounded-full text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-sm active:scale-95 transition-all inline-flex items-center gap-2"
+                className="px-5 py-2.5 rounded-full text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-sm active:scale-95 transition-[transform,opacity,background-color,color] inline-flex items-center gap-2"
               >
                 <RefreshCw size={14} />
                 Reload Page

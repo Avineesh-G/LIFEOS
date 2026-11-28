@@ -79,7 +79,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               haptics.snap();
               action.onClick();
             }}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium text-xs sm:text-sm shadow-md transition-all duration-200"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium text-xs sm:text-sm shadow-md transition-[transform,opacity,background-color,color] duration-200"
             style={{
               backgroundColor: 'var(--md-primary, #b51a55)',
               color: 'var(--md-on-primary, #ffffff)',

@@ -387,7 +387,7 @@ export function AddExpenseSheet({
                     setCategory(cat.label);
                     if (!title) setTitle(cat.label);
                   }}
-                  className={`py-2.5 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
+                  className={`py-2.5 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-[transform,opacity,background-color,color] ${
                     isSelected
                       ? 'bg-accent text-white border-accent shadow-sm shadow-accent/25 scale-[1.02]'
                       : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70 hover:border-accent/40'
@@ -431,7 +431,7 @@ export function AddExpenseSheet({
                     triggerHaptic('selection');
                     setPaidByPersonId(p.id);
                   }}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold border transition-[transform,opacity,background-color,color] ${
                     active
                       ? 'bg-accent text-white border-accent shadow-xs'
                       : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
@@ -459,7 +459,7 @@ export function AddExpenseSheet({
                 triggerHaptic('selection');
                 setSplitMode('equal');
               }}
-              className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`py-1.5 rounded-lg text-xs font-bold transition-[transform,opacity,background-color,color] ${
                 splitMode === 'equal'
                   ? 'bg-accent text-white shadow-xs'
                   : 'text-white/70'
@@ -473,7 +473,7 @@ export function AddExpenseSheet({
                 triggerHaptic('selection');
                 setSplitMode('personal');
               }}
-              className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`py-1.5 rounded-lg text-xs font-bold transition-[transform,opacity,background-color,color] ${
                 splitMode === 'personal'
                   ? 'bg-accent text-white shadow-xs'
                   : 'text-white/70'
@@ -487,7 +487,7 @@ export function AddExpenseSheet({
                 triggerHaptic('selection');
                 setSplitMode('custom');
               }}
-              className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`py-1.5 rounded-lg text-xs font-bold transition-[transform,opacity,background-color,color] ${
                 splitMode === 'custom'
                   ? 'bg-accent text-white shadow-xs'
                   : 'text-white/70'
@@ -516,7 +516,7 @@ export function AddExpenseSheet({
                           included ? prev.filter((id) => id !== p.id) : [...prev, p.id]
                         );
                       }}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                      className={`px-3 py-1 rounded-full text-xs font-medium border transition-[transform,opacity,background-color,color] ${
                         included
                           ? 'bg-accent/15 border-accent text-accent font-bold'
                           : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/40 opacity-60'
@@ -624,7 +624,7 @@ export function AddExpenseSheet({
                   triggerHaptic('selection');
                   setPaymentMethod(m);
                 }}
-                className={`py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+                className={`py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border transition-[transform,opacity,background-color,color] ${
                   paymentMethod === m
                     ? 'bg-accent text-white border-accent shadow-xs'
                     : 'bg-black/[0.02] dark:bg-white/[0.03] border-white/10 text-white/70'
@@ -673,7 +673,7 @@ export function AddExpenseSheet({
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               disabled={isCompressing || pendingReceipts.length >= MAX_RECEIPTS_PER_EXPENSE}
-              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-[transform,opacity,background-color,color] cursor-pointer"
             >
               <Camera size={16} />
               <span className="text-[9px] font-bold">Camera</span>
@@ -683,7 +683,7 @@ export function AddExpenseSheet({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isCompressing || pendingReceipts.length >= MAX_RECEIPTS_PER_EXPENSE}
-              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              className="h-16 w-16 rounded-2xl border-2 border-dashed border-white/10 hover:border-accent flex flex-col items-center justify-center gap-1 text-white/70 active:scale-95 disabled:opacity-40 transition-[transform,opacity,background-color,color] cursor-pointer"
             >
               <ImageIcon size={16} />
               <span className="text-[9px] font-bold">Gallery</span>
@@ -730,7 +730,7 @@ export function AddExpenseSheet({
             type="button"
             onClick={handleSave}
             disabled={amountPaise <= 0 || isCompressing}
-            className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-2xl bg-accent text-white font-bold text-sm shadow-md shadow-accent/25 hover:shadow-accent/40 active:scale-95 disabled:opacity-50 transition-[transform,opacity,background-color,color] cursor-pointer flex items-center justify-center gap-2"
           >
             <span>{expenseToEdit ? 'Save Expense' : 'Record Expense'}</span>
           </button>

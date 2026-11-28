@@ -67,7 +67,9 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
     await updateData({ shoppingLists: updated });
     setShowNewModal(false);
     setNewListName('');
-    navigate(`/shopping/${newList.id}`);
+    React.startTransition(() => {
+      navigate(`/shopping/${newList.id}`);
+    });
   };
 
   const handleCreateFromTemplate = async (template: ShoppingList, customName?: string) => {
@@ -83,7 +85,9 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
       message: newList.name,
       section: 'shopping',
     });
-    navigate(`/shopping/${newList.id}`);
+    React.startTransition(() => {
+      navigate(`/shopping/${newList.id}`);
+    });
   };
 
   const handleCreateStarterTemplate = async (starter: typeof STARTER_TEMPLATES[0]) => {
@@ -96,7 +100,9 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
       message: newList.name,
       section: 'shopping',
     });
-    navigate(`/shopping/${newList.id}`);
+    React.startTransition(() => {
+      navigate(`/shopping/${newList.id}`);
+    });
   };
 
   const handleDeleteList = async (list: ShoppingList) => {
@@ -155,7 +161,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                   <button
                     key={starter.name}
                     onClick={() => handleCreateStarterTemplate(starter)}
-                    className="p-4 rounded-2xl glass-card hover:bg-white/[0.08] transition-all text-left group active:scale-[0.98]"
+                    className="p-4 rounded-2xl glass-card hover:bg-white/[0.08] transition-[transform,opacity,background-color,color] text-left group active:scale-[0.98]"
                   >
                     <div className="flex items-center justify-between gap-1 mb-2">
                       <Badge label={starter.category} />
@@ -193,9 +199,11 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                     key={list.id}
                     onClick={() => {
                       triggerHaptic('nav');
-                      navigate(`/shopping/${list.id}`);
+                      React.startTransition(() => {
+                        navigate(`/shopping/${list.id}`);
+                      });
                     }}
-                    className="p-4 rounded-2xl glass-card cursor-pointer transition-all select-none hover:bg-white/[0.08] active:scale-[0.98]"
+                    className="p-4 rounded-2xl glass-card cursor-pointer transition-[transform,opacity,background-color,color] select-none hover:bg-white/[0.08] active:scale-[0.98]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -358,7 +366,7 @@ export default function ShoppingLists({ data, updateData }: ShoppingListsProps) 
                     <button
                       key={tmpl.id}
                       onClick={() => setSelectedTemplateId(tmpl.id)}
-                      className={`w-full p-3 rounded-xl glass-flat text-left flex items-center justify-between transition-all ${
+                      className={`w-full p-3 rounded-xl glass-flat text-left flex items-center justify-between transition-[transform,opacity,background-color,color] ${
                         selectedTemplateId === tmpl.id
                           ? 'bg-[#FF375F]/20 text-white'
                           : 'text-[rgba(235,235,245,0.70)] hover:text-white'

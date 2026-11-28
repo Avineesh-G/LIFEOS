@@ -1,15 +1,35 @@
 /**
  * LifeOS Adaptive Performance Engine
- * Automatically benchmarks and categorizes devices into 3 hardware tiers
- * optimized for the Indian mobile landscape (Android 13+, 3GB-8GB RAM, Mali/Adreno GPUs).
+ * Queries native Android Build/ActivityManager hardware details on APK (exact phone model, RAM, CPU cores, StatFs storage),
+ * with accurate Web Client-Hints & WebGL fallback on browsers.
  */
 
 import { useState, useEffect } from 'react';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+interface DeviceHardwareInfo {
+  model: string;
+  manufacturer: string;
+  deviceName: string;
+  androidVersion: string;
+  totalRamBytes: number;
+  totalRamGb: number;
+  cores: number;
+  storageFreeBytes: number;
+  storageTotalBytes: number;
+}
+
+const DeviceHardware = registerPlugin< {
+  getHardwareInfo(): Promise<DeviceHardwareInfo>;
+}>('DeviceHardware');
 
 export type DeviceTier = 1 | 2 | 3;
 
 export interface PerformanceMetrics {
   tier: DeviceTier;
+  deviceModel: string;
+  modelNumber: string;
+  isExactHardware: boolean;
   ramGb: number;
   ramDisplay: string;
   cores: number;
@@ -30,81 +50,73 @@ let cachedMetrics: PerformanceMetrics | null = null;
 const listeners = new Set<(metrics: PerformanceMetrics) => void>();
 
 export function cleanGpuName(raw: string): string {
-  if (!raw || raw === 'unknown' || raw === 'generic webgl') return 'Integrated Graphics';
-  
-  // Clean ANGLE wrappers: ANGLE (Vendor, Device Name Direct3D..., ...)
-  let clean = raw;
-  const angleMatch = raw.match(/angle\s*\([^,]+,\s*([^,)]+)/i);
-  if (angleMatch && angleMatch[1]) {
-    clean = angleMatch[1];
+  if (!raw || raw === 'unknown' || raw === 'generic webgl') return 'Integrated GPU';
+
+  // Mobile Adreno / Mali / Immortalis / Apple dedicated fast-paths
+  const adrenoMatch = raw.match(/adreno(?:\s*\(tm\))?\s*(\d{3,4}[a-z]*)/i);
+  if (adrenoMatch) return `Adreno ${adrenoMatch[1].toUpperCase()}`;
+
+  const immortalisMatch = raw.match(/immortalis[- ]?g?\d+[a-z0-9]*/i);
+  if (immortalisMatch) return immortalisMatch[0].replace(/\s+/g, '-').replace(/^immortalis/i, 'Immortalis');
+
+  const maliMatch = raw.match(/mali[- ]?([gt]?\d+[a-z0-9]*)/i);
+  if (maliMatch) return `Mali-${maliMatch[1].toUpperCase()}`;
+
+  if (/apple/i.test(raw)) return 'Apple GPU';
+
+  // Clean ANGLE wrappers safely (preserving inner parentheses like "Intel(R)")
+  let clean = raw.trim();
+  const angleWrapper = clean.match(/^\s*ANGLE\s*\((.+)\)\s*$/i);
+  if (angleWrapper && angleWrapper[1]) {
+    const commaParts = angleWrapper[1].split(',');
+    if (commaParts.length >= 2) {
+      clean = commaParts.slice(1).join(' ').trim();
+    }
   }
-  
-  // Remove direct3d/opengl/vulkan build noise
+
   clean = clean
-    .replace(/direct3d.*$/i, '')
-    .replace(/vs_\d+_\d+.*$/i, '')
-    .replace(/ps_\d+_\d+.*$/i, '')
-    .replace(/opengl.*$/i, '')
-    .replace(/vulkan.*$/i, '')
-    .replace(/\(tm\)/gi, '')
-    .replace(/\(r\)/gi, '')
-    .replace(/device.*$/i, '')
+    .replace(/\(\s*r\s*\)|\(\s*tm\s*\)|\(\s*c\s*\)/gi, '')
+    .replace(/\(0x[0-9a-f]+\)/gi, '')
+    .replace(/\b(?:direct3d\d*|d3d\d+|opengl(?:\s*es)?[\s\d.]*|vulkan[\s\d.]*|vs_\d+_\d+|ps_\d+_\d+)\b.*/i, '')
+    .replace(/\s+/g, ' ')
     .trim();
 
-  // Mobile Adreno detection
-  if (/adreno\s*\d+/i.test(raw)) {
-    const match = raw.match(/adreno\s*\d+/i);
-    if (match) return `Adreno ${match[0].replace(/adreno\s*/i, '').trim()}`;
-  }
-  // Mobile Mali detection
-  if (/mali-[a-z0-9]+/i.test(raw)) {
-    const match = raw.match(/mali-[a-z0-9]+/i);
-    if (match) return `Mali-${match[0].replace(/mali-/i, '').toUpperCase()}`;
-  }
-  if (/apple/i.test(raw)) {
-    return 'Apple Neural GPU';
-  }
-  if (/immortalis/i.test(raw)) {
-    const match = raw.match(/immortalis-[a-z0-9]+/i);
-    return match ? match[0].toUpperCase() : 'Immortalis GPU';
-  }
-  
-  return clean.length > 2 ? clean.charAt(0).toUpperCase() + clean.slice(1) : 'Standard GPU';
+  return clean.length > 2 ? clean : 'Standard GPU';
 }
 
-function getGpuRenderer(): string {
-  try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) return 'Unknown';
-    const debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info');
-    if (!debugInfo) return 'Generic WebGL';
-    return (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Generic WebGL';
-  } catch {
-    return 'Unknown';
+function getInitialDeviceModelFallback(): { deviceModel: string; modelNumber: string } {
+  if (typeof navigator === 'undefined') {
+    return { deviceModel: 'Mobile Device', modelNumber: '' };
   }
-}
+  const ua = navigator.userAgent || '';
 
-export function getDeviceTierOverride(): DeviceTier | 'auto' {
-  try {
-    const saved = localStorage.getItem('lifeos_perf_tier');
-    if (saved === '1' || saved === '2' || saved === '3') {
-      return parseInt(saved, 10) as DeviceTier;
+  // Parse explicit Android Build model token if exposed in UA (ignore Chrome UA-reduction generic "K")
+  const androidMatch = ua.match(/Android\s+[^;)]+;\s*([^;)]+?)(?:\s+Build\/|[;)])/i);
+  if (androidMatch && androidMatch[1]) {
+    const token = androidMatch[1].trim();
+    if (token && token.toUpperCase() !== 'K' && token.toLowerCase() !== 'wv') {
+      return { deviceModel: token, modelNumber: token };
     }
-  } catch {}
-  return 'auto';
+    return { deviceModel: 'Android Device', modelNumber: '' };
+  }
+
+  if (/iphone/i.test(ua)) return { deviceModel: 'Apple iPhone', modelNumber: 'iPhone' };
+  if (/ipad/i.test(ua)) return { deviceModel: 'Apple iPad', modelNumber: 'iPad' };
+  if (/windows/i.test(ua)) return { deviceModel: 'Windows Desktop', modelNumber: '' };
+  if (/macintosh|mac os/i.test(ua)) return { deviceModel: 'macOS', modelNumber: '' };
+  if (/linux/i.test(ua)) return { deviceModel: 'Linux Device', modelNumber: '' };
+
+  return { deviceModel: 'Web Device', modelNumber: '' };
 }
 
-export function detectDeviceTier(): PerformanceMetrics {
-  if (cachedMetrics) return cachedMetrics;
+function computeTierFromSpecs(
+  ramGb: number,
+  cores: number,
+  gpuLower: string,
+  userOverride: DeviceTier | 'auto'
+): DeviceTier {
+  if (userOverride !== 'auto') return userOverride;
 
-  const rawRam = (navigator as unknown as { deviceMemory?: number }).deviceMemory || 4; // Browser reports 2, 4, 8 max
-  const cores = navigator.hardwareConcurrency || 4;
-  const rawGpu = getGpuRenderer();
-  const gpuLower = rawGpu.toLowerCase();
-  const cleanGpu = cleanGpuName(rawGpu);
-
-  // Check for budget GPU keywords
   const isBudgetGpu =
     gpuLower.includes('mali-4') ||
     gpuLower.includes('mali-t') ||
@@ -132,28 +144,63 @@ export function detectDeviceTier(): PerformanceMetrics {
     gpuLower.includes('geforce') ||
     gpuLower.includes('rtx');
 
-  // Explicit user override stored in localStorage
-  const userOverride = getDeviceTierOverride();
-  let tier: DeviceTier = 2; // Default to Tier 2 (Balanced)
-
-  if (userOverride !== 'auto') {
-    tier = userOverride;
-  } else if (rawRam <= 3 || cores <= 4 || (isBudgetGpu && rawRam <= 4)) {
-    // Budget phone (Helio G85/G99, Snapdragon 680, 3-4GB RAM)
-    tier = 3;
-  } else if (rawRam >= 8 || cores >= 8 || isFlagshipGpu) {
-    // Flagship / High-Spec device (8GB+ RAM, 8+ Cores, Flagship GPU)
-    tier = 1;
-  } else {
-    // Standard Mid-range (6GB RAM, Dimensity 6020/7020, Snap 695)
-    tier = 2;
+  if (ramGb <= 3 || cores <= 4 || (isBudgetGpu && ramGb <= 4)) {
+    return 3;
   }
+  if ((ramGb >= 8 && cores >= 8) || (isFlagshipGpu && ramGb >= 6)) {
+    return 1;
+  }
+  return 2;
+}
 
-  // RAM Display string
-  const ramDisplay = rawRam >= 8 ? '8GB+ (16GB)' : `${rawRam}GB`;
+function getGpuRenderer(): string {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return 'Unknown';
+    const debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info');
+    if (!debugInfo) return 'Generic WebGL';
+    return (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Generic WebGL';
+  } catch {
+    return 'Unknown';
+  }
+}
+
+export function getDeviceTierOverride(): DeviceTier | 'auto' {
+  // System-managed: clear any stale manual override so tier always matches real device capability
+  try {
+    if (localStorage.getItem('lifeos_perf_tier') !== null) {
+      localStorage.removeItem('lifeos_perf_tier');
+    }
+  } catch {}
+  return 'auto';
+}
+
+export function detectDeviceTier(): PerformanceMetrics {
+  if (cachedMetrics) return cachedMetrics;
+
+  const isNative = Capacitor.isNativePlatform();
+  const deviceMem = (navigator as unknown as { deviceMemory?: number }).deviceMemory;
+  const rawRam = typeof deviceMem === 'number' && deviceMem > 0 ? deviceMem : 4;
+  const cores = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency > 0
+    ? navigator.hardwareConcurrency
+    : 4;
+  const rawGpu = getGpuRenderer();
+  const gpuLower = rawGpu.toLowerCase();
+  const cleanGpu = cleanGpuName(rawGpu);
+  const fallbackModel = getInitialDeviceModelFallback();
+
+  const userOverride = getDeviceTierOverride();
+  const tier = computeTierFromSpecs(rawRam, cores, gpuLower, userOverride);
+
+  // Browsers cap navigator.deviceMemory at 8GB by privacy spec; avoid fabricating "(16GB)" on web
+  const ramDisplay = !isNative && rawRam >= 8 ? '8+ GB RAM' : `${rawRam} GB RAM`;
 
   const metrics: PerformanceMetrics = {
     tier,
+    deviceModel: fallbackModel.deviceModel,
+    modelNumber: fallbackModel.modelNumber,
+    isExactHardware: false,
     ramGb: rawRam,
     ramDisplay,
     cores,
@@ -166,14 +213,14 @@ export function detectDeviceTier(): PerformanceMetrics {
     isLowStorage: false,
     userOverride,
     isLowPower: false,
-    canBlur: tier === 1,
+    canBlur: false,
     isLowEnd: tier === 3,
   };
 
   cachedMetrics = metrics;
   applyTierToDom(metrics);
   monitorBattery(metrics);
-  probeDeviceStorage(metrics);
+  probeNativeHardwareAndModel(metrics);
 
   return metrics;
 }
@@ -181,14 +228,83 @@ export function detectDeviceTier(): PerformanceMetrics {
 function applyTierToDom(metrics: PerformanceMetrics) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  root.classList.remove('tier-1', 'tier-2', 'tier-3', 'perf-low-power', 'perf-low-storage');
+  root.classList.remove('tier-1', 'tier-2', 'tier-3', 'perf-low-power', 'perf-low-storage', 'perf-lite');
   root.classList.add(`tier-${metrics.tier}`);
+  if (metrics.tier === 3) {
+    root.classList.add('perf-lite');
+  }
   if (metrics.isLowPower) {
     root.classList.add('perf-low-power');
   }
   if (metrics.isLowStorage) {
     root.classList.add('perf-low-storage');
   }
+}
+
+async function probeNativeHardwareAndModel(currentMetrics: PerformanceMetrics) {
+  // 1. On Capacitor Android APK, read exact physical hardware specs from native Build + ActivityManager + StatFs
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const hw = await DeviceHardware.getHardwareInfo();
+      if (hw) {
+        if (hw.deviceName) currentMetrics.deviceModel = hw.deviceName;
+        if (hw.model) currentMetrics.modelNumber = hw.model;
+        if (hw.totalRamGb > 0) {
+          currentMetrics.ramGb = hw.totalRamGb;
+          currentMetrics.ramDisplay = `${hw.totalRamGb} GB RAM`;
+        }
+        if (hw.cores > 0) {
+          currentMetrics.cores = hw.cores;
+        }
+        if (hw.storageFreeBytes > 0) {
+          const freeMb = Math.round(hw.storageFreeBytes / (1024 * 1024));
+          currentMetrics.storageFreeMb = freeMb;
+          currentMetrics.storageFreeDisplay =
+            freeMb >= 1024 ? `${(freeMb / 1024).toFixed(1)} GB free` : `${freeMb} MB free`;
+          currentMetrics.isLowStorage = freeMb < 500;
+        }
+        currentMetrics.isExactHardware = true;
+
+        const nextTier = computeTierFromSpecs(
+          currentMetrics.ramGb,
+          currentMetrics.cores,
+          currentMetrics.gpuRenderer.toLowerCase(),
+          currentMetrics.userOverride
+        );
+        currentMetrics.tier =
+          currentMetrics.isLowStorage && currentMetrics.userOverride === 'auto' && nextTier === 1
+            ? 2
+            : nextTier;
+        currentMetrics.isLowEnd = currentMetrics.tier === 3;
+
+        applyTierToDom(currentMetrics);
+        listeners.forEach((cb) => cb({ ...currentMetrics }));
+        return;
+      }
+    } catch {
+      // Fall through cleanly to browser storage & Client Hints
+    }
+  }
+
+  // 2. Web / Browser Client Hints for accurate Android/Chrome model (when UA is frozen/reduced)
+  try {
+    const uaData = (navigator as unknown as {
+      userAgentData?: {
+        getHighEntropyValues?: (hints: string[]) => Promise<{ model?: string; platform?: string }>;
+      };
+    }).userAgentData;
+    if (uaData?.getHighEntropyValues) {
+      const hv = await uaData.getHighEntropyValues(['model', 'platform']);
+      if (hv?.model && hv.model.trim()) {
+        currentMetrics.deviceModel = hv.model.trim();
+        currentMetrics.modelNumber = hv.model.trim();
+        currentMetrics.isExactHardware = true;
+        listeners.forEach((cb) => cb({ ...currentMetrics }));
+      }
+    }
+  } catch {}
+
+  await probeDeviceStorage(currentMetrics);
 }
 
 async function probeDeviceStorage(currentMetrics: PerformanceMetrics) {
@@ -261,13 +377,10 @@ export function subscribeToPerformanceMetrics(callback: (metrics: PerformanceMet
   return () => listeners.delete(callback);
 }
 
-export function setDeviceTierOverride(tier: DeviceTier | 'auto') {
+export function setDeviceTierOverride(_tier: DeviceTier | 'auto') {
+  // Manual overrides are disabled: tier is strictly auto-selected from device capability.
   try {
-    if (tier === 'auto') {
-      localStorage.removeItem('lifeos_perf_tier');
-    } else {
-      localStorage.setItem('lifeos_perf_tier', tier.toString());
-    }
+    localStorage.removeItem('lifeos_perf_tier');
     cachedMetrics = null;
     detectDeviceTier();
   } catch {}

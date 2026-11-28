@@ -400,7 +400,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   triggerHaptic('light');
                   setIsNewFolderOpen(true);
                 }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-all text-[12px] font-semibold cursor-pointer"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 active:scale-95 transition-[transform,opacity,background-color,color] text-[12px] font-semibold cursor-pointer"
                 title="Create New Folder"
               >
                 <FolderSimplePlus size={15} weight="bold" style={{ color: 'var(--app-accent-text, #D29B7E)' }} />
@@ -414,7 +414,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   setIsUploadSheetOpen(true);
                 }}
                 disabled={isQuotaFull || isUploading}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full active:scale-95 transition-all text-[12px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer touch-manipulation"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full active:scale-95 transition-[transform,opacity,background-color,color] text-[12px] font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer touch-manipulation"
                 style={{
                   background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))',
                 }}
@@ -458,7 +458,7 @@ export default function Drive({ data, updateData }: DriveProps) {
         {/* Progress Bar */}
         <div className="w-full h-3 rounded-full bg-white/[0.08] overflow-hidden p-0.5">
           <div
-            className="h-full rounded-full transition-all duration-300"
+            className="h-full rounded-full transition-[transform,opacity,background-color,color] duration-300"
             style={{
               width: `${Math.max(1, usedPercent)}%`,
               background: usedPercent >= 95
@@ -538,7 +538,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               <button
                 type="button"
                 onClick={handleCancelUpload}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 active:scale-95 text-red-400 text-[12px] font-semibold transition-all shrink-0 cursor-pointer touch-manipulation"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 active:scale-95 text-red-400 text-[12px] font-semibold transition-[transform,opacity,background-color,color] shrink-0 cursor-pointer touch-manipulation"
                 title="Cancel and delete this upload"
               >
                 <Trash size={14} weight="bold" />
@@ -550,7 +550,7 @@ export default function Drive({ data, updateData }: DriveProps) {
           {/* Smooth animated progress track */}
           <div className="w-full bg-white/10 rounded-full h-1.5 mt-2.5 overflow-hidden">
             <div
-              className="h-full transition-all duration-150 ease-out rounded-full"
+              className="h-full transition-[transform,opacity,background-color,color] duration-150 ease-out rounded-full"
               style={{
                 width: `${Math.min(100, Math.max(0, uploadPercent))}%`,
                 background: 'var(--preset-gradient, linear-gradient(90deg, #7B4B36 0%, #A46D52 100%))',
@@ -648,7 +648,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                     triggerHaptic('selection');
                     setCurrentFolderId(folder.id);
                   }}
-                  className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-[0.98] transition-all cursor-pointer flex flex-col justify-between group"
+                  className="p-3.5 rounded-2xl bg-[#1C1C1E] border border-white/10 hover:border-white/20 active:scale-[0.98] transition-[transform,opacity,background-color,color] cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div
@@ -709,7 +709,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   triggerHaptic('light');
                   setIsUploadSheetOpen(true);
                 }}
-                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold text-white shadow-md active:scale-95 transition-all touch-manipulation cursor-pointer"
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold text-white shadow-md active:scale-95 transition-[transform,opacity,background-color,color] touch-manipulation cursor-pointer"
                 style={{ background: 'var(--preset-gradient, linear-gradient(135deg, #7B4B36 0%, #A46D52 100%))' }}
               >
                 <CloudArrowUp size={16} weight="bold" />
@@ -728,7 +728,7 @@ export default function Drive({ data, updateData }: DriveProps) {
               return (
                 <div
                   key={file.id}
-                  className="p-3.5 rounded-2xl glass-card flex items-center justify-between gap-3 transition-colors"
+                  className="p-3.5 rounded-2xl glass-card lifeos-contain-item flex items-center justify-between gap-3 transition-colors"
                 >
                   {/* File Icon / Thumbnail & Info (Click to Open Reader) */}
                   <div
@@ -736,7 +736,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                     className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
                   >
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-all"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-[transform,opacity,background-color,color]"
                       style={{
                         backgroundColor: 'var(--app-accent-soft, rgba(164, 109, 82, 0.14))',
                       }}
@@ -775,7 +775,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                       type="button"
                       onClick={() => handleOpenFile(file)}
                       title="Open in Reader Mode"
-                      className="p-2 rounded-xl hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
+                      className="p-2 rounded-xl hover:bg-white/[0.08] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                       style={{ color: 'var(--app-accent-text, #D29B7E)' }}
                     >
                       <BookOpen size={18} weight="bold" />
@@ -785,7 +785,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                       type="button"
                       onClick={() => handleNativeShare(file)}
                       title="Share link"
-                      className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-all cursor-pointer"
+                      className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                     >
                       <ShareNetwork size={18} weight="duotone" />
                     </button>
@@ -795,7 +795,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                       type="button"
                       onClick={() => handleDeleteFile(file)}
                       title="Delete file"
-                      className="p-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                      className="p-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 active:scale-95 transition-[transform,opacity,background-color,color] cursor-pointer"
                     >
                       <Trash size={18} weight="duotone" />
                     </button>
@@ -860,7 +860,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                         triggerHaptic('light');
                         setNewFolderColor(c);
                       }}
-                      className="w-8 h-8 rounded-full transition-all active:scale-90 flex items-center justify-center cursor-pointer shadow-sm"
+                      className="w-8 h-8 rounded-full transition-[transform,opacity,background-color,color] active:scale-90 flex items-center justify-center cursor-pointer shadow-sm"
                       style={{
                         backgroundColor: c,
                         boxShadow: newFolderColor === c ? `0 0 0 2px #1C1C1E, 0 0 0 4px ${c}` : 'none',
@@ -876,7 +876,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                 <button
                   type="button"
                   onClick={() => setIsNewFolderOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/15 text-[13px] font-medium text-white/80 cursor-pointer active:scale-95 transition-all"
+                  className="px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/15 text-[13px] font-medium text-white/80 cursor-pointer active:scale-95 transition-[transform,opacity,background-color,color]"
                 >
                   Cancel
                 </button>
@@ -884,7 +884,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   type="button"
                   onClick={handleCreateFolder}
                   disabled={!newFolderName.trim()}
-                  className="px-4 py-2 rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 cursor-pointer active:scale-95 transition-all shadow-md"
+                  className="px-4 py-2 rounded-xl text-[13px] font-semibold text-white disabled:opacity-40 cursor-pointer active:scale-95 transition-[transform,opacity,background-color,color] shadow-md"
                   style={{ backgroundColor: newFolderColor }}
                 >
                   Create Folder
@@ -942,7 +942,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                     console.warn('Camera capture cancelled or failed:', err);
                   }
                 }}
-                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-all text-left cursor-pointer border border-white/[0.06] touch-manipulation"
+                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-[transform,opacity,background-color,color] text-left cursor-pointer border border-white/[0.06] touch-manipulation"
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
@@ -967,7 +967,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   triggerHaptic('light');
                   galleryInputRef.current?.click();
                 }}
-                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-all text-left cursor-pointer border border-white/[0.06] touch-manipulation"
+                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-[transform,opacity,background-color,color] text-left cursor-pointer border border-white/[0.06] touch-manipulation"
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
@@ -992,7 +992,7 @@ export default function Drive({ data, updateData }: DriveProps) {
                   triggerHaptic('light');
                   fileInputRef.current?.click();
                 }}
-                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-all text-left cursor-pointer border border-white/[0.06] touch-manipulation"
+                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] transition-[transform,opacity,background-color,color] text-left cursor-pointer border border-white/[0.06] touch-manipulation"
               >
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"

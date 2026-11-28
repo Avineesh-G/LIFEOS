@@ -1,12 +1,55 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Quotes } from '../../ui/tokens/icons';
-import { getDailyQuotesStream, QuoteItem } from '../../data/quotes';
+import type { QuoteItem } from '../../data/quotes';
 
 interface HomeStreakQuotesCardProps {}
 
+const FALLBACK_QUOTE: QuoteItem = {
+  id: 0,
+  quote: 'Small disciplined actions compounded daily build an extraordinary life.',
+  author: 'LifeOS',
+  category: 'life',
+};
+
+let cachedQuotesStream: QuoteItem[] | null = null;
+
 const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: HomeStreakQuotesCardProps = {}) {
-  const quotes: QuoteItem[] = useMemo(() => {
-    return getDailyQuotesStream(new Date(), 10);
+  const [quotes, setQuotes] = useState<QuoteItem[]>(() => cachedQuotesStream || [FALLBACK_QUOTE]);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Lazy-load the 197KB quotes dataset asynchronously after first paint so Home cold-start stays instant
+  useEffect(() => {
+    if (cachedQuotesStream) return;
+    let cancelled = false;
+    import('../../data/quotes')
+      .then((mod) => {
+        const stream = mod.getDailyQuotesStream(new Date(), 10);
+        cachedQuotesStream = stream;
+        if (!cancelled) {
+          React.startTransition(() => {
+            setQuotes(stream);
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Pause continuous GPU marquee when modal sheets are open or browser tab is backgrounded
+  useEffect(() => {
+    const onSubOpen = () => setIsPaused(true);
+    const onSubClose = () => setIsPaused(false);
+    const onVis = () => setIsPaused(document.hidden);
+    window.addEventListener('lifeos-subinterface-open', onSubOpen);
+    window.addEventListener('lifeos-subinterface-close', onSubClose);
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      window.removeEventListener('lifeos-subinterface-open', onSubOpen);
+      window.removeEventListener('lifeos-subinterface-close', onSubClose);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, []);
 
   const marqueeItems = useMemo(() => [...quotes, ...quotes], [quotes]);
@@ -41,7 +84,10 @@ const HomeStreakQuotesCard = React.memo(function HomeStreakQuotesCard(_props: Ho
         <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-[#141416] to-transparent pointer-events-none z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-3 bg-gradient-to-l from-[#141416] to-transparent pointer-events-none z-10" />
 
-        <div className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap">
+        <div
+          className="animate-quote-marquee flex items-center gap-12 whitespace-nowrap"
+          style={isPaused ? { animationPlayState: 'paused' } : undefined}
+        >
           {marqueeItems.map((item, idx) => (
             <div
               key={`${item.id}-${idx}`}

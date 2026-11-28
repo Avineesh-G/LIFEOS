@@ -116,7 +116,7 @@ export default function PaletteBoard() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPreviewDark(!previewDark)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition-[transform,opacity,background-color,color]"
             style={{
               backgroundColor: previewDark ? '#1F2937' : '#FFFFFF',
               borderColor: previewDark ? '#374151' : '#E5E7EB',
@@ -180,7 +180,7 @@ export default function PaletteBoard() {
           return (
             <div 
               key={entry.id}
-              className="p-4 rounded-3xl border transition-all duration-200 space-y-4"
+              className="p-4 rounded-3xl border transition-[transform,opacity,background-color,color] duration-200 space-y-4"
               style={{
                 backgroundColor: previewDark ? '#18191E' : '#FFFFFF',
                 borderColor: previewDark ? '#2D3039' : '#E2E8F0',

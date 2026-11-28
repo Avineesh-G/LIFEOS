@@ -99,7 +99,9 @@ export default function Timetable({ data, updateData }: TimetableProps) {
 
   const handleStartTimer = (block: TimetableBlock) => {
     triggerHaptic('selection');
-    navigate(`/tasks?subject=${encodeURIComponent(block.subject)}`);
+    React.startTransition(() => {
+      navigate(`/tasks?subject=${encodeURIComponent(block.subject)}`);
+    });
   };
 
   return (
